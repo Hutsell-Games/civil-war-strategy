@@ -1,0 +1,6 @@
+cwstrat+cwstrat2+cwsmenu+
+c:\pds71\noisam+c:\pds71\noems+c:\pds71\nocga+c:\pds71\noega+
+c:\pds71\nocom+c:\pds71\noherc+c:\pds71\nooga /E /NOE /PACKCODE
+cws
+nul
+c:\pds71\bcl71enr.lib c:\pds71\qbx.lib;

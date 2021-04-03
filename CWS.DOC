@@ -1,0 +1,1571 @@
+                        i
+===========================================================
+   VGA Civil War Strategy Game version 1.50
+            (c) 1994 W.R. Hutsell
+===========================================================
+           C O N T E N T S
+
+1      I N T R O D U C T I O N                        1
+1.1   Introduction                                    1
+1.2   Requirements                                    1
+1.3  Running the Game                                 1
+1.4  How to Win                                       2
+1.5   Map Display                                     2
+1.6   Using the Menus                                 3
+1.7   Menu for Railroad and Capital Moves             4
+1.8   Screen Saver                                    4
+1.9   Set Up                                          4
+1.10  Sequence of Play                                4
+2      D E C I S I O N    P H A S E                   5
+2.1   Movement                                        5
+2.2   Armies                                          6
+3      M A I N    M E N U                             6
+3.1   Main Menu                                       6
+3.2   Troops (Recruits)                               7
+3.3   Ships                                           8
+3.4   Invasions                                       8
+3.5   Raid Commerce                                   9
+3.6   Move Orders                                     9
+3.7   Railroad                                        10
+3.8   Next Turn                                       10
+3.9   Inform (Reports)                                10
+3.10  Commands                                        11
+3.11  Utility                                         11
+3.12  Files                                           11
+4      F U N C T I O N   K E Y S                      12
+4.1  F1 - Help                                        12
+4.2  F3 - Redraw Screen                               12
+4.3  F7 - Next Turn                                   12
+5      O P T I O N S                                  12
+5.1   Options Submenu                                 12
+5.2   Cancel                                          12
+5.3   Fortify                                         12
+5.4   Join (Combine)                                  13
+5.5   Supply                                          13
+5.6   Move Capital - ADVANCED FEATURE                 13
+5.7   Detach - ADVANCED FEATURE                       14
+5.8   Drill - ADVANCED FEATURE                        14
+5.9   Relieve - ADVANCED FEATURE                      14
+
+                      ii
+6      U T I L I T Y                                  14
+6.1   Utility Submenu                                 14
+6.2   Side                                            15
+6.3   Solo/2-Player                                   15
+6.4   Graphics                                        15
+6.5   Sound                                           15
+6.6   Display                                         15
+6.7   Balance                                         15
+6.8   End Game Conditions                             15
+6.9   Victory Condition Override                      16
+6.10  Random Events                                   16
+6.11  Vary Start                                      16
+6.12  January Campaigns                               16
+6.13  Realism Toggle                                  16
+6.14  Check Links                                     18
+6.15  Enemy Aggression                                18
+7      M O V E    &    C O M B A T    P H A S E       18
+7.1   Computer Decisions                              18
+7.2   Army Movement                                   18
+7.3   Combat                                          19
+7.4   Income Update                                   21
+8      A L T E R N A T E    S C E N A R I O           21
+8.1   Alternate Map                                   21
+9      D A T A    F I L E S                           21
+9.1   Initialization File (CWS.INI)                   21
+9.2   Configuration File (CWS.CFG)                    23
+9.3   City Matrix (CITIES.GRD)                        24
+10      D E S I G N E R    N O T E S                  25
+10.1  Combat Model Adjustment                         25
+10.2  Game Concept                                    25
+10.3  Victory                                         25
+
+===========================================================
+ 1              I N T R O D U C T I O N  v1.50
+===========================================================
+ 1.1   Introduction
+===================
+The VGA Civil War Strategy Game is a 1 or 2-player graphic
+strategic level wargame of the American Civil War. The game
+requires VGA. It is provided "as is" without any warranty of
+any kind. It has been tested on several types of IBM
+compatibles (from XT to 386) but it is impossible to try all
+the many combinations of equipment that exist.
+
+The object of the game is to accumulate as many victory
+points as possible. The game is played in turns of 2 months
+during which both sides perform their actions. Decisions are
+made using menus which are described below.
+
+ 1.2   Requirements
+===================
+The program requires the following files:
+CWS.EXE         - the game program
+CWS.CFG         - your customizable configuration file
+CWS.INI         - initialization data file
+CWSLEAD.DAT     - army leader data file
+CITIES.GRD      - city data file
+CWSDOC.COM      - online help file
+CWS.DOC         - this documentation file
+HISCORE.CWS     - high score file
+
+In addition, the program uses the following files for
+graphical effects:
+FACE1.VGA       -|
+FACE2.VGA        |
+FACE3.VGA        |-- for setting difficulty level
+FACE4.VGA        |
+FACE5.VGA       -|
+FORT0.VGA       -|
+FORT1.VGA        |-- level of fortification
+FORT2.VGA       -|
+MTN.VGA         - mountain icons
+
+If the History option is ON (see Utility menu below), the
+following files are created:
+BATTSUMM        - summary of battles and losses in the war
+CWS.HIS         - chronicle of battles, winners, losers, and
+                  losses; can be viewed using the Recap
+                  option in the Inform menu (see below).
+
+ 1.3  Running the Game
+======================
+Type 'CWS' at the command line prompt. The title screen
+display will appear while the game initializes. You can skip
+opening music and graphics by typing 'CWS Q' at the command
+line prompt.
+
+
+				- 2  -
+ 
+The option to load a game or begin a new game is given at
+the beginning of the game, in addition to being available
+during the game.
+
+ 1.4  How to Win
+================
+You are awarded victory points for (1) capturing cities, (2)
+capturing armies, (3) winning battles, and (4) special
+events. Each city you control gives you a certain number of
+victory points (and a like amount of income). This varies
+depending on the city. For instance, a large city such as
+Philadelphia is worth much more than a smaller city such as
+Fort Donelson. To see the number of victory points each city
+is worth, use the "Inform" option to access the "Cities"
+report.
+
+Capital cities are worth an additional bonus of 50 victory
+points in addition to the normal victory points. If you lose
+your capital, you permanently lose the bonus income. If your
+capital is threatened, you may move it if you have enough
+money, via the "Utility" option of the Main Menu.
+
+If your army defeats an enemy that has no route for retreat
+or causes enough casualties to crush the enemy, you capture
+the army and receive a bonus of 25 victory points.
+Eliminating the enemy fleet also results in bonus victory
+points.
+
+For each battle you win, you receive 1 victory point.
+
+Under some circumstances, special events (such as the
+Emancipation Proclamation or Lincoln being re-elected)
+result in extra victory points for one side or the other.
+
+If the Union does not crush the Rebels, the South will win
+by default after a period of time (determined by end game
+conditions). When this happens, the score for both sides is
+reduced to 70% of the original level.
+
+As play progresses, the score will not instantly track the
+performance on battlefield, but rather will "lag" slightly.
+
+The game continues until one side achieves an end game
+condition. (See End Game Conditions under the "Utility"
+submenu). The side that triggers the end of the game
+receives an additional bonus of 100 victory points.
+
+If your score is one of the top 5 scores for the side
+played, you name and score are entered into the high score
+file.
+
+When the game is over, you are returned to the opening
+screen, with the option to quit, load a game or begin a new
+game.
+
+
+				- 3  -
+ 1.5   Map Display
+==================
+The title screen will clear and a map of the eastern U.S.
+will appear along with a menu entitled 'Main'. This is the
+Main Menu from which you choose most of your options. Above
+the menu is a flag showing which side is currently selected,
+Union or Confederate. At the very top of the screen on the
+right is a bar graph which shows how the current side is
+doing, along with information on victory points and level of
+difficulty.
+
+The small colored circles on the map display are cities or
+other key locations. There are a total of 40 such locations.
+Blue circles are Union controlled; gray ones are Confederate
+controlled. Red circles are neutral cities (not controlled
+by either side). Two of the cities are CAPITAL cities, and
+their circle is marked with a small yellow cross. If the
+graphics option is ON, the connections between the cities
+will be shown by dashed lines.
+
+If the circle representing the city is surrounded by a
+HOLLOW BLACK box, it is a FORTIFIED (FORT+)location; if
+surrounded by a SOLID BLACK box, the location is HEAVILY
+FORTIFIED (FORT++). Any level of fortification tends to
+improve resistance to enemy attacks.
+
+A small box appears in the right of the display with the
+letters 'PHIL' underneath. This represents the port of
+Philadelphia. The city of Philadelphia itself is the right
+most circle at the top of the screen. You will see a small
+ship icon in the "PHIL" box which represents the Union navy.
+
+Small flag icons appear next to some cities. Each flag
+represents an army. Mountain and rivers features are also
+shown on the map.
+
+ 1.6   Using the Menus
+======================
+You may move the highlighted menu option by pressing the
+"up" and "down" arrow keys. Pressing 'Enter' will select the
+currently highlighted option. In most cases, you may exit
+from a menu without selecting any option by pressing the
+"escape" or "esc" key. In a few cases you must select an
+"EXIT" option to leave the menu without selecting any
+option.
+
+Hot keys" are provided to speed menu access. The first
+letter of each command will immediately select the item
+without having to move the menu bar. WARNING: In responding
+to city locations, watch out for cities that have the same
+first letter. Using the hot key will select the FIRST city
+on the menu that begins with the letter you press. If you
+wanted to select another, you must use the up/down arrow
+keys. Example: You have the option to recruit at either Fort
+Donelson or Front Royal, both of which begin with "F". If
+you press "F", Fort Donelson will be selected because it
+comes first alphabetically in the menu list. If you want to
+
+				- 4  -
+ 
+select Front Royal in this case, you must use the arrow
+keys. If there had been no other cities beginning with "F"
+except for Front Royal the hot key would have worked fine.
+
+Note that some menu items have had to be changed slightly to
+avoid duplicate first letters. For instance, "Inform" has
+replaced the earlier "Reports" menu item because there is
+already a menu item on the main menu beginning with "R"
+(Railroad).
+
+The menu cursor placement has been made more consistent for
+the Option and Utility menus. The cursor now stays on the
+submenu if there are more choices available for the item
+currently being selected (e.g., more troops to be drilled).
+Otherwise it returns to the main menu and stays on the
+Option or Utility item.
+
+PLEASE NOTE: TO RETURN TO THE MAIN MENU FROM EITHER THE
+COMMANDS OR UTILITY MENU, PRESS THE "ESCAPE" KEY ("Esc").
+
+ 1.7   Menu for Railroad and Capital Moves
+==========================================
+The move-to menu for train moves and capital relocation
+responds to the letter of the destination city as well as
+the up and down arrow keys. The city that will be displayed
+will be the FIRST (alphabetically) friendly city beginning
+with the letter you type. For instance, if you wish to move
+the army in Vicksburg by train to Charleston, SC, type "C",
+and the first friendly city beginning with "C" will show. If
+Chattanooga is friendly, it will be displayed. You can then
+quickly use the arrow keys to display the desired
+destination.
+
+ 1.8   Screen Saver
+===================
++=========================================================+
+|  There is a SCREEN SAVER accessed by pressing "Ctrl-B". |
+|  (The "B" may be either upper or lower case).           |
+|  The screen will instantly blank and random geometric   |
+|  designs will appear.                                   |
++---------------------------------------------------------+
+|  To restore the game map, press "Ctrl-B" again.         |
++=========================================================+
+
+ 1.9   Set Up
+=============
+There are several setup options available which can be
+accessed from the "UTILITY" option of the Main Menu. You can
+swap sides, select 1- or 2-player options, control sound and
+graphic options, and adjust difficulty. When you save a
+game, the configuration file is automatically updated to the
+current set of options you have chosen.
+
+ 1.10  Sequence of Play
+=======================
+Play proceeds in the following sequence for each game turn
+
+				- 5  -
+ 
+(representing 2 months):
+
+  A. Decision Phase
+      Side 1 Decisions
+             (Union if 2 players ; Human if 1 player)
+             1. Recruit
+             2. Naval Actions (Resolved Immediately)
+             3. Move Orders
+             4. Other Decisions (Combine, Fortify, etc.)
+
+      Side 2 Decisions
+             (Rebel if 2 players ; Computer if 1 player)
+             1. Recruit
+             2. Naval Actions (Resolved Immediately)
+             3. Move Orders
+             4. Other Decisions (Combine, Fortify, etc.)
+
+  B. Move & Combat Update Phase
+             (Move Orders Carried Out)
+
+  C. Turn Update Phase
+             1. Income Updated Based on Cities Controlled
+             2. Unit Supply Updated
+
+===========================================================
+ 2            D E C I S I O N    P H A S E
+===========================================================
+ 2.1   Movement
+===============
+Movement is from city to city (point-to-point movement) by
+armies. Any number of friendly armies may stack in a city.
+Armies that move to a city occupied by an enemy army must
+fight the enemy, and either drive off the enemy (to capture
+the city) or be forced back themselves.
+
+The move-to-menu for army moves has been enhanced when the
+currently selected city on the menu is occupied by another
+army (enemy or friendly). In that event, the name of the
+occupying army is shown in place of the city name on the
+highlighted menu line. Underneath the menu box, the strength
+of the occupying army is also displayed.
+
+NOTE: If there is more than one army in an occupied city
+that another army is viewing to move to, the name and
+strength of only one army is shown. You will need to consult
+use INFORM option to determine all the armies in that
+particular city.
+
+Moving into an enemy city that is not occupied by an army
+results in automatic capture of the city. Movement into a
+neutral city automatically captures the neutral city. The
+city will change colors to indicate you have gained control.
+
+Fighting to capture an occupied fortified city reduces the
+fortification by one level. (Thus, a FORTIFIED+ city would
+be reduced to an unfortified city.)
+
+				- 6  -
+ 
+
+When an army captures an unoccupied fortified city, the fort
+is not necessarily reduced. The victorious army is given the
+option to raze the fortifications. Note that razing TOTALLY
+destroys the forts, even if they were double fortified.
+
+ 2.2   Armies
+=============
+Armies have several attributes of importance. These will
+change as the game progresses, and it is important for you
+to understand how they influence the outcomes.
+
+STRENGTH   - the number of men in the unit; the prime
+             attribute in combat
+
+LEADER     - ability score of the unit leader, from 1 to 10.
+             Greatly affects the unit's effectiveness in
+             battle and movement.
+
+EXPERIENCE - the number of battles the unit has won (0-10).
+             More experienced units are more effective in
+             combat. Each battle won increases the
+             experience level by 1.
+
+SUPPLY     - the current state of food and equipment (0-10).
+             Units use 1 unit of supply each turn, except in
+             summer and autumn harvest months. Capturing
+             cities and capturing enemy armies increases
+             supply. Moving and fighting accelerate use of
+             supplies. Units that are 'out of supply'
+             (supply level=0) fight at 50% effectiveness,
+             and move more slowly. Units that are out of
+             supply are now marked with an "S" to make them
+             easier to locate. Armies in port cities are
+             always in supply if the city is not blockaded.
+
+===========================================================
+ 3                 M A I N    M E N U
+===========================================================
+ 3.1   Main Menu
+================
+
+                     +=============+
+                     |    Main     |
+                     +=============+
+                     | Troops      |
+                     | Ships       |
+                     | Army Moves  |
+                     | Railroad    |
+                     | NEXT TURN   |
+                     | Informs     |
+                     | COMMANDS    |
+                     | UTILITY     |
+                     | Files       |
+                     +=============+
+
+
+				- 7  -
+ 
+This menu shows the primary decisions you can make. At the
+bottom of the menu are symbols that tell you what setup
+options are active, and a reminder that F7 is a shortcut
+"speed" key to go to the next turn. (WARNING: F7 will take
+you to the next turn without asking for confirmation; be
+SURE you are through with your moves). The
+"music note" symbol tells you that music is ON. 'Snd' tells
+you that sound is ON. The "G" symbol tells you that graphics
+are ON for combat scenes. The number '1' or '2' tells you
+whether this is a 1- or 2-player game.
+
+When graphics are turned ON, the connection links between
+cities are shown. Also, there are displays for battles and
+special events, such as the surrender of an army. Play will
+be slowed slightly by when graphics are ON, due to time
+required to draw these displays.
+
+ 3.2   Troops (Recruits)
+========================
+Allows you to recruit new armies or build up existing
+armies. Each recruitment requires 100 money units. If you do
+not have enough money, you cannot recruit.
+
+You will be given one or more randomly selected cities where
+you may recruit (only ones that your side currently
+controls). If the city is vacant, a NEW army is placed
+there, along with a commander and his corresponding
+abilities. Adding recruits to an existing army increases its
+strength, but does not change the commander.
+
+Each side has 20 commanders available to lead separate
+armies. As the game progresses, the number of available
+commanders will be reduced as commanders are captured or are
+occupied leading other units.
+
+If the list of 20 preset commanders is exhausted, there is
+list of "generic" commanders provided so you can still
+recruit and finish the game. Generic units are given Roman
+numeral identifiers. For instance, Union army 12 is
+designated Union XII. Rebel army 22 is designated Rebel II,
+and so forth.
+
+Newly created armies MAY NOT move this turn, while they
+train and organize. Existing armies that are increased in
+strength CAN MOVE in the current turn.
+
+At the balanced play level, newly created stand-alone armies
+are 7,000 men. Additions to existing armies are 4,500 men.
+(See REALISM toggle).
+
+Experience level of recruits will be low (varies slightly,
+with slightly better levels for Rebel armies).
+
+NOTE: Once you have begin to recruit, you should NOT change
+      sides or number of players, since the cities to
+      recruit in are already selected for that part of the
+
+				- 8  -
+ 
+      turn.
+
+ 3.3   Ships
+============
+Allows you to build and move fleets and bombard enemy
+cities. Each side has one fleet, consisting of 0-10 ships.
+Ships can be added to the fleet only in friendly port
+cities.
+
+Two type of ships may now be built: wooden ships or
+ironclads. Wooden ships cost 100 money units; ironclads cost
+200 money units; Ironclads are no more effective than wooden
+ships in bombarding cities or conducting invasions. However,
+ironclads are superior to wooden ships in ship-to-ship
+combat. They are 10% more effective in scoring a hit than a
+wooden ship, and they can take 20 hits whereas wooden ships
+can only take 10 hits.
+
+As fleets are formed, ironclads are always added to the
+left most position in the fleet. Wooden ships are always
+added to the rightmost position. When combat or invasions
+occur, it proceeds from right to left. This means the ships
+to the right are engaged first.
+
+The ship icon displayed on the map is the one corresponding
+to the ship type of the first (left most position) in the
+fleet. Information on the composition of the enemy fleet can
+be found using the Inform option.
+
+Ships can be moved to any port city. This means ships may
+move much more rapidly than armies, but their effect is
+different.
+
+If the two fleets meet in a port, they will engage in
+combat. During each round of combat, the attacker has the
+option to press the attack or retire. Each ship can take 10
+enemy hits before it sinks. The current number of hits
+remaining is shown below the ship icon. Combat continues
+until one fleet either retreats or is eliminated. At the end
+of the turn, there can be only one fleet in a given port.
+
+Ships do not transport armies, but can bombard enemy cities
+to damage defending armies or fortifications, or to drive
+the city to neutrality. If the city has an enemy army, the
+bombardment will damage the enemy. The fleet will also
+blockade the enemy army in the port, reducing his supplies.
+Fortified cities may have the forts damaged or reduced.
+However, forts may sink attacking ships.
+
+Unfortified cities not occupied by a defending army may
+become neutral as a result of the bombardment.
+
+Note that both human and computer players are now prohibited
+from moving to a port and attacking the port on the same
+turn.
+
+
+				- 9  -
+ 
+ 3.4   Invasions
+================
+The realism toggle also affects the ability for seaborne
+units to conduct invasions.
+
+If the realism toggle is ON, the Union player ONLY
+may conduct invasions. Otherwise, BOTH sides may conduct
+invasions.
+
+Invasions may be conducted only at neutral cities if there
+is more than one ship in the invading fleet. The fleet size
+will be reduced by 1 and the new army will seize the neutral
+city, under the leadership of the next available commander.
+The invading army is small (3500 men) and vulnerable to
+attack. However, the captured city is eligible for possible
+recruiting later.
+
+ 3.5   Raid Commerce
+====================
+Ships from both sides have the option to raid enemy commerce
+on the high seas. This is shown as the "Raid" option on the
+Ships menu. Selecting this option will cause a red box to
+appear, with the word "Commerce" in it, along with the ship
+icon. Each turn that the fleet stays in this box, there is a
+probability of doing damage to the enemy by destroying
+commerce and thereby reducing his income. There is also a
+chance that one or more of the raiding ships will be sunk.
+If both fleets enter the commerce raiding zone, combat will
+occur and one fleet will either be destroyed or have to
+retreat. Only one fleet can remain in this zone at the end
+of the turn. It is that fleet which can attempt to raid
+enemy commerce.
+
+ 3.6   Move Orders
+==================
+Allows you to select an army to move and where to move it. A
+menu will cycle through all your armies that are able to
+move this turn. Armies that already have move orders, or
+that have been combined this turn, or that have built
+fortifications this turn, or newly created armies are not
+eligible to move in the current turn.
+
+Once you select the army to move, the choice of all possible
+connecting destinations for that army are shown. Selecting a
+destination will result in a white dotted line from the
+selected unit to the destination. Note that the army does
+not move immediately. Rather, it will attempt to move during
+the move and update phase.
+
+If an army with move orders is attacked during the move and
+update phase, there is a chance that it will not be able to
+carry out those orders. If it is defeated, it must retreat,
+but even if it wins it may have its orders cancelled.
+
+During the month of January, you may not carry out any land
+campaigns (i.e., attack enemy or neutral cities). You may
+
+				- 10  -
+ 
+move armies to friendly cities, fortify, or conduct other
+land operations. Naval operations are unaffected by the
+January restriction.
+
+ 3.7   Railroad
+===============
+Both sides have access to railroads to rapidly move 1 army
+per side from a friendly city to another. In order to use
+the railroad, it must not already be in use by an army on
+this turn. In order to be an origin or  destination for a
+railroad move, a city has to join with at least 2 other
+friendly cities.  Both terminals must be part of a "chain"
+of least 3 connected friendly cities. (In earlier versions,
+a "chain" of 2 friendly cities was considered a valid origin
+or destination). In other words, neither terminal can be cut
+off" by the enemy. Once selected, railroad moves can NOT be
+cancelled.
+
+The Union railroad can carry an army up to 60,000 men. The
+Rebel railroad can carry an army up to 30,000 men. (These
+values can be adjusted in the configuration file and will
+vary somewhat if the REALISM toggle is on). The current
+railroad capacity for your side is shown at the bottom of
+the screen. There is no cost for the rail movement. Note
+that to be eligible to move by rail, an army may not have
+other move orders, nor may it have used its turn in any
+other way (such as in fortifying a city).
+
+When an army is placed on the railroad, a small train icon
+of appropriate color will appear in the box in the upper
+left corner of the screen. The destination for railroad
+moves is shown in the railroad box. If you are playing a
+2-player game, your opponent will know  you have an army on
+the train, but will not know its destination. The arrival of
+armies moved by rail for BOTH sides takes place at the
+BEGINNING of the move and combat phase. Thus, armies
+transported by rail will appear at their destinations BEFORE
+any other land moves or attacks are made.
+
+ 3.8   Next Turn
+================
+When you have completed your decisions for the current turn,
+select this option to continue with the game sequence. Note
+that once the game sequence progresses, you cannot back up.
+Thus, when you select this option, you will be asked to
+confirm before the turn actually progresses.
+
+ 3.9   Inform (Reports)
+=======================
+Seven different reports are potentially available; there is
+no cost for any of the reports.
+
+  1) Friendly Army report
+       Shows the status of all your armies, and other useful
+       statistics on the progress of the game. After the
+       first turn, it will also show the total strength of
+
+				- 11  -
+ 
+       the enemy forces.
+
+  2) Enemy Army report
+       Shows information similar to Friendly army report,
+       except that it shows less complete information on the
+       enemy forces. It includes the composition of the
+       enemy navy.
+
+  3) City report
+       Provides information on the cities, their worth,
+       status, and so on.
+
+  4) Force summary
+       Shows on the map the strength of all armies (in 100's
+       of men).
+
+  5) Intelligence report
+       Provides an on-map summary of attributes of all
+       FRIENDLY armies (strength, leadership, experience,
+       and supply).
+
+  6) Battle Summary report
+       Shows number of battles won and casualties incurred
+       for each side.
+
+  7) Recap report (if HISTORY option is ON in the Utility
+     menu)
+       Scrolls you through a chronicle of the history of the
+       game thus far (battle outcomes and losses)
+
+     Typical chronicle entries might look like this:
+
+     Manassas *Lee (3200/29600) defeats McDowell (5400/30200)
+     Memphis  Pope (1000/9900) defeats *Johnston (2900/12400)
+
+     The asterisk indicates the attacker. Casualties and
+     total troop strength are indicated in the parentheses.
+
+ 3.10  Commands
+===============
+See Commands Submenu for a description of the choices. These
+generally relate to special commands available for
+individual armies.
+
+ 3.11  Utility
+==============
+See Utility Submenu. These provide game options that allow
+various features of overall game play to be modified.
+
+ 3.12  Files
+============
+Allows you to load or save games and to quit then program.
+There can be up to 9 saved games,"CWSx.SAV", where "x" is
+a number from 1 to 9. Those file names for which a saved
+game exists are marked with a "û" as a reminder.
+
+
+				- 12  -
+ 
+When the game is started, the base game is automatically
+initialized, configured according to the current CWS.CFG
+settings.
+
+===========================================================
+ 4             F U N C T I O N   K E Y S
+===========================================================
+ 4.1  F1 - Help
+===============
+Pressing F1 will display the on-line help file.
+
+ 4.2  F3 - Redraw Screen
+========================
+Pressing F3 will redraw (refresh) the screen.
+
+ 4.3  F7 - Next Turn
+====================
+Pressing F7 will advance to the next turn.
+CAUTION: this is offered as a SPEED option and it bypasses
+the "are you sure ?" check. Once you commit with the F7 key,
+you cannot back up!
+
+===========================================================
+ 5                   O P T I O N S
+===========================================================
+ 5.1   Options Submenu
+======================
+
+                     +============+
+                     |  Commands  |
+                     +============+
+                     | Cancel     |
+                     | Fortify    |
+                     | Join       |
+                     | Supply     |
+                     | Capital    |
+                     | Detach     |
+                     | Army Drill |
+                     | Relieve    |
+                     | MAIN MENU  |
+                     +============+
+
+ 5.2   Cancel
+=============
+Allows the move orders for unit selected (menu with eligible
+units will be displayed) to be cancelled - in case you
+change your mind before you go to the next turn.
+
+ 5.3   Fortify
+==============
+If ALL the following conditions are met, you may fortify a
+city:
+1. City is occupied by a friendly army
+2. City is not already at DOUBLE FORTIFIED ++ level
+3. You have at least 200 money units
+
+
+				- 13  -
+ 
+All cities meeting these conditions, will appear in a menu
+of candidates. Selecting a city to fortify will cause the
+city icon to be updated on the game display. The army
+occupying a city that is fortified loses its turn (it is
+presumably busy building fortifications) and will be shown
+as 'Resting' in the Army report.
+
+An army may increase a given city's fortifications by 1
+level per turn. If there are 2 units in a city, each army
+may add 1 level of fortification in a turn, thereby double
+fortifying the city.
+
+ 5.4   Join (Combine)
+=====================
+Up to a certain level, friendly armies may be combined to
+create larger and more powerful forces. In order to combine,
+armies must start the turn stacked in the same city. Stacked
+armies are indicated by a small gold circle on the flag
+icon. Selecting 'Combine' will result in a menu of candidate
+cities in which armies are stacked. Selecting a city will
+cause all armies in that city to attempt to combine, up to a
+maximum level of 125,000 men. Army attributes for combined
+armies are averaged, and the best commander of the armies
+combined will assume leadership of the combined forces. (His
+leadership ability will be reduced slightly to account for
+the increased difficulty of commanding the larger forces.)
+
+ 5.5   Supply
+=============
+On occasion, you may need to manually allocate additional
+provisions to units that are out of supply. These units may
+be seen on the map marked with an "S" to make them easier to
+locate. At the end of the move and update phase, units will
+automatically receive 1 unit of supply, assuming enough
+money is available. Automatic update of supply costs .002
+money units per 1,000 men in the army unit. (For instance, a
+22,000 man unit would require 44 money units to resupply).
+This automatic resupply is done in numerical unit sequence,
+so that higher numbered units are supplied last. If there is
+not enough money to supply all units, or if the unit expends
+more than expected supplies, or is blockaded in a port, some
+will eventually get out of supply. Note that in the months
+of July and September, units are resupplied without cost
+(except for blockaded units).
+
+To manually resupply, you must have enough money to provide
+the supplies, which depends on the size of the army being
+resupplied. Each unit of supply requires .001 money units
+1,000 men (cheaper that automatic resupply). However, the
+computer will attempt to allocate as much supply as possible
+to the unit selected, up to a maximum of 5 units of supply.
+If you do not have enough money to allocate at least 1 unit
+of supply, none will be provided.
+
+ 5.6   Move Capital - ADVANCED FEATURE
+======================================
+
+				- 14  -
+ 
+You may move your capital (if it has not yet been captured)
+for a cost of 500 money units. Moving the capital also
+results in awarding your enemy 50 victory points. However,
+it may help keep the enemy from capturing the capital, which
+normally will end the game. Use the up/down arrow keys until
+the desired city is shown for the new capital location (only
+the current candidate city is shown in the  menu). When the
+desired city for the new capital appears, press Enter.
+
+ 5.7   Detach - ADVANCED FEATURE
+================================
+The Rebel player ONLY may detach a unit from an existing
+army, provided the original army is large enough (6,500 men
+or more) and there is an available Rebel commander for the
+detached unit. 30% of the original force is split into the
+new unit, along with 30% of the supplies.
+
+ 5.8   Drill - ADVANCED FEATURE
+===============================
+Both sides may drill armies to increase their experience
+level. Drilling requires one turn in which the army cannot
+move. Experience gained in this manner cannot exceed the
+leader's command rating, and is limited to a maximum of 5 in
+any case.
+
+ 5.9   Relieve - ADVANCED FEATURE
+=================================
+The Relieve option allows you to replace generals, thereby
+removing them from their command. (This is, of course, quite
+historical as Lincoln and Davis both exercised this option
+several times). To be RELIEVED, a unit cannot have already
+used its turn (e.g., cannot have move orders). When a
+general is relieved, you are allowed to replace him with
+another general from the list of available commanders. When
+a general is relieved, the unit uses its turn, and suffers
+two additional penalties. Both the EXPERIENCE level and the
+LEADERSHIP level of the unit are decreased by 1 because of
+confusion about the new leader's style of command. The
+relieved general is placed on the list of available
+commanders, awaiting possible future service.
+
+===========================================================
+ 6                   U T I L I T Y
+===========================================================
+ 6.1   Utility Submenu
+======================
+                     +============+
+                     |  Utility   |
+                     +============+
+                     | Side       |
+                     | Solo       |
+                     | Graphics   |
+                     | Sounds     |
+                     | Display    |
+                     | Balance    |
+                     | End Cond   |
+
+				- 15  -
+ 
+                     | Events     |
+                     | Vary Start |
+                     | Jan Cmpgn  |
+                     | Realism    |
+                     | Chk Links  |
+                     | History    |
+                     | Aggress 1  |
+                     +============+
+
+ 6.2   Side
+===========
+Toggles between the Union and Rebel side for the 1 player
+game only.
+
+ 6.3   Solo/2-Player
+====================
+Toggles between 1- and 2- player game.
+
+ 6.4   Graphics
+===============
+Adjust level of graphics. Four levels of graphics are now
+allowed, designated G0 through G3.
+
+   G0  = no additional graphics (BASIC level)
+   G1  = show city connections
+   G2  = show city connections and city names
+   G3  = show city connections, city names, and additional
+         combat graphics
+
+   Higher graphics levels will slow the game somewhat while
+   the screen is redrawn.
+
+ 6.5   Sound
+============
+Toggle between Sound & Music, Sound Only, and Quiet.
+
+ 6.6   Display
+==============
+Sets display speed for messages displayed, from fast to very
+slow.
+
+ 6.7   Balance
+==============
+Set Play Balance from Rebel++ (large Rebel advantage) all
+the way to Union++ (large Union advantage). Play balance
+affects the relative resources allocated, along with the
+handicap received in combat.
+
+ 6.8   End Game Conditions
+==========================
+Shows the conditions that will determine when the game is
+over. These are specified in the input file CWS.INI, and can
+be changed by changing that file. Up to 5 different preset
+conditions may trigger the end of the game:
+
+                Time (Month & Year)
+
+				- 16  -
+ 
+                % Cities Controlled by Either Side
+                % Income for Either Side
+                Capital Capture By Either Side *
+                Ratio of Total Army Strength
+
+In addition, the total elimination of either side's armies
+will trigger a victory condition. Active conditions are
+marked with an "û". These may be toggled either off or on
+(active) using this option by pressing ENTER when the
+desired condition is highlighted, but the VALUES themselves
+can only be changed in CWS.INI (see "Files" section below).
+If ANY of the active conditions are achieved by EITHER SIDE,
+the game will end. If there are NO active end game
+conditions, the game will continue indefinitely.
+
+* Note: If BOTH sides lose their capital in the same turn,
+  the game does NOT end even if this condition is active.
+
+ 6.9  Victory Condition Override
+================================
+There is an override option when victory conditions signal
+the end of the game. This allows you to keep playing if you
+choose instead of abruptly ending the game. Each time the
+override is used it increases the victory condition that was
+triggered. For example, suppose the % cities controlled
+condition is triggered. Suppose it is currently set at 32
+(80% of total), and that the end game condition is
+overridden. The number of cities required to trigger the
+condition is increased to 33 (or 82.5%). If it is overridden
+later, it increases to 34 (85%) and so on.
+
+ 6.10 Random Events
+===================
+Control over random events has been extended in the Utility
+menu option. Random events can be toggled OFF so they do not
+occur. If random events are ON, the degree to which they
+favor one side or the other can be controlled:
+
+    Favor Union  (70% of random events help the Union)
+    Neutral (50% help the Union; 50% help the Rebels)
+    Favor Rebels (70% of random events help the Rebels)
+
+If random events are ON in a 1-player game, they will
+default in favor of the computer opponent if they are not
+
+ 6.11 Vary Start
+================
+Selecting this option at the beginning of the game will
+give different starting conditions.
+
+ 6.12 January Campaigns
+=======================
+Toggle to allow/disallow January campaigns.
+
+ 6.13 Realism Toggle
+====================
+
+				- 17  -
+ 
+A toggle is provided in the Utility menu ("REALISM") to
+control several aspects of the game. The specific effects
+are listed below.
+
+   a) When the REALISM toggle is ON, the number of possible
+      recruits depends on size of city in which recruiting
+      is taking place instead of a fixed number of recruits.
+      The city size is as represented by the income level in
+      the CITIES.GRD file.
+
+      When the toggle is OFF, the number of recruits for new
+      or existing armies is fixed at the levels in the basic
+      game (7000 for new armies; 4500 for additions to
+      existing armies). This number is fixed regardless of
+      whether recruiting is done in larger cities (e.g.,
+      Philadelphia) or smaller cities (e.g., Fort Donelson).
+      Likewise, any city currently controlled is potentially
+      available as a source for recruits (e.g., Rebels
+      recruiting in Philadelphia).
+
+      When the realism toggle is ON, the number of recruits
+      varies based on the value assigned to the city in the
+      CITIES.GRD data file. For cities with values in the
+      10-15 range, the number of recruits will be about the
+      same as with the toggle off. However, the number of
+      recruits will be larger than normal for bigger cities
+      and smaller than normal in smaller cities.
+
+   b) When REALISM is ON, recruiting cannot take place in
+      cities that were ORIGINALLY under enemy control. Thus,
+      if realism is ON, recruits may be raised only in
+      cities that were ORIGINALLY friendly or neutral. This
+      will prohibit Union recruits being raised in say, New
+      Orleans or Rebel troops being recruited in
+      Philadelphia.
+
+   c) When a city is completely isolated the number of
+      troops available for recruiting within that city is
+      reduced to 1/3 the normal level.
+
+   d) When the REALISM switch is ON, the railroad capacity
+      is variable, based on number of cities held. At the
+      beginning of the game, capacity for both sides will be
+      the initial level set in the CWS.CFG file. However,
+      for each additional city captured, the capacity will
+      increase by 5,000 troops. (Conversely, for each
+      additional city lost, the capacity will decrease by
+      5,000 troops). However, the capacity will not exceed
+      twice the initial level, nor fall below half the
+      initial level.
+
+   e) The realism toggle also affects the ability for
+      seaborne units to conduct invasions (see invasions).
+      When the REALISM toggle is ON, only the Union side may
+      conduct invasions.
+
+
+				- 18  -
+ 
+   f) When REALISM is ON, the defender combat advantage is
+      increased. This will make it harder for the Rebels to
+      make excursions into Ohio and the like. However,
+      history makes it very clear that the defensive
+      posture was extremely powerful in the war.
+
+  (g) When REALISM is ON, ironclads cannot be built prior
+      to 1862, to be more historically correct.
+
+ 6.14 Check Links
+=================
+A utility has been provided to check for return routes on
+maps that you design yourself. For instance, if you have a
+link from Manassas to Harpers Ferry but not from Harpers
+Ferry to Manassas, there is missing return route. This
+option is accessed by the 'Chk Links' option on the UTILITY
+menu. Missing return route links are identified, and if
+possible, corrected for current game being played. Note: the
+CITIES.GRD data file is not fixed; the user must note the
+corrections and make them via a text editor.
+
+ 6.15 Enemy Aggression
+======================
+This option applies only for 1-player game. By repeated
+selecting this option you may cycle through enemy
+aggressiveness levels from 0 (least aggressive) to 5 (most
+aggressive). The default level is 1. At the lower levels,
+the enemy will be more cautious and defensive, preferring to
+build forts and make attacks only when the odds are
+favorable. At the higher levels, the enemy will attack more
+often, perhaps even to the point of foolhardiness.
+
+===========================================================
+ 7      M O V E    &    C O M B A T    P H A S E
+===========================================================
+ 7.1    Computer Decisions
+==========================
+If you are playing a 1-player game versus the computer, you
+will see the computer decisions being made. The computer
+does not 'cheat' by taking advantage of knowledge of the
+moves you have selected.  If the side played by the computer
+has an advantage in play balance, it will be a more
+difficult opponent because it will get more resources, and
+will receive a combat handicap.
+
+You will be prompted to "press any key for month /year
+events". During the update phase, the message "UPDATE" will
+appear in the lower right of the map area. The computer will
+move the armies, provide information on battles, state of
+supplies, and so on. From time to time the display will
+pause to give you time to read the messages. You can press
+any key to move on.
+
+ 7.2   Army Movement
+====================
+When you see the message "press any key for (current month
+
+				- 19  -
+ 
+and year) events", the move and update phase has begun.
+During this phase both sides have their move orders carried
+out. When enemy armies meet in the same city, combat occurs.
+After combat, only one side will continue to occupy the
+city. The side that was driven off loses the battle.
+
++==========================================================+
+| The rail movement for BOTH sides takes place at the      |
+| BEGINNING of the move and combat phase. Thus, armies     |
+| being transported by rail will appear in their           |
+| destinations BEFORE any other army movement takes place. |
++==========================================================+
+
+The order in which armies move depends on (1) ability of the
+leader (better ones tend to move first), (2) supply (out of
+supply units move last) and (3) a random factor. Armies
+carry out their orders one at a time. The flag icon will
+move from the starting location to the destination city.
+
+ 7.3   Combat
+=============
+If combat occurs, a set of statistics will appear on the
+right of the screen giving important information on how the
+battle will be resolved. The information for both attacker
+and defender begins with a base calculation, which goes
+through a series of adjustments to arrive at a final value
+for this battle.
+
+   Item       Meaning
+----------  -----------------------------------------------
+
+ Base       Base combat strength, obtained by dividing unit
+            strength by 10,000 and rounding up. Thus, an
+            army with 23,000 men has a base combat strength
+            of 3. The base for defenders is increased to
+            account for their reduced exposure to fire.
+
+ Ldr/Exp    Base combat strength, adjusted for leadership
+            and experience. Armies outmanned by more than
+            5:1 will usually not receive this adjustment.
+            However, elite armies with experience levels of
+            8 or more automatically receive a bonus, even if
+            hopelessly outnumbered.
+
+ Small      Adjusted strength after penalizing for very
+            small forces (i.e., small force has less than
+            1,500 men).
+
+ Outman     Additional adjustment if the opposing army is
+            much larger than this army proportionately. This
+            occurs for the attacker if outnumbered by more
+            than 5:1 or for the defender if outnumbered by
+            more than 10:1.
+
+ Supply     Additional adjustment if unit is out of supply
+            (will be in contrasting color). Out-of-supply
+
+				- 20  -
+ 
+            units fight at half strength.
+
+ Difclt     Additional adjustment based on difficulty level.
+
+ Fort       (FOR DEFENDERS ONLY) - Additional adjustment if
+            location is fortified and defender has not moved
+            or fought previously in this turn. NOTE:
+            Occasionally an exceptional commander will get
+            the fort bonus even if he has fought previously
+            in the turn.
+
+The exact combat adjustment for outmanned armies has been is
+shown below:
++-------------------------+---------------+---------------+
+| Attacker/Defender Ratio |  Attack Adjust| Defend Adjust |
++=========================+===============+===============+
+|     1:10 or worse       | set to 1 (min)|set to 20 (max)|
++-------------------------+---------------+---------------+
+|     1:10 to  1:5        | set to 1 (min)|     + 2       |
++-------------------------+---------------+---------------+
+|     1:5  to  1:2        |      - 2      |     + 2       |
++-------------------------+---------------+---------------+
+|     1:2  to  2:1        |        0      |       0       |
++-------------------------+---------------+---------------+
+|     2:1  to  3:1        |        0      |     - 2       |
++-------------------------+---------------+---------------+
+|     3:1  to  5:1        |      + 2      |     - 2       |
++-------------------------+---------------+---------------+
+|     5:1  to 10:1        |      + 2      | set to 1 (min)|
++-------------------------+---------------+---------------+
+|     10:1 or better      |set to 20 (max)| set to 1 (min)|
++-------------------------+----------------+--------------+
+Note that this is in addition to any other combat
+adjustments, such as leadership, fortification, supply, etc.
+
+
+All combat adjustments are made sequentially, and the final
+result is the one actually used in the combat calculations.
+The final result for both the Attacker and the Defender is
+shown in a highlighted box. The final values can never be
+less than 1 nor more than 20. A calculation of the odds of
+an attacker victory are also given as A GUIDE ONLY. The
+computer actually resolves the combat separately from this
+calculation of attacker odds, but it should provide a good
+indicator of who is likely to win the battle.
+
+The actual results of the battle will be displayed after you
+press a key. The winner is announced at the bottom of the
+screen. Casualty information (numbers and percentages for
+each side) are shown at the top of the screen. Notice that
+an army can win the battle but suffer greater losses than
+the enemy.
+
+The loser must retreat to an adjacent friendly city. The
+human player is given the option as to which city to retreat
+to if a player-controlled DEFENDING army must retreat (if
+
+				- 21  -
+ 
+there is more than one choice for retreat). If there are no
+retreat options, the loser will surrender. Even if there is
+a retreat option, a unit may be so outnumbered and reduced
+in size so much that it can no longer function. Such
+shattered units will also surrender. When units surrender,
+their commanders are PERMANENTLY removed from the game.
+
+If there is more than one defending army in a city, the
+attacker must defeat each defender one at a time until all
+defenders are driven out before occupying the city.
+
+ 7.4   Income Update
+====================
+After all combat and moves are resolved, the supplies are
+distributed, and income and victory points are updated based
+on present game situations. Note that the Union side always
+receives income from other parts of the country outside the
+region shown (e.g., Boston, New York, Chicago, etc.) Thus,
+the Union in effect has an income bonus. Supplies are
+distributed based on cash remaining, to the armies in
+numerical order.
+
+===========================================================
+ 8        A L T E R N A T E    S C E N A R I O
+===========================================================
+ 8.1   Alternate Map
+====================
+There is an alternate game setup in the ALTMAP files, as
+follows:
+
+   ALTMAP.GRD is the alternate map grid
+   ALTMAP.INI is the alternate initialization file
+   ALTLEAD.DAT is the alternate leadership file
+
+A batch file ALTMAP.BAT will automatically switch these
+alternate files with the game files so they can be used by the
+program. To run this file, at your DOS prompt, simply type
+ ALTMAP
+To switch them back, run ALTMAP.BAT a second time.
+
+===========================================================
+ 9                D A T A    F I L E S
+===========================================================
+ 9.1   Initialization File (CWS.INI)
+====================================
+The data files are simple "flat ASCII" files and may be
+customized as you wish to change game conditions. (It is
+good practice to copy the original as a backup before you
+create a new one.) The program probably will not run if you
+make errors in these files.
+
+Examples of the actual data lines are shown below in the
+boxed areas; comment lines before each of the data lines
+describe the information in that line.
+
+Text for sides (Side 0, Side 1, Side 2)
+
+				- 22  -
+ 
++-----------------------------+
+|"NEUTRAL","Union","Rebel"    |
++-----------------------------+
+
+Month names (game uses odd months only; but all are required)
++-----------------------------------------------------------+
+|"January","February","March","April","May",June"           |
+|"July","August","September","October","November","December"|
++-----------------------------------------------------------+
+
+Beginning Dates and End Game Conditions
+Begin:    starting year (1861)
+          beginning month (3)
+End:      year to end game (1865)
+          month to end game (3)
+          integer % of cities controlled to end game (80)
+          integer % of income to end game (80)
+          1 = capital capture ends games; 0 = inactive
+          integer ratio of armies to end game;
+          e.g., 3 means a 3:1 ratio
++-----------------------------+
+|3,1861,3,1865,80,80,1,3      |
++-----------------------------+
+
+Number of Union armies at beginning of play
++---+
+|5  |
++---+
+
+Data lines for each Union army at beginning of play
+        city # (39 = Washington)
+        strength in 100's (400 = 40,000 men)
+        experience (1)
+        supply     (9)
++---------------+
+|39,400,1,9     |
+|7,200,0,9      |
+|13,75,0,9      |
+|34,100,0,5     |
+|31,125,0,5     |
++---------------+
+NOTE: These are assigned commanders starting with commander
+      1 for army in line 5, commander 2 for army in line 6,
+      and so on. There must be one line for each Union army
+      that starts at beginning.
+
+
+Number of Rebel armies at beginning of play
++---+
+|4  |
++---+
+
+Data lines for each Rebel army at beginning of play
+        city # (33 = Richmond)
+        strength in 100's (300 = 30,000 men)
+        experience (1)
+
+				- 23  -
+ 
+        supply     (7)
++---------------+
+|33,300,1,7     |
+|12,200,1,6     |
+|26,150,0,7     |
+|38,75,0,4      |
++---------------+
+
+Starting Cash Position
+        Starting Union cash (300)
+        Starting Rebel cash (50)
+        Base attacker casualty rate - ATKFAC (11%)
+        Base defender casualty rate - DEFASC (9%)
+        Total combat range - TCR (20)
++---------------+
+|300,50,11,9,20 |
++---------------+
+
+Union Navy Data
+
+        String showing the number of Union ships &
+          composition of fleet. (I=Ironclad, W=Wooden).
+          Maximum of 10 ships per side.
+        Union fleet start location (30= Philadelphia)
++-----------+
+|"IWWW",30  |
++-----------+
+
+Capital Cities
+
+        Union Capital (39=Washington)
+        Rebel Capital (33=Richmond)
++-------+
+|39,33  |
++-------+
+
+LAST LINE: More Graphics Data:  DO NOT CHANGE THIS LINE !
++-----------------------------------------------------------+
+|75,40,75,205,566,40,566,205,205,82,205,162,436,82,436,162,0|
++-----------------------------------------------------------+
+
+ 7.2  Commander File (CWSLEAD.DAT)
+==================================
+Commanders will be assigned to armies in the order listed in
+this file, with first 20 assigned to Union, second 20
+assigned to Rebels. There MUST be exactly 40 commanders
+total. First one listed goes with army 1, second with army 2
+and so on.
+
+Format :
+        Name
+        Rating (1-10)
++--------------------+
+|McDowell,4          |
++--------------------+
+
+
+				- 24  -
+ 
+ 9.2   Configuration File (CWS.CFG)
+===================================
+This file is automatically updated when you save a game in
+progress.
+
+Format:
+     1. Side chosen (1=Union  2=Rebel)
+     2. Graphics (0=off  1=on)
+     3. Sounds (0=none  1=sounds only   2= sounds and music)
+     4. Play Balance (1=Rebel++  3=Balanced  5=Union++)
+     5. Number of players (1-2)
+     6. Display speed (1=very fast  2=Normal  4=very slow)
+     7. Random event balance (0= off; 3= favor Rebels;
+        5= neutral; 7= favor Union)
+     8. Union railroad capacity (in 100's; 600 = 60,000)
+     9. Rebel railroad capacity (in 100's; 300 = 30,000)
+     10.January campaigns (0=prohibited  1=allowed)
+     11.Realism toggle (0=off 1=on)
+     12.Cumulative number of battles won by Union side
+     13.Cumulative number of battles won by Rebel side
+     14.Cumulative Union casualties
+     15.Cumulative Rebel casualties
+     16.History switch (0=off; 1=on)
+
++---------------------------------------------+
+|1,3,2,3,1,1,5,600,300,1,0,21,18,238,252,0,3  |
++---------------------------------------------+
+
+ 9.3   City Matrix (CITIES.GRD)
+===============================
+Unless you are very experienced, don't change this file.
+Even if you are experienced, you should make a back up copy.
+Please note: Cities MUST be in alphabetical order based on
+the city abbreviations used; the program depends on this
+order for army movement, fortification identification, and
+other options. STRANGE things may happen if your cities are
+not alphabetized. There must be exactly 40 cities.
+
+Format:
+        City #,
+        x VGA coordinate (1-530),
+        y coordinate (16-440),
+        city name (text),
+        which side initially possesses
+           (0=neutral, 1=Union, 2= Rebel)
+        income value (0-99)
+        next 6 numbers indicate which cities this connects
+           with
+        port indicator (0=not a port, 99=port city),
+                         fortification level (0-2))
++---------------------------------------------------+
+|1,265,290,"Atlanta",2,25,6,8,25,35,0,0,0,0         |
++---------------------------------------------------+
+Explanation of example line above:
+Atlanta is city 1
+        at (265,290)
+
+				- 25  -
+ 
+        possessed by side 2
+        income of is 25
+        links to cities 6,8,25, and 35
+        is not a port (next to last 0 indicates this)
+        is not fortified initially (last 0 indicates this)
+
+
+===========================================================
+ 10            D E S I G N E R    N O T E S
+===========================================================
+ 10.1 Combat Model Adjustment
+=============================
+The combat model has been made more "open" to allow more
+user customization. Three key combat factors are specified
+in the CWS.INI file (on the starting cash position line -
+see the DATA FILES section for specific information).
+
+  ATKFAC - the base attacker casualty rate. Default is 11%.
+           This value is adjusted, depending on whether the
+           defender is in a fortified position and whether
+           the attacker wins.
+  DEFAC  - the base defender casualty rate. Default is 9%.
+           This value is adjusted, depending on whether the
+           defender is in a fortified position and whether
+           the defender wins.
+  TCR    - the total combat range. Default is 20. This is
+           the limit of adjusted combat factors for both
+           the attacker and defender. Lower factors than
+           20 will tend to make battle outcomes more
+           influenced by random factors (luck). Higher
+           factors than 20 will increasingly give the edge
+           to the stronger army, particularly the one with
+           the most troops. A value around 20 will cause
+           the stronger side to generally win, but still
+           leave enough element of luck that the weaker
+           army can occasionally defeat a stronger foe.
+
+ 10.2  Game Concept
+===================
+The game takes a strategic military point of view. There are
+essentially 3 theaters of war, the Mississippi River,
+central Tennessee, and Virginia. Combat revolves around the
+power of defensive (particularly fortified) positions, and
+cutting lines of retreat to isolate and capture armies. The
+Confederates must move quickly early in the game before
+superior Union resources overwhelm them. Likewise, the Union
+must press to victory (normally taking the Rebel capital)
+before time expires and the Rebels earn a victory by default
+as the European powers recognize them.
+
+The game is intended first and foremost to be fun, and is
+basically a 2 player game. The computer AI ability is
+limited, and results may be quite a historical. The 2-player
+option offers more possibilities, but even here, historical
+accuracy is not claimed.
+
+
+				- 26  -
+ 
+ 10.3  Victory
+==============
+The game checks for active victory conditions and
+automatically ends when they are met. (You do get a chance
+to override if you want to play just a LITTLE longer). You
+will get a good indication of how the game is going for your
+side from the information in the upper right hand part of
+the screen. There is a moving banner line displayed at
+screen bottom to warn you when a victory condition is about
+to be reached.
+
+Enjoy !
+
+Will Hutsell
+3/95
+

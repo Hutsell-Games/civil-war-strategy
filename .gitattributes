@@ -1,0 +1,5 @@
+# Ensure binary files are not converted to text.
+.exe binary .vga binary .obj binary 
+
+# Set the default behavior, in case people don't have core.autocrlfset set.
+* text=auto
