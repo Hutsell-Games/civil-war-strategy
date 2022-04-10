@@ -74,7 +74,7 @@ DECLARE SUB usa ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 '==========================================================================
-COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, hilite%
+COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), savedGameExists
 COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), recruitFlag
 COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
@@ -83,7 +83,7 @@ COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
-COMMON SHARED victory(), graf, noise, capcity(), difficult, usAdvantage, bw
+COMMON SHARED victory(), graf, noise, capcity(), difficult, usAdvantage, borderWidth
 COMMON SHARED train(), font$(), brray(), jancam, randbal, realism, casualty&()
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
@@ -192,7 +192,7 @@ CLOSE #1: CALL clrbot
 RANDOMIZE TIMER
 TICK .3
 windowType = 2
-hilite = 15
+highlight = 15
 replaying = 1
 IF player = 2 THEN GOSUB blanken
 menuText$(0) = "VGA CIVILWAR STRATEGY"
@@ -262,7 +262,7 @@ CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
 IF cash(side) < 100 AND navyloc(side) = 0 THEN nflag = 1
 
-hilite = 11
+highlight = 11
 colour = 4
 tlx = 67: tly = 13
 menuText$(0) = "Main"
@@ -315,7 +315,7 @@ END IF
 '==========================================================================
 	CASE 5
 	tlx = 67: tly = 15
-	hilite = 15: colour = 3: chosenOption = 23
+	highlight = 15: colour = 3: chosenOption = 23
 	menuText$(0) = "End Turn"
 	menuText$(1) = "Yes"
 	menuText$(2) = "NOT YET"
@@ -338,7 +338,7 @@ endrnd:
 optmen:
 	tlx = 67: tly = 13
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	hilite = 15: colour = 3: chosit = 24
+	highlight = 15: colour = 3: chosit = 24
 	menuText$(0) = "Commands"
 	menuText$(1) = "Cancel"
 	menuText$(2) = "Fortify": IF cash(side) < 200 THEN menuText$(2) = "-"
@@ -566,7 +566,7 @@ utile:
 		menuText$(2) = "Normal"
 		menuText$(3) = "Slow"
 		menuText$(4) = "Very Slow"
-		menuText$(5) = "Reg Color": IF bw > 0 THEN menuText$(5) = "Alt Color"
+		menuText$(5) = "Reg Color": IF borderWidth > 0 THEN menuText$(5) = "Alt Color"
 		tlx = 67: tly = 15: menuRows = 5
 		CALL menu(0): CALL clrrite
 		SELECT CASE chosenOption
@@ -577,7 +577,7 @@ utile:
 				CALL clrbot: COLOR 11
 				PRINT "Display Speed : "; menuText$(chosenOption);
 			CASE 5
-				bw = 1 - bw
+				borderWidth = 1 - borderWidth
 				CLS
 				CALL usa
 				CALL topbar
@@ -851,7 +851,7 @@ FOR i = 1 TO 6: IF matrix(target, i) > 0 THEN menuRows = menuRows + 1: menuText$
 NEXT i
 CALL bubble(menuRows)
 
-hilite = 10: colour = 3: CALL menu(2): CALL clrrite
+highlight = 10: colour = 3: CALL menu(2): CALL clrrite
 IF chosenOption < 0 THEN EXIT SUB
 IF month < 3 AND jancam = 0 AND cityp(array(chosenOption)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: EXIT SUB
 
@@ -1078,7 +1078,7 @@ CALL icon(armyloc(defend), 0, 8)
 END SUB
 
 SUB combine (who)
-	colour = 3: target = 0: hilite = 3
+	colour = 3: target = 0: highlight = 3
 	tlx = 67: tly = 2
 	CALL starfin(star, fin, who)
 	menuRows = 0
@@ -1095,7 +1095,7 @@ SUB combine (who)
 
 	IF who <> side THEN chosenOption = 1 + INT(menuRows * RND): GOTO join
 	menuText$(0) = "Join"
-		chosenOption = 31: hilite = 11
+		chosenOption = 31: highlight = 11
 		CALL menu(9): CALL clrrite
 join:
 		IF chosenOption < 1 THEN EXIT SUB
@@ -1294,7 +1294,7 @@ PAINT (cityx(which), cityy(which)), c, c
 END SUB
 
 SUB fortify (target)
-	target = 0: hilite = 11
+	target = 0: highlight = 11
 	tlx = 67: tly = 2
 	who = side
 	CALL starfin(star, fin, who)
@@ -1450,7 +1450,7 @@ SUB movefrom (index, target)
 	menuText$(0) = "From"
 	CALL bubble(menuRows)
 	tlx = 67: tly = 5
-		hilite = 15: CALL menu(1): CALL clrrite
+		highlight = 15: CALL menu(1): CALL clrrite
 		IF chosenOption < 0 THEN target = 0: EXIT SUB
 		target = array(chosenOption)
 
@@ -1785,7 +1785,7 @@ wave:
 	menuText$(2) = "Retreat"
 	IF chx > 0 THEN chosenOption = 1: GOTO powder
       
-	menuRows = 2: colour = 3: hilite = 14: tlx = 50: tly = 18: CALL menu(0)
+	menuRows = 2: colour = 3: highlight = 14: tlx = 50: tly = 18: CALL menu(0)
 powder:
 	SELECT CASE chosenOption
 	 CASE 1
@@ -2598,7 +2598,7 @@ CALL placearmy(active)
 	c = armyloc(active)
 	IF player = 1 AND s = side AND fort(c) > 0 AND flag = 0 THEN
 		tlx = 67: tly = 15
-		hilite = 15: colour = 3
+		highlight = 15: colour = 3
 		menuText$(0) = "Raze ?"
 		menuText$(1) = "No"
 		menuText$(2) = "Yes"
@@ -2904,10 +2904,10 @@ sel1:
 		CASE 9: CALL icon(array(row), 0, 9)
 	END SELECT
 	IF flag = 0 THEN
-		COLOR hilite
+		COLOR highlight
 		LOCATE tly + 2 + row, tlx + 2
 		PRINT menuText$(row)
-		IF bw > 0 THEN LINE (8 * (tlx + 1), 16 * (tly + row + 1))-(8 * (tlx + LEN(menuText$(row)) + 1) - 1, 16 * (tly + row + 2) - 1), hilite, B
+		IF borderWidth > 0 THEN LINE (8 * (tlx + 1), 16 * (tly + row + 1))-(8 * (tlx + LEN(menuText$(row)) + 1) - 1, 16 * (tly + row + 2) - 1), highlight, B
 	END IF
 	GOSUB crsr
 	IF switch <> 3 GOTO reglr
@@ -3429,7 +3429,7 @@ what4:
 	menuText$(4) = menuText$(4) + "Capital Captured"
 	menuText$(5) = menuText$(5) + menuText$(9)
 	menuText$(6) = "DONE"
-	windowType = 2: colour = 3: menuRows = 6: hilite = 14
+	windowType = 2: colour = 3: menuRows = 6: highlight = 14
 	CALL menu(0)
 	chosit = 21 + chosenOption
 SELECT CASE chosenOption
@@ -3786,7 +3786,7 @@ FOR k = 1 TO 40
 	PSET (a, cityy(k) + 12), 10
 	
 	IF matrix(k, 7) < 90 THEN
-		IF bw = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
+		IF borderWidth = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
 	ELSE
 		DRAW "C10"
 	END IF
@@ -3850,7 +3850,7 @@ NEXT i
 END SUB
 
 SUB relieve (who)
-colour = 3: target = 0: hilite = 3
+colour = 3: target = 0: highlight = 3
 tlx = 67: tly = 2
 CALL starfin(star, fin, who)
 menuRows = 0
@@ -3866,7 +3866,7 @@ NEXT i
 IF menuRows = 0 THEN EXIT SUB
 CALL bubble(menuRows)
 menuText$(0) = "Relieve"
-chosenOption = 31: hilite = 11
+chosenOption = 31: highlight = 11
 CALL menu(6): CALL clrrite
 
 IF chosenOption < 1 THEN EXIT SUB
@@ -4133,7 +4133,7 @@ IF player = 1 THEN
 	IF (side = 1 AND defend > 20) OR (side = 2 AND defend < 21) THEN EXIT SUB
 END IF
 
-hilite = 13: colour = 3: tlx = 67: tly = 5: menuRows = 0
+highlight = 13: colour = 3: tlx = 67: tly = 5: menuRows = 0
 y = armyloc(defend)
 who = 1: IF defend > 20 THEN who = 2
 FOR k = 1 TO 6
@@ -4476,7 +4476,7 @@ SUB topbar
 	LOCATE 1, 10: PRINT "Input your decisions now for "; force$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
 
 	CALL flags((side), 0, 0)
-	COLOR 4: IF bw > 0 THEN COLOR 7
+	COLOR 4: IF borderWidth > 0 THEN COLOR 7
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(difficult)))
 	LOCATE 7, 68: PRINT "Funds:"; cash(side);
 
@@ -4982,7 +4982,7 @@ END SELECT
 	menuText$(2) = "No-Override"
 	menuRows = 2: colour = 4
 	tlx = 27: tly = 18
-	hilite = 15
+	highlight = 15
 	IF j = 7 THEN menuRows = 1
 	CALL menu(0)
 
