@@ -76,7 +76,7 @@ DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
-COMMON SHARED cash(), cityController(), matrix(), income(), anima(), rating(), recruitFlag
+COMMON SHARED cash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
 COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
@@ -88,7 +88,7 @@ COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casu
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityx(40), cityy(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), rcity(5)
-DIM SHARED cash(2), cityController(2), matrix(40, 7), income(2), anima(300), rating(40)
+DIM SHARED cash(2), cityController(2), matrix(40, 7), income(2), leaderRating(40)
 DIM SHARED menuText$(21), image(300), force$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
@@ -442,7 +442,7 @@ alone:
 	supply(empty) = .3 * supply(index): supply(index) = supply(index) - supply(empty): IF supply(index) < 0 THEN supply(index) = 0
 	armysize(empty) = .3 * armysize(index): armysize(index) = armysize(index) - armysize(empty)
 	armyloc(empty) = target: armyexper(empty) = armyexper(index): armymove(empty) = 0
-	armylead(empty) = rating(empty)
+	armylead(empty) = leaderRating(empty)
 	armyname$(empty) = leaderName$(empty): leaderName$(empty) = ""
 	armyexper(empty) = armyexper(index)
 	COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; armyname$(empty); : CALL TICK(turbo!): IF noise > 0 THEN SOUND 2222, 1
@@ -676,8 +676,8 @@ utile:
 		IF RND > .7 THEN capcity(2) = 25
 
 		FOR k = 1 TO 40
-		IF RND > .8 THEN rating(k) = rating(k) - 3 + 6 * RND: IF rating(k) > 9 THEN rating(k) = 9
-		IF rating(k) < 1 THEN rating(k) = 1
+		IF RND > .8 THEN leaderRating(k) = leaderRating(k) - 3 + 6 * RND: IF leaderRating(k) > 9 THEN leaderRating(k) = 9
+		IF leaderRating(k) < 1 THEN leaderRating(k) = 1
 		NEXT k
 		CLS
 		CALL usa
@@ -1171,7 +1171,7 @@ SUB filer (switch)
 SELECT CASE switch
 	CASE 1
 	OPEN "I", 1, "cwslead.dat"
-	FOR i = 1 TO 40: INPUT #1, leaderName$(i), rating(i): NEXT i
+	FOR i = 1 TO 40: INPUT #1, leaderName$(i), leaderRating(i): NEXT i
 	CLOSE #1
 	OPEN "I", 1, "cws.ini"
 	FOR i = 0 TO 2: INPUT #1, force$(i): NEXT i
@@ -1182,12 +1182,12 @@ SELECT CASE switch
 	vicflag(3) = .4 * vicflag(3)
 	INPUT #1, a             ' number of Yankee armies
 FOR i = 1 TO a
-	INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i): occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = rating(i): leaderName$(i) = ""
+	INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i): occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = leaderRating(i): leaderName$(i) = ""
 NEXT i
 	INPUT #1, a             ' number of Rebel armies
 FOR i = 21 TO 20 + a
 	INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i)
-	occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = rating(i): leaderName$(i) = ""
+	occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = leaderRating(i): leaderName$(i) = ""
 NEXT i
 FOR i = 1 TO 2: INPUT #1, cash(i): NEXT i
 	INPUT #1, ATKFAC, DEFAC, TCR
@@ -1905,7 +1905,7 @@ END SUB
 SUB newarmy (who, empty, target)
 	supply(empty) = 3 + 5 * RND: IF who = 1 THEN supply(empty) = supply(empty) + 2
 	armyexper(empty) = 1: IF who = 2 THEN armyexper(empty) = 2
-	armylead(empty) = rating(empty)
+	armylead(empty) = leaderRating(empty)
 	armyname$(empty) = leaderName$(empty): leaderName$(empty) = ""
 	COLOR 12: CALL clrbot: PRINT "Placing NEW army "; empty; armyname$(empty); " in "; cityName$(target);
 
@@ -3404,7 +3404,7 @@ SUB commander (who, empty)
 		CALL roman(x, a$)
 		empty = i
 		leaderName$(i) = a$
-		rating(i) = 1 + 8 * RND
+		leaderRating(i) = 1 + 8 * RND
 		EXIT SUB
 	END IF
 	NEXT i
@@ -3893,7 +3893,7 @@ tlx = 67: tly = 2
 CALL menu(0): CALL clrrite
 IF chosenOption < 1 GOTO have2
 armymove(index) = -1
-armylead(index) = rating(array(chosenOption))
+armylead(index) = leaderRating(array(chosenOption))
 IF armylead(index) > 0 THEN armylead(index) = armylead(index) - 1
 IF armyexper(index) > 0 THEN armyexper(index) = armyexper(index) - 1
 COLOR 15: CALL clrbot: PRINT leaderName$(array(chosenOption)); " has replaced "; t$; " in "; cityName$(armyloc(index)); : TICK 9
