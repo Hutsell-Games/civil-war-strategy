@@ -84,7 +84,7 @@ COMMON SHARED recruitCity(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), canMove, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fortLevel()
 COMMON SHARED victory(), graphicLevel, noise, capcity(), difficult, usAdvantage, borderWidth
-COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casualty&()
+COMMON SHARED train(), font$(), orderOfMoves(), januaryCampaign, randbal, realism, casualty&()
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityX(40), cityY(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
@@ -94,7 +94,7 @@ DIM SHARED armysize(40), armylead(40), armyexper(40), armySupply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
 DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fortLevel(40), rr(2)
 DIM SHARED victory(2), capcity(2), emancipate, tracks(2), fleet$(2)
-DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
+DIM SHARED train(2), font$(26), orderOfMoves(40), casualty&(2), batwon(2), cityo(40)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
 DIM SHARED graft(1 TO 1564)
 
@@ -2432,23 +2432,23 @@ FOR i = 1 TO 2: IF rr(i) > 0 THEN CALL railroad(i): LINE (5, 17)-(100, 63), 3, B
 NEXT i
 
 FOR i = 1 TO 40
-brray(i) = 999
+orderOfMoves(i) = 999
 IF armymove(i) < 0 THEN armymove(i) = 0
-IF armyloc(i) > 0 AND armymove(i) > 0 THEN brray(i) = INT(4 + 4 * RND) * 100 + i
-IF armySupply(i) < 1 AND armymove(i) > 0 THEN brray(i) = 900 + i
+IF armyloc(i) > 0 AND armymove(i) > 0 THEN orderOfMoves(i) = INT(4 + 4 * RND) * 100 + i
+IF armySupply(i) < 1 AND armymove(i) > 0 THEN orderOfMoves(i) = 900 + i
 SELECT CASE armysize(i)         'bigger armies move slower
 	CASE IS > 400
-		IF brray(i) < 900 THEN brray(i) = brray(i) + 100: x = 2
+		IF orderOfMoves(i) < 900 THEN orderOfMoves(i) = orderOfMoves(i) + 100: x = 2
 	CASE IS > 800
-		IF brray(i) < 800 THEN brray(i) = brray(i) + 200: x = 3
+		IF orderOfMoves(i) < 800 THEN orderOfMoves(i) = orderOfMoves(i) + 200: x = 3
 	CASE IS > 1000
-		IF brray(i) < 700 THEN brray(i) = brray(i) + 300: x = 4
+		IF orderOfMoves(i) < 700 THEN orderOfMoves(i) = orderOfMoves(i) + 300: x = 4
 	CASE ELSE
 		x = 1
 END SELECT
-IF brray(i) <> 999 AND armylead(i) > 10 * RND THEN
-		brray(i) = brray(i) - 100 * (armylead(i) \ 2)
-		IF brray(i) < 100 THEN brray(i) = 100 + i
+IF orderOfMoves(i) <> 999 AND armylead(i) > 10 * RND THEN
+		orderOfMoves(i) = orderOfMoves(i) - 100 * (armylead(i) \ 2)
+		IF orderOfMoves(i) < 100 THEN orderOfMoves(i) = 100 + i
 END IF
 NEXT i
 
@@ -2458,8 +2458,8 @@ CALL bub2(40)
 '==========================================================================
 FOR j = 1 TO 40
 flag = 0
-IF brray(j) = 999 GOTO allthru
-active = INT(brray(j) / 100): active = brray(j) - 100 * active: s = 1: IF active > 20 THEN s = 2
+IF orderOfMoves(j) = 999 GOTO allthru
+active = INT(orderOfMoves(j) / 100): active = orderOfMoves(j) - 100 * active: s = 1: IF active > 20 THEN s = 2
 IF armymove(active) < 1 GOTO digin
 COLOR 11: CALL clrbot: PRINT armyname$(active); " is moving to "; cityName$(armymove(active));
 
@@ -3179,8 +3179,8 @@ SUB bub2 (limit)
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
-	IF brray(i) > brray(i + 1) THEN
-		SWAP brray(i), brray(i + 1)
+	IF orderOfMoves(i) > orderOfMoves(i + 1) THEN
+		SWAP orderOfMoves(i), orderOfMoves(i + 1)
 		swaps% = i
 	END IF
 	NEXT i
