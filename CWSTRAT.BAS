@@ -75,17 +75,17 @@ DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED choose%, tlx%, tly%, size%, mtx$(), wtype%, colour%, hilite%
-COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
-COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), rflag
+COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), savedGameExists
+COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), recruitFlag
 COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
-COMMON SHARED victory(), graf, noise, capcity(), difficult, usadv, bw
+COMMON SHARED victory(), graf, noise, capcity(), difficult, usAdvantage, bw
 COMMON SHARED train(), font$(), brray(), jancam, randbal, realism, casualty&()
-COMMON SHARED pcode, history, thrill, fleet$(), commerce, raider, grudge
+COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityx(40), cityy(40), cityv(40), cityp(40), city$(40), lname$(40), rcity(5)
 DIM SHARED cash(2), control(2), matrix(40, 7), income(2), anima(300), rating(40)
@@ -98,17 +98,17 @@ DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
 DIM SHARED graft(1 TO 1564)
 
-replay = 0
+replaying = 0
 newgame:
-pcode = 0: rflag = 0
+timesPlayed = 0: recruitFlag = 0
 FOR k = 1 TO 40: armysize(k) = 0: armyloc(k) = 0: armymove(k) = 0: armylead(k) = 0: armyname$(k) = "": NEXT k
-usadv = 0: emancipate = 0
+usAdvantage = 0: emancipate = 0
 FOR k = 1 TO 2
 navysize(k) = 0: navyloc(k) = 0: navymove(k) = 0
 rr(k) = 0: victory(k) = 0: tracks(k) = 0
 NEXT k
 
-filel = 1: vicflag(1) = 1
+savedGameExists = 1: vicflag(1) = 1
 CALL filer(1)
 IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
@@ -155,7 +155,7 @@ LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
 CALL flags(1, -440, 0): CALL flags(2, -100, 0)
-IF replay = 0 AND noise = 2 AND choose = 0 THEN
+IF replaying = 0 AND noise = 2 AND choose = 0 THEN
 IF side = 1 THEN
 	IF INKEY$ <> "" GOTO notitle
 	PLAY "MST170o1e8o0b8o1e8"
@@ -178,7 +178,7 @@ GOSUB unionplus
 
 city$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
-vptotal = usadv + 200
+vptotal = usAdvantage + 200
 FOR i = 1 TO 40: INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
 cityo(i) = cityp(i)
 CALL occupy(i)
@@ -193,7 +193,7 @@ RANDOMIZE TIMER
 TICK .3
 wtype = 2
 hilite = 15
-replay = 1
+replaying = 1
 IF player = 2 THEN GOSUB blanken
 mtx$(0) = "VGA CIVILWAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
@@ -234,7 +234,7 @@ income(i) = 0
 IF cash(i) > 19999 THEN cash(i) = 19999
 IF cash(i) < 0 THEN cash(i) = 0
 NEXT i
-IF player = 1 AND side = 2 THEN income(1) = income(1) + usadv
+IF player = 1 AND side = 2 THEN income(1) = income(1) + usAdvantage
 
 FOR i = 1 TO 40
 IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: income(x) = income(x) + cityv(i)
@@ -251,7 +251,7 @@ chosit = 22
 IF player = 2 THEN GOSUB blanken: CALL usa
 CALL victor
 ON ERROR GOTO 0
-IF pcode > 0 THEN
+IF timesPlayed > 0 THEN
 	FOR k = 1 TO 40: armyloc(k) = 0: NEXT k
 	GOTO newgame
 END IF
@@ -266,7 +266,7 @@ hilite = 11
 colour = 4
 tlx = 67: tly = 13
 mtx$(0) = "Main"
-mtx$(1) = "Troops": IF rflag < 0 OR cash(side) < 100 THEN mtx$(1) = "-": chosit = 23
+mtx$(1) = "Troops": IF recruitFlag < 0 OR cash(side) < 100 THEN mtx$(1) = "-": chosit = 23
 mtx$(2) = "Moves": IF mflag > 0 THEN mtx$(2) = "-": IF chosit = 23 THEN chosit = 24
 mtx$(3) = "Ships": IF nflag > 0 THEN mtx$(3) = "-": IF chosit = 24 THEN chosit = 25
 mtx$(4) = "Railroad": IF rr(side) > 0 THEN mtx$(4) = "-": IF chosit = 25 THEN chosit = 26
@@ -284,7 +284,7 @@ CALL menu(0): CALL clrrite
 '==========================================================================
 SELECT CASE choose
 	CASE 1
-	IF cash(side) < 100 OR rflag < 0 THEN rflag = -1: GOTO menu0
+	IF cash(side) < 100 OR recruitFlag < 0 THEN recruitFlag = -1: GOTO menu0
 	CALL recruit((side))
 	chosit = 23
 	GOTO menu0
@@ -321,7 +321,7 @@ END IF
 	mtx$(2) = "NOT YET"
 	size = 2: CALL menu(0): CALL clrrite: IF choose <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
-	rflag = 0: mflag = 0: nflag = 0
+	recruitFlag = 0: mflag = 0: nflag = 0
 	IF player = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
 	GOTO newmonth
 '==========================================================================
@@ -744,11 +744,11 @@ utile:
 '                               Files
 '==========================================================================
 	CASE 9
-	IF _FILEEXISTS("*.sav") = 0 THEN filel = 0
+	IF _FILEEXISTS("*.sav") = 0 THEN savedGameExists = 0
 filex:
 	choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
 	mtx$(0) = "Options"
-	mtx$(1) = "Load": IF filel = 0 THEN mtx$(1) = "-": choose = 23
+	mtx$(1) = "Load": IF savedGameExists = 0 THEN mtx$(1) = "-": choose = 23
 	mtx$(2) = "Save"
 	mtx$(3) = "New Game"
 	mtx$(4) = "Quit"
@@ -758,9 +758,9 @@ filex:
 		CASE IS < 1: GOTO menu0
 		CASE 1, 2
 loader:
-			IF choose = 1 AND filel = 0 GOTO filex
+			IF choose = 1 AND savedGameExists = 0 GOTO filex
 			CALL filer(choose + 1)
-			IF choose = 1 THEN rflag = 0: mflag = 0: nflag = 0
+			IF choose = 1 THEN recruitFlag = 0: mflag = 0: nflag = 0
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
@@ -790,8 +790,8 @@ size = 2: colour = 5
 tlx = 67: tly = 15
 CALL menu(0): CALL clrrite: IF choose = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: usadv = 120 * difficult: IF player = 2 THEN usadv = 50 * difficult
-	   IF realism > 0 THEN usadv = usadv * .7
+unionplus: usAdvantage = 120 * difficult: IF player = 2 THEN usAdvantage = 50 * difficult
+	   IF realism > 0 THEN usAdvantage = usAdvantage * .7
 	   RETURN
 '............................................................................
 blanken:        c = 1: IF side = 2 THEN c = 7
@@ -1218,7 +1218,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	IF choose < 1 THEN EXIT SUB
 	OPEN "I", 1, "cws" + LTRIM$(STR$(array(choose))) + ".sav"
 	COLOR 11: CALL clrbot: PRINT "Loading";
-	INPUT #1, month, year, usadv, a
+	INPUT #1, month, year, usAdvantage, a
 	FOR i = 1 TO 40: INPUT #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
 	IF armyloc(i) > 0 THEN
 		IF armyname$(i) = lname$(i) THEN
@@ -1261,7 +1261,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	COLOR 11: CALL clrbot: PRINT "Saving";
 
 	OPEN "O", 1, "cws" + LTRIM$(STR$(choose)) + ".sav"
-	WRITE #1, month, year, usadv, side
+	WRITE #1, month, year, usAdvantage, side
 	FOR i = 1 TO 40: WRITE #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
 	NEXT i
 	FOR i = 1 TO 40: WRITE #1, occupied(i), cityp(i), fort(i): PRINT "."; : NEXT i
@@ -2090,7 +2090,7 @@ SUB recruit (who)
 	IF cash(who) < 100 THEN EXIT SUB
 	size = 0: COLOR 12
 	mtx$(0) = "Recruit"
-	IF who = side AND rflag > 0 THEN FOR i = 1 TO rflag: x = rcity(i): mtx$(i) = city$(x): array(i) = x: NEXT i: size = rflag: GOTO alldone
+	IF who = side AND recruitFlag > 0 THEN FOR i = 1 TO recruitFlag: x = rcity(i): mtx$(i) = city$(x): array(i) = x: NEXT i: size = recruitFlag: GOTO alldone
 	max = 4: IF RND > .8 THEN max = max - 1
 	IF difficult < 3 THEN max = max + 1
 
@@ -2111,7 +2111,7 @@ foe:
 	NEXT i
 alldone:
 	IF size = 0 THEN EXIT SUB
-	IF who = side AND rflag = 0 THEN FOR i = 1 TO size: rcity(i) = array(i): NEXT i: rflag = size
+	IF who = side AND recruitFlag = 0 THEN FOR i = 1 TO size: rcity(i) = array(i): NEXT i: recruitFlag = size
 	CALL bubble(size)
 '............................................................................
 levy:
@@ -3839,7 +3839,7 @@ foun:
 			FOR i = 1 TO 5
 			WRITE #1, city$(5 * (s - 1) + i), matrix(s, i)
 			NEXT i
-		NEXT s: CLOSE #1: PRINT "Game Over": DO WHILE INKEY$ = "": LOOP: pcode = 1
+		NEXT s: CLOSE #1: PRINT "Game Over": DO WHILE INKEY$ = "": LOOP: timesPlayed = 1
 END SUB
 
 SUB occupy (x)
