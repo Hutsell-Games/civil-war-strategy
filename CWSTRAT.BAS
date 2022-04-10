@@ -1,78 +1,4 @@
 DEFINT A-Z
-DECLARE SUB animate (index%, flag%)
-DECLARE SUB armies ()
-DECLARE SUB armystat (index%)
-DECLARE SUB armyxy (x%, y%, z%)
-DECLARE SUB barnacle (who%)
-DECLARE SUB battle (attack%, defend%, win%, lose%)
-DECLARE SUB bub2 (limit%)
-DECLARE SUB bubble (menuRows%)
-DECLARE SUB cancel (side%)
-DECLARE SUB cannon ()
-DECLARE SUB capitol ()
-DECLARE SUB capture (active%, c%, s%, flag%)
-DECLARE SUB center (y%, a$)
-DECLARE SUB chessie ()
-DECLARE SUB choices (b1%, wide%)
-DECLARE SUB clrbot ()
-DECLARE SUB combine (who%)
-DECLARE SUB clrrite ()
-DECLARE SUB commander (who%, empty%)
-DECLARE SUB cutoff (who%, target%, a%)
-DECLARE SUB endit ()
-DECLARE SUB engine ()
-DECLARE SUB evaluate (index%, x%)
-DECLARE SUB events ()
-DECLARE SUB filer (switch%)
-DECLARE SUB flags (who%, w%, a%)
-DECLARE SUB flashcity (which%)
-DECLARE SUB fortify (target%)
-DECLARE SUB icon (from%, dest%, kind%)
-DECLARE SUB image2 (a$, s%)
-DECLARE SUB integrity ()
-DECLARE SUB ironclad ()
-DECLARE SUB iterate ()
-DECLARE SUB maptext ()
-DECLARE SUB maxx ()
-DECLARE SUB menu (switch%)
-DECLARE SUB movefrom (index%, target%)
-DECLARE SUB mxw (wide%)
-DECLARE SUB navy (who%, x%)
-DECLARE SUB newarmy (who%, empty%, target%)
-DECLARE SUB newcity (index%)
-DECLARE SUB normal (xbar%, vary%, result%)
-DECLARE SUB occupy (x%)
-DECLARE SUB placearmy (which%)
-DECLARE SUB railroad (who%)
-DECLARE SUB recruit (who%)
-DECLARE SUB relieve (who%)
-DECLARE SUB report (who%)
-DECLARE SUB resupply (index%)
-DECLARE SUB retreat (active%, x%)
-DECLARE SUB roman (target%, a$)
-DECLARE SUB rwin ()
-DECLARE SUB schooner ()
-DECLARE SUB scribe (a$, flag%)
-DECLARE SUB shen ()
-DECLARE SUB ships ()
-DECLARE SUB shipicon (who%, flag%)
-DECLARE SUB shiptype (who%, i%)
-DECLARE SUB smarts ()
-DECLARE SUB showcity ()
-DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB starfin (star%, fin%, who%)
-DECLARE SUB stax (who%)
-DECLARE SUB strong (index%)
-DECLARE SUB surrender (who%)
-DECLARE SUB TICK (sec!)
-DECLARE SUB tinytrain (who%, flag%)
-DECLARE SUB traincapacity (who%, limit%)
-DECLARE SUB topbar ()
-DECLARE SUB touchup ()
-DECLARE SUB tupdate ()
-DECLARE SUB usa ()
-DECLARE SUB victor ()
-DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityX(), cityY(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
@@ -810,7 +736,7 @@ DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
-SUB animate (index, flag)
+SUB animate (index%, flag%)
 from = armyLocation(index): to2 = armymove(index): armyLocation(index) = 0
 x = cityX(from) - 12
 y = cityY(from) - 11
@@ -862,7 +788,7 @@ armymove(index) = array(chosenOption): CALL TICK(turbo!): CALL clrbot
 CALL clrrite
 END SUB
 
-SUB armystat (index)
+SUB armystat (index%)
 LINE (530, 60)-(639, 150), 0, BF
 COLOR 15
 LOCATE 5, 68: PRINT armyname$(index)
@@ -874,7 +800,7 @@ IF armySupply(index) < 2 THEN COLOR 12
 LOCATE 9, 68: PRINT "Supply:"; TAB(75); armySupply(index)
 END SUB
 
-SUB barnacle (who)
+SUB barnacle (who%)
 navySize(who) = navySize(who) - 1
 IF navySize(who) > 0 THEN
 	fleet$(who) = LEFT$(fleet$(who), navySize(who))
@@ -883,7 +809,7 @@ ELSE
 END IF
 END SUB
 
-SUB battle (attack, defend, win, lose)
+SUB battle (attack%, defend%, win%, lose%)
 IF armysize(defend) < 1 THEN armysize(defend) = 1
 IF armysize(attack) < 1 THEN armysize(attack) = 1
 
@@ -1077,7 +1003,7 @@ victoryPoints(s) = victoryPoints(s) + 1
 CALL icon(armyLocation(defend), 0, 8)
 END SUB
 
-SUB combine (who)
+SUB combine (who%)
 	colour = 3: target = 0: highlight = 3
 	tlx = 67: tly = 2
 	CALL starfin(star, fin, who)
@@ -1159,7 +1085,7 @@ dork1:
 		CALL stax(who)
 END SUB
 
-SUB cutoff (who, target, a)
+SUB cutoff (who%, target%, a%)
 a = 0
 FOR j = 1 TO 6
 y = matrix(target, j)
@@ -1167,7 +1093,7 @@ IF y > 0 AND cityOwner(y) = who THEN a = a + 1
 NEXT j
 END SUB
 
-SUB filer (switch)
+SUB filer (switch%)
 SELECT CASE switch
 	CASE 1
 	OPEN "I", 1, "cwslead.dat"
@@ -1279,7 +1205,7 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 END SELECT
 END SUB
 
-SUB flashcity (which)
+SUB flashcity (which%)
 FOR c = 1 TO 15 STEP 2
 CIRCLE (cityX(which), cityY(which)), 4, 0
 CIRCLE (cityX(which), cityY(which)), 3, c
@@ -1293,7 +1219,7 @@ CIRCLE (cityX(which), cityY(which)), 3, c
 PAINT (cityX(which), cityY(which)), c, c
 END SUB
 
-SUB fortify (target)
+SUB fortify (target%)
 	target = 0: highlight = 11
 	tlx = 67: tly = 2
 	who = side
@@ -1328,7 +1254,7 @@ SUB fortify (target)
 		CALL stax(who)
 END SUB
 
-SUB icon (from, dest, kind)
+SUB icon (from%, dest%, kind%)
 IF from < 1 OR from > 40 THEN EXIT SUB
 IF dest < 0 THEN EXIT SUB
 IF from = 999 THEN EXIT SUB
@@ -1440,7 +1366,7 @@ IF side = 2 AND x > 0 THEN aggress! = y / x ELSE aggress! = 1
 IF side = 1 AND y > 0 THEN aggress! = x / y ELSE IF side = 1 THEN aggress! = 1
 END SUB
 
-SUB movefrom (index, target)
+SUB movefrom (index%, target%)
 	colour = 3: tlx = 67: tly = 5: index = 0: menuRows = 0: target = 0
 	who = side: CALL starfin(star, fin, who)
 	FOR i = star TO fin
@@ -1466,7 +1392,7 @@ SUB movefrom (index, target)
 		index = array(chosenOption)
 END SUB
 
-SUB navy (who, chx)
+SUB navy (who%, chx%)
 DIM hit(2)
 IF chx > 0 THEN
 	IF navyLocation(who) < 1 THEN
@@ -1902,7 +1828,7 @@ sail3:
 	CLS : CALL usa
 END SUB
 
-SUB newarmy (who, empty, target)
+SUB newarmy (who%, empty%, target%)
 	armySupply(empty) = 3 + 5 * RND: IF who = 1 THEN armySupply(empty) = armySupply(empty) + 2
 	armyExp(empty) = 1: IF who = 2 THEN armyExp(empty) = 2
 	armyCommander(empty) = leaderRating(empty)
@@ -1919,7 +1845,7 @@ SUB newarmy (who, empty, target)
 	armymove(empty) = -1
 END SUB
 
-SUB newcity (index)
+SUB newcity (index%)
 		menuText$(1) = "  "
 		menuText$(3) = "  "
 		menuRows = 3: a$ = cityName$(index)
@@ -1960,7 +1886,7 @@ plus1:
 		END SELECT
 END SUB
 
-SUB normal (xbar, vary, result)
+SUB normal (xbar%, vary%, result%)
 ' NOTE : vary is VARIANCE
 pct! = 0
 FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
@@ -1968,7 +1894,7 @@ pct! = pct! - 5.5
 result = xbar + pct! * SQR(vary)
 END SUB
 
-SUB placearmy (which)
+SUB placearmy (which%)
 who = 1: IF which > 20 THEN who = 2
 x = cityX(armyLocation(which)) - 12
 y = cityY(armyLocation(which)) - 11
@@ -1981,7 +1907,7 @@ IF armySupply(which) < 1 THEN
 END IF
 END SUB
 
-SUB railroad (who)
+SUB railroad (who%)
 SELECT CASE rr(who)
 	CASE 0
 	IF who = side GOTO human
@@ -2086,7 +2012,7 @@ toot:
 	clrbot
 END SUB
 
-SUB recruit (who)
+SUB recruit (who%)
 	IF currentCash(who) < 100 THEN EXIT SUB
 	menuRows = 0: COLOR 12
 	menuText$(0) = "Recruit"
@@ -2192,7 +2118,7 @@ playb:
 	RETURN
 END SUB
 
-SUB shiptype (who, i)
+SUB shiptype (who%, i%)
 a = 1: IF MID$(fleet$(who), i, 1) = "I" THEN a = 2
 CALL shipicon(who, a)
 END SUB
@@ -2386,17 +2312,17 @@ RETURN
 '---------------------------------------------------------------------------
 END SUB
 
-SUB snapshot (x, y, flag)
+SUB snapshot (x%, y%, flag%)
 IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), image
 IF flag = 1 THEN PUT (x - 10, y - 10), image, PSET
 END SUB
 
-SUB strong (index)
+SUB strong (index%)
 a$ = LTRIM$(RTRIM$(STR$(armysize(index)))) + "00"
 PRINT a$;
 END SUB
 
-SUB tinytrain (who, flag)
+SUB tinytrain (who%, flag%)
 	IF tracks(who) = 0 THEN EXIT SUB
 	from = tracks(who)
 	x = cityX(from) - 12: y = cityY(from) - 11
@@ -2700,7 +2626,7 @@ END SUB
 '                            2=double line
 '               if >10 then 10's digit=box color  1's digit= window type
 
-SUB choices (b1, wide)
+SUB choices (b1%, wide%)
 boxc = colour: IF windowType > 10 THEN boxc = INT(windowType / 10): windowType = windowType - 10 * boxc
 COLOR boxc
 VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + menuRows + 2) + 8)
@@ -2995,7 +2921,7 @@ called:
 	VIEW
 END SUB
 
-SUB mxw (wide)
+SUB mxw (wide%)
 	wide = LEN(menuText$(0)) + 1
 	FOR i = 1 TO menuRows
 	x = LEN(menuText$(i))
@@ -3155,7 +3081,7 @@ LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
 NEXT k
 END SUB
 
-SUB armyxy (x, y, z)
+SUB armyxy (x%, y%, z%)
 LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
 SELECT CASE z
 	CASE 1
@@ -3175,7 +3101,7 @@ SELECT CASE z
 END SELECT
 END SUB
 
-SUB bub2 (limit)
+SUB bub2 (limit%)
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -3187,7 +3113,7 @@ DO
 LOOP WHILE swaps%
 END SUB
 
-SUB bubble (limit)
+SUB bubble (limit%)
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -3200,7 +3126,7 @@ DO
 LOOP WHILE swaps%
 END SUB
 
-SUB cancel (side)
+SUB cancel (side%)
 CALL starfin(star, fin, (side))
 
 CALL clrrite
@@ -3330,7 +3256,7 @@ FOR i = -565 TO 50 STEP 50: CALL flags(1, i, 0): NEXT i
 IF noise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
-SUB capture (active, c, s, flag)
+SUB capture (active%, c%, s%, flag%)
 	cityOwner(c) = s: CALL clrbot
 	a$ = armyname$(active) + " has captured " + cityName$(c)
 	COLOR 11: PRINT armyname$(active) + " has captured " + cityName$(c);
@@ -3350,7 +3276,7 @@ SUB capture (active, c, s, flag)
 	IF fortLevel(c) > 0 AND flag > 0 THEN fortLevel(c) = fortLevel(c) - 1: x = cityX(c): y = cityY(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL showcity
 END SUB
 
-SUB center (y, a$)
+SUB center (y%, a$)
 x = LEN(a$)
 x = 26 - x \ 2
 LOCATE y, 7 + x: PRINT a$
@@ -3390,7 +3316,7 @@ CLS 1
 VIEW
 END SUB
 
-SUB commander (who, empty)
+SUB commander (who%, empty%)
 	empty = 0
 	CALL starfin(star, fin, who)
 	FOR i = star TO fin
@@ -3462,7 +3388,7 @@ notrane:
 NEXT i
 END SUB
 
-SUB evaluate (index, x)
+SUB evaluate (index%, x%)
 from = armyLocation(index)
 x = 200: IF aggress! > 1.5 THEN x = 80: IF aggress! > 2 THEN x = 20: IF aggress! > 3 THEN x = 5
 CALL void(from, defend): IF defend = 0 THEN x = 0
@@ -3700,7 +3626,7 @@ dull1:
 	DO WHILE INKEY$ = "": LOOP
 END SUB
 
-SUB flags (who, w, a)
+SUB flags (who%, w%, a%)
 x = 585 + w: y = 200: IF w = 0 THEN y = 180
 IF a <> 0 THEN y = a
 SELECT CASE who
@@ -3735,7 +3661,7 @@ SELECT CASE who
 END SELECT
 END SUB
 
-SUB image2 (a$, s)
+SUB image2 (a$, s%)
 DIM g2(1 TO 8000)
 menuText$(1) = a$
 tlx = 32 - LEN(a$) \ 2
@@ -3842,14 +3768,14 @@ foun:
 		NEXT s: CLOSE #1: PRINT "Game Over": DO WHILE INKEY$ = "": LOOP: timesPlayed = 1
 END SUB
 
-SUB occupy (x)
+SUB occupy (x%)
 isOccupied(x) = 0
 FOR i = 1 TO 40
 IF armyLocation(i) = x THEN isOccupied(x) = i: EXIT SUB
 NEXT i
 END SUB
 
-SUB relieve (who)
+SUB relieve (who%)
 colour = 3: target = 0: highlight = 3
 tlx = 67: tly = 2
 CALL starfin(star, fin, who)
@@ -3903,7 +3829,7 @@ CALL icon(armyLocation(index), 0, 8)
 CALL clrbot
 END SUB
 
-SUB report (who)
+SUB report (who%)
 DIM summ(40)
 IF who = -1 GOTO frep
 IF who > 100 GOTO batrep
@@ -4112,7 +4038,7 @@ IF who < 3 THEN
 END IF
 END SUB
 
-SUB resupply (index)
+SUB resupply (index%)
 		who = 1: IF index > 20 THEN who = 2
 		IF realism > 0 THEN
 			CALL cutoff(who, armyLocation(index), a)
@@ -4127,7 +4053,7 @@ nocash:
 		CALL TICK(turbo!): IF currentCash(who) < 0 THEN currentCash(who) = 0
 END SUB
 
-SUB retreat (defend, x)
+SUB retreat (defend%, x%)
 x = 0
 IF humanPlayers = 1 THEN
 	IF (side = 1 AND defend > 20) OR (side = 2 AND defend < 21) THEN EXIT SUB
@@ -4149,7 +4075,7 @@ NEXT k
 	x = array(chosenOption)
 END SUB
 
-SUB roman (target, a$)
+SUB roman (target%, a$)
 a$ = "Union ": IF target > 20 THEN a$ = "Rebel "
 IF target > 20 THEN target = target - 20
 IF target > 10 THEN a$ = a$ + "X": target = target - 10
@@ -4247,7 +4173,7 @@ NEXT i
 RETURN
 END SUB
 
-SUB scribe (a$, flag)
+SUB scribe (a$, flag%)
 SELECT CASE flag
 		CASE 1: CALL clrbot: PRINT a$;
 		CASE 2: CALL image2(a$, 4)
@@ -4276,7 +4202,7 @@ IF noise = 2 THEN
 END IF
 END SUB
 
-SUB shipicon (who, flag)
+SUB shipicon (who%, flag%)
 	x = POINT(0) - 10: y = POINT(1) - 10
 	CIRCLE (x, y), 18, 9, , , .4
 	PAINT (x + 3, y + 4), 9, 9
@@ -4326,11 +4252,11 @@ sink:
 NEXT s
 END SUB
 
-SUB starfin (star, fin, who)
+SUB starfin (star%, fin%, who%)
 star = 1: fin = 20: IF who = 2 THEN star = 21: fin = 40
 END SUB
 
-SUB stax (who)
+SUB stax (who%)
 CALL starfin(star, fin, who)
 FOR i = star TO fin
 IF armysize(i) > 0 AND isOccupied(armyLocation(i)) <> i THEN
@@ -4341,7 +4267,7 @@ END IF
 NEXT i
 END SUB
 
-SUB surrender (who)
+SUB surrender (who%)
 SCREEN 12
 s = 1: c = 1: COLOR 0: w = 514
 IF who > 20 THEN c = 7: s = 2
@@ -4565,7 +4491,7 @@ PAINT (108, 400), 1, 10
 LINE (66, 375)-(52, 375), 10
 END SUB
 
-SUB traincapacity (who, limit)
+SUB traincapacity (who%, limit%)
 IF realism = 0 THEN limit = train(who): EXIT SUB
 x = 11: IF side = 2 THEN x = 23
 limit = train(who) + 5 * (cityController(who) - x)
@@ -5025,7 +4951,7 @@ stale:
     NEXT i
 END SUB
 
-SUB void (a, y)
+SUB void (a%, y%)
   y = 0
 FOR j = 1 TO 6
   x = matrix(a, j): IF x = 0 THEN EXIT SUB
