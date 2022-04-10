@@ -1,4 +1,3 @@
-                        i
 ===========================================================
    VGA Civil War Strategy Game version 1.50
             (c) 1994 W.R. Hutsell
@@ -13,7 +12,6 @@
 1.5   Map Display                                     2
 1.6   Using the Menus                                 3
 1.7   Menu for Railroad and Capital Moves             4
-1.8   Screen Saver                                    4
 1.9   Set Up                                          4
 1.10  Sequence of Play                                4
 2      D E C I S I O N    P H A S E                   5
@@ -46,8 +44,6 @@
 5.7   Detach - ADVANCED FEATURE                       14
 5.8   Drill - ADVANCED FEATURE                        14
 5.9   Relieve - ADVANCED FEATURE                      14
-
-                      ii
 6      U T I L I T Y                                  14
 6.1   Utility Submenu                                 14
 6.2   Side                                            15
@@ -79,7 +75,7 @@
 10.1  Combat Model Adjustment                         25
 10.2  Game Concept                                    25
 10.3  Victory                                         25
-
+
 ===========================================================
  1              I N T R O D U C T I O N  v1.50
 ===========================================================
@@ -134,9 +130,6 @@ Type 'CWS' at the command line prompt. The title screen
 display will appear while the game initializes. You can skip
 opening music and graphics by typing 'CWS Q' at the command
 line prompt.
-
-
-				- 2  -
  
 The option to load a game or begin a new game is given at
 the beginning of the game, in addition to being available
@@ -193,8 +186,6 @@ When the game is over, you are returned to the opening
 screen, with the option to quit, load a game or begin a new
 game.
 
-
-				- 3  -
  1.5   Map Display
 ==================
 The title screen will clear and a map of the eastern U.S.
@@ -252,9 +243,6 @@ keys. Example: You have the option to recruit at either Fort
 Donelson or Front Royal, both of which begin with "F". If
 you press "F", Fort Donelson will be selected because it
 comes first alphabetically in the menu list. If you want to
-
-				- 4  -
- 
 select Front Royal in this case, you must use the arrow
 keys. If there had been no other cities beginning with "F"
 except for Front Royal the hot key would have worked fine.
@@ -288,17 +276,6 @@ Chattanooga is friendly, it will be displayed. You can then
 quickly use the arrow keys to display the desired
 destination.
 
- 1.8   Screen Saver
-===================
-+=========================================================+
-|  There is a SCREEN SAVER accessed by pressing "Ctrl-B". |
-|  (The "B" may be either upper or lower case).           |
-|  The screen will instantly blank and random geometric   |
-|  designs will appear.                                   |
-+---------------------------------------------------------+
-|  To restore the game map, press "Ctrl-B" again.         |
-+=========================================================+
-
  1.9   Set Up
 =============
 There are several setup options available which can be
@@ -311,9 +288,6 @@ current set of options you have chosen.
  1.10  Sequence of Play
 =======================
 Play proceeds in the following sequence for each game turn
-
-				- 5  -
- 
 (representing 2 months):
 
   A. Decision Phase
@@ -370,9 +344,6 @@ city will change colors to indicate you have gained control.
 Fighting to capture an occupied fortified city reduces the
 fortification by one level. (Thus, a FORTIFIED+ city would
 be reduced to an unfortified city.)
-
-				- 6  -
- 
 
 When an army captures an unoccupied fortified city, the fort
 is not necessarily reduced. The victorious army is given the
@@ -428,9 +399,6 @@ SUPPLY     - the current state of food and equipment (0-10).
                      | UTILITY     |
                      | Files       |
                      +=============+
-
-
-				- 7  -
  
 This menu shows the primary decisions you can make. At the
 bottom of the menu are symbols that tell you what setup
@@ -488,9 +456,6 @@ with slightly better levels for Rebel armies).
 NOTE: Once you have begin to recruit, you should NOT change
       sides or number of players, since the cities to
       recruit in are already selected for that part of the
-
-				- 8  -
- 
       turn.
 
  3.3   Ships
@@ -546,9 +511,6 @@ become neutral as a result of the bombardment.
 Note that both human and computer players are now prohibited
 from moving to a port and attacking the port on the same
 turn.
-
-
-				- 9  -
  
  3.4   Invasions
 ================
@@ -606,9 +568,6 @@ but even if it wins it may have its orders cancelled.
 
 During the month of January, you may not carry out any land
 campaigns (i.e., attack enemy or neutral cities). You may
-
-				- 10  -
- 
 move armies to friendly cities, fortify, or conduct other
 land operations. Naval operations are unaffected by the
 January restriction.
@@ -665,9 +624,6 @@ no cost for any of the reports.
        Shows the status of all your armies, and other useful
        statistics on the progress of the game. After the
        first turn, it will also show the total strength of
-
-				- 11  -
- 
        the enemy forces.
 
   2) Enemy Army report
@@ -722,10 +678,7 @@ various features of overall game play to be modified.
 Allows you to load or save games and to quit then program.
 There can be up to 9 saved games,"CWSx.SAV", where "x" is
 a number from 1 to 9. Those file names for which a saved
-game exists are marked with a "û" as a reminder.
-
-
-				- 12  -
+game exists are marked with a "+" as a reminder.
  
 When the game is started, the base game is automatically
 initialized, configured according to the current CWS.CFG
@@ -782,9 +735,6 @@ city:
 1. City is occupied by a friendly army
 2. City is not already at DOUBLE FORTIFIED ++ level
 3. You have at least 200 money units
-
-
-				- 13  -
  
 All cities meeting these conditions, will appear in a menu
 of candidates. Selecting a city to fortify will cause the
@@ -842,9 +792,6 @@ of supply, none will be provided.
 
  5.6   Move Capital - ADVANCED FEATURE
 ======================================
-
-				- 14  -
- 
 You may move your capital (if it has not yet been captured)
 for a cost of 500 money units. Moving the capital also
 results in awarding your enemy 50 victory points. However,
@@ -901,9 +848,6 @@ commanders, awaiting possible future service.
                      | Display    |
                      | Balance    |
                      | End Cond   |
-
-				- 15  -
- 
                      | Events     |
                      | Vary Start |
                      | Jan Cmpgn  |
@@ -960,9 +904,6 @@ be changed by changing that file. Up to 5 different preset
 conditions may trigger the end of the game:
 
                 Time (Month & Year)
-
-				- 16  -
- 
                 % Cities Controlled by Either Side
                 % Income for Either Side
                 Capital Capture By Either Side *
@@ -970,7 +911,7 @@ conditions may trigger the end of the game:
 
 In addition, the total elimination of either side's armies
 will trigger a victory condition. Active conditions are
-marked with an "û". These may be toggled either off or on
+marked with an "ï¿½". These may be toggled either off or on
 (active) using this option by pressing ENTER when the
 desired condition is highlighted, but the VALUES themselves
 can only be changed in CWS.INI (see "Files" section below).
@@ -1019,9 +960,6 @@ Toggle to allow/disallow January campaigns.
 
  6.13 Realism Toggle
 ====================
-
-				- 17  -
- 
 A toggle is provided in the Utility menu ("REALISM") to
 control several aspects of the game. The specific effects
 are listed below.
@@ -1077,9 +1015,6 @@ are listed below.
       seaborne units to conduct invasions (see invasions).
       When the REALISM toggle is ON, only the Union side may
       conduct invasions.
-
-
-				- 18  -
  
    f) When REALISM is ON, the defender combat advantage is
       increased. This will make it harder for the Rebels to
@@ -1137,9 +1072,6 @@ any key to move on.
  7.2   Army Movement
 ====================
 When you see the message "press any key for (current month
-
-				- 19  -
- 
 and year) events", the move and update phase has begun.
 During this phase both sides have their move orders carried
 out. When enemy armies meet in the same city, combat occurs.
@@ -1196,9 +1128,6 @@ for this battle.
 
  Supply     Additional adjustment if unit is out of supply
             (will be in contrasting color). Out-of-supply
-
-				- 20  -
- 
             units fight at half strength.
 
  Difclt     Additional adjustment based on difficulty level.
@@ -1255,9 +1184,6 @@ the enemy.
 The loser must retreat to an adjacent friendly city. The
 human player is given the option as to which city to retreat
 to if a player-controlled DEFENDING army must retreat (if
-
-				- 21  -
- 
 there is more than one choice for retreat). If there are no
 retreat options, the loser will surrender. Even if there is
 a retreat option, a unit may be so outnumbered and reduced
@@ -1314,9 +1240,7 @@ boxed areas; comment lines before each of the data lines
 describe the information in that line.
 
 Text for sides (Side 0, Side 1, Side 2)
-
-				- 22  -
- 
+
 +-----------------------------+
 |"NEUTRAL","Union","Rebel"    |
 +-----------------------------+
@@ -1373,9 +1297,6 @@ Data lines for each Rebel army at beginning of play
         city # (33 = Richmond)
         strength in 100's (300 = 30,000 men)
         experience (1)
-
-				- 23  -
- 
         supply     (7)
 +---------------+
 |33,300,1,7     |
@@ -1431,9 +1352,6 @@ Format :
 +--------------------+
 |McDowell,4          |
 +--------------------+
-
-
-				- 24  -
  
  9.2   Configuration File (CWS.CFG)
 ===================================
@@ -1491,9 +1409,6 @@ Format:
 Explanation of example line above:
 Atlanta is city 1
         at (265,290)
-
-				- 25  -
- 
         possessed by side 2
         income of is 25
         links to cities 6,8,25, and 35
@@ -1549,9 +1464,6 @@ basically a 2 player game. The computer AI ability is
 limited, and results may be quite a historical. The 2-player
 option offers more possibilities, but even here, historical
 accuracy is not claimed.
-
-
-				- 26  -
  
  10.3  Victory
 ==============
