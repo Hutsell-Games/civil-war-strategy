@@ -76,7 +76,7 @@ DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityX(), cityY(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
-COMMON SHARED currentCash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
+COMMON SHARED currentCash(), cityController(), matrix(), currentIncome(), leaderRating(), recruitFlag
 COMMON SHARED hasNavy, aiBoldness, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED nationName$(), armyloc(), armyname$(), humanPlayers, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
@@ -88,7 +88,7 @@ COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casu
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityX(40), cityY(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
-DIM SHARED currentCash(2), cityController(2), matrix(40, 7), income(2), leaderRating(40)
+DIM SHARED currentCash(2), cityController(2), matrix(40, 7), currentIncome(2), leaderRating(40)
 DIM SHARED menuText$(21), nationName$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
@@ -137,7 +137,7 @@ IF side = 2 THEN randbal = 3
 	IF side = 2 AND difficult > 3 THEN currentCash(1) = currentCash(1) + 100 * difficult
 
 
-FOR i = 1 TO 2: income(i) = currentCash(i): currentCash(i) = currentCash(i) + 50 * RND: NEXT i
+FOR i = 1 TO 2: currentIncome(i) = currentCash(i): currentCash(i) = currentCash(i) + 50 * RND: NEXT i
 chosenOption = 0
 
 SCREEN 12
@@ -230,22 +230,22 @@ CALL tupdate
 cityController(1) = 0: cityController(2) = 0
 
 FOR i = 1 TO 2
-income(i) = 0
+currentIncome(i) = 0
 IF currentCash(i) > 19999 THEN currentCash(i) = 19999
 IF currentCash(i) < 0 THEN currentCash(i) = 0
 NEXT i
-IF humanPlayers = 1 AND side = 2 THEN income(1) = income(1) + usAdvantage
+IF humanPlayers = 1 AND side = 2 THEN currentIncome(1) = currentIncome(1) + usAdvantage
 
 FOR i = 1 TO 40
-IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: income(x) = income(x) + cityValue(i)
+IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: currentIncome(x) = currentIncome(x) + cityValue(i)
 armymove(i) = 0
 NEXT i
 
-FOR i = 1 TO 2: navymove(i) = 0: IF capcity(i) > 0 THEN income(i) = income(i) + 100
-currentCash(i) = currentCash(i) + income(i)
+FOR i = 1 TO 2: navymove(i) = 0: IF capcity(i) > 0 THEN currentIncome(i) = currentIncome(i) + 100
+currentCash(i) = currentCash(i) + currentIncome(i)
 IF commerce > 0 AND i <> commerce THEN currentCash(i) = currentCash(i) - raider
 NEXT i
-vptotal = income(1) + income(2)
+vptotal = currentIncome(1) + currentIncome(2)
 
 chosit = 22
 IF humanPlayers = 2 THEN GOSUB blanken: CALL usa
@@ -1233,7 +1233,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	END IF
 	NEXT i
 	FOR i = 1 TO 40: INPUT #1, occupied(i), cityOwner(i), fortLevel(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: INPUT #1, currentCash(i), cityController(i), income(i), victory(i), capcity(i)
+	FOR i = 1 TO 2: INPUT #1, currentCash(i), cityController(i), currentIncome(i), victory(i), capcity(i)
 	INPUT #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
 	navysize(i) = LEN(fleet$(i))
 	NEXT i
@@ -1265,7 +1265,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	FOR i = 1 TO 40: WRITE #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
 	NEXT i
 	FOR i = 1 TO 40: WRITE #1, occupied(i), cityOwner(i), fortLevel(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: WRITE #1, currentCash(i), cityController(i), income(i), victory(i), capcity(i)
+	FOR i = 1 TO 2: WRITE #1, currentCash(i), cityController(i), currentIncome(i), victory(i), capcity(i)
 	WRITE #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
 	NEXT i
 	CLOSE #1
@@ -2640,9 +2640,9 @@ IF navysize(commerce) < 1 THEN commerce = 0
 IF commerce > 0 THEN
 	CALL clrbot
 	IF RND < .8 + .02 * navysize(commerce) THEN
-		raider = .05 * navysize(commerce) * (1 + RND) * (income(3 - commerce))
+		raider = .05 * navysize(commerce) * (1 + RND) * (currentIncome(3 - commerce))
 		IF raider < 1 THEN raider = 1
-		IF raider / income(3 - commerce) > .3 THEN raider = .3 * income(3 - commerce)
+		IF raider / currentIncome(3 - commerce) > .3 THEN raider = .3 * currentIncome(3 - commerce)
 		COLOR 15: PRINT nationName$(commerce); " raiders have sunk $"; raider; " of "; nationName$(3 - commerce); " commerce";
 		a = 1: IF LEFT$(fleet$(commerce), 1) = "I" THEN a = 2
 		PSET (500, 465), 0: CALL shipicon(commerce, a)
@@ -2672,12 +2672,12 @@ CALL touchup: CALL ships: CALL iterate
 CALL clrbot
 LINE (390, 350)-(520, 400), 1, BF
 COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month$(month), 3)); ","; year
-victory(1) = .8 * victory(1) + .3 * (income(1) + cityController(1))
+victory(1) = .8 * victory(1) + .3 * (currentIncome(1) + cityController(1))
 IF cityController(1) > 29 THEN victory(1) = victory(1) + 50: IF cityController(1) > 34 THEN victory(1) = victory(1) + 100
 IF side = 2 AND cityController(1) < 11 THEN aggress! = aggress! + .7
 
 IF victory(1) < 1 THEN victory(1) = 0
-victory(2) = .8 * victory(2) + .3 * (income(2) + cityController(2))
+victory(2) = .8 * victory(2) + .3 * (currentIncome(2) + cityController(2))
 IF cityController(2) > 29 THEN victory(2) = victory(2) + 50: IF cityController(2) > 34 THEN victory(2) = victory(1) + 100
 IF side = 1 AND cityController(2) < 11 THEN aggress! = aggress! + .7
 IF humanPlayers = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
@@ -3951,7 +3951,7 @@ COLOR c: PRINT cityController(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40
 PRINT TAB(50); : COLOR 12: PRINT "Capital: "; cityName$(capcity(who))
 y = vptotal: IF capcity(1) > 0 THEN y = y + 100
 IF capcity(2) > 0 THEN y = y + 100
-PRINT income(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (income(who) / vptotal) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; currentCash(who)
+PRINT currentIncome(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (currentIncome(who) / vptotal) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; currentCash(who)
 COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
 x = 0: FOR i = star TO fin
 COLOR c
@@ -3998,8 +3998,8 @@ LOCATE i - 18, 41: PRINT i; TAB(46); cityName$(i); TAB(58); a$; TAB(69); cityVal
 NEXT i
 LINE (1, 360)-(630, 360), 15
 COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
-COLOR 9: PRINT nationName$(1); TAB(12); cityController(1); TAB(23); income(1); TAB(32); currentCash(1)
-COLOR 7: PRINT nationName$(2); TAB(12); cityController(2); TAB(23); income(2); TAB(32); currentCash(2)
+COLOR 9: PRINT nationName$(1); TAB(12); cityController(1); TAB(23); currentIncome(1); TAB(32); currentCash(1)
+COLOR 7: PRINT nationName$(2); TAB(12); cityController(2); TAB(23); currentIncome(2); TAB(32); currentCash(2)
 COLOR 4: PRINT nationName$(0); TAB(12); 40 - cityController(1) - cityController(2)
 LINE (1, 382)-(630, 382), 15
 GOTO endrep
@@ -4912,7 +4912,7 @@ SUB victor
 
 	IF year >= vicflag(2) AND month >= vicflag(1) AND vicflag(2) > 0 THEN j = 2: GOTO finis
 	IF cityController(i) >= vicflag(3) AND vicflag(3) > 0 THEN j = 3: GOTO finis
-	IF income(i) / (income(1) + income(2)) >= .01 * vicflag(4) AND vicflag(4) > 0 THEN j = 4: GOTO finis
+	IF currentIncome(i) / (currentIncome(1) + currentIncome(2)) >= .01 * vicflag(4) AND vicflag(4) > 0 THEN j = 4: GOTO finis
 	IF vicflag(5) > 0 AND capcity(3 - i) = 0 AND capcity(i) > 0 THEN j = 5: GOTO finis
 
 	IF vicflag(6) > 0 THEN
@@ -4932,7 +4932,7 @@ SUB victor
 		CALL image2(a$, 4)
 	END IF
 
-	IF vicflag(4) > 0 AND income(i) / (income(1) + income(2)) >= .009 * vicflag(4) THEN
+	IF vicflag(4) > 0 AND currentIncome(i) / (currentIncome(1) + currentIncome(2)) >= .009 * vicflag(4) THEN
 		a$ = nationName$(i) + " side close to" + STR$(vicflag(4)) + " % of total income"
 		CALL image2(a$, 4)
 	END IF
