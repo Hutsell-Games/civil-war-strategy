@@ -10,8 +10,8 @@ COMMON SHARED armysize(), armyCommander(), armyExp(), armySupply(), month$()
 COMMON SHARED recruitCity(), victoryFlags(), armyOnRailroad(), battleStats(), cityo()
 COMMON SHARED armyMove(), month, year, array(), canMove, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyLocation(), navySize(), navyMove(), isOccupied(), vpTotal, fortLevel()
-COMMON SHARED victoryPoints(), graphicLevel, soundEffects, capitalCity(), difficult, usAdvantage, borderWidth
-COMMON SHARED train(), font$(), orderOfMoves(), januaryCampaign, randbal, realism, casualty&()
+COMMON SHARED victoryPoints(), graphicLevel, soundEffects, capitalCity(), difficultyLevel, usAdvantage, borderWidth
+COMMON SHARED train(), font$(), orderOfMoves(), januaryCampaign, eventsBalance, realism, casualty&()
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityX(40), cityY(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
@@ -57,11 +57,11 @@ END IF
 iron:
 IF humanPlayers < 1 OR humanPlayers > 2 THEN humanPlayers = 1
 IF humanPlayers = 2 OR side = 0 THEN side = 1
-IF side = 1 THEN randbal = 7
-IF side = 2 THEN randbal = 3
+IF side = 1 THEN eventsBalance = 7
+IF side = 2 THEN eventsBalance = 3
 	IF turbo! < 1 THEN turbo! = 2
-	IF side = 1 AND difficult < 3 THEN currentCash(2) = currentCash(2) + 600 - 100 * difficult
-	IF side = 2 AND difficult > 3 THEN currentCash(1) = currentCash(1) + 100 * difficult
+	IF side = 1 AND difficultyLevel < 3 THEN currentCash(2) = currentCash(2) + 600 - 100 * difficultyLevel
+	IF side = 2 AND difficultyLevel > 3 THEN currentCash(1) = currentCash(1) + 100 * difficultyLevel
 
 
 FOR i = 1 TO 2: currentIncome(i) = currentCash(i): currentCash(i) = currentCash(i) + 50 * RND: NEXT i
@@ -415,10 +415,10 @@ utile:
 	menuText$(3) = "Graphics" + STR$(graphicLevel)
 	menuText$(4) = "Noise": IF soundEffects > 0 THEN menuText$(4) = menuText$(4) + STRING$(soundEffects, "*")
 	menuText$(5) = "Display" + STR$(turbo!)
-	a$ = STR$(difficult): IF side = 1 THEN a$ = STR$(6 - difficult)
+	a$ = STR$(difficultyLevel): IF side = 1 THEN a$ = STR$(6 - difficultyLevel)
 	menuText$(6) = "Balance" + a$
 	menuText$(7) = "End Cond"
-	a$ = "+": IF randbal = 0 THEN a$ = ""
+	a$ = "+": IF eventsBalance = 0 THEN a$ = ""
 	menuText$(8) = "Rndom Evt " + a$
 	menuText$(9) = "Vary Start"
 	a$ = "": IF januaryCampaign = 1 THEN a$ = "+"
@@ -440,8 +440,8 @@ utile:
 		IF humanPlayers = 2 GOTO menu0
 		side = 3 - side: COLOR 9: IF side = 2 THEN COLOR 7
 		CALL clrbot: PRINT "Now playing "; nationName$(side); " side"; : IF soundEffects > 0 THEN SOUND 999, 1
-		IF side = 1 THEN randbal = 7
-		IF side = 2 THEN randbal = 3
+		IF side = 1 THEN eventsBalance = 7
+		IF side = 2 THEN eventsBalance = 3
 		CALL topbar
 		GOTO menu0
 '-------------------------------------------------------------------------
@@ -514,7 +514,7 @@ utile:
 '                               Play Balance
 '-------------------------------------------------------------------------
 	   CASE 6
-		chosenOption = difficult + 21
+		chosenOption = difficultyLevel + 21
 		menuText$(0) = "Balance"
 		menuText$(1) = "Rebel ++"
 		menuText$(2) = "Rebel +"
@@ -526,7 +526,7 @@ utile:
 		IF chosenOption < 1 GOTO menu0
 		CALL clrbot
 		COLOR 11: CALL clrbot: PRINT "Play Balance : "; menuText$(chosenOption);
-		difficult = chosenOption
+		difficultyLevel = chosenOption
 		GOSUB unionplus
 		chosenOption = 27: GOTO utile
 '-------------------------------------------------------------------------
@@ -542,27 +542,27 @@ utile:
 		 menuText$(0) = "Random Events"
 		 menuRows = 4: tlx = 30: tly = 8
 		 menuText$(1) = "OFF"
-		 menuText$(2) = "Favor Union ": IF randbal = 3 THEN menuText$(2) = menuText$(2) + " "
-		 menuText$(3) = "Neutral     ": IF randbal = 5 THEN menuText$(3) = menuText$(3) + " "
-		 menuText$(4) = "Favor Rebels": IF randbal = 7 THEN menuText$(4) = menuText$(4) + " "
+		 menuText$(2) = "Favor Union ": IF eventsBalance = 3 THEN menuText$(2) = menuText$(2) + " "
+		 menuText$(3) = "Neutral     ": IF eventsBalance = 5 THEN menuText$(3) = menuText$(3) + " "
+		 menuText$(4) = "Favor Rebels": IF eventsBalance = 7 THEN menuText$(4) = menuText$(4) + " "
 		 colour = 5
 		 CALL menu(0)
 		 colour = 4
 
 		 SELECT CASE chosenOption
 		 CASE 1
-		 randbal = 0: t$ = ""
+		 eventsBalance = 0: t$ = ""
 		 CASE 2
-		 randbal = 3
+		 eventsBalance = 3
 		 CASE 3
-		 randbal = 5
+		 eventsBalance = 5
 		 CASE 4
-		 randbal = 7
+		 eventsBalance = 7
 		 CASE ELSE
 		 END SELECT
 		 IF chosenOption > 1 AND chosenOption < 5 THEN t$ = menuText$(chosenOption)
 		 CALL clrbot
-		 a$ = "": IF randbal = 0 THEN a$ = "OFF"
+		 a$ = "": IF eventsBalance = 0 THEN a$ = "OFF"
 		 COLOR 11: PRINT "Random Events : "; a$; " "; t$;
 		 COLOR 14: PRINT "			press a key";
 		 DO WHILE INKEY$ = "": LOOP
@@ -629,7 +629,7 @@ utile:
 		PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
 	ELSE
 		PRINT "REALISM ON: Recruiting based on CITY SIZE";
-		IF side = 2 AND randbal = 1 AND randbal < 5 THEN randbal = randbal + 2
+		IF side = 2 AND eventsBalance = 1 AND eventsBalance < 5 THEN eventsBalance = eventsBalance + 2
 		GOSUB unionplus
 	END IF
 		chosenOption = 32: GOTO utile
@@ -691,7 +691,7 @@ loader:
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
-			WRITE #1, side, graphicLevel, soundEffects, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+			WRITE #1, side, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 			CLOSE #1
 			CLS
 			GOTO newgame
@@ -717,7 +717,7 @@ menuRows = 2: colour = 5
 tlx = 67: tly = 15
 CALL menu(0): CALL clrrite: IF chosenOption = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: usAdvantage = 120 * difficult: IF humanPlayers = 2 THEN usAdvantage = 50 * difficult
+unionplus: usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvantage = 50 * difficultyLevel
 	   IF realism > 0 THEN usAdvantage = usAdvantage * .7
 	   RETURN
 '............................................................................
@@ -836,8 +836,8 @@ IF armySupply(attack) < 1 THEN x = .5 * x: COLOR 13
 LOCATE 8, y: PRINT "Supply  "; x: COLOR c
 IF x < 1 THEN x = 1
 '                       Adjust attack advantage
-IF attack < 21 AND side = 2 AND difficult > 3 THEN x = x + 2 * difficult - 6
-IF attack > 20 AND side = 1 AND difficult < 3 THEN x = x + 6 - 2 * difficult
+IF attack < 21 AND side = 2 AND difficultyLevel > 3 THEN x = x + 2 * difficultyLevel - 6
+IF attack > 20 AND side = 1 AND difficultyLevel < 3 THEN x = x + 6 - 2 * difficultyLevel
 LOCATE 9, y: PRINT "Difclt  "; x
 IF x > TCR THEN x = TCR
 COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
@@ -874,8 +874,8 @@ IF armySupply(defend) < 1 THEN x1 = .5 * x1: COLOR 13
 LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
 IF x1 < 1 THEN x1 = 1
 '                       Adjust defend advantage
-IF defend < 21 AND side = 2 AND difficult > 3 THEN x1 = x1 + 2 * difficult - 6
-IF defend > 20 AND side = 1 AND difficult < 3 THEN x1 = x1 + 6 - 2 * difficult
+IF defend < 21 AND side = 2 AND difficultyLevel > 3 THEN x1 = x1 + 2 * difficultyLevel - 6
+IF defend > 20 AND side = 1 AND difficultyLevel < 3 THEN x1 = x1 + 6 - 2 * difficultyLevel
 LOCATE 22, y: PRINT "Difclt  "; x1
 
 a$ = "Fort": IF armyMove(defend) = 0 THEN x1 = x1 * (1 + fortLevel(armyLocation(defend)))
@@ -1125,7 +1125,7 @@ FOR i = 1 TO 2: INPUT #1, currentCash(i): NEXT i
 FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, side, graphicLevel, soundEffects, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+	INPUT #1, side, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 
 	CASE 2
@@ -1167,7 +1167,7 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
        
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, myside, graphicLevel, soundEffects, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+	INPUT #1, myside, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 	SCREEN 12: CLS
 	CLOSE #1: CALL usa: CALL clrbot
@@ -1200,7 +1200,7 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 	myside = side
 	IF myside < 1 OR myside > 2 THEN myside = 1
 	OPEN "O", 1, "cws.cfg"
-	WRITE #1, myside, graphicLevel, soundEffects, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+	WRITE #1, myside, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, train(1), train(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 	CLS : CALL usa
 END SELECT
@@ -2019,7 +2019,7 @@ SUB recruit (who%)
 	menuText$(0) = "Recruit"
 	IF who = side AND recruitFlag > 0 THEN FOR i = 1 TO recruitFlag: x = recruitCity(i): menuText$(i) = cityName$(x): array(i) = x: NEXT i: menuRows = recruitFlag: GOTO alldone
 	max = 4: IF RND > .8 THEN max = max - 1
-	IF difficult < 3 THEN max = max + 1
+	IF difficultyLevel < 3 THEN max = max + 1
 
 	FOR i = 1 TO 40
 	IF cityController(who) > 0 THEN pct! = .6 * max / cityController(who) ELSE pct! = .3
@@ -2114,8 +2114,8 @@ randsel:
 	IF currentCash(who) < 100 THEN chosenOption = menuRows
 	RETURN
 playb:
-	IF side = 1 AND difficult < 3 THEN armysize(empty) = armysize(empty) + 15 - 5 * difficult
-	IF side = 2 AND difficult > 3 THEN armysize(empty) = armysize(empty) + 5 * difficult - 15
+	IF side = 1 AND difficultyLevel < 3 THEN armysize(empty) = armysize(empty) + 15 - 5 * difficultyLevel
+	IF side = 2 AND difficultyLevel > 3 THEN armysize(empty) = armysize(empty) + 5 * difficultyLevel - 15
 	RETURN
 END SUB
 
@@ -3488,13 +3488,13 @@ IF realism > 0 AND year = 1862 AND month < 3 THEN
 	DO WHILE INKEY$ = "": LOOP
 	EXIT SUB
 END IF
-IF randbal = 0 THEN EXIT SUB
-plus = difficult: IF side = 1 THEN plus = 6 - difficult
+IF eventsBalance = 0 THEN EXIT SUB
+plus = difficultyLevel: IF side = 1 THEN plus = 6 - difficultyLevel
 pct! = .005 * (year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
 IF RND > pct! THEN EXIT SUB
 
 CALL clrbot: COLOR 14: PRINT "SPECIAL EVENT...";
-who = 1: IF RND > .1 * randbal THEN who = 2
+who = 1: IF RND > .1 * eventsBalance THEN who = 2
 
 SELECT CASE who
 '----------------------------------------------------------------------------
@@ -4404,7 +4404,7 @@ SUB topbar
 
 	CALL flags((side), 0, 0)
 	COLOR 4: IF borderWidth > 0 THEN COLOR 7
-	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(difficult)))
+	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(difficultyLevel)))
 	LOCATE 7, 68: PRINT "Funds:"; currentCash(side);
 
 	FOR i = 1 TO 2: IF victoryPoints(i) < 0 THEN victoryPoints(i) = 0
