@@ -268,9 +268,7 @@ IF pcode > 0 THEN
 	GOTO newgame
 END IF
 
-'���������������������������������������������������������������������������
 '                              Main Menu
-'���������������������������������������������������������������������������
 menu0:
 CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
@@ -505,15 +503,15 @@ utile:
 	a$ = STR$(difficult): IF side = 1 THEN a$ = STR$(6 - difficult)
 	mtx$(6) = "Balance" + a$
 	mtx$(7) = "End Cond"
-	a$ = "�": IF randbal = 0 THEN a$ = ""
+	a$ = "+": IF randbal = 0 THEN a$ = ""
 	mtx$(8) = "Rndom Evt " + a$
 	mtx$(9) = "Vary Start"
-	a$ = "": IF jancam = 1 THEN a$ = "�"
+	a$ = "": IF jancam = 1 THEN a$ = "+"
 	mtx$(10) = "Jan Campgn" + a$
-	a$ = "": IF realism = 1 THEN a$ = "�"
+	a$ = "": IF realism = 1 THEN a$ = "+"
 	mtx$(11) = "Realism " + a$
 	mtx$(12) = "Chk Links"
-	a$ = "": IF history = 1 THEN a$ = "�"
+	a$ = "": IF history = 1 THEN a$ = "+"
 	mtx$(13) = "History" + a$
 	size = 13: tlx = 67: tly = 11
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
@@ -1066,8 +1064,8 @@ COLOR c
 LOCATE 1, 1: PRINT "Attack Loss: ";
 PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
 CALL strong(attack)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) �";
-COLOR 16 - c: PRINT "� Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%)";
+COLOR 16 - c: PRINT "Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
 CALL strong(defend)
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / armysize(defend)))))); "%)"
 '---------------------------------------------------------------------------
@@ -1281,7 +1279,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	mtx$(0) = "Save Game"
 	FOR k = 1 TO 9
 	mtx$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF _FILEEXISTS(mtx$(k)) THEN mtx$(k) = mtx$(k) + " �"
+	IF _FILEEXISTS(mtx$(k)) THEN mtx$(k) = mtx$(k) + " +"
 	NEXT k
 	tlx = 67: size = 9
 	CALL menu(0)
@@ -2665,9 +2663,9 @@ GOTO allthru
 upbox:
 LINE (450, 318)-(526, 420), 1, BF
 LINE (527, 315)-(527, 439), 10
-COLOR 14: LOCATE 23, 50: PRINT "�������������ͻ"
-LOCATE 24, 50: PRINT "� U P D A T E �"
-LOCATE 25, 50: PRINT "�������������ͼ"
+COLOR 14: LOCATE 23, 50: PRINT "============="
+LOCATE 24, 50: PRINT "| U P D A T E |"
+LOCATE 25, 50: PRINT "============="
 RETURN
 
 allthru:
@@ -3527,7 +3525,7 @@ SUB endit
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
 what4:
-	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "� " ELSE mtx$(i - 1) = "  "
+	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "+ " ELSE mtx$(i - 1) = "  "
 	NEXT i
 	choose = chosit
 	mtx$(0) = "Victory Conditions"
@@ -3911,9 +3909,9 @@ SUB maxx
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
-LOCATE 2, 7: PRINT STRING$(57, "�")
-LOCATE 9, 7: PRINT STRING$(57, "�")
-FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "�"; SPACE$(55); "�": NEXT i
+LOCATE 2, 7: PRINT STRING$(57, "+")
+LOCATE 9, 7: PRINT STRING$(57, "+")
+FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "+"; SPACE$(55); "+": NEXT i
 
 		OPEN "I", 1, "hiscore.cws"
 		FOR s = 1 TO 2
@@ -4077,9 +4075,9 @@ PRINT TAB(57); : IF armymove(i) > -1 THEN PRINT city$(armymove(i)) ELSE PRINT "R
 IF fort(armyloc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; fort(armyloc(i))
 deadeye:
 NEXT i
-PRINT " "; STRING$(70, "�")
+PRINT " "; STRING$(70, "+")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(aggress! * x))); "00 ]"
-PRINT " "; STRING$(70, "�")
+PRINT " "; STRING$(70, "+")
 PRINT " "; force$(who); " NAVY has "; navysize(who); " ship(s) ";
 x = 0
 FOR k = 1 TO navysize(who)
