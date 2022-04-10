@@ -78,7 +78,7 @@ COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, co
 COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
 COMMON SHARED cash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
 COMMON SHARED hasNavy, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
-COMMON SHARED nationName$(), armyloc(), armyname$(), player, aggress!
+COMMON SHARED nationName$(), armyloc(), armyname$(), humanPlayers, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
@@ -128,8 +128,8 @@ IF realism > 0 AND year < 1862 THEN
 		NEXT i
 END IF
 iron:
-IF player < 1 OR player > 2 THEN player = 1
-IF player = 2 OR side = 0 THEN side = 1
+IF humanPlayers < 1 OR humanPlayers > 2 THEN humanPlayers = 1
+IF humanPlayers = 2 OR side = 0 THEN side = 1
 IF side = 1 THEN randbal = 7
 IF side = 2 THEN randbal = 3
 	IF turbo! < 1 THEN turbo! = 2
@@ -194,7 +194,7 @@ TICK .3
 windowType = 2
 highlight = 15
 replaying = 1
-IF player = 2 THEN GOSUB blanken
+IF humanPlayers = 2 THEN GOSUB blanken
 menuText$(0) = "VGA CIVILWAR STRATEGY"
 menuText$(1) = "Resume Saved Game"
 menuText$(2) = "Start NEW Game"
@@ -234,7 +234,7 @@ income(i) = 0
 IF cash(i) > 19999 THEN cash(i) = 19999
 IF cash(i) < 0 THEN cash(i) = 0
 NEXT i
-IF player = 1 AND side = 2 THEN income(1) = income(1) + usAdvantage
+IF humanPlayers = 1 AND side = 2 THEN income(1) = income(1) + usAdvantage
 
 FOR i = 1 TO 40
 IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: income(x) = income(x) + cityValue(i)
@@ -248,7 +248,7 @@ NEXT i
 vptotal = income(1) + income(2)
 
 chosit = 22
-IF player = 2 THEN GOSUB blanken: CALL usa
+IF humanPlayers = 2 THEN GOSUB blanken: CALL usa
 CALL victor
 ON ERROR GOTO 0
 IF timesPlayed > 0 THEN
@@ -259,7 +259,7 @@ END IF
 '                              Main Menu
 menu0:
 CALL topbar
-IF player = 2 AND side = 0 THEN side = 1
+IF humanPlayers = 2 AND side = 0 THEN side = 1
 IF cash(side) < 100 AND navyloc(side) = 0 THEN hasNavy = 1
 
 highlight = 11
@@ -322,7 +322,7 @@ END IF
 	menuRows = 2: CALL menu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
 	recruitFlag = 0: mflag = 0: hasNavy = 0
-	IF player = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
+	IF humanPlayers = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
@@ -483,8 +483,8 @@ alone:
 utile:
 	chosit = 29
 	menuText$(0) = "Utility"
-	menuText$(1) = "Side": IF player = 2 THEN menuText$(2) = ""
-	menuText$(2) = "1 Player": IF player = 2 THEN menuText$(2) = "2 Player"
+	menuText$(1) = "Side": IF humanPlayers = 2 THEN menuText$(2) = ""
+	menuText$(2) = "1 Player": IF humanPlayers = 2 THEN menuText$(2) = "2 Player"
 	menuText$(3) = "Graphics" + STR$(graf)
 	menuText$(4) = "Noise": IF noise > 0 THEN menuText$(4) = menuText$(4) + STRING$(noise, "*")
 	menuText$(5) = "Display" + STR$(turbo!)
@@ -503,14 +503,14 @@ utile:
 	menuText$(13) = "History" + a$
 	menuRows = 13: tlx = 67: tly = 11
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	IF player = 1 THEN menuRows = 14: menuText$(14) = "Aggress" + STR$(bold)
+	IF humanPlayers = 1 THEN menuRows = 14: menuText$(14) = "Aggress" + STR$(bold)
 	CALL menu(-1): CALL clrrite
 	    SELECT CASE chosenOption
 '-------------------------------------------------------------------------
 '                               Swap Sides
 '-------------------------------------------------------------------------
 	    CASE 1
-		IF player = 2 GOTO menu0
+		IF humanPlayers = 2 GOTO menu0
 		side = 3 - side: COLOR 9: IF side = 2 THEN COLOR 7
 		CALL clrbot: PRINT "Now playing "; nationName$(side); " side"; : IF noise > 0 THEN SOUND 999, 1
 		IF side = 1 THEN randbal = 7
@@ -521,9 +521,9 @@ utile:
 '                               Solo or 2 Player
 '-------------------------------------------------------------------------
 	    CASE 2
-		player = 3 - player: CALL clrbot: COLOR 12
+		humanPlayers = 3 - humanPlayers: CALL clrbot: COLOR 12
 		IF noise > 0 THEN SOUND 999, 1
-		a$ = "Solo": IF player = 2 THEN a$ = "2 Player"
+		a$ = "Solo": IF humanPlayers = 2 THEN a$ = "2 Player"
 		PRINT a$; " Game";
 		chosenOption = 23: GOTO utile
 '-------------------------------------------------------------------------
@@ -764,7 +764,7 @@ loader:
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
-			WRITE #1, side, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+			WRITE #1, side, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
 			CLOSE #1
 			CLS
 			GOTO newgame
@@ -790,7 +790,7 @@ menuRows = 2: colour = 5
 tlx = 67: tly = 15
 CALL menu(0): CALL clrrite: IF chosenOption = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: usAdvantage = 120 * difficult: IF player = 2 THEN usAdvantage = 50 * difficult
+unionplus: usAdvantage = 120 * difficult: IF humanPlayers = 2 THEN usAdvantage = 50 * difficult
 	   IF realism > 0 THEN usAdvantage = usAdvantage * .7
 	   RETURN
 '............................................................................
@@ -1059,7 +1059,7 @@ IF win = defend THEN menuText$(3) = armyname$(win): menuText$(4) = "*" + armynam
 a$ = cityName$(armyloc(defend)) + ": " + menuText$(3) + menuText$(1) + " defeats " + menuText$(4) + menuText$(2)
 CALL scribe(a$, 0)
 
-IF player = 1 AND (side = 1 AND attack > 20) OR (side = 2 AND attack < 21) THEN
+IF humanPlayers = 1 AND (side = 1 AND attack > 20) OR (side = 2 AND attack < 21) THEN
 COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 END IF
 
@@ -1198,7 +1198,7 @@ FOR i = 1 TO 2: INPUT #1, cash(i): NEXT i
 FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, side, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+	INPUT #1, side, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
 	CLOSE #1
 
 	CASE 2
@@ -1240,7 +1240,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
        
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, myside, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+	INPUT #1, myside, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
 	CLOSE #1
 	SCREEN 12: CLS
 	CLOSE #1: CALL usa: CALL clrbot
@@ -1273,7 +1273,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	myside = side
 	IF myside < 1 OR myside > 2 THEN myside = 1
 	OPEN "O", 1, "cws.cfg"
-	WRITE #1, myside, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+	WRITE #1, myside, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
 	CLOSE #1
 	CLS : CALL usa
 END SELECT
@@ -2116,7 +2116,7 @@ alldone:
 '............................................................................
 levy:
 	IF cash(who) < 100 THEN EXIT SUB
-	IF (who = side) OR (player = 2) THEN CALL clrbot: PRINT nationName$(who); " funds available "; cash(who);
+	IF (who = side) OR (humanPlayers = 2) THEN CALL clrbot: PRINT nationName$(who); " funds available "; cash(who);
 	tlx = 67: tly = 12: colour = 3
 	IF who <> side THEN GOSUB randsel: GOTO auto1
       
@@ -2413,7 +2413,7 @@ END SUB
 
 SUB tupdate
 flag = 0
-IF player = 1 THEN
+IF humanPlayers = 1 THEN
 	CALL smarts
 ELSE
 	FOR i = 1 TO 40
@@ -2596,7 +2596,7 @@ CALL placearmy(active)
 '---------------------------------------------------------------------------
 	IF cityOwner(armyloc(active)) = s GOTO horde
 	c = armyloc(active)
-	IF player = 1 AND s = side AND fort(c) > 0 AND flag = 0 THEN
+	IF humanPlayers = 1 AND s = side AND fort(c) > 0 AND flag = 0 THEN
 		tlx = 67: tly = 15
 		highlight = 15: colour = 3
 		menuText$(0) = "Raze ?"
@@ -2607,7 +2607,7 @@ CALL placearmy(active)
 		CALL clrrite
 		IF chosenOption = 2 GOTO smoke
 	END IF
-	IF player = 1 AND s <> side AND fort(c) > 0 AND flag = 0 THEN
+	IF humanPlayers = 1 AND s <> side AND fort(c) > 0 AND flag = 0 THEN
 		IF realism > 0 AND cityy(c) > 150 THEN
 smoke:
 			fort(c) = 0
@@ -2680,7 +2680,7 @@ IF victory(1) < 1 THEN victory(1) = 0
 victory(2) = .8 * victory(2) + .3 * (income(2) + cityController(2))
 IF cityController(2) > 29 THEN victory(2) = victory(2) + 50: IF cityController(2) > 34 THEN victory(2) = victory(1) + 100
 IF side = 1 AND cityController(2) < 11 THEN aggress! = aggress! + .7
-IF player = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+IF humanPlayers = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 END SUB
 
 '============================================================================
@@ -3823,7 +3823,7 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "+"; SPACE$(55); "+": NEXT i
 			FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
 			LOCATE 12, 1: PRINT "Congratulations ! Score of"; victory(s)
 			PRINT "New Entry into "; nationName$(s); " HALL of FAME in place "; i
-			IF player = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; nationName$(s); " commander": GOTO automate
+			IF humanPlayers = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; nationName$(s); " commander": GOTO automate
 who4:
 			PRINT "What is name of "; nationName$(s); " commander"; : INPUT a$: IF a$ = "" GOTO who4
 automate:
@@ -4129,7 +4129,7 @@ END SUB
 
 SUB retreat (defend, x)
 x = 0
-IF player = 1 THEN
+IF humanPlayers = 1 THEN
 	IF (side = 1 AND defend > 20) OR (side = 2 AND defend < 21) THEN EXIT SUB
 END IF
 
@@ -4495,7 +4495,7 @@ SUB topbar
 
 a$ = "  Snd": IF noise < 2 THEN a$ = "   Snd": IF noise = 0 THEN a$ = "      "
 IF graf > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(graf))
-a$ = a$ + STR$(player)
+a$ = a$ + STR$(humanPlayers)
 COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
 COLOR c
 LOCATE 26, 68: PRINT "F3 Redrw Scrn"
@@ -4887,7 +4887,7 @@ FOR k = 1 TO 2
 CALL stax(k)
 NEXT k
 
-IF player = 2 GOTO nosee
+IF humanPlayers = 2 GOTO nosee
 FOR i = 1 TO 40: IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
 NEXT i
 nosee:
@@ -4997,7 +4997,7 @@ play4ever:
 	menuText$(0) = "Options"
 	menuText$(1) = "Quit this Game"
 	menuText$(2) = "Play More"
-	IF player = 1 THEN menuText$(2) = "No - Press Onward to " + cityName$(capcity(3 - side))
+	IF humanPlayers = 1 THEN menuText$(2) = "No - Press Onward to " + cityName$(capcity(3 - side))
 	menuRows = 2: colour = 8
 	tlx = 27: tly = 18
 	IF j <> 7 THEN
