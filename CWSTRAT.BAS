@@ -6,7 +6,7 @@ DECLARE SUB armyxy (x%, y%, z%)
 DECLARE SUB barnacle (who%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB bub2 (limit%)
-DECLARE SUB bubble (size%)
+DECLARE SUB bubble (menuRows%)
 DECLARE SUB cancel (side%)
 DECLARE SUB cannon ()
 DECLARE SUB capitol ()
@@ -74,7 +74,7 @@ DECLARE SUB usa ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 '==========================================================================
-COMMON SHARED chosenOption%, tlx%, tly%, size%, menuText$(), windowType%, colour%, hilite%
+COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, hilite%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), savedGameExists
 COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), recruitFlag
 COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
@@ -199,7 +199,7 @@ menuText$(0) = "VGA CIVILWAR STRATEGY"
 menuText$(1) = "Resume Saved Game"
 menuText$(2) = "Start NEW Game"
 menuText$(3) = "Quit"
-tlx = 33: tly = 20: colour = 5: size = 3
+tlx = 33: tly = 20: colour = 5: menuRows = 3
 chosenOption = 23
 CALL menu(0)
 IF chosenOption = 1 THEN
@@ -276,7 +276,7 @@ menuText$(7) = "COMMANDS"
 menuText$(8) = "UTILITY"
 menuText$(9) = "Files"
 
-size = 9
+menuRows = 9
 chosenOption = chosit
 CALL menu(0): CALL clrrite
 '==========================================================================
@@ -319,7 +319,7 @@ END IF
 	menuText$(0) = "End Turn"
 	menuText$(1) = "Yes"
 	menuText$(2) = "NOT YET"
-	size = 2: CALL menu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
+	menuRows = 2: CALL menu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
 	recruitFlag = 0: mflag = 0: nflag = 0
 	IF player = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
@@ -349,7 +349,7 @@ optmen:
 	menuText$(7) = "Army Drill"
 	menuText$(8) = "Relieve"
 	menuText$(9) = "MAIN MENU"
-	size = 9
+	menuRows = 9
 	CALL menu(0): CALL clrrite
 	chosit = 28
      SELECT CASE chosenOption
@@ -390,20 +390,20 @@ optmen:
 		CALL starfin(star, fin, (side))
 		menuText$(0) = "Supply"
 		tlx = 67: tly = 5: colour = 5
-		size = 0
+		menuRows = 0
 		FOR i = star TO fin
 		IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
 		IF realism > 0 THEN
 			CALL cutoff(side, armyloc(i), a)
 			IF a < 1 THEN CALL clrbot: COLOR 15: PRINT force$(side); " army in "; city$(armyloc(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
 		END IF
-		size = size + 1
+		menuRows = menuRows + 1
 		max = 11: IF LEN(armyname$(i)) < 11 THEN max = LEN(armyname$(i))
-		menuText$(size) = LEFT$(armyname$(i), max)
-		array(size) = i
+		menuText$(menuRows) = LEFT$(armyname$(i), max)
+		array(menuRows) = i
 alone:
 		NEXT i
-		IF size = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; force$(side); " armies have supplies"; : GOTO menu0
+		IF menuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; force$(side); " armies have supplies"; : GOTO menu0
 		CALL menu(6): CALL clrrite
 		IF chosenOption < 0 GOTO menu0
 		index = array(chosenOption)
@@ -501,9 +501,9 @@ utile:
 	menuText$(12) = "Chk Links"
 	a$ = "": IF history = 1 THEN a$ = "+"
 	menuText$(13) = "History" + a$
-	size = 13: tlx = 67: tly = 11
+	menuRows = 13: tlx = 67: tly = 11
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	IF player = 1 THEN size = 14: menuText$(14) = "Aggress" + STR$(bold)
+	IF player = 1 THEN menuRows = 14: menuText$(14) = "Aggress" + STR$(bold)
 	CALL menu(-1): CALL clrrite
 	    SELECT CASE chosenOption
 '-------------------------------------------------------------------------
@@ -549,7 +549,7 @@ utile:
 		menuText$(1) = "Quiet"
 		menuText$(2) = "Sound"
 		menuText$(3) = " & Sound"
-		size = 3: tlx = 67: tly = 12
+		menuRows = 3: tlx = 67: tly = 12
 		CALL menu(0): CALL clrrite
 		IF chosenOption < 1 GOTO menu0
 		COLOR 11: CALL clrbot: PRINT "Sound Option : "; menuText$(chosenOption);
@@ -567,7 +567,7 @@ utile:
 		menuText$(3) = "Slow"
 		menuText$(4) = "Very Slow"
 		menuText$(5) = "Reg Color": IF bw > 0 THEN menuText$(5) = "Alt Color"
-		tlx = 67: tly = 15: size = 5
+		tlx = 67: tly = 15: menuRows = 5
 		CALL menu(0): CALL clrrite
 		SELECT CASE chosenOption
 			CASE IS < 1
@@ -594,7 +594,7 @@ utile:
 		menuText$(3) = "Balanced"
 		menuText$(4) = "Union +"
 		menuText$(5) = "Union ++"
-		tlx = 67: tly = 15: size = 5
+		tlx = 67: tly = 15: menuRows = 5
 		CALL menu(8): CALL clrrite
 		IF chosenOption < 1 GOTO menu0
 		CALL clrbot
@@ -613,7 +613,7 @@ utile:
 '-------------------------------------------------------------------------
 	   CASE 8
 		 menuText$(0) = "Random Events"
-		 size = 4: tlx = 30: tly = 8
+		 menuRows = 4: tlx = 30: tly = 8
 		 menuText$(1) = "OFF"
 		 menuText$(2) = "Favor Union ": IF randbal = 3 THEN menuText$(2) = menuText$(2) + " "
 		 menuText$(3) = "Neutral     ": IF randbal = 5 THEN menuText$(3) = menuText$(3) + " "
@@ -752,7 +752,7 @@ filex:
 	menuText$(2) = "Save"
 	menuText$(3) = "New Game"
 	menuText$(4) = "Quit"
-	size = 4: tlx = 67: tly = 15
+	menuRows = 4: tlx = 67: tly = 15
 	CALL menu(0): CALL clrrite
 	SELECT CASE chosenOption
 		CASE IS < 1: GOTO menu0
@@ -786,7 +786,7 @@ chosenOption = 23
 menuText$(0) = "Quit"
 menuText$(1) = "Yes"
 menuText$(2) = "No"
-size = 2: colour = 5
+menuRows = 2: colour = 5
 tlx = 67: tly = 15
 CALL menu(0): CALL clrrite: IF chosenOption = 1 THEN END ELSE GOTO menu0
 '............................................................................
@@ -845,11 +845,11 @@ tlx = 67: tly = 12
 
 CALL armystat(index)
 COLOR 11: LOCATE 11, 68: PRINT city$(target)
-size = 0
+menuRows = 0
 menuText$(0) = "To"
-FOR i = 1 TO 6: IF matrix(target, i) > 0 THEN size = size + 1: menuText$(size) = city$(matrix(target, i)): array(size) = matrix(target, i)
+FOR i = 1 TO 6: IF matrix(target, i) > 0 THEN menuRows = menuRows + 1: menuText$(menuRows) = city$(matrix(target, i)): array(menuRows) = matrix(target, i)
 NEXT i
-CALL bubble(size)
+CALL bubble(menuRows)
 
 hilite = 10: colour = 3: CALL menu(2): CALL clrrite
 IF chosenOption < 0 THEN EXIT SUB
@@ -1081,19 +1081,19 @@ SUB combine (who)
 	colour = 3: target = 0: hilite = 3
 	tlx = 67: tly = 2
 	CALL starfin(star, fin, who)
-	size = 0
+	menuRows = 0
 	FOR i = 1 TO 40
 		IF cityp(i) = who AND occupied(i) > 0 THEN
 			FOR j = star TO fin
-			IF armyloc(j) = i AND occupied(i) <> j AND armymove(j) = 0 THEN size = size + 1: menuText$(size) = city$(i): array(size) = i: EXIT FOR
+			IF armyloc(j) = i AND occupied(i) <> j AND armymove(j) = 0 THEN menuRows = menuRows + 1: menuText$(menuRows) = city$(i): array(menuRows) = i: EXIT FOR
 			NEXT j
 		END IF
 	NEXT i
 	
-	IF size = 0 THEN who = -1: EXIT SUB
-	CALL bubble(size)
+	IF menuRows = 0 THEN who = -1: EXIT SUB
+	CALL bubble(menuRows)
 
-	IF who <> side THEN chosenOption = 1 + INT(size * RND): GOTO join
+	IF who <> side THEN chosenOption = 1 + INT(menuRows * RND): GOTO join
 	menuText$(0) = "Join"
 		chosenOption = 31: hilite = 11
 		CALL menu(9): CALL clrrite
@@ -1204,15 +1204,15 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CASE 2
 	IF _FILEEXISTS("*.sav") = 0 THEN chosenOption = -1: EXIT SUB
 	menuText$(0) = "Load"
-	size = 0
+	menuRows = 0
 	FOR k = 1 TO 9
 		t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
 		IF _FILEEXISTS(t$) THEN
-			size = size + 1: menuText$(size) = t$: array(size) = k
+			menuRows = menuRows + 1: menuText$(menuRows) = t$: array(menuRows) = k
 		END IF
 	NEXT k
-	CALL bubble((size))
-	tlx = 67: tly = 14 - .5 * size
+	CALL bubble((menuRows))
+	tlx = 67: tly = 14 - .5 * menuRows
 	CALL menu(0)
 	CALL clrrite
 	IF chosenOption < 1 THEN EXIT SUB
@@ -1255,7 +1255,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	menuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
 	IF _FILEEXISTS(menuText$(k)) THEN menuText$(k) = menuText$(k) + " +"
 	NEXT k
-	tlx = 67: size = 9
+	tlx = 67: menuRows = 9
 	CALL menu(0)
 	IF chosenOption < 1 THEN clrrite: EXIT SUB
 	COLOR 11: CALL clrbot: PRINT "Saving";
@@ -1298,16 +1298,16 @@ SUB fortify (target)
 	tlx = 67: tly = 2
 	who = side
 	CALL starfin(star, fin, who)
-	size = 0
+	menuRows = 0
 	FOR i = star TO fin
 	IF armyloc(i) > 0 AND fort(armyloc(i)) < 2 THEN
-		size = size + 1
-		menuText$(size) = city$(armyloc(i))
-		array(size) = armyloc(i)
+		menuRows = menuRows + 1
+		menuText$(menuRows) = city$(armyloc(i))
+		array(menuRows) = armyloc(i)
 	END IF
 	NEXT i
-	IF size = 0 THEN CALL clrbot: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
-	CALL bubble(size)
+	IF menuRows = 0 THEN CALL clrbot: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
+	CALL bubble(menuRows)
 	menuText$(0) = "Fortify"
 		chosenOption = 31
 		CALL menu(9): CALL clrrite
@@ -1441,26 +1441,26 @@ IF side = 1 AND y > 0 THEN aggress! = x / y ELSE IF side = 1 THEN aggress! = 1
 END SUB
 
 SUB movefrom (index, target)
-	colour = 3: tlx = 67: tly = 5: index = 0: size = 0: target = 0
+	colour = 3: tlx = 67: tly = 5: index = 0: menuRows = 0: target = 0
 	who = side: CALL starfin(star, fin, who)
 	FOR i = star TO fin
-	IF armyloc(i) > 0 AND armymove(i) = 0 THEN size = size + 1: menuText$(size) = city$(armyloc(i)): array(size) = armyloc(i)
+	IF armyloc(i) > 0 AND armymove(i) = 0 THEN menuRows = menuRows + 1: menuText$(menuRows) = city$(armyloc(i)): array(menuRows) = armyloc(i)
 	NEXT i
-	IF size = 0 THEN index = -1: EXIT SUB
+	IF menuRows = 0 THEN index = -1: EXIT SUB
 	menuText$(0) = "From"
-	CALL bubble(size)
+	CALL bubble(menuRows)
 	tlx = 67: tly = 5
 		hilite = 15: CALL menu(1): CALL clrrite
 		IF chosenOption < 0 THEN target = 0: EXIT SUB
 		target = array(chosenOption)
 
-		size = 0
+		menuRows = 0
 		FOR i = star TO fin
-		IF armyloc(i) = target AND armymove(i) = 0 THEN index = i: size = size + 1: menuText$(size) = "Army" + STR$(i): array(size) = i
+		IF armyloc(i) = target AND armymove(i) = 0 THEN index = i: menuRows = menuRows + 1: menuText$(menuRows) = "Army" + STR$(i): array(menuRows) = i
 		NEXT i
-		IF size = 1 THEN EXIT SUB
+		IF menuRows = 1 THEN EXIT SUB
 		menuText$(0) = "Which"
-		CALL bubble(size)
+		CALL bubble(menuRows)
 		tlx = 67: tly = 15: CALL menu(4): CALL clrrite
 		IF chosenOption < 0 THEN index = 0: EXIT SUB
 		index = array(chosenOption)
@@ -1497,10 +1497,10 @@ menuText$(1) = "-": menuText$(2) = "-": chosenOption = 24
 END IF
 menuText$(3) = "Sail": IF navyloc(who) < 1 THEN menuText$(3) = "-": IF chx = 3 THEN chx = 1
 menuText$(4) = "Raid": IF navysize(who) < 1 OR commerce = who THEN menuText$(4) = "-"
-tlx = 67: tly = 12: size = 4
+tlx = 67: tly = 12: menuRows = 4
 IF navyloc(who) <> 99 THEN
-IF who = 1 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN size = 5: menuText$(5) = "Invasion": CALL void(navyloc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
-IF realism = 0 AND who = 2 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN size = 5: menuText$(5) = "Invasion": CALL void(navyloc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
+IF who = 1 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN menuRows = 5: menuText$(5) = "Invasion": CALL void(navyloc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
+IF realism = 0 AND who = 2 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN menuRows = 5: menuText$(5) = "Invasion": CALL void(navyloc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
 END IF
 
 IF chx > 0 THEN chosenOption = chx: GOTO anchor
@@ -1531,7 +1531,7 @@ SELECT CASE chosenOption
 			menuText$(0) = "Type"
 			menuText$(1) = "Wooden"
 			menuText$(2) = "Ironclad"
-			size = 2
+			menuRows = 2
 			CALL menu(0)
 			CALL clrrite
 			IF chosenOption < 1 GOTO ahoy
@@ -1550,11 +1550,11 @@ noiron:
 	END IF
 	IF navysize(who) > 1 GOTO add2ship
 ships:
-	menuText$(0) = "Port": size = 0: tlx = 67: tly = 12
-	FOR i = 1 TO 40: IF matrix(i, 7) = 99 AND cityp(i) = who AND navyloc(3 - who) <> i THEN size = size + 1: menuText$(size) = city$(i): array(size) = i
+	menuText$(0) = "Port": menuRows = 0: tlx = 67: tly = 12
+	FOR i = 1 TO 40: IF matrix(i, 7) = 99 AND cityp(i) = who AND navyloc(3 - who) <> i THEN menuRows = menuRows + 1: menuText$(menuRows) = city$(i): array(menuRows) = i
 	NEXT i
-	IF chx = 1 THEN chosenOption = 1 + INT(size * RND)
-	IF size < 1 THEN
+	IF chx = 1 THEN chosenOption = 1 + INT(menuRows * RND)
+	IF menuRows < 1 THEN
 		navysize(who) = 0: fleet$(who) = ""
 		IF chx = 0 THEN CALL clrbot: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
 		IF chx = 1 THEN EXIT SUB
@@ -1638,11 +1638,11 @@ blast:
 	IF navysize(who) < 1 AND chx > 0 THEN EXIT SUB
 	IF navyloc(who) < 1 OR navysize(who) < 1 THEN CALL clrbot: PRINT "No ships remain"; : TICK 1: GOTO ahoy
 
-	size = 0
-	FOR i = 1 TO 40: IF matrix(i, 7) > 90 AND navyloc(who) <> i THEN size = size + 1: menuText$(size) = city$(i): array(size) = i
+	menuRows = 0
+	FOR i = 1 TO 40: IF matrix(i, 7) > 90 AND navyloc(who) <> i THEN menuRows = menuRows + 1: menuText$(menuRows) = city$(i): array(menuRows) = i
 	NEXT i
 	IF chx = 3 THEN
-		IF size = 0 THEN EXIT SUB
+		IF menuRows = 0 THEN EXIT SUB
 		IF grudge > 0 THEN chosenOption = 1: array(1) = navyloc(3 - who): GOTO admiral
 		GOSUB nest: IF chosenOption > 0 GOTO admiral ELSE EXIT SUB
 	END IF
@@ -1785,7 +1785,7 @@ wave:
 	menuText$(2) = "Retreat"
 	IF chx > 0 THEN chosenOption = 1: GOTO powder
       
-	size = 2: colour = 3: hilite = 14: tlx = 50: tly = 18: CALL menu(0)
+	menuRows = 2: colour = 3: hilite = 14: tlx = 50: tly = 18: CALL menu(0)
 powder:
 	SELECT CASE chosenOption
 	 CASE 1
@@ -1861,7 +1861,7 @@ clr1:
 	LOCATE 17, 1: PRINT SPACE$(60): RETURN
 nest:
 	best = 0: x = 0
-	FOR i = 1 TO size
+	FOR i = 1 TO menuRows
 	target = array(i)
 	IF cityp(target) = 0 GOTO neutral
 
@@ -1873,7 +1873,7 @@ nest:
 neutral:
 	NEXT i
 	IF best = 0 THEN
-		chosenOption = 1 + INT(RND * size)
+		chosenOption = 1 + INT(RND * menuRows)
 	ELSE
 		chosenOption = best
 	END IF
@@ -1922,7 +1922,7 @@ END SUB
 SUB newcity (index)
 		menuText$(1) = "  "
 		menuText$(3) = "  "
-		size = 3: a$ = city$(index)
+		menuRows = 3: a$ = city$(index)
 morecap:
 		tlx = 68: tly = 15: colour = 3: chosenOption = 23
 		menuText$(2) = city$(index)
@@ -2088,31 +2088,31 @@ END SUB
 
 SUB recruit (who)
 	IF cash(who) < 100 THEN EXIT SUB
-	size = 0: COLOR 12
+	menuRows = 0: COLOR 12
 	menuText$(0) = "Recruit"
-	IF who = side AND recruitFlag > 0 THEN FOR i = 1 TO recruitFlag: x = rcity(i): menuText$(i) = city$(x): array(i) = x: NEXT i: size = recruitFlag: GOTO alldone
+	IF who = side AND recruitFlag > 0 THEN FOR i = 1 TO recruitFlag: x = rcity(i): menuText$(i) = city$(x): array(i) = x: NEXT i: menuRows = recruitFlag: GOTO alldone
 	max = 4: IF RND > .8 THEN max = max - 1
 	IF difficult < 3 THEN max = max + 1
 
 	FOR i = 1 TO 40
 	IF control(who) > 0 THEN pct! = .6 * max / control(who) ELSE pct! = .3
-	IF size = 0 AND i > 20 THEN pct! = .3
-	IF size < 2 AND i > 30 THEN pct! = .3
+	IF menuRows = 0 AND i > 20 THEN pct! = .3
+	IF menuRows < 2 AND i > 30 THEN pct! = .3
 	array(i) = 0
 	IF occupied(i) > 0 AND cityp(i) = who THEN pct! = .4
 	IF RND < pct! AND cityp(i) = who THEN
 		IF realism > 0 AND cityo(i) = 3 - who GOTO foe
-		size = size + 1
-		menuText$(size) = city$(i)
-		array(size) = i
-		IF size > max - 1 GOTO alldone
+		menuRows = menuRows + 1
+		menuText$(menuRows) = city$(i)
+		array(menuRows) = i
+		IF menuRows > max - 1 GOTO alldone
 	END IF
 foe:
 	NEXT i
 alldone:
-	IF size = 0 THEN EXIT SUB
-	IF who = side AND recruitFlag = 0 THEN FOR i = 1 TO size: rcity(i) = array(i): NEXT i: recruitFlag = size
-	CALL bubble(size)
+	IF menuRows = 0 THEN EXIT SUB
+	IF who = side AND recruitFlag = 0 THEN FOR i = 1 TO menuRows: rcity(i) = array(i): NEXT i: recruitFlag = menuRows
+	CALL bubble(menuRows)
 '............................................................................
 levy:
 	IF cash(who) < 100 THEN EXIT SUB
@@ -2160,17 +2160,17 @@ add2:
 	GOTO levy
 randsel:
 		chosenOption = 0: x = 0
-		FOR i = 1 TO size
+		FOR i = 1 TO menuRows
 		target = array(i)
 		LOCATE 14 + i, 69
 		x = occupied(target)
 		IF x = 0 XOR armysize(x) < 155 THEN chosenOption = i
 		NEXT i
 
-	IF chosenOption = 0 THEN chosenOption = 1 + INT(RND * size)
+	IF chosenOption = 0 THEN chosenOption = 1 + INT(RND * menuRows)
 	IF realism > 0 THEN
 		x = 0
-		FOR i = 1 TO size
+		FOR i = 1 TO menuRows
 		target = array(i)
 		IF occupied(target) = 0 THEN
 			y = 3 * cityv(target) + 33
@@ -2184,7 +2184,7 @@ randsel:
 		IF y > x AND RND > .5 THEN x = y: chosenOption = i
 		NEXT i
 	END IF
-	IF cash(who) < 100 THEN chosenOption = size
+	IF cash(who) < 100 THEN chosenOption = menuRows
 	RETURN
 playb:
 	IF side = 1 AND difficult < 3 THEN armysize(empty) = armysize(empty) + 15 - 5 * difficult
@@ -2602,7 +2602,7 @@ CALL placearmy(active)
 		menuText$(0) = "Raze ?"
 		menuText$(1) = "No"
 		menuText$(2) = "Yes"
-		size = 2
+		menuRows = 2
 		CALL menu(0)
 		CALL clrrite
 		IF chosenOption = 2 GOTO smoke
@@ -2689,7 +2689,7 @@ END SUB
 '============================================================================
 '       tlx  = top left x  (if zero, automatically centered)
 '       tly = top left y   (if zero, automatically centered)
-'       size = # rows (current maximum=20)
+'       menuRows = # rows (current maximum=20)
 '       menuText$() = text for menu
 '                menuText$(0) = heading (blank defaults to M E N U)
 '                menuText$(1-size) are options
@@ -2703,18 +2703,18 @@ END SUB
 SUB choices (b1, wide)
 boxc = colour: IF windowType > 10 THEN boxc = INT(windowType / 10): windowType = windowType - 10 * boxc
 COLOR boxc
-VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8)
+VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + menuRows + 2) + 8)
 CLS 1
 VIEW
-LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8), colour, B
+LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + menuRows + 2) + 8), colour, B
 LINE (8 * tlx - 2, 16 * (tly + 1) + 3)-(8 * (tlx + wide + 1) + 3, 16 * (tly + 1) + 6), colour, B
 IF ABS(windowType) = 2 THEN
-LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + size + 2) + 4), colour, B
+LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + menuRows + 2) + 4), colour, B
 END IF
 COLOR colour
 
 LOCATE tly + 1, tlx + b1: PRINT menuText$(0)
-FOR i = 1 TO size
+FOR i = 1 TO menuRows
 LOCATE tly + 2 + i, tlx + 2: PRINT menuText$(i);
 NEXT i
 END SUB
@@ -2836,27 +2836,27 @@ remenu:
 	IF chosenOption > 21 THEN chosenOption = chosenOption - 21
 	IF chosenOption > 21 THEN chosenOption = 1
 	row = chosenOption: IF row < 1 THEN row = 1
-	IF row > size THEN row = 1
+	IF row > menuRows THEN row = 1
 	chosenOption = row
 	row1 = row
        
-	IF tly = 0 THEN tly = INT(11.5 - .5 * size)
-	IF tly + size > 26 THEN tly = 26 - size
+	IF tly = 0 THEN tly = INT(11.5 - .5 * menuRows)
+	IF tly + menuRows > 26 THEN tly = 26 - menuRows
        
 	brx = tlx + wide + 1
-	bry = tly + size + 3
+	bry = tly + menuRows + 3
        
 	boxc = colour: IF windowType > 10 THEN boxc = INT(windowType / 10): windowType = windowType - 10 * boxc
 
 	COLOR boxc
 
-	VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8)
+	VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + menuRows + 2) + 8)
 	CLS 1
 	VIEW
-	LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8), colour, B
+	LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + menuRows + 2) + 8), colour, B
 	LINE (8 * tlx - 2, 16 * (tly + 1) + 3)-(8 * (tlx + wide + 1) + 3, 16 * (tly + 1) + 6), colour, B
 	IF ABS(windowType) = 2 THEN
-		LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + size + 2) + 4), colour, B
+		LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + menuRows + 2) + 4), colour, B
 	END IF
 
 	COLOR colour
@@ -2875,12 +2875,12 @@ sel1:
 			COLOR 12
 			LOCATE tly + 2 + row, tlx + 2: PRINT SPACE$(wide);
 			LOCATE tly + 2 + row, tlx + 2: PRINT t$;
-			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
-			LOCATE tly + 4 + size, tlx + 1: PRINT "Size"; armysize(target);
+			LOCATE tly + 4 + menuRows, tlx + 1: PRINT SPACE$(12);
+			LOCATE tly + 4 + menuRows, tlx + 1: PRINT "Size"; armysize(target);
 			x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
 			ELSE
 			flag = 0
-			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
+			LOCATE tly + 4 + menuRows, tlx + 1: PRINT SPACE$(12);
 			END IF
 		CASE 4: CALL armystat(array(row))
 		CASE 5: COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
@@ -2935,7 +2935,7 @@ crsr:   a$ = INKEY$: IF a$ = "" GOTO crsr
 	IF switch = 3 THEN chosenOption = -ASC(UCASE$(a$)): GOTO called
 	IF ASC(a$) = 27 THEN chosenOption = -1: GOTO called
 		row1 = row
-		FOR k = 1 TO size
+		FOR k = 1 TO menuRows
 		c1$ = UCASE$(LEFT$(LTRIM$(menuText$(k)), 1))
 		IF c1$ = UCASE$(a$) THEN chosenOption = k: GOSUB limits: GOTO called
 		NEXT k
@@ -2946,7 +2946,7 @@ arrows:
 	 IF a$ = "H" THEN row = row - 1: GOSUB limits: RETURN
 	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
 	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
-	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
+	 IF a$ = "Q" THEN row = menuRows: GOSUB limits: RETURN
 	 IF a$ = ";" AND switch = 0 THEN
 		SCREEN 0: CLS
 		SHELL "cwsdoc.com"
@@ -2976,8 +2976,8 @@ arrows:
 	 RETURN
 
 limits:
-	IF row > size THEN row = 1
-	IF row < 1 THEN row = size
+	IF row > menuRows THEN row = 1
+	IF row < 1 THEN row = menuRows
 	RETURN
 noadjust:
 	IF tlx = 0 THEN tlx = INT(40.5 - .5 * wide)
@@ -2997,7 +2997,7 @@ END SUB
 
 SUB mxw (wide)
 	wide = LEN(menuText$(0)) + 1
-	FOR i = 1 TO size
+	FOR i = 1 TO menuRows
 	x = LEN(menuText$(i))
 	IF x > wide THEN wide = x
 	NEXT i
@@ -3204,18 +3204,18 @@ SUB cancel (side)
 CALL starfin(star, fin, (side))
 
 CALL clrrite
-	size = 0
+	menuRows = 0
 	FOR j = star TO fin
 	a$ = armyname$(j): IF LEN(a$) > 10 THEN x = INSTR(a$, " "): a$ = RIGHT$(a$, LEN(a$) - x)
-	IF armyloc(j) > 0 AND armymove(j) > 0 THEN size = size + 1: menuText$(size) = a$: array(size) = armyloc(j)
+	IF armyloc(j) > 0 AND armymove(j) > 0 THEN menuRows = menuRows + 1: menuText$(menuRows) = a$: array(menuRows) = armyloc(j)
 	NEXT j
-	CALL bubble(size)
+	CALL bubble(menuRows)
 	tlx = 67: tly = 2: windowType = 2
 	menuText$(0) = "Cancel"
-	IF size < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
+	IF menuRows < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
 	CALL menu(1)
 	SELECT CASE chosenOption
-	 CASE 1 TO size
+	 CASE 1 TO menuRows
 		target = array(chosenOption)
 	       
 		FOR i = star TO fin
@@ -3429,7 +3429,7 @@ what4:
 	menuText$(4) = menuText$(4) + "Capital Captured"
 	menuText$(5) = menuText$(5) + menuText$(9)
 	menuText$(6) = "DONE"
-	windowType = 2: colour = 3: size = 6: hilite = 14
+	windowType = 2: colour = 3: menuRows = 6: hilite = 14
 	CALL menu(0)
 	chosit = 21 + chosenOption
 SELECT CASE chosenOption
@@ -3739,7 +3739,7 @@ SUB image2 (a$, s)
 DIM g2(1 TO 8000)
 menuText$(1) = a$
 tlx = 32 - LEN(a$) \ 2
-tly = 10: size = 1
+tly = 10: menuRows = 1
 CALL mxw(wide)
 IF wide > 59 THEN wide = 59: a$ = LEFT$(a$, 59)
 x = 8 * (tlx + wide)
@@ -3853,18 +3853,18 @@ SUB relieve (who)
 colour = 3: target = 0: hilite = 3
 tlx = 67: tly = 2
 CALL starfin(star, fin, who)
-size = 0
+menuRows = 0
 FOR i = star TO fin
 IF armysize(i) > 0 AND armyloc(i) > 0 AND armymove(i) = 0 THEN
-	size = size + 1
-	menuText$(size) = armyname$(i)
-	IF LEN(menuText$(size)) > 11 THEN menuText$(size) = LEFT$(menuText$(size), 11)
-	array(size) = i
+	menuRows = menuRows + 1
+	menuText$(menuRows) = armyname$(i)
+	IF LEN(menuText$(menuRows)) > 11 THEN menuText$(menuRows) = LEFT$(menuText$(menuRows), 11)
+	array(menuRows) = i
 END IF
 NEXT i
 
-IF size = 0 THEN EXIT SUB
-CALL bubble(size)
+IF menuRows = 0 THEN EXIT SUB
+CALL bubble(menuRows)
 menuText$(0) = "Relieve"
 chosenOption = 31: hilite = 11
 CALL menu(6): CALL clrrite
@@ -3876,16 +3876,16 @@ CALL icon(armyloc(index), 0, 9)
 t$ = armyname$(index)
 lname$(index) = t$
 
-size = 0
+menuRows = 0
 FOR i = star TO fin
 IF lname$(i) <> "" THEN
-	size = size + 1
-	menuText$(size) = lname$(i)
-	IF LEN(menuText$(size)) > 11 THEN menuText$(size) = LEFT$(menuText$(size), 11)
-	array(size) = i
+	menuRows = menuRows + 1
+	menuText$(menuRows) = lname$(i)
+	IF LEN(menuText$(menuRows)) > 11 THEN menuText$(menuRows) = LEFT$(menuText$(menuRows), 11)
+	array(menuRows) = i
 END IF
 NEXT i
-CALL bubble(size)
+CALL bubble(menuRows)
 
 have2:
 menuText$(0) = "New Leader"
@@ -3913,8 +3913,8 @@ menuText$(2) = force$(3 - side) + " Armies"
 menuText$(3) = "Cities"
 menuText$(4) = "Force Summary"
 menuText$(5) = "Intelligence"
-menuText$(6) = "Battles": size = 6
-IF _FILEEXISTS("cws.his") THEN menuText$(7) = "Recap": size = 7
+menuText$(6) = "Battles": menuRows = 6
+IF _FILEEXISTS("cws.his") THEN menuText$(7) = "Recap": menuRows = 7
 CALL menu(0)
 SELECT CASE chosenOption
 CASE IS < 0
@@ -4133,19 +4133,19 @@ IF player = 1 THEN
 	IF (side = 1 AND defend > 20) OR (side = 2 AND defend < 21) THEN EXIT SUB
 END IF
 
-hilite = 13: colour = 3: tlx = 67: tly = 5: size = 0
+hilite = 13: colour = 3: tlx = 67: tly = 5: menuRows = 0
 y = armyloc(defend)
 who = 1: IF defend > 20 THEN who = 2
 FOR k = 1 TO 6
-	IF matrix(y, k) > 0 AND cityp(matrix(y, k)) = who THEN size = size + 1: menuText$(size) = city$(matrix(y, k)): array(size) = matrix(y, k)
+	IF matrix(y, k) > 0 AND cityp(matrix(y, k)) = who THEN menuRows = menuRows + 1: menuText$(menuRows) = city$(matrix(y, k)): array(menuRows) = matrix(y, k)
 NEXT k
-	IF size = 0 THEN EXIT SUB
-	IF size = 1 THEN x = array(1): EXIT SUB
+	IF menuRows = 0 THEN EXIT SUB
+	IF menuRows = 1 THEN x = array(1): EXIT SUB
 	menuText$(0) = "Retreat"
-	CALL bubble(size)
+	CALL bubble(menuRows)
 	CALL menu(9)
 	CALL clrrite
-	IF chosenOption < 0 OR chosenOption > size THEN x = 0: EXIT SUB
+	IF chosenOption < 0 OR chosenOption > menuRows THEN x = 0: EXIT SUB
 	x = array(chosenOption)
 END SUB
 
@@ -4980,10 +4980,10 @@ END SELECT
 	menuText$(0) = "End Game"
 	menuText$(1) = "Yes"
 	menuText$(2) = "No-Override"
-	size = 2: colour = 4
+	menuRows = 2: colour = 4
 	tlx = 27: tly = 18
 	hilite = 15
-	IF j = 7 THEN size = 1
+	IF j = 7 THEN menuRows = 1
 	CALL menu(0)
 
 	IF chosenOption <> 1 AND j < 7 THEN
@@ -4998,7 +4998,7 @@ play4ever:
 	menuText$(1) = "Quit this Game"
 	menuText$(2) = "Play More"
 	IF player = 1 THEN menuText$(2) = "No - Press Onward to " + city$(capcity(3 - side))
-	size = 2: colour = 8
+	menuRows = 2: colour = 8
 	tlx = 27: tly = 18
 	IF j <> 7 THEN
 		CALL menu(0)
