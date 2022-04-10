@@ -76,19 +76,19 @@ DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
-COMMON SHARED cash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
+COMMON SHARED currentCash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
 COMMON SHARED hasNavy, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED nationName$(), armyloc(), armyname$(), humanPlayers, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED recruitCity(), vicflag(), tracks(), batwon(), cityo()
-COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
+COMMON SHARED armymove(), month, year, array(), canMove, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
 COMMON SHARED victory(), graf, noise, capcity(), difficult, usAdvantage, borderWidth
 COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casualty&()
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityx(40), cityy(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
-DIM SHARED cash(2), cityController(2), matrix(40, 7), income(2), leaderRating(40)
+DIM SHARED currentCash(2), cityController(2), matrix(40, 7), income(2), leaderRating(40)
 DIM SHARED menuText$(21), nationName$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
@@ -133,11 +133,11 @@ IF humanPlayers = 2 OR side = 0 THEN side = 1
 IF side = 1 THEN randbal = 7
 IF side = 2 THEN randbal = 3
 	IF turbo! < 1 THEN turbo! = 2
-	IF side = 1 AND difficult < 3 THEN cash(2) = cash(2) + 600 - 100 * difficult
-	IF side = 2 AND difficult > 3 THEN cash(1) = cash(1) + 100 * difficult
+	IF side = 1 AND difficult < 3 THEN currentCash(2) = currentCash(2) + 600 - 100 * difficult
+	IF side = 2 AND difficult > 3 THEN currentCash(1) = currentCash(1) + 100 * difficult
 
 
-FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
+FOR i = 1 TO 2: income(i) = currentCash(i): currentCash(i) = currentCash(i) + 50 * RND: NEXT i
 chosenOption = 0
 
 SCREEN 12
@@ -184,7 +184,7 @@ cityo(i) = cityOwner(i)
 CALL occupy(i)
 FOR j = 1 TO 7: INPUT #1, matrix(i, j): NEXT j: INPUT #1, fort(i)
 IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: victory(x) = victory(x) + cityValue(i)
-IF cityOwner(i) > 0 THEN cash(cityOwner(i)) = cash(cityOwner(i)) + cityValue(i)
+IF cityOwner(i) > 0 THEN currentCash(cityOwner(i)) = currentCash(cityOwner(i)) + cityValue(i)
 vptotal = vptotal + cityValue(i)
 NEXT i
 CLOSE #1: CALL clrbot
@@ -231,8 +231,8 @@ cityController(1) = 0: cityController(2) = 0
 
 FOR i = 1 TO 2
 income(i) = 0
-IF cash(i) > 19999 THEN cash(i) = 19999
-IF cash(i) < 0 THEN cash(i) = 0
+IF currentCash(i) > 19999 THEN currentCash(i) = 19999
+IF currentCash(i) < 0 THEN currentCash(i) = 0
 NEXT i
 IF humanPlayers = 1 AND side = 2 THEN income(1) = income(1) + usAdvantage
 
@@ -242,8 +242,8 @@ armymove(i) = 0
 NEXT i
 
 FOR i = 1 TO 2: navymove(i) = 0: IF capcity(i) > 0 THEN income(i) = income(i) + 100
-cash(i) = cash(i) + income(i)
-IF commerce > 0 AND i <> commerce THEN cash(i) = cash(i) - raider
+currentCash(i) = currentCash(i) + income(i)
+IF commerce > 0 AND i <> commerce THEN currentCash(i) = currentCash(i) - raider
 NEXT i
 vptotal = income(1) + income(2)
 
@@ -260,14 +260,14 @@ END IF
 menu0:
 CALL topbar
 IF humanPlayers = 2 AND side = 0 THEN side = 1
-IF cash(side) < 100 AND navyloc(side) = 0 THEN hasNavy = 1
+IF currentCash(side) < 100 AND navyloc(side) = 0 THEN hasNavy = 1
 
 highlight = 11
 colour = 4
 tlx = 67: tly = 13
 menuText$(0) = "Main"
-menuText$(1) = "Troops": IF recruitFlag < 0 OR cash(side) < 100 THEN menuText$(1) = "-": chosit = 23
-menuText$(2) = "Moves": IF mflag > 0 THEN menuText$(2) = "-": IF chosit = 23 THEN chosit = 24
+menuText$(1) = "Troops": IF recruitFlag < 0 OR currentCash(side) < 100 THEN menuText$(1) = "-": chosit = 23
+menuText$(2) = "Moves": IF canMove > 0 THEN menuText$(2) = "-": IF chosit = 23 THEN chosit = 24
 menuText$(3) = "Ships": IF hasNavy > 0 THEN menuText$(3) = "-": IF chosit = 24 THEN chosit = 25
 menuText$(4) = "Railroad": IF rr(side) > 0 THEN menuText$(4) = "-": IF chosit = 25 THEN chosit = 26
 menuText$(5) = "END TURN"
@@ -284,7 +284,7 @@ CALL menu(0): CALL clrrite
 '==========================================================================
 SELECT CASE chosenOption
 	CASE 1
-	IF cash(side) < 100 OR recruitFlag < 0 THEN recruitFlag = -1: GOTO menu0
+	IF currentCash(side) < 100 OR recruitFlag < 0 THEN recruitFlag = -1: GOTO menu0
 	CALL recruit((side))
 	chosit = 23
 	GOTO menu0
@@ -321,7 +321,7 @@ END IF
 	menuText$(2) = "NOT YET"
 	menuRows = 2: CALL menu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
-	recruitFlag = 0: mflag = 0: hasNavy = 0
+	recruitFlag = 0: canMove = 0: hasNavy = 0
 	IF humanPlayers = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
 	GOTO newmonth
 '==========================================================================
@@ -341,10 +341,10 @@ optmen:
 	highlight = 15: colour = 3: chosit = 24
 	menuText$(0) = "Commands"
 	menuText$(1) = "Cancel"
-	menuText$(2) = "Fortify": IF cash(side) < 200 THEN menuText$(2) = "-"
+	menuText$(2) = "Fortify": IF currentCash(side) < 200 THEN menuText$(2) = "-"
 	menuText$(3) = "Join"
 	menuText$(4) = "Supply"
-	menuText$(5) = "Capital": IF capcity(side) = 0 OR cash(side) < 500 THEN menuText$(5) = "-"
+	menuText$(5) = "Capital": IF capcity(side) = 0 OR currentCash(side) < 500 THEN menuText$(5) = "-"
 	menuText$(6) = "Detach": IF side = 1 THEN menuText$(6) = "-"
 	menuText$(7) = "Army Drill"
 	menuText$(8) = "Relieve"
@@ -357,15 +357,15 @@ optmen:
 '                               Cancel
 '---------------------------------------------------------------------------
 		CASE 1
-	CALL cancel(side): mflag = 0
+	CALL cancel(side): canMove = 0
 	chosenOption = 22
 '---------------------------------------------------------------------------
 '                               Fortify
 '---------------------------------------------------------------------------
 		CASE 2
-	IF cash(side) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
+	IF currentCash(side) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
 	CALL fortify(target)
-	IF cash(side) < 200 GOTO menu0
+	IF currentCash(side) < 200 GOTO menu0
 	chosenOption = 23
 	GOTO optmen
 '---------------------------------------------------------------------------
@@ -417,8 +417,8 @@ alone:
 '                               Move Capital
 '-------------------------------------------------------------------------
 		CASE 5
-	IF capcity(side) = 0 OR cash(side) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
-	cash(side) = cash(side) - 500
+	IF capcity(side) = 0 OR currentCash(side) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
+	currentCash(side) = currentCash(side) - 500
 	victory(3 - side) = victory(3 - side) + 50
 	CALL clrrite
 	menuText$(0) = "Capital"
@@ -648,8 +648,8 @@ utile:
 '-------------------------------------------------------------------------
 	   CASE 9
 		CALL filer(1)
-		cash(1) = cash(1) - 100 + 200 * RND
-		cash(2) = cash(2) + 100 + 200 * RND
+		currentCash(1) = currentCash(1) - 100 + 200 * RND
+		currentCash(2) = currentCash(2) + 100 + 200 * RND
 		bold = 5 * RND
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
@@ -760,7 +760,7 @@ filex:
 loader:
 			IF chosenOption = 1 AND savedGameExists = 0 GOTO filex
 			CALL filer(chosenOption + 1)
-			IF chosenOption = 1 THEN recruitFlag = 0: mflag = 0: hasNavy = 0
+			IF chosenOption = 1 THEN recruitFlag = 0: canMove = 0: hasNavy = 0
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
@@ -838,7 +838,7 @@ END SUB
 
 SUB armies
 CALL movefrom(index, target): IF target > 0 AND index > 0 GOTO tent
-	IF index = -1 THEN mflag = 1
+	IF index = -1 THEN canMove = 1
 	EXIT SUB
 tent:
 tlx = 67: tly = 12
@@ -1189,7 +1189,7 @@ FOR i = 21 TO 20 + a
 	INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i)
 	occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = leaderRating(i): leaderName$(i) = ""
 NEXT i
-FOR i = 1 TO 2: INPUT #1, cash(i): NEXT i
+FOR i = 1 TO 2: INPUT #1, currentCash(i): NEXT i
 	INPUT #1, ATKFAC, DEFAC, TCR
 	INPUT #1, fleet$(1), navyloc(1), fleet$(2), navyloc(2)
 	FOR k = 1 TO 2: navysize(k) = LEN(fleet$(k)): NEXT k
@@ -1233,7 +1233,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	END IF
 	NEXT i
 	FOR i = 1 TO 40: INPUT #1, occupied(i), cityOwner(i), fort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: INPUT #1, cash(i), cityController(i), income(i), victory(i), capcity(i)
+	FOR i = 1 TO 2: INPUT #1, currentCash(i), cityController(i), income(i), victory(i), capcity(i)
 	INPUT #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
 	navysize(i) = LEN(fleet$(i))
 	NEXT i
@@ -1265,7 +1265,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	FOR i = 1 TO 40: WRITE #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
 	NEXT i
 	FOR i = 1 TO 40: WRITE #1, occupied(i), cityOwner(i), fort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: WRITE #1, cash(i), cityController(i), income(i), victory(i), capcity(i)
+	FOR i = 1 TO 2: WRITE #1, currentCash(i), cityController(i), income(i), victory(i), capcity(i)
 	WRITE #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
 	NEXT i
 	CLOSE #1
@@ -1315,10 +1315,10 @@ SUB fortify (target)
 		target = array(chosenOption): CALL occupy(target): x = occupied(target): IF x < 0 THEN EXIT SUB
 		IF fort(target) > 1 THEN CALL clrbot: PRINT cityName$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): EXIT SUB
 		cost = 200
-		IF cash(side) < cost THEN CALL clrbot: PRINT "Fortifications for "; cityName$(target); " cost "; cost; " and you only have "; cash(side); : CALL TICK(4): EXIT SUB
+		IF currentCash(side) < cost THEN CALL clrbot: PRINT "Fortifications for "; cityName$(target); " cost "; cost; " and you only have "; currentCash(side); : CALL TICK(4): EXIT SUB
 		COLOR 3
 		fort(target) = fort(target) + 1
-		cash(side) = cash(side) - cost
+		currentCash(side) = currentCash(side) - cost
 		CALL clrbot: PRINT cityName$(target); " fortifications increased to "; fort(target);
 		CALL icon(target, 0, 6)
 		CALL showcity
@@ -1413,11 +1413,11 @@ IF month > 12 THEN month = 1: year = year + 1
 s = 1
 FOR i = 1 TO 40: IF armyloc(i) < 1 GOTO rip
 IF i > 20 THEN s = 2
-IF cash(s) >= .2 * armysize(i) THEN
+IF currentCash(s) >= .2 * armysize(i) THEN
 	a = 1: IF realism > 0 THEN CALL cutoff(s, armyloc(i), a)
 	IF a > 0 THEN
 		supply(i) = supply(i) + 1
-		cash(s) = cash(s) - .2 * armysize(i)
+		currentCash(s) = currentCash(s) - .2 * armysize(i)
 	END IF
 END IF
 IF (month < 7 OR month > 10) AND matrix(armyloc(i), 7) < 99 THEN supply(i) = supply(i) - 1
@@ -1479,15 +1479,15 @@ END IF
 COLOR 11
 ahoy:
 cost = 100: cityOwner(0) = who
-IF chx = 0 THEN CALL clrbot: PRINT "Funds available "; cash(who);
+IF chx = 0 THEN CALL clrbot: PRINT "Funds available "; currentCash(who);
 IF chx = 1 THEN
-	IF cash(who) < cost THEN EXIT SUB
+	IF currentCash(who) < cost THEN EXIT SUB
 	IF navysize(who) > 9 THEN EXIT SUB
 END IF
 menuText$(0) = "Ships"
 menuText$(1) = "Build"
 IF navyloc(who) <> 99 THEN
-IF cash(who) < cost OR navysize(who) > 9 OR cityOwner(navyloc(who)) <> who THEN menuText$(1) = "-": chosenOption = 23
+IF currentCash(who) < cost OR navysize(who) > 9 OR cityOwner(navyloc(who)) <> who THEN menuText$(1) = "-": chosenOption = 23
 END IF
 menuText$(2) = "Attack"
 IF navyloc(who) <> 99 THEN
@@ -1513,7 +1513,7 @@ SELECT CASE chosenOption
 '                               Build Ship
 '---------------------------------------------------------------------------
 	CASE 1
-	IF cash(who) < cost OR navyloc(who) = 99 GOTO ahoy
+	IF currentCash(who) < cost OR navyloc(who) = 99 GOTO ahoy
 	IF chx = 1 AND navysize(who) > 9 THEN EXIT SUB
 	IF chx = 0 AND navysize(who) > 9 THEN GOTO ahoy
 
@@ -1525,7 +1525,7 @@ SELECT CASE chosenOption
 	a$ = "W"
 
 	IF realism > 0 AND ((year < 1862) OR (year = 1862 AND month < 3)) GOTO noiron
-	IF cash(who) >= 2 * cost THEN
+	IF currentCash(who) >= 2 * cost THEN
 		tlx = 67: tly = 12: colour = 9
 		IF who = side THEN
 			menuText$(0) = "Type"
@@ -1563,7 +1563,7 @@ ships:
 
 	IF chosenOption < 1 GOTO ships
 	navyloc(who) = array(chosenOption)
-	cash(who) = cash(who) - cost: navysize(who) = 1
+	currentCash(who) = currentCash(who) - cost: navysize(who) = 1
 	x = cityx(array(chosenOption)) + 25: y = cityy(array(chosenOption)) + 25: CALL ships
 	CALL clrbot: COLOR 11: PRINT nationName$(who); " is building NEW fleet in "; cityName$(array(chosenOption));
 	PSET (400, 465), 0: CALL shipicon(who, a)
@@ -1571,7 +1571,7 @@ ships:
 	CALL TICK(turbo!)
 	GOTO ahoy
 add2ship:
-	cash(who) = cash(who) - cost
+	currentCash(who) = currentCash(who) - cost
 	CALL clrbot: PRINT nationName$(who); " navy increased to "; navysize(who);
 	PSET (400, 465), 0: CALL shipicon(who, a)
 	CALL ships
@@ -1737,7 +1737,7 @@ admiral:
 	x = 35
 	CALL barnacle(who)
 	c = navyloc(who): CALL newarmy((who), empty, c)
-	cash(who) = cash(who) + 100     'compensate for cost of recruiting new army
+	currentCash(who) = currentCash(who) + 100     'compensate for cost of recruiting new army
 	CALL capture(empty, c, who, 0)
 	armysize(empty) = x
 	IF who = side THEN hasNavy = 1
@@ -1913,7 +1913,7 @@ SUB newarmy (who, empty, target)
 	CALL cutoff(who, target, a): IF a < 1 THEN x = x \ 3
 	occupied(target) = empty: armysize(empty) = x
 	PRINT " Size = "; : CALL strong(empty)
-	cash(who) = cash(who) - 100: IF noise > 0 THEN SOUND 2222, .5
+	currentCash(who) = currentCash(who) - 100: IF noise > 0 THEN SOUND 2222, .5
 	armyloc(empty) = target: CALL placearmy(empty)
 	CALL TICK(turbo! - .5)
 	armymove(empty) = -1
@@ -2087,7 +2087,7 @@ toot:
 END SUB
 
 SUB recruit (who)
-	IF cash(who) < 100 THEN EXIT SUB
+	IF currentCash(who) < 100 THEN EXIT SUB
 	menuRows = 0: COLOR 12
 	menuText$(0) = "Recruit"
 	IF who = side AND recruitFlag > 0 THEN FOR i = 1 TO recruitFlag: x = recruitCity(i): menuText$(i) = cityName$(x): array(i) = x: NEXT i: menuRows = recruitFlag: GOTO alldone
@@ -2115,8 +2115,8 @@ alldone:
 	CALL bubble(menuRows)
 '............................................................................
 levy:
-	IF cash(who) < 100 THEN EXIT SUB
-	IF (who = side) OR (humanPlayers = 2) THEN CALL clrbot: PRINT nationName$(who); " funds available "; cash(who);
+	IF currentCash(who) < 100 THEN EXIT SUB
+	IF (who = side) OR (humanPlayers = 2) THEN CALL clrbot: PRINT nationName$(who); " funds available "; currentCash(who);
 	tlx = 67: tly = 12: colour = 3
 	IF who <> side THEN GOSUB randsel: GOTO auto1
       
@@ -2148,7 +2148,7 @@ add2:
 	armysize(i) = armysize(i) + x
 
 	GOSUB playb
-	cash(who) = cash(who) - 100
+	currentCash(who) = currentCash(who) - 100
 	from = armyloc(i): x = cityx(from) - 12: y = cityy(from) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), anima
 	CALL icon(armyloc(i), 0, 2)
@@ -2184,7 +2184,7 @@ randsel:
 		IF y > x AND RND > .5 THEN x = y: chosenOption = i
 		NEXT i
 	END IF
-	IF cash(who) < 100 THEN chosenOption = menuRows
+	IF currentCash(who) < 100 THEN chosenOption = menuRows
 	RETURN
 playb:
 	IF side = 1 AND difficult < 3 THEN armysize(empty) = armysize(empty) + 15 - 5 * difficult
@@ -2239,7 +2239,7 @@ NEXT i
 '                       Fortify Capital or Other City
 '==========================================================================
 cost = 200
-IF cost > cash(who) GOTO signup
+IF cost > currentCash(who) GOTO signup
 
 target = 0: IF occupied(capcity(who)) = 0 OR fort(capcity(who)) > 1 GOTO city2
 target = capcity(who)
@@ -2260,32 +2260,32 @@ capital:
 	IF fort(target) > 1 GOTO signup
 	fort(target) = fort(target) + 1
 	x = occupied(target): armymove(x) = -1
-	cash(who) = cash(who) - cost
+	currentCash(who) = currentCash(who) - cost
 	CALL clrbot: PRINT cityName$(target); " fortifications increased to "; fort(target);
 	CALL icon(target, 0, 6)
 	CALL showcity
-	IF who = 1 AND navysize(1) < 1 AND RND > .5 AND cash < 222 GOTO signup
-	IF 3 * RND > 1 + aggress! AND cash(who) >= cost GOTO city2
+	IF who = 1 AND navysize(1) < 1 AND RND > .5 AND currentCash < 222 GOTO signup
+	IF 3 * RND > 1 + aggress! AND currentCash(who) >= cost GOTO city2
 '==========================================================================
 '                       Recruit New Armies
 '==========================================================================
 signup:
-IF who = 1 AND navysize(1) < 1 AND cash(1) > 100 THEN CALL navy(1, 1): IF cash(who) < 100 GOTO isok
+IF who = 1 AND navysize(1) < 1 AND currentCash(1) > 100 THEN CALL navy(1, 1): IF currentCash(who) < 100 GOTO isok
 GOSUB enufarmies
 IF x > 2 + 3 * side + 3 * RND GOTO isok
-IF navysize(who) < 5 AND cash(who) > 100 AND navyloc(who) <> 99 THEN IF cityOwner(navyloc(who)) = who THEN slush = slush + 100: cash(who) = cash(who) - 100: IF cash(who) < 100 GOTO isok
+IF navysize(who) < 5 AND currentCash(who) > 100 AND navyloc(who) <> 99 THEN IF cityOwner(navyloc(who)) = who THEN slush = slush + 100: currentCash(who) = currentCash(who) - 100: IF currentCash(who) < 100 GOTO isok
 CALL recruit(who)
 '==========================================================================
 '                         Naval Commands
 '==========================================================================
 isok:
-	cash(who) = cash(who) + slush
-	IF side = 2 AND navyloc(1) = 0 AND navysize(1) < 1 AND cityOwner(30) = 1 AND cash(1) > 100 THEN navyloc(1) = 30: CALL navy(1, 1): GOTO movenavy
+	currentCash(who) = currentCash(who) + slush
+	IF side = 2 AND navyloc(1) = 0 AND navysize(1) < 1 AND cityOwner(30) = 1 AND currentCash(1) > 100 THEN navyloc(1) = 30: CALL navy(1, 1): GOTO movenavy
 	IF navyloc(who) = 99 THEN
 		IF RND < .9 THEN CALL navy(who, 3)
 		GOTO movearmy
 	END IF
-	IF cash(who) < 100 OR navysize(who) > 9 OR cityOwner(navyloc(who)) <> who GOTO movenavy
+	IF currentCash(who) < 100 OR navysize(who) > 9 OR cityOwner(navyloc(who)) <> who GOTO movenavy
 	CALL navy(who, 1)
 '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 movenavy:
@@ -2883,7 +2883,7 @@ sel1:
 			LOCATE tly + 4 + menuRows, tlx + 1: PRINT SPACE$(12);
 			END IF
 		CASE 4: CALL armystat(array(row))
-		CASE 5: COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
+		CASE 5: COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; currentCash(side);
 		CASE 6: CALL icon(armyloc(array(row)), 0, 9)
 		CASE 8
 			IF graf > 2 AND row > 0 THEN
@@ -3609,7 +3609,7 @@ cotton:
 	IF RND > .5 OR cityController(2) < 12 GOTO uprising
 	CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
 purse:
-	cash(2) = cash(2) + 100 * plus
+	currentCash(2) = currentCash(2) + 100 * plus
 	GOTO dull1
 uprising:
 	pct! = .9
@@ -3674,7 +3674,7 @@ abe:
 	END IF
 	IF RND > .5 THEN
 		CALL scribe("Wealthy Unionists give generously to the Federal Cause", 2)
-		cash(1) = cash(1) + 100 * plus
+		currentCash(1) = currentCash(1) + 100 * plus
 		GOTO dull2
 	END IF
 	IF RND > .5 AND year > 1861 THEN
@@ -3951,7 +3951,7 @@ COLOR c: PRINT cityController(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40
 PRINT TAB(50); : COLOR 12: PRINT "Capital: "; cityName$(capcity(who))
 y = vptotal: IF capcity(1) > 0 THEN y = y + 100
 IF capcity(2) > 0 THEN y = y + 100
-PRINT income(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (income(who) / vptotal) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; cash(who)
+PRINT income(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (income(who) / vptotal) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; currentCash(who)
 COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
 x = 0: FOR i = star TO fin
 COLOR c
@@ -3998,8 +3998,8 @@ LOCATE i - 18, 41: PRINT i; TAB(46); cityName$(i); TAB(58); a$; TAB(69); cityVal
 NEXT i
 LINE (1, 360)-(630, 360), 15
 COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
-COLOR 9: PRINT nationName$(1); TAB(12); cityController(1); TAB(23); income(1); TAB(32); cash(1)
-COLOR 7: PRINT nationName$(2); TAB(12); cityController(2); TAB(23); income(2); TAB(32); cash(2)
+COLOR 9: PRINT nationName$(1); TAB(12); cityController(1); TAB(23); income(1); TAB(32); currentCash(1)
+COLOR 7: PRINT nationName$(2); TAB(12); cityController(2); TAB(23); income(2); TAB(32); currentCash(2)
 COLOR 4: PRINT nationName$(0); TAB(12); 40 - cityController(1) - cityController(2)
 LINE (1, 382)-(630, 382), 15
 GOTO endrep
@@ -4118,13 +4118,13 @@ SUB resupply (index)
 			CALL cutoff(who, armyloc(index), a)
 			IF a < 1 THEN EXIT SUB
 		END IF
-		IF armysize(index) > 0 THEN x = cash(who) / armysize(index) * 10
+		IF armysize(index) > 0 THEN x = currentCash(who) / armysize(index) * 10
 		y = x + supply(index): IF y > 5 THEN x = 5 - supply(index)
 		IF x < 1 THEN CALL clrbot: PRINT "Not enough funds in the Treasury to supply "; armyname$(index); : GOTO nocash
-		supply(index) = supply(index) + x: cash(who) = cash(who) - .1 * x * armysize(index)
+		supply(index) = supply(index) + x: currentCash(who) = currentCash(who) - .1 * x * armysize(index)
 		CALL clrbot: PRINT armyname$(index); " has received supplies "; : IF noise > 0 THEN SOUND 4500, .5
 nocash:
-		CALL TICK(turbo!): IF cash(who) < 0 THEN cash(who) = 0
+		CALL TICK(turbo!): IF currentCash(who) < 0 THEN currentCash(who) = 0
 END SUB
 
 SUB retreat (defend, x)
@@ -4478,7 +4478,7 @@ SUB topbar
 	CALL flags((side), 0, 0)
 	COLOR 4: IF borderWidth > 0 THEN COLOR 7
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(difficult)))
-	LOCATE 7, 68: PRINT "Funds:"; cash(side);
+	LOCATE 7, 68: PRINT "Funds:"; currentCash(side);
 
 	FOR i = 1 TO 2: IF victory(i) < 0 THEN victory(i) = 0
 	NEXT i
