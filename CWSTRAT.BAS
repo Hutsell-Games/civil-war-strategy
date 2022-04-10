@@ -78,7 +78,7 @@ COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, co
 COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
 COMMON SHARED cash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
 COMMON SHARED hasNavy, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
-COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
+COMMON SHARED nationName$(), armyloc(), armyname$(), player, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
@@ -89,7 +89,7 @@ COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityx(40), cityy(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), rcity(5)
 DIM SHARED cash(2), cityController(2), matrix(40, 7), income(2), leaderRating(40)
-DIM SHARED menuText$(21), image(300), force$(2), armyloc(40), armyname$(40), vicflag(6)
+DIM SHARED menuText$(21), nationName$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
 DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fort(40), rr(2)
@@ -395,7 +395,7 @@ optmen:
 		IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
 		IF realism > 0 THEN
 			CALL cutoff(side, armyloc(i), a)
-			IF a < 1 THEN CALL clrbot: COLOR 15: PRINT force$(side); " army in "; cityName$(armyloc(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
+			IF a < 1 THEN CALL clrbot: COLOR 15: PRINT nationName$(side); " army in "; cityName$(armyloc(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
 		END IF
 		menuRows = menuRows + 1
 		max = 11: IF LEN(armyname$(i)) < 11 THEN max = LEN(armyname$(i))
@@ -403,7 +403,7 @@ optmen:
 		array(menuRows) = i
 alone:
 		NEXT i
-		IF menuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; force$(side); " armies have supplies"; : GOTO menu0
+		IF menuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; nationName$(side); " armies have supplies"; : GOTO menu0
 		CALL menu(6): CALL clrrite
 		IF chosenOption < 0 GOTO menu0
 		index = array(chosenOption)
@@ -426,7 +426,7 @@ alone:
 	index = capcity(side): CALL newcity(index)
 	IF index = 0 GOTO menu0
 	capcity(side) = index
-	CALL clrbot: PRINT force$(side); " capital moved from "; a$; " to "; cityName$(capcity(side));
+	CALL clrbot: PRINT nationName$(side); " capital moved from "; a$; " to "; cityName$(capcity(side));
 	CALL clrrite
 	CALL showcity
 	CALL TICK(9): CALL clrbot
@@ -512,7 +512,7 @@ utile:
 	    CASE 1
 		IF player = 2 GOTO menu0
 		side = 3 - side: COLOR 9: IF side = 2 THEN COLOR 7
-		CALL clrbot: PRINT "Now playing "; force$(side); " side"; : IF noise > 0 THEN SOUND 999, 1
+		CALL clrbot: PRINT "Now playing "; nationName$(side); " side"; : IF noise > 0 THEN SOUND 999, 1
 		IF side = 1 THEN randbal = 7
 		IF side = 2 THEN randbal = 3
 		CALL topbar
@@ -798,7 +798,7 @@ blanken:        c = 1: IF side = 2 THEN c = 7
 		CLS : LINE (100, 200)-(500, 300), c, BF
 		LINE (100, 200)-(500, 300), 8 - c, B
 		COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
-		COLOR 11: LOCATE 17, 30: PRINT force$(side); " PLAYER TURN"
+		COLOR 11: LOCATE 17, 30: PRINT nationName$(side); " PLAYER TURN"
 		DO WHILE INKEY$ = "": LOOP
 		RETURN
 '............................................................................
@@ -1100,7 +1100,7 @@ SUB combine (who)
 join:
 		IF chosenOption < 1 THEN EXIT SUB
 		target = array(chosenOption)
-		CALL clrbot: PRINT "Combining "; force$(who); " armies in "; cityName$(target); :  CALL TICK(turbo!)
+		CALL clrbot: PRINT "Combining "; nationName$(who); " armies in "; cityName$(target); :  CALL TICK(turbo!)
 
 		armysize(0) = 0: armylead(0) = 0: armyexper(0) = 0: armyloc(0) = target
 		armyname$(0) = "": supply(0) = 0: armymove(0) = 0
@@ -1174,7 +1174,7 @@ SELECT CASE switch
 	FOR i = 1 TO 40: INPUT #1, leaderName$(i), leaderRating(i): NEXT i
 	CLOSE #1
 	OPEN "I", 1, "cws.ini"
-	FOR i = 0 TO 2: INPUT #1, force$(i): NEXT i
+	FOR i = 0 TO 2: INPUT #1, nationName$(i): NEXT i
 	FOR i = 1 TO 12: INPUT #1, month$(i): NEXT i
 	INPUT #1, month, year
 '               set end game conditions
@@ -1565,14 +1565,14 @@ ships:
 	navyloc(who) = array(chosenOption)
 	cash(who) = cash(who) - cost: navysize(who) = 1
 	x = cityx(array(chosenOption)) + 25: y = cityy(array(chosenOption)) + 25: CALL ships
-	CALL clrbot: COLOR 11: PRINT force$(who); " is building NEW fleet in "; cityName$(array(chosenOption));
+	CALL clrbot: COLOR 11: PRINT nationName$(who); " is building NEW fleet in "; cityName$(array(chosenOption));
 	PSET (400, 465), 0: CALL shipicon(who, a)
 	IF noise > 0 THEN SOUND 3000, 1
 	CALL TICK(turbo!)
 	GOTO ahoy
 add2ship:
 	cash(who) = cash(who) - cost
-	CALL clrbot: PRINT force$(who); " navy increased to "; navysize(who);
+	CALL clrbot: PRINT nationName$(who); " navy increased to "; navysize(who);
 	PSET (400, 465), 0: CALL shipicon(who, a)
 	CALL ships
 	IF noise > 0 THEN SOUND 3000, 1
@@ -1588,7 +1588,7 @@ add2ship:
 	IF navyloc(who) < 1 THEN EXIT SUB
 	IF who = side THEN hasNavy = 1
 	IF cityOwner(navyloc(who)) <> 3 - who GOTO ahoy
-	CALL clrbot: COLOR 12: PRINT force$(who); " fleet bombards "; cityName$(navyloc(who));
+	CALL clrbot: COLOR 12: PRINT nationName$(who); " fleet bombards "; cityName$(navyloc(who));
 	CALL icon(navyloc(who), 0, 3)
 	      
 	target = navyloc(who): index = occupied(target): IF index = 0 GOTO deserted
@@ -1604,12 +1604,12 @@ deserted:
 	IF RND < .7 + .03 * (navysize(who) - fort(target)) GOTO hurt1
 	CALL barnacle(who)
 	CALL clrbot
-	PRINT force$(cityOwner(target)); " shore battery sunk an attacking ship!"; navysize(who); "ship(s) left! ";
+	PRINT nationName$(cityOwner(target)); " shore battery sunk an attacking ship!"; navysize(who); "ship(s) left! ";
 	IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5
 	CALL TICK(turbo!)
 	IF navysize(who) < 1 THEN
 		navyloc(who) = 0: fleet$(who) = "": GOSUB box2
-		LOCATE 12, 27: PRINT force$(who); " fleet eliminated"
+		LOCATE 12, 27: PRINT nationName$(who); " fleet eliminated"
 		CALL TICK(9)
 		victory(3 - who) = victory(3 - who) + 5
 		IF who = side THEN grudge = 0
@@ -1662,7 +1662,7 @@ admiral:
 	IF navysize(who) < 1 GOTO ships
 	IF who = side THEN hasNavy = 1
 	GOSUB box2
-	LOCATE 10, 25: PRINT force$(who); " fleet of"; navysize(who); "ship(s) is sailing"
+	LOCATE 10, 25: PRINT nationName$(who); " fleet of"; navysize(who); "ship(s) is sailing"
 	LOCATE 11, 25: PRINT "From ";
 	IF navyloc(who) < 41 THEN
 		PRINT cityName$(navyloc(who));
@@ -1705,8 +1705,8 @@ admiral:
 
 	IF who = side THEN hasNavy = 1
 	GOSUB box2
-	LOCATE 10, 25: PRINT force$(who); " fleet of"; navysize(who); "ship(s) is sailing"
-	LOCATE 11, 25: PRINT "to RAID "; force$(3 - who); " COMMERCE !"
+	LOCATE 10, 25: PRINT nationName$(who); " fleet of"; navysize(who); "ship(s) is sailing"
+	LOCATE 11, 25: PRINT "to RAID "; nationName$(3 - who); " COMMERCE !"
 
 	FOR i = 1 TO navysize(who)
 		PSET (120 + 41 * i, 210), 0
@@ -1802,11 +1802,11 @@ hitem:
 	 x = 10 + 50 * navysize(3 - who)
 	 y = 90: IF who = 1 THEN y = 190
 	 GOSUB xout
-	 LOCATE 17, 5: PRINT force$(3 - who); " ship SUNK!": CALL TICK(turbo! + 1): GOSUB clr1
+	 LOCATE 17, 5: PRINT nationName$(3 - who); " ship SUNK!": CALL TICK(turbo! + 1): GOSUB clr1
 	 CALL barnacle(3 - who)
 	 IF navysize(3 - who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
-		PRINT force$(3 - who); " fleet DEFEATED"
+		PRINT nationName$(3 - who); " fleet DEFEATED"
 		CALL TICK(turbo!)
 		navyloc(3 - who) = 0: fleet$(3 - who) = ""
 		victory(3 - who) = victory(3 - who) + 10
@@ -1821,11 +1821,11 @@ hitme1:
 	 x = 10 + 50 * navysize(who)
 	 y = 190: IF who = 1 THEN y = 90
 	 GOSUB xout
-	 LOCATE 17, 5: PRINT "One of the "; force$(who); " ships was SUNK!": CALL TICK(turbo!): GOSUB clr1
+	 LOCATE 17, 5: PRINT "One of the "; nationName$(who); " ships was SUNK!": CALL TICK(turbo!): GOSUB clr1
 	 CALL barnacle(who)
 	 IF navysize(who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
-		PRINT "Attacking "; force$(who); " fleet has been ELIMINATED !"
+		PRINT "Attacking "; nationName$(who); " fleet has been ELIMINATED !"
 		CALL TICK(turbo!)
 		navyloc(who) = 0: fleet$(who) = ""
 		victory(who) = victory(who) + 10
@@ -1842,7 +1842,7 @@ hitme1:
 	 IF cityOwner(i) = who THEN IF i <> navyloc(who) AND matrix(i, 7) = 99 THEN target = i: IF RND > .3 GOTO found1
 	 NEXT i
 found1:
-	 CALL clrbot: COLOR 11: PRINT force$(who); " is retreating to "; cityName$(target); : CALL TICK(turbo!)
+	 CALL clrbot: COLOR 11: PRINT nationName$(who); " is retreating to "; cityName$(target); : CALL TICK(turbo!)
 	 navyloc(who) = target
 	 GOTO sail3
 	 CASE ELSE
@@ -2116,7 +2116,7 @@ alldone:
 '............................................................................
 levy:
 	IF cash(who) < 100 THEN EXIT SUB
-	IF (who = side) OR (player = 2) THEN CALL clrbot: PRINT force$(who); " funds available "; cash(who);
+	IF (who = side) OR (player = 2) THEN CALL clrbot: PRINT nationName$(who); " funds available "; cash(who);
 	tlx = 67: tly = 12: colour = 3
 	IF who <> side THEN GOSUB randsel: GOTO auto1
       
@@ -2228,7 +2228,7 @@ CALL events
 slush = 0: who = 3 - side
 c = 9: IF side = 1 THEN c = 15
 LOCATE 1, 1: PRINT SPACE$(80);
-COLOR c: LOCATE 1, 10: PRINT force$(who); " Side is making decisions";
+COLOR c: LOCATE 1, 10: PRINT nationName$(who); " Side is making decisions";
 CALL starfin(star, fin, who)
 '==========================================================================
 '                       Check Supply
@@ -2643,7 +2643,7 @@ IF commerce > 0 THEN
 		raider = .05 * navysize(commerce) * (1 + RND) * (income(3 - commerce))
 		IF raider < 1 THEN raider = 1
 		IF raider / income(3 - commerce) > .3 THEN raider = .3 * income(3 - commerce)
-		COLOR 15: PRINT force$(commerce); " raiders have sunk $"; raider; " of "; force$(3 - commerce); " commerce";
+		COLOR 15: PRINT nationName$(commerce); " raiders have sunk $"; raider; " of "; nationName$(3 - commerce); " commerce";
 		a = 1: IF LEFT$(fleet$(commerce), 1) = "I" THEN a = 2
 		PSET (500, 465), 0: CALL shipicon(commerce, a)
 		IF noise > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
@@ -2652,7 +2652,7 @@ IF commerce > 0 THEN
 	ELSE
 		raider = 0
 		CALL barnacle(commerce)
-		COLOR 15: PRINT force$(commerce); " raiders have lost a ship ("; navysize(commerce); " remain)";
+		COLOR 15: PRINT nationName$(commerce); " raiders have lost a ship ("; navysize(commerce); " remain)";
 		IF noise > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 		IF navyloc(commerce) > 0 THEN
 			TICK 9
@@ -3341,7 +3341,7 @@ SUB capture (active, c, s, flag)
 	IF c = capcity(3 - s) THEN
 		victory(s) = victory(s) + 100
 		victory(3 - s) = victory(3 - s) - 100
-		a$ = force$(3 - s) + " CAPITAL captured !"
+		a$ = nationName$(3 - s) + " CAPITAL captured !"
 		CALL scribe(a$, 1)
 		CALL image2(cityName$(capcity(3 - s)) + " has fallen!", 4)
 		capcity(3 - s) = 0
@@ -3408,7 +3408,7 @@ SUB commander (who, empty)
 		EXIT SUB
 	END IF
 	NEXT i
-	CALL clrbot: PRINT "No more "; force$(who); " commanders available"; : CALL TICK(turbo!)
+	CALL clrbot: PRINT "No more "; nationName$(who); " commanders available"; : CALL TICK(turbo!)
 END SUB
 
 SUB endit
@@ -3806,7 +3806,7 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "+"; SPACE$(55); "+": NEXT i
 
 		OPEN "I", 1, "hiscore.cws"
 		FOR s = 1 TO 2
-		COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT force$(s); " HALL of FAME"
+		COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT nationName$(s); " HALL of FAME"
 		COLOR 15, 0: FOR i = 1 TO 5
 		INPUT #1, cityName$(5 * (s - 1) + i), matrix(s, i)
 		LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, cityName$(5 * (s - 1) + i), matrix(s, i)
@@ -3822,10 +3822,10 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "+"; SPACE$(55); "+": NEXT i
 			COLOR 15, 1: IF s = 2 THEN COLOR 4, 7
 			FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
 			LOCATE 12, 1: PRINT "Congratulations ! Score of"; victory(s)
-			PRINT "New Entry into "; force$(s); " HALL of FAME in place "; i
-			IF player = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; force$(s); " commander": GOTO automate
+			PRINT "New Entry into "; nationName$(s); " HALL of FAME in place "; i
+			IF player = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; nationName$(s); " commander": GOTO automate
 who4:
-			PRINT "What is name of "; force$(s); " commander"; : INPUT a$: IF a$ = "" GOTO who4
+			PRINT "What is name of "; nationName$(s); " commander"; : INPUT a$: IF a$ = "" GOTO who4
 automate:
 			cityName$(5 * (s - 1) + i) = a$
 			matrix(s, i) = victory(s): GOTO foun
@@ -3908,8 +3908,8 @@ DIM summ(40)
 IF who = -1 GOTO frep
 IF who > 100 GOTO batrep
 menuText$(0) = "Information"
-menuText$(1) = force$(side) + " Armies"
-menuText$(2) = force$(3 - side) + " Armies"
+menuText$(1) = nationName$(side) + " Armies"
+menuText$(2) = nationName$(3 - side) + " Armies"
 menuText$(3) = "Cities"
 menuText$(4) = "Force Summary"
 menuText$(5) = "Intelligence"
@@ -3937,7 +3937,7 @@ IF chosenOption = 4 GOTO frep
 CALL starfin(star, fin, who)
 CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
 COLOR c
-PRINT " Report for "; force$(who); " Forces"; TAB(30); month$(month); ","; year; TAB(49); : COLOR 14: PRINT " Victory Points "; victory(who);
+PRINT " Report for "; nationName$(who); " Forces"; TAB(30); month$(month); ","; year; TAB(49); : COLOR 14: PRINT " Victory Points "; victory(who);
 IF c = 15 THEN c = 7
 x = victory(who) + victory(3 - who)
 IF x = 0 THEN
@@ -3968,7 +3968,7 @@ NEXT i
 PRINT " "; STRING$(70, "+")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(aggress! * x))); "00 ]"
 PRINT " "; STRING$(70, "+")
-PRINT " "; force$(who); " NAVY has "; navysize(who); " ship(s) ";
+PRINT " "; nationName$(who); " NAVY has "; navysize(who); " ship(s) ";
 x = 0
 FOR k = 1 TO navysize(who)
 	IF MID$(fleet$(who), k, 1) = "I" THEN x = x + 1
@@ -3998,9 +3998,9 @@ LOCATE i - 18, 41: PRINT i; TAB(46); cityName$(i); TAB(58); a$; TAB(69); cityVal
 NEXT i
 LINE (1, 360)-(630, 360), 15
 COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
-COLOR 9: PRINT force$(1); TAB(12); cityController(1); TAB(23); income(1); TAB(32); cash(1)
-COLOR 7: PRINT force$(2); TAB(12); cityController(2); TAB(23); income(2); TAB(32); cash(2)
-COLOR 4: PRINT force$(0); TAB(12); 40 - cityController(1) - cityController(2)
+COLOR 9: PRINT nationName$(1); TAB(12); cityController(1); TAB(23); income(1); TAB(32); cash(1)
+COLOR 7: PRINT nationName$(2); TAB(12); cityController(2); TAB(23); income(2); TAB(32); cash(2)
+COLOR 4: PRINT nationName$(0); TAB(12); 40 - cityController(1) - cityController(2)
 LINE (1, 382)-(630, 382), 15
 GOTO endrep
 '..........................................................................
@@ -4080,7 +4080,7 @@ IF history > 0 AND who > 2 THEN
 	PRINT #1, " SIDE      BATTLES WON       LOSSES"
 	FOR k = 1 TO 2
 	a$ = " ": IF thrill = k THEN a$ = "*"
-	PRINT #1, a$; force$(k), batwon(k), 100 * casualty&(k)
+	PRINT #1, a$; nationName$(k), batwon(k), 100 * casualty&(k)
 	NEXT k
 	CLOSE #1
 END IF
@@ -4473,7 +4473,7 @@ END SUB
 SUB topbar
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR 11
-	LOCATE 1, 10: PRINT "Input your decisions now for "; force$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
+	LOCATE 1, 10: PRINT "Input your decisions now for "; nationName$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
 
 	CALL flags((side), 0, 0)
 	COLOR 4: IF borderWidth > 0 THEN COLOR 7
@@ -4928,18 +4928,18 @@ SUB victor
 
 	CALL clrbot: COLOR 14
 	IF vicflag(3) > 0 AND cityController(i) >= .9 * vicflag(3) THEN
-		a$ = force$(i) + " side almost controls" + STR$(vicflag(3)) + " cities"
+		a$ = nationName$(i) + " side almost controls" + STR$(vicflag(3)) + " cities"
 		CALL image2(a$, 4)
 	END IF
 
 	IF vicflag(4) > 0 AND income(i) / (income(1) + income(2)) >= .009 * vicflag(4) THEN
-		a$ = force$(i) + " side close to" + STR$(vicflag(4)) + " % of total income"
+		a$ = nationName$(i) + " side close to" + STR$(vicflag(4)) + " % of total income"
 		CALL image2(a$, 4)
 	END IF
 
 	IF vicflag(6) > 0 AND x > 0 AND y > 0 THEN
 		IF (i = 1 AND x / y > .9 * vicflag(6)) OR (i = 2 AND y / x > .9 * vicflag(6)) THEN
-		a$ = force$(i) + "side close to" + STR$(vicflag(6)) + ":1 strength ratio"
+		a$ = nationName$(i) + "side close to" + STR$(vicflag(6)) + ":1 strength ratio"
 		CALL image2(a$, 4)
 		END IF
 	END IF
@@ -4969,7 +4969,7 @@ END SELECT
 	LINE (50, 120)-(465, 250), c, BF
 	LINE (50, 120)-(465, 250), 4, B
 	COLOR 14
-	t$ = force$(i) + " SIDE IS WINNING"
+	t$ = nationName$(i) + " SIDE IS WINNING"
 	IF j = 2 THEN CALL center(10, "Confederates will win a technical victory") ELSE CALL center(10, t$)
 
 	COLOR 15
