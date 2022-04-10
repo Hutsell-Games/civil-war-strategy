@@ -77,7 +77,7 @@ DECLARE SUB void (a%, y%)
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
 COMMON SHARED cash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
-COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
+COMMON SHARED hasNavy, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
@@ -260,7 +260,7 @@ END IF
 menu0:
 CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
-IF cash(side) < 100 AND navyloc(side) = 0 THEN nflag = 1
+IF cash(side) < 100 AND navyloc(side) = 0 THEN hasNavy = 1
 
 highlight = 11
 colour = 4
@@ -268,7 +268,7 @@ tlx = 67: tly = 13
 menuText$(0) = "Main"
 menuText$(1) = "Troops": IF recruitFlag < 0 OR cash(side) < 100 THEN menuText$(1) = "-": chosit = 23
 menuText$(2) = "Moves": IF mflag > 0 THEN menuText$(2) = "-": IF chosit = 23 THEN chosit = 24
-menuText$(3) = "Ships": IF nflag > 0 THEN menuText$(3) = "-": IF chosit = 24 THEN chosit = 25
+menuText$(3) = "Ships": IF hasNavy > 0 THEN menuText$(3) = "-": IF chosit = 24 THEN chosit = 25
 menuText$(4) = "Railroad": IF rr(side) > 0 THEN menuText$(4) = "-": IF chosit = 25 THEN chosit = 26
 menuText$(5) = "END TURN"
 menuText$(6) = "Inform"
@@ -295,7 +295,7 @@ SELECT CASE chosenOption
 	GOTO menu0
 '==========================================================================
 	CASE 3
-	IF nflag = 0 THEN CALL navy((side), 0)
+	IF hasNavy = 0 THEN CALL navy((side), 0)
 	chosit = 25
 	CASE 4
 IF rr(side) = 0 THEN
@@ -321,7 +321,7 @@ END IF
 	menuText$(2) = "NOT YET"
 	menuRows = 2: CALL menu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
-	recruitFlag = 0: mflag = 0: nflag = 0
+	recruitFlag = 0: mflag = 0: hasNavy = 0
 	IF player = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
 	GOTO newmonth
 '==========================================================================
@@ -760,7 +760,7 @@ filex:
 loader:
 			IF chosenOption = 1 AND savedGameExists = 0 GOTO filex
 			CALL filer(chosenOption + 1)
-			IF chosenOption = 1 THEN recruitFlag = 0: mflag = 0: nflag = 0
+			IF chosenOption = 1 THEN recruitFlag = 0: mflag = 0: hasNavy = 0
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
@@ -1504,7 +1504,7 @@ IF realism = 0 AND who = 2 AND navysize(who) > 1 AND cityOwner(navyloc(who)) = 0
 END IF
 
 IF chx > 0 THEN chosenOption = chx: GOTO anchor
-IF nflag > 0 AND chosenOption <> 1 THEN EXIT SUB
+IF hasNavy > 0 AND chosenOption <> 1 THEN EXIT SUB
 CALL menu(0): CALL clrrite
 anchor:
 '---------------------------------------------------------------------------
@@ -1586,7 +1586,7 @@ add2ship:
 	IF chx = 2 AND occupied(navyloc(who)) > 0 AND RND > .5 THEN chx = 3: GOTO anchor
 	IF chx = 2 AND cityOwner(navyloc(who)) = 0 THEN chx = 3: GOTO ahoy
 	IF navyloc(who) < 1 THEN EXIT SUB
-	IF who = side THEN nflag = 1
+	IF who = side THEN hasNavy = 1
 	IF cityOwner(navyloc(who)) <> 3 - who GOTO ahoy
 	CALL clrbot: COLOR 12: PRINT force$(who); " fleet bombards "; cityName$(navyloc(who));
 	CALL icon(navyloc(who), 0, 3)
@@ -1660,7 +1660,7 @@ admiral:
 	IF array(chosenOption) = navyloc(who) THEN EXIT SUB
 	IF array(chosenOption) < 1 THEN EXIT SUB
 	IF navysize(who) < 1 GOTO ships
-	IF who = side THEN nflag = 1
+	IF who = side THEN hasNavy = 1
 	GOSUB box2
 	LOCATE 10, 25: PRINT force$(who); " fleet of"; navysize(who); "ship(s) is sailing"
 	LOCATE 11, 25: PRINT "From ";
@@ -1703,7 +1703,7 @@ admiral:
 	IF navysize(who) < 1 AND chx > 0 THEN EXIT SUB
 	IF navysize(who) < 1 OR commerce = who GOTO ahoy
 
-	IF who = side THEN nflag = 1
+	IF who = side THEN hasNavy = 1
 	GOSUB box2
 	LOCATE 10, 25: PRINT force$(who); " fleet of"; navysize(who); "ship(s) is sailing"
 	LOCATE 11, 25: PRINT "to RAID "; force$(3 - who); " COMMERCE !"
@@ -1740,7 +1740,7 @@ admiral:
 	cash(who) = cash(who) + 100     'compensate for cost of recruiting new army
 	CALL capture(empty, c, who, 0)
 	armysize(empty) = x
-	IF who = side THEN nflag = 1
+	IF who = side THEN hasNavy = 1
 	EXIT SUB
 '---------------------------------------------------------------------------
 '                               Exit
