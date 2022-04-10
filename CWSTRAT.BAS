@@ -80,20 +80,20 @@ COMMON SHARED cash(), cityController(), matrix(), income(), leaderRating(), recr
 COMMON SHARED hasNavy, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED nationName$(), armyloc(), armyname$(), humanPlayers, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
-COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
+COMMON SHARED recruitCity(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
 COMMON SHARED victory(), graf, noise, capcity(), difficult, usAdvantage, borderWidth
 COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casualty&()
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
-DIM SHARED cityx(40), cityy(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), rcity(5)
+DIM SHARED cityx(40), cityy(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
 DIM SHARED cash(2), cityController(2), matrix(40, 7), income(2), leaderRating(40)
 DIM SHARED menuText$(21), nationName$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
 DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fort(40), rr(2)
-DIM SHARED victory(2), capcity(2), emancipate, price(3), tracks(2), fleet$(2)
+DIM SHARED victory(2), capcity(2), emancipate, tracks(2), fleet$(2)
 DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
 DIM SHARED graft(1 TO 1564)
@@ -2090,7 +2090,7 @@ SUB recruit (who)
 	IF cash(who) < 100 THEN EXIT SUB
 	menuRows = 0: COLOR 12
 	menuText$(0) = "Recruit"
-	IF who = side AND recruitFlag > 0 THEN FOR i = 1 TO recruitFlag: x = rcity(i): menuText$(i) = cityName$(x): array(i) = x: NEXT i: menuRows = recruitFlag: GOTO alldone
+	IF who = side AND recruitFlag > 0 THEN FOR i = 1 TO recruitFlag: x = recruitCity(i): menuText$(i) = cityName$(x): array(i) = x: NEXT i: menuRows = recruitFlag: GOTO alldone
 	max = 4: IF RND > .8 THEN max = max - 1
 	IF difficult < 3 THEN max = max + 1
 
@@ -2111,7 +2111,7 @@ foe:
 	NEXT i
 alldone:
 	IF menuRows = 0 THEN EXIT SUB
-	IF who = side AND recruitFlag = 0 THEN FOR i = 1 TO menuRows: rcity(i) = array(i): NEXT i: recruitFlag = menuRows
+	IF who = side AND recruitFlag = 0 THEN FOR i = 1 TO menuRows: recruitCity(i) = array(i): NEXT i: recruitFlag = menuRows
 	CALL bubble(menuRows)
 '............................................................................
 levy:
