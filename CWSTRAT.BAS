@@ -79,7 +79,7 @@ COMMON SHARED cityX(), cityY(), cityValue(), cityOwner(), cityName$(), leaderNam
 COMMON SHARED currentCash(), cityController(), matrix(), currentIncome(), leaderRating(), recruitFlag
 COMMON SHARED hasNavy, aiBoldness, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED nationName$(), armyloc(), armyname$(), humanPlayers, aggress!
-COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
+COMMON SHARED armysize(), armylead(), armyexper(), armySupply(), month$()
 COMMON SHARED recruitCity(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), canMove, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fortLevel()
@@ -90,7 +90,7 @@ COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 DIM SHARED cityX(40), cityY(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
 DIM SHARED currentCash(2), cityController(2), matrix(40, 7), currentIncome(2), leaderRating(40)
 DIM SHARED menuText$(21), nationName$(2), armyloc(40), armyname$(40), vicflag(6)
-DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
+DIM SHARED armysize(40), armylead(40), armyexper(40), armySupply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
 DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fortLevel(40), rr(2)
 DIM SHARED victory(2), capcity(2), emancipate, tracks(2), fleet$(2)
@@ -392,7 +392,7 @@ optmen:
 		tlx = 67: tly = 5: colour = 5
 		menuRows = 0
 		FOR i = star TO fin
-		IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
+		IF armyloc(i) = 0 OR armySupply(i) > 1 GOTO alone
 		IF realism > 0 THEN
 			CALL cutoff(side, armyloc(i), a)
 			IF a < 1 THEN CALL clrbot: COLOR 15: PRINT nationName$(side); " army in "; cityName$(armyloc(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
@@ -407,7 +407,7 @@ alone:
 		CALL menu(6): CALL clrrite
 		IF chosenOption < 0 GOTO menu0
 		index = array(chosenOption)
-		IF supply(index) < 2 THEN
+		IF armySupply(index) < 2 THEN
 		CALL resupply(index)
 		CALL placearmy(index)
 		END IF
@@ -439,7 +439,7 @@ alone:
 	CALL movefrom(index, target): IF target < 1 OR index < 1 GOTO menu0
 	IF armysize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
 	CALL commander(2, empty): IF empty = 0 GOTO menu0
-	supply(empty) = .3 * supply(index): supply(index) = supply(index) - supply(empty): IF supply(index) < 0 THEN supply(index) = 0
+	armySupply(empty) = .3 * armySupply(index): armySupply(index) = armySupply(index) - armySupply(empty): IF armySupply(index) < 0 THEN armySupply(index) = 0
 	armysize(empty) = .3 * armysize(index): armysize(index) = armysize(index) - armysize(empty)
 	armyloc(empty) = target: armyexper(empty) = armyexper(index): armymove(empty) = 0
 	armylead(empty) = leaderRating(empty)
@@ -654,13 +654,13 @@ utile:
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
 			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+			armyexper(k) = 0: armymove(k) = 0: armySupply(k) = 0
 			END IF
 		NEXT k
 		FOR k = 21 TO 6
 			IF RND > .6 THEN
 			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+			armyexper(k) = 0: armymove(k) = 0: armySupply(k) = 0
 			END IF
 		NEXT k
 		FOR k = 1 TO 40: CALL occupy(k): NEXT k
@@ -870,8 +870,8 @@ COLOR 9: IF index > 20 THEN COLOR 7
 LOCATE 6, 68: PRINT "Size:"; : CALL strong(index)
 LOCATE 7, 68: PRINT "Leader:"; TAB(75); armylead(index)
 LOCATE 8, 68: PRINT "Exper:"; TAB(75); armyexper(index)
-IF supply(index) < 2 THEN COLOR 12
-LOCATE 9, 68: PRINT "Supply:"; TAB(75); supply(index)
+IF armySupply(index) < 2 THEN COLOR 12
+LOCATE 9, 68: PRINT "Supply:"; TAB(75); armySupply(index)
 END SUB
 
 SUB barnacle (who)
@@ -905,7 +905,7 @@ IF armysize(attack) / armysize(defend) > 3 THEN x = x + 2: IF x > TCR THEN x = T
 IF armysize(attack) / armysize(defend) > 10 THEN x = TCR
 IF armysize(attack) / armysize(defend) <= .2 THEN x = 1
 LOCATE 7, y: PRINT "Outman  "; x
-IF supply(attack) < 1 THEN x = .5 * x: COLOR 13
+IF armySupply(attack) < 1 THEN x = .5 * x: COLOR 13
 LOCATE 8, y: PRINT "Supply  "; x: COLOR c
 IF x < 1 THEN x = 1
 '                       Adjust attack advantage
@@ -943,7 +943,7 @@ END SELECT
 	IF x1 > TCR THEN x1 = TCR
 
 LOCATE 20, y: PRINT "Outman  "; x1
-IF supply(defend) < 1 THEN x1 = .5 * x1: COLOR 13
+IF armySupply(defend) < 1 THEN x1 = .5 * x1: COLOR 13
 LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
 IF x1 < 1 THEN x1 = 1
 '                       Adjust defend advantage
@@ -985,7 +985,7 @@ IF graphicLevel > 2 THEN
 ELSE
 	CALL clrrite
 END IF
-FOR i = 1 TO 2: IF supply(i) > 0 THEN supply(i) = supply(i) - 1
+FOR i = 1 TO 2: IF armySupply(i) > 0 THEN armySupply(i) = armySupply(i) - 1
 NEXT i
 '---------------------------------------------------------------------------
 grapple:
@@ -1103,7 +1103,7 @@ join:
 		CALL clrbot: PRINT "Combining "; nationName$(who); " armies in "; cityName$(target); :  CALL TICK(turbo!)
 
 		armysize(0) = 0: armylead(0) = 0: armyexper(0) = 0: armyloc(0) = target
-		armyname$(0) = "": supply(0) = 0: armymove(0) = 0
+		armyname$(0) = "": armySupply(0) = 0: armymove(0) = 0
 '...........................................................................
 		best = 0: x = 0: spin = 0
 		FOR j = star TO fin
@@ -1123,11 +1123,11 @@ join:
 		spin = spin + 1
 		armyexper(0) = (1 - pct!) * armyexper(0) + pct! * armyexper(j)
 		CALL clrbot: PRINT armyname$(j); " is combining his "; : CALL strong(j): PRINT " forces"; : CALL TICK(turbo!)
-		supply(0) = supply(0) + supply(j)
-		IF supply(0) > 10 THEN supply(0) = 10
+		armySupply(0) = armySupply(0) + armySupply(j)
+		IF armySupply(0) > 10 THEN armySupply(0) = 10
 		armysize(j) = 0: armyloc(j) = 0: armyexper(j) = 0: armymove(j) = 0
 		leaderName$(j) = armyname$(j)
-		armylead(j) = 0: supply(j) = 0: armyname$(j) = ""
+		armylead(j) = 0: armySupply(j) = 0: armyname$(j) = ""
 dork1:
 		NEXT j
 
@@ -1139,7 +1139,7 @@ dork1:
 				EXIT SUB
 		END IF
 		armysize(best) = armysize(0): armylead(best) = armylead(0)
-		armyexper(best) = armyexper(0): supply(best) = supply(0)
+		armyexper(best) = armyexper(0): armySupply(best) = armySupply(0)
 		armyloc(best) = target
 		armyname$(best) = armyname$(0)
 		leaderName$(best) = ""
@@ -1182,11 +1182,11 @@ SELECT CASE switch
 	vicflag(3) = .4 * vicflag(3)
 	INPUT #1, a             ' number of Yankee armies
 FOR i = 1 TO a
-	INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i): occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = leaderRating(i): leaderName$(i) = ""
+	INPUT #1, armyloc(i), armysize(i), armyexper(i), armySupply(i): occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = leaderRating(i): leaderName$(i) = ""
 NEXT i
 	INPUT #1, a             ' number of Rebel armies
 FOR i = 21 TO 20 + a
-	INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i)
+	INPUT #1, armyloc(i), armysize(i), armyexper(i), armySupply(i)
 	occupied(armyloc(i)) = i: armyname$(i) = leaderName$(i): armylead(i) = leaderRating(i): leaderName$(i) = ""
 NEXT i
 FOR i = 1 TO 2: INPUT #1, currentCash(i): NEXT i
@@ -1219,7 +1219,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	OPEN "I", 1, "cws" + LTRIM$(STR$(array(chosenOption))) + ".sav"
 	COLOR 11: CALL clrbot: PRINT "Loading";
 	INPUT #1, month, year, usAdvantage, a
-	FOR i = 1 TO 40: INPUT #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
+	FOR i = 1 TO 40: INPUT #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), armySupply(i), armymove(i)
 	IF armyloc(i) > 0 THEN
 		IF armyname$(i) = leaderName$(i) THEN
 			leaderName$(i) = ""
@@ -1262,7 +1262,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 
 	OPEN "O", 1, "cws" + LTRIM$(STR$(chosenOption)) + ".sav"
 	WRITE #1, month, year, usAdvantage, side
-	FOR i = 1 TO 40: WRITE #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
+	FOR i = 1 TO 40: WRITE #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), armySupply(i), armymove(i)
 	NEXT i
 	FOR i = 1 TO 40: WRITE #1, occupied(i), cityOwner(i), fortLevel(i): PRINT "."; : NEXT i
 	FOR i = 1 TO 2: WRITE #1, currentCash(i), cityController(i), currentIncome(i), victory(i), capcity(i)
@@ -1416,15 +1416,15 @@ IF i > 20 THEN s = 2
 IF currentCash(s) >= .2 * armysize(i) THEN
 	a = 1: IF realism > 0 THEN CALL cutoff(s, armyloc(i), a)
 	IF a > 0 THEN
-		supply(i) = supply(i) + 1
+		armySupply(i) = armySupply(i) + 1
 		currentCash(s) = currentCash(s) - .2 * armysize(i)
 	END IF
 END IF
-IF (month < 7 OR month > 10) AND matrix(armyloc(i), 7) < 99 THEN supply(i) = supply(i) - 1
-IF matrix(armyloc(i), 7) = 99 AND navyloc(3 - s) = armyloc(i) THEN supply(i) = supply(i) - 1: CALL clrbot: PRINT armyname$(i); " is blockaded"; : CALL TICK(turbo!)
+IF (month < 7 OR month > 10) AND matrix(armyloc(i), 7) < 99 THEN armySupply(i) = armySupply(i) - 1
+IF matrix(armyloc(i), 7) = 99 AND navyloc(3 - s) = armyloc(i) THEN armySupply(i) = armySupply(i) - 1: CALL clrbot: PRINT armyname$(i); " is blockaded"; : CALL TICK(turbo!)
 COLOR 13
-IF supply(i) < 1 THEN
-	supply(i) = 0
+IF armySupply(i) < 1 THEN
+	armySupply(i) = 0
 	CALL clrbot
 	PRINT armyname$(i); " is out of supplies";
 	CALL placearmy(i)
@@ -1594,8 +1594,8 @@ add2ship:
 	target = navyloc(who): index = occupied(target): IF index = 0 GOTO deserted
 	pct! = .005 * navysize(who) + .02 * RND: killd = armysize(index) * pct!: IF killd < 1 THEN killd = 1
 	CALL clrbot: PRINT armyname$(index); " suffered "; 100 * killd; " casualties";
-	x = .5 * navysize(who) + 1: IF x > supply(index) THEN x = supply(index)
-	supply(index) = supply(index) - x
+	x = .5 * navysize(who) + 1: IF x > armySupply(index) THEN x = armySupply(index)
+	armySupply(index) = armySupply(index) - x
 	CALL TICK(turbo!)
 	armysize(index) = armysize(index) - killd: IF armysize(index) < 1 THEN armysize(index) = 1
 	EXIT SUB
@@ -1903,7 +1903,7 @@ sail3:
 END SUB
 
 SUB newarmy (who, empty, target)
-	supply(empty) = 3 + 5 * RND: IF who = 1 THEN supply(empty) = supply(empty) + 2
+	armySupply(empty) = 3 + 5 * RND: IF who = 1 THEN armySupply(empty) = armySupply(empty) + 2
 	armyexper(empty) = 1: IF who = 2 THEN armyexper(empty) = 2
 	armylead(empty) = leaderRating(empty)
 	armyname$(empty) = leaderName$(empty): leaderName$(empty) = ""
@@ -1973,7 +1973,7 @@ who = 1: IF which > 20 THEN who = 2
 x = cityX(armyloc(which)) - 12
 y = cityY(armyloc(which)) - 11
 CALL armyxy(x, y, who)
-IF supply(which) < 1 THEN
+IF armySupply(which) < 1 THEN
 	x = x - 3: y = y + 4
 	PSET (x, y), 13: DRAW "C11S8"
 	DRAW font$(19)
@@ -2233,7 +2233,7 @@ CALL starfin(star, fin, who)
 '==========================================================================
 '                       Check Supply
 '==========================================================================
-FOR i = star TO fin: IF armyloc(i) > 0 AND supply(i) < 1 THEN CALL resupply(i)
+FOR i = star TO fin: IF armyloc(i) > 0 AND armySupply(i) < 1 THEN CALL resupply(i)
 NEXT i
 '==========================================================================
 '                       Fortify Capital or Other City
@@ -2325,7 +2325,7 @@ CALL railroad(who)
 FOR i = star TO fin
 target = armyloc(i)
 IF armyloc(i) < 1 OR armymove(i) < 0 GOTO deadman
-x = armysize(i): IF supply(i) < 1 AND RND > .1 GOTO deadman
+x = armysize(i): IF armySupply(i) < 1 AND RND > .1 GOTO deadman
 
 chosenOption = 0
 
@@ -2435,7 +2435,7 @@ FOR i = 1 TO 40
 brray(i) = 999
 IF armymove(i) < 0 THEN armymove(i) = 0
 IF armyloc(i) > 0 AND armymove(i) > 0 THEN brray(i) = INT(4 + 4 * RND) * 100 + i
-IF supply(i) < 1 AND armymove(i) > 0 THEN brray(i) = 900 + i
+IF armySupply(i) < 1 AND armymove(i) > 0 THEN brray(i) = 900 + i
 SELECT CASE armysize(i)         'bigger armies move slower
 	CASE IS > 400
 		IF brray(i) < 900 THEN brray(i) = brray(i) + 100: x = 2
@@ -2463,7 +2463,7 @@ active = INT(brray(j) / 100): active = brray(j) - 100 * active: s = 1: IF active
 IF armymove(active) < 1 GOTO digin
 COLOR 11: CALL clrbot: PRINT armyname$(active); " is moving to "; cityName$(armymove(active));
 
-supply(active) = supply(active) - 1: IF supply(active) < 0 THEN supply(active) = 0: CALL TICK(turbo!): CALL clrbot: PRINT armyname$(active); " is out of supplies !";
+armySupply(active) = armySupply(active) - 1: IF armySupply(active) < 0 THEN armySupply(active) = 0: CALL TICK(turbo!): CALL clrbot: PRINT armyname$(active); " is out of supplies !";
 
 CALL placearmy(active)
 CALL icon(armyloc(active), armymove(active), 5)
@@ -2571,9 +2571,9 @@ crushed:
 	victory(3 - s) = victory(3 - s) + 25
 	armyloc(index) = 0: leaderName$(index) = "": armyname$(index) = ""
 	armysize(index) = 0: armylead(index) = 0
-	armyexper(index) = 0: armymove(index) = 0: supply(index) = 0
-	supply(active) = supply(active) + supply(index): supply(index) = 0
-	IF supply(active) > 10 THEN supply(active) = 10
+	armyexper(index) = 0: armymove(index) = 0: armySupply(index) = 0
+	armySupply(active) = armySupply(active) + armySupply(index): armySupply(index) = 0
+	IF armySupply(active) > 10 THEN armySupply(active) = 10
 	CALL TICK(9): CALL clrrite
 	IF armyloc(active) = 0 GOTO digin
 '---------------------------------------------------------------------------
@@ -2622,7 +2622,7 @@ smoke:
 	END IF
 	CALL capture(active, c, s, flag)
 horde:
-IF supply(active) < 10 THEN supply(active) = supply(active) + 1: IF RND > .8 GOTO horde
+IF armySupply(active) < 10 THEN armySupply(active) = armySupply(active) + 1: IF RND > .8 GOTO horde
 digin:
 NEXT j
 GOTO allthru
@@ -3504,7 +3504,7 @@ FOR j = 1 TO 6
 	   IF realism > 0 THEN y = y - 15
 	   IF odds! < .5 THEN y = y - 200
 	   IF aiBoldness = 0 AND RND > .9 THEN y = y + 10 * (armylead(index) - armylead(c) + armyexper(index) - armylead(index))
-	   IF supply(index) < 1 THEN y = y - 100
+	   IF armySupply(index) < 1 THEN y = y - 100
 	   SELECT CASE odds! + .5 * aiBoldness
 		CASE IS < .3
 		y = -9999
@@ -3599,7 +3599,7 @@ mercen:
 	a$ = "French": IF RND > .5 THEN a$ = "British"
 	CALL scribe(a$ + " mercenaries join " + armyname$(index) + "'s army", 2)
 	armysize(index) = armysize(index) + 100 * plus
-	armyexper(index) = 10: supply(index) = 10
+	armyexper(index) = 10: armySupply(index) = 10
 	GOTO dull1
 money:
 	IF RND > .3 OR cityController(2) < 12 GOTO cotton
@@ -3960,7 +3960,7 @@ x = x + armysize(i)
 PRINT i; TAB(5); armyname$(i); TAB(25); : y = CSRLIN
 CALL strong(i): PRINT TAB(32); cityName$(armyloc(i));
 IF who <> side THEN PRINT : GOTO deadeye
-PRINT TAB(43); armylead(i); TAB(47); armyexper(i); TAB(52); supply(i);
+PRINT TAB(43); armylead(i); TAB(47); armyexper(i); TAB(52); armySupply(i);
 PRINT TAB(57); : IF armymove(i) > -1 THEN PRINT cityName$(armymove(i)) ELSE PRINT "Resting"
 IF fortLevel(armyloc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; fortLevel(armyloc(i))
 deadeye:
@@ -4024,7 +4024,7 @@ FOR k = star TO fin
 	LOCATE y, x: PRINT "Siz:"; : CALL strong(k)
 	LOCATE y + 1, x: PRINT "Ldr:"; armylead(k)
 	LOCATE y + 2, x: PRINT "Xpr:"; armyexper(k)
-	LOCATE y + 3, x: PRINT "Sup:"; supply(k);
+	LOCATE y + 3, x: PRINT "Sup:"; armySupply(k);
 	LINE (8 * (x - 1) - 1, 16 * (y - 1) - 1)-(8 * (x + z - 1) + 1, 16 * (y + 3) + 1), 15, B
 	TICK 1
 END IF
@@ -4119,9 +4119,9 @@ SUB resupply (index)
 			IF a < 1 THEN EXIT SUB
 		END IF
 		IF armysize(index) > 0 THEN x = currentCash(who) / armysize(index) * 10
-		y = x + supply(index): IF y > 5 THEN x = 5 - supply(index)
+		y = x + armySupply(index): IF y > 5 THEN x = 5 - armySupply(index)
 		IF x < 1 THEN CALL clrbot: PRINT "Not enough funds in the Treasury to supply "; armyname$(index); : GOTO nocash
-		supply(index) = supply(index) + x: currentCash(who) = currentCash(who) - .1 * x * armysize(index)
+		armySupply(index) = armySupply(index) + x: currentCash(who) = currentCash(who) - .1 * x * armysize(index)
 		CALL clrbot: PRINT armyname$(index); " has received supplies "; : IF noise > 0 THEN SOUND 4500, .5
 nocash:
 		CALL TICK(turbo!): IF currentCash(who) < 0 THEN currentCash(who) = 0
