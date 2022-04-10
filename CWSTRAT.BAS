@@ -1,20 +1,102 @@
 DEFINT A-Z
+DECLARE SUB animate (index%, flag%)
+DECLARE SUB armies ()
+DECLARE SUB armystat (index%)
 DECLARE SUB armyxy (x%, y%, z%)
+DECLARE SUB banner (a$)
 DECLARE SUB barnacle (who%)
+DECLARE SUB battle (attack%, defend%, win%, lose%)
+DECLARE SUB blastem ()
+DECLARE SUB bub2 (limit%)
+DECLARE SUB bubble (size%)
+DECLARE SUB burn (who%)
+DECLARE SUB cancel (side%)
+DECLARE SUB cannon ()
+DECLARE SUB capitol ()
+DECLARE SUB capture (active%, c%, s%, flag%)
+DECLARE SUB chessie ()
+DECLARE SUB clrbot ()
+DECLARE SUB combine (who%)
+DECLARE SUB clrrite ()
+DECLARE SUB commander (who%, empty%)
+DECLARE SUB cutoff (who%, target%, a%)
+DECLARE SUB endit ()
+DECLARE SUB engine ()
+DECLARE SUB evaluate (index%, x%)
+DECLARE SUB events ()
+DECLARE SUB filer (switch%)
 DECLARE SUB flags (who%, w%, a%)
+DECLARE SUB flashcity (which%)
+DECLARE SUB fortify (target%)
+DECLARE SUB icon (from%, dest%, kind%)
 DECLARE SUB integrity ()
 DECLARE SUB ironclad ()
+DECLARE SUB iterate ()
+DECLARE SUB maxx ()
+DECLARE SUB menu (switch%)
+DECLARE SUB movefrom (index%, target%)
+DECLARE SUB navy (who%, x%)
+DECLARE SUB newarmy (who%, empty%, target%)
+DECLARE SUB newcity (index%)
 DECLARE SUB normal (xbar%, vary%, result%)
+DECLARE SUB occupy (x%)
+DECLARE SUB placearmy (which%)
+DECLARE SUB railroad (who%)
+DECLARE SUB recruit (who%)
 DECLARE SUB relieve (who%)
+DECLARE SUB report (who%)
+DECLARE SUB resupply (index%)
 DECLARE SUB retreat (active%, x%)
+DECLARE SUB rwin ()
 DECLARE SUB schooner ()
+DECLARE SUB scribe (a$, flag%)
+DECLARE SUB shen ()
+DECLARE SUB ships ()
+DECLARE SUB shipicon (who%, flag%)
 DECLARE SUB shiptype (who%, i%)
+DECLARE SUB smarts ()
+DECLARE SUB showcity ()
+DECLARE SUB snapshot (x%, y%, flag%)
+DECLARE SUB sndblst (file$, flag%)
+DECLARE SUB sndfx (flag%)
+DECLARE SUB starfin (star%, fin%, who%)
 DECLARE SUB stax (who%)
+DECLARE SUB strong (index%)
+DECLARE SUB surrender (who%)
+DECLARE SUB TICK (sec!)
 DECLARE SUB tinytrain (who%, flag%)
 DECLARE SUB traincapacity (who%, limit%)
 DECLARE SUB topbar ()
+DECLARE SUB touchup ()
+DECLARE SUB tupdate ()
+DECLARE SUB usa ()
+DECLARE SUB usamap ()
+DECLARE SUB victor ()
+DECLARE SUB void (a%, y%)
+DECLARE SUB war ()
+'==========================================================================
+COMMON SHARED choose%, tlx%, tly%, size%, mtx$(), wtype%, colour%, hilite%
+COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
+COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), rflag
+COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
+COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
+COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
+COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
+COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
+COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
+COMMON SHARED victory(), graf, noise, capcity(), difficult, usadv, bw
+COMMON SHARED train(), font$(), brray(), jancam, randbal, realism, casualty&()
+COMMON SHARED pcode, history, thrill, fleet$(), commerce, raider, grudge
+'==========================================================================
+DIM SHARED cityx(40), cityy(40), cityv(40), cityp(40), city$(40), lname$(40), rcity(5)
+DIM SHARED cash(2), control(2), matrix(40, 7), income(2), anima(300), rating(40)
+DIM SHARED mtx$(21), image(300), force$(2), armyloc(40), armyname$(40), vicflag(6)
+DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
+DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
+DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fort(40), rr(2)
+DIM SHARED victory(2), capcity(2), emancipate, price(3), tracks(2), fleet$(2)
+DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
-' $INCLUDE: 'cws14.bi'
 
 replay = 0
 newgame:
@@ -177,9 +259,9 @@ IF pcode > 0 THEN
 	GOTO newgame
 END IF
 
-'±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 '                              Main Menu
-'±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 menu0:
 CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
@@ -414,15 +496,15 @@ utile:
 	a$ = STR$(difficult): IF side = 1 THEN a$ = STR$(6 - difficult)
 	mtx$(6) = "Balance" + a$
 	mtx$(7) = "End Cond"
-	a$ = "û": IF randbal = 0 THEN a$ = ""
+	a$ = "ï¿½": IF randbal = 0 THEN a$ = ""
 	mtx$(8) = "Rndom Evt " + a$
 	mtx$(9) = "Vary Start"
-	a$ = "": IF jancam = 1 THEN a$ = "û"
+	a$ = "": IF jancam = 1 THEN a$ = "ï¿½"
 	mtx$(10) = "Jan Campgn" + a$
-	a$ = "": IF realism = 1 THEN a$ = "û"
+	a$ = "": IF realism = 1 THEN a$ = "ï¿½"
 	mtx$(11) = "Realism " + a$
 	mtx$(12) = "Chk Links"
-	a$ = "": IF history = 1 THEN a$ = "û"
+	a$ = "": IF history = 1 THEN a$ = "ï¿½"
 	mtx$(13) = "History" + a$
 	size = 13: tlx = 67: tly = 11
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
@@ -975,8 +1057,8 @@ COLOR c
 LOCATE 1, 1: PRINT "Attack Loss: ";
 PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
 CALL strong(attack)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) ²";
-COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) ï¿½";
+COLOR 16 - c: PRINT "ï¿½ Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
 CALL strong(defend)
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / armysize(defend)))))); "%)"
 '---------------------------------------------------------------------------
@@ -1190,7 +1272,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	mtx$(0) = "Save Game"
 	FOR k = 1 TO 9
 	mtx$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF LEN(DIR$(mtx$(k))) > 0 THEN mtx$(k) = mtx$(k) + " û"
+	IF LEN(DIR$(mtx$(k))) > 0 THEN mtx$(k) = mtx$(k) + " ï¿½"
 	NEXT k
 	tlx = 67: size = 9
 	CALL menu(0)
@@ -2574,9 +2656,9 @@ GOTO allthru
 upbox:
 LINE (450, 318)-(526, 420), 1, BF
 LINE (527, 315)-(527, 439), 10
-COLOR 14: LOCATE 23, 50: PRINT "ÉÍÍÍÍÍÍÍÍÍÍÍÍÍ»"
-LOCATE 24, 50: PRINT "º U P D A T E º"
-LOCATE 25, 50: PRINT "ÈÍÍÍÍÍÍÍÍÍÍÍÍÍ¼"
+COLOR 14: LOCATE 23, 50: PRINT "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»"
+LOCATE 24, 50: PRINT "ï¿½ U P D A T E ï¿½"
+LOCATE 25, 50: PRINT "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼"
 RETURN
 
 allthru:
