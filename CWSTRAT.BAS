@@ -3,10 +3,8 @@ DECLARE SUB animate (index%, flag%)
 DECLARE SUB armies ()
 DECLARE SUB armystat (index%)
 DECLARE SUB armyxy (x%, y%, z%)
-DECLARE SUB banner (a$)
 DECLARE SUB barnacle (who%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
-DECLARE SUB blastem ()
 DECLARE SUB bub2 (limit%)
 DECLARE SUB bubble (size%)
 DECLARE SUB cancel (side%)
@@ -37,7 +35,6 @@ DECLARE SUB iterate ()
 DECLARE SUB maptext ()
 DECLARE SUB maxx ()
 DECLARE SUB menu (switch%)
-DECLARE SUB mountain (xx%, yy%)
 DECLARE SUB movefrom (index%, target%)
 DECLARE SUB mxw (wide%)
 DECLARE SUB navy (who%, x%)
@@ -63,8 +60,6 @@ DECLARE SUB shiptype (who%, i%)
 DECLARE SUB smarts ()
 DECLARE SUB showcity ()
 DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB sndblst (file$, flag%)
-DECLARE SUB sndfx (flag%)
 DECLARE SUB starfin (star%, fin%, who%)
 DECLARE SUB stax (who%)
 DECLARE SUB strong (index%)
@@ -76,10 +71,8 @@ DECLARE SUB topbar ()
 DECLARE SUB touchup ()
 DECLARE SUB tupdate ()
 DECLARE SUB usa ()
-DECLARE SUB usamap ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
-DECLARE SUB war ()
 '==========================================================================
 COMMON SHARED choose%, tlx%, tly%, size%, mtx$(), wtype%, colour%, hilite%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
@@ -207,7 +200,7 @@ IF player = 2 THEN GOSUB blanken
 mtx$(0) = "VGA CIVILWAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
-mtx$(3) = "Quit to DOS"
+mtx$(3) = "Quit"
 tlx = 33: tly = 20: colour = 5: size = 3
 choose = 23
 CALL menu(0)
@@ -760,7 +753,7 @@ filex:
 	mtx$(1) = "Load": IF filel = 0 THEN mtx$(1) = "-": choose = 23
 	mtx$(2) = "Save"
 	mtx$(3) = "New Game"
-	mtx$(4) = "Quit to DOS"
+	mtx$(4) = "Quit"
 	size = 4: tlx = 67: tly = 15
 	CALL menu(0): CALL clrrite
 	SELECT CASE choose
