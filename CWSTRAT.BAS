@@ -76,7 +76,7 @@ DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
-COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), recruitFlag
+COMMON SHARED cash(), cityController(), matrix(), income(), anima(), rating(), recruitFlag
 COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
@@ -88,7 +88,7 @@ COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casu
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
 DIM SHARED cityx(40), cityy(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), rcity(5)
-DIM SHARED cash(2), control(2), matrix(40, 7), income(2), anima(300), rating(40)
+DIM SHARED cash(2), cityController(2), matrix(40, 7), income(2), anima(300), rating(40)
 DIM SHARED menuText$(21), image(300), force$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
@@ -183,7 +183,7 @@ FOR i = 1 TO 40: INPUT #1, a, cityx(i), cityy(i), cityName$(i), cityOwner(i), ci
 cityo(i) = cityOwner(i)
 CALL occupy(i)
 FOR j = 1 TO 7: INPUT #1, matrix(i, j): NEXT j: INPUT #1, fort(i)
-IF cityOwner(i) > 0 THEN x = cityOwner(i): control(x) = control(x) + 1: victory(x) = victory(x) + cityValue(i)
+IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: victory(x) = victory(x) + cityValue(i)
 IF cityOwner(i) > 0 THEN cash(cityOwner(i)) = cash(cityOwner(i)) + cityValue(i)
 vptotal = vptotal + cityValue(i)
 NEXT i
@@ -227,7 +227,7 @@ IF side > 2 THEN side = 1
 a$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
 CALL scribe(a$, 0)
 CALL tupdate
-control(1) = 0: control(2) = 0
+cityController(1) = 0: cityController(2) = 0
 
 FOR i = 1 TO 2
 income(i) = 0
@@ -237,7 +237,7 @@ NEXT i
 IF player = 1 AND side = 2 THEN income(1) = income(1) + usAdvantage
 
 FOR i = 1 TO 40
-IF cityOwner(i) > 0 THEN x = cityOwner(i): control(x) = control(x) + 1: income(x) = income(x) + cityValue(i)
+IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: income(x) = income(x) + cityValue(i)
 armymove(i) = 0
 NEXT i
 
@@ -1233,7 +1233,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	END IF
 	NEXT i
 	FOR i = 1 TO 40: INPUT #1, occupied(i), cityOwner(i), fort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: INPUT #1, cash(i), control(i), income(i), victory(i), capcity(i)
+	FOR i = 1 TO 2: INPUT #1, cash(i), cityController(i), income(i), victory(i), capcity(i)
 	INPUT #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
 	navysize(i) = LEN(fleet$(i))
 	NEXT i
@@ -1265,7 +1265,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	FOR i = 1 TO 40: WRITE #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
 	NEXT i
 	FOR i = 1 TO 40: WRITE #1, occupied(i), cityOwner(i), fort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: WRITE #1, cash(i), control(i), income(i), victory(i), capcity(i)
+	FOR i = 1 TO 2: WRITE #1, cash(i), cityController(i), income(i), victory(i), capcity(i)
 	WRITE #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
 	NEXT i
 	CLOSE #1
@@ -2095,7 +2095,7 @@ SUB recruit (who)
 	IF difficult < 3 THEN max = max + 1
 
 	FOR i = 1 TO 40
-	IF control(who) > 0 THEN pct! = .6 * max / control(who) ELSE pct! = .3
+	IF cityController(who) > 0 THEN pct! = .6 * max / cityController(who) ELSE pct! = .3
 	IF menuRows = 0 AND i > 20 THEN pct! = .3
 	IF menuRows < 2 AND i > 30 THEN pct! = .3
 	array(i) = 0
@@ -2672,14 +2672,14 @@ CALL touchup: CALL ships: CALL iterate
 CALL clrbot
 LINE (390, 350)-(520, 400), 1, BF
 COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month$(month), 3)); ","; year
-victory(1) = .8 * victory(1) + .3 * (income(1) + control(1))
-IF control(1) > 29 THEN victory(1) = victory(1) + 50: IF control(1) > 34 THEN victory(1) = victory(1) + 100
-IF side = 2 AND control(1) < 11 THEN aggress! = aggress! + .7
+victory(1) = .8 * victory(1) + .3 * (income(1) + cityController(1))
+IF cityController(1) > 29 THEN victory(1) = victory(1) + 50: IF cityController(1) > 34 THEN victory(1) = victory(1) + 100
+IF side = 2 AND cityController(1) < 11 THEN aggress! = aggress! + .7
 
 IF victory(1) < 1 THEN victory(1) = 0
-victory(2) = .8 * victory(2) + .3 * (income(2) + control(2))
-IF control(2) > 29 THEN victory(2) = victory(2) + 50: IF control(2) > 34 THEN victory(2) = victory(1) + 100
-IF side = 1 AND control(2) < 11 THEN aggress! = aggress! + .7
+victory(2) = .8 * victory(2) + .3 * (income(2) + cityController(2))
+IF cityController(2) > 29 THEN victory(2) = victory(2) + 50: IF cityController(2) > 34 THEN victory(2) = victory(1) + 100
+IF side = 1 AND cityController(2) < 11 THEN aggress! = aggress! + .7
 IF player = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 END SUB
 
@@ -3595,18 +3595,18 @@ float1:
 	navyloc(2) = empty: CALL ships
 	GOTO dull1
 mercen:
-	IF RND > .1 OR control(2) < 30 GOTO money
+	IF RND > .1 OR cityController(2) < 30 GOTO money
 	a$ = "French": IF RND > .5 THEN a$ = "British"
 	CALL scribe(a$ + " mercenaries join " + armyname$(index) + "'s army", 2)
 	armysize(index) = armysize(index) + 100 * plus
 	armyexper(index) = 10: supply(index) = 10
 	GOTO dull1
 money:
-	IF RND > .3 OR control(2) < 12 GOTO cotton
+	IF RND > .3 OR cityController(2) < 12 GOTO cotton
 		CALL scribe("The South has obtained a loan from Europe", 2)
 		GOTO purse
 cotton:
-	IF RND > .5 OR control(2) < 12 GOTO uprising
+	IF RND > .5 OR cityController(2) < 12 GOTO uprising
 	CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
 purse:
 	cash(2) = cash(2) + 100 * plus
@@ -3624,7 +3624,7 @@ uprising:
 '----------------------------------------------------------------------------
 riot:
 	IF realism = 0 THEN RETURN
-	IF control(who) = 1 THEN EXIT SUB
+	IF cityController(who) = 1 THEN EXIT SUB
 	FOR k = 1 TO 99
 	x = 1 + INT(40 * RND)
 		IF cityo(x) <> who AND cityOwner(x) = who AND occupied(x) = 0 THEN
@@ -3947,7 +3947,7 @@ ELSE
 	PRINT "("; y; " %)";
 END IF
 CALL armyxy(215, 8, who)
-COLOR c: PRINT control(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(control(who) * 2.5 + .5): PRINT x; "%)";
+COLOR c: PRINT cityController(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(cityController(who) * 2.5 + .5): PRINT x; "%)";
 PRINT TAB(50); : COLOR 12: PRINT "Capital: "; cityName$(capcity(who))
 y = vptotal: IF capcity(1) > 0 THEN y = y + 100
 IF capcity(2) > 0 THEN y = y + 100
@@ -3998,9 +3998,9 @@ LOCATE i - 18, 41: PRINT i; TAB(46); cityName$(i); TAB(58); a$; TAB(69); cityVal
 NEXT i
 LINE (1, 360)-(630, 360), 15
 COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
-COLOR 9: PRINT force$(1); TAB(12); control(1); TAB(23); income(1); TAB(32); cash(1)
-COLOR 7: PRINT force$(2); TAB(12); control(2); TAB(23); income(2); TAB(32); cash(2)
-COLOR 4: PRINT force$(0); TAB(12); 40 - control(1) - control(2)
+COLOR 9: PRINT force$(1); TAB(12); cityController(1); TAB(23); income(1); TAB(32); cash(1)
+COLOR 7: PRINT force$(2); TAB(12); cityController(2); TAB(23); income(2); TAB(32); cash(2)
+COLOR 4: PRINT force$(0); TAB(12); 40 - cityController(1) - cityController(2)
 LINE (1, 382)-(630, 382), 15
 GOTO endrep
 '..........................................................................
@@ -4568,7 +4568,7 @@ END SUB
 SUB traincapacity (who, limit)
 IF realism = 0 THEN limit = train(who): EXIT SUB
 x = 11: IF side = 2 THEN x = 23
-limit = train(who) + 5 * (control(who) - x)
+limit = train(who) + 5 * (cityController(who) - x)
 x = 2 * train(who)
 IF limit > x THEN limit = x
 IF limit < x \ 4 THEN limit = x \ 4
@@ -4911,7 +4911,7 @@ SUB victor
 	IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: victory(i) = victory(i) + 300: GOTO finis
 
 	IF year >= vicflag(2) AND month >= vicflag(1) AND vicflag(2) > 0 THEN j = 2: GOTO finis
-	IF control(i) >= vicflag(3) AND vicflag(3) > 0 THEN j = 3: GOTO finis
+	IF cityController(i) >= vicflag(3) AND vicflag(3) > 0 THEN j = 3: GOTO finis
 	IF income(i) / (income(1) + income(2)) >= .01 * vicflag(4) AND vicflag(4) > 0 THEN j = 4: GOTO finis
 	IF vicflag(5) > 0 AND capcity(3 - i) = 0 AND capcity(i) > 0 THEN j = 5: GOTO finis
 
@@ -4927,7 +4927,7 @@ SUB victor
 	END IF
 
 	CALL clrbot: COLOR 14
-	IF vicflag(3) > 0 AND control(i) >= .9 * vicflag(3) THEN
+	IF vicflag(3) > 0 AND cityController(i) >= .9 * vicflag(3) THEN
 		a$ = force$(i) + " side almost controls" + STR$(vicflag(3)) + " cities"
 		CALL image2(a$, 4)
 	END IF
