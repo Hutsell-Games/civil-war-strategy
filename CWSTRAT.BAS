@@ -75,7 +75,7 @@ DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
-COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
+COMMON SHARED cityX(), cityY(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
 COMMON SHARED currentCash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
 COMMON SHARED hasNavy, aiBoldness, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED nationName$(), armyloc(), armyname$(), humanPlayers, aggress!
@@ -87,7 +87,7 @@ COMMON SHARED victory(), graphicLevel, noise, capcity(), difficult, usAdvantage,
 COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casualty&()
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
-DIM SHARED cityx(40), cityy(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
+DIM SHARED cityX(40), cityY(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
 DIM SHARED currentCash(2), cityController(2), matrix(40, 7), income(2), leaderRating(40)
 DIM SHARED menuText$(21), nationName$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
@@ -179,7 +179,7 @@ GOSUB unionplus
 cityName$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 vptotal = usAdvantage + 200
-FOR i = 1 TO 40: INPUT #1, a, cityx(i), cityy(i), cityName$(i), cityOwner(i), cityValue(i)
+FOR i = 1 TO 40: INPUT #1, a, cityX(i), cityY(i), cityName$(i), cityOwner(i), cityValue(i)
 cityo(i) = cityOwner(i)
 CALL occupy(i)
 FOR j = 1 TO 7: INPUT #1, matrix(i, j): NEXT j: INPUT #1, fortLevel(i)
@@ -812,10 +812,10 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
 SUB animate (index, flag)
 from = armyloc(index): to2 = armymove(index): armyloc(index) = 0
-x = cityx(from) - 12
-y = cityy(from) - 11
-x1 = .5 * (cityx(to2) + cityx(from))
-y1 = .5 * (cityy(to2) + cityy(from))
+x = cityX(from) - 12
+y = cityY(from) - 11
+x1 = .5 * (cityX(to2) + cityX(from))
+y1 = .5 * (cityY(to2) + cityY(from))
 
 CALL occupy(from): IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
        
@@ -825,8 +825,8 @@ IF flag > 0 GOTO already
 already:
 
 	FOR i = 2 TO 8
-	x1 = .1 * (i * cityx(to2) + (10 - i) * cityx(from))
-	y1 = .1 * (i * cityy(to2) + (10 - i) * cityy(from))
+	x1 = .1 * (i * cityX(to2) + (10 - i) * cityX(from))
+	y1 = .1 * (i * cityY(to2) + (10 - i) * cityY(from))
 	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
 	PUT (x1 - 10, y1 - 10), anima, PSET
 	IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
@@ -1281,16 +1281,16 @@ END SUB
 
 SUB flashcity (which)
 FOR c = 1 TO 15 STEP 2
-CIRCLE (cityx(which), cityy(which)), 4, 0
-CIRCLE (cityx(which), cityy(which)), 3, c
-PAINT (cityx(which), cityy(which)), c, c
+CIRCLE (cityX(which), cityY(which)), 4, 0
+CIRCLE (cityX(which), cityY(which)), 3, c
+PAINT (cityX(which), cityY(which)), c, c
 CALL TICK(.1)
 NEXT c
 c = 9: IF cityOwner(which) = 2 THEN c = 7
 IF cityOwner(which) = 0 THEN c = 12
-CIRCLE (cityx(which), cityy(which)), 4, 0
-CIRCLE (cityx(which), cityy(which)), 3, c
-PAINT (cityx(which), cityy(which)), c, c
+CIRCLE (cityX(which), cityY(which)), 4, 0
+CIRCLE (cityX(which), cityY(which)), 3, c
+PAINT (cityX(which), cityY(which)), c, c
 END SUB
 
 SUB fortify (target)
@@ -1332,8 +1332,8 @@ SUB icon (from, dest, kind)
 IF from < 1 OR from > 40 THEN EXIT SUB
 IF dest < 0 THEN EXIT SUB
 IF from = 999 THEN EXIT SUB
-x = cityx(from) - 12: y = cityy(from) - 11
-x1 = cityx(dest): y1 = cityy(dest)
+x = cityX(from) - 12: y = cityY(from) - 11
+x1 = cityX(dest): y1 = cityY(dest)
 SELECT CASE kind
 	CASE 1
 	LINE (x, y)-(x1, y1), 15, , &HF0F0
@@ -1345,7 +1345,7 @@ SELECT CASE kind
 	CALL TICK(.1)
        
 	CASE 3
-	x = cityx(from): y = cityy(from)
+	x = cityX(from): y = cityY(from)
 	CALL snapshot(x, y, 0)
 	FOR j = 1 TO 3
 	FOR i = 4 TO 10 STEP 1
@@ -1366,7 +1366,7 @@ SELECT CASE kind
 	IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
 
 	CASE 6
-	x = cityx(from): y = cityy(from)
+	x = cityX(from): y = cityY(from)
 	CALL snapshot(x, y, 0)
 	LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
 	LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
@@ -1374,16 +1374,16 @@ SELECT CASE kind
 	CALL TICK(turbo! - .5)
 	CALL snapshot(x, y, 1)
 	CASE 7          ' draw white box
-	x = cityx(from) - 12: y = cityy(from) - 11
+	x = cityX(from) - 12: y = cityY(from) - 11
 	GET (x - 8, y - 8)-(x + 8, y + 8), image
 	LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
 	LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
 	     CASE 8     ' replace old image
-	x = cityx(from) - 12: y = cityy(from) - 11
+	x = cityX(from) - 12: y = cityY(from) - 11
 	IF x > 0 THEN PUT (x - 8, y - 8), image, PSET
        
 	CASE 9          ' draw arrow pointer
-	x = cityx(from) - 12: y = cityy(from) - 11
+	x = cityX(from) - 12: y = cityY(from) - 11
 	GET (x - 8, y - 8)-(x + 10, y + 7), image
 	x = x + 7: y = y + 5
 	LINE (x + 2, y)-(x + 2, y - 8), 12
@@ -1564,7 +1564,7 @@ ships:
 	IF chosenOption < 1 GOTO ships
 	navyloc(who) = array(chosenOption)
 	currentCash(who) = currentCash(who) - cost: navysize(who) = 1
-	x = cityx(array(chosenOption)) + 25: y = cityy(array(chosenOption)) + 25: CALL ships
+	x = cityX(array(chosenOption)) + 25: y = cityY(array(chosenOption)) + 25: CALL ships
 	CALL clrbot: COLOR 11: PRINT nationName$(who); " is building NEW fleet in "; cityName$(array(chosenOption));
 	PSET (400, 465), 0: CALL shipicon(who, a)
 	IF noise > 0 THEN SOUND 3000, 1
@@ -1618,7 +1618,7 @@ deserted:
 	GOTO deserted
 hurt1:
 	CALL clrbot: PRINT cityName$(target); " fortifications damaged";
-	fortLevel(target) = fortLevel(target) - 1: x = cityx(target): y = cityy(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+	fortLevel(target) = fortLevel(target) - 1: x = cityX(target): y = cityY(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
 	CALL showcity
 	CALL TICK(turbo!)
 	EXIT SUB
@@ -1970,8 +1970,8 @@ END SUB
 
 SUB placearmy (which)
 who = 1: IF which > 20 THEN who = 2
-x = cityx(armyloc(which)) - 12
-y = cityy(armyloc(which)) - 11
+x = cityX(armyloc(which)) - 12
+y = cityY(armyloc(which)) - 11
 CALL armyxy(x, y, who)
 IF supply(which) < 1 THEN
 	x = x - 3: y = y + 4
@@ -2004,8 +2004,8 @@ puter:  NEXT i
 	IF occupied(i) > 0 GOTO puted
 	target = i
 	GOSUB route: IF x = 0 GOTO puted
-	IF side = 1 AND cityy(i) < cityy(from) THEN x1 = i
-	IF side = 2 AND cityy(i) > cityy(from) THEN x1 = i
+	IF side = 1 AND cityY(i) < cityY(from) THEN x1 = i
+	IF side = 2 AND cityY(i) > cityY(from) THEN x1 = i
 	IF fortLevel(i) > 0 AND occupied(i) = 0 THEN x1 = i: EXIT FOR
 puted:  NEXT i
 	IF vicflag(5) > 0 AND occupied(capcity(who)) = 0 THEN
@@ -2058,7 +2058,7 @@ haul:
 	rr(who) = 0: armyloc(index) = armymove(index): armymove(index) = -1
 	COLOR 11: CALL clrbot: PRINT "Train with "; armyname$(index); " has arrived in "; cityName$(armyloc(index)); : IF noise > 0 THEN SOUND 1200, 2
 	CALL TICK(turbo!)
-	x = cityx(armyloc(index)) - 12: y = cityy(armyloc(index)) - 11
+	x = cityX(armyloc(index)) - 12: y = cityY(armyloc(index)) - 11
 	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 	IF cityOwner(armyloc(index)) <> who THEN CALL capture(index, armyloc(index), who, 0)
 	CALL placearmy(index)
@@ -2149,7 +2149,7 @@ add2:
 
 	GOSUB playb
 	currentCash(who) = currentCash(who) - 100
-	from = armyloc(i): x = cityx(from) - 12: y = cityy(from) - 11
+	from = armyloc(i): x = cityX(from) - 12: y = cityY(from) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), anima
 	CALL icon(armyloc(i), 0, 2)
 	IF noise > 0 THEN SOUND 2222, 1
@@ -2201,7 +2201,7 @@ SUB showcity
 FOR i = 1 TO 40
 c = 9: IF cityOwner(i) = 2 THEN c = 7
 IF cityOwner(i) = 0 THEN c = 12
-x = cityx(i): y = cityy(i)
+x = cityX(i): y = cityY(i)
 IF i = capcity(1) OR i = capcity(2) THEN
 	PUT (x - 6, y - 6), Ncap, PSET
 	LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
@@ -2212,9 +2212,9 @@ IF i = capcity(1) OR i = capcity(2) THEN
 ELSE
 	IF fortLevel(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
 	IF fortLevel(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-	CIRCLE (cityx(i), cityy(i)), 4, 0
-	CIRCLE (cityx(i), cityy(i)), 3, c
-	PAINT (cityx(i), cityy(i)), c, c
+	CIRCLE (cityX(i), cityY(i)), 4, 0
+	CIRCLE (cityX(i), cityY(i)), 3, c
+	PAINT (cityX(i), cityY(i)), c, c
 END IF
 IF graphicLevel = 0 GOTO nocon
 	FOR j = 1 TO 6: IF matrix(i, j) > 0 THEN CALL icon(i, matrix(i, j), 11)
@@ -2355,7 +2355,7 @@ move9:
 		CALL icon(armyloc(i), armymove(i), 1)
 		CALL icon(armyloc(i), armymove(i), 9)
 	CALL TICK(turbo! - 1)
-	PUT (cityx(armyloc(i)) - 20, cityy(armyloc(i)) - 19), image, PSET
+	PUT (cityX(armyloc(i)) - 20, cityY(armyloc(i)) - 19), image, PSET
 deadman:
 NEXT i
 	FOR i = star TO fin
@@ -2399,7 +2399,7 @@ END SUB
 SUB tinytrain (who, flag)
 	IF tracks(who) = 0 THEN EXIT SUB
 	from = tracks(who)
-	x = cityx(from) - 12: y = cityy(from) - 11
+	x = cityX(from) - 12: y = cityY(from) - 11
 SELECT CASE flag
 	CASE IS > 0
 	LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
@@ -2608,11 +2608,11 @@ CALL placearmy(active)
 		IF chosenOption = 2 GOTO smoke
 	END IF
 	IF humanPlayers = 1 AND s <> side AND fortLevel(c) > 0 AND flag = 0 THEN
-		IF realism > 0 AND cityy(c) > 150 THEN
+		IF realism > 0 AND cityY(c) > 150 THEN
 smoke:
 			fortLevel(c) = 0
-			x = cityx(c)
-			y = cityy(c)
+			x = cityX(c)
+			y = cityY(c)
 			LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
 			CALL showcity
 			CALL clrbot
@@ -3347,7 +3347,7 @@ SUB capture (active, c, s, flag)
 		capcity(3 - s) = 0
 		CALL flashcity(c)
 	END IF
-	IF fortLevel(c) > 0 AND flag > 0 THEN fortLevel(c) = fortLevel(c) - 1: x = cityx(c): y = cityy(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL showcity
+	IF fortLevel(c) > 0 AND flag > 0 THEN fortLevel(c) = fortLevel(c) - 1: x = cityX(c): y = cityY(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL showcity
 END SUB
 
 SUB center (y, a$)
@@ -3521,8 +3521,8 @@ FOR j = 1 TO 6
 	   END SELECT
 ourn:
 	IF cityOwner(a) = 3 - side AND c > 0 AND armymove(c) = 0 THEN y = y - armysize(c)
-	IF side = 1 AND cityy(a) < cityy(from) THEN y = y + 2
-	IF side = 2 AND cityy(a) > cityy(from) THEN y = y + 2
+	IF side = 1 AND cityY(a) < cityY(from) THEN y = y + 2
+	IF side = 2 AND cityY(a) > cityY(from) THEN y = y + 2
 '---------------------------------------------------------------------------
 	FOR k = 1 TO 6: m = matrix(a, k): IF m = 0 GOTO tally3
 	IF cityOwner(m) = 0 THEN y = y + 3 * cityValue(m) + 4 * fortLevel(m)
@@ -3780,10 +3780,10 @@ END SUB
 SUB maptext
 FOR k = 1 TO 40
 	FOR j = 1 TO LEN(cityName$(k))
-	a = cityx(k) + 6 * (j - 4) - 3
+	a = cityX(k) + 6 * (j - 4) - 3
 	x = ASC(MID$(UCASE$(cityName$(k)), j, 1)) - 64
 	IF a > 527 GOTO nextc
-	PSET (a, cityy(k) + 12), 10
+	PSET (a, cityY(k) + 12), 10
 	
 	IF matrix(k, 7) < 90 THEN
 		IF borderWidth = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
@@ -4013,8 +4013,8 @@ CALL starfin(star, fin, side)
 FOR k = star TO fin
 	IF armysize(k) > 0 THEN
 	COLOR c
-	x = cityx(armyloc(k))
-	y = cityy(armyloc(k))
+	x = cityX(armyloc(k))
+	y = cityY(armyloc(k))
 	z = 10: IF armysize(k) < 1000 THEN z = 9
 	x = x / 8 - 2: y = y / 16
 	IF y > 26 THEN y = 26
@@ -4047,7 +4047,7 @@ FOR k = 1 TO 40
 IF summ(k) > 0 THEN
 	c = 9: IF cityOwner(k) = 2 THEN c = 7
 	COLOR c
-	LOCATE INT(cityy(k) / 16 + 1), cityx(k) / 8: PRINT summ(k)
+	LOCATE INT(cityY(k) / 16 + 1), cityX(k) / 8: PRINT summ(k)
 END IF
 NEXT k
 COLOR 14: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
@@ -4316,7 +4316,7 @@ IF navyloc(s) = 30 THEN x = 515: y = 268: GOTO float
 IF navyloc(s) = 28 THEN x = 517: y = 172: GOTO float
 IF navyloc(s) = 17 THEN x = 380: y = 425: GOTO float
 IF navyloc(s) = 99 THEN x = 495: y = 310: GOTO float
-x = cityx(navyloc(s)) + 25: y = cityy(navyloc(s)) + 25
+x = cityX(navyloc(s)) + 25: y = cityY(navyloc(s)) + 25
 IF navyloc(s) = 24 THEN y = y + 5: x = x - 5
 float:
 	PSET (x, y), 1
@@ -4335,7 +4335,7 @@ CALL starfin(star, fin, who)
 FOR i = star TO fin
 IF armysize(i) > 0 AND occupied(armyloc(i)) <> i THEN
 	target = armyloc(i)
-	x = cityx(target) - 12: y = cityy(target) - 12
+	x = cityX(target) - 12: y = cityY(target) - 12
 	CIRCLE (x, y), 3, 14
 END IF
 NEXT i
