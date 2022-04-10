@@ -1230,7 +1230,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 
 	CASE 2
-	IF _FILEEXISTS("*.sav") = 0 choose = -1: EXIT SUB
+	IF _FILEEXISTS("*.sav") = 0 THEN choose = -1: EXIT SUB
 	mtx$(0) = "Load"
 	size = 0
 	FOR k = 1 TO 9
@@ -4026,7 +4026,7 @@ mtx$(3) = "Cities"
 mtx$(4) = "Force Summary"
 mtx$(5) = "Intelligence"
 mtx$(6) = "Battles": size = 6
-IF _FILEEXISTS("cws.his")) THEN mtx$(7) = "Recap": size = 7
+IF _FILEEXISTS("cws.his") THEN mtx$(7) = "Recap": size = 7
 CALL menu(0)
 SELECT CASE choose
 CASE IS < 0
@@ -4693,7 +4693,7 @@ LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
 COLOR 10
 '==========================  Mountains =================================
-IF _FILEEXISTS("mtn.vga")) THEN
+IF _FILEEXISTS("mtn.vga") THEN
 	PUT (380, 30), mtn, PSET
 	PUT (270, 200), mtn, PSET
 	PUT (310, 160), mtn, PSET
