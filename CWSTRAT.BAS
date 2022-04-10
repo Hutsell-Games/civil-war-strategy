@@ -77,13 +77,13 @@ DECLARE SUB void (a%, y%)
 COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
 COMMON SHARED cityx(), cityy(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
 COMMON SHARED currentCash(), cityController(), matrix(), income(), leaderRating(), recruitFlag
-COMMON SHARED hasNavy, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
+COMMON SHARED hasNavy, aiBoldness, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED nationName$(), armyloc(), armyname$(), humanPlayers, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED recruitCity(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), canMove, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
-COMMON SHARED victory(), graf, noise, capcity(), difficult, usAdvantage, borderWidth
+COMMON SHARED victory(), graphicLevel, noise, capcity(), difficult, usAdvantage, borderWidth
 COMMON SHARED train(), font$(), brray(), januaryCampaign, randbal, realism, casualty&()
 COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
@@ -485,7 +485,7 @@ utile:
 	menuText$(0) = "Utility"
 	menuText$(1) = "Side": IF humanPlayers = 2 THEN menuText$(2) = ""
 	menuText$(2) = "1 Player": IF humanPlayers = 2 THEN menuText$(2) = "2 Player"
-	menuText$(3) = "Graphics" + STR$(graf)
+	menuText$(3) = "Graphics" + STR$(graphicLevel)
 	menuText$(4) = "Noise": IF noise > 0 THEN menuText$(4) = menuText$(4) + STRING$(noise, "*")
 	menuText$(5) = "Display" + STR$(turbo!)
 	a$ = STR$(difficult): IF side = 1 THEN a$ = STR$(6 - difficult)
@@ -503,7 +503,7 @@ utile:
 	menuText$(13) = "History" + a$
 	menuRows = 13: tlx = 67: tly = 11
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	IF humanPlayers = 1 THEN menuRows = 14: menuText$(14) = "Aggress" + STR$(bold)
+	IF humanPlayers = 1 THEN menuRows = 14: menuText$(14) = "Aggress" + STR$(aiBoldness)
 	CALL menu(-1): CALL clrrite
 	    SELECT CASE chosenOption
 '-------------------------------------------------------------------------
@@ -530,12 +530,12 @@ utile:
 '                               Graphics
 '-------------------------------------------------------------------------
 	    CASE 3
-		graf = graf + 1
-		IF graf > 3 THEN graf = 0
+		graphicLevel = graphicLevel + 1
+		IF graphicLevel > 3 THEN graphicLevel = 0
 		a$ = "ROADS"
-		IF graf = 0 THEN a$ = "DISABLED"
-		IF graf = 2 THEN a$ = "CITY NAMES"
-		IF graf = 3 THEN a$ = "FULL"
+		IF graphicLevel = 0 THEN a$ = "DISABLED"
+		IF graphicLevel = 2 THEN a$ = "CITY NAMES"
+		IF graphicLevel = 3 THEN a$ = "FULL"
 		CLS
 		CALL usa
 		CALL clrbot: COLOR 11: PRINT "Graphics : "; a$; : IF noise > 0 THEN SOUND 2700, 1
@@ -650,7 +650,7 @@ utile:
 		CALL filer(1)
 		currentCash(1) = currentCash(1) - 100 + 200 * RND
 		currentCash(2) = currentCash(2) + 100 + 200 * RND
-		bold = 5 * RND
+		aiBoldness = 5 * RND
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
 			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
@@ -725,8 +725,8 @@ utile:
 '                               Aggression
 '-------------------------------------------------------------------------
 	   CASE 14
-		bold = bold + 1: IF bold > 5 THEN bold = 0
-		SELECT CASE bold
+		aiBoldness = aiBoldness + 1: IF aiBoldness > 5 THEN aiBoldness = 0
+		SELECT CASE aiBoldness
 		CASE 0: a$ = "PASSIVE"
 		CASE 1: a$ = "TIMID"
 		CASE 2: a$ = "CAUTIOUS"
@@ -736,7 +736,7 @@ utile:
 		END SELECT
 		CALL clrbot
 		COLOR 11
-		PRINT "Enemy Aggression : "; a$; " ("; bold; ")";
+		PRINT "Enemy Aggression : "; a$; " ("; aiBoldness; ")";
 		chosenOption = 35: GOTO utile
 		CASE ELSE
 	   END SELECT
@@ -764,7 +764,7 @@ loader:
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
-			WRITE #1, side, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+			WRITE #1, side, graphicLevel, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, aiBoldness
 			CLOSE #1
 			CLS
 			GOTO newgame
@@ -972,7 +972,7 @@ COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
 LINE (530, 412)-(635, 435), 14, B
 LINE (528, 410)-(637, 437), 14, B
 DO WHILE INKEY$ = "": LOOP
-IF graf > 2 THEN
+IF graphicLevel > 2 THEN
 	CALL cannon
 	k = fort(armyloc(defend))
 	t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
@@ -1198,7 +1198,7 @@ FOR i = 1 TO 2: INPUT #1, currentCash(i): NEXT i
 FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, side, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+	INPUT #1, side, graphicLevel, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 
 	CASE 2
@@ -1240,7 +1240,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
        
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, myside, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+	INPUT #1, myside, graphicLevel, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 	SCREEN 12: CLS
 	CLOSE #1: CALL usa: CALL clrbot
@@ -1273,7 +1273,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	myside = side
 	IF myside < 1 OR myside > 2 THEN myside = 1
 	OPEN "O", 1, "cws.cfg"
-	WRITE #1, myside, graf, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+	WRITE #1, myside, graphicLevel, noise, difficult, humanPlayers, turbo!, randbal, train(1), train(2), januaryCampaign, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 	CLS : CALL usa
 END SELECT
@@ -1680,7 +1680,7 @@ admiral:
 		PSET (120 + 41 * i, 210), 0
 		CALL shiptype(who, i)
 	NEXT i
-	IF graf > 2 THEN
+	IF graphicLevel > 2 THEN
 		a = ASC(LEFT$(fleet$(who), 1))
 		SELECT CASE a
 			CASE 73
@@ -1712,7 +1712,7 @@ admiral:
 		PSET (120 + 41 * i, 210), 0
 		CALL shiptype(who, i)
 	NEXT i
-	IF graf > 2 THEN
+	IF graphicLevel > 2 THEN
 		a = ASC(LEFT$(fleet$(who), 1))
 		SELECT CASE a
 			CASE 73
@@ -2216,7 +2216,7 @@ ELSE
 	CIRCLE (cityx(i), cityy(i)), 3, c
 	PAINT (cityx(i), cityy(i)), c, c
 END IF
-IF graf = 0 GOTO nocon
+IF graphicLevel = 0 GOTO nocon
 	FOR j = 1 TO 6: IF matrix(i, j) > 0 THEN CALL icon(i, matrix(i, j), 11)
 	NEXT j
 nocon:
@@ -2247,7 +2247,7 @@ IF cityOwner(target) = who GOTO capital ELSE GOTO city2
 IF target > 0 GOTO capital
 
 city2:
-IF 1 + RND < bold + aggress! GOTO signup
+IF 1 + RND < aiBoldness + aggress! GOTO signup
 target = 0: FOR i = star TO fin
 x = armyloc(i): IF x = 0 OR armymove(occupied(x)) < 0 OR armymove(i) < 0 GOTO endlook
 IF fort(x) > 1 GOTO endlook
@@ -2489,7 +2489,7 @@ CALL icon(target, 0, 3)
 defend = occupied(target)
 
 COLOR 11: CALL clrbot: PRINT armyname$(active); " attacks "; armyname$(defend); " in "; cityName$(armyloc(defend)); : CALL TICK(turbo! - 1)
-IF armysize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF graf > 0 THEN GOSUB upbox
+IF armysize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF graphicLevel > 0 THEN GOSUB upbox
 IF armyexper(win) < 10 THEN armyexper(win) = armyexper(win) + 1
 
 IF armysize(lose) < 2 THEN
@@ -2564,7 +2564,7 @@ deadmeat:
 	a$ = armyname$(index) + " surrenders to " + armyname$(active) + " in " + cityName$(armyloc(index))
 	CALL scribe(a$, 2)
 crushed:
-	IF graf > 2 THEN CALL surrender(index): COLOR 14: LOCATE 3, 68: PRINT armyname$(index): LOCATE 4, 68: PRINT "surrenders !"
+	IF graphicLevel > 2 THEN CALL surrender(index): COLOR 14: LOCATE 3, 68: PRINT armyname$(index): LOCATE 4, 68: PRINT "surrenders !"
 	x = 1: IF index > 20 THEN x = 2
 	IF noise > 1 AND x <> side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
 	IF armymove(index) > 0 THEN CALL icon(armyloc(index), armymove(index), 4)
@@ -2886,7 +2886,7 @@ sel1:
 		CASE 5: COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; currentCash(side);
 		CASE 6: CALL icon(armyloc(array(row)), 0, 9)
 		CASE 8
-			IF graf > 2 AND row > 0 THEN
+			IF graphicLevel > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
 				a = row: IF side = 1 THEN a = 6 - row
 				t$ = "face" + LTRIM$(STR$(a)) + ".vga"
@@ -3466,14 +3466,14 @@ SUB evaluate (index, x)
 from = armyloc(index)
 x = 200: IF aggress! > 1.5 THEN x = 80: IF aggress! > 2 THEN x = 20: IF aggress! > 3 THEN x = 5
 CALL void(from, defend): IF defend = 0 THEN x = 0
-IF bold > 1 THEN x = .5 * x
+IF aiBoldness > 1 THEN x = .5 * x
 
 best = armysize(index)
 
 FOR j = 1 TO 6: array(j) = -1
 a = matrix(from, j): IF a > 0 THEN IF occupied(a) > 0 THEN best = best - armysize(occupied(a)): y = 1
 NEXT j: best = .01 * best
-IF bold > 0 THEN best = best + 20 * bold
+IF aiBoldness > 0 THEN best = best + 20 * aiBoldness
 
 CALL starfin(star, fin, 3 - side)
 
@@ -3500,12 +3500,12 @@ FOR j = 1 TO 6
 	   END IF
 
 	   IF armysize(index) < 15 THEN y = y - 300: odds! = .1
-	   IF bold < 3 AND armysize(index) < 40 AND odds! < .8 THEN y = 0
+	   IF aiBoldness < 3 AND armysize(index) < 40 AND odds! < .8 THEN y = 0
 	   IF realism > 0 THEN y = y - 15
 	   IF odds! < .5 THEN y = y - 200
-	   IF bold = 0 AND RND > .9 THEN y = y + 10 * (armylead(index) - armylead(c) + armyexper(index) - armylead(index))
+	   IF aiBoldness = 0 AND RND > .9 THEN y = y + 10 * (armylead(index) - armylead(c) + armyexper(index) - armylead(index))
 	   IF supply(index) < 1 THEN y = y - 100
-	   SELECT CASE odds! + .5 * bold
+	   SELECT CASE odds! + .5 * aiBoldness
 		CASE IS < .3
 		y = -9999
 		CASE IS < .5
@@ -4494,7 +4494,7 @@ SUB topbar
 	LOCATE 5, 68: PRINT "("; y; "%)"
 
 a$ = "  Snd": IF noise < 2 THEN a$ = "   Snd": IF noise = 0 THEN a$ = "      "
-IF graf > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(graf))
+IF graphicLevel > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(graphicLevel))
 a$ = a$ + STR$(humanPlayers)
 COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
 COLOR c
@@ -4867,7 +4867,7 @@ IF navyloc(1) = 30 OR navyloc(2) = 30 THEN
 	LINE (485, 241)-(525, 270), 11, B
 END IF
 
-IF graf > 1 THEN CALL maptext
+IF graphicLevel > 1 THEN CALL maptext
 IF commerce > 0 THEN
 LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
 y = 312
