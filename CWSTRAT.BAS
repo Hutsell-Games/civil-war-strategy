@@ -3,10 +3,8 @@ DECLARE SUB animate (index%, flag%)
 DECLARE SUB armies ()
 DECLARE SUB armystat (index%)
 DECLARE SUB armyxy (x%, y%, z%)
-DECLARE SUB banner (a$)
 DECLARE SUB barnacle (who%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
-DECLARE SUB blastem ()
 DECLARE SUB bub2 (limit%)
 DECLARE SUB bubble (size%)
 DECLARE SUB cancel (side%)
@@ -37,7 +35,6 @@ DECLARE SUB iterate ()
 DECLARE SUB maptext ()
 DECLARE SUB maxx ()
 DECLARE SUB menu (switch%)
-DECLARE SUB mountain (xx%, yy%)
 DECLARE SUB movefrom (index%, target%)
 DECLARE SUB mxw (wide%)
 DECLARE SUB navy (who%, x%)
@@ -63,8 +60,6 @@ DECLARE SUB shiptype (who%, i%)
 DECLARE SUB smarts ()
 DECLARE SUB showcity ()
 DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB sndblst (file$, flag%)
-DECLARE SUB sndfx (flag%)
 DECLARE SUB starfin (star%, fin%, who%)
 DECLARE SUB stax (who%)
 DECLARE SUB strong (index%)
@@ -76,10 +71,8 @@ DECLARE SUB topbar ()
 DECLARE SUB touchup ()
 DECLARE SUB tupdate ()
 DECLARE SUB usa ()
-DECLARE SUB usamap ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
-DECLARE SUB war ()
 '==========================================================================
 COMMON SHARED choose%, tlx%, tly%, size%, mtx$(), wtype%, colour%, hilite%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
@@ -146,9 +139,7 @@ IF side = 2 THEN randbal = 3
 
 FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
 choose = 0
-a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 
-notitle2:
 SCREEN 12
 	DEF SEG = VARSEG(graphic(1))
 	BLOAD "cwsicon.vga", VARPTR(graphic(1))
@@ -207,7 +198,7 @@ IF player = 2 THEN GOSUB blanken
 mtx$(0) = "VGA CIVILWAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
-mtx$(3) = "Quit to DOS"
+mtx$(3) = "Quit"
 tlx = 33: tly = 20: colour = 5: size = 3
 choose = 23
 CALL menu(0)
@@ -760,7 +751,7 @@ filex:
 	mtx$(1) = "Load": IF filel = 0 THEN mtx$(1) = "-": choose = 23
 	mtx$(2) = "Save"
 	mtx$(3) = "New Game"
-	mtx$(4) = "Quit to DOS"
+	mtx$(4) = "Quit"
 	size = 4: tlx = 67: tly = 15
 	CALL menu(0): CALL clrrite
 	SELECT CASE choose
@@ -789,12 +780,6 @@ END SELECT
 GOTO menu0
 '............................................................................
 '                               Subs
-'............................................................................
-topbar:
-LOCATE 1, 1: PRINT SPACE$(80);
-COLOR 11
-LOCATE 1, 10: PRINT "Input your decisions now for "; force$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
-RETURN
 '............................................................................
 rusure:
 choose = 23
@@ -854,7 +839,7 @@ END SUB
 SUB armies
 CALL movefrom(index, target): IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN mflag = 1
-	GOTO dudd
+	EXIT SUB
 tent:
 tlx = 67: tly = 12
 
@@ -867,15 +852,14 @@ NEXT i
 CALL bubble(size)
 
 hilite = 10: colour = 3: CALL menu(2): CALL clrrite
-IF choose < 0 GOTO dudd
-IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: GOTO dudd
+IF choose < 0 THEN EXIT SUB
+IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: EXIT SUB
 
 CALL clrbot: PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(target); " to "; city$(array(choose));
 IF noise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
 CALL icon(target, array(choose), 1)
 armymove(index) = array(choose): CALL TICK(turbo!): CALL clrbot
 CALL clrrite
-dudd:
 END SUB
 
 SUB armystat (index)
@@ -1114,7 +1098,7 @@ SUB combine (who)
 		choose = 31: hilite = 11
 		CALL menu(9): CALL clrrite
 join:
-		IF choose < 1 GOTO nocity2
+		IF choose < 1 THEN EXIT SUB
 		target = array(choose)
 		CALL clrbot: PRINT "Combining "; force$(who); " armies in "; city$(target); :  CALL TICK(turbo!)
 
@@ -1173,7 +1157,6 @@ dork1:
 		CALL icon(target, 0, 6)
 		occupied(target) = best
 		CALL stax(who)
-nocity2:
 END SUB
 
 SUB cutoff (who, target, a)
@@ -1328,11 +1311,11 @@ SUB fortify (target)
 	mtx$(0) = "Fortify"
 		choose = 31
 		CALL menu(9): CALL clrrite
-		IF choose < 0 GOTO nocity
-		target = array(choose): CALL occupy(target): x = occupied(target): IF x < 0 GOTO nocity
-		IF fort(target) > 1 THEN CALL clrbot: PRINT city$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): GOTO nocity
+		IF choose < 0 THEN EXIT SUB
+		target = array(choose): CALL occupy(target): x = occupied(target): IF x < 0 THEN EXIT SUB
+		IF fort(target) > 1 THEN CALL clrbot: PRINT city$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): EXIT SUB
 		cost = 200
-		IF cash(side) < cost THEN CALL clrbot: PRINT "Fortifications for "; city$(target); " cost "; cost; " and you only have "; cash(side); : CALL TICK(4): GOTO nocity
+		IF cash(side) < cost THEN CALL clrbot: PRINT "Fortifications for "; city$(target); " cost "; cost; " and you only have "; cash(side); : CALL TICK(4): EXIT SUB
 		COLOR 3
 		fort(target) = fort(target) + 1
 		cash(side) = cash(side) - cost
@@ -1343,13 +1326,12 @@ SUB fortify (target)
 		armymove(x) = -1
 		CALL placearmy(x)
 		CALL stax(who)
-nocity:
 END SUB
 
 SUB icon (from, dest, kind)
-IF from < 1 OR from > 40 GOTO noshow
-IF dest < 0 GOTO noshow
-IF from = 999 GOTO noshow
+IF from < 1 OR from > 40 THEN EXIT SUB
+IF dest < 0 THEN EXIT SUB
+IF from = 999 THEN EXIT SUB
 x = cityx(from) - 12: y = cityy(from) - 11
 x1 = cityx(dest): y1 = cityy(dest)
 SELECT CASE kind
@@ -1418,7 +1400,6 @@ SELECT CASE kind
 
 	CASE ELSE
 END SELECT
-noshow:
 END SUB
 
 SUB iterate
@@ -1465,26 +1446,24 @@ SUB movefrom (index, target)
 	FOR i = star TO fin
 	IF armyloc(i) > 0 AND armymove(i) = 0 THEN size = size + 1: mtx$(size) = city$(armyloc(i)): array(size) = armyloc(i)
 	NEXT i
-	IF size = 0 THEN index = -1: GOTO notarg
+	IF size = 0 THEN index = -1: EXIT SUB
 	mtx$(0) = "From"
 	CALL bubble(size)
-movopt:
 	tlx = 67: tly = 5
 		hilite = 15: CALL menu(1): CALL clrrite
-		IF choose < 0 THEN target = 0: GOTO notarg
+		IF choose < 0 THEN target = 0: EXIT SUB
 		target = array(choose)
 
 		size = 0
 		FOR i = star TO fin
 		IF armyloc(i) = target AND armymove(i) = 0 THEN index = i: size = size + 1: mtx$(size) = "Army" + STR$(i): array(size) = i
 		NEXT i
-		IF size = 1 GOTO notarg
+		IF size = 1 THEN EXIT SUB
 		mtx$(0) = "Which"
 		CALL bubble(size)
 		tlx = 67: tly = 15: CALL menu(4): CALL clrrite
-		IF choose < 0 THEN index = 0: GOTO notarg
+		IF choose < 0 THEN index = 0: EXIT SUB
 		index = array(choose)
-notarg:
 END SUB
 
 SUB navy (who, chx)
@@ -1971,7 +1950,7 @@ minus1:
 		index = index - 1: IF index < 1 THEN index = 40
 		IF cityp(index) <> side GOTO minus1 ELSE GOTO morecap
 		CASE 2
-		GOTO fnew
+		EXIT SUB
 		CASE 3
 plus1:
 		index = index + 1: IF index > 40 THEN index = 1
@@ -1979,7 +1958,6 @@ plus1:
 		CASE ELSE
 		index = 0
 		END SELECT
-fnew:
 END SUB
 
 SUB normal (xbar, vary, result)
@@ -2109,7 +2087,7 @@ toot:
 END SUB
 
 SUB recruit (who)
-	IF cash(who) < 100 GOTO menu1
+	IF cash(who) < 100 THEN EXIT SUB
 	size = 0: COLOR 12
 	mtx$(0) = "Recruit"
 	IF who = side AND rflag > 0 THEN FOR i = 1 TO rflag: x = rcity(i): mtx$(i) = city$(x): array(i) = x: NEXT i: size = rflag: GOTO alldone
@@ -2132,19 +2110,19 @@ SUB recruit (who)
 foe:
 	NEXT i
 alldone:
-	IF size = 0 GOTO menu1
+	IF size = 0 THEN EXIT SUB
 	IF who = side AND rflag = 0 THEN FOR i = 1 TO size: rcity(i) = array(i): NEXT i: rflag = size
 	CALL bubble(size)
 '............................................................................
 levy:
-	IF cash(who) < 100 GOTO menu1
+	IF cash(who) < 100 THEN EXIT SUB
 	IF (who = side) OR (player = 2) THEN CALL clrbot: PRINT force$(who); " funds available "; cash(who);
 	tlx = 67: tly = 12: colour = 3
 	IF who <> side THEN GOSUB randsel: GOTO auto1
       
 	IF choose > 0 THEN choose = 21 + choose
 	CALL menu(2): CALL clrrite
-	IF choose < 1 GOTO menu1
+	IF choose < 1 THEN EXIT SUB
 auto1:
 	empty = 0
 	index = array(choose)
@@ -2152,7 +2130,7 @@ auto1:
 	IF occupied(index) > 0 THEN i = occupied(index): GOTO add2
 	CALL commander((who), empty)
        
-	IF who <> side AND empty = 0 GOTO menu1
+	IF who <> side AND empty = 0 THEN EXIT SUB
 	IF empty = 0 GOTO levy
 	armyloc(empty) = index
 	GOSUB playb
@@ -2212,7 +2190,6 @@ playb:
 	IF side = 1 AND difficult < 3 THEN armysize(empty) = armysize(empty) + 15 - 5 * difficult
 	IF side = 2 AND difficult > 3 THEN armysize(empty) = armysize(empty) + 5 * difficult - 15
 	RETURN
-menu1:
 END SUB
 
 SUB shiptype (who, i)
@@ -2303,7 +2280,6 @@ CALL recruit(who)
 '==========================================================================
 isok:
 	cash(who) = cash(who) + slush
-dock:
 	IF side = 2 AND navyloc(1) = 0 AND navysize(1) < 1 AND cityp(30) = 1 AND cash(1) > 100 THEN navyloc(1) = 30: CALL navy(1, 1): GOTO movenavy
 	IF navyloc(who) = 99 THEN
 		IF RND < .9 THEN CALL navy(who, 3)
@@ -3006,10 +2982,6 @@ limits:
 noadjust:
 	IF tlx = 0 THEN tlx = INT(40.5 - .5 * wide)
 	RETURN
-boss1:
-	CLS
-	CALL usa
-	GOTO remenu
 called:
 	IF noise > 0 THEN SOUND 700, .5
 	COLOR colour
@@ -3230,7 +3202,7 @@ END SUB
 
 SUB cancel (side)
 CALL starfin(star, fin, (side))
-counter:
+
 CALL clrrite
 	size = 0
 	FOR j = star TO fin
@@ -3475,7 +3447,7 @@ cheer:
 END SUB
 
 SUB engine
-IF rr(1) + rr(2) = 0 GOTO notrain
+IF rr(1) + rr(2) = 0 THEN EXIT SUB
 LINE (5, 17)-(100, 63), 3, BF
 LINE (5, 17)-(100, 47), 0, B
 LINE (5, 47)-(100, 63), 0, B
@@ -3488,8 +3460,6 @@ x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
 LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(city$(armymove(rr(i))), 5)
 notrane:
 NEXT i
-
-notrain:
 END SUB
 
 SUB evaluate (index, x)
@@ -3875,9 +3845,8 @@ END SUB
 SUB occupy (x)
 occupied(x) = 0
 FOR i = 1 TO 40
-IF armyloc(i) = x THEN occupied(x) = i: GOTO holdup
+IF armyloc(i) = x THEN occupied(x) = i: EXIT SUB
 NEXT i
-holdup:
 END SUB
 
 SUB relieve (who)
@@ -4251,7 +4220,7 @@ PAINT (x - 5, y + 15), 8
 
 FOR i = 1 TO 6: LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF: NEXT i
 
-IF noise < 2 GOTO relee
+IF noise < 2 THEN EXIT SUB
 PLAY "MBMS T120"
 PLAY "O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
 PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8"
@@ -4262,7 +4231,7 @@ PLAY "O3 a O4 d4. O3 T150 L16 g a b T120 L8 O4 c e d. c16"
 PLAY "L8 O3 a b O4 c. O3 a16 g e O4 c. O3 e16 e d4 e c4. e d4. a"
 PLAY "L8 g e O4 c. e16 d c4 O3 e c4. e d4. a g e O4 e4. c16 d c4"
 
-GOTO relee
+EXIT SUB
 
 stars:
 FOR i = 1 TO 8
@@ -4276,7 +4245,6 @@ LINE -(x, y - 9): LINE -(x + 16, y - 9)
 LINE -(x + 2, y - 1): PAINT (x, y), 15
 NEXT i
 RETURN
-relee:
 END SUB
 
 SUB scribe (a$, flag)
@@ -5060,13 +5028,12 @@ END SUB
 SUB void (a, y)
   y = 0
 FOR j = 1 TO 6
-  x = matrix(a, j): IF x = 0 GOTO tally5
+  x = matrix(a, j): IF x = 0 THEN EXIT SUB
   IF cityp(x) = side AND occupied(x) > 0 THEN y = y + armysize(occupied(x))
 	FOR k = 1 TO 6: m = matrix(x, k): IF m = 0 OR m = a GOTO tally4
 	IF cityp(m) = side AND occupied(m) > 0 THEN y = y + .1 * armysize(occupied(m))
 tally4:
 	NEXT k
 NEXT j
-tally5:
 END SUB
 
