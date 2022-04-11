@@ -127,7 +127,7 @@ TICK .3
 windowType = 2
 highlight = 15
 replaying = 1
-IF humanPlayers = 2 THEN GOSUB blanken
+IF humanPlayers = 2 THEN CALL Blanken
 menuText$(0) = "VGA CIVILWAR STRATEGY"
 menuText$(1) = "Resume Saved Game"
 menuText$(2) = "Start NEW Game"
@@ -183,7 +183,7 @@ NEXT i
 vpTotal = currentIncome(1) + currentIncome(2)
 
 newChosenOption = 22
-IF humanPlayers = 2 THEN GOSUB blanken: CALL DrawMap
+IF humanPlayers = 2 THEN CALL Blanken: CALL DrawMap
 CALL victor
 ON ERROR GOTO 0
 IF timesPlayed > 0 THEN
@@ -253,7 +253,7 @@ SELECT CASE chosenOption ' Main Menu
 		menuRows = 2: CALL ShowMenu(0): CALL clrrite: IF chosenOption <> 1 THEN newChosenOption = 24: GOTO menu0
 		endturn: ' Line Label
 		recruitFlag = 0: canMove = 0: hasNavy = 0
-		IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN GOSUB blanken: CALL DrawMap: GOTO menu0
+		IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN CALL Blanken: CALL DrawMap: GOTO menu0
 		GOTO newmonth
 	CASE 6 ' Reports
 		CALL ShowReports((currentSide)): newChosenOption = 27
@@ -639,18 +639,7 @@ CASE ELSE
 	GOTO menu0
 END SELECT
 GOTO menu0
-'............................................................................
-'                               Subs
-'............................................................................
-blanken:
-c = 1: IF currentSide = 2 THEN c = 7
-CLS : LINE (100, 200)-(500, 300), c, BF
-LINE (100, 200)-(500, 300), 8 - c, B
-COLOR 7: LOCATE 14, 31: PRINT " "; monthes$(currentMonth); currentYear
-COLOR 11: LOCATE 17, 30: PRINT nationName$(currentSide); " PLAYER TURN"
-DO WHILE INKEY$ = "": LOOP
-RETURN
-'............................................................................
+
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
 DATA "U4BD2BR1R3U2BD3D1","R1U4L1R2BL1BD4R1","R1E1U3BG3F1","U4BR3G2F2"
@@ -658,6 +647,15 @@ DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
 DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+
+SUB blanken
+	c = 1: IF currentSide = 2 THEN c = 7
+	CLS : LINE (100, 200)-(500, 300), c, BF
+	LINE (100, 200)-(500, 300), 8 - c, B
+	COLOR 7: LOCATE 14, 31: PRINT " "; monthes$(currentMonth); currentYear
+	COLOR 11: LOCATE 17, 30: PRINT nationName$(currentSide); " PLAYER TURN"
+	DO WHILE INKEY$ = "": LOOP
+END SUB
 
 SUB UnionPlus
 	usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvantage = 50 * difficultyLevel
