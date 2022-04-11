@@ -2,16 +2,16 @@ DEFINT A-Z
  
 DIM SHARED ATKFAC, DEFAC, TCR
 DIM SHARED aggress!, aiBoldness, armySize(40), armyCommander(40), armyExp(40), armySupply(40), armyMove(40), array(40)
-DIM SHARED armyOnRailroad(2), armyLocation(40), armyName$(40), battleStats(2), borderWidth, canMove, commerce
-DIM SHARED currentIncome(2), capitalCity(2), casualty&(2), chosenOption%, cityo(40), cityX(40), cityY(40), cityValue(40)
-DIM SHARED cityOwner(40), currentCash(2), cityController(2), cityName$(40), colour%, currentSide
+DIM SHARED armyOnRailroad(2), armyLocation(40), armyName$(40), battleStats(2), borderWidth, canMove
+DIM SHARED currentIncome(2), capitalCity(2), casualty&(2), chosenOption%, cityO(40), cityX(40), cityY(40), cityValue(40)
+DIM SHARED cityOwner(40), currentCash(2), cityController(2), cityName$(40), colour%, currentSide, currentMonth, currentYear
 DIM SHARED difficultyLevel, emancipate, eventsBalance, facesImage(1 TO 1564), fleet$(2), font$(26), fortLevel(40)
-DIM SHARED graphicLevel, graphic(1 TO 1564), grudge, hasNavy, highlight%, history, humanPlayers, isOccupied(40), januaryCampaign
-DIM SHARED leaderName$(40), leaderRating(40), menuText$(21), menuRows%, matrix(40, 7), month, month$(12), mtn(1 TO 1564)
-DIM SHARED nationName$(2), navyLocation(2), navySize(2), navyMove(2), Ncap(60), orderOfMoves(40), rr(2), rrFrom(2), realism, raider
+DIM SHARED graphicLevel, graphicImage(1 TO 1564), grudge, hasNavy, highlight%, history, humanPlayers, isOccupied(40), januaryCampaign
+DIM SHARED leaderName$(40), leaderRating(40), menuText$(21), menuRows%, matrix(40, 7), monthes$(12), mtn(1 TO 1564)
+DIM SHARED nationName$(2), navalCommerce, navyLocation(2), navySize(2), navyMove(2), northernCapital(60), orderOfMoves(40), rr(2), rrFrom(2), realism, navalRaider
 DIM SHARED recruitCity(5), recruitFlag, savedGameExists, soundEffects, starX(8), starY(8), thrill, turbo!
 DIM SHARED tlx%, tly%, trainCapacity(2), timesPlayed
-DIM SHARED usAdvantage, victoryFlags(6), victoryPoints(2), windowType%, vpTotal, year
+DIM SHARED usAdvantage, victoryFlags(6), victoryPoints(2), windowType%, vpTotal
 
 replaying = 0
 newgame:
@@ -36,7 +36,7 @@ END IF
 RESTORE
 FOR k = 1 TO 26: READ font$(k): NEXT k
 
-IF realism > 0 AND year < 1862 THEN
+IF realism > 0 AND currentYear < 1862 THEN
 		FOR i = 1 TO 2
 			someString$ = STRING$(LEN(fleet$(i)), "W")
 			fleet$(i) = someString$
@@ -56,12 +56,12 @@ FOR i = 1 TO 2: currentIncome(i) = currentCash(i): currentCash(i) = currentCash(
 chosenOption = 0
 
 SCREEN 12
-	DEF SEG = VARSEG(graphic(1))
-	BLOAD "cwsicon.vga", VARPTR(graphic(1))
+	DEF SEG = VARSEG(graphicImage(1))
+	BLOAD "cwsicon.vga", VARPTR(graphicImage(1))
 	DEF SEG
 
-	PUT (100, 100), graphic, PSET
-	GET (101, 101)-(113, 113), Ncap
+	PUT (100, 100), graphicImage, PSET
+	GET (101, 101)-(113, 113), northernCapital
 CLS
 COLOR 11: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
 COLOR 4: LOCATE 15, 32: PRINT "Registered Edition"
@@ -95,7 +95,7 @@ cityName$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 vpTotal = usAdvantage + 200
 FOR i = 1 TO 40: INPUT #1, a, cityX(i), cityY(i), cityName$(i), cityOwner(i), cityValue(i)
-cityo(i) = cityOwner(i)
+cityO(i) = cityOwner(i)
 CALL occupy(i)
 FOR j = 1 TO 7: INPUT #1, matrix(i, j): NEXT j: INPUT #1, fortLevel(i)
 IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: victoryPoints(x) = victoryPoints(x) + cityValue(i)
@@ -139,7 +139,7 @@ GOTO menu0
 '==========================================================================
 newmonth:
 IF currentSide > 2 THEN currentSide = 1
-someString$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
+someString$ = "--------> EVENTS FOR " + monthes$(currentMonth) + " " + STR$(currentYear) + " --------"
 CALL scribe(someString$, 0)
 CALL tupdate
 cityController(1) = 0: cityController(2) = 0
@@ -158,7 +158,7 @@ NEXT i
 
 FOR i = 1 TO 2: navyMove(i) = 0: IF capitalCity(i) > 0 THEN currentIncome(i) = currentIncome(i) + 100
 currentCash(i) = currentCash(i) + currentIncome(i)
-IF commerce > 0 AND i <> commerce THEN currentCash(i) = currentCash(i) - raider
+IF navalCommerce > 0 AND i <> navalCommerce THEN currentCash(i) = currentCash(i) - navalRaider
 NEXT i
 vpTotal = currentIncome(1) + currentIncome(2)
 
@@ -370,7 +370,7 @@ alone:
 		CASE 7
 	COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
 	CALL movefrom(index, target)
-	IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; month$(month); : GOTO menu0
+	IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; monthes$(currentMonth); : GOTO menu0
 	IF armyExp(index) > 5 OR armyExp(index) >= armyCommander(index) THEN COLOR 12: CALL clrbot: PRINT armyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
 	armyExp(index) = armyExp(index) + 1
 	CALL clrbot: PRINT armyName$(index); " has drilled to reach experience level "; armyExp(index); : IF soundEffects > 0 THEN SOUND 2222, 1
@@ -661,7 +661,7 @@ utile:
 	CASE 9
 	IF _FILEEXISTS("*.sav") = 0 THEN savedGameExists = 0
 filex:
-	chosenOption = 23: chosit = 30: IF year = 1861 THEN chosenOption = 22
+	chosenOption = 23: chosit = 30: IF currentYear = 1861 THEN chosenOption = 22
 	menuText$(0) = "Options"
 	menuText$(1) = "Load": IF savedGameExists = 0 THEN menuText$(1) = "-": chosenOption = 23
 	menuText$(2) = "Save"
@@ -712,7 +712,7 @@ unionplus: usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvan
 blanken:        c = 1: IF currentSide = 2 THEN c = 7
 		CLS : LINE (100, 200)-(500, 300), c, BF
 		LINE (100, 200)-(500, 300), 8 - c, B
-		COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
+		COLOR 7: LOCATE 14, 31: PRINT " "; monthes$(currentMonth); currentYear
 		COLOR 11: LOCATE 17, 30: PRINT nationName$(currentSide); " PLAYER TURN"
 		DO WHILE INKEY$ = "": LOOP
 		RETURN
@@ -768,7 +768,7 @@ CALL bubble(menuRows)
 
 highlight = 10: colour = 3: CALL menu(2): CALL clrrite
 IF chosenOption < 0 THEN EXIT SUB
-IF month < 3 AND januaryCampaign = 0 AND cityOwner(array(chosenOption)) <> currentSide THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: EXIT SUB
+IF currentMonth < 3 AND januaryCampaign = 0 AND cityOwner(array(chosenOption)) <> currentSide THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: EXIT SUB
 
 CALL clrbot: PRINT "Army "; index; " "; armyName$(index); " is moving from "; cityName$(target); " to "; cityName$(array(chosenOption));
 IF soundEffects > 0 THEN SOUND 2200, .5: SOUND 2900, .7
@@ -892,10 +892,10 @@ IF graphicLevel > 2 THEN
 	k = fortLevel(armyLocation(defend))
 	anotherString$ = "fort" + LTRIM$(STR$(k)) + ".vga"
 	IF _FILEEXISTS(anotherString$) THEN
-		DEF SEG = VARSEG(graphic(1))
-		BLOAD anotherString$, VARPTR(graphic(1))
+		DEF SEG = VARSEG(graphicImage(1))
+		BLOAD anotherString$, VARPTR(graphicImage(1))
 		DEF SEG
-		PUT (550, 270), graphic, PSET
+		PUT (550, 270), graphicImage, PSET
 	END IF
 ELSE
 	CALL clrrite
@@ -1090,8 +1090,8 @@ SELECT CASE switch
 	CLOSE #1
 	OPEN "I", 1, "cws.ini"
 	FOR i = 0 TO 2: INPUT #1, nationName$(i): NEXT i
-	FOR i = 1 TO 12: INPUT #1, month$(i): NEXT i
-	INPUT #1, month, year
+	FOR i = 1 TO 12: INPUT #1, monthes$(i): NEXT i
+	INPUT #1, currentMonth, currentYear
 '               set end game conditions
 	FOR i = 1 TO 6: INPUT #1, victoryFlags(i): NEXT i
 	victoryFlags(3) = .4 * victoryFlags(3)
@@ -1133,7 +1133,7 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 	IF chosenOption < 1 THEN EXIT SUB
 	OPEN "I", 1, "cws" + LTRIM$(STR$(array(chosenOption))) + ".sav"
 	COLOR 11: CALL clrbot: PRINT "Loading";
-	INPUT #1, month, year, usAdvantage, a
+	INPUT #1, currentMonth, currentYear, usAdvantage, a
 	FOR i = 1 TO 40: INPUT #1, armyName$(i), armySize(i), armyCommander(i), armyLocation(i), armyExp(i), armySupply(i), armyMove(i)
 	IF armyLocation(i) > 0 THEN
 		IF armyName$(i) = leaderName$(i) THEN
@@ -1176,7 +1176,7 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 	COLOR 11: CALL clrbot: PRINT "Saving";
 
 	OPEN "O", 1, "cws" + LTRIM$(STR$(chosenOption)) + ".sav"
-	WRITE #1, month, year, usAdvantage, currentSide
+	WRITE #1, currentMonth, currentYear, usAdvantage, currentSide
 	FOR i = 1 TO 40: WRITE #1, armyName$(i), armySize(i), armyCommander(i), armyLocation(i), armyExp(i), armySupply(i), armyMove(i)
 	NEXT i
 	FOR i = 1 TO 40: WRITE #1, isOccupied(i), cityOwner(i), fortLevel(i): PRINT "."; : NEXT i
@@ -1322,8 +1322,8 @@ SUB iterate
 FOR i = 1 TO 40: IF armyLocation(i) > 0 THEN CALL placearmy(i)
 NEXT i
 '---------------------------------------------------------------------------
-month = month + 2
-IF month > 12 THEN month = 1: year = year + 1
+currentMonth = currentMonth + 2
+IF currentMonth > 12 THEN currentMonth = 1: currentYear = currentYear + 1
 '---------------------------------------------------------------------------
 s = 1
 FOR i = 1 TO 40: IF armyLocation(i) < 1 GOTO rip
@@ -1335,7 +1335,7 @@ IF currentCash(s) >= .2 * armySize(i) THEN
 		currentCash(s) = currentCash(s) - .2 * armySize(i)
 	END IF
 END IF
-IF (month < 7 OR month > 10) AND matrix(armyLocation(i), 7) < 99 THEN armySupply(i) = armySupply(i) - 1
+IF (currentMonth < 7 OR currentMonth > 10) AND matrix(armyLocation(i), 7) < 99 THEN armySupply(i) = armySupply(i) - 1
 IF matrix(armyLocation(i), 7) = 99 AND navyLocation(3 - s) = armyLocation(i) THEN armySupply(i) = armySupply(i) - 1: CALL clrbot: PRINT armyName$(i); " is blockaded"; : CALL TICK(turbo!)
 COLOR 13
 IF armySupply(i) < 1 THEN
@@ -1387,7 +1387,7 @@ IF chx > 0 THEN
 	IF navyLocation(who) < 1 THEN
 		chx = 1
 	ELSE
-		IF commerce = 3 - who AND raider > 0 THEN chx = 4
+		IF navalCommerce = 3 - who AND navalRaider > 0 THEN chx = 4
 		IF grudge > 0 THEN chx = 3
 	END IF
 END IF
@@ -1411,7 +1411,7 @@ ELSE
 menuText$(1) = "-": menuText$(2) = "-": chosenOption = 24
 END IF
 menuText$(3) = "Sail": IF navyLocation(who) < 1 THEN menuText$(3) = "-": IF chx = 3 THEN chx = 1
-menuText$(4) = "Raid": IF navySize(who) < 1 OR commerce = who THEN menuText$(4) = "-"
+menuText$(4) = "Raid": IF navySize(who) < 1 OR navalCommerce = who THEN menuText$(4) = "-"
 tlx = 67: tly = 12: menuRows = 4
 IF navyLocation(who) <> 99 THEN
 IF who = 1 AND navySize(who) > 1 AND cityOwner(navyLocation(who)) = 0 THEN menuRows = 5: menuText$(5) = "Invasion": CALL void(navyLocation(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
@@ -1439,7 +1439,7 @@ SELECT CASE chosenOption
 	IF chx = 1 AND RND < .07 * navySize(who) THEN EXIT SUB
 	someString$ = "W"
 
-	IF realism > 0 AND ((year < 1862) OR (year = 1862 AND month < 3)) GOTO noiron
+	IF realism > 0 AND ((currentYear < 1862) OR (currentYear = 1862 AND currentMonth < 3)) GOTO noiron
 	IF currentCash(who) >= 2 * cost THEN
 		tlx = 67: tly = 12: colour = 9
 		IF who = currentSide THEN
@@ -1616,7 +1616,7 @@ admiral:
 	CASE 4
 	navySize(who) = LEN(fleet$(who))
 	IF navySize(who) < 1 AND chx > 0 THEN EXIT SUB
-	IF navySize(who) < 1 OR commerce = who GOTO ahoy
+	IF navySize(who) < 1 OR navalCommerce = who GOTO ahoy
 
 	IF who = currentSide THEN hasNavy = 1
 	GOSUB box2
@@ -1639,7 +1639,7 @@ admiral:
 	ELSE
 		TICK turbo!
 	END IF
-	navyLocation(who) = 99: commerce = who
+	navyLocation(who) = 99: navalCommerce = who
 	IF navyLocation(1) = navyLocation(2) GOTO pirate
 	CLS : CALL usa
 	EXIT SUB
@@ -1810,9 +1810,9 @@ xout:
 		PAINT (x - 3, y + 1), 12, 15
 	RETURN
 sail3:
-	commerce = 0
+	navalCommerce = 0
 	FOR k = 1 TO 2
-	IF navyLocation(k) = 99 THEN commerce = k
+	IF navyLocation(k) = 99 THEN navalCommerce = k
 	NEXT k
 	CLS : CALL usa
 END SUB
@@ -2016,7 +2016,7 @@ SUB recruit (who%)
 	array(i) = 0
 	IF isOccupied(i) > 0 AND cityOwner(i) = who THEN pct! = .4
 	IF RND < pct! AND cityOwner(i) = who THEN
-		IF realism > 0 AND cityo(i) = 3 - who GOTO foe
+		IF realism > 0 AND cityO(i) = 3 - who GOTO foe
 		menuRows = menuRows + 1
 		menuText$(menuRows) = cityName$(i)
 		array(menuRows) = i
@@ -2118,7 +2118,7 @@ c = 9: IF cityOwner(i) = 2 THEN c = 7
 IF cityOwner(i) = 0 THEN c = 12
 x = cityX(i): y = cityY(i)
 IF i = capitalCity(1) OR i = capitalCity(2) THEN
-	PUT (x - 6, y - 6), Ncap, PSET
+	PUT (x - 6, y - 6), northernCapital, PSET
 	LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
 	LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
 	PSET (x + 8, y - 4)
@@ -2261,7 +2261,7 @@ move9:
 	armyMove(i) = matrix(target, chosenOption)
 
 	IF cityOwner(armyMove(i)) = who THEN y = isOccupied(armyMove(i)): IF y > 0 THEN IF armyMove(y) = x THEN armyMove(i) = 0: GOTO deadman  ' eliminate crossing moves
-	IF month = 1 AND januaryCampaign = 0 AND cityOwner(armyMove(i)) <> who THEN armyMove(i) = 0: GOTO deadman
+	IF currentMonth = 1 AND januaryCampaign = 0 AND cityOwner(armyMove(i)) <> who THEN armyMove(i) = 0: GOTO deadman
 
 	IF turbo! > 1 THEN
 		COLOR c: CALL clrbot
@@ -2336,8 +2336,8 @@ ELSE
 	NEXT i
 END IF
 COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
-LOCATE 1, 20: PRINT "Update for "; month$(month); ","; year
-CALL clrbot: PRINT "press any key for "; month$(month); ","; year; " events";
+LOCATE 1, 20: PRINT "Update for "; monthes$(currentMonth); ","; currentYear
+CALL clrbot: PRINT "press any key for "; monthes$(currentMonth); ","; currentYear; " events";
 DO WHILE INKEY$ = "": LOOP
 GOSUB upbox
 '==========================================================================
@@ -2551,29 +2551,29 @@ LOCATE 25, 50: PRINT "============="
 RETURN
 
 allthru:
-IF navySize(commerce) < 1 THEN commerce = 0
-IF commerce > 0 THEN
+IF navySize(navalCommerce) < 1 THEN navalCommerce = 0
+IF navalCommerce > 0 THEN
 	CALL clrbot
-	IF RND < .8 + .02 * navySize(commerce) THEN
-		raider = .05 * navySize(commerce) * (1 + RND) * (currentIncome(3 - commerce))
-		IF raider < 1 THEN raider = 1
-		IF raider / currentIncome(3 - commerce) > .3 THEN raider = .3 * currentIncome(3 - commerce)
-		COLOR 15: PRINT nationName$(commerce); " raiders have sunk $"; raider; " of "; nationName$(3 - commerce); " commerce";
-		a = 1: IF LEFT$(fleet$(commerce), 1) = "I" THEN a = 2
-		PSET (500, 465), 0: CALL shipicon(commerce, a)
+	IF RND < .8 + .02 * navySize(navalCommerce) THEN
+		navalRaider = .05 * navySize(navalCommerce) * (1 + RND) * (currentIncome(3 - navalCommerce))
+		IF navalRaider < 1 THEN navalRaider = 1
+		IF navalRaider / currentIncome(3 - navalCommerce) > .3 THEN navalRaider = .3 * currentIncome(3 - navalCommerce)
+		COLOR 15: PRINT nationName$(navalCommerce); " raiders have sunk $"; navalRaider; " of "; nationName$(3 - navalCommerce); " commerce";
+		a = 1: IF LEFT$(fleet$(navalCommerce), 1) = "I" THEN a = 2
+		PSET (500, 465), 0: CALL shipicon(navalCommerce, a)
 		IF soundEffects > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
-		IF commerce = currentSide THEN grudge = 1
+		IF navalCommerce = currentSide THEN grudge = 1
 		TICK 9
 	ELSE
-		raider = 0
-		CALL barnacle(commerce)
-		COLOR 15: PRINT nationName$(commerce); " raiders have lost a ship ("; navySize(commerce); " remain)";
+		navalRaider = 0
+		CALL barnacle(navalCommerce)
+		COLOR 15: PRINT nationName$(navalCommerce); " raiders have lost a ship ("; navySize(navalCommerce); " remain)";
 		IF soundEffects > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
-		IF navyLocation(commerce) > 0 THEN
+		IF navyLocation(navalCommerce) > 0 THEN
 			TICK 9
 			GOTO allthru
 		ELSE
-			commerce = 0
+			navalCommerce = 0
 			LINE (447, 291)-(525, 335), 1, BF
 			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
 			TICK 9
@@ -2586,7 +2586,7 @@ CALL touchup: CALL ships: CALL iterate
 
 CALL clrbot
 LINE (390, 350)-(520, 400), 1, BF
-COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month$(month), 3)); ","; year
+COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(monthes$(currentMonth), 3)); ","; currentYear
 victoryPoints(1) = .8 * victoryPoints(1) + .3 * (currentIncome(1) + cityController(1))
 IF cityController(1) > 29 THEN victoryPoints(1) = victoryPoints(1) + 50: IF cityController(1) > 34 THEN victoryPoints(1) = victoryPoints(1) + 100
 IF currentSide = 2 AND cityController(1) < 11 THEN aggress! = aggress! + .7
@@ -3329,7 +3329,7 @@ END SUB
 SUB endit
 	someString$ = STR$(ABS(victoryFlags(3)) * 2.5) + "% Cities"
 	anotherString$ = STR$(ABS(victoryFlags(3)) * 2.5) + "% Total Income"
-	menuText$(8) = "Time: " + month$(victoryFlags(1)) + STR$(ABS(victoryFlags(2)))
+	menuText$(8) = "Time: " + monthes$(victoryFlags(1)) + STR$(ABS(victoryFlags(2)))
 	menuText$(9) = RTRIM$(STR$(ABS(victoryFlags(6)))) + ":1 Force Ratio"
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
@@ -3469,7 +3469,7 @@ SUB events
 '==========================================================================
 '                              Special Events
 '==========================================================================
-IF realism > 0 AND year = 1862 AND month < 3 THEN
+IF realism > 0 AND currentYear = 1862 AND currentMonth < 3 THEN
 	COLOR 14: CALL clrbot
 	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
 	IF soundEffects > 0 THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
@@ -3478,7 +3478,7 @@ IF realism > 0 AND year = 1862 AND month < 3 THEN
 END IF
 IF eventsBalance = 0 THEN EXIT SUB
 plus = difficultyLevel: IF currentSide = 1 THEN plus = 6 - difficultyLevel
-pct! = .005 * (year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
+pct! = .005 * (currentYear - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
 IF RND > pct! THEN EXIT SUB
 
 CALL clrbot: COLOR 14: PRINT "SPECIAL EVENT...";
@@ -3489,8 +3489,8 @@ SELECT CASE who
 '                               good for South
 '----------------------------------------------------------------------------
 	CASE 1
-	IF year = 1864 AND month = 1 THEN victoryPoints(2) = victoryPoints(2) + 50
-	IF year = 1865 AND month = 1 THEN victoryPoints(2) = victoryPoints(2) + 100
+	IF currentYear = 1864 AND currentMonth = 1 THEN victoryPoints(2) = victoryPoints(2) + 50
+	IF currentYear = 1865 AND currentMonth = 1 THEN victoryPoints(2) = victoryPoints(2) + 100
 	IF RND > .9 THEN GOSUB riot: EXIT SUB
 
 	CALL clrbot
@@ -3530,7 +3530,7 @@ uprising:
 	pct! = .9
 	someString$ = "Union troops diverted to fight Western Indian uprisings"
 	IF RND > .5 THEN someString$ = "Union 90-day enlistees return home"
-	IF year = 1864 AND month > 5 THEN someString$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
+	IF currentYear = 1864 AND currentMonth > 5 THEN someString$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
 	CALL scribe(someString$, 2)
 	FOR k = 1 TO 20
 	armySize(k) = pct! * armySize(k)
@@ -3542,7 +3542,7 @@ riot:
 	IF cityController(who) = 1 THEN EXIT SUB
 	FOR k = 1 TO 99
 	x = 1 + INT(40 * RND)
-		IF cityo(x) <> who AND cityOwner(x) = who AND isOccupied(x) = 0 THEN
+		IF cityO(x) <> who AND cityOwner(x) = who AND isOccupied(x) = 0 THEN
 			CALL clrbot: COLOR 15
 			PRINT " Riots have broken out in "; cityName$(x);
 			cityOwner(x) = 0
@@ -3574,7 +3574,7 @@ event2:
 	IF armySize(i) > 0 AND RND > .5 THEN armySize(i) = armySize(i) * 1.1 + plus
 	NEXT i: GOTO dull2
 abe:
-	IF emancipate = 0 AND year > 1862 THEN
+	IF emancipate = 0 AND currentYear > 1862 THEN
 
 		emancipate = 1
 		CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
@@ -3582,7 +3582,7 @@ abe:
 		CALL usa
 		GOTO dull2
 	END IF
-	IF year = 1864 AND month = 11 THEN
+	IF currentYear = 1864 AND currentMonth = 11 THEN
 		CALL scribe("Lincoln has been reelected", 2)
 		victoryPoints(2) = .5 * victoryPoints(2)
 		GOTO dull2
@@ -3592,11 +3592,11 @@ abe:
 		currentCash(1) = currentCash(1) + 100 * plus
 		GOTO dull2
 	END IF
-	IF RND > .5 AND year > 1861 THEN
+	IF RND > .5 AND currentYear > 1861 THEN
 		CALL scribe("Rebel deserters leave the battlefield to go home", 2)
 		FOR i = 21 TO 40: armySize(i) = .92 * armySize(i): NEXT i: GOTO dull2
 	END IF
-	IF RND > .5 AND year > 1861 THEN
+	IF RND > .5 AND currentYear > 1861 THEN
 		CALL scribe("Union soldiers now have repeating rifles", 2)
 		FOR i = 1 TO 20
 			IF armyExp(i) < 9 THEN armyExp(i) = armyExp(i) + 2
@@ -3852,7 +3852,7 @@ IF chosenOption = 4 GOTO frep
 CALL starfin(start, fin, who)
 CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
 COLOR c
-PRINT " Report for "; nationName$(who); " Forces"; TAB(30); month$(month); ","; year; TAB(49); : COLOR 14: PRINT " Victory Points "; victoryPoints(who);
+PRINT " Report for "; nationName$(who); " Forces"; TAB(30); monthes$(currentMonth); ","; currentYear; TAB(49); : COLOR 14: PRINT " Victory Points "; victoryPoints(who);
 IF c = 15 THEN c = 7
 x = victoryPoints(who) + victoryPoints(3 - who)
 IF x = 0 THEN
@@ -3899,7 +3899,7 @@ GOTO endrep
 '..........................................................................
 cityrep:
 CLS : LOCATE 1, 1: COLOR 14
-PRINT "City Report"; TAB(20); month$(month); ","; year: COLOR 15
+PRINT "City Report"; TAB(20); monthes$(currentMonth); ","; currentYear: COLOR 15
 PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
 LINE (1, 30)-(630, 30), 15
 FOR i = 1 TO 20: COLOR 4: someString$ = "neutral": IF cityOwner(i) = 1 THEN COLOR 9: someString$ = "UNION"
@@ -4388,7 +4388,7 @@ END SUB
 SUB topbar
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR 11
-	LOCATE 1, 10: PRINT "Input your decisions now for "; nationName$(currentSide); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
+	LOCATE 1, 10: PRINT "Input your decisions now for "; nationName$(currentSide); " side "; : COLOR 14: PRINT monthes$(currentMonth); ","; currentYear; "  "
 
 	CALL flags((currentSide), 0, 0)
 	COLOR 4: IF borderWidth > 0 THEN COLOR 7
@@ -4783,7 +4783,7 @@ IF navyLocation(1) = 30 OR navyLocation(2) = 30 THEN
 END IF
 
 IF graphicLevel > 1 THEN CALL maptext
-IF commerce > 0 THEN
+IF navalCommerce > 0 THEN
 LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
 y = 312
 someString$ = "COMMERCE"
@@ -4808,7 +4808,7 @@ NEXT i
 nosee:
 CALL ships
 CALL engine
-COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month$(month), 3)); ","; year
+COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(monthes$(currentMonth), 3)); ","; currentYear
 END SUB
 
 SUB victor
@@ -4818,14 +4818,14 @@ SUB victor
 	NEXT j
 
 	CALL clrbot: COLOR 14
-	IF victoryFlags(2) > 0 AND year >= victoryFlags(2) AND month < victoryFlags(1) THEN
-		someString$ = "Time almost expired (" + month$(victoryFlags(1)) + "," + STR$(victoryFlags(2)) + ")"
+	IF victoryFlags(2) > 0 AND currentYear >= victoryFlags(2) AND currentMonth < victoryFlags(1) THEN
+		someString$ = "Time almost expired (" + monthes$(victoryFlags(1)) + "," + STR$(victoryFlags(2)) + ")"
 		CALL image2(someString$, 4)
 	END IF
     FOR i = 1 TO 2
 	IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: victoryPoints(i) = victoryPoints(i) + 300: GOTO finis
 
-	IF year >= victoryFlags(2) AND month >= victoryFlags(1) AND victoryFlags(2) > 0 THEN j = 2: GOTO finis
+	IF currentYear >= victoryFlags(2) AND currentMonth >= victoryFlags(1) AND victoryFlags(2) > 0 THEN j = 2: GOTO finis
 	IF cityController(i) >= victoryFlags(3) AND victoryFlags(3) > 0 THEN j = 3: GOTO finis
 	IF currentIncome(i) / (currentIncome(1) + currentIncome(2)) >= .01 * victoryFlags(4) AND victoryFlags(4) > 0 THEN j = 4: GOTO finis
 	IF victoryFlags(5) > 0 AND capitalCity(3 - i) = 0 AND capitalCity(i) > 0 THEN j = 5: GOTO finis
