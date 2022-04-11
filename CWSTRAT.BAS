@@ -15,15 +15,29 @@ DIM SHARED usAdvantage, victoryFlags(6), victoryPoints(2), windowType%, vpTotal
 
 replaying = 0
 newgame:
-timesPlayed = 0: recruitFlag = 0
-FOR k = 1 TO 40: armySize(k) = 0: armyLocation(k) = 0: armyMove(k) = 0: armyCommander(k) = 0: armyName$(k) = "": NEXT k
-usAdvantage = 0: emancipate = 0
+timesPlayed = 0
+recruitFlag = 0
+FOR k = 1 TO 40
+	armySize(k) = 0
+	armyLocation(k) = 0
+	armyMove(k) = 0
+	armyCommander(k) = 0
+	armyName$(k) = ""
+NEXT k
+usAdvantage = 0
+emancipate = 0
 FOR k = 1 TO 2
-navySize(k) = 0: navyLocation(k) = 0: navyMove(k) = 0
-rr(k) = 0: victoryPoints(k) = 0: armyOnRailroad(k) = 0
+	navySize(k) = 0
+	navyLocation(k) = 0
+	navyMove(k) = 0
+	rr(k) = 0
+	victoryPoints(k) = 0
+	armyOnRailroad(k) = 0
 NEXT k
 
-savedGameExists = 1: victoryFlags(1) = 1
+savedGameExists = 1
+victoryFlags(1) = 1
+
 CALL FileManager(1)
 IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
@@ -34,7 +48,9 @@ ELSE
 END IF
 
 RESTORE
-FOR k = 1 TO 26: READ font$(k): NEXT k
+FOR k = 1 TO 26
+	READ font$(k)
+NEXT k
 
 IF realism > 0 AND currentYear < 1862 THEN
 		FOR i = 1 TO 2
@@ -52,7 +68,9 @@ IF currentSide = 2 THEN eventsBalance = 3
 	IF currentSide = 2 AND difficultyLevel > 3 THEN currentCash(1) = currentCash(1) + 100 * difficultyLevel
 
 
-FOR i = 1 TO 2: currentIncome(i) = currentCash(i): currentCash(i) = currentCash(i) + 50 * RND: NEXT i
+FOR i = 1 TO 2
+	currentIncome(i) = currentCash(i): currentCash(i) = currentCash(i) + 50 * RND
+NEXT i
 chosenOption = 0
 
 SCREEN 12
