@@ -1,18 +1,11 @@
 DEFINT A-Z
 
-COMMON SHARED chosenOption%, tlx%, tly%, menuRows%, menuText$(), windowType%, colour%, highlight%
-COMMON SHARED cityX(), cityY(), cityValue(), cityOwner(), cityName$(), leaderName$(), savedGameExists
-COMMON SHARED currentCash(), cityController(), matrix(), currentIncome(), leaderRating(), recruitFlag
-COMMON SHARED hasNavy, aiBoldness, turbo!, rr(), starX(), starY(), mtn(), rrFrom()
-COMMON SHARED nationName$(), armyLocation(), armyName$(), humanPlayers, aggress!
-COMMON SHARED armySize(), armyCommander(), armyExp(), armySupply(), month$()
-COMMON SHARED recruitCity(), victoryFlags(), armyOnRailroad(), battleStats(), cityo()
-COMMON SHARED armyMove(), month, year, array(), canMove, currentSide, ATKFAC, DEFAC, TCR
-COMMON SHARED navyLocation(), navySize(), navyMove(), isOccupied(), vpTotal, fortLevel()
-COMMON SHARED victoryPoints(), graphicLevel, soundEffects, capitalCity(), difficultyLevel, usAdvantage, borderWidth
-COMMON SHARED trainCapacity(), font$(), orderOfMoves(), januaryCampaign, eventsBalance, realism, casualty&()
-COMMON SHARED timesPlayed, history, thrill, fleet$(), commerce, raider, grudge
-
+DIM SHARED chosenOption%, tlx%, tly%, menuRows%, windowType%, colour%, highlight%
+DIM SHARED savedGameExists, recruitFlag, hasNavy, aiBoldness, turbo!
+DIM SHARED month, year, canMove, currentSide, ATKFAC, DEFAC, TCR
+DIM SHARED vpTotal, graphicLevel, soundEffects, difficultyLevel, usAdvantage, borderWidth
+DIM SHARED januaryCampaign, eventsBalance, realism, humanPlayers, aggress!
+DIM SHARED timesPlayed, history, thrill, commerce, raider, grudge
 DIM SHARED cityX(40), cityY(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
 DIM SHARED currentCash(2), cityController(2), matrix(40, 7), currentIncome(2), leaderRating(40)
 DIM SHARED menuText$(21), nationName$(2), armyLocation(40), armyName$(40), victoryFlags(6)
