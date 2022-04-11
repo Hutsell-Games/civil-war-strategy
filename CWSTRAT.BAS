@@ -622,7 +622,14 @@ SELECT CASE chosenOption ' Main Menu
 				CLOSE #1
 				CLS
 				GOTO newgame
-			CASE 4: GOTO confirmquitmenu
+			CASE 4:
+				chosenOption = 23
+				menuText$(0) = "Quit"
+				menuText$(1) = "Yes"
+				menuText$(2) = "No"
+				menuRows = 2: colour = 5
+				tlx = 67: tly = 15
+				CALL ShowMenu(0): CALL clrrite: IF chosenOption = 1 THEN END ELSE GOTO menu0
 		END SELECT
 '==========================================================================
 	CASE 99
@@ -634,15 +641,6 @@ END SELECT
 GOTO menu0
 '............................................................................
 '                               Subs
-'............................................................................
-confirmquitmenu:
-chosenOption = 23
-menuText$(0) = "Quit"
-menuText$(1) = "Yes"
-menuText$(2) = "No"
-menuRows = 2: colour = 5
-tlx = 67: tly = 15
-CALL ShowMenu(0): CALL clrrite: IF chosenOption = 1 THEN END ELSE GOTO menu0
 '............................................................................
 unionplus: 
 usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvantage = 50 * difficultyLevel
