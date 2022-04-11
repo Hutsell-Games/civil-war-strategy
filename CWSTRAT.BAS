@@ -6,9 +6,10 @@ DIM SHARED gArmyOnRailroad(2), gArmyLocation(40), gArmyName$(40), gBattleStats(2
 DIM SHARED gCurrentIncome(2), gCapitalCity(2), gCasualty&(2), gChosenOption%, gCityO(40), gCityX(40), gCityY(40), gCityValue(40)
 DIM SHARED gCityOwner(40), gCurrentCash(2), gCityController(2), gCityName$(40), gColour%, gCurrentSide, gCurrentMonth, gCurrentYear
 DIM SHARED gDifficultyLevel, gEmancipate, gEventsBalance, gFacesImage(1 TO 1564), gFleet$(2), gFont$(26), gFortLevel(40)
-DIM SHARED gGraphicLevel, gGraphicImage(1 TO 1564), gGrudge, gHasNavy, gHighlight%, gHistory, gHumanPlayers, gIsOccupied(40), gJanuaryCampaign
+DIM SHARED gGraphicLevel, gGraphicImage(300), gGrudge, gHasNavy, gHighlight%, gHistory, gHumanPlayers, gIsOccupied(40), gJanuaryCampaign
 DIM SHARED gLeaderName$(40), gLeaderRating(40), gMenuText$(21), gMenuRows%, gMatrix(40, 7), gMonthes$(12), gMtn(1 TO 1564)
-DIM SHARED gNationName$(2), gNavalCommerce, gNavyLocation(2), gNavySize(2), gNavyMove(2), gUnionCapital(60), gOrderOfMoves(40), gRR(2), gRRFrom(2), gRealism, gNavalRaider
+DIM SHARED gNationName$(2), gNavalCommerce, gNavyLocation(2), gNavySize(2), gNavyMove(2), gUnionCapital(60), gOrderOfMoves(40)
+DIM SHARED gRR(2), gRRFrom(2), gRealism, gNavalRaider 
 DIM SHARED gRecruitCity(5), gRecruitFlag, gSavedGameExists, gSoundEffects, gStarX(8), gStarY(8), gThrill, gTurbo!
 DIM SHARED gTLX%, gTLY%, gTrainCapacity(2), gTimesPlayed
 DIM SHARED gUSAdvantage, gVictoryFlags(6), gVictoryPoints(2), gWindowType%, gVPTotal
@@ -1187,16 +1188,16 @@ SUB MoveUnitIcon (from%, dest%, kind%)
 		CALL snapshot(x, y, 1)
 		CASE 7          ' draw white box
 		x = gCityX(from) - 12: y = gCityY(from) - 11
-		GET (x - 8, y - 8)-(x + 8, y + 8), image
+		GET (x - 8, y - 8)-(x + 8, y + 8), gGraphicImage
 		LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
 		LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
 			CASE 8     ' replace old image
 		x = gCityX(from) - 12: y = gCityY(from) - 11
-		IF x > 0 THEN PUT (x - 8, y - 8), image, PSET
+		IF x > 0 THEN PUT (x - 8, y - 8), gGraphicImage, PSET
 		
 		CASE 9          ' draw arrow pointer
 		x = gCityX(from) - 12: y = gCityY(from) - 11
-		GET (x - 8, y - 8)-(x + 10, y + 7), image
+		GET (x - 8, y - 8)-(x + 10, y + 7), gGraphicImage
 		x = x + 7: y = y + 5
 		LINE (x + 2, y)-(x + 2, y - 8), 12
 		LINE -(x, y - 6), 12
@@ -2128,7 +2129,7 @@ SUB ComputerPlayer
 			CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 1)
 			CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 9)
 		CALL TICK(gTurbo! - 1)
-		PUT (gCityX(gArmyLocation(i)) - 20, gCityY(gArmyLocation(i)) - 19), image, PSET
+		PUT (gCityX(gArmyLocation(i)) - 20, gCityY(gArmyLocation(i)) - 19), gGraphicImage, PSET
 	deadman:
 	NEXT i
 		FOR i = start TO fin
@@ -2160,8 +2161,8 @@ SUB ComputerPlayer
 END SUB
 
 SUB snapshot (x%, y%, flag%)
-	IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), image
-	IF flag = 1 THEN PUT (x - 10, y - 10), image, PSET
+	IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), gGraphicImage
+	IF flag = 1 THEN PUT (x - 10, y - 10), gGraphicImage, PSET
 END SUB
 
 SUB CorrectArmySize (index%)
@@ -3997,11 +3998,11 @@ SUB AnimateMovement (index%, flag%)
 		FOR i = 2 TO 8
 		x1 = .1 * (i * gCityX(to2) + (10 - i) * gCityX(from))
 		y1 = .1 * (i * gCityY(to2) + (10 - i) * gCityY(from))
-		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
+		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), gGraphicImage
 		PUT (x1 - 10, y1 - 10), anima, PSET
 		IF gTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
 		IF gSoundEffects > 0 THEN SOUND 200, .1: SOUND 50, .1
-		PUT (x1 - 10, y1 - 10), image, PSET
+		PUT (x1 - 10, y1 - 10), gGraphicImage, PSET
 		NEXT i
 		gArmyLocation(index) = from
 END SUB
