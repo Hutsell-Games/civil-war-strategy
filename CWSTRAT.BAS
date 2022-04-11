@@ -85,7 +85,7 @@ IF currentSide = 1 THEN
 	IF INKEY$ <> "" GOTO notitle
 	PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
     ELSE
-	CALL shen
+	CALL ShenandoahSong
     END IF
 END IF
 notitle:
@@ -173,7 +173,7 @@ END IF
 
 '                              Main Menu
 menu0:
-CALL topbar
+CALL DrawTopBar
 IF humanPlayers = 2 AND currentSide = 0 THEN currentSide = 1
 IF currentCash(currentSide) < 100 AND navyLocation(currentSide) = 0 THEN hasNavy = 1
 
@@ -241,8 +241,8 @@ endrnd:
 	GOTO newmonth
 '==========================================================================
 	CASE 6
-	CALL report((currentSide)): chosit = 27
-	CALL starfin(start, fin, currentSide)
+	CALL ShowReports((currentSide)): chosit = 27
+	CALL StartToFinish(start, fin, currentSide)
 	FOR i = start TO fin
 	IF armyMove(i) > 0 THEN CALL MoveUnitIcon(armyLocation(i), armyMove(i), 1)
 	NEXT i
@@ -272,7 +272,7 @@ optmen:
 '                               Cancel
 '---------------------------------------------------------------------------
 		CASE 1
-	CALL cancel(currentSide): canMove = 0
+	CALL CancelArmyMovement(currentSide): canMove = 0
 	chosenOption = 22
 '---------------------------------------------------------------------------
 '                               Fortify
@@ -302,7 +302,7 @@ optmen:
 '                               Supply
 '---------------------------------------------------------------------------
 		CASE 4
-		CALL starfin(start, fin, (currentSide))
+		CALL StartToFinish(start, fin, (currentSide))
 		menuText$(0) = "Supply"
 		tlx = 67: tly = 5: colour = 5
 		menuRows = 0
@@ -323,7 +323,7 @@ alone:
 		IF chosenOption < 0 GOTO menu0
 		index = array(chosenOption)
 		IF armySupply(index) < 2 THEN
-		CALL resupply(index)
+		CALL ResupplyArmy(index)
 		CALL DrawArmyUnit(index)
 		END IF
 		chosenOption = 25
@@ -430,7 +430,7 @@ utile:
 		CALL clrbot: PRINT "Now playing "; nationName$(currentSide); " side"; : IF soundEffects > 0 THEN SOUND 999, 1
 		IF currentSide = 1 THEN eventsBalance = 7
 		IF currentSide = 2 THEN eventsBalance = 3
-		CALL topbar
+		CALL DrawTopBar
 		GOTO menu0
 '-------------------------------------------------------------------------
 '                               Solo or 2 Player
@@ -495,7 +495,7 @@ utile:
 				borderWidth = 1 - borderWidth
 				CLS
 				CALL usa
-				CALL topbar
+				CALL DrawTopBar
 		END SELECT
 		chosenOption = 26: GOTO utile
 '-------------------------------------------------------------------------
@@ -521,7 +521,7 @@ utile:
 '                               Ending Conditions
 '-------------------------------------------------------------------------
 	   CASE 7
-		CALL endit
+		CALL VictoryConditionsMet
 		chosenOption = 28: GOTO utile
 '-------------------------------------------------------------------------
 '                           Random Events Options
@@ -625,7 +625,7 @@ utile:
 '                               Check Map Linakges
 '-------------------------------------------------------------------------
 	   CASE 12
-		CALL integrity
+		CALL CheckMapIntegrity
 		CALL TICK(99)
 		CALL usa
 '-------------------------------------------------------------------------
@@ -888,7 +888,7 @@ LINE (530, 412)-(635, 435), 14, B
 LINE (528, 410)-(637, 437), 14, B
 DO WHILE INKEY$ = "": LOOP
 IF graphicLevel > 2 THEN
-	CALL cannon
+	CALL DrawCannon
 	k = fortLevel(armyLocation(defend))
 	anotherString$ = "fort" + LTRIM$(STR$(k)) + ".vga"
 	IF _FILEEXISTS(anotherString$) THEN
@@ -995,7 +995,7 @@ END SUB
 SUB CombineArmies (who%)
 	colour = 3: target = 0: highlight = 3
 	tlx = 67: tly = 2
-	CALL starfin(start, fin, who)
+	CALL StartToFinish(start, fin, who)
 	menuRows = 0
 	FOR i = 1 TO 40
 		IF cityOwner(i) = who AND isOccupied(i) > 0 THEN
@@ -1140,7 +1140,7 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 			leaderName$(i) = ""
 		ELSE
 			who = 1: IF i > 20 THEN who = 2
-			CALL starfin(start, fin, who)
+			CALL StartToFinish(start, fin, who)
 			FOR k = start TO fin
 			IF armyName$(i) = leaderName$(k) THEN leaderName$(k) = "": EXIT FOR
 			NEXT k
@@ -1212,7 +1212,7 @@ SUB FortifyCity (target%)
 	target = 0: highlight = 11
 	tlx = 67: tly = 2
 	who = currentSide
-	CALL starfin(start, fin, who)
+	CALL StartToFinish(start, fin, who)
 	menuRows = 0
 	FOR i = start TO fin
 	IF armyLocation(i) > 0 AND fortLevel(armyLocation(i)) < 2 THEN
@@ -1275,7 +1275,7 @@ SELECT CASE kind
 	CASE 4
 	IF isOccupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
 	IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-	IF from = 27 OR from = 28 THEN CALL touchup
+	IF from = 27 OR from = 28 THEN CALL TouchupMap
 
 	CASE 5
 	IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
@@ -1357,7 +1357,7 @@ END SUB
 
 SUB MoveFrom (index%, target%)
 	colour = 3: tlx = 67: tly = 5: index = 0: menuRows = 0: target = 0
-	who = currentSide: CALL starfin(start, fin, who)
+	who = currentSide: CALL StartToFinish(start, fin, who)
 	FOR i = start TO fin
 	IF armyLocation(i) > 0 AND armyMove(i) = 0 THEN menuRows = menuRows + 1: menuText$(menuRows) = cityName$(armyLocation(i)): array(menuRows) = armyLocation(i)
 	NEXT i
@@ -1481,14 +1481,14 @@ ships:
 	currentCash(who) = currentCash(who) - cost: navySize(who) = 1
 	x = cityX(array(chosenOption)) + 25: y = cityY(array(chosenOption)) + 25: CALL ships
 	CALL clrbot: COLOR 11: PRINT nationName$(who); " is building NEW fleet in "; cityName$(array(chosenOption));
-	PSET (400, 465), 0: CALL shipicon(who, a)
+	PSET (400, 465), 0: CALL DrawShipIcon(who, a)
 	IF soundEffects > 0 THEN SOUND 3000, 1
 	CALL TICK(turbo!)
 	GOTO ahoy
 add2ship:
 	currentCash(who) = currentCash(who) - cost
 	CALL clrbot: PRINT nationName$(who); " navy increased to "; navySize(who);
-	PSET (400, 465), 0: CALL shipicon(who, a)
+	PSET (400, 465), 0: CALL DrawShipIcon(who, a)
 	CALL ships
 	IF soundEffects > 0 THEN SOUND 3000, 1
 	CALL TICK(turbo!)
@@ -1653,7 +1653,7 @@ admiral:
 	CALL ShipDestroyed(who)
 	c = navyLocation(who): CALL CreateNewArmy((who), empty, c)
 	currentCash(who) = currentCash(who) + 100     'compensate for cost of recruiting new army
-	CALL capture(empty, c, who, 0)
+	CALL DrawCityCaptured(empty, c, who, 0)
 	armySize(empty) = x
 	IF who = currentSide THEN hasNavy = 1
 	EXIT SUB
@@ -1900,7 +1900,7 @@ SUB railroad (who%)
 SELECT CASE rr(who)
 	CASE 0
 	IF who = currentSide GOTO human
-	CALL starfin(start, fin, who): max = 32767
+	CALL StartToFinish(start, fin, who): max = 32767
 	index = 0
 	FOR i = start TO fin: IF armyLocation(i) = 0 OR armyMove(i) <> 0 GOTO puter
 	x = 0: FOR j = 1 TO 6: from = matrix(armyLocation(i), j): IF from > 0 AND cityOwner(from) <> who THEN x = x + 1
@@ -1975,7 +1975,7 @@ haul:
 	CALL TICK(turbo!)
 	x = cityX(armyLocation(index)) - 12: y = cityY(armyLocation(index)) - 11
 	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-	IF cityOwner(armyLocation(index)) <> who THEN CALL capture(index, armyLocation(index), who, 0)
+	IF cityOwner(armyLocation(index)) <> who THEN CALL DrawCityCaptured(index, armyLocation(index), who, 0)
 	CALL DrawArmyUnit(index)
 	IF isOccupied(armyLocation(index)) > 0 THEN CALL stax(who): GOTO toot
 	CALL occupy(armyLocation(index)): CALL DrawArmyUnit(index)
@@ -2109,7 +2109,7 @@ END SUB
 
 SUB ShipType (who%, i%)
 a = 1: IF MID$(fleet$(who), i, 1) = "I" THEN a = 2
-CALL shipicon(who, a)
+CALL DrawShipIcon(who, a)
 END SUB
 
 SUB DrawCities
@@ -2139,16 +2139,16 @@ NEXT i
 END SUB
 
 SUB ComputerPlayer
-CALL events
+CALL SpecialEvents
 slush = 0: who = 3 - currentSide
 c = 9: IF currentSide = 1 THEN c = 15
 LOCATE 1, 1: PRINT SPACE$(80);
 COLOR c: LOCATE 1, 10: PRINT nationName$(who); " Side is making decisions";
-CALL starfin(start, fin, who)
+CALL StartToFinish(start, fin, who)
 '==========================================================================
 '                       Check Supply
 '==========================================================================
-FOR i = start TO fin: IF armyLocation(i) > 0 AND armySupply(i) < 1 THEN CALL resupply(i)
+FOR i = start TO fin: IF armyLocation(i) > 0 AND armySupply(i) < 1 THEN CALL ResupplyArmy(i)
 NEXT i
 '==========================================================================
 '                       Fortify Capital or Other City
@@ -2288,11 +2288,11 @@ NEXT i
 EXIT SUB
 '---------------------------------------------------------------------------
 enufarmies:
-CALL starfin(start, fin, 3 - who)
+CALL StartToFinish(start, fin, 3 - who)
 FOR i = start TO fin
 	IF armyLocation(i) > 0 THEN y = y + .1 * armySize(i)
 NEXT i
-CALL starfin(start, fin, who)
+CALL StartToFinish(start, fin, who)
 x = 0: z = 0: FOR i = start TO fin: IF armyLocation(i) > 0 THEN x = x + 1: z = z + .1 * armySize(i)
 NEXT i
 IF y > z THEN x = x - 2
@@ -2367,7 +2367,7 @@ IF orderOfMoves(i) <> 999 AND armyCommander(i) > 10 * RND THEN
 END IF
 NEXT i
 
-CALL bub2(40)
+CALL SortArmyMoves(40)
 '==========================================================================
 '                       Begin Main Loop
 '==========================================================================
@@ -2479,7 +2479,7 @@ deadmeat:
 	someString$ = armyName$(index) + " surrenders to " + armyName$(active) + " in " + cityName$(armyLocation(index))
 	CALL scribe(someString$, 2)
 crushed:
-	IF graphicLevel > 2 THEN CALL surrender(index): COLOR 14: LOCATE 3, 68: PRINT armyName$(index): LOCATE 4, 68: PRINT "surrenders !"
+	IF graphicLevel > 2 THEN CALL DrawArmySurrender(index): COLOR 14: LOCATE 3, 68: PRINT armyName$(index): LOCATE 4, 68: PRINT "surrenders !"
 	x = 1: IF index > 20 THEN x = 2
 	IF soundEffects > 1 AND x <> currentSide THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
 	IF armyMove(index) > 0 THEN CALL MoveUnitIcon(armyLocation(index), armyMove(index), 4)
@@ -2535,7 +2535,7 @@ smoke:
 			TICK 3
 		END IF
 	END IF
-	CALL capture(active, c, s, flag)
+	CALL DrawCityCaptured(active, c, s, flag)
 horde:
 IF armySupply(active) < 10 THEN armySupply(active) = armySupply(active) + 1: IF RND > .8 GOTO horde
 digin:
@@ -2560,7 +2560,7 @@ IF navalCommerce > 0 THEN
 		IF navalRaider / currentIncome(3 - navalCommerce) > .3 THEN navalRaider = .3 * currentIncome(3 - navalCommerce)
 		COLOR 15: PRINT nationName$(navalCommerce); " raiders have sunk $"; navalRaider; " of "; nationName$(3 - navalCommerce); " commerce";
 		a = 1: IF LEFT$(fleet$(navalCommerce), 1) = "I" THEN a = 2
-		PSET (500, 465), 0: CALL shipicon(navalCommerce, a)
+		PSET (500, 465), 0: CALL DrawShipIcon(navalCommerce, a)
 		IF soundEffects > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
 		IF navalCommerce = currentSide THEN grudge = 1
 		TICK 9
@@ -2582,7 +2582,7 @@ IF navalCommerce > 0 THEN
 	END IF
 END IF
 
-CALL touchup: CALL ships: CALL ProcessTurn
+CALL TouchupMap: CALL ships: CALL ProcessTurn
 
 CALL clrbot
 LINE (390, 350)-(520, 400), 1, BF
@@ -2865,16 +2865,16 @@ arrows:
 	 IF someString$ = ";" AND switch = 0 THEN
 		SCREEN 0: CLS
 		SHELL "cwsdoc.com"
-		SCREEN 12: CALL usa
+		SCREEN 12: CALL DrawMap
 		CALL GenericMenu(b1, wide)
-		CALL topbar
+		CALL DrawTopBar
 		RETURN
 	  END IF
 	 IF someString$ = "=" AND switch = 0 THEN
 		CLS
-		CALL usa
+		CALL DrawMap
 		CALL GenericMenu(b1, wide)
-		CALL topbar
+		CALL DrawTopBar
 		RETURN
 	 END IF
 	 IF someString$ = "A" AND switch = 0 THEN
@@ -2883,9 +2883,9 @@ arrows:
 		RETURN
 	 END IF
 	 IF someString$ = ">" AND switch = 0 THEN
-		CALL report(-1)
+		CALL ShowReports(-1)
 		CALL GenericMenu(b1, wide)
-		CALL topbar
+		CALL DrawTopBar
 		RETURN
 	 END IF
 	 RETURN
@@ -3090,7 +3090,7 @@ SELECT CASE z
 END SELECT
 END SUB
 
-SUB bub2 (limit%)
+SUB SortArmyMoves (limit%)
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -3115,8 +3115,8 @@ DO
 LOOP WHILE swaps%
 END SUB
 
-SUB cancel (currentSide%)
-CALL starfin(start, fin, (currentSide))
+SUB CancelArmyMovement (currentSide%)
+CALL StartToFinish(start, fin, (currentSide))
 
 CALL clrrite
 	menuRows = 0
@@ -3148,7 +3148,7 @@ finix:
 	CALL clrrite
 END SUB
 
-SUB cannon
+SUB DrawCannon
 CALL clrrite
 LINE (528, 80)-(639, 310), 3, BF
 LINE (528, 310)-(639, 435), 2, BF
@@ -3197,7 +3197,7 @@ DRAW "BD15"
 x = POINT(0): y = POINT(1): PAINT (x, y), 14, 15
 END SUB
 
-SUB capitol
+SUB DrawUnionWin
 SCREEN 12
 CLS
 LINE (1, 1)-(639, 150), 4, BF
@@ -3245,7 +3245,7 @@ FOR i = -565 TO 50 STEP 50: CALL flags(1, i, 0): NEXT i
 IF soundEffects = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
-SUB capture (active%, c%, s%, flag%)
+SUB DrawCityCaptured (active%, c%, s%, flag%)
 	cityOwner(c) = s: CALL clrbot
 	someString$ = armyName$(active) + " has captured " + cityName$(c)
 	COLOR 11: PRINT armyName$(active) + " has captured " + cityName$(c);
@@ -3271,7 +3271,7 @@ x = 26 - x \ 2
 LOCATE y, 7 + x: PRINT someString$
 END SUB
 
-SUB chessie
+SUB DrawChesapeake
 COLOR 10
 LINE (500, 185)-(505, 180): LINE -(505, 175)
 LINE -(500, 170): LINE -(490, 165)
@@ -3307,7 +3307,7 @@ END SUB
 
 SUB commander (who%, empty%)
 	empty = 0
-	CALL starfin(start, fin, who)
+	CALL StartToFinish(start, fin, who)
 	FOR i = start TO fin
 	IF armyLocation(i) = 0 AND leaderName$(i) <> "" THEN empty = i: EXIT SUB
 	NEXT i
@@ -3316,7 +3316,7 @@ SUB commander (who%, empty%)
 	FOR i = start TO fin
 	IF armyLocation(i) = 0 THEN
 		x = i
-		CALL roman(x, someString$)
+		CALL MakeRomanNumerals(x, someString$)
 		empty = i
 		leaderName$(i) = someString$
 		leaderRating(i) = 1 + 8 * RND
@@ -3326,7 +3326,7 @@ SUB commander (who%, empty%)
 	CALL clrbot: PRINT "No more "; nationName$(who); " commanders available"; : CALL TICK(turbo!)
 END SUB
 
-SUB endit
+SUB VictoryConditionsMet
 	someString$ = STR$(ABS(victoryFlags(3)) * 2.5) + "% Cities"
 	anotherString$ = STR$(ABS(victoryFlags(3)) * 2.5) + "% Total Income"
 	menuText$(8) = "Time: " + monthes$(victoryFlags(1)) + STR$(ABS(victoryFlags(2)))
@@ -3358,7 +3358,7 @@ END SELECT
 	GOTO what4
 cheer:
 	CLS
-	CALL usa
+	CALL DrawMap
 END SUB
 
 SUB engine
@@ -3390,7 +3390,7 @@ a = matrix(from, j): IF a > 0 THEN IF isOccupied(a) > 0 THEN best = best - armyS
 NEXT j: best = .01 * best
 IF aiBoldness > 0 THEN best = best + 20 * aiBoldness
 
-CALL starfin(start, fin, 3 - currentSide)
+CALL StartToFinish(start, fin, 3 - currentSide)
 
 FOR j = 1 TO 6
 	y = -1: a = matrix(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
@@ -3465,7 +3465,7 @@ NEXT j
 	x = best
 END SUB
 
-SUB events
+SUB SpecialEvents
 '==========================================================================
 '                              Special Events
 '==========================================================================
@@ -3579,7 +3579,7 @@ abe:
 		emancipate = 1
 		CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
 		victoryPoints(1) = victoryPoints(1) + 100: victoryPoints(2) = victoryPoints(2) - 100
-		CALL usa
+		CALL DrawMap
 		GOTO dull2
 	END IF
 	IF currentYear = 1864 AND currentMonth = 11 THEN
@@ -3672,7 +3672,7 @@ y = 16 * (tly + 1)
 	PUT (8 * tlx - 4, 16 * tly - 3), g2, PSET
 END SUB
 
-SUB integrity
+SUB CheckMapIntegrity
 CLS : COLOR 15
 x = 0: y = 0
 FOR i = 1 TO 40
@@ -3711,7 +3711,7 @@ nextc:
 NEXT k
 END SUB
 
-SUB maxx
+SUB HallOfFame
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
@@ -3767,7 +3767,7 @@ END SUB
 SUB relieve (who%)
 colour = 3: target = 0: highlight = 3
 tlx = 67: tly = 2
-CALL starfin(start, fin, who)
+CALL StartToFinish(start, fin, who)
 menuRows = 0
 FOR i = start TO fin
 IF armySize(i) > 0 AND armyLocation(i) > 0 AND armyMove(i) = 0 THEN
@@ -3818,7 +3818,7 @@ CALL MoveUnitIcon(armyLocation(index), 0, 8)
 CALL clrbot
 END SUB
 
-SUB report (who%)
+SUB ShowReports (who%)
 DIM summ(40)
 IF who = -1 GOTO frep
 IF who > 100 GOTO batrep
@@ -3834,7 +3834,7 @@ CALL ShowMenu(0)
 SELECT CASE chosenOption
 CASE IS < 0
 	CLS
-	CALL usa
+	CALL DrawMap
 	EXIT SUB
 CASE 2: who = 3 - currentSide
 CASE 3: GOTO cityrep
@@ -3849,7 +3849,7 @@ END SELECT
 '..........................................................................
 IF chosenOption < 0 GOTO endrep
 IF chosenOption = 4 GOTO frep
-CALL starfin(start, fin, who)
+CALL StartToFinish(start, fin, who)
 CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
 COLOR c
 PRINT " Report for "; nationName$(who); " Forces"; TAB(30); monthes$(currentMonth); ","; currentYear; TAB(49); : COLOR 14: PRINT " Victory Points "; victoryPoints(who);
@@ -3923,8 +3923,8 @@ GOTO endrep
 '..........................................................................
 srep:
 c = 9: IF currentSide = 2 THEN c = 7
-CALL usa
-CALL starfin(start, fin, currentSide)
+CALL DrawMap
+CALL StartToFinish(start, fin, currentSide)
 FOR k = start TO fin
 	IF armySize(k) > 0 THEN
 	COLOR c
@@ -3957,7 +3957,7 @@ FOR k = 1 TO 40
 	END IF
 NEXT k
 
-CLS : CALL usa
+CLS : CALL DrawMap
 FOR k = 1 TO 40
 IF summ(k) > 0 THEN
 	c = 9: IF cityOwner(k) = 2 THEN c = 7
@@ -4023,11 +4023,11 @@ COLOR 14: LOCATE 29, 29: PRINT "press a key";
 DO WHILE INKEY$ = "": LOOP
 IF who < 3 THEN
 	CLS
-	CALL usa
+	CALL DrawMap
 END IF
 END SUB
 
-SUB resupply (index%)
+SUB ResupplyArmy (index%)
 		who = 1: IF index > 20 THEN who = 2
 		IF realism > 0 THEN
 			CALL cutoff(who, armyLocation(index), a)
@@ -4064,7 +4064,7 @@ NEXT k
 	x = array(chosenOption)
 END SUB
 
-SUB roman (target%, someString$)
+SUB MakeRomanNumerals (target%, someString$)
 someString$ = "Union ": IF target > 20 THEN someString$ = "Rebel "
 IF target > 20 THEN target = target - 20
 IF target > 10 THEN someString$ = someString$ + "X": target = target - 10
@@ -4090,7 +4090,7 @@ RETURN
 
 END SUB
 
-SUB rwin
+SUB DrawRebelWin
 LINE (2, 2)-(637, 239), 4, BF
 COLOR 15: LINE (2, 40)-(597, 239): LINE -(637, 239): LINE -(637, 199): LINE -(40, 2): LINE -(2, 2): LINE -(2, 40)
 COLOR 15: LINE (2, 199)-(2, 239): LINE -(40, 239): LINE -(637, 40): LINE -(637, 2): LINE -(597, 2): LINE -(2, 199)
@@ -4175,7 +4175,7 @@ IF history > 0 THEN
 END IF
 END SUB
 
-SUB shen
+SUB ShenandoahSong
 '                       Shenandoah
 IF soundEffects = 2 THEN
 	IF INKEY$ <> "" THEN chosenOption = 1: EXIT SUB
@@ -4191,7 +4191,7 @@ IF soundEffects = 2 THEN
 END IF
 END SUB
 
-SUB shipicon (who%, flag%)
+SUB DrawShipIcon (who%, flag%)
 	x = POINT(0) - 10: y = POINT(1) - 10
 	CIRCLE (x, y), 18, 9, , , .4
 	PAINT (x + 3, y + 4), 9, 9
@@ -4236,17 +4236,17 @@ IF navyLocation(s) = 24 THEN y = y + 5: x = x - 5
 float:
 	PSET (x, y), 1
 	a = 1: IF LEFT$(fleet$(s), 1) = "I" THEN a = 2
-	CALL shipicon(s, a)
+	CALL DrawShipIcon(s, a)
 sink:
 NEXT s
 END SUB
 
-SUB starfin (start%, fin%, who%)
+SUB StartToFinish (start%, fin%, who%)
 start = 1: fin = 20: IF who = 2 THEN start = 21: fin = 40
 END SUB
 
 SUB stax (who%)
-CALL starfin(start, fin, who)
+CALL StartToFinish(start, fin, who)
 FOR i = start TO fin
 IF armySize(i) > 0 AND isOccupied(armyLocation(i)) <> i THEN
 	target = armyLocation(i)
@@ -4256,7 +4256,7 @@ END IF
 NEXT i
 END SUB
 
-SUB surrender (who%)
+SUB DrawArmySurrender (who%)
 SCREEN 12
 s = 1: c = 1: COLOR 0: w = 514
 IF who > 20 THEN c = 7: s = 2
@@ -4385,7 +4385,7 @@ start! = TIMER
 DO WHILE TIMER - start! < sec! AND INKEY$ = "": LOOP
 END SUB
 
-SUB topbar
+SUB DrawTopBar
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR 11
 	LOCATE 1, 10: PRINT "Input your decisions now for "; nationName$(currentSide); " side "; : COLOR 14: PRINT monthes$(currentMonth); ","; currentYear; "  "
@@ -4418,7 +4418,7 @@ LOCATE 27, 68: PRINT "F7 End Turn"
 LOCATE 28, 68: PRINT someString$
 END SUB
 
-SUB touchup
+SUB TouchupMap
 
 LINE (500, 170)-(490, 165), 10 'Norfolk Coast
 LINE -(495, 160), 10
@@ -4489,7 +4489,7 @@ IF limit > x THEN limit = x
 IF limit < x \ 4 THEN limit = x \ 4
 END SUB
 
-SUB usa
+SUB DrawMap
 SCREEN 12
 LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
@@ -4642,7 +4642,7 @@ LINE -(512, 208)
 LINE -(510, 206)
 
 '=========================== Chesapeake ====================================
-CALL chessie
+CALL DrawChesapeake
 '=============== Ohio, Pennslyvania, Maryland, Virginia =====================
 LINE (291, 111)-(301, 101), 1
 LINE -(316, 96), 1
@@ -4879,7 +4879,7 @@ END SELECT
 	c = 1: IF i = 2 THEN c = 7
 	LINE (0, 0)-(639, 479), 4, BF
 	LINE (0, 40)-(550, 460), 0, BF
-	CALL usa
+	CALL DrawMap
 	LINE (70, 140)-(485, 265), 0, BF
 	LINE (50, 120)-(465, 250), c, BF
 	LINE (50, 120)-(465, 250), 4, B
@@ -4906,7 +4906,7 @@ play4ever:
 			victoryFlags(j) = victoryFlags(j) + 1
 			IF j = 5 THEN victoryFlags(j) = 0
 			CLS
-			CALL usa
+			CALL DrawMap
 			EXIT SUB
 	END IF
 	menuText$(0) = "Options"
@@ -4923,18 +4923,18 @@ play4ever:
 	END IF
 
 	thrill = i
-	CALL usa: CALL report(100 + currentSide)
-	IF j = 2 THEN FOR k = 1 TO 2: victoryPoints(k) = .7 * victoryPoints(k): NEXT k: CALL rwin: GOTO death
+	CALL usa: CALL ShowReports(100 + currentSide)
+	IF j = 2 THEN FOR k = 1 TO 2: victoryPoints(k) = .7 * victoryPoints(k): NEXT k: CALL DrawRebelWin: GOTO death
 
-	IF i = 1 THEN CALL capitol: COLOR 15: LOCATE 2, 27: anotherString$ = "UNION VICTORY  VP's=" + STR$(victoryPoints(1)): PRINT anotherString$: GOTO death
-	IF i = 2 THEN CALL rwin: COLOR 15: LOCATE 2, 27: anotherString$ = "REBEL VICTORY  VP's=" + STR$(victoryPoints(2)): PRINT anotherString$
+	IF i = 1 THEN CALL DrawUnionWin: COLOR 15: LOCATE 2, 27: anotherString$ = "UNION VICTORY  VP's=" + STR$(victoryPoints(1)): PRINT anotherString$: GOTO death
+	IF i = 2 THEN CALL DrawRebelWin: COLOR 15: LOCATE 2, 27: anotherString$ = "REBEL VICTORY  VP's=" + STR$(victoryPoints(2)): PRINT anotherString$
 death:
 	COLOR 14: LOCATE 4, 40 - .5 * LEN(someString$)
 	IF history > 0 THEN
 		CALL scribe(anotherString$, 0)
 		CALL scribe(someString$, 0)
 	END IF
-	PRINT someString$: CALL maxx
+	PRINT someString$: CALL HallOfFame
 	EXIT SUB
 stale:
     NEXT i
