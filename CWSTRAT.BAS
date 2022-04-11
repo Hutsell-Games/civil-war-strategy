@@ -1496,13 +1496,13 @@ add2ship:
 '                               Attack City
 '---------------------------------------------------------------------------
 	CASE 2
-	IF navyLocation(who) = 99 GOTO ahoy
+	IF navyLocation(who) = 99 GOTO labelmanagenavy
 	IF chx = 2 AND cityOwner(navyLocation(who)) = who THEN EXIT SUB
 	IF chx = 2 AND isOccupied(navyLocation(who)) > 0 AND RND > .5 THEN chx = 3: GOTO anchor
-	IF chx = 2 AND cityOwner(navyLocation(who)) = 0 THEN chx = 3: GOTO ahoy
+	IF chx = 2 AND cityOwner(navyLocation(who)) = 0 THEN chx = 3: GOTO labelmanagenavy
 	IF navyLocation(who) < 1 THEN EXIT SUB
 	IF who = currentSide THEN hasNavy = 1
-	IF cityOwner(navyLocation(who)) <> 3 - who GOTO ahoy
+	IF cityOwner(navyLocation(who)) <> 3 - who GOTO labelmanagenavy
 	CALL clrbot: COLOR 12: PRINT nationName$(who); " fleet bombards "; cityName$(navyLocation(who));
 	CALL MoveUnitIcon(navyLocation(who), 0, 3)
 	      
@@ -1551,7 +1551,7 @@ bombardcity:
 	CASE 3
 	navySize(who) = LEN(fleet$(who))
 	IF navySize(who) < 1 AND chx > 0 THEN EXIT SUB
-	IF navyLocation(who) < 1 OR navySize(who) < 1 THEN CALL clrbot: PRINT "No ships remain"; : TICK 1: GOTO ahoy
+	IF navyLocation(who) < 1 OR navySize(who) < 1 THEN CALL clrbot: PRINT "No ships remain"; : TICK 1: GOTO labelmanagenavy
 
 	menuRows = 0
 	FOR i = 1 TO 40: IF matrix(i, 7) > 90 AND navyLocation(who) <> i THEN menuRows = menuRows + 1: menuText$(menuRows) = cityName$(i): array(menuRows) = i
@@ -1616,7 +1616,7 @@ admiral:
 	CASE 4
 	navySize(who) = LEN(fleet$(who))
 	IF navySize(who) < 1 AND chx > 0 THEN EXIT SUB
-	IF navySize(who) < 1 OR navalCommerce = who GOTO ahoy
+	IF navySize(who) < 1 OR navalCommerce = who GOTO labelmanagenavy
 
 	IF who = currentSide THEN hasNavy = 1
 	GOSUB box2
@@ -1663,7 +1663,7 @@ admiral:
 	CASE ELSE
 	EXIT SUB
 END SELECT
-GOTO ahoy
+GOTO labelmanagenavy
 '---------------------------------------------------------------------------
 '                               Ship vs. Ship
 '---------------------------------------------------------------------------
