@@ -1930,24 +1930,24 @@ puted:  NEXT i
 			IF defend > 0 THEN x1 = capitalCity(who)
 		END IF
 	END IF
-	IF x1 > 0 GOTO haul ELSE GOTO toot
+	IF x1 > 0 GOTO confirmrrdestination ELSE GOTO toot
 human:
 	CALL MoveFrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "Railroad move not allowed"; : GOTO toot
 	x = 1: IF index > 20 THEN x = 2
 	CALL traincapacity(who, limit)
 	IF armySize(index) > limit THEN CALL clrbot: PRINT "Too many troops for railroad capacity"; : GOTO toot
 	
-	target = armyLocation(index): GOSUB route: IF x > 1 GOTO aboard
+	target = armyLocation(index): GOSUB route: IF x > 1 GOTO chooserrdestination
 	CALL clrbot: PRINT "Track from "; cityName$(target); " is blocked"; : GOTO toot
-aboard:
+chooserrdestination:
 	CALL clrbot: PRINT "Select destination for "; armyName$(index); " from "; cityName$(target);
 	menuText$(0) = "To": from = target: x1 = from: IF from = 0 GOTO toot
 	CALL newcity(x1): IF x1 = from OR x1 = 0 GOTO toot
 
-	target = x1: GOSUB route: IF x > 1 GOTO haul
+	target = x1: GOSUB route: IF x > 1 GOTO confirmrrdestination
 	CALL clrbot: PRINT armyName$(index); "'s train cannot go to "; cityName$(x1); " - select another city"; : CALL TICK(9)
-	GOTO aboard
-haul:
+	GOTO chooserrdestination
+confirmrrdestination:
 	COLOR 11: CALL clrbot: PRINT armyName$(index); " is taking the train from "; cityName$(from); " to "; cityName$(x1);
 	armyOnRailroad(who) = armyLocation(index)
 	from = armyLocation(index)
@@ -2339,7 +2339,7 @@ COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
 LOCATE 1, 20: PRINT "Update for "; monthes$(currentMonth); ","; currentYear
 CALL clrbot: PRINT "press any key for "; monthes$(currentMonth); ","; currentYear; " events";
 DO WHILE INKEY$ = "": LOOP
-GOSUB upbox
+GOSUB turnupdatebox
 '==========================================================================
 '                       Assign Time of Action
 '==========================================================================
@@ -2386,25 +2386,25 @@ CALL MoveUnitIcon(armyLocation(active), armyMove(active), 5)
 CALL AnimateMovement(active, 0)
 '==========================================================================
 target = armyMove(active)
-IF isOccupied(target) = 0 GOTO easy
-IF (s = 1 AND isOccupied(target) < 21) OR (s = 2 AND isOccupied(target) > 20) GOTO friend ELSE GOTO enemy
+IF isOccupied(target) = 0 GOTO moveintonewcity
+IF (s = 1 AND isOccupied(target) < 21) OR (s = 2 AND isOccupied(target) > 20) GOTO friendlyarmiesmeet ELSE GOTO enemyarmiesbattle
 '==========================================================================
 '                         Join Forces
 '==========================================================================
-friend:
+friendlyarmiesmeet:
 COLOR 11: CALL clrbot: PRINT armyName$(active); " and "; armyName$(isOccupied(target)); " meet in "; cityName$(target); : CALL TICK(turbo!)
 CALL MoveUnitIcon(armyMove(active), 0, 6)
 CALL clrbot
-GOTO easy
+GOTO moveintonewcity
 '==========================================================================
 '                       Attack
 '==========================================================================
-enemy:
+enemyarmiesbattle:
 CALL MoveUnitIcon(target, 0, 3)
 defend = isOccupied(target)
 
 COLOR 11: CALL clrbot: PRINT armyName$(active); " attacks "; armyName$(defend); " in "; cityName$(armyLocation(defend)); : CALL TICK(turbo! - 1)
-IF armySize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF graphicLevel > 0 THEN GOSUB upbox
+IF armySize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF graphicLevel > 0 THEN GOSUB turnupdatebox
 IF armyExp(win) < 10 THEN armyExp(win) = armyExp(win) + 1
 
 IF armySize(lose) < 2 THEN
@@ -2418,7 +2418,7 @@ CALL clrrite
 '==========================================================================
 '                       Attacker Loses
 '==========================================================================
-IF win = active GOTO kickbutt
+IF win = active GOTO defenderretreats
 armyMove(active) = armyLocation(active)
 armyLocation(active) = target
 COLOR 11: CALL clrbot: PRINT armyName$(active); " withdrew to "; cityName$(armyMove(active));
@@ -2438,7 +2438,7 @@ CALL TICK(turbo!): GOTO digin
 '==========================================================================
 '                       Defender Retreats
 '==========================================================================
-kickbutt:
+defenderretreats:
 	CALL MoveUnitIcon(armyLocation(active), target, 4)
 	IF armyMove(defend) > 0 THEN CALL MoveUnitIcon(target, armyMove(defend), 4)
 
@@ -2455,7 +2455,7 @@ kickbutt:
 		END IF
 	END IF
 	NEXT i
-	IF flee = 0 GOTO deadmeat
+	IF flee = 0 GOTO defendersurrenders
 	move2 = matrix(target, flee)
 outta:
 	CALL DrawArmyUnit(defend)                  ' in old city
@@ -2472,9 +2472,9 @@ outta:
        
 	CALL MoveUnitIcon(target, 0, 6)
 	armyMove(defend) = -2
-	GOTO holdon
+	GOTO checkmoredefenders
 
-deadmeat:
+defendersurrenders:
 	index = defend
 	someString$ = armyName$(index) + " surrenders to " + armyName$(active) + " in " + cityName$(armyLocation(index))
 	CALL scribe(someString$, 2)
@@ -2494,14 +2494,14 @@ crushed:
 '---------------------------------------------------------------------------
 '                       check for more defenders !
 '---------------------------------------------------------------------------
-holdon:
-	CALL occupy(target): IF isOccupied(target) = 0 GOTO easy
+checkmoredefenders:
+	CALL occupy(target): IF isOccupied(target) = 0 GOTO moveintonewcity
 	COLOR 11: CALL clrbot: PRINT "There are still defenders in "; cityName$(target); : CALL TICK(99)
-	GOTO enemy
+	GOTO enemyarmiesbattle
 '==========================================================================
 '                       Move Into New City
 '==========================================================================
-easy:
+moveintonewcity:
 CALL MoveUnitIcon(armyLocation(active), target, 4)
 armyLocation(active) = target: armyMove(active) = -2
 CALL occupy(armyLocation(active))
@@ -2520,11 +2520,11 @@ CALL DrawArmyUnit(active)
 		menuRows = 2
 		CALL ShowMenu(0)
 		CALL clrrite
-		IF chosenOption = 2 GOTO smoke
+		IF chosenOption = 2 GOTO razefort
 	END IF
 	IF humanPlayers = 1 AND s <> currentSide AND fortLevel(c) > 0 AND flag = 0 THEN
 		IF realism > 0 AND cityY(c) > 150 THEN
-smoke:
+razefort:
 			fortLevel(c) = 0
 			x = cityX(c)
 			y = cityY(c)
@@ -2542,7 +2542,7 @@ digin:
 NEXT j
 GOTO allthru
 
-upbox:
+turnupdatebox:
 LINE (450, 318)-(526, 420), 1, BF
 LINE (527, 315)-(527, 439), 10
 COLOR 14: LOCATE 23, 50: PRINT "============="
