@@ -24,7 +24,7 @@ rr(k) = 0: victoryPoints(k) = 0: armyOnRailroad(k) = 0
 NEXT k
 
 savedGameExists = 1: victoryFlags(1) = 1
-CALL filer(1)
+CALL FileManager(1)
 IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
 	BLOAD "mtn.vga", VARPTR(mtn(1))
@@ -141,7 +141,7 @@ newmonth:
 IF currentSide > 2 THEN currentSide = 1
 someString$ = "--------> EVENTS FOR " + monthes$(currentMonth) + " " + STR$(currentYear) + " --------"
 CALL scribe(someString$, 0)
-CALL tupdate
+CALL TurnUpdate
 cityController(1) = 0: cityController(2) = 0
 
 FOR i = 1 TO 2
@@ -205,7 +205,7 @@ SELECT CASE chosenOption
 	GOTO menu0
 '==========================================================================
 	CASE 2
-	CALL armies
+	CALL MoveArmies
 	chosit = 23
 	GOTO menu0
 '==========================================================================
@@ -279,7 +279,7 @@ optmen:
 '---------------------------------------------------------------------------
 		CASE 2
 	IF currentCash(currentSide) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
-	CALL fortify(target)
+	CALL FortifyCity(target)
 	IF currentCash(currentSide) < 200 GOTO menu0
 	chosenOption = 23
 	GOTO optmen
@@ -288,7 +288,7 @@ optmen:
 '---------------------------------------------------------------------------
 		CASE 3
 	x = currentSide
-	CALL combine(x)
+	CALL CombineArmies(x)
 	IF x < 0 THEN
 		CALL clrbot
 		COLOR 11
@@ -562,7 +562,7 @@ utile:
 '                              Vary Start Conditions
 '-------------------------------------------------------------------------
 	   CASE 9
-		CALL filer(1)
+		CALL FileManager(1)
 		currentCash(1) = currentCash(1) - 100 + 200 * RND
 		currentCash(2) = currentCash(2) + 100 + 200 * RND
 		aiBoldness = 5 * RND
@@ -674,7 +674,7 @@ filex:
 		CASE 1, 2
 loader:
 			IF chosenOption = 1 AND savedGameExists = 0 GOTO filex
-			CALL filer(chosenOption + 1)
+			CALL FileManager(chosenOption + 1)
 			IF chosenOption = 1 THEN recruitFlag = 0: canMove = 0: hasNavy = 0
 			GOTO menu0
 		CASE 3
@@ -725,7 +725,7 @@ DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
-SUB animate (index%, flag%)
+SUB AnimateMovement (index%, flag%)
 from = armyLocation(index): to2 = armyMove(index): armyLocation(index) = 0
 x = cityX(from) - 12
 y = cityY(from) - 11
@@ -751,14 +751,14 @@ already:
 	armyLocation(index) = from
 END SUB
 
-SUB armies
+SUB MoveArmies
 CALL movefrom(index, target): IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN canMove = 1
 	EXIT SUB
 tent:
 tlx = 67: tly = 12
 
-CALL armystat(index)
+CALL ShowArmyStats(index)
 COLOR 11: LOCATE 11, 68: PRINT cityName$(target)
 menuRows = 0
 menuText$(0) = "To"
@@ -777,7 +777,7 @@ armyMove(index) = array(chosenOption): CALL TICK(turbo!): CALL clrbot
 CALL clrrite
 END SUB
 
-SUB armystat (index%)
+SUB ShowArmyStats (index%)
 LINE (530, 60)-(639, 150), 0, BF
 COLOR 15
 LOCATE 5, 68: PRINT armyName$(index)
@@ -789,7 +789,7 @@ IF armySupply(index) < 2 THEN COLOR 12
 LOCATE 9, 68: PRINT "Supply:"; TAB(75); armySupply(index)
 END SUB
 
-SUB barnacle (who%)
+SUB ShipDestroyed (who%)
 navySize(who) = navySize(who) - 1
 IF navySize(who) > 0 THEN
 	fleet$(who) = LEFT$(fleet$(who), navySize(who))
@@ -992,7 +992,7 @@ victoryPoints(s) = victoryPoints(s) + 1
 CALL icon(armyLocation(defend), 0, 8)
 END SUB
 
-SUB combine (who%)
+SUB CombineArmies (who%)
 	colour = 3: target = 0: highlight = 3
 	tlx = 67: tly = 2
 	CALL starfin(start, fin, who)
@@ -1082,7 +1082,7 @@ IF y > 0 AND cityOwner(y) = who THEN a = a + 1
 NEXT j
 END SUB
 
-SUB filer (switch%)
+SUB FileManager (switch%)
 SELECT CASE switch
 	CASE 1
 	OPEN "I", 1, "cwslead.dat"
@@ -1194,7 +1194,7 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 END SELECT
 END SUB
 
-SUB flashcity (which%)
+SUB AnimateCityFlash (which%)
 FOR c = 1 TO 15 STEP 2
 CIRCLE (cityX(which), cityY(which)), 4, 0
 CIRCLE (cityX(which), cityY(which)), 3, c
@@ -1208,7 +1208,7 @@ CIRCLE (cityX(which), cityY(which)), 3, c
 PAINT (cityX(which), cityY(which)), c, c
 END SUB
 
-SUB fortify (target%)
+SUB FortifyCity (target%)
 	target = 0: highlight = 11
 	tlx = 67: tly = 2
 	who = currentSide
@@ -1517,7 +1517,7 @@ add2ship:
 deserted:
 	IF fortLevel(target) = 0 GOTO blast
 	IF RND < .7 + .03 * (navySize(who) - fortLevel(target)) GOTO hurt1
-	CALL barnacle(who)
+	CALL ShipDestroyed(who)
 	CALL clrbot
 	PRINT nationName$(cityOwner(target)); " shore battery sunk an attacking ship!"; navySize(who); "ship(s) left! ";
 	IF soundEffects > 0 THEN SOUND 77, .5: SOUND 59, .5
@@ -1650,7 +1650,7 @@ admiral:
 	CALL commander((who), empty)
 	IF chx > 0 AND empty = 0 THEN chx = 3: GOTO anchor
 	x = 35
-	CALL barnacle(who)
+	CALL ShipDestroyed(who)
 	c = navyLocation(who): CALL newarmy((who), empty, c)
 	currentCash(who) = currentCash(who) + 100     'compensate for cost of recruiting new army
 	CALL capture(empty, c, who, 0)
@@ -1718,7 +1718,7 @@ hitem:
 	 y = 90: IF who = 1 THEN y = 190
 	 GOSUB xout
 	 LOCATE 17, 5: PRINT nationName$(3 - who); " ship SUNK!": CALL TICK(turbo! + 1): GOSUB clr1
-	 CALL barnacle(3 - who)
+	 CALL ShipDestroyed(3 - who)
 	 IF navySize(3 - who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
 		PRINT nationName$(3 - who); " fleet DEFEATED"
@@ -1737,7 +1737,7 @@ hitme1:
 	 y = 190: IF who = 1 THEN y = 90
 	 GOSUB xout
 	 LOCATE 17, 5: PRINT "One of the "; nationName$(who); " ships was SUNK!": CALL TICK(turbo!): GOSUB clr1
-	 CALL barnacle(who)
+	 CALL ShipDestroyed(who)
 	 IF navySize(who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
 		PRINT "Attacking "; nationName$(who); " fleet has been ELIMINATED !"
@@ -2326,7 +2326,7 @@ SELECT CASE flag
 END SELECT
 END SUB
 
-SUB tupdate
+SUB TurnUpdate
 flag = 0
 IF humanPlayers = 1 THEN
 	CALL smarts
@@ -2383,7 +2383,7 @@ armySupply(active) = armySupply(active) - 1: IF armySupply(active) < 0 THEN army
 CALL placearmy(active)
 CALL icon(armyLocation(active), armyMove(active), 5)
 
-CALL animate(active, 0)
+CALL AnimateMovement(active, 0)
 '==========================================================================
 target = armyMove(active)
 IF isOccupied(target) = 0 GOTO easy
@@ -2424,7 +2424,7 @@ armyLocation(active) = target
 COLOR 11: CALL clrbot: PRINT armyName$(active); " withdrew to "; cityName$(armyMove(active));
 
 CALL placearmy(armyLocation(active))
-CALL animate(active, 1)
+CALL AnimateMovement(active, 1)
 
 armyLocation(active) = armyMove(active)
 CALL placearmy(armyLocation(active))
@@ -2461,7 +2461,7 @@ outta:
 	CALL placearmy(defend)                  ' in old city
 
 	armyMove(defend) = move2
-	CALL animate(defend, 0)                 ' animate retreat
+	CALL AnimateMovement(defend, 0)                 ' animate retreat
        
 	armyLocation(defend) = move2
 	isOccupied(move2) = defend
@@ -2566,7 +2566,7 @@ IF navalCommerce > 0 THEN
 		TICK 9
 	ELSE
 		navalRaider = 0
-		CALL barnacle(navalCommerce)
+		CALL ShipDestroyed(navalCommerce)
 		COLOR 15: PRINT nationName$(navalCommerce); " raiders have lost a ship ("; navySize(navalCommerce); " remain)";
 		IF soundEffects > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 		IF navyLocation(navalCommerce) > 0 THEN
@@ -2797,7 +2797,7 @@ sel1:
 			flag = 0
 			LOCATE tly + 4 + menuRows, tlx + 1: PRINT SPACE$(12);
 			END IF
-		CASE 4: CALL armystat(array(row))
+		CASE 4: CALL ShowArmyStats(array(row))
 		CASE 5: COLOR 11: CALL clrbot: PRINT armyName$(index); "  Exp="; armyExp(index); " Cash="; currentCash(currentSide);
 		CASE 6: CALL icon(armyLocation(array(row)), 0, 9)
 		CASE 8
@@ -3251,7 +3251,7 @@ SUB capture (active%, c%, s%, flag%)
 	COLOR 11: PRINT armyName$(active) + " has captured " + cityName$(c);
 	IF active < 21 AND soundEffects > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	IF active > 20 AND soundEffects > 1 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-	IF c <> capitalCity(3 - s) THEN CALL flashcity(c)
+	IF c <> capitalCity(3 - s) THEN CALL AnimateCityFlash(c)
 	victoryPoints(s) = victoryPoints(s) + cityValue(c)
 	IF c = capitalCity(3 - s) THEN
 		victoryPoints(s) = victoryPoints(s) + 100
@@ -3260,7 +3260,7 @@ SUB capture (active%, c%, s%, flag%)
 		CALL scribe(someString$, 1)
 		CALL image2(cityName$(capitalCity(3 - s)) + " has fallen!", 4)
 		capitalCity(3 - s) = 0
-		CALL flashcity(c)
+		CALL AnimateCityFlash(c)
 	END IF
 	IF fortLevel(c) > 0 AND flag > 0 THEN fortLevel(c) = fortLevel(c) - 1: x = cityX(c): y = cityY(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL showcity
 END SUB
