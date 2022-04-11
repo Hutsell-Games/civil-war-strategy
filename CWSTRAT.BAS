@@ -42,7 +42,7 @@ IF realism > 0 AND currentYear < 1862 THEN
 			fleet$(i) = someString$
 		NEXT i
 END IF
-iron:
+
 IF humanPlayers < 1 OR humanPlayers > 2 THEN humanPlayers = 1
 IF humanPlayers = 2 OR currentSide = 0 THEN currentSide = 1
 IF currentSide = 1 THEN eventsBalance = 7
@@ -72,23 +72,23 @@ LINE (180, 180)-(450, 250), 7, B
 CALL flags(1, -440, 0): CALL flags(2, -100, 0)
 IF replaying = 0 AND soundEffects = 2 AND chosenOption = 0 THEN
 IF currentSide = 1 THEN
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO skipmusic
 	PLAY "MST170o1e8o0b8o1e8"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO skipmusic
 	PLAY "e8e4f#8g4f#8"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO skipmusic
 	PLAY "g4e8d2o0b8o1d2 "
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO skipmusic
 	PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO skipmusic
 	PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO skipmusic
 	PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
     ELSE
 	CALL ShenandoahSong
     END IF
 END IF
-notitle:
+skipmusic:
 GOSUB unionplus
 
 cityName$(0) = "NONE"
@@ -235,7 +235,7 @@ END IF
 	menuText$(1) = "Yes"
 	menuText$(2) = "NOT YET"
 	menuRows = 2: CALL ShowMenu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
-endrnd:
+endturn:
 	recruitFlag = 0: canMove = 0: hasNavy = 0
 	IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN GOSUB blanken: CALL DrawMap: GOTO menu0
 	GOTO newmonth
@@ -250,7 +250,7 @@ endrnd:
 '                            Commands
 '==========================================================================
 	CASE 7
-optmen:
+commandsmenu:
 	tlx = 67: tly = 13
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
 	highlight = 15: colour = 3: chosit = 24
@@ -282,7 +282,7 @@ optmen:
 	CALL FortifyCity(target)
 	IF currentCash(currentSide) < 200 GOTO menu0
 	chosenOption = 23
-	GOTO optmen
+	GOTO commandsmenu
 '---------------------------------------------------------------------------
 '                               Combine
 '---------------------------------------------------------------------------
@@ -297,7 +297,7 @@ optmen:
 		GOTO menu0
 	END IF
 	chosenOption = 24
-	GOTO optmen
+	GOTO commandsmenu
 '---------------------------------------------------------------------------
 '                               Supply
 '---------------------------------------------------------------------------
@@ -327,7 +327,7 @@ alone:
 		CALL DrawArmyUnit(index)
 		END IF
 		chosenOption = 25
-		GOTO optmen
+		GOTO commandsmenu
 '-------------------------------------------------------------------------
 '                               Move Capital
 '-------------------------------------------------------------------------
@@ -363,7 +363,7 @@ alone:
 	COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; armyName$(empty); : CALL TICK(turbo!): IF soundEffects > 0 THEN SOUND 2222, 1
 	CALL stax(currentSide)
 	chosenOption = 27
-	GOTO optmen
+	GOTO commandsmenu
 '-------------------------------------------------------------------------
 '                               Drill
 '-------------------------------------------------------------------------
@@ -371,31 +371,31 @@ alone:
 	COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
 	CALL MoveFrom(index, target)
 	IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; monthes$(currentMonth); : GOTO menu0
-	IF armyExp(index) > 5 OR armyExp(index) >= armyCommander(index) THEN COLOR 12: CALL clrbot: PRINT armyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
+	IF armyExp(index) > 5 OR armyExp(index) >= armyCommander(index) THEN COLOR 12: CALL clrbot: PRINT armyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO commandsmenu
 	armyExp(index) = armyExp(index) + 1
 	CALL clrbot: PRINT armyName$(index); " has drilled to reach experience level "; armyExp(index); : IF soundEffects > 0 THEN SOUND 2222, 1
 	CALL TICK(turbo!): clrbot
 	armyMove(index) = -1
 	chosenOption = 28
-	GOTO optmen
+	GOTO commandsmenu
 '-------------------------------------------------------------------------
 '                               Relieve
 '-------------------------------------------------------------------------
 		CASE 8
 		CALL relieve(currentSide)
 		chosenOption = 29
-		GOTO optmen
+		GOTO commandsmenu
 '-------------------------------------------------------------------------
 		CASE ELSE
 		chosit = 28
 		GOTO menu0
       END SELECT
-	chosenOption = 21 + chosenOption: GOTO optmen
+	chosenOption = 21 + chosenOption: GOTO commandsmenu
 '==========================================================================
 '                               Utility Menu
 '==========================================================================
 	CASE 8
-utile:
+utilitymenu:
 	chosit = 29
 	menuText$(0) = "Utility"
 	menuText$(1) = "Side": IF humanPlayers = 2 THEN menuText$(2) = ""
@@ -440,7 +440,7 @@ utile:
 		IF soundEffects > 0 THEN SOUND 999, 1
 		someString$ = "Solo": IF humanPlayers = 2 THEN someString$ = "2 Player"
 		PRINT someString$; " Game";
-		chosenOption = 23: GOTO utile
+		chosenOption = 23: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Graphics
 '-------------------------------------------------------------------------
@@ -454,7 +454,7 @@ utile:
 		CLS
 		CALL DrawMap
 		CALL clrbot: COLOR 11: PRINT "Graphics : "; someString$; : IF soundEffects > 0 THEN SOUND 2700, 1
-		chosenOption = 24: GOTO utile
+		chosenOption = 24: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Sounds
 '-------------------------------------------------------------------------
@@ -470,7 +470,7 @@ utile:
 		COLOR 11: CALL clrbot: PRINT "Sound Option : "; menuText$(chosenOption);
 		soundEffects = chosenOption - 1
 		IF soundEffects > 0 THEN SOUND 999, 1
-		chosenOption = 25: GOTO utile
+		chosenOption = 25: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Display Speed
 '-------------------------------------------------------------------------
@@ -497,7 +497,7 @@ utile:
 				CALL DrawMap
 				CALL DrawTopBar
 		END SELECT
-		chosenOption = 26: GOTO utile
+		chosenOption = 26: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Play Balance
 '-------------------------------------------------------------------------
@@ -516,13 +516,13 @@ utile:
 		COLOR 11: CALL clrbot: PRINT "Play Balance : "; menuText$(chosenOption);
 		difficultyLevel = chosenOption
 		GOSUB unionplus
-		chosenOption = 27: GOTO utile
+		chosenOption = 27: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Ending Conditions
 '-------------------------------------------------------------------------
 	   CASE 7
 		CALL VictoryConditionsMet
-		chosenOption = 28: GOTO utile
+		chosenOption = 28: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                           Random Events Options
 '-------------------------------------------------------------------------
@@ -557,7 +557,7 @@ utile:
 		 CLS
 		 CALL DrawMap
 		 chosenOption = 29
-		 GOTO utile
+		 GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                              Vary Start Conditions
 '-------------------------------------------------------------------------
@@ -596,7 +596,7 @@ utile:
 		NEXT k
 		CLS
 		CALL DrawMap
-		chosenOption = 30: GOTO utile
+		chosenOption = 30: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               January Campaigns
 '-------------------------------------------------------------------------
@@ -606,7 +606,7 @@ utile:
 		COLOR 11
 		CALL clrbot
 		PRINT "January Campaigns : "; someString$;
-		chosenOption = 31: GOTO utile
+		chosenOption = 31: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Realism Switch
 '-------------------------------------------------------------------------
@@ -620,7 +620,7 @@ utile:
 		IF currentSide = 2 AND eventsBalance = 1 AND eventsBalance < 5 THEN eventsBalance = eventsBalance + 2
 		GOSUB unionplus
 	END IF
-		chosenOption = 32: GOTO utile
+		chosenOption = 32: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Check Map Linakges
 '-------------------------------------------------------------------------
@@ -635,7 +635,7 @@ utile:
 		history = 1 - history
 		someString$ = "OFF": IF history = 1 THEN someString$ = "ON"
 		CALL clrbot: PRINT "History is now "; someString$;
-		chosenOption = 34: GOTO utile
+		chosenOption = 34: GOTO utilitymenu
 '-------------------------------------------------------------------------
 '                               Aggression
 '-------------------------------------------------------------------------
@@ -652,7 +652,7 @@ utile:
 		CALL clrbot
 		COLOR 11
 		PRINT "Enemy Aggression : "; someString$; " ("; aiBoldness; ")";
-		chosenOption = 35: GOTO utile
+		chosenOption = 35: GOTO utilitymenu
 		CASE ELSE
 	   END SELECT
 '==========================================================================
@@ -660,7 +660,7 @@ utile:
 '==========================================================================
 	CASE 9
 	IF _FILEEXISTS("*.sav") = 0 THEN savedGameExists = 0
-filex:
+newgamemenu:
 	chosenOption = 23: chosit = 30: IF currentYear = 1861 THEN chosenOption = 22
 	menuText$(0) = "Options"
 	menuText$(1) = "Load": IF savedGameExists = 0 THEN menuText$(1) = "-": chosenOption = 23
@@ -673,7 +673,7 @@ filex:
 		CASE IS < 1: GOTO menu0
 		CASE 1, 2
 loader:
-			IF chosenOption = 1 AND savedGameExists = 0 GOTO filex
+			IF chosenOption = 1 AND savedGameExists = 0 GOTO newgamemenu
 			CALL FileManager(chosenOption + 1)
 			IF chosenOption = 1 THEN recruitFlag = 0: canMove = 0: hasNavy = 0
 			GOTO menu0
@@ -683,11 +683,11 @@ loader:
 			CLOSE #1
 			CLS
 			GOTO newgame
-		CASE 4: GOTO rusure
+		CASE 4: GOTO confirmquitmenu
 	END SELECT
 '==========================================================================
 	CASE 99
-	GOTO endrnd
+	GOTO endturn
 CASE ELSE
 	chosit = 22
 	GOTO menu0
@@ -696,7 +696,7 @@ GOTO menu0
 '............................................................................
 '                               Subs
 '............................................................................
-rusure:
+confirmquitmenu:
 chosenOption = 23
 menuText$(0) = "Quit"
 menuText$(1) = "Yes"
@@ -1022,8 +1022,8 @@ join:
 '...........................................................................
 		best = 0: x = 0: spin = 0
 		FOR j = start TO fin
-		IF armyMove(j) <> 0 OR armyLocation(j) <> target OR armySize(j) = 0 GOTO dork1
-		IF armySize(0) + armySize(j) > 1250 THEN CALL clrbot: PRINT "Cannot combine "; armyName$(j); "... TOO LARGE"; : CALL TICK(turbo!): GOTO dork1
+		IF armyMove(j) <> 0 OR armyLocation(j) <> target OR armySize(j) = 0 GOTO cannotcombinearmies
+		IF armySize(0) + armySize(j) > 1250 THEN CALL clrbot: PRINT "Cannot combine "; armyName$(j); "... TOO LARGE"; : CALL TICK(turbo!): GOTO cannotcombinearmies
 
 		IF armyCommander(j) > x THEN
 			x = armyCommander(j)
@@ -1033,7 +1033,7 @@ join:
 		END IF
 
 		armySize(0) = armySize(0) + armySize(j)
-		IF armySize(0) < 1 GOTO dork1
+		IF armySize(0) < 1 GOTO cannotcombinearmies
 		pct! = (armySize(j) / armySize(0))
 		spin = spin + 1
 		armyExp(0) = (1 - pct!) * armyExp(0) + pct! * armyExp(j)
@@ -1043,7 +1043,7 @@ join:
 		armySize(j) = 0: armyLocation(j) = 0: armyExp(j) = 0: armyMove(j) = 0
 		leaderName$(j) = armyName$(j)
 		armyCommander(j) = 0: armySupply(j) = 0: armyName$(j) = ""
-dork1:
+cannotcombinearmies:
 		NEXT j
 
 		CALL clrbot
@@ -1326,7 +1326,7 @@ currentMonth = currentMonth + 2
 IF currentMonth > 12 THEN currentMonth = 1: currentYear = currentYear + 1
 '---------------------------------------------------------------------------
 s = 1
-FOR i = 1 TO 40: IF armyLocation(i) < 1 GOTO rip
+FOR i = 1 TO 40: IF armyLocation(i) < 1 GOTO skiparmy
 IF i > 20 THEN s = 2
 IF currentCash(s) >= .2 * armySize(i) THEN
 	a = 1: IF realism > 0 THEN CALL cutoff(s, armyLocation(i), a)
@@ -1346,7 +1346,7 @@ IF armySupply(i) < 1 THEN
 	CALL TICK(turbo!)
 	IF RND > .8 AND armySize(i) > 50 THEN armySize(i) = .9 * armySize(i)
 END IF
-rip:
+skiparmy:
 NEXT i
 FOR k = 1 TO 2: CALL stax(k): NEXT k
 y = 0: FOR i = 1 TO 20: y = y + .1 * armySize(i): NEXT i
@@ -1392,7 +1392,7 @@ IF chx > 0 THEN
 	END IF
 END IF
 COLOR 11
-ahoy:
+labelmanagenavy:
 cost = 100: cityOwner(0) = who
 IF chx = 0 THEN CALL clrbot: PRINT "Funds available "; currentCash(who);
 IF chx = 1 THEN
@@ -1428,13 +1428,13 @@ SELECT CASE chosenOption
 '                               Build Ship
 '---------------------------------------------------------------------------
 	CASE 1
-	IF currentCash(who) < cost OR navyLocation(who) = 99 GOTO ahoy
+	IF currentCash(who) < cost OR navyLocation(who) = 99 GOTO labelmanagenavy
 	IF chx = 1 AND navySize(who) > 9 THEN EXIT SUB
-	IF chx = 0 AND navySize(who) > 9 THEN GOTO ahoy
+	IF chx = 0 AND navySize(who) > 9 THEN GOTO labelmanagenavy
 
 	IF chx = 0 AND navyLocation(who) > 0 THEN
-		IF cityOwner(navyLocation(who)) <> who GOTO ahoy
-		IF matrix(navyLocation(who), 7) < 99 GOTO ahoy
+		IF cityOwner(navyLocation(who)) <> who GOTO labelmanagenavy
+		IF matrix(navyLocation(who), 7) < 99 GOTO labelmanagenavy
 	END IF
 	IF chx = 1 AND RND < .07 * navySize(who) THEN EXIT SUB
 	someString$ = "W"
@@ -1449,7 +1449,7 @@ SELECT CASE chosenOption
 			menuRows = 2
 			CALL ShowMenu(0)
 			CALL clrrite
-			IF chosenOption < 1 GOTO ahoy
+			IF chosenOption < 1 GOTO labelmanagenavy
 			IF chosenOption = 2 THEN someString$ = "I": cost = 2 * cost
 		ELSE
 			someString$ = "I"
@@ -1484,7 +1484,7 @@ ships:
 	PSET (400, 465), 0: CALL DrawShipIcon(who, a)
 	IF soundEffects > 0 THEN SOUND 3000, 1
 	CALL TICK(turbo!)
-	GOTO ahoy
+	GOTO labelmanagenavy
 add2ship:
 	currentCash(who) = currentCash(who) - cost
 	CALL clrbot: PRINT nationName$(who); " navy increased to "; navySize(who);
@@ -1515,8 +1515,8 @@ add2ship:
 	armySize(index) = armySize(index) - killd: IF armySize(index) < 1 THEN armySize(index) = 1
 	EXIT SUB
 deserted:
-	IF fortLevel(target) = 0 GOTO blast
-	IF RND < .7 + .03 * (navySize(who) - fortLevel(target)) GOTO hurt1
+	IF fortLevel(target) = 0 GOTO bombardcity
+	IF RND < .7 + .03 * (navySize(who) - fortLevel(target)) GOTO damagedfortifications
 	CALL ShipDestroyed(who)
 	CALL clrbot
 	PRINT nationName$(cityOwner(target)); " shore battery sunk an attacking ship!"; navySize(who); "ship(s) left! ";
@@ -1531,13 +1531,13 @@ deserted:
 		GOTO sail3
 	END IF
 	GOTO deserted
-hurt1:
+damagedfortifications:
 	CALL clrbot: PRINT cityName$(target); " fortifications damaged";
 	fortLevel(target) = fortLevel(target) - 1: x = cityX(target): y = cityY(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
 	CALL DrawCities
 	CALL TICK(turbo!)
 	EXIT SUB
-blast:
+bombardcity:
 	IF RND > .25 + .07 * navySize(who) THEN CALL clrbot: PRINT "Citizens of "; cityName$(target); " stand firm against the attack"; : CALL TICK(turbo!): EXIT SUB
 	IF navyLocation(who) = capitalCity(3 - who) THEN CALL clrbot: PRINT "The CAPITAL steadfastly stands loyal"; : CALL TICK(turbo!): EXIT SUB
 	cityOwner(navyLocation(who)) = 0
@@ -1608,7 +1608,7 @@ admiral:
 		TICK turbo!
 	END IF
 	navyLocation(who) = array(chosenOption)
-	IF navyLocation(1) = navyLocation(2) GOTO pirate
+	IF navyLocation(1) = navyLocation(2) GOTO navalbattle
 	GOTO sail3
 '---------------------------------------------------------------------------
 '                               Raid Commerce
@@ -1640,7 +1640,7 @@ admiral:
 		TICK turbo!
 	END IF
 	navyLocation(who) = 99: navalCommerce = who
-	IF navyLocation(1) = navyLocation(2) GOTO pirate
+	IF navyLocation(1) = navyLocation(2) GOTO navalbattle
 	CLS : CALL DrawMap
 	EXIT SUB
 '---------------------------------------------------------------------------
@@ -1667,13 +1667,13 @@ GOTO ahoy
 '---------------------------------------------------------------------------
 '                               Ship vs. Ship
 '---------------------------------------------------------------------------
-pirate:
+navalbattle:
 	CLS : LOCATE 1, 30: COLOR 11: PRINT "NAVAL COMBAT"
 	FOR k = 1 TO 2
 	hit(k) = 10
 	IF RIGHT$(fleet$(k), 1) = "I" THEN hit(k) = 20
 	NEXT k
-cannon:
+drawnavalbattle:
 	LOCATE 9, 1: PRINT SPACE$(79)
 	LOCATE 15, 1: PRINT SPACE$(79)
 	x = 10: y = 100
@@ -1694,7 +1694,7 @@ cannon:
 	CALL ShipType(2, i)
 	NEXT i
 	COLOR 11
-wave:
+navalbattleoptions:
 	menuText$(0) = "Options"
 	menuText$(1) = "Attack"
 	menuText$(2) = "Retreat"
@@ -1730,7 +1730,7 @@ hitem:
 	 END IF
 	 hit(3 - who) = 10
 	 IF RIGHT$(fleet$(3 - who), 1) = "I" THEN hit(3 - who) = 20
-	 GOTO cannon
+	 GOTO drawnavalbattle
 hitme1:
 	 hit(who) = hit(who) - 1: GOSUB showhit: IF hit(who) > 0 GOTO firemore
 	 x = 10 + 50 * navySize(who)
@@ -1749,7 +1749,7 @@ hitme1:
 	 END IF
 	 hit(who) = 10
 	 IF RIGHT$(fleet$(who), 1) = "I" THEN hit(who) = 20
-	 GOTO cannon
+	 GOTO drawnavalbattle
 
 	 CASE 2
 	 target = 0
@@ -1761,9 +1761,9 @@ found1:
 	 navyLocation(who) = target
 	 GOTO sail3
 	 CASE ELSE
-	 GOTO wave
+	 GOTO navalbattleoptions
 	 END SELECT
-	 GOTO pirate
+	 GOTO navalbattle
 '---------------------------------------------------------------------------
 '                               Subs
 '---------------------------------------------------------------------------
