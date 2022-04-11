@@ -162,7 +162,7 @@ IF navalCommerce > 0 AND i <> navalCommerce THEN currentCash(i) = currentCash(i)
 NEXT i
 vpTotal = currentIncome(1) + currentIncome(2)
 
-chosit = 22
+newChosenOption = 22
 IF humanPlayers = 2 THEN GOSUB blanken: CALL DrawMap
 CALL victor
 ON ERROR GOTO 0
@@ -181,10 +181,10 @@ highlight = 11
 colour = 4
 tlx = 67: tly = 13
 menuText$(0) = "Main"
-menuText$(1) = "Troops": IF recruitFlag < 0 OR currentCash(currentSide) < 100 THEN menuText$(1) = "-": chosit = 23
-menuText$(2) = "Moves": IF canMove > 0 THEN menuText$(2) = "-": IF chosit = 23 THEN chosit = 24
-menuText$(3) = "Ships": IF hasNavy > 0 THEN menuText$(3) = "-": IF chosit = 24 THEN chosit = 25
-menuText$(4) = "Railroad": IF rr(currentSide) > 0 THEN menuText$(4) = "-": IF chosit = 25 THEN chosit = 26
+menuText$(1) = "Troops": IF recruitFlag < 0 OR currentCash(currentSide) < 100 THEN menuText$(1) = "-": newChosenOption = 23
+menuText$(2) = "Moves": IF canMove > 0 THEN menuText$(2) = "-": IF newChosenOption = 23 THEN newChosenOption = 24
+menuText$(3) = "Ships": IF hasNavy > 0 THEN menuText$(3) = "-": IF newChosenOption = 24 THEN newChosenOption = 25
+menuText$(4) = "Railroad": IF rr(currentSide) > 0 THEN menuText$(4) = "-": IF newChosenOption = 25 THEN newChosenOption = 26
 menuText$(5) = "END TURN"
 menuText$(6) = "Inform"
 menuText$(7) = "COMMANDS"
@@ -192,7 +192,7 @@ menuText$(8) = "UTILITY"
 menuText$(9) = "Files"
 
 menuRows = 9
-chosenOption = chosit
+chosenOption = newChosenOption
 CALL ShowMenu(0): CALL clrrite
 '==========================================================================
 '                            Main Menu
@@ -201,17 +201,17 @@ SELECT CASE chosenOption
 	CASE 1
 	IF currentCash(currentSide) < 100 OR recruitFlag < 0 THEN recruitFlag = -1: GOTO menu0
 	CALL RecruitArmy((currentSide))
-	chosit = 23
+	newChosenOption = 23
 	GOTO menu0
 '==========================================================================
 	CASE 2
 	CALL MoveArmies
-	chosit = 23
+	newChosenOption = 23
 	GOTO menu0
 '==========================================================================
 	CASE 3
 	IF hasNavy = 0 THEN CALL ManageNavy((currentSide), 0)
-	chosit = 25
+	newChosenOption = 25
 	CASE 4
 IF rr(currentSide) = 0 THEN
 	COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
@@ -234,14 +234,14 @@ END IF
 	menuText$(0) = "End Turn"
 	menuText$(1) = "Yes"
 	menuText$(2) = "NOT YET"
-	menuRows = 2: CALL ShowMenu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
+	menuRows = 2: CALL ShowMenu(0): CALL clrrite: IF chosenOption <> 1 THEN newChosenOption = 24: GOTO menu0
 endturn:
 	recruitFlag = 0: canMove = 0: hasNavy = 0
 	IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN GOSUB blanken: CALL DrawMap: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
-	CALL ShowReports((currentSide)): chosit = 27
+	CALL ShowReports((currentSide)): newChosenOption = 27
 	CALL StartToFinish(start, fin, currentSide)
 	FOR i = start TO fin
 	IF armyMove(i) > 0 THEN CALL MoveUnitIcon(armyLocation(i), armyMove(i), 1)
@@ -253,7 +253,7 @@ endturn:
 commandsmenu:
 	tlx = 67: tly = 13
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	highlight = 15: colour = 3: chosit = 24
+	highlight = 15: colour = 3: newChosenOption = 24
 	menuText$(0) = "Commands"
 	menuText$(1) = "Cancel"
 	menuText$(2) = "Fortify": IF currentCash(currentSide) < 200 THEN menuText$(2) = "-"
@@ -266,7 +266,7 @@ commandsmenu:
 	menuText$(9) = "MAIN MENU"
 	menuRows = 9
 	CALL ShowMenu(0): CALL clrrite
-	chosit = 28
+	newChosenOption = 28
      SELECT CASE chosenOption
 '---------------------------------------------------------------------------
 '                               Cancel
@@ -387,7 +387,7 @@ alone:
 		GOTO commandsmenu
 '-------------------------------------------------------------------------
 		CASE ELSE
-		chosit = 28
+		newChosenOption = 28
 		GOTO menu0
       END SELECT
 	chosenOption = 21 + chosenOption: GOTO commandsmenu
@@ -396,7 +396,7 @@ alone:
 '==========================================================================
 	CASE 8
 utilitymenu:
-	chosit = 29
+	newChosenOption = 29
 	menuText$(0) = "Utility"
 	menuText$(1) = "Side": IF humanPlayers = 2 THEN menuText$(2) = ""
 	menuText$(2) = "1 Player": IF humanPlayers = 2 THEN menuText$(2) = "2 Player"
@@ -661,7 +661,7 @@ utilitymenu:
 	CASE 9
 	IF _FILEEXISTS("*.sav") = 0 THEN savedGameExists = 0
 newgamemenu:
-	chosenOption = 23: chosit = 30: IF currentYear = 1861 THEN chosenOption = 22
+	chosenOption = 23: newChosenOption = 30: IF currentYear = 1861 THEN chosenOption = 22
 	menuText$(0) = "Options"
 	menuText$(1) = "Load": IF savedGameExists = 0 THEN menuText$(1) = "-": chosenOption = 23
 	menuText$(2) = "Save"
@@ -689,7 +689,7 @@ loader:
 	CASE 99
 	GOTO endturn
 CASE ELSE
-	chosit = 22
+	newChosenOption = 22
 	GOTO menu0
 END SELECT
 GOTO menu0
@@ -2859,7 +2859,7 @@ SUB VictoryConditionsMet
 	showvictoryconditionsbox:
 		FOR i = 2 TO 6: IF victoryFlags(i) > 0 THEN menuText$(i - 1) = "+ " ELSE menuText$(i - 1) = "  "
 		NEXT i
-		chosenOption = chosit
+		chosenOption = newChosenOption
 		menuText$(0) = "Victory Conditions"
 		menuText$(1) = menuText$(1) + menuText$(8)
 		menuText$(2) = menuText$(2) + someString$
@@ -2869,7 +2869,7 @@ SUB VictoryConditionsMet
 		menuText$(6) = "DONE"
 		windowType = 2: colour = 3: menuRows = 6: highlight = 14
 		CALL ShowMenu(0)
-		chosit = 21 + chosenOption
+		newChosenOption = 21 + chosenOption
 	SELECT CASE chosenOption
 		CASE 1
 		victoryFlags(2) = -victoryFlags(2)
