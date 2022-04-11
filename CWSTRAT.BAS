@@ -1,21 +1,17 @@
 DEFINT A-Z
-
-DIM SHARED chosenOption%, tlx%, tly%, menuRows%, windowType%, colour%, highlight%
-DIM SHARED savedGameExists, recruitFlag, hasNavy, aiBoldness, turbo!
-DIM SHARED month, year, canMove, currentSide, ATKFAC, DEFAC, TCR
-DIM SHARED vpTotal, graphicLevel, soundEffects, difficultyLevel, usAdvantage, borderWidth
-DIM SHARED januaryCampaign, eventsBalance, realism, humanPlayers, aggress!
-DIM SHARED timesPlayed, history, thrill, commerce, raider, grudge
-DIM SHARED cityX(40), cityY(40), cityValue(40), cityOwner(40), cityName$(40), leaderName$(40), recruitCity(5)
-DIM SHARED currentCash(2), cityController(2), matrix(40, 7), currentIncome(2), leaderRating(40)
-DIM SHARED menuText$(21), nationName$(2), armyLocation(40), armyName$(40), victoryFlags(6)
-DIM SHARED armySize(40), armyCommander(40), armyExp(40), armySupply(40), month$(12)
-DIM SHARED armyMove(40), array(40), starX(8), starY(8), mtn(1 TO 1564), rrFrom(2)
-DIM SHARED navyLocation(2), navySize(2), navyMove(2), isOccupied(40), fortLevel(40), rr(2)
-DIM SHARED victoryPoints(2), capitalCity(2), emancipate, armyOnRailroad(2), fleet$(2)
-DIM SHARED trainCapacity(2), font$(26), orderOfMoves(40), casualty&(2), battleStats(2), cityo(40)
-DIM SHARED graphic(1 TO 1564), Ncap(60)
-DIM SHARED facesImage(1 TO 1564)
+ 
+DIM SHARED ATKFAC, DEFAC, TCR
+DIM SHARED aggress!, aiBoldness, armySize(40), armyCommander(40), armyExp(40), armySupply(40), armyMove(40), array(40)
+DIM SHARED armyOnRailroad(2), armyLocation(40), armyName$(40), battleStats(2), borderWidth, canMove, commerce
+DIM SHARED currentIncome(2), capitalCity(2), casualty&(2), chosenOption%, cityo(40), cityX(40), cityY(40), cityValue(40)
+DIM SHARED cityOwner(40), currentCash(2), cityController(2), cityName$(40), colour%, currentSide
+DIM SHARED difficultyLevel, emancipate, eventsBalance, facesImage(1 TO 1564), fleet$(2), font$(26), fortLevel(40)
+DIM SHARED graphicLevel, graphic(1 TO 1564), grudge, hasNavy, highlight%, history, humanPlayers, isOccupied(40), januaryCampaign
+DIM SHARED leaderName$(40), leaderRating(40), menuText$(21), menuRows%, matrix(40, 7), month, month$(12), mtn(1 TO 1564)
+DIM SHARED nationName$(2), navyLocation(2), navySize(2), navyMove(2), Ncap(60), orderOfMoves(40), rr(2), rrFrom(2), realism, raider
+DIM SHARED recruitCity(5), recruitFlag, savedGameExists, soundEffects, starX(8), starY(8), thrill, turbo!
+DIM SHARED tlx%, tly%, trainCapacity(2), timesPlayed
+DIM SHARED usAdvantage, victoryFlags(6), victoryPoints(2), windowType%, vpTotal, year
 
 replaying = 0
 newgame:
