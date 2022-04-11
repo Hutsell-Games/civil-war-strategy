@@ -2740,7 +2740,6 @@ LINE (110, 313)-(114, 315), 0, BF
 END SUB
 
 SUB ShowMenu (switch%)
-remenu:
 	IF colour = 0 THEN colour = 7
 	LOCATE 1, 1, 0
 	IF menuText$(0) = "" THEN menuText$(0) = "M E N U"
@@ -3333,7 +3332,7 @@ SUB VictoryConditionsMet
 	menuText$(9) = RTRIM$(STR$(ABS(victoryFlags(6)))) + ":1 Force Ratio"
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
-what4:
+showvictoryconditionsbox:
 	FOR i = 2 TO 6: IF victoryFlags(i) > 0 THEN menuText$(i - 1) = "+ " ELSE menuText$(i - 1) = "  "
 	NEXT i
 	chosenOption = chosit
@@ -3355,7 +3354,7 @@ SELECT CASE chosenOption
 	CASE ELSE
 	GOTO cheer
 END SELECT
-	GOTO what4
+	GOTO showvictoryconditionsbox
 cheer:
 	CLS
 	CALL DrawMap
@@ -3491,42 +3490,42 @@ SELECT CASE who
 	CASE 1
 	IF currentYear = 1864 AND currentMonth = 1 THEN victoryPoints(2) = victoryPoints(2) + 50
 	IF currentYear = 1865 AND currentMonth = 1 THEN victoryPoints(2) = victoryPoints(2) + 100
-	IF RND > .9 THEN GOSUB riot: EXIT SUB
+	IF RND > .9 THEN GOSUB riotsincity: EXIT SUB
 
 	CALL clrbot
-	IF RND > .2 OR navySize(2) > 9 GOTO mercen
-	IF navySize(2) > 0 AND navyLocation(2) <> 99 THEN empty = navyLocation(2): GOTO float1
+	IF RND > .2 OR navySize(2) > 9 GOTO mercenariesjoin
+	IF navySize(2) > 0 AND navyLocation(2) <> 99 THEN empty = navyLocation(2): GOTO englandgivesships
 		empty = 0
 		FOR i = 1 TO 40
 		IF cityOwner(i) = 2 AND matrix(i, 7) = 99 AND navyLocation(1) <> i THEN empty = i: EXIT FOR
 		NEXT i
-	IF empty = 0 GOTO mercen
-float1:
+	IF empty = 0 GOTO mercenariesjoin
+englandgivesships:
 	CALL scribe("England has given ships to the South", 2)
 	navySize(2) = navySize(2) + 2 * plus
 	IF navySize(2) > 10 THEN navySize(2) = 10
 	x = navySize(2) - LEN(fleet$(2))
 	fleet$(2) = fleet$(2) + STRING$(x, "W")
 	navyLocation(2) = empty: CALL ships
-	GOTO dull1
-mercen:
-	IF RND > .1 OR cityController(2) < 30 GOTO money
+	GOTO southeventmusic
+mercenariesjoin:
+	IF RND > .1 OR cityController(2) < 30 GOTO europeloan
 	someString$ = "French": IF RND > .5 THEN someString$ = "British"
 	CALL scribe(someString$ + " mercenaries join " + armyName$(index) + "'s army", 2)
 	armySize(index) = armySize(index) + 100 * plus
 	armyExp(index) = 10: armySupply(index) = 10
-	GOTO dull1
-money:
-	IF RND > .3 OR cityController(2) < 12 GOTO cotton
+	GOTO southeventmusic
+europeloan:
+	IF RND > .3 OR cityController(2) < 12 GOTO cottonsales
 		CALL scribe("The South has obtained a loan from Europe", 2)
-		GOTO purse
-cotton:
-	IF RND > .5 OR cityController(2) < 12 GOTO uprising
+		GOTO skipcottonsales
+cottonsales:
+	IF RND > .5 OR cityController(2) < 12 GOTO nativeuprising
 	CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
-purse:
+skipcottonsales:
 	currentCash(2) = currentCash(2) + 100 * plus
-	GOTO dull1
-uprising:
+	GOTO southeventmusic
+nativeuprising:
 	pct! = .9
 	someString$ = "Union troops diverted to fight Western Indian uprisings"
 	IF RND > .5 THEN someString$ = "Union 90-day enlistees return home"
@@ -3535,9 +3534,9 @@ uprising:
 	FOR k = 1 TO 20
 	armySize(k) = pct! * armySize(k)
 	NEXT k
-	GOTO dull1
+	GOTO southeventmusic
 '----------------------------------------------------------------------------
-riot:
+riotsincity:
 	IF realism = 0 THEN RETURN
 	IF cityController(who) = 1 THEN EXIT SUB
 	FOR k = 1 TO 99
@@ -3559,42 +3558,42 @@ riot:
 '                               good for Union
 '----------------------------------------------------------------------------
 	CASE 2
-	IF RND > .1 OR navyLocation(1) = 0 OR navySize(1) > 9 GOTO event2
-	IF RND > .95 THEN GOSUB riot: EXIT SUB
+	IF RND > .1 OR navyLocation(1) = 0 OR navySize(1) > 9 GOTO unionvolunteers
+	IF RND > .95 THEN GOSUB riotsincity: EXIT SUB
 	CALL scribe("Union shipworks have produced extra ships", 2)
 	navySize(1) = navySize(1) + plus
 	IF navySize(1) > 10 THEN navySize(1) = 10
 	x = navySize(1) - LEN(fleet$(1))
 	fleet$(1) = fleet$(1) + STRING$(x, "W")
-	GOTO dull2
-event2:
-	IF RND < .7 GOTO abe
+	GOTO northeventmusic
+unionvolunteers:
+	IF RND < .7 GOTO emancipated
 	CALL scribe("Volunteer troops swell the Union ranks", 2)
-	x = 0: FOR i = 1 TO 20: x = x + 1: IF x > 5 GOTO dull2
+	x = 0: FOR i = 1 TO 20: x = x + 1: IF x > 5 GOTO northeventmusic
 	IF armySize(i) > 0 AND RND > .5 THEN armySize(i) = armySize(i) * 1.1 + plus
-	NEXT i: GOTO dull2
-abe:
+	NEXT i: GOTO northeventmusic
+emancipated:
 	IF emancipate = 0 AND currentYear > 1862 THEN
 
 		emancipate = 1
 		CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
 		victoryPoints(1) = victoryPoints(1) + 100: victoryPoints(2) = victoryPoints(2) - 100
 		CALL DrawMap
-		GOTO dull2
+		GOTO northeventmusic
 	END IF
 	IF currentYear = 1864 AND currentMonth = 11 THEN
 		CALL scribe("Lincoln has been reelected", 2)
 		victoryPoints(2) = .5 * victoryPoints(2)
-		GOTO dull2
+		GOTO northeventmusic
 	END IF
 	IF RND > .5 THEN
 		CALL scribe("Wealthy Unionists give generously to the Federal Cause", 2)
 		currentCash(1) = currentCash(1) + 100 * plus
-		GOTO dull2
+		GOTO northeventmusic
 	END IF
 	IF RND > .5 AND currentYear > 1861 THEN
 		CALL scribe("Rebel deserters leave the battlefield to go home", 2)
-		FOR i = 21 TO 40: armySize(i) = .92 * armySize(i): NEXT i: GOTO dull2
+		FOR i = 21 TO 40: armySize(i) = .92 * armySize(i): NEXT i: GOTO northeventmusic
 	END IF
 	IF RND > .5 AND currentYear > 1861 THEN
 		CALL scribe("Union soldiers now have repeating rifles", 2)
@@ -3603,14 +3602,14 @@ abe:
 		NEXT i
 	END IF
 		CALL scribe("Secretary of War Stanton predicts the end of the Rebellion", 2)
-		victoryPoints(1) = victoryPoints(1) + 10: GOTO dull2
+		victoryPoints(1) = victoryPoints(1) + 10: GOTO northeventmusic
 	CASE ELSE
 END SELECT
 
-dull2:
+northeventmusic:
 	IF soundEffects = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	DO WHILE INKEY$ = "": LOOP: EXIT SUB
-dull1:
+southeventmusic:
 	IF soundEffects = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	DO WHILE INKEY$ = "": LOOP
 END SUB
@@ -3802,11 +3801,11 @@ END IF
 NEXT i
 CALL bubble(menuRows)
 
-have2:
+selectnewleader:
 menuText$(0) = "New Leader"
 tlx = 67: tly = 2
 CALL ShowMenu(0): CALL clrrite
-IF chosenOption < 1 GOTO have2
+IF chosenOption < 1 GOTO selectnewleader
 armyMove(index) = -1
 armyCommander(index) = leaderRating(array(chosenOption))
 IF armyCommander(index) > 0 THEN armyCommander(index) = armyCommander(index) - 1
@@ -3820,8 +3819,8 @@ END SUB
 
 SUB ShowReports (who%)
 DIM summ(40)
-IF who = -1 GOTO frep
-IF who > 100 GOTO batrep
+IF who = -1 GOTO forcesummary
+IF who > 100 GOTO battlereport
 menuText$(0) = "Information"
 menuText$(1) = nationName$(currentSide) + " Armies"
 menuText$(2) = nationName$(3 - currentSide) + " Armies"
@@ -3837,10 +3836,10 @@ CASE IS < 0
 	CALL DrawMap
 	EXIT SUB
 CASE 2: who = 3 - currentSide
-CASE 3: GOTO cityrep
-CASE 4: GOTO frep
+CASE 3: GOTO cityreport
+CASE 4: GOTO forcesummary
 CASE 5: GOTO srep
-CASE 6: GOTO batrep
+CASE 6: GOTO battlereport
 CASE 7: GOTO recap
 CASE ELSE
 END SELECT
@@ -3848,7 +3847,7 @@ END SELECT
 '                               Army Report
 '..........................................................................
 IF chosenOption < 0 GOTO endrep
-IF chosenOption = 4 GOTO frep
+IF chosenOption = 4 GOTO forcesummary
 CALL StartToFinish(start, fin, who)
 CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
 COLOR c
@@ -3897,7 +3896,7 @@ GOTO endrep
 '..........................................................................
 '                               City Report
 '..........................................................................
-cityrep:
+cityreport:
 CLS : LOCATE 1, 1: COLOR 14
 PRINT "City Report"; TAB(20); monthes$(currentMonth); ","; currentYear: COLOR 15
 PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
@@ -3948,7 +3947,7 @@ GOTO endrep
 '..........................................................................
 '                               Force Summary
 '..........................................................................
-frep:
+forcesummary:
 FOR k = 1 TO 40
 	IF isOccupied(k) > 0 THEN
 		FOR j = 1 TO 40
@@ -3970,7 +3969,7 @@ GOTO endrep
 '..........................................................................
 '                               Battle Report
 '..........................................................................
-batrep:
+battlereport:
 VIEW (200, 123)-(400, 284)
 CLS 1
 VIEW
