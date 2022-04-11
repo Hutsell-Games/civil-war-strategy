@@ -163,20 +163,22 @@ CALL TurnUpdate
 cityController(1) = 0: cityController(2) = 0
 
 FOR i = 1 TO 2
-currentIncome(i) = 0
-IF currentCash(i) > 19999 THEN currentCash(i) = 19999
-IF currentCash(i) < 0 THEN currentCash(i) = 0
+	currentIncome(i) = 0
+	IF currentCash(i) > 19999 THEN currentCash(i) = 19999
+	IF currentCash(i) < 0 THEN currentCash(i) = 0
 NEXT i
 IF humanPlayers = 1 AND currentSide = 2 THEN currentIncome(1) = currentIncome(1) + usAdvantage
 
 FOR i = 1 TO 40
-IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: currentIncome(x) = currentIncome(x) + cityValue(i)
-armyMove(i) = 0
+	IF cityOwner(i) > 0 THEN x = cityOwner(i): cityController(x) = cityController(x) + 1: currentIncome(x) = currentIncome(x) + cityValue(i)
+	armyMove(i) = 0
 NEXT i
 
-FOR i = 1 TO 2: navyMove(i) = 0: IF capitalCity(i) > 0 THEN currentIncome(i) = currentIncome(i) + 100
-currentCash(i) = currentCash(i) + currentIncome(i)
-IF navalCommerce > 0 AND i <> navalCommerce THEN currentCash(i) = currentCash(i) - navalRaider
+FOR i = 1 TO 2
+	navyMove(i) = 0
+	IF capitalCity(i) > 0 THEN currentIncome(i) = currentIncome(i) + 100
+	currentCash(i) = currentCash(i) + currentIncome(i)
+	IF navalCommerce > 0 AND i <> navalCommerce THEN currentCash(i) = currentCash(i) - navalRaider
 NEXT i
 vpTotal = currentIncome(1) + currentIncome(2)
 
@@ -185,7 +187,9 @@ IF humanPlayers = 2 THEN GOSUB blanken: CALL DrawMap
 CALL victor
 ON ERROR GOTO 0
 IF timesPlayed > 0 THEN
-	FOR k = 1 TO 40: armyLocation(k) = 0: NEXT k
+	FOR k = 1 TO 40
+		armyLocation(k) = 0
+	NEXT k
 	GOTO newgame
 END IF
 
