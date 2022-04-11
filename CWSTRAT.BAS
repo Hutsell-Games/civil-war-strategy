@@ -107,7 +107,7 @@ IF currentSide = 1 THEN
     END IF
 END IF
 skipmusic:
-GOSUB unionplus
+CALL UnionPlus
 
 cityName$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
@@ -481,7 +481,7 @@ SELECT CASE chosenOption ' Main Menu
 			CALL clrbot
 			COLOR 11: CALL clrbot: PRINT "Play Balance : "; menuText$(chosenOption);
 			difficultyLevel = chosenOption
-			GOSUB unionplus
+			CALL UnionPlus
 			chosenOption = 27: GOTO utilitymenu
 		CASE 7 ' Ending Conditions
 			CALL VictoryConditionsMet
@@ -569,7 +569,7 @@ SELECT CASE chosenOption ' Main Menu
 			ELSE
 				PRINT "REALISM ON: Recruiting based on CITY SIZE";
 				IF currentSide = 2 AND eventsBalance = 1 AND eventsBalance < 5 THEN eventsBalance = eventsBalance + 2
-				GOSUB unionplus
+				CALL UnionPlus
 			END IF
 			chosenOption = 32: GOTO utilitymenu
 		CASE 12 ' Check Map Linkages
@@ -642,11 +642,6 @@ GOTO menu0
 '............................................................................
 '                               Subs
 '............................................................................
-unionplus: 
-usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvantage = 50 * difficultyLevel
-IF realism > 0 THEN usAdvantage = usAdvantage * .7
-RETURN
-'............................................................................
 blanken:
 c = 1: IF currentSide = 2 THEN c = 7
 CLS : LINE (100, 200)-(500, 300), c, BF
@@ -663,6 +658,11 @@ DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
 DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+
+SUB UnionPlus
+	usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvantage = 50 * difficultyLevel
+	IF realism > 0 THEN usAdvantage = usAdvantage * .7
+END SUB
 
 SUB MoveArmies
 	CALL MoveFrom(index, target): IF target > 0 AND index > 0 GOTO tent
