@@ -281,101 +281,101 @@ SELECT CASE chosenOption ' Main Menu
 		newChosenOption = 28
 		SELECT CASE chosenOption
 			CASE 1 ' Cancel
-		CALL CancelArmyMovement(currentSide): canMove = 0
-		chosenOption = 22
+				CALL CancelArmyMovement(currentSide): canMove = 0
+				chosenOption = 22
 			CASE 2 ' Fortify
-		IF currentCash(currentSide) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
-		CALL FortifyCity(target)
-		IF currentCash(currentSide) < 200 GOTO menu0
-		chosenOption = 23
-		GOTO commandsmenu
+				IF currentCash(currentSide) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
+				CALL FortifyCity(target)
+				IF currentCash(currentSide) < 200 GOTO menu0
+				chosenOption = 23
+				GOTO commandsmenu
 			CASE 3 ' Combine
-		x = currentSide
-		CALL CombineArmies(x)
-		IF x < 0 THEN
-			CALL clrbot
-			COLOR 11
-			PRINT "No eligible armies in same city to combine";
-			CALL stax(currentSide)
-			GOTO menu0
-		END IF
-		chosenOption = 24
-		GOTO commandsmenu
+				x = currentSide
+				CALL CombineArmies(x)
+				IF x < 0 THEN
+					CALL clrbot
+					COLOR 11
+					PRINT "No eligible armies in same city to combine";
+					CALL stax(currentSide)
+					GOTO menu0
+				END IF
+				chosenOption = 24
+				GOTO commandsmenu
 			CASE 4 ' Supply
-			CALL StartToFinish(start, fin, (currentSide))
-			menuText$(0) = "Supply"
-			tlx = 67: tly = 5: colour = 5
-			menuRows = 0
-			FOR i = start TO fin
-			IF armyLocation(i) = 0 OR armySupply(i) > 1 GOTO alone
-			IF realism > 0 THEN
-				CALL cutoff(currentSide, armyLocation(i), a)
-				IF a < 1 THEN CALL clrbot: COLOR 15: PRINT nationName$(currentSide); " army in "; cityName$(armyLocation(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
-			END IF
-			menuRows = menuRows + 1
-			max = 11: IF LEN(armyName$(i)) < 11 THEN max = LEN(armyName$(i))
-			menuText$(menuRows) = LEFT$(armyName$(i), max)
-			array(menuRows) = i
-			alone: ' Line Label
-			NEXT i
-			IF menuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; nationName$(currentSide); " armies have supplies"; : GOTO menu0
-			CALL ShowMenu(6): CALL clrrite
-			IF chosenOption < 0 GOTO menu0
-			index = array(chosenOption)
-			IF armySupply(index) < 2 THEN
-			CALL ResupplyArmy(index)
-			CALL DrawArmyUnit(index)
-			END IF
-			chosenOption = 25
-			GOTO commandsmenu
+				CALL StartToFinish(start, fin, (currentSide))
+				menuText$(0) = "Supply"
+				tlx = 67: tly = 5: colour = 5
+				menuRows = 0
+				FOR i = start TO fin
+				IF armyLocation(i) = 0 OR armySupply(i) > 1 GOTO alone
+				IF realism > 0 THEN
+					CALL cutoff(currentSide, armyLocation(i), a)
+					IF a < 1 THEN CALL clrbot: COLOR 15: PRINT nationName$(currentSide); " army in "; cityName$(armyLocation(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
+				END IF
+				menuRows = menuRows + 1
+				max = 11: IF LEN(armyName$(i)) < 11 THEN max = LEN(armyName$(i))
+				menuText$(menuRows) = LEFT$(armyName$(i), max)
+				array(menuRows) = i
+				alone: ' Line Label
+				NEXT i
+				IF menuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; nationName$(currentSide); " armies have supplies"; : GOTO menu0
+				CALL ShowMenu(6): CALL clrrite
+				IF chosenOption < 0 GOTO menu0
+				index = array(chosenOption)
+				IF armySupply(index) < 2 THEN
+				CALL ResupplyArmy(index)
+				CALL DrawArmyUnit(index)
+				END IF
+				chosenOption = 25
+				GOTO commandsmenu
 			CASE 5 ' Move Capital
-		IF capitalCity(currentSide) = 0 OR currentCash(currentSide) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
-		currentCash(currentSide) = currentCash(currentSide) - 500
-		victoryPoints(3 - currentSide) = victoryPoints(3 - currentSide) + 50
-		CALL clrrite
-		menuText$(0) = "Capital"
-		someString$ = cityName$(capitalCity(currentSide))
-		index = capitalCity(currentSide): CALL newcity(index)
-		IF index = 0 GOTO menu0
-		capitalCity(currentSide) = index
-		CALL clrbot: PRINT nationName$(currentSide); " capital moved from "; someString$; " to "; cityName$(capitalCity(currentSide));
-		CALL clrrite
-		CALL DrawCities
-		CALL TICK(9): CALL clrbot
+				IF capitalCity(currentSide) = 0 OR currentCash(currentSide) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
+				currentCash(currentSide) = currentCash(currentSide) - 500
+				victoryPoints(3 - currentSide) = victoryPoints(3 - currentSide) + 50
+				CALL clrrite
+				menuText$(0) = "Capital"
+				someString$ = cityName$(capitalCity(currentSide))
+				index = capitalCity(currentSide): CALL newcity(index)
+				IF index = 0 GOTO menu0
+				capitalCity(currentSide) = index
+				CALL clrbot: PRINT nationName$(currentSide); " capital moved from "; someString$; " to "; cityName$(capitalCity(currentSide));
+				CALL clrrite
+				CALL DrawCities
+				CALL TICK(9): CALL clrbot
 			CASE 6 ' Detach
-		IF currentSide = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
-		COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-		CALL MoveFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
-		IF armySize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
-		CALL commander(2, empty): IF empty = 0 GOTO menu0
-		armySupply(empty) = .3 * armySupply(index): armySupply(index) = armySupply(index) - armySupply(empty): IF armySupply(index) < 0 THEN armySupply(index) = 0
-		armySize(empty) = .3 * armySize(index): armySize(index) = armySize(index) - armySize(empty)
-		armyLocation(empty) = target: armyExp(empty) = armyExp(index): armyMove(empty) = 0
-		armyCommander(empty) = leaderRating(empty)
-		armyName$(empty) = leaderName$(empty): leaderName$(empty) = ""
-		armyExp(empty) = armyExp(index)
-		COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; armyName$(empty); : CALL TICK(turbo!): IF soundEffects > 0 THEN SOUND 2222, 1
-		CALL stax(currentSide)
-		chosenOption = 27
-		GOTO commandsmenu
+				IF currentSide = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
+				COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
+				CALL MoveFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
+				IF armySize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
+				CALL commander(2, empty): IF empty = 0 GOTO menu0
+				armySupply(empty) = .3 * armySupply(index): armySupply(index) = armySupply(index) - armySupply(empty): IF armySupply(index) < 0 THEN armySupply(index) = 0
+				armySize(empty) = .3 * armySize(index): armySize(index) = armySize(index) - armySize(empty)
+				armyLocation(empty) = target: armyExp(empty) = armyExp(index): armyMove(empty) = 0
+				armyCommander(empty) = leaderRating(empty)
+				armyName$(empty) = leaderName$(empty): leaderName$(empty) = ""
+				armyExp(empty) = armyExp(index)
+				COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; armyName$(empty); : CALL TICK(turbo!): IF soundEffects > 0 THEN SOUND 2222, 1
+				CALL stax(currentSide)
+				chosenOption = 27
+				GOTO commandsmenu
 			CASE 7 ' Drill
-		COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
-		CALL MoveFrom(index, target)
-		IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; monthes$(currentMonth); : GOTO menu0
-		IF armyExp(index) > 5 OR armyExp(index) >= armyCommander(index) THEN COLOR 12: CALL clrbot: PRINT armyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO commandsmenu
-		armyExp(index) = armyExp(index) + 1
-		CALL clrbot: PRINT armyName$(index); " has drilled to reach experience level "; armyExp(index); : IF soundEffects > 0 THEN SOUND 2222, 1
-		CALL TICK(turbo!): clrbot
-		armyMove(index) = -1
-		chosenOption = 28
-		GOTO commandsmenu
+				COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
+				CALL MoveFrom(index, target)
+				IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; monthes$(currentMonth); : GOTO menu0
+				IF armyExp(index) > 5 OR armyExp(index) >= armyCommander(index) THEN COLOR 12: CALL clrbot: PRINT armyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO commandsmenu
+				armyExp(index) = armyExp(index) + 1
+				CALL clrbot: PRINT armyName$(index); " has drilled to reach experience level "; armyExp(index); : IF soundEffects > 0 THEN SOUND 2222, 1
+				CALL TICK(turbo!): clrbot
+				armyMove(index) = -1
+				chosenOption = 28
+				GOTO commandsmenu
 			CASE 8 ' Relieve
-			CALL relieve(currentSide)
-			chosenOption = 29
-			GOTO commandsmenu
+				CALL relieve(currentSide)
+				chosenOption = 29
+				GOTO commandsmenu
 			CASE ELSE ' Else
-			newChosenOption = 28
-			GOTO menu0
+				newChosenOption = 28
+				GOTO menu0
 		END SELECT
 		chosenOption = 21 + chosenOption: GOTO commandsmenu
 	CASE 8 ' Utility Menu
