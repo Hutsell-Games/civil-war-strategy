@@ -10,7 +10,7 @@ DIM SHARED graphicLevel, graphicImage(1 TO 1564), grudge, hasNavy, highlight%, h
 DIM SHARED leaderName$(40), leaderRating(40), menuText$(21), menuRows%, matrix(40, 7), monthes$(12), mtn(1 TO 1564)
 DIM SHARED nationName$(2), navalCommerce, navyLocation(2), navySize(2), navyMove(2), northernCapital(60), orderOfMoves(40), rr(2), rrFrom(2), realism, navalRaider
 DIM SHARED recruitCity(5), recruitFlag, savedGameExists, soundEffects, starX(8), starY(8), thrill, turbo!
-DIM SHARED tlx%, tly%, trainCapacity(2), timesPlayed
+DIM SHARED tlx%, tly%, ytrainCapacity(2), timesPlayed
 DIM SHARED usAdvantage, victoryFlags(6), victoryPoints(2), windowType%, vpTotal
 
 replaying = 0
@@ -132,7 +132,7 @@ IF history = 1 THEN
 ELSE
 	SCREEN 12: CLS
 END IF
-CALL usa
+CALL DrawMap
 GOTO menu0
 '==========================================================================
 '                              New Month
@@ -163,7 +163,7 @@ NEXT i
 vpTotal = currentIncome(1) + currentIncome(2)
 
 chosit = 22
-IF humanPlayers = 2 THEN GOSUB blanken: CALL usa
+IF humanPlayers = 2 THEN GOSUB blanken: CALL DrawMap
 CALL victor
 ON ERROR GOTO 0
 IF timesPlayed > 0 THEN
@@ -237,7 +237,7 @@ END IF
 	menuRows = 2: CALL ShowMenu(0): CALL clrrite: IF chosenOption <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
 	recruitFlag = 0: canMove = 0: hasNavy = 0
-	IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
+	IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN GOSUB blanken: CALL DrawMap: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
@@ -452,7 +452,7 @@ utile:
 		IF graphicLevel = 2 THEN someString$ = "CITY NAMES"
 		IF graphicLevel = 3 THEN someString$ = "FULL"
 		CLS
-		CALL usa
+		CALL DrawMap
 		CALL clrbot: COLOR 11: PRINT "Graphics : "; someString$; : IF soundEffects > 0 THEN SOUND 2700, 1
 		chosenOption = 24: GOTO utile
 '-------------------------------------------------------------------------
@@ -494,7 +494,7 @@ utile:
 			CASE 5
 				borderWidth = 1 - borderWidth
 				CLS
-				CALL usa
+				CALL DrawMap
 				CALL DrawTopBar
 		END SELECT
 		chosenOption = 26: GOTO utile
@@ -555,7 +555,7 @@ utile:
 		 COLOR 14: PRINT "			press a key";
 		 DO WHILE INKEY$ = "": LOOP
 		 CLS
-		 CALL usa
+		 CALL DrawMap
 		 chosenOption = 29
 		 GOTO utile
 '-------------------------------------------------------------------------
@@ -595,7 +595,7 @@ utile:
 		IF leaderRating(k) < 1 THEN leaderRating(k) = 1
 		NEXT k
 		CLS
-		CALL usa
+		CALL DrawMap
 		chosenOption = 30: GOTO utile
 '-------------------------------------------------------------------------
 '                               January Campaigns
@@ -627,7 +627,7 @@ utile:
 	   CASE 12
 		CALL CheckMapIntegrity
 		CALL TICK(99)
-		CALL usa
+		CALL DrawMap
 '-------------------------------------------------------------------------
 '                               History
 '-------------------------------------------------------------------------
@@ -679,7 +679,7 @@ loader:
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
-			WRITE #1, currentSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, trainCapacity(1), trainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+			WRITE #1, currentSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, ytrainCapacity(1), ytrainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 			CLOSE #1
 			CLS
 			GOTO newgame
@@ -1113,7 +1113,7 @@ FOR i = 1 TO 2: INPUT #1, currentCash(i): NEXT i
 FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, currentSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, trainCapacity(1), trainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+	INPUT #1, currentSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, ytrainCapacity(1), ytrainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 
 	CASE 2
@@ -1155,10 +1155,10 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
        
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, playersSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, trainCapacity(1), trainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+	INPUT #1, playersSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, ytrainCapacity(1), ytrainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
 	SCREEN 12: CLS
-	CLOSE #1: CALL usa: CALL clrbot
+	CLOSE #1: CALL DrawMap: CALL clrbot
 	FOR k = 1 TO 2
 	IF rr(k) > 0 THEN CALL tinytrain(k, 1)
 	NEXT k
@@ -1188,9 +1188,9 @@ FOR i = 1 TO 8: INPUT #1, starX(i), starY(i): NEXT i  ' star locations on flag
 	playersSide = currentSide
 	IF playersSide < 1 OR playersSide > 2 THEN playersSide = 1
 	OPEN "O", 1, "cws.cfg"
-	WRITE #1, playersSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, trainCapacity(1), trainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+	WRITE #1, playersSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, ytrainCapacity(1), ytrainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
 	CLOSE #1
-	CLS : CALL usa
+	CLS : CALL DrawMap
 END SELECT
 END SUB
 
@@ -1641,7 +1641,7 @@ admiral:
 	END IF
 	navyLocation(who) = 99: navalCommerce = who
 	IF navyLocation(1) = navyLocation(2) GOTO pirate
-	CLS : CALL usa
+	CLS : CALL DrawMap
 	EXIT SUB
 '---------------------------------------------------------------------------
 '                               Invasion
@@ -1814,7 +1814,7 @@ sail3:
 	FOR k = 1 TO 2
 	IF navyLocation(k) = 99 THEN navalCommerce = k
 	NEXT k
-	CLS : CALL usa
+	CLS : CALL DrawMap
 END SUB
 
 SUB CreateNewArmy (who%, empty%, target%)
@@ -2232,7 +2232,7 @@ movearmy:
 '---------------------------------------------------------------------------
 '                               Check to Combine
 '---------------------------------------------------------------------------
-a = who: CALL combine(a)
+a = who: CALL CombineArmies(a)
 CALL railroad(who)
 '---------------------------------------------------------------------------
 '                               Top Priority
@@ -4481,10 +4481,10 @@ LINE (66, 375)-(52, 375), 10
 END SUB
 
 SUB traincapacity (who%, limit%)
-IF realism = 0 THEN limit = trainCapacity(who): EXIT SUB
+IF realism = 0 THEN limit = ytrainCapacity(who): EXIT SUB
 x = 11: IF currentSide = 2 THEN x = 23
-limit = trainCapacity(who) + 5 * (cityController(who) - x)
-x = 2 * trainCapacity(who)
+limit = ytrainCapacity(who) + 5 * (cityController(who) - x)
+x = 2 * ytrainCapacity(who)
 IF limit > x THEN limit = x
 IF limit < x \ 4 THEN limit = x \ 4
 END SUB
@@ -4923,7 +4923,7 @@ play4ever:
 	END IF
 
 	thrill = i
-	CALL usa: CALL ShowReports(100 + currentSide)
+	CALL DrawMap: CALL ShowReports(100 + currentSide)
 	IF j = 2 THEN FOR k = 1 TO 2: victoryPoints(k) = .7 * victoryPoints(k): NEXT k: CALL DrawRebelWin: GOTO death
 
 	IF i = 1 THEN CALL DrawUnionWin: COLOR 15: LOCATE 2, 27: anotherString$ = "UNION VICTORY  VP's=" + STR$(victoryPoints(1)): PRINT anotherString$: GOTO death
