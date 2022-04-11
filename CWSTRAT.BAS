@@ -379,7 +379,7 @@ SELECT CASE chosenOption ' Main Menu
 		END SELECT
 		chosenOption = 21 + chosenOption: GOTO commandsmenu
 	CASE 8 ' Utility Menu
-	utilitymenu:
+		utilitymenu: ' Line Label
 		newChosenOption = 29
 		menuText$(0) = "Utility"
 		menuText$(1) = "Side": IF humanPlayers = 2 THEN menuText$(2) = ""
@@ -404,69 +404,69 @@ SELECT CASE chosenOption ' Main Menu
 		COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
 		IF humanPlayers = 1 THEN menuRows = 14: menuText$(14) = "Aggress" + STR$(aiBoldness)
 		CALL ShowMenu(-1): CALL clrrite
-			SELECT CASE chosenOption
+		SELECT CASE chosenOption
 			CASE 1 ' Swap Sides
-			IF humanPlayers = 2 GOTO menu0
-			currentSide = 3 - currentSide: COLOR 9: IF currentSide = 2 THEN COLOR 7
-			CALL clrbot: PRINT "Now playing "; nationName$(currentSide); " side"; : IF soundEffects > 0 THEN SOUND 999, 1
-			IF currentSide = 1 THEN eventsBalance = 7
-			IF currentSide = 2 THEN eventsBalance = 3
-			CALL DrawTopBar
-			GOTO menu0
+				IF humanPlayers = 2 GOTO menu0
+				currentSide = 3 - currentSide: COLOR 9: IF currentSide = 2 THEN COLOR 7
+				CALL clrbot: PRINT "Now playing "; nationName$(currentSide); " side"; : IF soundEffects > 0 THEN SOUND 999, 1
+				IF currentSide = 1 THEN eventsBalance = 7
+				IF currentSide = 2 THEN eventsBalance = 3
+				CALL DrawTopBar
+				GOTO menu0
 			CASE 2 ' Solo or 2 Player
-			humanPlayers = 3 - humanPlayers: CALL clrbot: COLOR 12
-			IF soundEffects > 0 THEN SOUND 999, 1
-			someString$ = "Solo": IF humanPlayers = 2 THEN someString$ = "2 Player"
-			PRINT someString$; " Game";
-			chosenOption = 23: GOTO utilitymenu
+				humanPlayers = 3 - humanPlayers: CALL clrbot: COLOR 12
+				IF soundEffects > 0 THEN SOUND 999, 1
+				someString$ = "Solo": IF humanPlayers = 2 THEN someString$ = "2 Player"
+				PRINT someString$; " Game";
+				chosenOption = 23: GOTO utilitymenu
 			CASE 3 ' Graphics
-			graphicLevel = graphicLevel + 1
-			IF graphicLevel > 3 THEN graphicLevel = 0
-			someString$ = "ROADS"
-			IF graphicLevel = 0 THEN someString$ = "DISABLED"
-			IF graphicLevel = 2 THEN someString$ = "CITY NAMES"
-			IF graphicLevel = 3 THEN someString$ = "FULL"
-			CLS
-			CALL DrawMap
-			CALL clrbot: COLOR 11: PRINT "Graphics : "; someString$; : IF soundEffects > 0 THEN SOUND 2700, 1
-			chosenOption = 24: GOTO utilitymenu
+				graphicLevel = graphicLevel + 1
+				IF graphicLevel > 3 THEN graphicLevel = 0
+				someString$ = "ROADS"
+				IF graphicLevel = 0 THEN someString$ = "DISABLED"
+				IF graphicLevel = 2 THEN someString$ = "CITY NAMES"
+				IF graphicLevel = 3 THEN someString$ = "FULL"
+				CLS
+				CALL DrawMap
+				CALL clrbot: COLOR 11: PRINT "Graphics : "; someString$; : IF soundEffects > 0 THEN SOUND 2700, 1
+				chosenOption = 24: GOTO utilitymenu
 			CASE 4 ' Sounds
-			CALL clrrite: chosenOption = soundEffects + 22
-			menuText$(0) = "SOUNDS"
-			menuText$(1) = "Quiet"
-			menuText$(2) = "Sound"
-			menuText$(3) = " & Sound"
-			menuRows = 3: tlx = 67: tly = 12
-			CALL ShowMenu(0): CALL clrrite
-			IF chosenOption < 1 GOTO menu0
-			COLOR 11: CALL clrbot: PRINT "Sound Option : "; menuText$(chosenOption);
-			soundEffects = chosenOption - 1
-			IF soundEffects > 0 THEN SOUND 999, 1
-			chosenOption = 25: GOTO utilitymenu
+				CALL clrrite: chosenOption = soundEffects + 22
+				menuText$(0) = "SOUNDS"
+				menuText$(1) = "Quiet"
+				menuText$(2) = "Sound"
+				menuText$(3) = " & Sound"
+				menuRows = 3: tlx = 67: tly = 12
+				CALL ShowMenu(0): CALL clrrite
+				IF chosenOption < 1 GOTO menu0
+				COLOR 11: CALL clrbot: PRINT "Sound Option : "; menuText$(chosenOption);
+				soundEffects = chosenOption - 1
+				IF soundEffects > 0 THEN SOUND 999, 1
+				chosenOption = 25: GOTO utilitymenu
 			CASE 5 ' Display Speed
-			chosenOption = turbo! + 21
-			menuText$(0) = "Display"
-			menuText$(1) = "Fast"
-			menuText$(2) = "Normal"
-			menuText$(3) = "Slow"
-			menuText$(4) = "Very Slow"
-			menuText$(5) = "Reg Color": IF borderWidth > 0 THEN menuText$(5) = "Alt Color"
-			tlx = 67: tly = 15: menuRows = 5
-			CALL ShowMenu(0): CALL clrrite
-			SELECT CASE chosenOption
-				CASE IS < 1
-				CASE IS < 5
-					turbo! = chosenOption
-					IF turbo! = 4 THEN turbo! = 8
-					CALL clrbot: COLOR 11
-					PRINT "Display Speed : "; menuText$(chosenOption);
-				CASE 5
-					borderWidth = 1 - borderWidth
-					CLS
-					CALL DrawMap
-					CALL DrawTopBar
-			END SELECT
-			chosenOption = 26: GOTO utilitymenu
+				chosenOption = turbo! + 21
+				menuText$(0) = "Display"
+				menuText$(1) = "Fast"
+				menuText$(2) = "Normal"
+				menuText$(3) = "Slow"
+				menuText$(4) = "Very Slow"
+				menuText$(5) = "Reg Color": IF borderWidth > 0 THEN menuText$(5) = "Alt Color"
+				tlx = 67: tly = 15: menuRows = 5
+				CALL ShowMenu(0): CALL clrrite
+				SELECT CASE chosenOption
+					CASE IS < 1
+					CASE IS < 5
+						turbo! = chosenOption
+						IF turbo! = 4 THEN turbo! = 8
+						CALL clrbot: COLOR 11
+						PRINT "Display Speed : "; menuText$(chosenOption);
+					CASE 5
+						borderWidth = 1 - borderWidth
+						CLS
+						CALL DrawMap
+						CALL DrawTopBar
+				END SELECT
+				chosenOption = 26: GOTO utilitymenu
 		CASE 6 ' Play Balance
 			chosenOption = difficultyLevel + 21
 			menuText$(0) = "Balance"
@@ -499,13 +499,13 @@ SELECT CASE chosenOption ' Main Menu
 
 			SELECT CASE chosenOption
 			CASE 1
-			eventsBalance = 0: anotherString$ = ""
+				eventsBalance = 0: anotherString$ = ""
 			CASE 2
-			eventsBalance = 3
+				eventsBalance = 3
 			CASE 3
-			eventsBalance = 5
+				eventsBalance = 5
 			CASE 4
-			eventsBalance = 7
+				eventsBalance = 7
 			CASE ELSE
 			END SELECT
 			IF chosenOption > 1 AND chosenOption < 5 THEN anotherString$ = menuText$(chosenOption)
@@ -564,13 +564,13 @@ SELECT CASE chosenOption ' Main Menu
 		CASE 11 ' Realism Switch
 			realism = 1 - realism
 			CALL clrbot: COLOR 11
-		IF realism = 0 THEN
-			PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
-		ELSE
-			PRINT "REALISM ON: Recruiting based on CITY SIZE";
-			IF currentSide = 2 AND eventsBalance = 1 AND eventsBalance < 5 THEN eventsBalance = eventsBalance + 2
-			GOSUB unionplus
-		END IF
+			IF realism = 0 THEN
+				PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
+			ELSE
+				PRINT "REALISM ON: Recruiting based on CITY SIZE";
+				IF currentSide = 2 AND eventsBalance = 1 AND eventsBalance < 5 THEN eventsBalance = eventsBalance + 2
+				GOSUB unionplus
+			END IF
 			chosenOption = 32: GOTO utilitymenu
 		CASE 12 ' Check Map Linkages
 			CALL CheckMapIntegrity
@@ -598,32 +598,32 @@ SELECT CASE chosenOption ' Main Menu
 			CASE ELSE
 		END SELECT
 	CASE 9 ' Files
-			IF _FILEEXISTS("*.sav") = 0 THEN savedGameExists = 0
-		newgamemenu:
-			chosenOption = 23: newChosenOption = 30: IF currentYear = 1861 THEN chosenOption = 22
-			menuText$(0) = "Options"
-			menuText$(1) = "Load": IF savedGameExists = 0 THEN menuText$(1) = "-": chosenOption = 23
-			menuText$(2) = "Save"
-			menuText$(3) = "New Game"
-			menuText$(4) = "Quit"
-			menuRows = 4: tlx = 67: tly = 15
-			CALL ShowMenu(0): CALL clrrite
-			SELECT CASE chosenOption
-				CASE IS < 1: GOTO menu0
-				CASE 1, 2
-		loader:
-					IF chosenOption = 1 AND savedGameExists = 0 GOTO newgamemenu
-					CALL FileManager(chosenOption + 1)
-					IF chosenOption = 1 THEN recruitFlag = 0: canMove = 0: hasNavy = 0
-					GOTO menu0
-				CASE 3
-					OPEN "O", 1, "cws.cfg"
-					WRITE #1, currentSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, ytrainCapacity(1), ytrainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
-					CLOSE #1
-					CLS
-					GOTO newgame
-				CASE 4: GOTO confirmquitmenu
-			END SELECT
+		IF _FILEEXISTS("*.sav") = 0 THEN savedGameExists = 0
+		newgamemenu: ' Line Label
+		chosenOption = 23: newChosenOption = 30: IF currentYear = 1861 THEN chosenOption = 22
+		menuText$(0) = "Options"
+		menuText$(1) = "Load": IF savedGameExists = 0 THEN menuText$(1) = "-": chosenOption = 23
+		menuText$(2) = "Save"
+		menuText$(3) = "New Game"
+		menuText$(4) = "Quit"
+		menuRows = 4: tlx = 67: tly = 15
+		CALL ShowMenu(0): CALL clrrite
+		SELECT CASE chosenOption
+			CASE IS < 1: GOTO menu0
+			CASE 1, 2
+		loader: ' Line Label
+				IF chosenOption = 1 AND savedGameExists = 0 GOTO newgamemenu
+				CALL FileManager(chosenOption + 1)
+				IF chosenOption = 1 THEN recruitFlag = 0: canMove = 0: hasNavy = 0
+				GOTO menu0
+			CASE 3
+				OPEN "O", 1, "cws.cfg"
+				WRITE #1, currentSide, graphicLevel, soundEffects, difficultyLevel, humanPlayers, turbo!, eventsBalance, ytrainCapacity(1), ytrainCapacity(2), januaryCampaign, realism, battleStats(1), battleStats(2), casualty&(1), casualty&(2), history, aiBoldness
+				CLOSE #1
+				CLS
+				GOTO newgame
+			CASE 4: GOTO confirmquitmenu
+		END SELECT
 '==========================================================================
 	CASE 99
 	GOTO endturn
