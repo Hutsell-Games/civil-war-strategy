@@ -2059,32 +2059,6 @@ SUB ShipType (who%, i%)
 	CALL DrawShipIcon(who, a)
 END SUB
 
-SUB DrawCities
-	FOR i = 1 TO 40
-	c = 9: IF cityOwner(i) = 2 THEN c = 7
-	IF cityOwner(i) = 0 THEN c = 12
-	x = cityX(i): y = cityY(i)
-	IF i = capitalCity(1) OR i = capitalCity(2) THEN
-		PUT (x - 6, y - 6), northernCapital, PSET
-		LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
-		LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
-		PSET (x + 8, y - 4)
-		IF fortLevel(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
-		IF fortLevel(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
-	ELSE
-		IF fortLevel(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
-		IF fortLevel(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-		CIRCLE (cityX(i), cityY(i)), 4, 0
-		CIRCLE (cityX(i), cityY(i)), 3, c
-		PAINT (cityX(i), cityY(i)), c, c
-	END IF
-	IF graphicLevel = 0 GOTO nocon
-		FOR j = 1 TO 6: IF matrix(i, j) > 0 THEN CALL MoveUnitIcon(i, matrix(i, j), 11)
-		NEXT j
-	nocon:
-	NEXT i
-END SUB
-
 SUB ComputerPlayer
 	CALL SpecialEvents
 	slush = 0: who = 3 - currentSide
@@ -4522,6 +4496,32 @@ SUB DrawArmyUnit (which%)
 		DRAW font$(19)
 		DRAW "S4"
 	END IF
+END SUB
+
+SUB DrawCities
+	FOR i = 1 TO 40
+	c = 9: IF cityOwner(i) = 2 THEN c = 7
+	IF cityOwner(i) = 0 THEN c = 12
+	x = cityX(i): y = cityY(i)
+	IF i = capitalCity(1) OR i = capitalCity(2) THEN
+		PUT (x - 6, y - 6), northernCapital, PSET
+		LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
+		LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
+		PSET (x + 8, y - 4)
+		IF fortLevel(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
+		IF fortLevel(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
+	ELSE
+		IF fortLevel(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
+		IF fortLevel(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+		CIRCLE (cityX(i), cityY(i)), 4, 0
+		CIRCLE (cityX(i), cityY(i)), 3, c
+		PAINT (cityX(i), cityY(i)), c, c
+	END IF
+	IF graphicLevel = 0 GOTO nocon
+		FOR j = 1 TO 6: IF matrix(i, j) > 0 THEN CALL MoveUnitIcon(i, matrix(i, j), 11)
+		NEXT j
+	nocon:
+	NEXT i
 END SUB
 
 SUB DrawMap
