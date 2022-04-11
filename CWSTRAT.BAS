@@ -644,17 +644,19 @@ menuRows = 2: colour = 5
 tlx = 67: tly = 15
 CALL ShowMenu(0): CALL clrrite: IF chosenOption = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvantage = 50 * difficultyLevel
-	   IF realism > 0 THEN usAdvantage = usAdvantage * .7
-	   RETURN
+unionplus: 
+usAdvantage = 120 * difficultyLevel: IF humanPlayers = 2 THEN usAdvantage = 50 * difficultyLevel
+IF realism > 0 THEN usAdvantage = usAdvantage * .7
+RETURN
 '............................................................................
-blanken:        c = 1: IF currentSide = 2 THEN c = 7
-		CLS : LINE (100, 200)-(500, 300), c, BF
-		LINE (100, 200)-(500, 300), 8 - c, B
-		COLOR 7: LOCATE 14, 31: PRINT " "; monthes$(currentMonth); currentYear
-		COLOR 11: LOCATE 17, 30: PRINT nationName$(currentSide); " PLAYER TURN"
-		DO WHILE INKEY$ = "": LOOP
-		RETURN
+blanken:
+c = 1: IF currentSide = 2 THEN c = 7
+CLS : LINE (100, 200)-(500, 300), c, BF
+LINE (100, 200)-(500, 300), 8 - c, B
+COLOR 7: LOCATE 14, 31: PRINT " "; monthes$(currentMonth); currentYear
+COLOR 11: LOCATE 17, 30: PRINT nationName$(currentSide); " PLAYER TURN"
+DO WHILE INKEY$ = "": LOOP
+RETURN
 '............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
