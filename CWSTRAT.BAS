@@ -4383,6 +4383,147 @@ SUB traincapacity (who%, limit%)
 	IF limit < x \ 4 THEN limit = x \ 4
 END SUB
 
+SUB victor
+		x = 0: FOR j = 1 TO 20: IF armyLocation(j) > 0 THEN x = x + armySize(j)
+		NEXT j
+		y = 0: FOR j = 21 TO 40: IF armyLocation(j) > 0 THEN y = y + armySize(j)
+		NEXT j
+
+		CALL clrbot: COLOR 14
+		IF victoryFlags(2) > 0 AND currentYear >= victoryFlags(2) AND currentMonth < victoryFlags(1) THEN
+			someString$ = "Time almost expired (" + monthes$(victoryFlags(1)) + "," + STR$(victoryFlags(2)) + ")"
+			CALL image2(someString$, 4)
+		END IF
+		FOR i = 1 TO 2
+		IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: victoryPoints(i) = victoryPoints(i) + 300: GOTO finis
+
+		IF currentYear >= victoryFlags(2) AND currentMonth >= victoryFlags(1) AND victoryFlags(2) > 0 THEN j = 2: GOTO finis
+		IF cityController(i) >= victoryFlags(3) AND victoryFlags(3) > 0 THEN j = 3: GOTO finis
+		IF currentIncome(i) / (currentIncome(1) + currentIncome(2)) >= .01 * victoryFlags(4) AND victoryFlags(4) > 0 THEN j = 4: GOTO finis
+		IF victoryFlags(5) > 0 AND capitalCity(3 - i) = 0 AND capitalCity(i) > 0 THEN j = 5: GOTO finis
+
+		IF victoryFlags(6) > 0 THEN
+			IF i = 1 THEN
+				IF y = 0 THEN j = 7: GOTO finis
+				IF x / y > victoryFlags(6) THEN j = 6: GOTO finis
+			END IF
+			IF i = 2 THEN
+				IF x = 0 THEN j = 7: GOTO finis
+				IF y / x > victoryFlags(6) THEN j = 6: GOTO finis
+			END IF
+		END IF
+
+		CALL clrbot: COLOR 14
+		IF victoryFlags(3) > 0 AND cityController(i) >= .9 * victoryFlags(3) THEN
+			someString$ = nationName$(i) + " side almost controls" + STR$(victoryFlags(3)) + " cities"
+			CALL image2(someString$, 4)
+		END IF
+
+		IF victoryFlags(4) > 0 AND currentIncome(i) / (currentIncome(1) + currentIncome(2)) >= .009 * victoryFlags(4) THEN
+			someString$ = nationName$(i) + " side close to" + STR$(victoryFlags(4)) + " % of total income"
+			CALL image2(someString$, 4)
+		END IF
+
+		IF victoryFlags(6) > 0 AND x > 0 AND y > 0 THEN
+			IF (i = 1 AND x / y > .9 * victoryFlags(6)) OR (i = 2 AND y / x > .9 * victoryFlags(6)) THEN
+			someString$ = nationName$(i) + "side close to" + STR$(victoryFlags(6)) + ":1 strength ratio"
+			CALL image2(someString$, 4)
+			END IF
+		END IF
+		GOTO stale
+
+	finis:
+		SELECT CASE j
+			CASE IS < 3
+			someString$ = "TIME EXPIRED"
+			CASE 3
+			someString$ = STR$(2.5 * victoryFlags(3)) + "% CITIES CONTROLLED"
+			CASE 4
+			someString$ = STR$(victoryFlags(4)) + " % OF TOTAL INCOME"
+			CASE 5
+			someString$ = "CAPITAL CAPTURED"
+			CASE 6
+			someString$ = STR$(victoryFlags(6)) + ":1 ARMY STRENGTH RATIO"
+			CASE 7
+			someString$ = "ENEMY ANNIHILATED"
+	END SELECT
+		CLS
+		c = 1: IF i = 2 THEN c = 7
+		LINE (0, 0)-(639, 479), 4, BF
+		LINE (0, 40)-(550, 460), 0, BF
+		CALL DrawMap
+		LINE (70, 140)-(485, 265), 0, BF
+		LINE (50, 120)-(465, 250), c, BF
+		LINE (50, 120)-(465, 250), 4, B
+		COLOR 14
+		anotherString$ = nationName$(i) + " SIDE IS WINNING"
+		IF j = 2 THEN CALL center(10, "Confederates will win a technical victory") ELSE CALL center(10, anotherString$)
+
+		COLOR 15
+		anotherString$ = "END GAME VICTORY CONDITION" + STR$(j - 1) + " REACHED"
+		CALL center(12, anotherString$)
+		CALL center(14, someString$)
+
+		menuText$(0) = "End Game"
+		menuText$(1) = "Yes"
+		menuText$(2) = "No-Override"
+		menuRows = 2: colour = 4
+		tlx = 27: tly = 18
+		highlight = 15
+		IF j = 7 THEN menuRows = 1
+		CALL ShowMenu(0)
+
+		IF chosenOption <> 1 AND j < 7 THEN
+	play4ever:
+				victoryFlags(j) = victoryFlags(j) + 1
+				IF j = 5 THEN victoryFlags(j) = 0
+				CLS
+				CALL DrawMap
+				EXIT SUB
+		END IF
+		menuText$(0) = "Options"
+		menuText$(1) = "Quit this Game"
+		menuText$(2) = "Play More"
+		IF humanPlayers = 1 THEN menuText$(2) = "No - Press Onward to " + cityName$(capitalCity(3 - currentSide))
+		menuRows = 2: colour = 8
+		tlx = 27: tly = 18
+		IF j <> 7 THEN
+			CALL ShowMenu(0)
+			IF chosenOption <> 1 GOTO play4ever
+		ELSE
+			victoryPoints(i) = victoryPoints(i) + 100
+		END IF
+
+		thrill = i
+		CALL DrawMap: CALL ShowReports(100 + currentSide)
+		IF j = 2 THEN FOR k = 1 TO 2: victoryPoints(k) = .7 * victoryPoints(k): NEXT k: CALL DrawRebelWin: GOTO death
+
+		IF i = 1 THEN CALL DrawUnionWin: COLOR 15: LOCATE 2, 27: anotherString$ = "UNION VICTORY  VP's=" + STR$(victoryPoints(1)): PRINT anotherString$: GOTO death
+		IF i = 2 THEN CALL DrawRebelWin: COLOR 15: LOCATE 2, 27: anotherString$ = "REBEL VICTORY  VP's=" + STR$(victoryPoints(2)): PRINT anotherString$
+	death:
+		COLOR 14: LOCATE 4, 40 - .5 * LEN(someString$)
+		IF history > 0 THEN
+			CALL scribe(anotherString$, 0)
+			CALL scribe(someString$, 0)
+		END IF
+		PRINT someString$: CALL HallOfFame
+		EXIT SUB
+	stale:
+		NEXT i
+END SUB
+
+SUB void (a%, y%)
+	y = 0
+	FOR j = 1 TO 6
+	x = matrix(a, j): IF x = 0 THEN EXIT SUB
+	IF cityOwner(x) = currentSide AND isOccupied(x) > 0 THEN y = y + armySize(isOccupied(x))
+		FOR k = 1 TO 6: m = matrix(x, k): IF m = 0 OR m = a GOTO tally4
+		IF cityOwner(m) = currentSide AND isOccupied(m) > 0 THEN y = y + .1 * armySize(isOccupied(m))
+	tally4:
+		NEXT k
+	NEXT j
+END SUB
+
 SUB DrawMap
 	SCREEN 12
 	LINE (1, 16)-(527, 440), 10, B
@@ -4703,147 +4844,6 @@ SUB DrawMap
 	CALL ships
 	CALL engine
 	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(monthes$(currentMonth), 3)); ","; currentYear
-END SUB
-
-SUB victor
-		x = 0: FOR j = 1 TO 20: IF armyLocation(j) > 0 THEN x = x + armySize(j)
-		NEXT j
-		y = 0: FOR j = 21 TO 40: IF armyLocation(j) > 0 THEN y = y + armySize(j)
-		NEXT j
-
-		CALL clrbot: COLOR 14
-		IF victoryFlags(2) > 0 AND currentYear >= victoryFlags(2) AND currentMonth < victoryFlags(1) THEN
-			someString$ = "Time almost expired (" + monthes$(victoryFlags(1)) + "," + STR$(victoryFlags(2)) + ")"
-			CALL image2(someString$, 4)
-		END IF
-		FOR i = 1 TO 2
-		IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: victoryPoints(i) = victoryPoints(i) + 300: GOTO finis
-
-		IF currentYear >= victoryFlags(2) AND currentMonth >= victoryFlags(1) AND victoryFlags(2) > 0 THEN j = 2: GOTO finis
-		IF cityController(i) >= victoryFlags(3) AND victoryFlags(3) > 0 THEN j = 3: GOTO finis
-		IF currentIncome(i) / (currentIncome(1) + currentIncome(2)) >= .01 * victoryFlags(4) AND victoryFlags(4) > 0 THEN j = 4: GOTO finis
-		IF victoryFlags(5) > 0 AND capitalCity(3 - i) = 0 AND capitalCity(i) > 0 THEN j = 5: GOTO finis
-
-		IF victoryFlags(6) > 0 THEN
-			IF i = 1 THEN
-				IF y = 0 THEN j = 7: GOTO finis
-				IF x / y > victoryFlags(6) THEN j = 6: GOTO finis
-			END IF
-			IF i = 2 THEN
-				IF x = 0 THEN j = 7: GOTO finis
-				IF y / x > victoryFlags(6) THEN j = 6: GOTO finis
-			END IF
-		END IF
-
-		CALL clrbot: COLOR 14
-		IF victoryFlags(3) > 0 AND cityController(i) >= .9 * victoryFlags(3) THEN
-			someString$ = nationName$(i) + " side almost controls" + STR$(victoryFlags(3)) + " cities"
-			CALL image2(someString$, 4)
-		END IF
-
-		IF victoryFlags(4) > 0 AND currentIncome(i) / (currentIncome(1) + currentIncome(2)) >= .009 * victoryFlags(4) THEN
-			someString$ = nationName$(i) + " side close to" + STR$(victoryFlags(4)) + " % of total income"
-			CALL image2(someString$, 4)
-		END IF
-
-		IF victoryFlags(6) > 0 AND x > 0 AND y > 0 THEN
-			IF (i = 1 AND x / y > .9 * victoryFlags(6)) OR (i = 2 AND y / x > .9 * victoryFlags(6)) THEN
-			someString$ = nationName$(i) + "side close to" + STR$(victoryFlags(6)) + ":1 strength ratio"
-			CALL image2(someString$, 4)
-			END IF
-		END IF
-		GOTO stale
-
-	finis:
-		SELECT CASE j
-			CASE IS < 3
-			someString$ = "TIME EXPIRED"
-			CASE 3
-			someString$ = STR$(2.5 * victoryFlags(3)) + "% CITIES CONTROLLED"
-			CASE 4
-			someString$ = STR$(victoryFlags(4)) + " % OF TOTAL INCOME"
-			CASE 5
-			someString$ = "CAPITAL CAPTURED"
-			CASE 6
-			someString$ = STR$(victoryFlags(6)) + ":1 ARMY STRENGTH RATIO"
-			CASE 7
-			someString$ = "ENEMY ANNIHILATED"
-	END SELECT
-		CLS
-		c = 1: IF i = 2 THEN c = 7
-		LINE (0, 0)-(639, 479), 4, BF
-		LINE (0, 40)-(550, 460), 0, BF
-		CALL DrawMap
-		LINE (70, 140)-(485, 265), 0, BF
-		LINE (50, 120)-(465, 250), c, BF
-		LINE (50, 120)-(465, 250), 4, B
-		COLOR 14
-		anotherString$ = nationName$(i) + " SIDE IS WINNING"
-		IF j = 2 THEN CALL center(10, "Confederates will win a technical victory") ELSE CALL center(10, anotherString$)
-
-		COLOR 15
-		anotherString$ = "END GAME VICTORY CONDITION" + STR$(j - 1) + " REACHED"
-		CALL center(12, anotherString$)
-		CALL center(14, someString$)
-
-		menuText$(0) = "End Game"
-		menuText$(1) = "Yes"
-		menuText$(2) = "No-Override"
-		menuRows = 2: colour = 4
-		tlx = 27: tly = 18
-		highlight = 15
-		IF j = 7 THEN menuRows = 1
-		CALL ShowMenu(0)
-
-		IF chosenOption <> 1 AND j < 7 THEN
-	play4ever:
-				victoryFlags(j) = victoryFlags(j) + 1
-				IF j = 5 THEN victoryFlags(j) = 0
-				CLS
-				CALL DrawMap
-				EXIT SUB
-		END IF
-		menuText$(0) = "Options"
-		menuText$(1) = "Quit this Game"
-		menuText$(2) = "Play More"
-		IF humanPlayers = 1 THEN menuText$(2) = "No - Press Onward to " + cityName$(capitalCity(3 - currentSide))
-		menuRows = 2: colour = 8
-		tlx = 27: tly = 18
-		IF j <> 7 THEN
-			CALL ShowMenu(0)
-			IF chosenOption <> 1 GOTO play4ever
-		ELSE
-			victoryPoints(i) = victoryPoints(i) + 100
-		END IF
-
-		thrill = i
-		CALL DrawMap: CALL ShowReports(100 + currentSide)
-		IF j = 2 THEN FOR k = 1 TO 2: victoryPoints(k) = .7 * victoryPoints(k): NEXT k: CALL DrawRebelWin: GOTO death
-
-		IF i = 1 THEN CALL DrawUnionWin: COLOR 15: LOCATE 2, 27: anotherString$ = "UNION VICTORY  VP's=" + STR$(victoryPoints(1)): PRINT anotherString$: GOTO death
-		IF i = 2 THEN CALL DrawRebelWin: COLOR 15: LOCATE 2, 27: anotherString$ = "REBEL VICTORY  VP's=" + STR$(victoryPoints(2)): PRINT anotherString$
-	death:
-		COLOR 14: LOCATE 4, 40 - .5 * LEN(someString$)
-		IF history > 0 THEN
-			CALL scribe(anotherString$, 0)
-			CALL scribe(someString$, 0)
-		END IF
-		PRINT someString$: CALL HallOfFame
-		EXIT SUB
-	stale:
-		NEXT i
-END SUB
-
-SUB void (a%, y%)
-	y = 0
-	FOR j = 1 TO 6
-	x = matrix(a, j): IF x = 0 THEN EXIT SUB
-	IF cityOwner(x) = currentSide AND isOccupied(x) > 0 THEN y = y + armySize(isOccupied(x))
-		FOR k = 1 TO 6: m = matrix(x, k): IF m = 0 OR m = a GOTO tally4
-		IF cityOwner(m) = currentSide AND isOccupied(m) > 0 THEN y = y + .1 * armySize(isOccupied(m))
-	tally4:
-		NEXT k
-	NEXT j
 END SUB
 
 SUB DrawIronclad
