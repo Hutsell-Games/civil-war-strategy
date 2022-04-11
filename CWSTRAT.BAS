@@ -216,207 +216,169 @@ menuText$(9) = "Files"
 menuRows = 9
 chosenOption = newChosenOption
 CALL ShowMenu(0): CALL clrrite
-'==========================================================================
-'                            Main Menu
-'==========================================================================
-SELECT CASE chosenOption
-	CASE 1
-	IF currentCash(currentSide) < 100 OR recruitFlag < 0 THEN recruitFlag = -1: GOTO menu0
-	CALL RecruitArmy((currentSide))
-	newChosenOption = 23
-	GOTO menu0
-'==========================================================================
-	CASE 2
-	CALL MoveArmies
-	newChosenOption = 23
-	GOTO menu0
-'==========================================================================
-	CASE 3
-	IF hasNavy = 0 THEN CALL ManageNavy((currentSide), 0)
-	newChosenOption = 25
-	CASE 4
-IF rr(currentSide) = 0 THEN
-	COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
-	PSET (550, 20), 0
-	DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
-	z = 9: IF currentSide = 2 THEN z = 7
-	x = POINT(0): y = POINT(1)
-	PAINT (x, y), z, 15
-	COLOR 15: IF currentSide = 1 THEN COLOR 11
-	CALL traincapacity(currentSide, limit)
-	CALL clrbot: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
-	CALL railroad(currentSide)
-ELSE
-	CALL clrbot: COLOR 11: PRINT "Railroad is already carrying "; armyName$(rr(currentSide)); " to "; cityName$(armyMove(rr(currentSide))); : GOTO menu0
-END IF
-'==========================================================================
-	CASE 5
-	tlx = 67: tly = 15
-	highlight = 15: colour = 3: chosenOption = 23
-	menuText$(0) = "End Turn"
-	menuText$(1) = "Yes"
-	menuText$(2) = "NOT YET"
-	menuRows = 2: CALL ShowMenu(0): CALL clrrite: IF chosenOption <> 1 THEN newChosenOption = 24: GOTO menu0
-endturn:
-	recruitFlag = 0: canMove = 0: hasNavy = 0
-	IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN GOSUB blanken: CALL DrawMap: GOTO menu0
-	GOTO newmonth
-'==========================================================================
-	CASE 6
-	CALL ShowReports((currentSide)): newChosenOption = 27
-	CALL StartToFinish(start, fin, currentSide)
-	FOR i = start TO fin
-	IF armyMove(i) > 0 THEN CALL MoveUnitIcon(armyLocation(i), armyMove(i), 1)
-	NEXT i
-'==========================================================================
-'                            Commands
-'==========================================================================
-	CASE 7
-commandsmenu:
-	tlx = 67: tly = 13
-	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	highlight = 15: colour = 3: newChosenOption = 24
-	menuText$(0) = "Commands"
-	menuText$(1) = "Cancel"
-	menuText$(2) = "Fortify": IF currentCash(currentSide) < 200 THEN menuText$(2) = "-"
-	menuText$(3) = "Join"
-	menuText$(4) = "Supply"
-	menuText$(5) = "Capital": IF capitalCity(currentSide) = 0 OR currentCash(currentSide) < 500 THEN menuText$(5) = "-"
-	menuText$(6) = "Detach": IF currentSide = 1 THEN menuText$(6) = "-"
-	menuText$(7) = "Army Drill"
-	menuText$(8) = "Relieve"
-	menuText$(9) = "MAIN MENU"
-	menuRows = 9
-	CALL ShowMenu(0): CALL clrrite
-	newChosenOption = 28
-     SELECT CASE chosenOption
-'---------------------------------------------------------------------------
-'                               Cancel
-'---------------------------------------------------------------------------
-		CASE 1
-	CALL CancelArmyMovement(currentSide): canMove = 0
-	chosenOption = 22
-'---------------------------------------------------------------------------
-'                               Fortify
-'---------------------------------------------------------------------------
-		CASE 2
-	IF currentCash(currentSide) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
-	CALL FortifyCity(target)
-	IF currentCash(currentSide) < 200 GOTO menu0
-	chosenOption = 23
-	GOTO commandsmenu
-'---------------------------------------------------------------------------
-'                               Combine
-'---------------------------------------------------------------------------
-		CASE 3
-	x = currentSide
-	CALL CombineArmies(x)
-	IF x < 0 THEN
-		CALL clrbot
-		COLOR 11
-		PRINT "No eligible armies in same city to combine";
-		CALL stax(currentSide)
+SELECT CASE chosenOption ' Main Menu
+	CASE 1 ' Recruit
+		IF currentCash(currentSide) < 100 OR recruitFlag < 0 THEN recruitFlag = -1: GOTO menu0
+		CALL RecruitArmy((currentSide))
+		newChosenOption = 23
 		GOTO menu0
-	END IF
-	chosenOption = 24
-	GOTO commandsmenu
-'---------------------------------------------------------------------------
-'                               Supply
-'---------------------------------------------------------------------------
-		CASE 4
-		CALL StartToFinish(start, fin, (currentSide))
-		menuText$(0) = "Supply"
-		tlx = 67: tly = 5: colour = 5
-		menuRows = 0
+	CASE 2 ' Move
+		CALL MoveArmies
+		newChosenOption = 23
+		GOTO menu0
+	CASE 3 ' Navy
+		IF hasNavy = 0 THEN CALL ManageNavy((currentSide), 0)
+		newChosenOption = 25
+	CASE 4 ' Railroad
+		IF rr(currentSide) = 0 THEN
+			COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
+			PSET (550, 20), 0
+			DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
+			z = 9: IF currentSide = 2 THEN z = 7
+			x = POINT(0): y = POINT(1)
+			PAINT (x, y), z, 15
+			COLOR 15: IF currentSide = 1 THEN COLOR 11
+			CALL traincapacity(currentSide, limit)
+			CALL clrbot: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
+			CALL railroad(currentSide)
+		ELSE
+			CALL clrbot: COLOR 11: PRINT "Railroad is already carrying "; armyName$(rr(currentSide)); " to "; cityName$(armyMove(rr(currentSide))); : GOTO menu0
+		END IF
+	CASE 5 ' End Turn
+			tlx = 67: tly = 15
+			highlight = 15: colour = 3: chosenOption = 23
+			menuText$(0) = "End Turn"
+			menuText$(1) = "Yes"
+			menuText$(2) = "NOT YET"
+			menuRows = 2: CALL ShowMenu(0): CALL clrrite: IF chosenOption <> 1 THEN newChosenOption = 24: GOTO menu0
+		endturn:
+			recruitFlag = 0: canMove = 0: hasNavy = 0
+			IF humanPlayers = 2 THEN currentSide = currentSide + 1: IF currentSide = 2 THEN GOSUB blanken: CALL DrawMap: GOTO menu0
+			GOTO newmonth
+	CASE 6 ' Reports
+		CALL ShowReports((currentSide)): newChosenOption = 27
+		CALL StartToFinish(start, fin, currentSide)
 		FOR i = start TO fin
-		IF armyLocation(i) = 0 OR armySupply(i) > 1 GOTO alone
-		IF realism > 0 THEN
-			CALL cutoff(currentSide, armyLocation(i), a)
-			IF a < 1 THEN CALL clrbot: COLOR 15: PRINT nationName$(currentSide); " army in "; cityName$(armyLocation(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
-		END IF
-		menuRows = menuRows + 1
-		max = 11: IF LEN(armyName$(i)) < 11 THEN max = LEN(armyName$(i))
-		menuText$(menuRows) = LEFT$(armyName$(i), max)
-		array(menuRows) = i
-alone:
+		IF armyMove(i) > 0 THEN CALL MoveUnitIcon(armyLocation(i), armyMove(i), 1)
 		NEXT i
-		IF menuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; nationName$(currentSide); " armies have supplies"; : GOTO menu0
-		CALL ShowMenu(6): CALL clrrite
-		IF chosenOption < 0 GOTO menu0
-		index = array(chosenOption)
-		IF armySupply(index) < 2 THEN
-		CALL ResupplyArmy(index)
-		CALL DrawArmyUnit(index)
-		END IF
-		chosenOption = 25
-		GOTO commandsmenu
-'-------------------------------------------------------------------------
-'                               Move Capital
-'-------------------------------------------------------------------------
-		CASE 5
-	IF capitalCity(currentSide) = 0 OR currentCash(currentSide) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
-	currentCash(currentSide) = currentCash(currentSide) - 500
-	victoryPoints(3 - currentSide) = victoryPoints(3 - currentSide) + 50
-	CALL clrrite
-	menuText$(0) = "Capital"
-	someString$ = cityName$(capitalCity(currentSide))
-	index = capitalCity(currentSide): CALL newcity(index)
-	IF index = 0 GOTO menu0
-	capitalCity(currentSide) = index
-	CALL clrbot: PRINT nationName$(currentSide); " capital moved from "; someString$; " to "; cityName$(capitalCity(currentSide));
-	CALL clrrite
-	CALL DrawCities
-	CALL TICK(9): CALL clrbot
-'-------------------------------------------------------------------------
-'                               Detach
-'-------------------------------------------------------------------------
-		CASE 6
-	IF currentSide = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
-	COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-	CALL MoveFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
-	IF armySize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
-	CALL commander(2, empty): IF empty = 0 GOTO menu0
-	armySupply(empty) = .3 * armySupply(index): armySupply(index) = armySupply(index) - armySupply(empty): IF armySupply(index) < 0 THEN armySupply(index) = 0
-	armySize(empty) = .3 * armySize(index): armySize(index) = armySize(index) - armySize(empty)
-	armyLocation(empty) = target: armyExp(empty) = armyExp(index): armyMove(empty) = 0
-	armyCommander(empty) = leaderRating(empty)
-	armyName$(empty) = leaderName$(empty): leaderName$(empty) = ""
-	armyExp(empty) = armyExp(index)
-	COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; armyName$(empty); : CALL TICK(turbo!): IF soundEffects > 0 THEN SOUND 2222, 1
-	CALL stax(currentSide)
-	chosenOption = 27
-	GOTO commandsmenu
-'-------------------------------------------------------------------------
-'                               Drill
-'-------------------------------------------------------------------------
-		CASE 7
-	COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
-	CALL MoveFrom(index, target)
-	IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; monthes$(currentMonth); : GOTO menu0
-	IF armyExp(index) > 5 OR armyExp(index) >= armyCommander(index) THEN COLOR 12: CALL clrbot: PRINT armyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO commandsmenu
-	armyExp(index) = armyExp(index) + 1
-	CALL clrbot: PRINT armyName$(index); " has drilled to reach experience level "; armyExp(index); : IF soundEffects > 0 THEN SOUND 2222, 1
-	CALL TICK(turbo!): clrbot
-	armyMove(index) = -1
-	chosenOption = 28
-	GOTO commandsmenu
-'-------------------------------------------------------------------------
-'                               Relieve
-'-------------------------------------------------------------------------
-		CASE 8
-		CALL relieve(currentSide)
-		chosenOption = 29
-		GOTO commandsmenu
-'-------------------------------------------------------------------------
-		CASE ELSE
-		newChosenOption = 28
-		GOTO menu0
-      END SELECT
-	chosenOption = 21 + chosenOption: GOTO commandsmenu
-'==========================================================================
-'                               Utility Menu
-'==========================================================================
-	CASE 8
+	CASE 7 ' Commands Menu
+		commandsmenu:
+			tlx = 67: tly = 13
+			COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
+			highlight = 15: colour = 3: newChosenOption = 24
+			menuText$(0) = "Commands"
+			menuText$(1) = "Cancel"
+			menuText$(2) = "Fortify": IF currentCash(currentSide) < 200 THEN menuText$(2) = "-"
+			menuText$(3) = "Join"
+			menuText$(4) = "Supply"
+			menuText$(5) = "Capital": IF capitalCity(currentSide) = 0 OR currentCash(currentSide) < 500 THEN menuText$(5) = "-"
+			menuText$(6) = "Detach": IF currentSide = 1 THEN menuText$(6) = "-"
+			menuText$(7) = "Army Drill"
+			menuText$(8) = "Relieve"
+			menuText$(9) = "MAIN MENU"
+			menuRows = 9
+			CALL ShowMenu(0): CALL clrrite
+			newChosenOption = 28
+			SELECT CASE chosenOption
+				CASE 1 ' Cancel
+			CALL CancelArmyMovement(currentSide): canMove = 0
+			chosenOption = 22
+				CASE 2 ' Fortify
+			IF currentCash(currentSide) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
+			CALL FortifyCity(target)
+			IF currentCash(currentSide) < 200 GOTO menu0
+			chosenOption = 23
+			GOTO commandsmenu
+				CASE 3 ' Combine
+			x = currentSide
+			CALL CombineArmies(x)
+			IF x < 0 THEN
+				CALL clrbot
+				COLOR 11
+				PRINT "No eligible armies in same city to combine";
+				CALL stax(currentSide)
+				GOTO menu0
+			END IF
+			chosenOption = 24
+			GOTO commandsmenu
+				CASE 4 ' Supply
+				CALL StartToFinish(start, fin, (currentSide))
+				menuText$(0) = "Supply"
+				tlx = 67: tly = 5: colour = 5
+				menuRows = 0
+				FOR i = start TO fin
+				IF armyLocation(i) = 0 OR armySupply(i) > 1 GOTO alone
+				IF realism > 0 THEN
+					CALL cutoff(currentSide, armyLocation(i), a)
+					IF a < 1 THEN CALL clrbot: COLOR 15: PRINT nationName$(currentSide); " army in "; cityName$(armyLocation(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
+				END IF
+				menuRows = menuRows + 1
+				max = 11: IF LEN(armyName$(i)) < 11 THEN max = LEN(armyName$(i))
+				menuText$(menuRows) = LEFT$(armyName$(i), max)
+				array(menuRows) = i
+		alone:
+				NEXT i
+				IF menuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; nationName$(currentSide); " armies have supplies"; : GOTO menu0
+				CALL ShowMenu(6): CALL clrrite
+				IF chosenOption < 0 GOTO menu0
+				index = array(chosenOption)
+				IF armySupply(index) < 2 THEN
+				CALL ResupplyArmy(index)
+				CALL DrawArmyUnit(index)
+				END IF
+				chosenOption = 25
+				GOTO commandsmenu
+				CASE 5 ' Move Capital
+			IF capitalCity(currentSide) = 0 OR currentCash(currentSide) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
+			currentCash(currentSide) = currentCash(currentSide) - 500
+			victoryPoints(3 - currentSide) = victoryPoints(3 - currentSide) + 50
+			CALL clrrite
+			menuText$(0) = "Capital"
+			someString$ = cityName$(capitalCity(currentSide))
+			index = capitalCity(currentSide): CALL newcity(index)
+			IF index = 0 GOTO menu0
+			capitalCity(currentSide) = index
+			CALL clrbot: PRINT nationName$(currentSide); " capital moved from "; someString$; " to "; cityName$(capitalCity(currentSide));
+			CALL clrrite
+			CALL DrawCities
+			CALL TICK(9): CALL clrbot
+				CASE 6 ' Detach
+			IF currentSide = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
+			COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
+			CALL MoveFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
+			IF armySize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
+			CALL commander(2, empty): IF empty = 0 GOTO menu0
+			armySupply(empty) = .3 * armySupply(index): armySupply(index) = armySupply(index) - armySupply(empty): IF armySupply(index) < 0 THEN armySupply(index) = 0
+			armySize(empty) = .3 * armySize(index): armySize(index) = armySize(index) - armySize(empty)
+			armyLocation(empty) = target: armyExp(empty) = armyExp(index): armyMove(empty) = 0
+			armyCommander(empty) = leaderRating(empty)
+			armyName$(empty) = leaderName$(empty): leaderName$(empty) = ""
+			armyExp(empty) = armyExp(index)
+			COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; armyName$(empty); : CALL TICK(turbo!): IF soundEffects > 0 THEN SOUND 2222, 1
+			CALL stax(currentSide)
+			chosenOption = 27
+			GOTO commandsmenu
+				CASE 7 ' Drill
+			COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
+			CALL MoveFrom(index, target)
+			IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; monthes$(currentMonth); : GOTO menu0
+			IF armyExp(index) > 5 OR armyExp(index) >= armyCommander(index) THEN COLOR 12: CALL clrbot: PRINT armyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO commandsmenu
+			armyExp(index) = armyExp(index) + 1
+			CALL clrbot: PRINT armyName$(index); " has drilled to reach experience level "; armyExp(index); : IF soundEffects > 0 THEN SOUND 2222, 1
+			CALL TICK(turbo!): clrbot
+			armyMove(index) = -1
+			chosenOption = 28
+			GOTO commandsmenu
+				CASE 8 ' Relieve
+				CALL relieve(currentSide)
+				chosenOption = 29
+				GOTO commandsmenu
+				CASE ELSE ' Else
+				newChosenOption = 28
+				GOTO menu0
+			END SELECT
+			chosenOption = 21 + chosenOption: GOTO commandsmenu
+	CASE 8 ' Utility Menu
 utilitymenu:
 	newChosenOption = 29
 	menuText$(0) = "Utility"
@@ -443,10 +405,7 @@ utilitymenu:
 	IF humanPlayers = 1 THEN menuRows = 14: menuText$(14) = "Aggress" + STR$(aiBoldness)
 	CALL ShowMenu(-1): CALL clrrite
 	    SELECT CASE chosenOption
-'-------------------------------------------------------------------------
-'                               Swap Sides
-'-------------------------------------------------------------------------
-	    CASE 1
+	    CASE 1 ' Swap Sides
 		IF humanPlayers = 2 GOTO menu0
 		currentSide = 3 - currentSide: COLOR 9: IF currentSide = 2 THEN COLOR 7
 		CALL clrbot: PRINT "Now playing "; nationName$(currentSide); " side"; : IF soundEffects > 0 THEN SOUND 999, 1
@@ -454,19 +413,13 @@ utilitymenu:
 		IF currentSide = 2 THEN eventsBalance = 3
 		CALL DrawTopBar
 		GOTO menu0
-'-------------------------------------------------------------------------
-'                               Solo or 2 Player
-'-------------------------------------------------------------------------
-	    CASE 2
+	    CASE 2 ' Solo or 2 Player
 		humanPlayers = 3 - humanPlayers: CALL clrbot: COLOR 12
 		IF soundEffects > 0 THEN SOUND 999, 1
 		someString$ = "Solo": IF humanPlayers = 2 THEN someString$ = "2 Player"
 		PRINT someString$; " Game";
 		chosenOption = 23: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Graphics
-'-------------------------------------------------------------------------
-	    CASE 3
+	    CASE 3 ' Graphics
 		graphicLevel = graphicLevel + 1
 		IF graphicLevel > 3 THEN graphicLevel = 0
 		someString$ = "ROADS"
@@ -477,10 +430,7 @@ utilitymenu:
 		CALL DrawMap
 		CALL clrbot: COLOR 11: PRINT "Graphics : "; someString$; : IF soundEffects > 0 THEN SOUND 2700, 1
 		chosenOption = 24: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Sounds
-'-------------------------------------------------------------------------
-	    CASE 4
+	    CASE 4 ' Sounds
 		CALL clrrite: chosenOption = soundEffects + 22
 		menuText$(0) = "SOUNDS"
 		menuText$(1) = "Quiet"
@@ -493,10 +443,7 @@ utilitymenu:
 		soundEffects = chosenOption - 1
 		IF soundEffects > 0 THEN SOUND 999, 1
 		chosenOption = 25: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Display Speed
-'-------------------------------------------------------------------------
-	    CASE 5
+	    CASE 5 ' Display Speed
 		chosenOption = turbo! + 21
 		menuText$(0) = "Display"
 		menuText$(1) = "Fast"
@@ -520,10 +467,7 @@ utilitymenu:
 				CALL DrawTopBar
 		END SELECT
 		chosenOption = 26: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Play Balance
-'-------------------------------------------------------------------------
-	   CASE 6
+	   CASE 6 ' Play Balance
 		chosenOption = difficultyLevel + 21
 		menuText$(0) = "Balance"
 		menuText$(1) = "Rebel ++"
@@ -539,16 +483,10 @@ utilitymenu:
 		difficultyLevel = chosenOption
 		GOSUB unionplus
 		chosenOption = 27: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Ending Conditions
-'-------------------------------------------------------------------------
-	   CASE 7
+	   CASE 7 ' Ending Conditions
 		CALL VictoryConditionsMet
 		chosenOption = 28: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                           Random Events Options
-'-------------------------------------------------------------------------
-	   CASE 8
+	   CASE 8 ' Random Events Options
 		 menuText$(0) = "Random Events"
 		 menuRows = 4: tlx = 30: tly = 8
 		 menuText$(1) = "OFF"
@@ -580,10 +518,7 @@ utilitymenu:
 		 CALL DrawMap
 		 chosenOption = 29
 		 GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                              Vary Start Conditions
-'-------------------------------------------------------------------------
-	   CASE 9
+	   CASE 9 ' Vary Start Conditions
 		CALL FileManager(1)
 		currentCash(1) = currentCash(1) - 100 + 200 * RND
 		currentCash(2) = currentCash(2) + 100 + 200 * RND
@@ -619,20 +554,14 @@ utilitymenu:
 		CLS
 		CALL DrawMap
 		chosenOption = 30: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               January Campaigns
-'-------------------------------------------------------------------------
-	   CASE 10
+	   CASE 10 ' January Campaigns
 		januaryCampaign = 1 - januaryCampaign
 		someString$ = "PROHIBITED": IF januaryCampaign = 1 THEN someString$ = "ALLOWED"
 		COLOR 11
 		CALL clrbot
 		PRINT "January Campaigns : "; someString$;
 		chosenOption = 31: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Realism Switch
-'-------------------------------------------------------------------------
-	   CASE 11
+	   CASE 11 ' Realism Switch
 		realism = 1 - realism
 		CALL clrbot: COLOR 11
 	IF realism = 0 THEN
@@ -643,25 +572,16 @@ utilitymenu:
 		GOSUB unionplus
 	END IF
 		chosenOption = 32: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Check Map Linakges
-'-------------------------------------------------------------------------
-	   CASE 12
+	   CASE 12 ' Check Map Linkages
 		CALL CheckMapIntegrity
 		CALL TICK(99)
 		CALL DrawMap
-'-------------------------------------------------------------------------
-'                               History
-'-------------------------------------------------------------------------
-	   CASE 13
+	   CASE 13 ' History
 		history = 1 - history
 		someString$ = "OFF": IF history = 1 THEN someString$ = "ON"
 		CALL clrbot: PRINT "History is now "; someString$;
 		chosenOption = 34: GOTO utilitymenu
-'-------------------------------------------------------------------------
-'                               Aggression
-'-------------------------------------------------------------------------
-	   CASE 14
+	   CASE 14 ' Aggression
 		aiBoldness = aiBoldness + 1: IF aiBoldness > 5 THEN aiBoldness = 0
 		SELECT CASE aiBoldness
 		CASE 0: someString$ = "PASSIVE"
@@ -677,10 +597,7 @@ utilitymenu:
 		chosenOption = 35: GOTO utilitymenu
 		CASE ELSE
 	   END SELECT
-'==========================================================================
-'                               Files
-'==========================================================================
-	CASE 9
+	CASE 9 ' Files
 	IF _FILEEXISTS("*.sav") = 0 THEN savedGameExists = 0
 newgamemenu:
 	chosenOption = 23: newChosenOption = 30: IF currentYear = 1861 THEN chosenOption = 22
