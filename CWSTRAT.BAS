@@ -1843,19 +1843,6 @@ SUB normal (xbar%, vary%, result%)
 	result = xbar + pct! * SQR(vary)
 END SUB
 
-SUB DrawArmyUnit (which%)
-	who = 1: IF which > 20 THEN who = 2
-	x = cityX(armyLocation(which)) - 12
-	y = cityY(armyLocation(which)) - 11
-	CALL armyxy(x, y, who)
-	IF armySupply(which) < 1 THEN
-		x = x - 3: y = y + 4
-		PSET (x, y), 13: DRAW "C11S8"
-		DRAW font$(19)
-		DRAW "S4"
-	END IF
-END SUB
-
 SUB railroad (who%)
 	SELECT CASE rr(who)
 		CASE 0
@@ -4522,6 +4509,19 @@ SUB DrawArmySurrender (who%)
 
 	CALL DrawFlags(3 - s, 26, 0)
 	IF who < 99 THEN CALL TICK(turbo!)
+END SUB
+
+SUB DrawArmyUnit (which%)
+	who = 1: IF which > 20 THEN who = 2
+	x = cityX(armyLocation(which)) - 12
+	y = cityY(armyLocation(which)) - 11
+	CALL armyxy(x, y, who)
+	IF armySupply(which) < 1 THEN
+		x = x - 3: y = y + 4
+		PSET (x, y), 13: DRAW "C11S8"
+		DRAW font$(19)
+		DRAW "S4"
+	END IF
 END SUB
 
 SUB DrawMap
