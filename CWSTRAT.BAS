@@ -194,8 +194,7 @@ IF gTimesPlayed > 0 THEN
 	GOTO newgame
 END IF
 
-'                              Main Menu
-menu0:
+menu0: ' Main Menu
 CALL DrawTopBar
 IF gHumanPlayers = 2 AND gCurrentSide = 0 THEN gCurrentSide = 1
 IF gCurrentCash(gCurrentSide) < 100 AND gNavyLocation(gCurrentSide) = 0 THEN gHasNavy = 1
@@ -542,15 +541,15 @@ SELECT CASE gChosenOption ' Main Menu
 			FOR i = 1 TO 2
 				gFleet$(i) = ""
 				FOR j = 1 TO gNavySize(i)
-				someString$ = "W": IF RND > .45 * gCurrentSide THEN someString$ = "I"
-				gFleet$(i) = gFleet$(i) + someString$
-			NEXT j
+					someString$ = "W": IF RND > .45 * gCurrentSide THEN someString$ = "I"
+					gFleet$(i) = gFleet$(i) + someString$
+				NEXT j
 			NEXT i
 			IF RND > .7 THEN gCapitalCity(2) = 25
 
 			FOR k = 1 TO 40
-			IF RND > .8 THEN gLeaderRating(k) = gLeaderRating(k) - 3 + 6 * RND: IF gLeaderRating(k) > 9 THEN gLeaderRating(k) = 9
-			IF gLeaderRating(k) < 1 THEN gLeaderRating(k) = 1
+				IF RND > .8 THEN gLeaderRating(k) = gLeaderRating(k) - 3 + 6 * RND: IF gLeaderRating(k) > 9 THEN gLeaderRating(k) = 9
+				IF gLeaderRating(k) < 1 THEN gLeaderRating(k) = 1
 			NEXT k
 			CLS
 			CALL DrawMap
@@ -612,7 +611,7 @@ SELECT CASE gChosenOption ' Main Menu
 		SELECT CASE gChosenOption
 			CASE IS < 1: GOTO menu0
 			CASE 1, 2
-		loader: ' Line Label
+				loader: ' Line Label
 				IF gChosenOption = 1 AND gSavedGameExists = 0 GOTO newgamemenu
 				CALL FileManager(gChosenOption + 1)
 				IF gChosenOption = 1 THEN gRecruitFlag = 0: gCanMove = 0: gHasNavy = 0
@@ -632,7 +631,6 @@ SELECT CASE gChosenOption ' Main Menu
 				gTLX = 67: gTLY = 15
 				CALL ShowMenu(0): CALL clrrite: IF gChosenOption = 1 THEN END ELSE GOTO menu0
 		END SELECT
-'==========================================================================
 	CASE 99
 	GOTO endturn
 CASE ELSE
@@ -674,7 +672,8 @@ SUB MoveArmies
 	COLOR 11: LOCATE 11, 68: PRINT gCityName$(target)
 	gMenuRows = 0
 	gMenuText$(0) = "To"
-	FOR i = 1 TO 6: IF gMatrix(target, i) > 0 THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = gCityName$(gMatrix(target, i)): gArray(gMenuRows) = gMatrix(target, i)
+	FOR i = 1 TO 6
+		IF gMatrix(target, i) > 0 THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = gCityName$(gMatrix(target, i)): gArray(gMenuRows) = gMatrix(target, i)
 	NEXT i
 	CALL bubble(gMenuRows)
 
@@ -3748,7 +3747,6 @@ SUB DrawTopBar
 	someString$ = "  Snd": IF gSoundEffects < 2 THEN someString$ = "   Snd": IF gSoundEffects = 0 THEN someString$ = "      "
 	IF gGraphicLevel > 0 THEN someString$ = someString$ + " G" + LTRIM$(STR$(gGraphicLevel))
 	someString$ = someString$ + STR$(gHumanPlayers)
-	COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
 	COLOR c
 	LOCATE 26, 68: PRINT "F3 Redrw Scrn"
 	LOCATE 27, 68: PRINT "F7 End Turn"
