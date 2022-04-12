@@ -379,224 +379,7 @@ SELECT CASE gChosenOption ' Main Menu
 		END SELECT
 		gChosenOption = 21 + gChosenOption: GOTO commandsmenu
 	CASE 8 ' Utility Menu
-		utilitymenu: ' Line Label
-		newChosenOption = 29
-		gMenuText$(0) = "Utility"
-		gMenuText$(1) = "Side": IF gHumanPlayers = 2 THEN gMenuText$(2) = ""
-		gMenuText$(2) = "1 Player": IF gHumanPlayers = 2 THEN gMenuText$(2) = "2 Player"
-		gMenuText$(3) = "Graphics" + STR$(gGraphicLevel)
-		gMenuText$(4) = "Noise": IF gSoundEffects > 0 THEN gMenuText$(4) = gMenuText$(4) + STRING$(gSoundEffects, "*")
-		gMenuText$(5) = "Display" + STR$(gTurbo!)
-		someString$ = STR$(gDifficultyLevel): IF gCurrentSide = 1 THEN someString$ = STR$(6 - gDifficultyLevel)
-		gMenuText$(6) = "Balance" + someString$
-		gMenuText$(7) = "End Cond"
-		someString$ = "+": IF gEventsBalance = 0 THEN someString$ = ""
-		gMenuText$(8) = "Rndom Evt " + someString$
-		gMenuText$(9) = "Vary Start"
-		someString$ = "": IF gJanuaryCampaign = 1 THEN someString$ = "+"
-		gMenuText$(10) = "Jan Campgn" + someString$
-		someString$ = "": IF gRealism = 1 THEN someString$ = "+"
-		gMenuText$(11) = "Realism " + someString$
-		gMenuText$(12) = "Chk Links"
-		someString$ = "": IF gHistory = 1 THEN someString$ = "+"
-		gMenuText$(13) = "History" + someString$
-		gMenuRows = 13: gTLX = 67: gTLY = 11
-		COLOR 11: LOCATE gTLY - 2, gTLX: PRINT "esc=Main Menu"
-		IF gHumanPlayers = 1 THEN gMenuRows = 14: gMenuText$(14) = "Aggress" + STR$(gAIBoldness)
-		CALL ShowMenu(-1): CALL clrrite
-		SELECT CASE gChosenOption
-			CASE 1 ' Swap Sides
-				IF gHumanPlayers = 2 GOTO menu0
-				gCurrentSide = 3 - gCurrentSide: COLOR 9: IF gCurrentSide = 2 THEN COLOR 7
-				CALL clrbot: PRINT "Now playing "; gNationName$(gCurrentSide); " side"; : IF gSoundEffects > 0 THEN SOUND 999, 1
-				IF gCurrentSide = 1 THEN gEventsBalance = 7
-				IF gCurrentSide = 2 THEN gEventsBalance = 3
-				CALL DrawTopBar
-				GOTO menu0
-			CASE 2 ' Solo or 2 Player
-				gHumanPlayers = 3 - gHumanPlayers: CALL clrbot: COLOR 12
-				IF gSoundEffects > 0 THEN SOUND 999, 1
-				someString$ = "Solo": IF gHumanPlayers = 2 THEN someString$ = "2 Player"
-				PRINT someString$; " Game";
-				gChosenOption = 23: GOTO utilitymenu
-			CASE 3 ' Graphics
-				gGraphicLevel = gGraphicLevel + 1
-				IF gGraphicLevel > 3 THEN gGraphicLevel = 0
-				someString$ = "ROADS"
-				IF gGraphicLevel = 0 THEN someString$ = "DISABLED"
-				IF gGraphicLevel = 2 THEN someString$ = "CITY NAMES"
-				IF gGraphicLevel = 3 THEN someString$ = "FULL"
-				CLS
-				CALL DrawMap
-				CALL clrbot: COLOR 11: PRINT "Graphics : "; someString$; : IF gSoundEffects > 0 THEN SOUND 2700, 1
-				gChosenOption = 24: GOTO utilitymenu
-			CASE 4 ' Sounds
-				CALL clrrite: gChosenOption = gSoundEffects + 22
-				gMenuText$(0) = "SOUNDS"
-				gMenuText$(1) = "Quiet"
-				gMenuText$(2) = "Sound"
-				gMenuText$(3) = " & Sound"
-				gMenuRows = 3: gTLX = 67: gTLY = 12
-				CALL ShowMenu(0): CALL clrrite
-				IF gChosenOption < 1 GOTO menu0
-				COLOR 11: CALL clrbot: PRINT "Sound Option : "; gMenuText$(gChosenOption);
-				gSoundEffects = gChosenOption - 1
-				IF gSoundEffects > 0 THEN SOUND 999, 1
-				gChosenOption = 25: GOTO utilitymenu
-			CASE 5 ' Display Speed
-				gChosenOption = gTurbo! + 21
-				gMenuText$(0) = "Display"
-				gMenuText$(1) = "Fast"
-				gMenuText$(2) = "Normal"
-				gMenuText$(3) = "Slow"
-				gMenuText$(4) = "Very Slow"
-				gMenuText$(5) = "Reg Color": IF gBorderWidth > 0 THEN gMenuText$(5) = "Alt Color"
-				gTLX = 67: gTLY = 15: gMenuRows = 5
-				CALL ShowMenu(0): CALL clrrite
-				SELECT CASE gChosenOption
-					CASE IS < 1
-					CASE IS < 5
-						gTurbo! = gChosenOption
-						IF gTurbo! = 4 THEN gTurbo! = 8
-						CALL clrbot: COLOR 11
-						PRINT "Display Speed : "; gMenuText$(gChosenOption);
-					CASE 5
-						gBorderWidth = 1 - gBorderWidth
-						CLS
-						CALL DrawMap
-						CALL DrawTopBar
-				END SELECT
-				gChosenOption = 26: GOTO utilitymenu
-		CASE 6 ' Play Balance
-			gChosenOption = gDifficultyLevel + 21
-			gMenuText$(0) = "Balance"
-			gMenuText$(1) = "Rebel ++"
-			gMenuText$(2) = "Rebel +"
-			gMenuText$(3) = "Balanced"
-			gMenuText$(4) = "Union +"
-			gMenuText$(5) = "Union ++"
-			gTLX = 67: gTLY = 15: gMenuRows = 5
-			CALL ShowMenu(8): CALL clrrite
-			IF gChosenOption < 1 GOTO menu0
-			CALL clrbot
-			COLOR 11: CALL clrbot: PRINT "Play Balance : "; gMenuText$(gChosenOption);
-			gDifficultyLevel = gChosenOption
-			CALL UnionPlus
-			gChosenOption = 27: GOTO utilitymenu
-		CASE 7 ' Ending Conditions
-			CALL VictoryConditionsMet
-			gChosenOption = 28: GOTO utilitymenu
-		CASE 8 ' Random Events Options
-			gMenuText$(0) = "Random Events"
-			gMenuRows = 4: gTLX = 30: gTLY = 8
-			gMenuText$(1) = "OFF"
-			gMenuText$(2) = "Favor Union ": IF gEventsBalance = 3 THEN gMenuText$(2) = gMenuText$(2) + " "
-			gMenuText$(3) = "Neutral     ": IF gEventsBalance = 5 THEN gMenuText$(3) = gMenuText$(3) + " "
-			gMenuText$(4) = "Favor Rebels": IF gEventsBalance = 7 THEN gMenuText$(4) = gMenuText$(4) + " "
-			gColour = 5
-			CALL ShowMenu(0)
-			gColour = 4
-
-			SELECT CASE gChosenOption
-			CASE 1
-				gEventsBalance = 0: anotherString$ = ""
-			CASE 2
-				gEventsBalance = 3
-			CASE 3
-				gEventsBalance = 5
-			CASE 4
-				gEventsBalance = 7
-			CASE ELSE
-			END SELECT
-			IF gChosenOption > 1 AND gChosenOption < 5 THEN anotherString$ = gMenuText$(gChosenOption)
-			CALL clrbot
-			someString$ = "": IF gEventsBalance = 0 THEN someString$ = "OFF"
-			COLOR 11: PRINT "Random Events : "; someString$; " "; anotherString$;
-			COLOR 14: PRINT "			press a key";
-			DO WHILE INKEY$ = "": LOOP
-			CLS
-			CALL DrawMap
-			gChosenOption = 29
-			GOTO utilitymenu
-		CASE 9 ' Vary Start Conditions
-			CALL FileManager(1)
-			gCurrentCash(1) = gCurrentCash(1) - 100 + 200 * RND
-			gCurrentCash(2) = gCurrentCash(2) + 100 + 200 * RND
-			gAIBoldness = 5 * RND
-			FOR k = 1 TO 6
-				IF RND > .6 THEN
-				gArmyLocation(k) = 0: gArmySize(k) = 0: gArmyCommander(k) = 0
-				gArmyExp(k) = 0: gArmyMove(k) = 0: gArmySupply(k) = 0
-				END IF
-			NEXT k
-			FOR k = 21 TO 6
-				IF RND > .6 THEN
-				gArmyLocation(k) = 0: gArmySize(k) = 0: gArmyCommander(k) = 0
-				gArmyExp(k) = 0: gArmyMove(k) = 0: gArmySupply(k) = 0
-				END IF
-			NEXT k
-			FOR k = 1 TO 40: CALL occupy(k): NEXT k
-			gNavySize(1) = 10 * RND: IF gNavySize(1) = 0 THEN gNavyLocation(1) = 0
-			gNavySize(2) = 10 * RND: IF gNavySize(2) > 0 THEN gNavyLocation(2) = 27
-			FOR i = 1 TO 2
-				gFleet$(i) = ""
-				FOR j = 1 TO gNavySize(i)
-					someString$ = "W": IF RND > .45 * gCurrentSide THEN someString$ = "I"
-					gFleet$(i) = gFleet$(i) + someString$
-				NEXT j
-			NEXT i
-			IF RND > .7 THEN gCapitalCity(2) = 25
-
-			FOR k = 1 TO 40
-				IF RND > .8 THEN gLeaderRating(k) = gLeaderRating(k) - 3 + 6 * RND: IF gLeaderRating(k) > 9 THEN gLeaderRating(k) = 9
-				IF gLeaderRating(k) < 1 THEN gLeaderRating(k) = 1
-			NEXT k
-			CLS
-			CALL DrawMap
-			gChosenOption = 30: GOTO utilitymenu
-		CASE 10 ' January Campaigns
-			gJanuaryCampaign = 1 - gJanuaryCampaign
-			someString$ = "PROHIBITED": IF gJanuaryCampaign = 1 THEN someString$ = "ALLOWED"
-			COLOR 11
-			CALL clrbot
-			PRINT "January Campaigns : "; someString$;
-			gChosenOption = 31: GOTO utilitymenu
-		CASE 11 ' Realism Switch
-			gRealism = 1 - gRealism
-			CALL clrbot: COLOR 11
-			IF gRealism = 0 THEN
-				PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
-			ELSE
-				PRINT "REALISM ON: Recruiting based on CITY SIZE";
-				IF gCurrentSide = 2 AND gEventsBalance = 1 AND gEventsBalance < 5 THEN gEventsBalance = gEventsBalance + 2
-				CALL UnionPlus
-			END IF
-			gChosenOption = 32: GOTO utilitymenu
-		CASE 12 ' Check Map Linkages
-			CALL CheckMapIntegrity
-			CALL TICK(99)
-			CALL DrawMap
-		CASE 13 ' History
-			gHistory = 1 - gHistory
-			someString$ = "OFF": IF gHistory = 1 THEN someString$ = "ON"
-			CALL clrbot: PRINT "History is now "; someString$;
-			gChosenOption = 34: GOTO utilitymenu
-		CASE 14 ' Aggression
-			gAIBoldness = gAIBoldness + 1: IF gAIBoldness > 5 THEN gAIBoldness = 0
-			SELECT CASE gAIBoldness
-			CASE 0: someString$ = "PASSIVE"
-			CASE 1: someString$ = "TIMID"
-			CASE 2: someString$ = "CAUTIOUS"
-			CASE 3: someString$ = "NORMAL"
-			CASE 4: someString$ = "BOLD"
-			CASE 5: someString$ = "RECKLESS"
-			END SELECT
-			CALL clrbot
-			COLOR 11
-			PRINT "Enemy Aggression : "; someString$; " ("; gAIBoldness; ")";
-			gChosenOption = 35: GOTO utilitymenu
-			CASE ELSE
-		END SELECT
+		CALL UtilityMenu
 	CASE 9 ' Files
 		IF _FILEEXISTS("*.sav") = 0 THEN gSavedGameExists = 0
 		newgamemenu: ' Line Label
@@ -646,6 +429,224 @@ DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
 DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+
+SUB UtilityMenu
+	newChosenOption = 29
+	gMenuText$(0) = "Utility"
+	gMenuText$(1) = "Side": IF gHumanPlayers = 2 THEN gMenuText$(2) = ""
+	gMenuText$(2) = "1 Player": IF gHumanPlayers = 2 THEN gMenuText$(2) = "2 Player"
+	gMenuText$(3) = "Graphics" + STR$(gGraphicLevel)
+	gMenuText$(4) = "Noise": IF gSoundEffects > 0 THEN gMenuText$(4) = gMenuText$(4) + STRING$(gSoundEffects, "*")
+	gMenuText$(5) = "Display" + STR$(gTurbo!)
+	someString$ = STR$(gDifficultyLevel): IF gCurrentSide = 1 THEN someString$ = STR$(6 - gDifficultyLevel)
+	gMenuText$(6) = "Balance" + someString$
+	gMenuText$(7) = "End Cond"
+	someString$ = "+": IF gEventsBalance = 0 THEN someString$ = ""
+	gMenuText$(8) = "Rndom Evt " + someString$
+	gMenuText$(9) = "Vary Start"
+	someString$ = "": IF gJanuaryCampaign = 1 THEN someString$ = "+"
+	gMenuText$(10) = "Jan Campgn" + someString$
+	someString$ = "": IF gRealism = 1 THEN someString$ = "+"
+	gMenuText$(11) = "Realism " + someString$
+	gMenuText$(12) = "Chk Links"
+	someString$ = "": IF gHistory = 1 THEN someString$ = "+"
+	gMenuText$(13) = "History" + someString$
+	gMenuRows = 13: gTLX = 67: gTLY = 11
+	COLOR 11: LOCATE gTLY - 2, gTLX: PRINT "esc=Main Menu"
+	IF gHumanPlayers = 1 THEN gMenuRows = 14: gMenuText$(14) = "Aggress" + STR$(gAIBoldness)
+	CALL ShowMenu(-1): CALL clrrite
+	SELECT CASE gChosenOption
+		CASE 1 ' Swap Sides
+			IF gHumanPlayers = 2 GOTO menu0
+			gCurrentSide = 3 - gCurrentSide: COLOR 9: IF gCurrentSide = 2 THEN COLOR 7
+			CALL clrbot: PRINT "Now playing "; gNationName$(gCurrentSide); " side"; : IF gSoundEffects > 0 THEN SOUND 999, 1
+			IF gCurrentSide = 1 THEN gEventsBalance = 7
+			IF gCurrentSide = 2 THEN gEventsBalance = 3
+			CALL DrawTopBar
+			GOTO menu0
+		CASE 2 ' Solo or 2 Player
+			gHumanPlayers = 3 - gHumanPlayers: CALL clrbot: COLOR 12
+			IF gSoundEffects > 0 THEN SOUND 999, 1
+			someString$ = "Solo": IF gHumanPlayers = 2 THEN someString$ = "2 Player"
+			PRINT someString$; " Game";
+			gChosenOption = 23: CALL UtilityMenu
+		CASE 3 ' Graphics
+			gGraphicLevel = gGraphicLevel + 1
+			IF gGraphicLevel > 3 THEN gGraphicLevel = 0
+			someString$ = "ROADS"
+			IF gGraphicLevel = 0 THEN someString$ = "DISABLED"
+			IF gGraphicLevel = 2 THEN someString$ = "CITY NAMES"
+			IF gGraphicLevel = 3 THEN someString$ = "FULL"
+			CLS
+			CALL DrawMap
+			CALL clrbot: COLOR 11: PRINT "Graphics : "; someString$; : IF gSoundEffects > 0 THEN SOUND 2700, 1
+			gChosenOption = 24: CALL UtilityMenu
+		CASE 4 ' Sounds
+			CALL clrrite: gChosenOption = gSoundEffects + 22
+			gMenuText$(0) = "SOUNDS"
+			gMenuText$(1) = "Quiet"
+			gMenuText$(2) = "Sound"
+			gMenuText$(3) = " & Sound"
+			gMenuRows = 3: gTLX = 67: gTLY = 12
+			CALL ShowMenu(0): CALL clrrite
+			IF gChosenOption < 1 GOTO menu0
+			COLOR 11: CALL clrbot: PRINT "Sound Option : "; gMenuText$(gChosenOption);
+			gSoundEffects = gChosenOption - 1
+			IF gSoundEffects > 0 THEN SOUND 999, 1
+			gChosenOption = 25: CALL UtilityMenu
+		CASE 5 ' Display Speed
+			gChosenOption = gTurbo! + 21
+			gMenuText$(0) = "Display"
+			gMenuText$(1) = "Fast"
+			gMenuText$(2) = "Normal"
+			gMenuText$(3) = "Slow"
+			gMenuText$(4) = "Very Slow"
+			gMenuText$(5) = "Reg Color": IF gBorderWidth > 0 THEN gMenuText$(5) = "Alt Color"
+			gTLX = 67: gTLY = 15: gMenuRows = 5
+			CALL ShowMenu(0): CALL clrrite
+			SELECT CASE gChosenOption
+				CASE IS < 1
+				CASE IS < 5
+					gTurbo! = gChosenOption
+					IF gTurbo! = 4 THEN gTurbo! = 8
+					CALL clrbot: COLOR 11
+					PRINT "Display Speed : "; gMenuText$(gChosenOption);
+				CASE 5
+					gBorderWidth = 1 - gBorderWidth
+					CLS
+					CALL DrawMap
+					CALL DrawTopBar
+			END SELECT
+			gChosenOption = 26: CALL UtilityMenu
+	CASE 6 ' Play Balance
+		gChosenOption = gDifficultyLevel + 21
+		gMenuText$(0) = "Balance"
+		gMenuText$(1) = "Rebel ++"
+		gMenuText$(2) = "Rebel +"
+		gMenuText$(3) = "Balanced"
+		gMenuText$(4) = "Union +"
+		gMenuText$(5) = "Union ++"
+		gTLX = 67: gTLY = 15: gMenuRows = 5
+		CALL ShowMenu(8): CALL clrrite
+		IF gChosenOption < 1 GOTO menu0
+		CALL clrbot
+		COLOR 11: CALL clrbot: PRINT "Play Balance : "; gMenuText$(gChosenOption);
+		gDifficultyLevel = gChosenOption
+		CALL UnionPlus
+		gChosenOption = 27: CALL UtilityMenu
+	CASE 7 ' Ending Conditions
+		CALL VictoryConditionsMet
+		gChosenOption = 28: CALL UtilityMenu
+	CASE 8 ' Random Events Options
+		gMenuText$(0) = "Random Events"
+		gMenuRows = 4: gTLX = 30: gTLY = 8
+		gMenuText$(1) = "OFF"
+		gMenuText$(2) = "Favor Union ": IF gEventsBalance = 3 THEN gMenuText$(2) = gMenuText$(2) + " "
+		gMenuText$(3) = "Neutral     ": IF gEventsBalance = 5 THEN gMenuText$(3) = gMenuText$(3) + " "
+		gMenuText$(4) = "Favor Rebels": IF gEventsBalance = 7 THEN gMenuText$(4) = gMenuText$(4) + " "
+		gColour = 5
+		CALL ShowMenu(0)
+		gColour = 4
+		SELECT CASE gChosenOption
+		CASE 1
+			gEventsBalance = 0: anotherString$ = ""
+		CASE 2
+			gEventsBalance = 3
+		CASE 3
+			gEventsBalance = 5
+		CASE 4
+			gEventsBalance = 7
+		CASE ELSE
+		END SELECT
+		IF gChosenOption > 1 AND gChosenOption < 5 THEN anotherString$ = gMenuText$(gChosenOption)
+		CALL clrbot
+		someString$ = "": IF gEventsBalance = 0 THEN someString$ = "OFF"
+		COLOR 11: PRINT "Random Events : "; someString$; " "; anotherString$;
+		COLOR 14: PRINT "			press a key";
+		DO WHILE INKEY$ = "": LOOP
+		CLS
+		CALL DrawMap
+		gChosenOption = 29
+		CALL UtilityMenu
+	CASE 9 ' Vary Start Conditions
+		CALL FileManager(1)
+		gCurrentCash(1) = gCurrentCash(1) - 100 + 200 * RND
+		gCurrentCash(2) = gCurrentCash(2) + 100 + 200 * RND
+		gAIBoldness = 5 * RND
+		FOR k = 1 TO 6
+			IF RND > .6 THEN
+			gArmyLocation(k) = 0: gArmySize(k) = 0: gArmyCommander(k) = 0
+			gArmyExp(k) = 0: gArmyMove(k) = 0: gArmySupply(k) = 0
+			END IF
+		NEXT k
+		FOR k = 21 TO 6
+			IF RND > .6 THEN
+			gArmyLocation(k) = 0: gArmySize(k) = 0: gArmyCommander(k) = 0
+			gArmyExp(k) = 0: gArmyMove(k) = 0: gArmySupply(k) = 0
+			END IF
+		NEXT k
+		FOR k = 1 TO 40: CALL occupy(k): NEXT k
+		gNavySize(1) = 10 * RND: IF gNavySize(1) = 0 THEN gNavyLocation(1) = 0
+		gNavySize(2) = 10 * RND: IF gNavySize(2) > 0 THEN gNavyLocation(2) = 27
+		FOR i = 1 TO 2
+			gFleet$(i) = ""
+			FOR j = 1 TO gNavySize(i)
+				someString$ = "W": IF RND > .45 * gCurrentSide THEN someString$ = "I"
+				gFleet$(i) = gFleet$(i) + someString$
+			NEXT j
+		NEXT i
+		IF RND > .7 THEN gCapitalCity(2) = 25
+		FOR k = 1 TO 40
+			IF RND > .8 THEN gLeaderRating(k) = gLeaderRating(k) - 3 + 6 * RND: IF gLeaderRating(k) > 9 THEN gLeaderRating(k) = 9
+			IF gLeaderRating(k) < 1 THEN gLeaderRating(k) = 1
+		NEXT k
+		CLS
+		CALL DrawMap
+		gChosenOption = 30: CALL UtilityMenu
+	CASE 10 ' January Campaigns
+		gJanuaryCampaign = 1 - gJanuaryCampaign
+		someString$ = "PROHIBITED": IF gJanuaryCampaign = 1 THEN someString$ = "ALLOWED"
+		COLOR 11
+		CALL clrbot
+		PRINT "January Campaigns : "; someString$;
+		gChosenOption = 31: CALL UtilityMenu
+	CASE 11 ' Realism Switch
+		gRealism = 1 - gRealism
+		CALL clrbot: COLOR 11
+		IF gRealism = 0 THEN
+			PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
+		ELSE
+			PRINT "REALISM ON: Recruiting based on CITY SIZE";
+			IF gCurrentSide = 2 AND gEventsBalance = 1 AND gEventsBalance < 5 THEN gEventsBalance = gEventsBalance + 2
+			CALL UnionPlus
+		END IF
+		gChosenOption = 32: CALL UtilityMenu
+	CASE 12 ' Check Map Linkages
+		CALL CheckMapIntegrity
+		CALL TICK(99)
+		CALL DrawMap
+	CASE 13 ' History
+		gHistory = 1 - gHistory
+		someString$ = "OFF": IF gHistory = 1 THEN someString$ = "ON"
+		CALL clrbot: PRINT "History is now "; someString$;
+		gChosenOption = 34: CALL UtilityMenu
+	CASE 14 ' Aggression
+		gAIBoldness = gAIBoldness + 1: IF gAIBoldness > 5 THEN gAIBoldness = 0
+		SELECT CASE gAIBoldness
+		CASE 0: someString$ = "PASSIVE"
+		CASE 1: someString$ = "TIMID"
+		CASE 2: someString$ = "CAUTIOUS"
+		CASE 3: someString$ = "NORMAL"
+		CASE 4: someString$ = "BOLD"
+		CASE 5: someString$ = "RECKLESS"
+		END SELECT
+		CALL clrbot
+		COLOR 11
+		PRINT "Enemy Aggression : "; someString$; " ("; gAIBoldness; ")";
+		gChosenOption = 35: CALL UtilityMenu
+		CASE ELSE
+	END SELECT
+END SUB
 
 SUB blanken
 	c = 1: IF gCurrentSide = 2 THEN c = 7
