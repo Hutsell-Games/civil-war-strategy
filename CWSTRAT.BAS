@@ -262,122 +262,7 @@ SELECT CASE gChosenOption ' Main Menu
 		IF gArmyMove(i) > 0 THEN CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 1)
 		NEXT i
 	CASE 7 ' Commands Menu
-		commandsmenu: ' Line Label
-		gTLX = 67: gTLY = 13
-		COLOR 11: LOCATE gTLY - 2, gTLX: PRINT "esc=Main Menu"
-		gHighlight = 15: gColour = 3: newChosenOption = 24
-		gMenuText$(0) = "Commands"
-		gMenuText$(1) = "Cancel"
-		gMenuText$(2) = "Fortify": IF gCurrentCash(gCurrentSide) < 200 THEN gMenuText$(2) = "-"
-		gMenuText$(3) = "Join"
-		gMenuText$(4) = "Supply"
-		gMenuText$(5) = "Capital": IF gCapitalCity(gCurrentSide) = 0 OR gCurrentCash(gCurrentSide) < 500 THEN gMenuText$(5) = "-"
-		gMenuText$(6) = "Detach": IF gCurrentSide = 1 THEN gMenuText$(6) = "-"
-		gMenuText$(7) = "Army Drill"
-		gMenuText$(8) = "Relieve"
-		gMenuText$(9) = "MAIN MENU"
-		gMenuRows = 9
-		CALL ShowMenu(0): CALL clrrite
-		newChosenOption = 28
-		SELECT CASE gChosenOption
-			CASE 1 ' Cancel
-				CALL CancelArmyMovement(gCurrentSide): gCanMove = 0
-				gChosenOption = 22
-			CASE 2 ' Fortify
-				IF gCurrentCash(gCurrentSide) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
-				CALL FortifyCity(target)
-				IF gCurrentCash(gCurrentSide) < 200 GOTO menu0
-				gChosenOption = 23
-				GOTO commandsmenu
-			CASE 3 ' Combine
-				x = gCurrentSide
-				CALL CombineArmies(x)
-				IF x < 0 THEN
-					CALL clrbot
-					COLOR 11
-					PRINT "No eligible armies in same city to combine";
-					CALL stax(gCurrentSide)
-					GOTO menu0
-				END IF
-				gChosenOption = 24
-				GOTO commandsmenu
-			CASE 4 ' Supply
-				CALL StartToFinish(start, fin, (gCurrentSide))
-				gMenuText$(0) = "Supply"
-				gTLX = 67: gTLY = 5: gColour = 5
-				gMenuRows = 0
-				FOR i = start TO fin
-				IF gArmyLocation(i) = 0 OR gArmySupply(i) > 1 GOTO alone
-				IF gRealism > 0 THEN
-					CALL cutoff(gCurrentSide, gArmyLocation(i), a)
-					IF a < 1 THEN CALL clrbot: COLOR 15: PRINT gNationName$(gCurrentSide); " army in "; gCityName$(gArmyLocation(i)); " is CUT OFF !"; : TICK gTurbo!: GOTO alone
-				END IF
-				gMenuRows = gMenuRows + 1
-				max = 11: IF LEN(gArmyName$(i)) < 11 THEN max = LEN(gArmyName$(i))
-				gMenuText$(gMenuRows) = LEFT$(gArmyName$(i), max)
-				gArray(gMenuRows) = i
-				alone: ' Line Label
-				NEXT i
-				IF gMenuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; gNationName$(gCurrentSide); " armies have supplies"; : GOTO menu0
-				CALL ShowMenu(6): CALL clrrite
-				IF gChosenOption < 0 GOTO menu0
-				index = gArray(gChosenOption)
-				IF gArmySupply(index) < 2 THEN
-				CALL ResupplyArmy(index)
-				CALL DrawArmyUnit(index)
-				END IF
-				gChosenOption = 25
-				GOTO commandsmenu
-			CASE 5 ' Move Capital
-				IF gCapitalCity(gCurrentSide) = 0 OR gCurrentCash(gCurrentSide) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
-				gCurrentCash(gCurrentSide) = gCurrentCash(gCurrentSide) - 500
-				gVictoryPoints(3 - gCurrentSide) = gVictoryPoints(3 - gCurrentSide) + 50
-				CALL clrrite
-				gMenuText$(0) = "Capital"
-				someString$ = gCityName$(gCapitalCity(gCurrentSide))
-				index = gCapitalCity(gCurrentSide): CALL newcity(index)
-				IF index = 0 GOTO menu0
-				gCapitalCity(gCurrentSide) = index
-				CALL clrbot: PRINT gNationName$(gCurrentSide); " capital moved from "; someString$; " to "; gCityName$(gCapitalCity(gCurrentSide));
-				CALL clrrite
-				CALL DrawCities
-				CALL TICK(9): CALL clrbot
-			CASE 6 ' Detach
-				IF gCurrentSide = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
-				COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-				CALL MoveFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
-				IF gArmySize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(gTurbo!): GOTO menu0
-				CALL commander(2, empty): IF empty = 0 GOTO menu0
-				gArmySupply(empty) = .3 * gArmySupply(index): gArmySupply(index) = gArmySupply(index) - gArmySupply(empty): IF gArmySupply(index) < 0 THEN gArmySupply(index) = 0
-				gArmySize(empty) = .3 * gArmySize(index): gArmySize(index) = gArmySize(index) - gArmySize(empty)
-				gArmyLocation(empty) = target: gArmyExp(empty) = gArmyExp(index): gArmyMove(empty) = 0
-				gArmyCommander(empty) = gLeaderRating(empty)
-				gArmyName$(empty) = gLeaderName$(empty): gLeaderName$(empty) = ""
-				gArmyExp(empty) = gArmyExp(index)
-				COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; gArmyName$(empty); : CALL TICK(gTurbo!): IF gSoundEffects > 0 THEN SOUND 2222, 1
-				CALL stax(gCurrentSide)
-				gChosenOption = 27
-				GOTO commandsmenu
-			CASE 7 ' Drill
-				COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
-				CALL MoveFrom(index, target)
-				IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; gMonthes$(gCurrentMonth); : GOTO menu0
-				IF gArmyExp(index) > 5 OR gArmyExp(index) >= gArmyCommander(index) THEN COLOR 12: CALL clrbot: PRINT gArmyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO commandsmenu
-				gArmyExp(index) = gArmyExp(index) + 1
-				CALL clrbot: PRINT gArmyName$(index); " has drilled to reach experience level "; gArmyExp(index); : IF gSoundEffects > 0 THEN SOUND 2222, 1
-				CALL TICK(gTurbo!): clrbot
-				gArmyMove(index) = -1
-				gChosenOption = 28
-				GOTO commandsmenu
-			CASE 8 ' Relieve
-				CALL relieve(gCurrentSide)
-				gChosenOption = 29
-				GOTO commandsmenu
-			CASE ELSE ' Else
-				newChosenOption = 28
-				GOTO menu0
-		END SELECT
-		gChosenOption = 21 + gChosenOption: GOTO commandsmenu
+		CALL CommandsMenu
 	CASE 8 ' Utility Menu
 		CALL UtilityMenu
 	CASE 9 ' Files
@@ -429,6 +314,125 @@ DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
 DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+
+SUB CommandsMenu
+	commandsmenu: ' Line Label
+	gTLX = 67: gTLY = 13
+	COLOR 11: LOCATE gTLY - 2, gTLX: PRINT "esc=Main Menu"
+	gHighlight = 15: gColour = 3: newChosenOption = 24
+	gMenuText$(0) = "Commands"
+	gMenuText$(1) = "Cancel"
+	gMenuText$(2) = "Fortify": IF gCurrentCash(gCurrentSide) < 200 THEN gMenuText$(2) = "-"
+	gMenuText$(3) = "Join"
+	gMenuText$(4) = "Supply"
+	gMenuText$(5) = "Capital": IF gCapitalCity(gCurrentSide) = 0 OR gCurrentCash(gCurrentSide) < 500 THEN gMenuText$(5) = "-"
+	gMenuText$(6) = "Detach": IF gCurrentSide = 1 THEN gMenuText$(6) = "-"
+	gMenuText$(7) = "Army Drill"
+	gMenuText$(8) = "Relieve"
+	gMenuText$(9) = "MAIN MENU"
+	gMenuRows = 9
+	CALL ShowMenu(0): CALL clrrite
+	newChosenOption = 28
+	SELECT CASE gChosenOption
+		CASE 1 ' Cancel
+			CALL CancelArmyMovement(gCurrentSide): gCanMove = 0
+			gChosenOption = 22
+		CASE 2 ' Fortify
+			IF gCurrentCash(gCurrentSide) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
+			CALL FortifyCity(target)
+			IF gCurrentCash(gCurrentSide) < 200 GOTO menu0
+			gChosenOption = 23
+			CALL CommandsMenu
+		CASE 3 ' Combine
+			x = gCurrentSide
+			CALL CombineArmies(x)
+			IF x < 0 THEN
+				CALL clrbot
+				COLOR 11
+				PRINT "No eligible armies in same city to combine";
+				CALL stax(gCurrentSide)
+				GOTO menu0
+			END IF
+			gChosenOption = 24
+			CALL CommandsMenu
+		CASE 4 ' Supply
+			CALL StartToFinish(start, fin, (gCurrentSide))
+			gMenuText$(0) = "Supply"
+			gTLX = 67: gTLY = 5: gColour = 5
+			gMenuRows = 0
+			FOR i = start TO fin
+			IF gArmyLocation(i) = 0 OR gArmySupply(i) > 1 GOTO alone
+			IF gRealism > 0 THEN
+				CALL cutoff(gCurrentSide, gArmyLocation(i), a)
+				IF a < 1 THEN CALL clrbot: COLOR 15: PRINT gNationName$(gCurrentSide); " army in "; gCityName$(gArmyLocation(i)); " is CUT OFF !"; : TICK gTurbo!: GOTO alone
+			END IF
+			gMenuRows = gMenuRows + 1
+			max = 11: IF LEN(gArmyName$(i)) < 11 THEN max = LEN(gArmyName$(i))
+			gMenuText$(gMenuRows) = LEFT$(gArmyName$(i), max)
+			gArray(gMenuRows) = i
+			alone: ' Line Label
+			NEXT i
+			IF gMenuRows = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; gNationName$(gCurrentSide); " armies have supplies"; : GOTO menu0
+			CALL ShowMenu(6): CALL clrrite
+			IF gChosenOption < 0 GOTO menu0
+			index = gArray(gChosenOption)
+			IF gArmySupply(index) < 2 THEN
+			CALL ResupplyArmy(index)
+			CALL DrawArmyUnit(index)
+			END IF
+			gChosenOption = 25
+			CALL CommandsMenu
+		CASE 5 ' Move Capital
+			IF gCapitalCity(gCurrentSide) = 0 OR gCurrentCash(gCurrentSide) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
+			gCurrentCash(gCurrentSide) = gCurrentCash(gCurrentSide) - 500
+			gVictoryPoints(3 - gCurrentSide) = gVictoryPoints(3 - gCurrentSide) + 50
+			CALL clrrite
+			gMenuText$(0) = "Capital"
+			someString$ = gCityName$(gCapitalCity(gCurrentSide))
+			index = gCapitalCity(gCurrentSide): CALL newcity(index)
+			IF index = 0 GOTO menu0
+			gCapitalCity(gCurrentSide) = index
+			CALL clrbot: PRINT gNationName$(gCurrentSide); " capital moved from "; someString$; " to "; gCityName$(gCapitalCity(gCurrentSide));
+			CALL clrrite
+			CALL DrawCities
+			CALL TICK(9): CALL clrbot
+		CASE 6 ' Detach
+			IF gCurrentSide = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
+			COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
+			CALL MoveFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
+			IF gArmySize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(gTurbo!): GOTO menu0
+			CALL commander(2, empty): IF empty = 0 GOTO menu0
+			gArmySupply(empty) = .3 * gArmySupply(index): gArmySupply(index) = gArmySupply(index) - gArmySupply(empty): IF gArmySupply(index) < 0 THEN gArmySupply(index) = 0
+			gArmySize(empty) = .3 * gArmySize(index): gArmySize(index) = gArmySize(index) - gArmySize(empty)
+			gArmyLocation(empty) = target: gArmyExp(empty) = gArmyExp(index): gArmyMove(empty) = 0
+			gArmyCommander(empty) = gLeaderRating(empty)
+			gArmyName$(empty) = gLeaderName$(empty): gLeaderName$(empty) = ""
+			gArmyExp(empty) = gArmyExp(index)
+			COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; gArmyName$(empty); : CALL TICK(gTurbo!): IF gSoundEffects > 0 THEN SOUND 2222, 1
+			CALL stax(gCurrentSide)
+			gChosenOption = 27
+			CALL CommandsMenu
+		CASE 7 ' Drill
+			COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
+			CALL MoveFrom(index, target)
+			IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; gMonthes$(gCurrentMonth); : GOTO menu0
+			IF gArmyExp(index) > 5 OR gArmyExp(index) >= gArmyCommander(index) THEN COLOR 12: CALL clrbot: PRINT gArmyName$(index); ": Army has reached maximum improvement through drilling"; : CALL CommandsMenu
+			gArmyExp(index) = gArmyExp(index) + 1
+			CALL clrbot: PRINT gArmyName$(index); " has drilled to reach experience level "; gArmyExp(index); : IF gSoundEffects > 0 THEN SOUND 2222, 1
+			CALL TICK(gTurbo!): clrbot
+			gArmyMove(index) = -1
+			gChosenOption = 28
+			CALL CommandsMenu
+		CASE 8 ' Relieve
+			CALL relieve(gCurrentSide)
+			gChosenOption = 29
+			CALL CommandsMenu
+		CASE ELSE ' Else
+			newChosenOption = 28
+			GOTO menu0
+	END SELECT
+	gChosenOption = 21 + gChosenOption: CALL CommandsMenu
+END SUB
 
 SUB UtilityMenu
 	newChosenOption = 29
