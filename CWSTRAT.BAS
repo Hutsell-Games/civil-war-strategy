@@ -16,7 +16,7 @@ DIM SHARED gUSAdvantage, gVictoryFlags(6), gVictoryPoints(2), gWindowType%, gVPT
 DIM SHARED gReplaying
 
 gReplaying = 0
-newgame:
+CALL NewGame
 
 CALL DrawMap
 CALL Menu0
@@ -81,13 +81,14 @@ SUB NewGame
 	IF gHumanPlayers = 2 OR gCurrentSide = 0 THEN gCurrentSide = 1
 	IF gCurrentSide = 1 THEN gEventsBalance = 7
 	IF gCurrentSide = 2 THEN gEventsBalance = 3
-		IF gTurbo! < 1 THEN gTurbo! = 2
-		IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN gCurrentCash(2) = gCurrentCash(2) + 600 - 100 * gDifficultyLevel
-		IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN gCurrentCash(1) = gCurrentCash(1) + 100 * gDifficultyLevel
+	IF gTurbo! < 1 THEN gTurbo! = 2
+	IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN gCurrentCash(2) = gCurrentCash(2) + 600 - 100 * gDifficultyLevel
+	IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN gCurrentCash(1) = gCurrentCash(1) + 100 * gDifficultyLevel
 
 
 	FOR i = 1 TO 2
-		gCurrentIncome(i) = gCurrentCash(i): gCurrentCash(i) = gCurrentCash(i) + 50 * RND
+		gCurrentIncome(i) = gCurrentCash(i)
+		gCurrentCash(i) = gCurrentCash(i) + 50 * RND
 	NEXT i
 	gChosenOption = 0
 
@@ -130,15 +131,26 @@ SUB NewGame
 	gCityName$(0) = "NONE"
 	OPEN "I", 1, "cities.grd"
 	gVPTotal = gUSAdvantage + 200
-	FOR i = 1 TO 40: INPUT #1, a, gCityX(i), gCityY(i), gCityName$(i), gCityOwner(i), gCityValue(i)
-	gCityO(i) = gCityOwner(i)
-	CALL occupy(i)
-	FOR j = 1 TO 7: INPUT #1, gMatrix(i, j): NEXT j: INPUT #1, gFortLevel(i)
-	IF gCityOwner(i) > 0 THEN x = gCityOwner(i): gCityController(x) = gCityController(x) + 1: gVictoryPoints(x) = gVictoryPoints(x) + gCityValue(i)
-	IF gCityOwner(i) > 0 THEN gCurrentCash(gCityOwner(i)) = gCurrentCash(gCityOwner(i)) + gCityValue(i)
-	gVPTotal = gVPTotal + gCityValue(i)
+	FOR i = 1 TO 40
+		INPUT #1, a, gCityX(i), gCityY(i), gCityName$(i), gCityOwner(i), gCityValue(i)
+		gCityO(i) = gCityOwner(i)
+		CALL occupy(i)
+		FOR j = 1 TO 7
+			INPUT #1, gMatrix(i, j)
+		NEXT j
+		INPUT #1, gFortLevel(i)
+		IF gCityOwner(i) > 0 THEN 
+			x = gCityOwner(i)
+			gCityController(x) = gCityController(x) + 1
+			gVictoryPoints(x) = gVictoryPoints(x) + gCityValue(i)
+		END IF
+		IF gCityOwner(i) > 0 THEN 
+			gCurrentCash(gCityOwner(i)) = gCurrentCash(gCityOwner(i)) + gCityValue(i)
+		END IF
+		gVPTotal = gVPTotal + gCityValue(i)
 	NEXT i
-	CLOSE #1: CALL clrbot
+	CLOSE #1
+	CALL clrbot
 
 	RANDOMIZE TIMER
 	TICK .3
@@ -169,6 +181,7 @@ SUB NewGame
 		SCREEN 12: CLS
 	END IF
 END SUB
+
 SUB NewMonth
 	IF gCurrentSide > 2 THEN gCurrentSide = 1
 	someString$ = "--------> EVENTS FOR " + gMonthes$(gCurrentMonth) + " " + STR$(gCurrentYear) + " --------"
