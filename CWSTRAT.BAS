@@ -1296,25 +1296,35 @@ SUB MoveUnitIcon (from%, dest%, kind%)
 END SUB
 
 SUB ProcessTurn
-	'---------------------------------------------------------------------------
-	FOR i = 1 TO 40: IF gArmyLocation(i) > 0 THEN CALL DrawArmyUnit(i)
+	FOR i = 1 TO 40
+		IF gArmyLocation(i) > 0 THEN CALL DrawArmyUnit(i)
 	NEXT i
-	'---------------------------------------------------------------------------
+
 	gCurrentMonth = gCurrentMonth + 2
-	IF gCurrentMonth > 12 THEN gCurrentMonth = 1: gCurrentYear = gCurrentYear + 1
-	'---------------------------------------------------------------------------
-	s = 1
-	FOR i = 1 TO 40: IF gArmyLocation(i) < 1 GOTO skiparmy
-	IF i > 20 THEN s = 2
-	IF gCurrentCash(s) >= .2 * gArmySize(i) THEN
-		a = 1: IF gRealism > 0 THEN CALL cutoff(s, gArmyLocation(i), a)
-		IF a > 0 THEN
-			gArmySupply(i) = gArmySupply(i) + 1
-			gCurrentCash(s) = gCurrentCash(s) - .2 * gArmySize(i)
-		END IF
+	IF gCurrentMonth > 12 THEN 
+		gCurrentMonth = 1
+		gCurrentYear = gCurrentYear + 1
 	END IF
-	IF (gCurrentMonth < 7 OR gCurrentMonth > 10) AND gMatrix(gArmyLocation(i), 7) < 99 THEN gArmySupply(i) = gArmySupply(i) - 1
-	IF gMatrix(gArmyLocation(i), 7) = 99 AND gNavyLocation(3 - s) = gArmyLocation(i) THEN gArmySupply(i) = gArmySupply(i) - 1: CALL clrbot: PRINT gArmyName$(i); " is blockaded"; : CALL TICK(gTurbo!)
+
+	s = 1
+	FOR i = 1 TO 40
+		IF gArmyLocation(i) < 1 GOTO skiparmy
+		IF i > 20 THEN s = 2
+		IF gCurrentCash(s) >= .2 * gArmySize(i) THEN
+			a = 1
+			IF gRealism > 0 THEN CALL cutoff(s, gArmyLocation(i), a)
+			IF a > 0 THEN
+				gArmySupply(i) = gArmySupply(i) + 1
+				gCurrentCash(s) = gCurrentCash(s) - .2 * gArmySize(i)
+			END IF
+		END IF
+	IF (gCurrentMonth < 7 OR gCurrentMonth > 10) AND gMatrix(gArmyLocation(i), 7) < 99 THEN 
+		gArmySupply(i) = gArmySupply(i) - 1
+	END IF
+	IF gMatrix(gArmyLocation(i), 7) = 99 AND gNavyLocation(3 - s) = gArmyLocation(i) THEN 
+		gArmySupply(i) = gArmySupply(i) - 1: CALL clrbot: PRINT gArmyName$(i); " is blockaded";
+		CALL TICK(gTurbo!)
+	END IF
 	COLOR 13
 	IF gArmySupply(i) < 1 THEN
 		gArmySupply(i) = 0
@@ -1326,9 +1336,17 @@ SUB ProcessTurn
 	END IF
 	skiparmy:
 	NEXT i
-	FOR k = 1 TO 2: CALL stax(k): NEXT k
-	y = 0: FOR i = 1 TO 20: y = y + .1 * gArmySize(i): NEXT i
-	x = 0: FOR i = 21 TO 40: x = x + .1 * gArmySize(i): NEXT i
+	FOR k = 1 TO 2
+		CALL stax(k)
+		NEXT k
+	y = 0
+	FOR i = 1 TO 20
+		y = y + .1 * gArmySize(i)
+	NEXT i
+	x = 0
+	FOR i = 21 TO 40
+		x = x + .1 * gArmySize(i)
+	NEXT i
 	IF gCurrentSide = 2 AND x > 0 THEN gAggress! = y / x ELSE gAggress! = 1
 	IF gCurrentSide = 1 AND y > 0 THEN gAggress! = x / y ELSE IF gCurrentSide = 1 THEN gAggress! = 1
 END SUB
