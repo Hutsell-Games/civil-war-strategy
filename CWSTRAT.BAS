@@ -912,7 +912,7 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	END SELECT
 	xbar = gArmySize(attack) * pct!
 	vary = xbar * (1 - pct!)
-	CALL normal(xbar, vary, killd)
+	CALL normal(xbar, vary, DefendersKilled)
 	
 	pct! = .01 * gATKFAC + .02 * gFortLevel(gArmyLocation(defend))
 	IF win = defend THEN pct! = 1.5 * pct!
@@ -924,18 +924,18 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	END SELECT
 	xbar = gArmySize(defend) * pct!
 	vary = xbar * (1 - pct!)
-	CALL normal(xbar, vary, killa)
+	CALL normal(xbar, vary, AttackersKilled)
 	
 
-	killa = .8 * killa + .2 * killd
-	IF killa < 1 THEN killa = 1
-	killd = .8 * killd + .2 * killa
-	IF killd < 1 THEN killd = 1
-	IF killa > 9 * killd THEN killa = 9 * killd
-	IF killd > 5 * killa THEN killd = 5 * killa
+	AttackersKilled = .8 * AttackersKilled + .2 * DefendersKilled
+	IF AttackersKilled < 1 THEN AttackersKilled = 1
+	DefendersKilled = .8 * DefendersKilled + .2 * AttackersKilled
+	IF DefendersKilled < 1 THEN DefendersKilled = 1
+	IF AttackersKilled > 9 * DefendersKilled THEN AttackersKilled = 9 * DefendersKilled
+	IF DefendersKilled > 5 * AttackersKilled THEN DefendersKilled = 5 * AttackersKilled
 
-	IF killa >= gArmySize(attack) THEN killa = gArmySize(attack) - 1
-	IF killd >= gArmySize(defend) THEN killd = gArmySize(defend) - 1
+	IF AttackersKilled >= gArmySize(attack) THEN AttackersKilled = gArmySize(attack) - 1
+	IF DefendersKilled >= gArmySize(defend) THEN DefendersKilled = gArmySize(defend) - 1
 	
 	AttackerScore = INT(100 * odds!)
 	IF AttackerScore < 1 THEN AttackerScore = 1
@@ -943,15 +943,15 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 
 	COLOR c
 	LOCATE 1, 1: PRINT "Attack Loss: ";
-	PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
+	PRINT LTRIM$(RTRIM$(STR$(AttackersKilled)) + "00"); "/";
 	CALL CorrectArmySize(attack)
-	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / gArmySize(attack)))))); "%)";
-	COLOR 16 - c: PRINT "Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (AttackersKilled / gArmySize(attack)))))); "%)";
+	COLOR 16 - c: PRINT "Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(DefendersKilled)) + "00"); "/";
 	CALL CorrectArmySize(defend)
-	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / gArmySize(defend)))))); "%)"
+	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (DefendersKilled / gArmySize(defend)))))); "%)"
 	
-	gMenuText$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(gArmySize(attack)) + "00") + ") "
-	anotherString$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(gArmySize(defend)) + "00") + ")"
+	gMenuText$(1) = " (" + LTRIM$(RTRIM$(STR$(AttackersKilled) + "00")) + "/" + LTRIM$(STR$(gArmySize(attack)) + "00") + ") "
+	anotherString$ = " (" + LTRIM$(RTRIM$(STR$(DefendersKilled) + "00")) + "/" + LTRIM$(STR$(gArmySize(defend)) + "00") + ")"
 	gMenuText$(2) = anotherString$
 	IF win = defend THEN 
 		gMenuText$(2) = gMenuText$(1)
@@ -970,13 +970,13 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 		COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 	END IF
 
-	gArmySize(attack) = gArmySize(attack) - killa
-	gArmySize(defend) = gArmySize(defend) - killd
+	gArmySize(attack) = gArmySize(attack) - AttackersKilled
+	gArmySize(defend) = gArmySize(defend) - DefendersKilled
 	IF gArmySize(defend) < 1 THEN gArmySize(defend) = 1
 	
 	IF attack > 2 THEN s = 2 ELSE s = 1
-	gCasualty&(s) = gCasualty&(s) + killa
-	gCasualty&(3 - s) = gCasualty&(3 - s) + killd
+	gCasualty&(s) = gCasualty&(s) + AttackersKilled
+	gCasualty&(3 - s) = gCasualty&(3 - s) + DefendersKilled
 	
 	IF win > 20 THEN s = 2 ELSE s = 1
 	gBattleStats(s) = gBattleStats(s) + 1
@@ -1485,12 +1485,12 @@ SUB ManageNavy (who%, chx%)
 		CALL MoveUnitIcon(gNavyLocation(who), 0, 3)
 			
 		target = gNavyLocation(who): index = gIsOccupied(target): IF index = 0 GOTO deserted
-		pct! = .005 * gNavySize(who) + .02 * RND: killd = gArmySize(index) * pct!: IF killd < 1 THEN killd = 1
-		CALL clrbot: PRINT gArmyName$(index); " suffered "; 100 * killd; " casualties";
+		pct! = .005 * gNavySize(who) + .02 * RND: DefendersKilled = gArmySize(index) * pct!: IF DefendersKilled < 1 THEN DefendersKilled = 1
+		CALL clrbot: PRINT gArmyName$(index); " suffered "; 100 * DefendersKilled; " casualties";
 		x = .5 * gNavySize(who) + 1: IF x > gArmySupply(index) THEN x = gArmySupply(index)
 		gArmySupply(index) = gArmySupply(index) - x
 		CALL TICK(gTurbo!)
-		gArmySize(index) = gArmySize(index) - killd: IF gArmySize(index) < 1 THEN gArmySize(index) = 1
+		gArmySize(index) = gArmySize(index) - DefendersKilled: IF gArmySize(index) < 1 THEN gArmySize(index) = 1
 		EXIT SUB
 	deserted:
 		IF gFortLevel(target) = 0 GOTO bombardcity
