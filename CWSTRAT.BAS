@@ -2280,7 +2280,7 @@ SUB TurnUpdate
 	LOCATE 1, 20: PRINT "Update for "; gMonthes$(gCurrentMonth); ","; gCurrentYear
 	CALL clrbot: PRINT "press any key for "; gMonthes$(gCurrentMonth); ","; gCurrentYear; " events";
 	DO WHILE INKEY$ = "": LOOP
-	GOSUB turnupdatebox
+	CALL TurnUpdateBox
 	'==========================================================================
 	'                       Assign Time of Action
 	'==========================================================================
@@ -2378,7 +2378,7 @@ SUB TurnUpdate
 	IF gArmySize(defend) > 0 THEN 
 		CALL ComputeBattle(active, defend, win, lose)
 		flag = 1
-		IF gGraphicLevel > 0 THEN GOSUB turnupdatebox
+		IF gGraphicLevel > 0 THEN CALL TurnUpdateBox
 	END IF
 	IF gArmyExp(win) < 10 THEN gArmyExp(win) = gArmyExp(win) + 1
 
@@ -2547,14 +2547,6 @@ SUB TurnUpdate
 	NEXT j
 	GOTO allthru
 
-	turnupdatebox:
-	LINE (450, 318)-(526, 420), 1, BF
-	LINE (527, 315)-(527, 439), 10
-	COLOR 14: LOCATE 23, 50: PRINT "============="
-	LOCATE 24, 50: PRINT "| U P D A T E |"
-	LOCATE 25, 50: PRINT "============="
-	RETURN
-
 	allthru:
 	IF gNavySize(gNavalCommerce) < 1 THEN gNavalCommerce = 0
 	IF gNavalCommerce > 0 THEN
@@ -2611,6 +2603,14 @@ SUB TurnUpdate
 	END IF
 	IF gCurrentSide = 1 AND gCityController(2) < 11 THEN gAggress! = gAggress! + .7
 	IF gHumanPlayers = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+END SUB
+
+SUB TurnUpdateBox
+	LINE (450, 318)-(526, 420), 1, BF
+	LINE (527, 315)-(527, 439), 10
+	COLOR 14: LOCATE 23, 50: PRINT "============="
+	LOCATE 24, 50: PRINT "| U P D A T E |"
+	LOCATE 25, 50: PRINT "============="
 END SUB
 
 '============================================================================
