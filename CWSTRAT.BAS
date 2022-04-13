@@ -153,48 +153,9 @@ ELSE
 END IF
 CALL DrawMap
 CALL Menu0
-'==========================================================================
-'                              New Month
-'==========================================================================
-newmonth:
-IF gCurrentSide > 2 THEN gCurrentSide = 1
-someString$ = "--------> EVENTS FOR " + gMonthes$(gCurrentMonth) + " " + STR$(gCurrentYear) + " --------"
-CALL scribe(someString$, 0)
-CALL TurnUpdate
-gCityController(1) = 0: gCityController(2) = 0
+CALL NewMonth
 
-FOR i = 1 TO 2
-	gCurrentIncome(i) = 0
-	IF gCurrentCash(i) > 19999 THEN gCurrentCash(i) = 19999
-	IF gCurrentCash(i) < 0 THEN gCurrentCash(i) = 0
-NEXT i
-IF gHumanPlayers = 1 AND gCurrentSide = 2 THEN gCurrentIncome(1) = gCurrentIncome(1) + gUSAdvantage
-
-FOR i = 1 TO 40
-	IF gCityOwner(i) > 0 THEN x = gCityOwner(i): gCityController(x) = gCityController(x) + 1: gCurrentIncome(x) = gCurrentIncome(x) + gCityValue(i)
-	gArmyMove(i) = 0
-NEXT i
-
-FOR i = 1 TO 2
-	gNavyMove(i) = 0
-	IF gCapitalCity(i) > 0 THEN gCurrentIncome(i) = gCurrentIncome(i) + 100
-	gCurrentCash(i) = gCurrentCash(i) + gCurrentIncome(i)
-	IF gNavalCommerce > 0 AND i <> gNavalCommerce THEN gCurrentCash(i) = gCurrentCash(i) - gNavalRaider
-NEXT i
-gVPTotal = gCurrentIncome(1) + gCurrentIncome(2)
-
-newChosenOption = 22
-IF gHumanPlayers = 2 THEN CALL Blanken: CALL DrawMap
-CALL victor
-ON ERROR GOTO 0
-IF gTimesPlayed > 0 THEN
-	FOR k = 1 TO 40
-		gArmyLocation(k) = 0
-	NEXT k
-	GOTO newgame
-END IF
-
-CALL menu0
+CALL Menu0
 
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
@@ -203,6 +164,45 @@ DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
 DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+
+SUB NewMonth
+	IF gCurrentSide > 2 THEN gCurrentSide = 1
+	someString$ = "--------> EVENTS FOR " + gMonthes$(gCurrentMonth) + " " + STR$(gCurrentYear) + " --------"
+	CALL scribe(someString$, 0)
+	CALL TurnUpdate
+	gCityController(1) = 0: gCityController(2) = 0
+
+	FOR i = 1 TO 2
+		gCurrentIncome(i) = 0
+		IF gCurrentCash(i) > 19999 THEN gCurrentCash(i) = 19999
+		IF gCurrentCash(i) < 0 THEN gCurrentCash(i) = 0
+	NEXT i
+	IF gHumanPlayers = 1 AND gCurrentSide = 2 THEN gCurrentIncome(1) = gCurrentIncome(1) + gUSAdvantage
+
+	FOR i = 1 TO 40
+		IF gCityOwner(i) > 0 THEN x = gCityOwner(i): gCityController(x) = gCityController(x) + 1: gCurrentIncome(x) = gCurrentIncome(x) + gCityValue(i)
+		gArmyMove(i) = 0
+	NEXT i
+
+	FOR i = 1 TO 2
+		gNavyMove(i) = 0
+		IF gCapitalCity(i) > 0 THEN gCurrentIncome(i) = gCurrentIncome(i) + 100
+		gCurrentCash(i) = gCurrentCash(i) + gCurrentIncome(i)
+		IF gNavalCommerce > 0 AND i <> gNavalCommerce THEN gCurrentCash(i) = gCurrentCash(i) - gNavalRaider
+	NEXT i
+	gVPTotal = gCurrentIncome(1) + gCurrentIncome(2)
+
+	newChosenOption = 22
+	IF gHumanPlayers = 2 THEN CALL Blanken: CALL DrawMap
+	CALL victor
+	ON ERROR GOTO 0
+	IF gTimesPlayed > 0 THEN
+		FOR k = 1 TO 40
+			gArmyLocation(k) = 0
+		NEXT k
+		GOTO newgame
+	END IF
+END SUB
 
 SUB Menu0 ' Main Menu
 	CALL DrawTopBar
@@ -265,7 +265,7 @@ SUB Menu0 ' Main Menu
 			endturn: ' Line Label
 			gRecruitFlag = 0: gCanMove = 0: gHasNavy = 0
 			IF gHumanPlayers = 2 THEN gCurrentSide = gCurrentSide + 1: IF gCurrentSide = 2 THEN CALL Blanken: CALL DrawMap: CALL Menu0
-			' GOTO newmonth
+			CALL NewMonth
 		CASE 6 ' Reports
 			CALL ShowReports((gCurrentSide)): newChosenOption = 27
 			CALL StartToFinish(start, fin, gCurrentSide)
