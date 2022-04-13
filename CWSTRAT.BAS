@@ -3849,9 +3849,8 @@ SUB UnionSong
 			PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
 		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
 			PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
-		ELSE
-			CALL ShenandoahSong
-		END IF
+	ELSE
+		CALL ShenandoahSong
 	END IF
 END SUB
 
