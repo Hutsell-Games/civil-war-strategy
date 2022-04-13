@@ -17,141 +17,7 @@ DIM SHARED gReplaying
 
 gReplaying = 0
 newgame:
-gTimesPlayed = 0
-gRecruitFlag = 0
-FOR k = 1 TO 40
-	gArmySize(k) = 0
-	gArmyLocation(k) = 0
-	gArmyMove(k) = 0
-	gArmyCommander(k) = 0
-	gArmyName$(k) = ""
-NEXT k
-gUSAdvantage = 0
-gEmancipate = 0
-FOR k = 1 TO 2
-	gNavySize(k) = 0
-	gNavyLocation(k) = 0
-	gNavyMove(k) = 0
-	gRR(k) = 0
-	gVictoryPoints(k) = 0
-	gArmyOnRailroad(k) = 0
-NEXT k
 
-gSavedGameExists = 1
-gVictoryFlags(1) = 1
-
-CALL FileManager(1)
-IF _FILEEXISTS("mtn.vga") THEN
-	DEF SEG = VARSEG(gMtn(1))
-	BLOAD "mtn.vga", VARPTR(gMtn(1))
-	DEF SEG
-ELSE
-	COLOR 15: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": TICK 9
-END IF
-
-RESTORE
-FOR k = 1 TO 26
-	READ gFont$(k)
-NEXT k
-
-IF gRealism > 0 AND gCurrentYear < 1862 THEN
-		FOR i = 1 TO 2
-			someString$ = STRING$(LEN(gFleet$(i)), "W")
-			gFleet$(i) = someString$
-		NEXT i
-END IF
-
-IF gHumanPlayers < 1 OR gHumanPlayers > 2 THEN gHumanPlayers = 1
-IF gHumanPlayers = 2 OR gCurrentSide = 0 THEN gCurrentSide = 1
-IF gCurrentSide = 1 THEN gEventsBalance = 7
-IF gCurrentSide = 2 THEN gEventsBalance = 3
-	IF gTurbo! < 1 THEN gTurbo! = 2
-	IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN gCurrentCash(2) = gCurrentCash(2) + 600 - 100 * gDifficultyLevel
-	IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN gCurrentCash(1) = gCurrentCash(1) + 100 * gDifficultyLevel
-
-
-FOR i = 1 TO 2
-	gCurrentIncome(i) = gCurrentCash(i): gCurrentCash(i) = gCurrentCash(i) + 50 * RND
-NEXT i
-gChosenOption = 0
-
-SCREEN 12
-	DEF SEG = VARSEG(gGraphicImage(1))
-	BLOAD "cwsicon.vga", VARPTR(gGraphicImage(1))
-	DEF SEG
-
-	PUT (100, 100), gGraphicImage, PSET
-	GET (101, 101)-(113, 113), gUnionCapital
-CLS
-COLOR 11: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
-COLOR 4: LOCATE 15, 32: PRINT "Registered Edition"
-COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
-LOCATE 28, 60: PRINT "v1.57"
-LINE (190, 170)-(440, 260), 1, B
-LINE (180, 180)-(450, 250), 7, B
-CALL DrawFlags(1, -440, 0): CALL DrawFlags(2, -100, 0)
-IF gReplaying = 0 AND gSoundEffects = 2 AND gChosenOption = 0 THEN
-IF gCurrentSide = 1 THEN
-	IF INKEY$ <> "" GOTO skipmusic
-	PLAY "MST170o1e8o0b8o1e8"
-	IF INKEY$ <> "" GOTO skipmusic
-	PLAY "e8e4f#8g4f#8"
-	IF INKEY$ <> "" GOTO skipmusic
-	PLAY "g4e8d2o0b8o1d2 "
-	IF INKEY$ <> "" GOTO skipmusic
-	PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
-	IF INKEY$ <> "" GOTO skipmusic
-	PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
-	IF INKEY$ <> "" GOTO skipmusic
-	PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
-    ELSE
-	CALL ShenandoahSong
-    END IF
-END IF
-skipmusic:
-CALL UnionPlus
-
-gCityName$(0) = "NONE"
-OPEN "I", 1, "cities.grd"
-gVPTotal = gUSAdvantage + 200
-FOR i = 1 TO 40: INPUT #1, a, gCityX(i), gCityY(i), gCityName$(i), gCityOwner(i), gCityValue(i)
-gCityO(i) = gCityOwner(i)
-CALL occupy(i)
-FOR j = 1 TO 7: INPUT #1, gMatrix(i, j): NEXT j: INPUT #1, gFortLevel(i)
-IF gCityOwner(i) > 0 THEN x = gCityOwner(i): gCityController(x) = gCityController(x) + 1: gVictoryPoints(x) = gVictoryPoints(x) + gCityValue(i)
-IF gCityOwner(i) > 0 THEN gCurrentCash(gCityOwner(i)) = gCurrentCash(gCityOwner(i)) + gCityValue(i)
-gVPTotal = gVPTotal + gCityValue(i)
-NEXT i
-CLOSE #1: CALL clrbot
-
-RANDOMIZE TIMER
-TICK .3
-gWindowType = 2
-gHighlight = 15
-gReplaying = 1
-IF gHumanPlayers = 2 THEN CALL Blanken
-gMenuText$(0) = "VGA CIVILWAR STRATEGY"
-gMenuText$(1) = "Resume Saved Game"
-gMenuText$(2) = "Start NEW Game"
-gMenuText$(3) = "Quit"
-gTLX = 33: gTLY = 20: gColour = 5: gMenuRows = 3
-gChosenOption = 23
-CALL ShowMenu(0)
-IF gChosenOption = 1 THEN
-	CLS
-	' GOTO loader
-	CALL Menu0
-END IF
-IF gChosenOption = 3 THEN CLS : END
-IF gHistory = 1 THEN
-	CLS
-	IF _FILEEXISTS("cws.his") THEN SHELL "copy cws.his oldhist.ory"
-	OPEN "O", 2, "cws.his"
-	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; DATE$; " ]"
-	CLOSE #2
-ELSE
-	SCREEN 12: CLS
-END IF
 CALL DrawMap
 CALL Menu0
 CALL NewMonth
@@ -166,6 +32,143 @@ DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
+SUB NewGame
+	gTimesPlayed = 0
+	gRecruitFlag = 0
+	FOR k = 1 TO 40
+		gArmySize(k) = 0
+		gArmyLocation(k) = 0
+		gArmyMove(k) = 0
+		gArmyCommander(k) = 0
+		gArmyName$(k) = ""
+	NEXT k
+	gUSAdvantage = 0
+	gEmancipate = 0
+	FOR k = 1 TO 2
+		gNavySize(k) = 0
+		gNavyLocation(k) = 0
+		gNavyMove(k) = 0
+		gRR(k) = 0
+		gVictoryPoints(k) = 0
+		gArmyOnRailroad(k) = 0
+	NEXT k
+
+	gSavedGameExists = 1
+	gVictoryFlags(1) = 1
+
+	CALL FileManager(1)
+	IF _FILEEXISTS("mtn.vga") THEN
+		DEF SEG = VARSEG(gMtn(1))
+		BLOAD "mtn.vga", VARPTR(gMtn(1))
+		DEF SEG
+	ELSE
+		COLOR 15: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": TICK 9
+	END IF
+
+	RESTORE
+	FOR k = 1 TO 26
+		READ gFont$(k)
+	NEXT k
+
+	IF gRealism > 0 AND gCurrentYear < 1862 THEN
+			FOR i = 1 TO 2
+				someString$ = STRING$(LEN(gFleet$(i)), "W")
+				gFleet$(i) = someString$
+			NEXT i
+	END IF
+
+	IF gHumanPlayers < 1 OR gHumanPlayers > 2 THEN gHumanPlayers = 1
+	IF gHumanPlayers = 2 OR gCurrentSide = 0 THEN gCurrentSide = 1
+	IF gCurrentSide = 1 THEN gEventsBalance = 7
+	IF gCurrentSide = 2 THEN gEventsBalance = 3
+		IF gTurbo! < 1 THEN gTurbo! = 2
+		IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN gCurrentCash(2) = gCurrentCash(2) + 600 - 100 * gDifficultyLevel
+		IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN gCurrentCash(1) = gCurrentCash(1) + 100 * gDifficultyLevel
+
+
+	FOR i = 1 TO 2
+		gCurrentIncome(i) = gCurrentCash(i): gCurrentCash(i) = gCurrentCash(i) + 50 * RND
+	NEXT i
+	gChosenOption = 0
+
+	SCREEN 12
+		DEF SEG = VARSEG(gGraphicImage(1))
+		BLOAD "cwsicon.vga", VARPTR(gGraphicImage(1))
+		DEF SEG
+
+		PUT (100, 100), gGraphicImage, PSET
+		GET (101, 101)-(113, 113), gUnionCapital
+	CLS
+	COLOR 11: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
+	COLOR 4: LOCATE 15, 32: PRINT "Registered Edition"
+	COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
+	LOCATE 28, 60: PRINT "v1.57"
+	LINE (190, 170)-(440, 260), 1, B
+	LINE (180, 180)-(450, 250), 7, B
+	CALL DrawFlags(1, -440, 0): CALL DrawFlags(2, -100, 0)
+	IF gReplaying = 0 AND gSoundEffects = 2 AND gChosenOption = 0 THEN
+	IF gCurrentSide = 1 THEN
+		IF INKEY$ <> "" GOTO skipmusic
+		PLAY "MST170o1e8o0b8o1e8"
+		IF INKEY$ <> "" GOTO skipmusic
+		PLAY "e8e4f#8g4f#8"
+		IF INKEY$ <> "" GOTO skipmusic
+		PLAY "g4e8d2o0b8o1d2 "
+		IF INKEY$ <> "" GOTO skipmusic
+		PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
+		IF INKEY$ <> "" GOTO skipmusic
+		PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
+		IF INKEY$ <> "" GOTO skipmusic
+		PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
+		ELSE
+		CALL ShenandoahSong
+		END IF
+	END IF
+	skipmusic:
+	CALL UnionPlus
+
+	gCityName$(0) = "NONE"
+	OPEN "I", 1, "cities.grd"
+	gVPTotal = gUSAdvantage + 200
+	FOR i = 1 TO 40: INPUT #1, a, gCityX(i), gCityY(i), gCityName$(i), gCityOwner(i), gCityValue(i)
+	gCityO(i) = gCityOwner(i)
+	CALL occupy(i)
+	FOR j = 1 TO 7: INPUT #1, gMatrix(i, j): NEXT j: INPUT #1, gFortLevel(i)
+	IF gCityOwner(i) > 0 THEN x = gCityOwner(i): gCityController(x) = gCityController(x) + 1: gVictoryPoints(x) = gVictoryPoints(x) + gCityValue(i)
+	IF gCityOwner(i) > 0 THEN gCurrentCash(gCityOwner(i)) = gCurrentCash(gCityOwner(i)) + gCityValue(i)
+	gVPTotal = gVPTotal + gCityValue(i)
+	NEXT i
+	CLOSE #1: CALL clrbot
+
+	RANDOMIZE TIMER
+	TICK .3
+	gWindowType = 2
+	gHighlight = 15
+	gReplaying = 1
+	IF gHumanPlayers = 2 THEN CALL Blanken
+	gMenuText$(0) = "VGA CIVILWAR STRATEGY"
+	gMenuText$(1) = "Resume Saved Game"
+	gMenuText$(2) = "Start NEW Game"
+	gMenuText$(3) = "Quit"
+	gTLX = 33: gTLY = 20: gColour = 5: gMenuRows = 3
+	gChosenOption = 23
+	CALL ShowMenu(0)
+	IF gChosenOption = 1 THEN
+		CLS
+		' GOTO loader
+		CALL Menu0
+	END IF
+	IF gChosenOption = 3 THEN CLS : END
+	IF gHistory = 1 THEN
+		CLS
+		IF _FILEEXISTS("cws.his") THEN SHELL "copy cws.his oldhist.ory"
+		OPEN "O", 2, "cws.his"
+		PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; DATE$; " ]"
+		CLOSE #2
+	ELSE
+		SCREEN 12: CLS
+	END IF
+END SUB
 SUB NewMonth
 	IF gCurrentSide > 2 THEN gCurrentSide = 1
 	someString$ = "--------> EVENTS FOR " + gMonthes$(gCurrentMonth) + " " + STR$(gCurrentYear) + " --------"
