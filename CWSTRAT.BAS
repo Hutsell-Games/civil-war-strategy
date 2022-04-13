@@ -714,7 +714,7 @@ SUB ShipDestroyed (who%)
 	END IF
 END SUB
 
-SUB battle (attack%, defend%, win%, lose%)
+SUB ComputeBattle (attack%, defend%, win%, lose%)
 	IF gArmySize(defend) < 1 THEN gArmySize(defend) = 1
 	IF gArmySize(attack) < 1 THEN gArmySize(attack) = 1
 
@@ -2267,7 +2267,7 @@ SUB TurnUpdate
 	defend = gIsOccupied(target)
 
 	COLOR 11: CALL clrbot: PRINT gArmyName$(active); " attacks "; gArmyName$(defend); " in "; gCityName$(gArmyLocation(defend)); : CALL TICK(gTurbo! - 1)
-	IF gArmySize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF gGraphicLevel > 0 THEN GOSUB turnupdatebox
+	IF gArmySize(defend) > 0 THEN CALL ComputeBattle(active, defend, win, lose): flag = 1: IF gGraphicLevel > 0 THEN GOSUB turnupdatebox
 	IF gArmyExp(win) < 10 THEN gArmyExp(win) = gArmyExp(win) + 1
 
 	IF gArmySize(lose) < 2 THEN
