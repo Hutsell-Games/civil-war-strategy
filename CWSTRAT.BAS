@@ -720,23 +720,50 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 
 	CALL MoveUnitIcon(gArmyLocation(defend), 0, 9)
 	LOCATE 1, 1: PRINT SPACE$(80)
-	CALL clrrite: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
-	c = 9: IF attack > 20 THEN c = 7
-	COLOR c: LOCATE 2, y: PRINT gArmyName$(attack)
+	CALL clrrite
+	y = 68
+	COLOR 11
+	LOCATE 1, y: PRINT "Attacker"
+	IF attack > 20 THEN c = 7 ELSE c = 9
+	COLOR c
+	LOCATE 2, y: PRINT gArmyName$(attack)
 	LOCATE 3, y: CALL CorrectArmySize(attack)
-	x = .01 * gArmySize(attack): IF x > gTCR THEN x = gTCR
+	x = .01 * gArmySize(attack)
+	IF x > gTCR THEN x = gTCR
 	LOCATE 4, y: PRINT "Base    "; x
-	IF gArmySize(attack) / gArmySize(defend) > .2 THEN x = x + .3 * gArmyCommander(attack) + .3 * gArmyExp(attack): IF x > gTCR THEN x = gTCR
-	IF gArmyExp(attack) > 8 THEN x = x + 1: IF x > gTCR THEN x = gTCR
+	IF gArmySize(attack) / gArmySize(defend) > .2 THEN 
+		x = x + .3 * gArmyCommander(attack) + .3 * gArmyExp(attack)
+		IF x > gTCR THEN x = gTCR
+	END IF
+	IF gArmyExp(attack) > 8 THEN 
+		x = x + 1
+		IF x > gTCR THEN x = gTCR
+	END IF
 	LOCATE 5, y: PRINT "Ldr/Exp "; x
-	IF gArmySize(attack) < 15 THEN x = .5 * x: IF x > gTCR THEN x = gTCR
+	IF gArmySize(attack) < 15 THEN
+		x = .5 * x
+		IF x > gTCR THEN x = gTCR
+	END IF
 	LOCATE 6, y: PRINT "Small   "; x
-	IF gArmySize(attack) / gArmySize(defend) <= .5 THEN x = x - 2: IF x < 1 THEN x = 1
-	IF gArmySize(attack) / gArmySize(defend) > 3 THEN x = x + 2: IF x > gTCR THEN x = gTCR
-	IF gArmySize(attack) / gArmySize(defend) > 10 THEN x = gTCR
-	IF gArmySize(attack) / gArmySize(defend) <= .2 THEN x = 1
+	IF gArmySize(attack) / gArmySize(defend) <= .5 THEN 
+		x = x - 2
+		IF x < 1 THEN x = 1
+	END IF
+	IF gArmySize(attack) / gArmySize(defend) > 3 THEN 
+		x = x + 2
+		IF x > gTCR THEN x = gTCR
+	END IF
+	IF gArmySize(attack) / gArmySize(defend) > 10 THEN 
+		x = gTCR
+	END IF
+	IF gArmySize(attack) / gArmySize(defend) <= .2 THEN 
+		x = 1
+	END IF
 	LOCATE 7, y: PRINT "Outman  "; x
-	IF gArmySupply(attack) < 1 THEN x = .5 * x: COLOR 13
+	IF gArmySupply(attack) < 1 THEN 
+		x = .5 * x
+		COLOR 13
+	END IF
 	LOCATE 8, y: PRINT "Supply  "; x: COLOR c
 	IF x < 1 THEN x = 1
 	'                       Adjust attack advantage
@@ -747,14 +774,24 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
 	LINE (530, 155)-(635, 175), 11, B
 
-	x1 = .013 * gArmySize(defend) + 1: IF gRealism = 1 THEN x1 = .02 * gArmySize(defend) + 2: IF x1 > 20 THEN x1 = 20
+	x1 = .013 * gArmySize(defend) + 1
+	IF gRealism = 1 THEN 
+		x1 = .02 * gArmySize(defend) + 2
+		IF x1 > 20 THEN x1 = 20
+	END IF
 	LOCATE 13, y: PRINT "Defender"
 	COLOR 16 - c: LOCATE 14, y: PRINT gArmyName$(defend)
 	LOCATE 15, y: CALL CorrectArmySize(defend)
 	LOCATE 16, y: PRINT "Base    "; INT(.01 * gArmySize(defend))
 	LOCATE 17, y: PRINT "Defense "; x1
-	IF gArmySize(defend) / gArmySize(attack) > .2 THEN x1 = x1 + .3 * gArmyCommander(defend) + .3 * gArmyExp(defend): IF x1 > gTCR THEN x1 = gTCR
-	IF gArmyExp(defend) > 8 THEN x1 = x1 + 1: IF x1 > gTCR THEN x1 = gTCR
+	IF gArmySize(defend) / gArmySize(attack) > .2 THEN
+		x1 = x1 + .3 * gArmyCommander(defend) + .3 * gArmyExp(defend)
+		IF x1 > gTCR THEN x1 = gTCR
+	END IF
+	IF gArmyExp(defend) > 8 THEN 
+		x1 = x1 + 1
+		IF x1 > gTCR THEN x1 = gTCR
+	END IF
 	LOCATE 18, y: PRINT "Ldr/Exp "; x1
 	IF gArmySize(defend) < 15 THEN x1 = .5 * x1
 	LOCATE 19, y: PRINT "Small   "; x1
@@ -782,7 +819,8 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	IF defend > 20 AND gCurrentSide = 1 AND gDifficultyLevel < 3 THEN x1 = x1 + 6 - 2 * gDifficultyLevel
 	LOCATE 22, y: PRINT "Difclt  "; x1
 
-	someString$ = "Fort": IF gArmyMove(defend) = 0 THEN x1 = x1 * (1 + gFortLevel(gArmyLocation(defend)))
+	someString$ = "Fort"
+	IF gArmyMove(defend) = 0 THEN x1 = x1 * (1 + gFortLevel(gArmyLocation(defend)))
 	IF x1 > gTCR THEN x1 = gTCR
 	IF gFortLevel(gArmyLocation(defend)) > 0 AND gArmyMove(defend) = 0 THEN
 		COLOR 13: someString$ = "Fort+"
@@ -794,10 +832,13 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	LINE (530, 380)-(635, 400), 11, B
 
 	spin = 0
-	scale = x: IF x1 > scale THEN scale = x1
+	scale = x
+	IF x1 > scale THEN scale = x1
 	scale = scale + 1
 
-	odds! = x / (x + x1): a = INT(100 * odds!): IF a < 1 THEN a = 1
+	odds! = x / (x + x1)
+	a = INT(100 * odds!)
+	IF a < 1 THEN a = 1
 	someString$ = LTRIM$(RTRIM$(STR$(a))) + "%"
 	COLOR 14: LOCATE 27, y: PRINT "Odds:  "; someString$;
 	LINE (530, 412)-(635, 435), 14, B
@@ -816,7 +857,8 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	ELSE
 		CALL clrrite
 	END IF
-	FOR i = 1 TO 2: IF gArmySupply(i) > 0 THEN gArmySupply(i) = gArmySupply(i) - 1
+	FOR i = 1 TO 2
+		IF gArmySupply(i) > 0 THEN gArmySupply(i) = gArmySupply(i) - 1
 	NEXT i
 	'---------------------------------------------------------------------------
 	grapple:
@@ -828,17 +870,27 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 
 	IF hit = 0 AND hit1 = 0 GOTO grapple
 	IF hit = 1 AND hit1 = 1 GOTO grapple
-	win = defend: lose = attack: IF hit = 1 THEN win = attack: lose = defend
+	win = defend
+	lose = attack
+	IF hit = 1 THEN 
+		win = attack
+		lose = defend
+	END IF
 	'---------------------------------------------------------------------------
-	someString$ = "UNION": IF win > 20 THEN someString$ = "REBEL"
+	someString$ = "UNION"
+	IF win > 20 THEN someString$ = "REBEL"
 	COLOR 14: LOCATE 3, 68: PRINT someString$; " VICTORY"
 	LOCATE 4, 71: PRINT "in"
 	LOCATE 5, 69: PRINT gCityName$(gArmyLocation(defend))
-	a = 1: IF win > 20 THEN a = 2
+	a = 1
+	IF win > 20 THEN a = 2
 	CALL DrawFlags(a, 0, 0)
-	CALL clrbot: COLOR 11: PRINT gArmyName$(win); " defeats "; gArmyName$(lose); " in "; gCityName$(gArmyLocation(defend)); : CALL TICK(9)
+	CALL clrbot
+	COLOR 11: PRINT gArmyName$(win); " defeats "; gArmyName$(lose); " in "; gCityName$(gArmyLocation(defend));
+	CALL TICK(9)
 	'===========================================================================
-	pct! = .01 * gDEFAC - .03 * gFortLevel(gArmyLocation(defend)): IF win = attack THEN pct! = 1.3 * pct!
+	pct! = .01 * gDEFAC - .03 * gFortLevel(gArmyLocation(defend))
+	IF win = attack THEN pct! = 1.3 * pct!
 	SELECT CASE gArmySize(defend)
 		CASE IS > 300
 			pct! = .9 * pct!
@@ -849,7 +901,8 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	vary = xbar * (1 - pct!)
 	CALL normal(xbar, vary, killd)
 	'...........................................................................
-	pct! = .01 * gATKFAC + .02 * gFortLevel(gArmyLocation(defend)): IF win = defend THEN pct! = 1.5 * pct!
+	pct! = .01 * gATKFAC + .02 * gFortLevel(gArmyLocation(defend))
+	IF win = defend THEN pct! = 1.5 * pct!
 	SELECT CASE gArmySize(attack)
 		CASE IS > 300
 			pct! = .9 * pct!
@@ -861,15 +914,18 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	CALL normal(xbar, vary, killa)
 	'===========================================================================
 
-	killa = .8 * killa + .2 * killd: IF killa < 1 THEN killa = 1
-	killd = .8 * killd + .2 * killa: IF killd < 1 THEN killd = 1
+	killa = .8 * killa + .2 * killd
+	IF killa < 1 THEN killa = 1
+	killd = .8 * killd + .2 * killa
+	IF killd < 1 THEN killd = 1
 	IF killa > 9 * killd THEN killa = 9 * killd
 	IF killd > 5 * killa THEN killd = 5 * killa
 
 	IF killa >= gArmySize(attack) THEN killa = gArmySize(attack) - 1
 	IF killd >= gArmySize(defend) THEN killd = gArmySize(defend) - 1
 	'---------------------------------------------------------------------------
-	x = INT(100 * odds!): IF x < 1 THEN x = 1
+	x = INT(100 * odds!)
+	IF x < 1 THEN x = 1
 	someString$ = LTRIM$(RTRIM$(STR$(x))) + "%"
 
 	COLOR c
@@ -884,25 +940,34 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	gMenuText$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(gArmySize(attack)) + "00") + ") "
 	anotherString$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(gArmySize(defend)) + "00") + ")"
 	gMenuText$(2) = anotherString$
-	IF win = defend THEN gMenuText$(2) = gMenuText$(1): gMenuText$(1) = anotherString$
-	gMenuText$(3) = "*" + gArmyName$(win): gMenuText$(4) = gArmyName$(lose)
-	IF win = defend THEN gMenuText$(3) = gArmyName$(win): gMenuText$(4) = "*" + gArmyName$(lose)
+	IF win = defend THEN 
+		gMenuText$(2) = gMenuText$(1)
+		gMenuText$(1) = anotherString$
+	END IF
+	gMenuText$(3) = "*" + gArmyName$(win)
+	gMenuText$(4) = gArmyName$(lose)
+	IF win = defend THEN 
+		gMenuText$(3) = gArmyName$(win)
+		gMenuText$(4) = "*" + gArmyName$(lose)
+	END IF
 	someString$ = gCityName$(gArmyLocation(defend)) + ": " + gMenuText$(3) + gMenuText$(1) + " defeats " + gMenuText$(4) + gMenuText$(2)
 	CALL scribe(someString$, 0)
 
 	IF gHumanPlayers = 1 AND (gCurrentSide = 1 AND attack > 20) OR (gCurrentSide = 2 AND attack < 21) THEN
-	COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
+		COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 	END IF
 
 	gArmySize(attack) = gArmySize(attack) - killa
 	gArmySize(defend) = gArmySize(defend) - killd
 	IF gArmySize(defend) < 1 THEN gArmySize(defend) = 1
 	'---------------------------------------------------------------------------
-	s = 1: IF attack > 2 THEN s = 2
+	s = 1
+	IF attack > 2 THEN s = 2
 	gCasualty&(s) = gCasualty&(s) + killa
 	gCasualty&(3 - s) = gCasualty&(3 - s) + killd
 	'---------------------------------------------------------------------------
-	s = 1: IF win > 20 THEN s = 2
+	s = 1
+	IF win > 20 THEN s = 2
 	gBattleStats(s) = gBattleStats(s) + 1
 	gVictoryPoints(s) = gVictoryPoints(s) + 1
 	CALL MoveUnitIcon(gArmyLocation(defend), 0, 8)
