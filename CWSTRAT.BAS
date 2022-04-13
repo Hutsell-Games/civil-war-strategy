@@ -16,12 +16,11 @@ DIM SHARED gUSAdvantage, gVictoryFlags(6), gVictoryPoints(2), gWindowType%, gVPT
 DIM SHARED gReplaying
 
 gReplaying = 0
-CALL NewGame
 
+CALL NewGame
 CALL DrawMap
 CALL Menu0
 CALL NewMonth
-
 CALL Menu0
 
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
@@ -71,10 +70,10 @@ SUB NewGame
 	NEXT k
 
 	IF gRealism > 0 AND gCurrentYear < 1862 THEN
-			FOR i = 1 TO 2
-				someString$ = STRING$(LEN(gFleet$(i)), "W")
-				gFleet$(i) = someString$
-			NEXT i
+		FOR i = 1 TO 2
+			someString$ = STRING$(LEN(gFleet$(i)), "W")
+			gFleet$(i) = someString$
+		NEXT i
 	END IF
 
 	IF gHumanPlayers < 1 OR gHumanPlayers > 2 THEN gHumanPlayers = 1
@@ -82,9 +81,12 @@ SUB NewGame
 	IF gCurrentSide = 1 THEN gEventsBalance = 7
 	IF gCurrentSide = 2 THEN gEventsBalance = 3
 	IF gTurbo! < 1 THEN gTurbo! = 2
-	IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN gCurrentCash(2) = gCurrentCash(2) + 600 - 100 * gDifficultyLevel
-	IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN gCurrentCash(1) = gCurrentCash(1) + 100 * gDifficultyLevel
-
+	IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN 
+		gCurrentCash(2) = gCurrentCash(2) + 600 - 100 * gDifficultyLevel
+	END IF
+	IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN 
+		gCurrentCash(1) = gCurrentCash(1) + 100 * gDifficultyLevel
+	END IF
 
 	FOR i = 1 TO 2
 		gCurrentIncome(i) = gCurrentCash(i)
@@ -106,26 +108,12 @@ SUB NewGame
 	LOCATE 28, 60: PRINT "v1.57"
 	LINE (190, 170)-(440, 260), 1, B
 	LINE (180, 180)-(450, 250), 7, B
-	CALL DrawFlags(1, -440, 0): CALL DrawFlags(2, -100, 0)
+	CALL DrawFlags(1, -440, 0)
+	CALL DrawFlags(2, -100, 0)
 	IF gReplaying = 0 AND gSoundEffects = 2 AND gChosenOption = 0 THEN
-	IF gCurrentSide = 1 THEN
-		IF INKEY$ <> "" GOTO skipmusic
-		PLAY "MST170o1e8o0b8o1e8"
-		IF INKEY$ <> "" GOTO skipmusic
-		PLAY "e8e4f#8g4f#8"
-		IF INKEY$ <> "" GOTO skipmusic
-		PLAY "g4e8d2o0b8o1d2 "
-		IF INKEY$ <> "" GOTO skipmusic
-		PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
-		IF INKEY$ <> "" GOTO skipmusic
-		PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
-		IF INKEY$ <> "" GOTO skipmusic
-		PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
-		ELSE
-		CALL ShenandoahSong
-		END IF
+		CALL UnionSong
 	END IF
-	skipmusic:
+
 	CALL UnionPlus
 
 	gCityName$(0) = "NONE"
@@ -3833,7 +3821,6 @@ SUB scribe (someString$, flag%)
 END SUB
 
 SUB ShenandoahSong
-	'                       Shenandoah
 	IF gSoundEffects = 2 THEN
 		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
 		PLAY "T90MFMNo1c4f8f8f4."
@@ -3845,6 +3832,26 @@ SUB ShenandoahSong
 		PLAY "o1a8o2c8o1a8g8f4.g4a4.f8"
 		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
 		PLAY "a8o2d8c4.o1f8g8a4.f8g4f2."
+	END IF
+END SUB
+
+SUB UnionSong
+	IF gCurrentSide = 1 THEN
+		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
+			PLAY "MST170o1e8o0b8o1e8"
+		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
+			PLAY "e8e4f#8g4f#8"
+		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
+			PLAY "g4e8d2o0b8o1d2 "
+		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
+			PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
+		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
+			PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
+		IF INKEY$ <> "" THEN gChosenOption = 1: EXIT SUB
+			PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
+		ELSE
+			CALL ShenandoahSong
+		END IF
 	END IF
 END SUB
 
