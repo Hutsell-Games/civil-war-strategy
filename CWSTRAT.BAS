@@ -217,7 +217,7 @@ SUB NewMonth
 		FOR k = 1 TO 40
 			gArmyLocation(k) = 0
 		NEXT k
-		GOTO newgame
+		CALL NewGame
 	END IF
 END SUB
 
@@ -317,7 +317,7 @@ SUB Menu0 ' Main Menu
 					WRITE #1, gCurrentSide, gGraphicLevel, gSoundEffects, gDifficultyLevel, gHumanPlayers, gTurbo!, gEventsBalance, gTrainCapacity(1), gTrainCapacity(2), gJanuaryCampaign, gRealism, gBattleStats(1), gBattleStats(2), gCasualty&(1), gCasualty&(2), gHistory, gAIBoldness
 					CLOSE #1
 					CLS
-					' GOTO newgame
+					CALL NewGame
 				CASE 4:
 					gChosenOption = 23
 					gMenuText$(0) = "Quit"
