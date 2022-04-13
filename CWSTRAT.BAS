@@ -13,8 +13,9 @@ DIM SHARED gRR(2), gRRFrom(2), gRealism, gNavalRaider
 DIM SHARED gRecruitCity(5), gRecruitFlag, gSavedGameExists, gSoundEffects, gStarX(8), gStarY(8), gThrill, gTurbo!
 DIM SHARED gTLX%, gTLY%, gTrainCapacity(2), gTimesPlayed
 DIM SHARED gUSAdvantage, gVictoryFlags(6), gVictoryPoints(2), gWindowType%, gVPTotal
+DIM SHARED gReplaying
 
-replaying = 0
+gReplaying = 0
 newgame:
 gTimesPlayed = 0
 gRecruitFlag = 0
@@ -89,7 +90,7 @@ LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
 CALL DrawFlags(1, -440, 0): CALL DrawFlags(2, -100, 0)
-IF replaying = 0 AND gSoundEffects = 2 AND gChosenOption = 0 THEN
+IF gReplaying = 0 AND gSoundEffects = 2 AND gChosenOption = 0 THEN
 IF gCurrentSide = 1 THEN
 	IF INKEY$ <> "" GOTO skipmusic
 	PLAY "MST170o1e8o0b8o1e8"
@@ -127,7 +128,7 @@ RANDOMIZE TIMER
 TICK .3
 gWindowType = 2
 gHighlight = 15
-replaying = 1
+gReplaying = 1
 IF gHumanPlayers = 2 THEN CALL Blanken
 gMenuText$(0) = "VGA CIVILWAR STRATEGY"
 gMenuText$(1) = "Resume Saved Game"
