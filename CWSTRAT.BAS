@@ -721,6 +721,7 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	CALL MoveUnitIcon(gArmyLocation(defend), 0, 9)
 	LOCATE 1, 1: PRINT SPACE$(80)
 	CALL clrrite
+
 	y = 68
 	COLOR 11
 	LOCATE 1, y: PRINT "Attacker"
@@ -728,115 +729,115 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	COLOR c
 	LOCATE 2, y: PRINT gArmyName$(attack)
 	LOCATE 3, y: CALL CorrectArmySize(attack)
-	x = .01 * gArmySize(attack)
-	IF x > gTCR THEN x = gTCR
-	LOCATE 4, y: PRINT "Base    "; x
+	AttackerScore = .01 * gArmySize(attack)
+	IF AttackerScore > gTCR THEN AttackerScore = gTCR
+	LOCATE 4, y: PRINT "Base    "; AttackerScore
 	IF gArmySize(attack) / gArmySize(defend) > .2 THEN 
-		x = x + .3 * gArmyCommander(attack) + .3 * gArmyExp(attack)
-		IF x > gTCR THEN x = gTCR
+		AttackerScore = AttackerScore + .3 * gArmyCommander(attack) + .3 * gArmyExp(attack)
+		IF AttackerScore > gTCR THEN AttackerScore = gTCR
 	END IF
 	IF gArmyExp(attack) > 8 THEN 
-		x = x + 1
-		IF x > gTCR THEN x = gTCR
+		AttackerScore = AttackerScore + 1
+		IF AttackerScore > gTCR THEN AttackerScore = gTCR
 	END IF
-	LOCATE 5, y: PRINT "Ldr/Exp "; x
+	LOCATE 5, y: PRINT "Ldr/Exp "; AttackerScore
 	IF gArmySize(attack) < 15 THEN
-		x = .5 * x
-		IF x > gTCR THEN x = gTCR
+		AttackerScore = .5 * AttackerScore
+		IF AttackerScore > gTCR THEN AttackerScore = gTCR
 	END IF
-	LOCATE 6, y: PRINT "Small   "; x
+	LOCATE 6, y: PRINT "Small   "; AttackerScore
 	IF gArmySize(attack) / gArmySize(defend) <= .5 THEN 
-		x = x - 2
-		IF x < 1 THEN x = 1
+		AttackerScore = AttackerScore - 2
+		IF AttackerScore < 1 THEN AttackerScore = 1
 	END IF
 	IF gArmySize(attack) / gArmySize(defend) > 3 THEN 
-		x = x + 2
-		IF x > gTCR THEN x = gTCR
+		AttackerScore = AttackerScore + 2
+		IF AttackerScore > gTCR THEN AttackerScore = gTCR
 	END IF
 	IF gArmySize(attack) / gArmySize(defend) > 10 THEN 
-		x = gTCR
+		AttackerScore = gTCR
 	END IF
 	IF gArmySize(attack) / gArmySize(defend) <= .2 THEN 
-		x = 1
+		AttackerScore = 1
 	END IF
-	LOCATE 7, y: PRINT "Outman  "; x
+	LOCATE 7, y: PRINT "Outman  "; AttackerScore
 	IF gArmySupply(attack) < 1 THEN 
-		x = .5 * x
+		AttackerScore = .5 * AttackerScore
 		COLOR 13
 	END IF
-	LOCATE 8, y: PRINT "Supply  "; x: COLOR c
-	IF x < 1 THEN x = 1
+	LOCATE 8, y: PRINT "Supply  "; AttackerScore: COLOR c
+	IF AttackerScore < 1 THEN AttackerScore = 1
 	'                       Adjust attack advantage
-	IF attack < 21 AND gCurrentSide = 2 AND gDifficultyLevel > 3 THEN x = x + 2 * gDifficultyLevel - 6
-	IF attack > 20 AND gCurrentSide = 1 AND gDifficultyLevel < 3 THEN x = x + 6 - 2 * gDifficultyLevel
-	LOCATE 9, y: PRINT "Difclt  "; x
-	IF x > gTCR THEN x = gTCR
-	COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
+	IF attack < 21 AND gCurrentSide = 2 AND gDifficultyLevel > 3 THEN AttackerScore = AttackerScore + 2 * gDifficultyLevel - 6
+	IF attack > 20 AND gCurrentSide = 1 AND gDifficultyLevel < 3 THEN AttackerScore = AttackerScore + 6 - 2 * gDifficultyLevel
+	LOCATE 9, y: PRINT "Difclt  "; AttackerScore
+	IF AttackerScore > gTCR THEN AttackerScore = gTCR
+	COLOR 11: LOCATE 11, y: PRINT "Attack  "; AttackerScore
 	LINE (530, 155)-(635, 175), 11, B
 
-	x1 = .013 * gArmySize(defend) + 1
+	DefenderScore = .013 * gArmySize(defend) + 1
 	IF gRealism = 1 THEN 
-		x1 = .02 * gArmySize(defend) + 2
-		IF x1 > 20 THEN x1 = 20
+		DefenderScore = .02 * gArmySize(defend) + 2
+		IF DefenderScore > 20 THEN DefenderScore = 20
 	END IF
 	LOCATE 13, y: PRINT "Defender"
 	COLOR 16 - c: LOCATE 14, y: PRINT gArmyName$(defend)
 	LOCATE 15, y: CALL CorrectArmySize(defend)
 	LOCATE 16, y: PRINT "Base    "; INT(.01 * gArmySize(defend))
-	LOCATE 17, y: PRINT "Defense "; x1
+	LOCATE 17, y: PRINT "Defense "; DefenderScore
 	IF gArmySize(defend) / gArmySize(attack) > .2 THEN
-		x1 = x1 + .3 * gArmyCommander(defend) + .3 * gArmyExp(defend)
-		IF x1 > gTCR THEN x1 = gTCR
+		DefenderScore = DefenderScore + .3 * gArmyCommander(defend) + .3 * gArmyExp(defend)
+		IF DefenderScore > gTCR THEN DefenderScore = gTCR
 	END IF
 	IF gArmyExp(defend) > 8 THEN 
-		x1 = x1 + 1
-		IF x1 > gTCR THEN x1 = gTCR
+		DefenderScore = DefenderScore + 1
+		IF DefenderScore > gTCR THEN DefenderScore = gTCR
 	END IF
-	LOCATE 18, y: PRINT "Ldr/Exp "; x1
-	IF gArmySize(defend) < 15 THEN x1 = .5 * x1
-	LOCATE 19, y: PRINT "Small   "; x1
+	LOCATE 18, y: PRINT "Ldr/Exp "; DefenderScore
+	IF gArmySize(defend) < 15 THEN DefenderScore = .5 * DefenderScore
+	LOCATE 19, y: PRINT "Small   "; DefenderScore
 
 	R! = gArmySize(defend) / gArmySize(attack)
 	SELECT CASE R!
 		CASE IS > 10
-			x1 = gTCR
+			DefenderScore = gTCR
 		CASE IS > 1.5
-			x1 = x1 + 2
+			DefenderScore = DefenderScore + 2
 		CASE IS < .5
-			x1 = .8 * x1
+			DefenderScore = .8 * DefenderScore
 		CASE IS < .2
-			x1 = .5 * x1
+			DefenderScore = .5 * DefenderScore
 	END SELECT
-		IF x1 < 1 THEN x1 = 1
-		IF x1 > gTCR THEN x1 = gTCR
+		IF DefenderScore < 1 THEN DefenderScore = 1
+		IF DefenderScore > gTCR THEN DefenderScore = gTCR
 
-	LOCATE 20, y: PRINT "Outman  "; x1
-	IF gArmySupply(defend) < 1 THEN x1 = .5 * x1: COLOR 13
-	LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
-	IF x1 < 1 THEN x1 = 1
+	LOCATE 20, y: PRINT "Outman  "; DefenderScore
+	IF gArmySupply(defend) < 1 THEN DefenderScore = .5 * DefenderScore: COLOR 13
+	LOCATE 21, y: PRINT "Supply  "; DefenderScore: COLOR 16 - c
+	IF DefenderScore < 1 THEN DefenderScore = 1
 	'                       Adjust defend advantage
-	IF defend < 21 AND gCurrentSide = 2 AND gDifficultyLevel > 3 THEN x1 = x1 + 2 * gDifficultyLevel - 6
-	IF defend > 20 AND gCurrentSide = 1 AND gDifficultyLevel < 3 THEN x1 = x1 + 6 - 2 * gDifficultyLevel
-	LOCATE 22, y: PRINT "Difclt  "; x1
+	IF defend < 21 AND gCurrentSide = 2 AND gDifficultyLevel > 3 THEN DefenderScore = DefenderScore + 2 * gDifficultyLevel - 6
+	IF defend > 20 AND gCurrentSide = 1 AND gDifficultyLevel < 3 THEN DefenderScore = DefenderScore + 6 - 2 * gDifficultyLevel
+	LOCATE 22, y: PRINT "Difclt  "; DefenderScore
 
 	someString$ = "Fort"
-	IF gArmyMove(defend) = 0 THEN x1 = x1 * (1 + gFortLevel(gArmyLocation(defend)))
-	IF x1 > gTCR THEN x1 = gTCR
+	IF gArmyMove(defend) = 0 THEN DefenderScore = DefenderScore * (1 + gFortLevel(gArmyLocation(defend)))
+	IF DefenderScore > gTCR THEN DefenderScore = gTCR
 	IF gFortLevel(gArmyLocation(defend)) > 0 AND gArmyMove(defend) = 0 THEN
 		COLOR 13: someString$ = "Fort+"
 		IF gFortLevel(gArmyLocation(defend)) = 2 THEN someString$ = "Fort++"
 	END IF
-	LOCATE 23, y: PRINT someString$; TAB(76); x1
-	IF x1 > gTCR THEN x1 = gTCR
-	COLOR 11: LOCATE 25, y: PRINT "Defend  "; x1
+	LOCATE 23, y: PRINT someString$; TAB(76); DefenderScore
+	IF DefenderScore > gTCR THEN DefenderScore = gTCR
+	COLOR 11: LOCATE 25, y: PRINT "Defend  "; DefenderScore
 	LINE (530, 380)-(635, 400), 11, B
 
 	spin = 0
-	scale = x
-	IF x1 > scale THEN scale = x1
+	scale = AttackerScore
+	IF DefenderScore > scale THEN scale = DefenderScore
 	scale = scale + 1
 
-	odds! = x / (x + x1)
+	odds! = AttackerScore / (AttackerScore + DefenderScore)
 	a = INT(100 * odds!)
 	IF a < 1 THEN a = 1
 	someString$ = LTRIM$(RTRIM$(STR$(a))) + "%"
@@ -865,8 +866,8 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	hit = 0: hit1 = 0
 	start = scale * RND: fin = scale * RND
 	IF gSoundEffects > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
-	IF start <= x THEN hit = 1
-	IF fin <= x1 THEN hit1 = 1
+	IF start <= AttackerScore THEN hit = 1
+	IF fin <= DefenderScore THEN hit1 = 1
 
 	IF hit = 0 AND hit1 = 0 GOTO grapple
 	IF hit = 1 AND hit1 = 1 GOTO grapple
@@ -924,9 +925,9 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	IF killa >= gArmySize(attack) THEN killa = gArmySize(attack) - 1
 	IF killd >= gArmySize(defend) THEN killd = gArmySize(defend) - 1
 	'---------------------------------------------------------------------------
-	x = INT(100 * odds!)
-	IF x < 1 THEN x = 1
-	someString$ = LTRIM$(RTRIM$(STR$(x))) + "%"
+	AttackerScore = INT(100 * odds!)
+	IF AttackerScore < 1 THEN AttackerScore = 1
+	someString$ = LTRIM$(RTRIM$(STR$(AttackerScore))) + "%"
 
 	COLOR c
 	LOCATE 1, 1: PRINT "Attack Loss: ";
