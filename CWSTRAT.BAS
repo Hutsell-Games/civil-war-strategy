@@ -4233,27 +4233,27 @@ SUB traincapacity (who%, limit%)
 END SUB
 
 SUB victor
-		x = 0
-		FOR j = 1 TO 20
-			IF gArmyLocation(j) > 0 THEN x = x + gArmySize(j)
-		NEXT j
-		y = 0
-		FOR j = 21 TO 40
-			IF gArmyLocation(j) > 0 THEN y = y + gArmySize(j)
-		NEXT j
+	x = 0
+	FOR j = 1 TO 20
+		IF gArmyLocation(j) > 0 THEN x = x + gArmySize(j)
+	NEXT j
+	y = 0
+	FOR j = 21 TO 40
+		IF gArmyLocation(j) > 0 THEN y = y + gArmySize(j)
+	NEXT j
 
-		CALL ClearBottom
-		COLOR 14
-		IF gVictoryFlags(2) > 0 AND gCurrentYear >= gVictoryFlags(2) AND gCurrentMonth < gVictoryFlags(1) THEN
-			someString$ = "Time almost expired (" + gMonthes$(gVictoryFlags(1)) + "," + STR$(gVictoryFlags(2)) + ")"
-			CALL image2(someString$, 4)
+	CALL ClearBottom
+	COLOR 14
+	IF gVictoryFlags(2) > 0 AND gCurrentYear >= gVictoryFlags(2) AND gCurrentMonth < gVictoryFlags(1) THEN
+		someString$ = "Time almost expired (" + gMonthes$(gVictoryFlags(1)) + "," + STR$(gVictoryFlags(2)) + ")"
+		CALL image2(someString$, 4)
+	END IF
+	FOR i = 1 TO 2
+		IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN 
+			j = 7
+			gVictoryPoints(i) = gVictoryPoints(i) + 300
+			GOTO finis
 		END IF
-		FOR i = 1 TO 2
-			IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN 
-				j = 7
-				gVictoryPoints(i) = gVictoryPoints(i) + 300
-				GOTO finis
-			END IF
 
 		' Refactor as Select Case Maybe?
 		IF gCurrentYear >= gVictoryFlags(2) AND gCurrentMonth >= gVictoryFlags(1) AND gVictoryFlags(2) > 0 THEN 
@@ -4284,7 +4284,8 @@ SUB victor
 			END IF
 		END IF
 
-		CALL ClearBottom: COLOR 14
+		CALL ClearBottom
+		COLOR 14
 		IF gVictoryFlags(3) > 0 AND gCityController(i) >= .9 * gVictoryFlags(3) THEN
 			someString$ = gNationName$(i) + " side almost controls" + STR$(gVictoryFlags(3)) + " cities"
 			CALL image2(someString$, 4)
@@ -4303,21 +4304,21 @@ SUB victor
 		END IF
 		GOTO stale
 
-	finis:
+		finis: ' line label
 		SELECT CASE j
 			CASE IS < 3
-			someString$ = "TIME EXPIRED"
+				someString$ = "TIME EXPIRED"
 			CASE 3
-			someString$ = STR$(2.5 * gVictoryFlags(3)) + "% CITIES CONTROLLED"
+				someString$ = STR$(2.5 * gVictoryFlags(3)) + "% CITIES CONTROLLED"
 			CASE 4
-			someString$ = STR$(gVictoryFlags(4)) + " % OF TOTAL INCOME"
+				someString$ = STR$(gVictoryFlags(4)) + " % OF TOTAL INCOME"
 			CASE 5
-			someString$ = "CAPITAL CAPTURED"
+				someString$ = "CAPITAL CAPTURED"
 			CASE 6
-			someString$ = STR$(gVictoryFlags(6)) + ":1 ARMY STRENGTH RATIO"
+				someString$ = STR$(gVictoryFlags(6)) + ":1 ARMY STRENGTH RATIO"
 			CASE 7
-			someString$ = "ENEMY ANNIHILATED"
-	END SELECT
+				someString$ = "ENEMY ANNIHILATED"
+		END SELECT
 		CLS
 		IF i = 2 THEN c = 7 ELSE c = 1
 		LINE (0, 0)-(639, 479), 4, BF
@@ -4345,12 +4346,12 @@ SUB victor
 		CALL ShowMenu(0)
 
 		IF gChosenOption <> 1 AND j < 7 THEN
-		play4ever: ' line label
-				gVictoryFlags(j) = gVictoryFlags(j) + 1
-				IF j = 5 THEN gVictoryFlags(j) = 0
-				CLS
-				CALL DrawMap
-				EXIT SUB
+			play4ever: ' line label
+			gVictoryFlags(j) = gVictoryFlags(j) + 1
+			IF j = 5 THEN gVictoryFlags(j) = 0
+			CLS
+			CALL DrawMap
+			EXIT SUB
 		END IF
 		gMenuText$(0) = "Options"
 		gMenuText$(1) = "Quit this Game"
@@ -4395,7 +4396,7 @@ SUB victor
 		CALL HallOfFame
 		EXIT SUB
 		stale: ' line label
-		NEXT i
+	NEXT i
 END SUB
 
 SUB void (a%, y%)
