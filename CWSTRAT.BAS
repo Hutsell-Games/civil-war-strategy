@@ -138,7 +138,7 @@ SUB NewGame
 		gVPTotal = gVPTotal + gCityValue(i)
 	NEXT i
 	CLOSE #1
-	CALL clrbot
+	CALL ClearBottom
 
 	RANDOMIZE TIMER
 	TICK .3
@@ -273,11 +273,11 @@ SUB Menu0 ' Main Menu
 				PAINT (x, y), z, 15
 				IF gCurrentSide = 1 THEN COLOR 11 ELSE COLOR 15
 				CALL traincapacity(gCurrentSide, limit)
-				CALL clrbot
+				CALL ClearBottom
 				PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 				CALL railroad(gCurrentSide)
 			ELSE
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 11: PRINT "Railroad is already carrying "; gArmyName$(gRR(gCurrentSide)); " to "; gCityName$(gArmyMove(gRR(gCurrentSide)));
 				CALL Menu0
 			END IF
@@ -401,7 +401,7 @@ SUB CommandsMenu
 			gChosenOption = 22
 		CASE 2 ' Fortify
 			IF gCurrentCash(gCurrentSide) < 200 THEN 
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 11: PRINT "Not enough money for fort";
 				CALL Menu0
 			END IF
@@ -413,7 +413,7 @@ SUB CommandsMenu
 			x = gCurrentSide
 			CALL CombineArmies(x)
 			IF x < 0 THEN
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 11
 				PRINT "No eligible armies in same city to combine";
 				CALL stax(gCurrentSide)
@@ -431,7 +431,7 @@ SUB CommandsMenu
 				IF gRealism > 0 THEN
 					CALL cutoff(gCurrentSide, gArmyLocation(i), a)
 					IF a < 1 THEN 
-						CALL clrbot
+						CALL ClearBottom
 						COLOR 15: PRINT gNationName$(gCurrentSide); " army in "; gCityName$(gArmyLocation(i)); " is CUT OFF !";
 						TICK gTurbo!
 						GOTO alone
@@ -444,7 +444,7 @@ SUB CommandsMenu
 				alone: ' Line Label
 			NEXT i
 			IF gMenuRows = 0 THEN 
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 11: PRINT "All eligible "; gNationName$(gCurrentSide); " armies have supplies";
 				CALL Menu0
 			END IF
@@ -460,7 +460,7 @@ SUB CommandsMenu
 			CALL CommandsMenu
 		CASE 5 ' Move Capital
 			IF gCapitalCity(gCurrentSide) = 0 OR gCurrentCash(gCurrentSide) < 500 THEN 
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 11: PRINT "Cannot move capital";
 				CALL Menu0
 			END IF
@@ -473,15 +473,15 @@ SUB CommandsMenu
 			CALL newcity(index)
 			IF index = 0 THEN CALL Menu0
 			gCapitalCity(gCurrentSide) = index
-			CALL clrbot
+			CALL ClearBottom
 			PRINT gNationName$(gCurrentSide); " capital moved from "; someString$; " to "; gCityName$(gCapitalCity(gCurrentSide));
 			CALL clrrite
 			CALL DrawCities
 			CALL TICK(9)
-			CALL clrbot
+			CALL ClearBottom
 		CASE 6 ' Detach
 			IF gCurrentSide = 1 THEN 
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 11: PRINT "Option not available to Union";
 				CALL Menu0
 			END IF
@@ -489,7 +489,7 @@ SUB CommandsMenu
 			CALL MoveFrom(index, target)
 			IF target < 1 OR index < 1 THEN CALL Menu0
 			IF gArmySize(index) < 65 THEN 
-				CALL clrbot
+				CALL ClearBottom
 				PRINT "Too small to detach";
 				CALL TICK(gTurbo!)
 				CALL Menu0
@@ -508,7 +508,7 @@ SUB CommandsMenu
 			gArmyName$(empty) = gLeaderName$(empty)
 			gLeaderName$(empty) = ""
 			gArmyExp(empty) = gArmyExp(index)
-			CALL clrbot
+			CALL ClearBottom
 			COLOR 11: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; gArmyName$(empty);
 			CALL TICK(gTurbo!)
 			IF gSoundEffects > 0 THEN SOUND 2222, 1
@@ -519,20 +519,20 @@ SUB CommandsMenu
 			COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
 			CALL MoveFrom(index, target)
 			IF target < 1 OR index < 1 THEN 
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 11: PRINT "No armies remain eligible for drills in "; gMonthes$(gCurrentMonth);
 				CALL Menu0
 			END IF
 			IF gArmyExp(index) > 5 OR gArmyExp(index) >= gArmyCommander(index) THEN 
-				CALL clrbot
+				CALL ClearBottom
 				COLOR 12: PRINT gArmyName$(index); ": Army has reached maximum improvement through drilling";
 				CALL CommandsMenu
 			END IF
 			gArmyExp(index) = gArmyExp(index) + 1
-			CALL clrbot
+			CALL ClearBottom
 			PRINT gArmyName$(index); " has drilled to reach experience level "; gArmyExp(index);
 			IF gSoundEffects > 0 THEN SOUND 2222, 1
-			CALL TICK(gTurbo!): clrbot
+			CALL TICK(gTurbo!): ClearBottom
 			gArmyMove(index) = -1
 			gChosenOption = 28
 			CALL CommandsMenu
@@ -580,7 +580,7 @@ SUB UtilityMenu
 			IF gHumanPlayers = 2 THEN CALL Menu0
 			gCurrentSide = 3 - gCurrentSide: COLOR 9
 			IF gCurrentSide = 2 THEN COLOR 7
-			CALL clrbot
+			CALL ClearBottom
 			PRINT "Now playing "; gNationName$(gCurrentSide); " side";
 			IF gSoundEffects > 0 THEN SOUND 999, 1
 			IF gCurrentSide = 1 THEN gEventsBalance = 7
@@ -589,7 +589,7 @@ SUB UtilityMenu
 			CALL Menu0
 		CASE 2 ' Solo or 2 Player
 			gHumanPlayers = 3 - gHumanPlayers
-			CALL clrbot
+			CALL ClearBottom
 			COLOR 12
 			IF gSoundEffects > 0 THEN SOUND 999, 1
 			IF gHumanPlayers = 2 THEN someString$ = "2 Player" ELSE someString$ = "Solo"
@@ -605,7 +605,7 @@ SUB UtilityMenu
 			IF gGraphicLevel = 3 THEN someString$ = "FULL"
 			CLS
 			CALL DrawMap
-			CALL clrbot
+			CALL ClearBottom
 			COLOR 11: PRINT "Graphics : "; someString$;
 			IF gSoundEffects > 0 THEN SOUND 2700, 1
 			gChosenOption = 24
@@ -621,7 +621,8 @@ SUB UtilityMenu
 			CALL ShowMenu(0)
 			CALL clrrite
 			IF gChosenOption < 1 THEN CALL Menu0
-			COLOR 11: CALL clrbot: PRINT "Sound Option : "; gMenuText$(gChosenOption);
+			CALL ClearBottom
+			COLOR 11: PRINT "Sound Option : "; gMenuText$(gChosenOption);
 			gSoundEffects = gChosenOption - 1
 			IF gSoundEffects > 0 THEN SOUND 999, 1
 			gChosenOption = 25
@@ -642,7 +643,7 @@ SUB UtilityMenu
 				CASE IS < 5
 					gTurbo! = gChosenOption
 					IF gTurbo! = 4 THEN gTurbo! = 8
-					CALL clrbot
+					CALL ClearBottom
 					COLOR 11
 					PRINT "Display Speed : "; gMenuText$(gChosenOption);
 				CASE 5
@@ -663,8 +664,8 @@ SUB UtilityMenu
 		gTLX = 67: gTLY = 15: gMenuRows = 5
 		CALL ShowMenu(8): CALL clrrite
 		IF gChosenOption < 1 THEN CALL Menu0
-		CALL clrbot
-		COLOR 11: CALL clrbot: PRINT "Play Balance : "; gMenuText$(gChosenOption);
+		CALL ClearBottom
+		COLOR 11: PRINT "Play Balance : "; gMenuText$(gChosenOption);
 		gDifficultyLevel = gChosenOption
 		CALL UnionPlus
 		gChosenOption = 27
@@ -698,7 +699,7 @@ SUB UtilityMenu
 		IF gChosenOption > 1 AND gChosenOption < 5 THEN
 			anotherString$ = gMenuText$(gChosenOption)
 		END IF
-		CALL clrbot
+		CALL ClearBottom
 		IF gEventsBalance = 0 THEN someString$ = "OFF" ELSE someString$ = ""
 		COLOR 11: PRINT "Random Events : "; someString$; " "; anotherString$;
 		COLOR 14: PRINT "			press a key";
@@ -764,13 +765,14 @@ SUB UtilityMenu
 		someString$ = "PROHIBITED"
 		IF gJanuaryCampaign = 1 THEN someString$ = "ALLOWED"
 		COLOR 11
-		CALL clrbot
+		CALL ClearBottom
 		PRINT "January Campaigns : "; someString$;
 		gChosenOption = 31
 		CALL UtilityMenu
 	CASE 11 ' Realism Switch
 		gRealism = 1 - gRealism
-		CALL clrbot: COLOR 11
+		CALL ClearBottom
+		COLOR 11
 		IF gRealism = 0 THEN
 			PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
 		ELSE
@@ -789,7 +791,7 @@ SUB UtilityMenu
 		gHistory = 1 - gHistory
 		someString$ = "OFF"
 		IF gHistory = 1 THEN someString$ = "ON"
-		CALL clrbot
+		CALL ClearBottom
 		PRINT "History is now "; someString$;
 		gChosenOption = 34
 		CALL UtilityMenu
@@ -804,7 +806,7 @@ SUB UtilityMenu
 			CASE 4: someString$ = "BOLD"
 			CASE 5: someString$ = "RECKLESS"
 		END SELECT
-		CALL clrbot
+		CALL ClearBottom
 		COLOR 11
 		PRINT "Enemy Aggression : "; someString$; " ("; gAIBoldness; ")";
 		gChosenOption = 35
@@ -854,19 +856,20 @@ SUB MoveArmies
 	CALL clrrite
 	IF gChosenOption < 0 THEN EXIT SUB
 	IF gCurrentMonth < 3 AND gJanuaryCampaign = 0 AND gCityOwner(gArray(gChosenOption)) <> gCurrentSide THEN 
-		COLOR 11: CALL clrbot: PRINT "No campaigns in January";
+		CALL ClearBottom
+		COLOR 11: PRINT "No campaigns in January";
 		CALL TICK(9)
-		CALL clrbot
+		CALL ClearBottom
 		EXIT SUB
 	END IF
 
-	CALL clrbot
+	CALL ClearBottom
 	PRINT "Army "; index; " "; gArmyName$(index); " is moving from "; gCityName$(target); " to "; gCityName$(gArray(gChosenOption));
 	IF gSoundEffects > 0 THEN SOUND 2200, .5: SOUND 2900, .7
 	CALL MoveUnitIcon(target, gArray(gChosenOption), 1)
 	gArmyMove(index) = gArray(gChosenOption)
 	CALL TICK(gTurbo!)
-	CALL clrbot
+	CALL ClearBottom
 	CALL clrrite
 END SUB
 
@@ -1075,7 +1078,7 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	LOCATE 5, 69: PRINT gCityName$(gArmyLocation(defend))
 	IF win > 20 THEN a = 2 ELSE a = 1
 	CALL DrawFlags(a, 0, 0)
-	CALL clrbot
+	CALL ClearBottom
 	COLOR 11: PRINT gArmyName$(win); " defeats "; gArmyName$(lose); " in "; gCityName$(gArmyLocation(defend));
 	CALL TICK(9)
 	
@@ -1144,7 +1147,8 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 	CALL scribe(someString$, 0)
 
 	IF gHumanPlayers = 1 AND (gCurrentSide = 1 AND attack > 20) OR (gCurrentSide = 2 AND attack < 21) THEN
-		COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
+		CALL ClearBottom
+		COLOR 14: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 	END IF
 
 	gArmySize(attack) = gArmySize(attack) - AttackersKilled
@@ -1193,7 +1197,7 @@ SUB CombineArmies (who%)
 	join:
 	IF gChosenOption < 1 THEN EXIT SUB
 	target = gArray(gChosenOption)
-	CALL clrbot
+	CALL ClearBottom
 	PRINT "Combining "; gNationName$(who); " armies in "; gCityName$(target);
 	CALL TICK(gTurbo!)
 
@@ -1211,7 +1215,7 @@ SUB CombineArmies (who%)
 	FOR j = start TO fin
 		IF gArmyMove(j) <> 0 OR gArmyLocation(j) <> target OR gArmySize(j) = 0 GOTO cannotcombinearmies
 		IF gArmySize(0) + gArmySize(j) > 1250 THEN 
-			CALL clrbot
+			CALL ClearBottom
 			PRINT "Cannot combine "; gArmyName$(j); "... TOO LARGE";
 			CALL TICK(gTurbo!)
 			GOTO cannotcombinearmies
@@ -1229,7 +1233,7 @@ SUB CombineArmies (who%)
 		pct! = (gArmySize(j) / gArmySize(0))
 		spin = spin + 1
 		gArmyExp(0) = (1 - pct!) * gArmyExp(0) + pct! * gArmyExp(j)
-		CALL clrbot
+		CALL ClearBottom
 		PRINT gArmyName$(j); " is combining his "; : CALL CorrectArmySize(j): PRINT " forces";
 		CALL TICK(gTurbo!)
 		gArmySupply(0) = gArmySupply(0) + gArmySupply(j)
@@ -1245,7 +1249,7 @@ SUB CombineArmies (who%)
 	cannotcombinearmies:
 	NEXT j
 
-	CALL clrbot
+	CALL ClearBottom
 	IF who <> gCurrentSide AND spin = 0 THEN EXIT SUB
 	IF spin = 0 THEN
 		PRINT "No valid armies to combine at this time in "; gCityName$(target);
@@ -1332,7 +1336,8 @@ SUB FileManager (switch%)
 			CALL clrrite
 			IF gChosenOption < 1 THEN EXIT SUB
 			OPEN "I", 1, "cws" + LTRIM$(STR$(gArray(gChosenOption))) + ".sav"
-			COLOR 11: CALL clrbot: PRINT "Loading";
+			CALL ClearBottom
+			COLOR 11: PRINT "Loading";
 			INPUT #1, gCurrentMonth, gCurrentYear, gUSAdvantage, a
 			FOR i = 1 TO 40: INPUT #1, gArmyName$(i), gArmySize(i), gArmyCommander(i), gArmyLocation(i), gArmyExp(i), gArmySupply(i), gArmyMove(i)
 			IF gArmyLocation(i) > 0 THEN
@@ -1358,7 +1363,9 @@ SUB FileManager (switch%)
 			INPUT #1, playersSide, gGraphicLevel, gSoundEffects, gDifficultyLevel, gHumanPlayers, gTurbo!, gEventsBalance, gTrainCapacity(1), gTrainCapacity(2), gJanuaryCampaign, gRealism, gBattleStats(1), gBattleStats(2), gCasualty&(1), gCasualty&(2), gHistory, gAIBoldness
 			CLOSE #1
 			SCREEN 12: CLS
-			CLOSE #1: CALL DrawMap: CALL clrbot
+			CLOSE #1
+			CALL DrawMap
+			CALL ClearBottom
 			FOR k = 1 TO 2
 			IF gRR(k) > 0 THEN CALL tinytrain(k, 1)
 			NEXT k
@@ -1372,7 +1379,8 @@ SUB FileManager (switch%)
 			gTLX = 67: gMenuRows = 9
 			CALL ShowMenu(0)
 			IF gChosenOption < 1 THEN clrrite: EXIT SUB
-			COLOR 11: CALL clrbot: PRINT "Saving";
+			CALL ClearBottom
+			COLOR 11: PRINT "Saving";
 
 			OPEN "O", 1, "cws" + LTRIM$(STR$(gChosenOption)) + ".sav"
 			WRITE #1, gCurrentMonth, gCurrentYear, gUSAdvantage, gCurrentSide
@@ -1406,20 +1414,20 @@ SUB FortifyCity (target%)
 		gArray(gMenuRows) = gArmyLocation(i)
 	END IF
 	NEXT i
-	IF gMenuRows = 0 THEN CALL clrbot: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
+	IF gMenuRows = 0 THEN CALL ClearBottom: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
 	CALL bubble(gMenuRows)
 	gMenuText$(0) = "Fortify"
 		gChosenOption = 31
 		CALL ShowMenu(9): CALL clrrite
 		IF gChosenOption < 0 THEN EXIT SUB
 		target = gArray(gChosenOption): CALL occupy(target): x = gIsOccupied(target): IF x < 0 THEN EXIT SUB
-		IF gFortLevel(target) > 1 THEN CALL clrbot: PRINT gCityName$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): EXIT SUB
+		IF gFortLevel(target) > 1 THEN CALL ClearBottom: PRINT gCityName$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): EXIT SUB
 		cost = 200
-		IF gCurrentCash(gCurrentSide) < cost THEN CALL clrbot: PRINT "Fortifications for "; gCityName$(target); " cost "; cost; " and you only have "; gCurrentCash(gCurrentSide); : CALL TICK(4): EXIT SUB
+		IF gCurrentCash(gCurrentSide) < cost THEN CALL ClearBottom: PRINT "Fortifications for "; gCityName$(target); " cost "; cost; " and you only have "; gCurrentCash(gCurrentSide); : CALL TICK(4): EXIT SUB
 		COLOR 3
 		gFortLevel(target) = gFortLevel(target) + 1
 		gCurrentCash(gCurrentSide) = gCurrentCash(gCurrentSide) - cost
-		CALL clrbot: PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
+		CALL ClearBottom: PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
 		CALL MoveUnitIcon(target, 0, 6)
 		CALL DrawCities
 		IF gArmyMove(x) > 0 THEN CALL MoveUnitIcon(gArmyLocation(x), gArmyMove(x), 5)
@@ -1529,13 +1537,13 @@ SUB ProcessTurn
 		gArmySupply(i) = gArmySupply(i) - 1
 	END IF
 	IF gMatrix(gArmyLocation(i), 7) = 99 AND gNavyLocation(3 - s) = gArmyLocation(i) THEN 
-		gArmySupply(i) = gArmySupply(i) - 1: CALL clrbot: PRINT gArmyName$(i); " is blockaded";
+		gArmySupply(i) = gArmySupply(i) - 1: CALL ClearBottom: PRINT gArmyName$(i); " is blockaded";
 		CALL TICK(gTurbo!)
 	END IF
 	COLOR 13
 	IF gArmySupply(i) < 1 THEN
 		gArmySupply(i) = 0
-		CALL clrbot
+		CALL ClearBottom
 		PRINT gArmyName$(i); " is out of supplies";
 		CALL DrawArmyUnit(i)
 		CALL TICK(gTurbo!)
@@ -1597,7 +1605,7 @@ SUB ManageNavy (who%, chx%)
 	COLOR 11
 	labelmanagenavy:
 	cost = 100: gCityOwner(0) = who
-	IF chx = 0 THEN CALL clrbot: PRINT "Funds available "; gCurrentCash(who);
+	IF chx = 0 THEN CALL ClearBottom: PRINT "Funds available "; gCurrentCash(who);
 	IF chx = 1 THEN
 		IF gCurrentCash(who) < cost THEN EXIT SUB
 		IF gNavySize(who) > 9 THEN EXIT SUB
@@ -1674,7 +1682,7 @@ SUB ManageNavy (who%, chx%)
 		IF chx = 1 THEN gChosenOption = 1 + INT(gMenuRows * RND)
 		IF gMenuRows < 1 THEN
 			gNavySize(who) = 0: gFleet$(who) = ""
-			IF chx = 0 THEN CALL clrbot: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
+			IF chx = 0 THEN CALL ClearBottom: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
 			IF chx = 1 THEN EXIT SUB
 		END IF
 		IF chx = 0 THEN CALL ShowMenu(9): CALL clrrite
@@ -1683,14 +1691,14 @@ SUB ManageNavy (who%, chx%)
 		gNavyLocation(who) = gArray(gChosenOption)
 		gCurrentCash(who) = gCurrentCash(who) - cost: gNavySize(who) = 1
 		x = gCityX(gArray(gChosenOption)) + 25: y = gCityY(gArray(gChosenOption)) + 25: CALL ships
-		CALL clrbot: COLOR 11: PRINT gNationName$(who); " is building NEW fleet in "; gCityName$(gArray(gChosenOption));
+		CALL ClearBottom: COLOR 11: PRINT gNationName$(who); " is building NEW fleet in "; gCityName$(gArray(gChosenOption));
 		PSET (400, 465), 0: CALL DrawShipIcon(who, a)
 		IF gSoundEffects > 0 THEN SOUND 3000, 1
 		CALL TICK(gTurbo!)
 		GOTO labelmanagenavy
 	add2ship:
 		gCurrentCash(who) = gCurrentCash(who) - cost
-		CALL clrbot: PRINT gNationName$(who); " navy increased to "; gNavySize(who);
+		CALL ClearBottom: PRINT gNationName$(who); " navy increased to "; gNavySize(who);
 		PSET (400, 465), 0: CALL DrawShipIcon(who, a)
 		CALL ships
 		IF gSoundEffects > 0 THEN SOUND 3000, 1
@@ -1706,12 +1714,12 @@ SUB ManageNavy (who%, chx%)
 		IF gNavyLocation(who) < 1 THEN EXIT SUB
 		IF who = gCurrentSide THEN gHasNavy = 1
 		IF gCityOwner(gNavyLocation(who)) <> 3 - who GOTO labelmanagenavy
-		CALL clrbot: COLOR 12: PRINT gNationName$(who); " fleet bombards "; gCityName$(gNavyLocation(who));
+		CALL ClearBottom: COLOR 12: PRINT gNationName$(who); " fleet bombards "; gCityName$(gNavyLocation(who));
 		CALL MoveUnitIcon(gNavyLocation(who), 0, 3)
 			
 		target = gNavyLocation(who): index = gIsOccupied(target): IF index = 0 GOTO deserted
 		pct! = .005 * gNavySize(who) + .02 * RND: DefendersKilled = gArmySize(index) * pct!: IF DefendersKilled < 1 THEN DefendersKilled = 1
-		CALL clrbot: PRINT gArmyName$(index); " suffered "; 100 * DefendersKilled; " casualties";
+		CALL ClearBottom: PRINT gArmyName$(index); " suffered "; 100 * DefendersKilled; " casualties";
 		x = .5 * gNavySize(who) + 1: IF x > gArmySupply(index) THEN x = gArmySupply(index)
 		gArmySupply(index) = gArmySupply(index) - x
 		CALL TICK(gTurbo!)
@@ -1721,7 +1729,7 @@ SUB ManageNavy (who%, chx%)
 		IF gFortLevel(target) = 0 GOTO bombardcity
 		IF RND < .7 + .03 * (gNavySize(who) - gFortLevel(target)) GOTO damagedfortifications
 		CALL ShipDestroyed(who)
-		CALL clrbot
+		CALL ClearBottom
 		PRINT gNationName$(gCityOwner(target)); " shore battery sunk an attacking ship!"; gNavySize(who); "ship(s) left! ";
 		IF gSoundEffects > 0 THEN SOUND 77, .5: SOUND 59, .5
 		CALL TICK(gTurbo!)
@@ -1735,16 +1743,16 @@ SUB ManageNavy (who%, chx%)
 		END IF
 		GOTO deserted
 	damagedfortifications:
-		CALL clrbot: PRINT gCityName$(target); " fortifications damaged";
+		CALL ClearBottom: PRINT gCityName$(target); " fortifications damaged";
 		gFortLevel(target) = gFortLevel(target) - 1: x = gCityX(target): y = gCityY(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
 		CALL DrawCities
 		CALL TICK(gTurbo!)
 		EXIT SUB
 	bombardcity:
-		IF RND > .25 + .07 * gNavySize(who) THEN CALL clrbot: PRINT "Citizens of "; gCityName$(target); " stand firm against the attack"; : CALL TICK(gTurbo!): EXIT SUB
-		IF gNavyLocation(who) = gCapitalCity(3 - who) THEN CALL clrbot: PRINT "The CAPITAL steadfastly stands loyal"; : CALL TICK(gTurbo!): EXIT SUB
+		IF RND > .25 + .07 * gNavySize(who) THEN CALL ClearBottom: PRINT "Citizens of "; gCityName$(target); " stand firm against the attack"; : CALL TICK(gTurbo!): EXIT SUB
+		IF gNavyLocation(who) = gCapitalCity(3 - who) THEN CALL ClearBottom: PRINT "The CAPITAL steadfastly stands loyal"; : CALL TICK(gTurbo!): EXIT SUB
 		gCityOwner(gNavyLocation(who)) = 0
-		CALL clrbot: PRINT gCityName$(gNavyLocation(who)); " is now  NEUTRAL";
+		CALL ClearBottom: PRINT gCityName$(gNavyLocation(who)); " is now  NEUTRAL";
 		CALL DrawCities
 		gVictoryPoints(who) = gVictoryPoints(who) + gCityValue(gNavyLocation(who))
 		EXIT SUB
@@ -1754,7 +1762,7 @@ SUB ManageNavy (who%, chx%)
 		CASE 3
 		gNavySize(who) = LEN(gFleet$(who))
 		IF gNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
-		IF gNavyLocation(who) < 1 OR gNavySize(who) < 1 THEN CALL clrbot: PRINT "No ships remain"; : TICK 1: GOTO labelmanagenavy
+		IF gNavyLocation(who) < 1 OR gNavySize(who) < 1 THEN CALL ClearBottom: PRINT "No ships remain"; : TICK 1: GOTO labelmanagenavy
 
 		gMenuRows = 0
 		FOR i = 1 TO 40: IF gMatrix(i, 7) > 90 AND gNavyLocation(who) <> i THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = gCityName$(i): gArray(gMenuRows) = i
@@ -1960,7 +1968,7 @@ SUB ManageNavy (who%, chx%)
 		IF gCityOwner(i) = who THEN IF i <> gNavyLocation(who) AND gMatrix(i, 7) = 99 THEN target = i: IF RND > .3 GOTO found1
 		NEXT i
 	found1:
-		CALL clrbot: COLOR 11: PRINT gNationName$(who); " is retreating to "; gCityName$(target); : CALL TICK(gTurbo!)
+		CALL ClearBottom: COLOR 11: PRINT gNationName$(who); " is retreating to "; gCityName$(target); : CALL TICK(gTurbo!)
 		gNavyLocation(who) = target
 		GOTO sail3
 		CASE ELSE
@@ -2025,7 +2033,7 @@ SUB CreateNewArmy (who%, empty%, target%)
 	gArmyExp(empty) = 1: IF who = 2 THEN gArmyExp(empty) = 2
 	gArmyCommander(empty) = gLeaderRating(empty)
 	gArmyName$(empty) = gLeaderName$(empty): gLeaderName$(empty) = ""
-	COLOR 12: CALL clrbot: PRINT "Placing NEW army "; empty; gArmyName$(empty); " in "; gCityName$(target);
+	COLOR 12: CALL ClearBottom: PRINT "Placing NEW army "; empty; gArmyName$(empty); " in "; gCityName$(target);
 
 	x = 70: IF gRealism > 0 THEN x = 3 * gCityValue(target) + 33
 	CALL cutoff(who, target, a): IF a < 1 THEN x = x \ 3
@@ -2122,23 +2130,23 @@ SUB railroad (who%)
 		END IF
 		IF x1 > 0 GOTO confirmrrdestination ELSE GOTO toot
 	human:
-		CALL MoveFrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "Railroad move not allowed"; : GOTO toot
+		CALL MoveFrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL ClearBottom: PRINT "Railroad move not allowed"; : GOTO toot
 		x = 1: IF index > 20 THEN x = 2
 		CALL traincapacity(who, limit)
-		IF gArmySize(index) > limit THEN CALL clrbot: PRINT "Too many troops for railroad capacity"; : GOTO toot
+		IF gArmySize(index) > limit THEN CALL ClearBottom: PRINT "Too many troops for railroad capacity"; : GOTO toot
 		
 		target = gArmyLocation(index): GOSUB route: IF x > 1 GOTO chooserrdestination
-		CALL clrbot: PRINT "Track from "; gCityName$(target); " is blocked"; : GOTO toot
+		CALL ClearBottom: PRINT "Track from "; gCityName$(target); " is blocked"; : GOTO toot
 	chooserrdestination:
-		CALL clrbot: PRINT "Select destination for "; gArmyName$(index); " from "; gCityName$(target);
+		CALL ClearBottom: PRINT "Select destination for "; gArmyName$(index); " from "; gCityName$(target);
 		gMenuText$(0) = "To": from = target: x1 = from: IF from = 0 GOTO toot
 		CALL newcity(x1): IF x1 = from OR x1 = 0 GOTO toot
 
 		target = x1: GOSUB route: IF x > 1 GOTO confirmrrdestination
-		CALL clrbot: PRINT gArmyName$(index); "'s train cannot go to "; gCityName$(x1); " - select another city"; : CALL TICK(9)
+		CALL ClearBottom: PRINT gArmyName$(index); "'s train cannot go to "; gCityName$(x1); " - select another city"; : CALL TICK(9)
 		GOTO chooserrdestination
 	confirmrrdestination:
-		COLOR 11: CALL clrbot: PRINT gArmyName$(index); " is taking the train from "; gCityName$(from); " to "; gCityName$(x1);
+		COLOR 11: CALL ClearBottom: PRINT gArmyName$(index); " is taking the train from "; gCityName$(from); " to "; gCityName$(x1);
 		gArmyOnRailroad(who) = gArmyLocation(index)
 		from = gArmyLocation(index)
 		gRRFrom(who) = from
@@ -2161,7 +2169,7 @@ SUB railroad (who%)
 		CALL tinytrain(who, 1)
 
 		gRR(who) = 0: gArmyLocation(index) = gArmyMove(index): gArmyMove(index) = -1
-		COLOR 11: CALL clrbot: PRINT "Train with "; gArmyName$(index); " has arrived in "; gCityName$(gArmyLocation(index)); : IF gSoundEffects > 0 THEN SOUND 1200, 2
+		COLOR 11: CALL ClearBottom: PRINT "Train with "; gArmyName$(index); " has arrived in "; gCityName$(gArmyLocation(index)); : IF gSoundEffects > 0 THEN SOUND 1200, 2
 		CALL TICK(gTurbo!)
 		x = gCityX(gArmyLocation(index)) - 12: y = gCityY(gArmyLocation(index)) - 11
 		LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
@@ -2188,7 +2196,7 @@ SUB railroad (who%)
 	toot:
 		IF who = gCurrentSide THEN CALL TICK(9)
 		CALL clrrite
-		clrbot
+		ClearBottom
 END SUB
 
 SUB RecruitArmy (who%)
@@ -2221,7 +2229,7 @@ SUB RecruitArmy (who%)
 	'............................................................................
 	levy:
 		IF gCurrentCash(who) < 100 THEN EXIT SUB
-		IF (who = gCurrentSide) OR (gHumanPlayers = 2) THEN CALL clrbot: PRINT gNationName$(who); " funds available "; gCurrentCash(who);
+		IF (who = gCurrentSide) OR (gHumanPlayers = 2) THEN CALL ClearBottom: PRINT gNationName$(who); " funds available "; gCurrentCash(who);
 		gTLX = 67: gTLY = 12: gColour = 3
 		IF who <> gCurrentSide THEN GOSUB randsel: GOTO auto1
 		
@@ -2258,7 +2266,7 @@ SUB RecruitArmy (who%)
 		GET (x - 9, y - 7)-(x + 9, y + 6), anima
 		CALL MoveUnitIcon(gArmyLocation(i), 0, 2)
 		IF gSoundEffects > 0 THEN SOUND 2222, 1
-		COLOR 11: CALL clrbot: PRINT "Army "; i; gArmyName$(i); " in "; gCityName$(gArmyLocation(i)); " strength increased to "; : CALL CorrectArmySize(i)
+		COLOR 11: CALL ClearBottom: PRINT "Army "; i; gArmyName$(i); " in "; gCityName$(gArmyLocation(i)); " strength increased to "; : CALL CorrectArmySize(i)
 		IF someString$ <> "" THEN PRINT someString$;
 		PUT (x - 9, y - 7), anima, PSET
 		CALL TICK(gTurbo! - .5)
@@ -2340,7 +2348,7 @@ SUB ComputerPlayer
 		gFortLevel(target) = gFortLevel(target) + 1
 		x = gIsOccupied(target): gArmyMove(x) = -1
 		gCurrentCash(who) = gCurrentCash(who) - cost
-		CALL clrbot: PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
+		CALL ClearBottom: PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
 		CALL MoveUnitIcon(target, 0, 6)
 		CALL DrawCities
 		IF who = 1 AND gNavySize(1) < 1 AND RND > .5 AND gCurrentCash < 222 GOTO signup
@@ -2428,7 +2436,7 @@ SUB ComputerPlayer
 		IF gCurrentMonth = 1 AND gJanuaryCampaign = 0 AND gCityOwner(gArmyMove(i)) <> who THEN gArmyMove(i) = 0: GOTO deadman
 
 		IF gTurbo! > 1 THEN
-			COLOR c: CALL clrbot
+			COLOR c: CALL ClearBottom
 			PRINT gArmyName$(i); " plans to move from "; gCityName$(gArmyLocation(i)); " to "; gCityName$(gArmyMove(i));
 		END IF
 			CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 1)
@@ -2442,7 +2450,7 @@ SUB ComputerPlayer
 			gArmyExp(i) = gArmyExp(i) + 1
 
 			IF gTurbo! > 1 THEN
-			CALL clrbot
+			CALL ClearBottom
 				PRINT gArmyName$(i); " has drilled to reach experience level "; gArmyExp(i);
 			END IF
 			gArmyMove(i) = -1
@@ -2503,7 +2511,7 @@ SUB TurnUpdate
 	END IF
 	COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
 	LOCATE 1, 20: PRINT "Update for "; gMonthes$(gCurrentMonth); ","; gCurrentYear
-	CALL clrbot: PRINT "press any key for "; gMonthes$(gCurrentMonth); ","; gCurrentYear; " events";
+	CALL ClearBottom: PRINT "press any key for "; gMonthes$(gCurrentMonth); ","; gCurrentYear; " events";
 	DO WHILE INKEY$ = "": LOOP
 	CALL TurnUpdateBox
 	'==========================================================================
@@ -2560,13 +2568,13 @@ SUB TurnUpdate
 		active = gOrderOfMoves(j) - 100 * active
 		IF active > 20 THEN s = 2 ELSE s = 1
 	IF gArmyMove(active) < 1 GOTO digin
-	COLOR 11: CALL clrbot: PRINT gArmyName$(active); " is moving to "; gCityName$(gArmyMove(active));
+	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " is moving to "; gCityName$(gArmyMove(active));
 
 	gArmySupply(active) = gArmySupply(active) - 1
 	IF gArmySupply(active) < 0 THEN 
 		gArmySupply(active) = 0
 		CALL TICK(gTurbo!)
-		CALL clrbot
+		CALL ClearBottom
 		PRINT gArmyName$(active); " is out of supplies !";
 	END IF
 
@@ -2586,10 +2594,10 @@ SUB TurnUpdate
 	'                         Join Forces
 	'==========================================================================
 	friendlyarmiesmeet:
-	COLOR 11: CALL clrbot: PRINT gArmyName$(active); " and "; gArmyName$(gIsOccupied(target)); " meet in "; gCityName$(target);
+	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " and "; gArmyName$(gIsOccupied(target)); " meet in "; gCityName$(target);
 	CALL TICK(gTurbo!)
 	CALL MoveUnitIcon(gArmyMove(active), 0, 6)
-	CALL clrbot
+	CALL ClearBottom
 	GOTO moveintonewcity
 	'==========================================================================
 	'                       Attack
@@ -2598,7 +2606,7 @@ SUB TurnUpdate
 	CALL MoveUnitIcon(target, 0, 3)
 	defend = gIsOccupied(target)
 
-	COLOR 11: CALL clrbot: PRINT gArmyName$(active); " attacks "; gArmyName$(defend); " in "; gCityName$(gArmyLocation(defend));
+	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " attacks "; gArmyName$(defend); " in "; gCityName$(gArmyLocation(defend));
 	CALL TICK(gTurbo! - 1)
 	IF gArmySize(defend) > 0 THEN 
 		CALL ComputeBattle(active, defend, win, lose)
@@ -2608,7 +2616,7 @@ SUB TurnUpdate
 	IF gArmyExp(win) < 10 THEN gArmyExp(win) = gArmyExp(win) + 1
 
 	IF gArmySize(lose) < 2 THEN
-		CALL clrbot
+		CALL ClearBottom
 		someString$ = gArmyName$(lose) + "'s army is crushed in " + gCityName$(gArmyLocation(defend))
 		CALL scribe(someString$, 2)
 		index = lose
@@ -2622,7 +2630,7 @@ SUB TurnUpdate
 	IF win = active GOTO defenderretreats
 	gArmyMove(active) = gArmyLocation(active)
 	gArmyLocation(active) = target
-	COLOR 11: CALL clrbot: PRINT gArmyName$(active); " withdrew to "; gCityName$(gArmyMove(active));
+	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " withdrew to "; gCityName$(gArmyMove(active));
 
 	CALL DrawArmyUnit(gArmyLocation(active))
 	CALL AnimateMovement(active, 1)
@@ -2678,7 +2686,7 @@ SUB TurnUpdate
 		
 		gArmyLocation(defend) = move2
 		gIsOccupied(move2) = defend
-		CALL clrbot
+		CALL ClearBottom
 		PRINT gArmyName$(defend) + " is withdrawing to " + gCityName$(move2);
 
 		CALL DrawArmyUnit(defend)                  ' in new city
@@ -2722,7 +2730,7 @@ SUB TurnUpdate
 	checkmoredefenders:
 		CALL occupy(target)
 		IF gIsOccupied(target) = 0 GOTO moveintonewcity
-		COLOR 11: CALL clrbot: PRINT "There are still defenders in "; gCityName$(target);
+		COLOR 11: CALL ClearBottom: PRINT "There are still defenders in "; gCityName$(target);
 		CALL TICK(99)
 		GOTO enemyarmiesbattle
 	'==========================================================================
@@ -2757,7 +2765,7 @@ SUB TurnUpdate
 				y = gCityY(c)
 				LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
 				CALL DrawCities
-				CALL clrbot
+				CALL ClearBottom
 				PRINT gArmyName$(active); " has destroyed the forts at "; gCityName$(c);
 				TICK 3
 			END IF
@@ -2775,7 +2783,7 @@ SUB TurnUpdate
 	allthru:
 	IF gNavySize(gNavalCommerce) < 1 THEN gNavalCommerce = 0
 	IF gNavalCommerce > 0 THEN
-		CALL clrbot
+		CALL ClearBottom
 		IF RND < .8 + .02 * gNavySize(gNavalCommerce) THEN
 			gNavalRaider = .05 * gNavySize(gNavalCommerce) * (1 + RND) * (gCurrentIncome(3 - gNavalCommerce))
 			IF gNavalRaider < 1 THEN gNavalRaider = 1
@@ -2810,7 +2818,7 @@ SUB TurnUpdate
 	CALL ships
 	CALL ProcessTurn
 
-	CALL clrbot
+	CALL ClearBottom
 	LINE (390, 350)-(520, 400), 1, BF
 	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(gMonthes$(gCurrentMonth), 3)); ","; gCurrentYear
 	gVictoryPoints(1) = .8 * gVictoryPoints(1) + .3 * (gCurrentIncome(1) + gCityController(1))
@@ -2827,7 +2835,7 @@ SUB TurnUpdate
 		IF gCityController(2) > 34 THEN gVictoryPoints(2) = gVictoryPoints(1) + 100
 	END IF
 	IF gCurrentSide = 1 AND gCityController(2) < 11 THEN gAggress! = gAggress! + .7
-	IF gHumanPlayers = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+	IF gHumanPlayers = 2 THEN CALL ClearBottom: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 END SUB
 
 SUB TurnUpdateBox
@@ -2932,7 +2940,7 @@ SUB ShowMenu (switch%)
 				LOCATE gTLY + 4 + gMenuRows, gTLX + 1: PRINT SPACE$(12);
 				END IF
 			CASE 4: CALL ShowArmyStats(gArray(row))
-			CASE 5: COLOR 11: CALL clrbot: PRINT gArmyName$(index); "  Exp="; gArmyExp(index); " Cash="; gCurrentCash(gCurrentSide);
+			CASE 5: COLOR 11: CALL ClearBottom: PRINT gArmyName$(index); "  Exp="; gArmyExp(index); " Cash="; gCurrentCash(gCurrentSide);
 			CASE 6: CALL MoveUnitIcon(gArmyLocation(gArray(row)), 0, 9)
 			CASE 8
 				IF gGraphicLevel > 2 AND row > 0 THEN
@@ -3109,7 +3117,7 @@ SUB CancelArmyMovement (gCurrentSide%)
 		CALL bubble(gMenuRows)
 		gTLX = 67: gTLY = 2: gWindowType = 2
 		gMenuText$(0) = "Cancel"
-		IF gMenuRows < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
+		IF gMenuRows < 1 THEN CALL ClearBottom: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
 		CALL ShowMenu(1)
 		SELECT CASE gChosenOption
 		CASE 1 TO gMenuRows
@@ -3119,7 +3127,7 @@ SUB CancelArmyMovement (gCurrentSide%)
 			IF gArmyLocation(i) = target THEN x = INSTR(gArmyName$(i), gMenuText$(gChosenOption)): IF x > 0 AND gArmyMove(i) > 0 THEN index = i
 			NEXT i
 
-			CALL clrbot: COLOR 11: PRINT gArmyName$(index); " has cancelled move to "; gCityName$(gArmyMove(index)); : CALL TICK(turbo + 1)
+			CALL ClearBottom: COLOR 11: PRINT gArmyName$(index); " has cancelled move to "; gCityName$(gArmyMove(index)); : CALL TICK(turbo + 1)
 			CALL MoveUnitIcon(gArmyLocation(index), gArmyMove(index), 4)
 			gArmyMove(index) = 0: IF gSoundEffects > 0 THEN SOUND 2999, .5
 			CALL stax(gCurrentSide)
@@ -3136,7 +3144,7 @@ SUB center (y%, someString$)
 	LOCATE y, 7 + x: PRINT someString$
 END SUB
 
-SUB clrbot
+SUB ClearBottom
 	LOCATE 29, 1: PRINT SPACE$(79);
 	LOCATE 29, 1
 END SUB
@@ -3165,7 +3173,7 @@ SUB commander (who%, empty%)
 		EXIT SUB
 	END IF
 	NEXT i
-	CALL clrbot: PRINT "No more "; gNationName$(who); " commanders available"; : CALL TICK(gTurbo!)
+	CALL ClearBottom: PRINT "No more "; gNationName$(who); " commanders available"; : CALL TICK(gTurbo!)
 END SUB
 
 SUB VictoryConditionsMet
@@ -3312,7 +3320,7 @@ SUB SpecialEvents
 	'                              Special Events
 	'==========================================================================
 	IF gRealism > 0 AND gCurrentYear = 1862 AND gCurrentMonth < 3 THEN
-		COLOR 14: CALL clrbot
+		COLOR 14: CALL ClearBottom
 		PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
 		IF gSoundEffects > 0 THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
 		DO WHILE INKEY$ = "": LOOP
@@ -3323,7 +3331,7 @@ SUB SpecialEvents
 	pct! = .005 * (gCurrentYear - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
 	IF RND > pct! THEN EXIT SUB
 
-	CALL clrbot: COLOR 14: PRINT "SPECIAL EVENT...";
+	CALL ClearBottom: COLOR 14: PRINT "SPECIAL EVENT...";
 	who = 1: IF RND > .1 * gEventsBalance THEN who = 2
 
 	SELECT CASE who
@@ -3335,7 +3343,7 @@ SUB SpecialEvents
 		IF gCurrentYear = 1865 AND gCurrentMonth = 1 THEN gVictoryPoints(2) = gVictoryPoints(2) + 100
 		IF RND > .9 THEN GOSUB riotsincity: EXIT SUB
 
-		CALL clrbot
+		CALL ClearBottom
 		IF RND > .2 OR gNavySize(2) > 9 GOTO mercenariesjoin
 		IF gNavySize(2) > 0 AND gNavyLocation(2) <> 99 THEN empty = gNavyLocation(2): GOTO englandgivesships
 			empty = 0
@@ -3385,12 +3393,12 @@ SUB SpecialEvents
 		FOR k = 1 TO 99
 		x = 1 + INT(40 * RND)
 			IF gCityO(x) <> who AND gCityOwner(x) = who AND gIsOccupied(x) = 0 THEN
-				CALL clrbot: COLOR 15
+				CALL ClearBottom: COLOR 15
 				PRINT " Riots have broken out in "; gCityName$(x);
 				gCityOwner(x) = 0
 				CALL DrawCities
 				TICK gTurbo!
-				CALL clrbot
+				CALL ClearBottom
 				CALL image2(gCityName$(x) + " is now NEUTRAL !", 4)
 				TICK gTurbo!
 				RETURN
@@ -3653,11 +3661,11 @@ SUB relieve (who%)
 	gArmyCommander(index) = gLeaderRating(gArray(gChosenOption))
 	IF gArmyCommander(index) > 0 THEN gArmyCommander(index) = gArmyCommander(index) - 1
 	IF gArmyExp(index) > 0 THEN gArmyExp(index) = gArmyExp(index) - 1
-	COLOR 15: CALL clrbot: PRINT gLeaderName$(gArray(gChosenOption)); " has replaced "; anotherString$; " in "; gCityName$(gArmyLocation(index)); : TICK 9
+	COLOR 15: CALL ClearBottom: PRINT gLeaderName$(gArray(gChosenOption)); " has replaced "; anotherString$; " in "; gCityName$(gArmyLocation(index)); : TICK 9
 	gArmyName$(index) = gLeaderName$(gArray(gChosenOption))
 	gLeaderName$(gArray(gChosenOption)) = ""
 	CALL MoveUnitIcon(gArmyLocation(index), 0, 8)
-	CALL clrbot
+	CALL ClearBottom
 END SUB
 
 SUB ShowReports (who%)
@@ -3877,9 +3885,9 @@ SUB ResupplyArmy (index%)
 			END IF
 			IF gArmySize(index) > 0 THEN x = gCurrentCash(who) / gArmySize(index) * 10
 			y = x + gArmySupply(index): IF y > 5 THEN x = 5 - gArmySupply(index)
-			IF x < 1 THEN CALL clrbot: PRINT "Not enough funds in the Treasury to supply "; gArmyName$(index); : GOTO nocash
+			IF x < 1 THEN CALL ClearBottom: PRINT "Not enough funds in the Treasury to supply "; gArmyName$(index); : GOTO nocash
 			gArmySupply(index) = gArmySupply(index) + x: gCurrentCash(who) = gCurrentCash(who) - .1 * x * gArmySize(index)
-			CALL clrbot: PRINT gArmyName$(index); " has received supplies "; : IF gSoundEffects > 0 THEN SOUND 4500, .5
+			CALL ClearBottom: PRINT gArmyName$(index); " has received supplies "; : IF gSoundEffects > 0 THEN SOUND 4500, .5
 	nocash:
 			CALL TICK(gTurbo!): IF gCurrentCash(who) < 0 THEN gCurrentCash(who) = 0
 END SUB
@@ -4006,7 +4014,7 @@ END SUB
 
 SUB scribe (someString$, flag%)
 	SELECT CASE flag
-			CASE 1: CALL clrbot: PRINT someString$;
+			CASE 1: CALL ClearBottom: PRINT someString$;
 			CASE 2: CALL image2(someString$, 4)
 	END SELECT
 	IF gHistory > 0 THEN
@@ -4230,7 +4238,7 @@ SUB victor
 		y = 0: FOR j = 21 TO 40: IF gArmyLocation(j) > 0 THEN y = y + gArmySize(j)
 		NEXT j
 
-		CALL clrbot: COLOR 14
+		CALL ClearBottom: COLOR 14
 		IF gVictoryFlags(2) > 0 AND gCurrentYear >= gVictoryFlags(2) AND gCurrentMonth < gVictoryFlags(1) THEN
 			someString$ = "Time almost expired (" + gMonthes$(gVictoryFlags(1)) + "," + STR$(gVictoryFlags(2)) + ")"
 			CALL image2(someString$, 4)
@@ -4254,7 +4262,7 @@ SUB victor
 			END IF
 		END IF
 
-		CALL clrbot: COLOR 14
+		CALL ClearBottom: COLOR 14
 		IF gVictoryFlags(3) > 0 AND gCityController(i) >= .9 * gVictoryFlags(3) THEN
 			someString$ = gNationName$(i) + " side almost controls" + STR$(gVictoryFlags(3)) + " cities"
 			CALL image2(someString$, 4)
@@ -4406,7 +4414,7 @@ SUB AnimateMovement (index%, flag%)
 END SUB
 
 SUB DrawCityCaptured (active%, c%, s%, flag%)
-	gCityOwner(c) = s: CALL clrbot
+	gCityOwner(c) = s: CALL ClearBottom
 	someString$ = gArmyName$(active) + " has captured " + gCityName$(c)
 	COLOR 11: PRINT gArmyName$(active) + " has captured " + gCityName$(c);
 	IF active < 21 AND gSoundEffects > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
