@@ -246,7 +246,7 @@ SUB Menu0 ' Main Menu
 	gMenuRows = 9
 	gChosenOption = newChosenOption
 	CALL ShowMenu(0)
-	CALL clrrite
+	CALL ClearRight
 	SELECT CASE gChosenOption ' Main Menu
 		CASE 1 ' Recruit
 			IF gCurrentCash(gCurrentSide) < 100 OR gRecruitFlag < 0 THEN 
@@ -289,7 +289,7 @@ SUB Menu0 ' Main Menu
 			gMenuText$(2) = "NOT YET"
 			gMenuRows = 2
 			CALL ShowMenu(0)
-			CALL clrrite
+			CALL ClearRight
 			IF gChosenOption <> 1 THEN 
 				newChosenOption = 24
 				CALL Menu0
@@ -332,7 +332,7 @@ SUB Menu0 ' Main Menu
 			gMenuText$(4) = "Quit"
 			gMenuRows = 4: gTLX = 67: gTLY = 15
 			CALL ShowMenu(0)
-			CALL clrrite
+			CALL ClearRight
 			SELECT CASE gChosenOption
 				CASE IS < 1
 					CALL Menu0
@@ -360,7 +360,7 @@ SUB Menu0 ' Main Menu
 					gMenuRows = 2: gColour = 5
 					gTLX = 67: gTLY = 15
 					CALL ShowMenu(0)
-					CALL clrrite
+					CALL ClearRight
 					IF gChosenOption = 1 THEN 
 						END
 					ELSE 
@@ -392,7 +392,7 @@ SUB CommandsMenu
 	gMenuText$(9) = "MAIN MENU"
 	gMenuRows = 9
 	CALL ShowMenu(0)
-	CALL clrrite
+	CALL ClearRight
 	newChosenOption = 28
 	SELECT CASE gChosenOption
 		CASE 1 ' Cancel
@@ -449,7 +449,7 @@ SUB CommandsMenu
 				CALL Menu0
 			END IF
 			CALL ShowMenu(6)
-			CALL clrrite
+			CALL ClearRight
 			IF gChosenOption < 0 THEN CALL Menu0
 			index = gArray(gChosenOption)
 			IF gArmySupply(index) < 2 THEN
@@ -466,7 +466,7 @@ SUB CommandsMenu
 			END IF
 			gCurrentCash(gCurrentSide) = gCurrentCash(gCurrentSide) - 500
 			gVictoryPoints(3 - gCurrentSide) = gVictoryPoints(3 - gCurrentSide) + 50
-			CALL clrrite
+			CALL ClearRight
 			gMenuText$(0) = "Capital"
 			someString$ = gCityName$(gCapitalCity(gCurrentSide))
 			index = gCapitalCity(gCurrentSide)
@@ -475,7 +475,7 @@ SUB CommandsMenu
 			gCapitalCity(gCurrentSide) = index
 			CALL ClearBottom
 			PRINT gNationName$(gCurrentSide); " capital moved from "; someString$; " to "; gCityName$(gCapitalCity(gCurrentSide));
-			CALL clrrite
+			CALL ClearRight
 			CALL DrawCities
 			CALL TICK(9)
 			CALL ClearBottom
@@ -574,7 +574,7 @@ SUB UtilityMenu
 	IF gHumanPlayers = 1 THEN 
 		gMenuRows = 14: gMenuText$(14) = "Aggress" + STR$(gAIBoldness)
 	END IF
-	CALL ShowMenu(-1): CALL clrrite
+	CALL ShowMenu(-1): CALL ClearRight
 	SELECT CASE gChosenOption
 		CASE 1 ' Swap Sides
 			IF gHumanPlayers = 2 THEN CALL Menu0
@@ -611,7 +611,7 @@ SUB UtilityMenu
 			gChosenOption = 24
 			CALL UtilityMenu
 		CASE 4 ' Sounds
-			CALL clrrite
+			CALL ClearRight
 			gChosenOption = gSoundEffects + 22
 			gMenuText$(0) = "SOUNDS"
 			gMenuText$(1) = "Quiet"
@@ -619,7 +619,7 @@ SUB UtilityMenu
 			gMenuText$(3) = " & Sound"
 			gMenuRows = 3: gTLX = 67: gTLY = 12
 			CALL ShowMenu(0)
-			CALL clrrite
+			CALL ClearRight
 			IF gChosenOption < 1 THEN CALL Menu0
 			CALL ClearBottom
 			COLOR 11: PRINT "Sound Option : "; gMenuText$(gChosenOption);
@@ -637,7 +637,7 @@ SUB UtilityMenu
 			gMenuText$(5) = "Reg Color": IF gBorderWidth > 0 THEN gMenuText$(5) = "Alt Color"
 			gTLX = 67: gTLY = 15: gMenuRows = 5
 			CALL ShowMenu(0)
-			CALL clrrite
+			CALL ClearRight
 			SELECT CASE gChosenOption
 				CASE IS < 1
 				CASE IS < 5
@@ -662,7 +662,7 @@ SUB UtilityMenu
 		gMenuText$(4) = "Union +"
 		gMenuText$(5) = "Union ++"
 		gTLX = 67: gTLY = 15: gMenuRows = 5
-		CALL ShowMenu(8): CALL clrrite
+		CALL ShowMenu(8): CALL ClearRight
 		IF gChosenOption < 1 THEN CALL Menu0
 		CALL ClearBottom
 		COLOR 11: PRINT "Play Balance : "; gMenuText$(gChosenOption);
@@ -853,7 +853,7 @@ SUB MoveArmies
 
 	gHighlight = 10: gColour = 3
 	CALL ShowMenu(2)
-	CALL clrrite
+	CALL ClearRight
 	IF gChosenOption < 0 THEN EXIT SUB
 	IF gCurrentMonth < 3 AND gJanuaryCampaign = 0 AND gCityOwner(gArray(gChosenOption)) <> gCurrentSide THEN 
 		CALL ClearBottom
@@ -870,7 +870,7 @@ SUB MoveArmies
 	gArmyMove(index) = gArray(gChosenOption)
 	CALL TICK(gTurbo!)
 	CALL ClearBottom
-	CALL clrrite
+	CALL ClearRight
 END SUB
 
 SUB ShowArmyStats (index%)
@@ -900,7 +900,7 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 
 	CALL MoveUnitIcon(gArmyLocation(defend), 0, 9)
 	LOCATE 1, 1: PRINT SPACE$(80)
-	CALL clrrite
+	CALL ClearRight
 
 	y = 68
 	COLOR 11
@@ -1049,7 +1049,7 @@ SUB ComputeBattle (attack%, defend%, win%, lose%)
 			PUT (550, 270), gGraphicImage, PSET
 		END IF
 	ELSE
-		CALL clrrite
+		CALL ClearRight
 	END IF
 	FOR i = 1 TO 2
 		IF gArmySupply(i) > 0 THEN gArmySupply(i) = gArmySupply(i) - 1
@@ -1193,7 +1193,7 @@ SUB CombineArmies (who%)
 	gMenuText$(0) = "Join"
 	gChosenOption = 31: gHighlight = 11
 	CALL ShowMenu(9)
-	CALL clrrite
+	CALL ClearRight
 	join:
 	IF gChosenOption < 1 THEN EXIT SUB
 	target = gArray(gChosenOption)
@@ -1333,7 +1333,7 @@ SUB FileManager (switch%)
 			CALL bubble((gMenuRows))
 			gTLX = 67: gTLY = 14 - .5 * gMenuRows
 			CALL ShowMenu(0)
-			CALL clrrite
+			CALL ClearRight
 			IF gChosenOption < 1 THEN EXIT SUB
 			OPEN "I", 1, "cws" + LTRIM$(STR$(gArray(gChosenOption))) + ".sav"
 			CALL ClearBottom
@@ -1378,7 +1378,7 @@ SUB FileManager (switch%)
 			NEXT k
 			gTLX = 67: gMenuRows = 9
 			CALL ShowMenu(0)
-			IF gChosenOption < 1 THEN clrrite: EXIT SUB
+			IF gChosenOption < 1 THEN ClearRight: EXIT SUB
 			CALL ClearBottom
 			COLOR 11: PRINT "Saving";
 
@@ -1418,7 +1418,7 @@ SUB FortifyCity (target%)
 	CALL bubble(gMenuRows)
 	gMenuText$(0) = "Fortify"
 		gChosenOption = 31
-		CALL ShowMenu(9): CALL clrrite
+		CALL ShowMenu(9): CALL ClearRight
 		IF gChosenOption < 0 THEN EXIT SUB
 		target = gArray(gChosenOption): CALL occupy(target): x = gIsOccupied(target): IF x < 0 THEN EXIT SUB
 		IF gFortLevel(target) > 1 THEN CALL ClearBottom: PRINT gCityName$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): EXIT SUB
@@ -1576,7 +1576,7 @@ SUB MoveFrom (index%, target%)
 	gMenuText$(0) = "From"
 	CALL bubble(gMenuRows)
 	gTLX = 67: gTLY = 5
-		gHighlight = 15: CALL ShowMenu(1): CALL clrrite
+		gHighlight = 15: CALL ShowMenu(1): CALL ClearRight
 		IF gChosenOption < 0 THEN target = 0: EXIT SUB
 		target = gArray(gChosenOption)
 
@@ -1587,7 +1587,7 @@ SUB MoveFrom (index%, target%)
 		IF gMenuRows = 1 THEN EXIT SUB
 		gMenuText$(0) = "Which"
 		CALL bubble(gMenuRows)
-		gTLX = 67: gTLY = 15: CALL ShowMenu(4): CALL clrrite
+		gTLX = 67: gTLY = 15: CALL ShowMenu(4): CALL ClearRight
 		IF gChosenOption < 0 THEN index = 0: EXIT SUB
 		index = gArray(gChosenOption)
 END SUB
@@ -1631,7 +1631,7 @@ SUB ManageNavy (who%, chx%)
 
 	IF chx > 0 THEN gChosenOption = chx: GOTO anchor
 	IF gHasNavy > 0 AND gChosenOption <> 1 THEN EXIT SUB
-	CALL ShowMenu(0): CALL clrrite
+	CALL ShowMenu(0): CALL ClearRight
 	anchor:
 	'---------------------------------------------------------------------------
 	SELECT CASE gChosenOption
@@ -1659,7 +1659,7 @@ SUB ManageNavy (who%, chx%)
 				gMenuText$(2) = "Ironclad"
 				gMenuRows = 2
 				CALL ShowMenu(0)
-				CALL clrrite
+				CALL ClearRight
 				IF gChosenOption < 1 GOTO labelmanagenavy
 				IF gChosenOption = 2 THEN someString$ = "I": cost = 2 * cost
 			ELSE
@@ -1685,7 +1685,7 @@ SUB ManageNavy (who%, chx%)
 			IF chx = 0 THEN CALL ClearBottom: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
 			IF chx = 1 THEN EXIT SUB
 		END IF
-		IF chx = 0 THEN CALL ShowMenu(9): CALL clrrite
+		IF chx = 0 THEN CALL ShowMenu(9): CALL ClearRight
 
 		IF gChosenOption < 1 GOTO ships
 		gNavyLocation(who) = gArray(gChosenOption)
@@ -1781,7 +1781,7 @@ SUB ManageNavy (who%, chx%)
 		gMenuText$(0) = "To"
 		gColour = 3: gTLX = 67: gTLY = 12
 		
-		CALL ShowMenu(9): CALL clrrite: IF gChosenOption < 1 THEN EXIT SUB
+		CALL ShowMenu(9): CALL ClearRight: IF gChosenOption < 1 THEN EXIT SUB
 	admiral:
 		IF gArray(gChosenOption) = gNavyLocation(who) THEN EXIT SUB
 		IF gArray(gChosenOption) < 1 THEN EXIT SUB
@@ -2052,7 +2052,7 @@ SUB newcity (index%)
 	morecap:
 			gTLX = 68: gTLY = 15: gColour = 3: gChosenOption = 23
 			gMenuText$(2) = gCityName$(index)
-			CALL ShowMenu(3): CALL clrrite
+			CALL ShowMenu(3): CALL ClearRight
 			SELECT CASE gChosenOption
 			CASE IS = -27
 			index = 0: EXIT SUB
@@ -2195,7 +2195,7 @@ SUB railroad (who%)
 
 	toot:
 		IF who = gCurrentSide THEN CALL TICK(9)
-		CALL clrrite
+		CALL ClearRight
 		ClearBottom
 END SUB
 
@@ -2234,7 +2234,7 @@ SUB RecruitArmy (who%)
 		IF who <> gCurrentSide THEN GOSUB randsel: GOTO auto1
 		
 		IF gChosenOption > 0 THEN gChosenOption = 21 + gChosenOption
-		CALL ShowMenu(2): CALL clrrite
+		CALL ShowMenu(2): CALL ClearRight
 		IF gChosenOption < 1 THEN EXIT SUB
 	auto1:
 		empty = 0
@@ -2623,7 +2623,7 @@ SUB TurnUpdate
 		GOTO crushed
 	END IF
 
-	CALL clrrite
+	CALL ClearRight
 	'==========================================================================
 	'                       Attacker Loses
 	'==========================================================================
@@ -2722,7 +2722,7 @@ SUB TurnUpdate
 		gArmySupply(index) = 0
 		IF gArmySupply(active) > 10 THEN gArmySupply(active) = 10
 		CALL TICK(9)
-		CALL clrrite
+		CALL ClearRight
 		IF gArmyLocation(active) = 0 GOTO digin
 	'---------------------------------------------------------------------------
 	'                       check for more defenders !
@@ -2754,7 +2754,7 @@ SUB TurnUpdate
 			gMenuText$(2) = "Yes"
 			gMenuRows = 2
 			CALL ShowMenu(0)
-			CALL clrrite
+			CALL ClearRight
 			IF gChosenOption = 2 GOTO razefort
 		END IF
 		IF gHumanPlayers = 1 AND s <> gCurrentSide AND gFortLevel(c) > 0 AND flag = 0 THEN
@@ -3108,7 +3108,7 @@ END SUB
 SUB CancelArmyMovement (gCurrentSide%)
 	CALL StartToFinish(start, fin, (gCurrentSide))
 
-	CALL clrrite
+	CALL ClearRight
 		gMenuRows = 0
 		FOR j = start TO fin
 		someString$ = gArmyName$(j): IF LEN(someString$) > 10 THEN x = INSTR(someString$, " "): someString$ = RIGHT$(someString$, LEN(someString$) - x)
@@ -3135,7 +3135,7 @@ SUB CancelArmyMovement (gCurrentSide%)
 			GOTO finix
 		END SELECT
 	finix:
-		CALL clrrite
+		CALL ClearRight
 END SUB
 
 SUB center (y%, someString$)
@@ -3149,7 +3149,7 @@ SUB ClearBottom
 	LOCATE 29, 1
 END SUB
 
-SUB clrrite
+SUB ClearRight
 	VIEW (528, 1)-(639, 450)
 	CLS 1
 	VIEW
@@ -3632,7 +3632,7 @@ SUB relieve (who%)
 	CALL bubble(gMenuRows)
 	gMenuText$(0) = "Relieve"
 	gChosenOption = 31: gHighlight = 11
-	CALL ShowMenu(6): CALL clrrite
+	CALL ShowMenu(6): CALL ClearRight
 
 	IF gChosenOption < 1 THEN EXIT SUB
 	index = gArray(gChosenOption)
@@ -3655,7 +3655,7 @@ SUB relieve (who%)
 	selectnewleader:
 	gMenuText$(0) = "New Leader"
 	gTLX = 67: gTLY = 2
-	CALL ShowMenu(0): CALL clrrite
+	CALL ShowMenu(0): CALL ClearRight
 	IF gChosenOption < 1 GOTO selectnewleader
 	gArmyMove(index) = -1
 	gArmyCommander(index) = gLeaderRating(gArray(gChosenOption))
@@ -3909,7 +3909,7 @@ SUB retreat (defend%, x%)
 		gMenuText$(0) = "Retreat"
 		CALL bubble(gMenuRows)
 		CALL ShowMenu(9)
-		CALL clrrite
+		CALL ClearRight
 		IF gChosenOption < 0 OR gChosenOption > gMenuRows THEN x = 0: EXIT SUB
 		x = gArray(gChosenOption)
 END SUB
@@ -4571,7 +4571,7 @@ SUB DrawArmyUnit (which%)
 END SUB
 
 SUB DrawCannon
-	CALL clrrite
+	CALL ClearRight
 	LINE (528, 80)-(639, 310), 3, BF
 	LINE (528, 310)-(639, 435), 2, BF
 	LINE (528, 405)-(639, 420), 0, BF
