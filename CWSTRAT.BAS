@@ -273,7 +273,8 @@ SUB Menu0 ' Main Menu
 				PAINT (x, y), z, 15
 				IF gCurrentSide = 1 THEN COLOR 11 ELSE COLOR 15
 				CALL traincapacity(gCurrentSide, limit)
-				CALL clrbot: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
+				CALL clrbot
+				PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 				CALL railroad(gCurrentSide)
 			ELSE
 				CALL clrbot
@@ -321,7 +322,8 @@ SUB Menu0 ' Main Menu
 		CASE 9 ' Files
 			IF _FILEEXISTS("*.sav") = 0 THEN gSavedGameExists = 0
 			newgamemenu: ' Line Label
-			gChosenOption = 23: newChosenOption = 30
+			gChosenOption = 23
+			newChosenOption = 30
 			IF gCurrentYear = 1861 THEN gChosenOption = 22
 			gMenuText$(0) = "Options"
 			gMenuText$(1) = "Load": IF gSavedGameExists = 0 THEN gMenuText$(1) = "-": gChosenOption = 23
@@ -374,10 +376,10 @@ SUB Menu0 ' Main Menu
 END SUB
 
 SUB CommandsMenu
-	commandsmenu: ' Line Label
 	gTLX = 67: gTLY = 13
 	COLOR 11: LOCATE gTLY - 2, gTLX: PRINT "esc=Main Menu"
-	gHighlight = 15: gColour = 3: newChosenOption = 24
+	gHighlight = 15: gColour = 3
+	newChosenOption = 24
 	gMenuText$(0) = "Commands"
 	gMenuText$(1) = "Cancel"
 	gMenuText$(2) = "Fortify": IF gCurrentCash(gCurrentSide) < 200 THEN gMenuText$(2) = "-"
@@ -399,7 +401,8 @@ SUB CommandsMenu
 			gChosenOption = 22
 		CASE 2 ' Fortify
 			IF gCurrentCash(gCurrentSide) < 200 THEN 
-				COLOR 11: CALL clrbot: PRINT "Not enough money for fort";
+				CALL clrbot
+				COLOR 11: PRINT "Not enough money for fort";
 				CALL Menu0
 			END IF
 			CALL FortifyCity(target)
@@ -441,7 +444,8 @@ SUB CommandsMenu
 				alone: ' Line Label
 			NEXT i
 			IF gMenuRows = 0 THEN 
-				COLOR 11: CALL clrbot: PRINT "All eligible "; gNationName$(gCurrentSide); " armies have supplies";
+				CALL clrbot
+				COLOR 11: PRINT "All eligible "; gNationName$(gCurrentSide); " armies have supplies";
 				CALL Menu0
 			END IF
 			CALL ShowMenu(6)
@@ -492,7 +496,8 @@ SUB CommandsMenu
 			END IF
 			CALL commander(2, empty)
 			IF empty = 0 THEN CALL Menu0
-			gArmySupply(empty) = .3 * gArmySupply(index): gArmySupply(index) = gArmySupply(index) - gArmySupply(empty)
+			gArmySupply(empty) = .3 * gArmySupply(index)
+			gArmySupply(index) = gArmySupply(index) - gArmySupply(empty)
 			IF gArmySupply(index) < 0 THEN gArmySupply(index) = 0
 			gArmySize(empty) = .3 * gArmySize(index)
 			gArmySize(index) = gArmySize(index) - gArmySize(empty)
@@ -503,7 +508,8 @@ SUB CommandsMenu
 			gArmyName$(empty) = gLeaderName$(empty)
 			gLeaderName$(empty) = ""
 			gArmyExp(empty) = gArmyExp(index)
-			COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; gArmyName$(empty);
+			CALL clrbot
+			COLOR 11: PRINT "Unit #"; empty; " with "; : CALL CorrectArmySize(empty): PRINT " men detached under "; gArmyName$(empty);
 			CALL TICK(gTurbo!)
 			IF gSoundEffects > 0 THEN SOUND 2222, 1
 			CALL stax(gCurrentSide)
@@ -513,11 +519,13 @@ SUB CommandsMenu
 			COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
 			CALL MoveFrom(index, target)
 			IF target < 1 OR index < 1 THEN 
-				COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; gMonthes$(gCurrentMonth);
+				CALL clrbot
+				COLOR 11: PRINT "No armies remain eligible for drills in "; gMonthes$(gCurrentMonth);
 				CALL Menu0
 			END IF
 			IF gArmyExp(index) > 5 OR gArmyExp(index) >= gArmyCommander(index) THEN 
-				COLOR 12: CALL clrbot: PRINT gArmyName$(index); ": Army has reached maximum improvement through drilling";
+				CALL clrbot
+				COLOR 12: PRINT gArmyName$(index); ": Army has reached maximum improvement through drilling";
 				CALL CommandsMenu
 			END IF
 			gArmyExp(index) = gArmyExp(index) + 1
