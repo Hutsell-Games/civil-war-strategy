@@ -4558,7 +4558,7 @@ SUB DrawArmySurrender (who%)
 END SUB
 
 SUB DrawArmyUnit (which%)
-	who = 1: IF which > 20 THEN who = 2
+	IF which > 20 THEN who = 2 ELSE who = 1
 	x = gCityX(gArmyLocation(which)) - 12
 	y = gCityY(gArmyLocation(which)) - 11
 	CALL armyxy(x, y, who)
@@ -4644,27 +4644,28 @@ END SUB
 
 SUB DrawCities
 	FOR i = 1 TO 40
-	c = 9: IF gCityOwner(i) = 2 THEN c = 7
-	IF gCityOwner(i) = 0 THEN c = 12
-	x = gCityX(i): y = gCityY(i)
-	IF i = gCapitalCity(1) OR i = gCapitalCity(2) THEN
-		PUT (x - 6, y - 6), gUnionCapital, PSET
-		LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
-		LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
-		PSET (x + 8, y - 4)
-		IF gFortLevel(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
-		IF gFortLevel(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
-	ELSE
-		IF gFortLevel(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
-		IF gFortLevel(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-		CIRCLE (gCityX(i), gCityY(i)), 4, 0
-		CIRCLE (gCityX(i), gCityY(i)), 3, c
-		PAINT (gCityX(i), gCityY(i)), c, c
-	END IF
-	IF gGraphicLevel = 0 GOTO nocon
-		FOR j = 1 TO 6: IF gMatrix(i, j) > 0 THEN CALL MoveUnitIcon(i, gMatrix(i, j), 11)
-		NEXT j
-	nocon:
+		IF gCityOwner(i) = 2 THEN c = 7 ELSE c = 9
+		IF gCityOwner(i) = 0 THEN c = 12
+		x = gCityX(i): y = gCityY(i)
+		IF i = gCapitalCity(1) OR i = gCapitalCity(2) THEN
+			PUT (x - 6, y - 6), gUnionCapital, PSET
+			LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
+			LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
+			PSET (x + 8, y - 4)
+			IF gFortLevel(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
+			IF gFortLevel(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
+		ELSE
+			IF gFortLevel(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
+			IF gFortLevel(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+			CIRCLE (gCityX(i), gCityY(i)), 4, 0
+			CIRCLE (gCityX(i), gCityY(i)), 3, c
+			PAINT (gCityX(i), gCityY(i)), c, c
+		END IF
+		IF gGraphicLevel = 0 GOTO nocon
+			FOR j = 1 TO 6
+				IF gMatrix(i, j) > 0 THEN CALL MoveUnitIcon(i, gMatrix(i, j), 11)
+			NEXT j
+		nocon: ' line label
 	NEXT i
 END SUB
 
@@ -4966,23 +4967,25 @@ SUB DrawMap
 	LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
 	y = 312
 	someString$ = "COMMERCE"
-	FOR j = 1 TO LEN(someString$): x = ASC(MID$(UCASE$(someString$), j, 1)) - 64
-	PSET (440 + 10 * j, y), 0: DRAW gFont$(x)
+	FOR j = 1 TO LEN(someString$)
+		x = ASC(MID$(UCASE$(someString$), j, 1)) - 64
+		PSET (440 + 10 * j, y), 0: DRAW gFont$(x)
 	NEXT j
 	ELSE
 	LINE (447, 291)-(525, 335), 1, BF
 	END IF
 
 	FOR i = 1 TO 40
-	IF gArmyLocation(i) > 0 THEN CALL DrawArmyUnit(i)
+		IF gArmyLocation(i) > 0 THEN CALL DrawArmyUnit(i)
 	NEXT i
 
 	FOR k = 1 TO 2
-	CALL stax(k)
+		CALL stax(k)
 	NEXT k
 
 	IF gHumanPlayers = 2 GOTO nosee
-	FOR i = 1 TO 40: IF gArmyLocation(i) > 0 AND gArmyMove(i) > 0 THEN CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 1)
+	FOR i = 1 TO 40
+		IF gArmyLocation(i) > 0 AND gArmyMove(i) > 0 THEN CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 1)
 	NEXT i
 	nosee:
 	CALL ships
