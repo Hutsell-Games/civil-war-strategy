@@ -4233,23 +4233,45 @@ SUB traincapacity (who%, limit%)
 END SUB
 
 SUB victor
-		x = 0: FOR j = 1 TO 20: IF gArmyLocation(j) > 0 THEN x = x + gArmySize(j)
+		x = 0
+		FOR j = 1 TO 20
+			IF gArmyLocation(j) > 0 THEN x = x + gArmySize(j)
 		NEXT j
-		y = 0: FOR j = 21 TO 40: IF gArmyLocation(j) > 0 THEN y = y + gArmySize(j)
+		y = 0
+		FOR j = 21 TO 40
+			IF gArmyLocation(j) > 0 THEN y = y + gArmySize(j)
 		NEXT j
 
-		CALL ClearBottom: COLOR 14
+		CALL ClearBottom
+		COLOR 14
 		IF gVictoryFlags(2) > 0 AND gCurrentYear >= gVictoryFlags(2) AND gCurrentMonth < gVictoryFlags(1) THEN
 			someString$ = "Time almost expired (" + gMonthes$(gVictoryFlags(1)) + "," + STR$(gVictoryFlags(2)) + ")"
 			CALL image2(someString$, 4)
 		END IF
 		FOR i = 1 TO 2
-		IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: gVictoryPoints(i) = gVictoryPoints(i) + 300: GOTO finis
+			IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN 
+				j = 7
+				gVictoryPoints(i) = gVictoryPoints(i) + 300
+				GOTO finis
+			END IF
 
-		IF gCurrentYear >= gVictoryFlags(2) AND gCurrentMonth >= gVictoryFlags(1) AND gVictoryFlags(2) > 0 THEN j = 2: GOTO finis
-		IF gCityController(i) >= gVictoryFlags(3) AND gVictoryFlags(3) > 0 THEN j = 3: GOTO finis
-		IF gCurrentIncome(i) / (gCurrentIncome(1) + gCurrentIncome(2)) >= .01 * gVictoryFlags(4) AND gVictoryFlags(4) > 0 THEN j = 4: GOTO finis
-		IF gVictoryFlags(5) > 0 AND gCapitalCity(3 - i) = 0 AND gCapitalCity(i) > 0 THEN j = 5: GOTO finis
+		' Refactor as Select Case Maybe?
+		IF gCurrentYear >= gVictoryFlags(2) AND gCurrentMonth >= gVictoryFlags(1) AND gVictoryFlags(2) > 0 THEN 
+			j = 2
+			GOTO finis
+		END IF
+		IF gCityController(i) >= gVictoryFlags(3) AND gVictoryFlags(3) > 0 THEN 
+			j = 3
+			GOTO finis
+		END IF
+		IF gCurrentIncome(i) / (gCurrentIncome(1) + gCurrentIncome(2)) >= .01 * gVictoryFlags(4) AND gVictoryFlags(4) > 0 THEN 
+			j = 4
+			GOTO finis
+		END IF
+		IF gVictoryFlags(5) > 0 AND gCapitalCity(3 - i) = 0 AND gCapitalCity(i) > 0 THEN 
+			j = 5
+			GOTO finis
+		END IF
 
 		IF gVictoryFlags(6) > 0 THEN
 			IF i = 1 THEN
@@ -4297,7 +4319,7 @@ SUB victor
 			someString$ = "ENEMY ANNIHILATED"
 	END SELECT
 		CLS
-		c = 1: IF i = 2 THEN c = 7
+		IF i = 2 THEN c = 7 ELSE c = 1
 		LINE (0, 0)-(639, 479), 4, BF
 		LINE (0, 40)-(550, 460), 0, BF
 		CALL DrawMap
@@ -4323,7 +4345,7 @@ SUB victor
 		CALL ShowMenu(0)
 
 		IF gChosenOption <> 1 AND j < 7 THEN
-	play4ever:
+		play4ever: ' line label
 				gVictoryFlags(j) = gVictoryFlags(j) + 1
 				IF j = 5 THEN gVictoryFlags(j) = 0
 				CLS
@@ -4344,43 +4366,61 @@ SUB victor
 		END IF
 
 		gThrill = i
-		CALL DrawMap: CALL ShowReports(100 + gCurrentSide)
-		IF j = 2 THEN FOR k = 1 TO 2: gVictoryPoints(k) = .7 * gVictoryPoints(k): NEXT k: CALL DrawRebelWin: GOTO death
+		CALL DrawMap
+		CALL ShowReports(100 + gCurrentSide)
+		IF j = 2 THEN
+			FOR k = 1 TO 2
+				gVictoryPoints(k) = .7 * gVictoryPoints(k)
+			NEXT k
+			CALL DrawRebelWin
+			GOTO death
+		END IF
 
-		IF i = 1 THEN CALL DrawUnionWin: COLOR 15: LOCATE 2, 27: anotherString$ = "UNION VICTORY  VP's=" + STR$(gVictoryPoints(1)): PRINT anotherString$: GOTO death
-		IF i = 2 THEN CALL DrawRebelWin: COLOR 15: LOCATE 2, 27: anotherString$ = "REBEL VICTORY  VP's=" + STR$(gVictoryPoints(2)): PRINT anotherString$
-	death:
+		IF i = 1 THEN 
+			CALL DrawUnionWin
+			COLOR 15: LOCATE 2, 27: anotherString$ = "UNION VICTORY  VP's=" + STR$(gVictoryPoints(1)): PRINT anotherString$
+			GOTO death
+		END IF
+		IF i = 2 THEN 
+			CALL DrawRebelWin
+			COLOR 15: LOCATE 2, 27: anotherString$ = "REBEL VICTORY  VP's=" + STR$(gVictoryPoints(2)): PRINT anotherString$
+		END IF
+		death: ' line label
 		COLOR 14: LOCATE 4, 40 - .5 * LEN(someString$)
 		IF gHistory > 0 THEN
 			CALL scribe(anotherString$, 0)
 			CALL scribe(someString$, 0)
 		END IF
-		PRINT someString$: CALL HallOfFame
+		PRINT someString$
+		CALL HallOfFame
 		EXIT SUB
-	stale:
+		stale: ' line label
 		NEXT i
 END SUB
 
 SUB void (a%, y%)
 	y = 0
 	FOR j = 1 TO 6
-	x = gMatrix(a, j): IF x = 0 THEN EXIT SUB
-	IF gCityOwner(x) = gCurrentSide AND gIsOccupied(x) > 0 THEN y = y + gArmySize(gIsOccupied(x))
-		FOR k = 1 TO 6: m = gMatrix(x, k): IF m = 0 OR m = a GOTO tally4
-		IF gCityOwner(m) = gCurrentSide AND gIsOccupied(m) > 0 THEN y = y + .1 * gArmySize(gIsOccupied(m))
-	tally4:
+		x = gMatrix(a, j)
+		IF x = 0 THEN EXIT SUB
+		IF gCityOwner(x) = gCurrentSide AND gIsOccupied(x) > 0 THEN y = y + gArmySize(gIsOccupied(x))
+		FOR k = 1 TO 6
+			m = gMatrix(x, k)
+			IF m = 0 OR m = a GOTO tally4
+			IF gCityOwner(m) = gCurrentSide AND gIsOccupied(m) > 0 THEN y = y + .1 * gArmySize(gIsOccupied(m))
+			tally4: ' line label
 		NEXT k
 	NEXT j
 END SUB
 
 SUB AnimateCityFlash (which%)
 	FOR c = 1 TO 15 STEP 2
-	CIRCLE (gCityX(which), gCityY(which)), 4, 0
-	CIRCLE (gCityX(which), gCityY(which)), 3, c
-	PAINT (gCityX(which), gCityY(which)), c, c
-	CALL TICK(.1)
+		CIRCLE (gCityX(which), gCityY(which)), 4, 0
+		CIRCLE (gCityX(which), gCityY(which)), 3, c
+		PAINT (gCityX(which), gCityY(which)), c, c
+		CALL TICK(.1)
 	NEXT c
-	c = 9: IF gCityOwner(which) = 2 THEN c = 7
+	IF gCityOwner(which) = 2 THEN c = 7 ELSE c = 9
 	IF gCityOwner(which) = 0 THEN c = 12
 	CIRCLE (gCityX(which), gCityY(which)), 4, 0
 	CIRCLE (gCityX(which), gCityY(which)), 3, c
@@ -4388,33 +4428,37 @@ SUB AnimateCityFlash (which%)
 END SUB
 
 SUB AnimateMovement (index%, flag%)
-	from = gArmyLocation(index): to2 = gArmyMove(index): gArmyLocation(index) = 0
+	from = gArmyLocation(index)
+	to2 = gArmyMove(index)
+	gArmyLocation(index) = 0
 	x = gCityX(from) - 12
 	y = gCityY(from) - 11
 	x1 = .5 * (gCityX(to2) + gCityX(from))
 	y1 = .5 * (gCityY(to2) + gCityY(from))
 
-	CALL occupy(from): IF gIsOccupied(from) > 0 THEN CALL DrawArmyUnit(gIsOccupied(from))
+	CALL occupy(from)
+	IF gIsOccupied(from) > 0 THEN CALL DrawArmyUnit(gIsOccupied(from))
 		
 	IF flag > 0 GOTO already
 		GET (x - 9, y - 7)-(x + 9, y + 6), anima
 		IF gIsOccupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-	already:
+	already: ' line label
 
 		FOR i = 2 TO 8
-		x1 = .1 * (i * gCityX(to2) + (10 - i) * gCityX(from))
-		y1 = .1 * (i * gCityY(to2) + (10 - i) * gCityY(from))
-		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), gGraphicImage
-		PUT (x1 - 10, y1 - 10), anima, PSET
-		IF gTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
-		IF gSoundEffects > 0 THEN SOUND 200, .1: SOUND 50, .1
-		PUT (x1 - 10, y1 - 10), gGraphicImage, PSET
+			x1 = .1 * (i * gCityX(to2) + (10 - i) * gCityX(from))
+			y1 = .1 * (i * gCityY(to2) + (10 - i) * gCityY(from))
+			GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), gGraphicImage
+			PUT (x1 - 10, y1 - 10), anima, PSET
+			IF gTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
+			IF gSoundEffects > 0 THEN SOUND 200, .1: SOUND 50, .1
+			PUT (x1 - 10, y1 - 10), gGraphicImage, PSET
 		NEXT i
 		gArmyLocation(index) = from
 END SUB
 
 SUB DrawCityCaptured (active%, c%, s%, flag%)
-	gCityOwner(c) = s: CALL ClearBottom
+	gCityOwner(c) = s
+	CALL ClearBottom
 	someString$ = gArmyName$(active) + " has captured " + gCityName$(c)
 	COLOR 11: PRINT gArmyName$(active) + " has captured " + gCityName$(c);
 	IF active < 21 AND gSoundEffects > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
@@ -4430,7 +4474,12 @@ SUB DrawCityCaptured (active%, c%, s%, flag%)
 		gCapitalCity(3 - s) = 0
 		CALL AnimateCityFlash(c)
 	END IF
-	IF gFortLevel(c) > 0 AND flag > 0 THEN gFortLevel(c) = gFortLevel(c) - 1: x = gCityX(c): y = gCityY(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL DrawCities
+	IF gFortLevel(c) > 0 AND flag > 0 THEN 
+		gFortLevel(c) = gFortLevel(c) - 1
+		x = gCityX(c): y = gCityY(c)
+		LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+		CALL DrawCities
+	END IF
 END SUB
 
 SUB DrawArmySurrender (who%)
