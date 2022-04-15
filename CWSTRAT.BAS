@@ -3365,7 +3365,7 @@ SUB SpecialEvents
 			gFleet$(2) = gFleet$(2) + STRING$(x, "W")
 			gNavyLocation(2) = empty
 			CALL ships
-			GOTO southeventmusic
+			CALL SouthSpecialEventMusic: EXIT SUB
 			mercenariesjoin: ' line label
 			IF RND > .1 OR gCityController(2) < 30 GOTO europeloan
 			IF RND > .5 THEN someString$ = "British" ELSE someString$ = "French"
@@ -3373,7 +3373,7 @@ SUB SpecialEvents
 			gArmySize(index) = gArmySize(index) + 100 * plus
 			gArmyExp(index) = 10
 			gArmySupply(index) = 10
-			GOTO southeventmusic
+			CALL SouthSpecialEventMusic: EXIT SUB
 			europeloan: ' line label
 			IF RND > .3 OR gCityController(2) < 12 GOTO cottonsales
 			CALL scribe("The South has obtained a loan from Europe", 2)
@@ -3383,7 +3383,7 @@ SUB SpecialEvents
 			CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
 			skipcottonsales: ' line label
 			gCurrentCash(2) = gCurrentCash(2) + 100 * plus
-			GOTO southeventmusic
+			CALL SouthSpecialEventMusic: EXIT SUB
 			nativeuprising: ' line label
 			pct! = .9
 			IF RND > .5 THEN someString$ = "Union 90-day enlistees return home" ELSE someString$ = "Union troops diverted to fight Western Indian uprisings"
@@ -3392,7 +3392,7 @@ SUB SpecialEvents
 			FOR k = 1 TO 20
 				gArmySize(k) = pct! * gArmySize(k)
 			NEXT k
-			GOTO southeventmusic
+			CALL SouthSpecialEventMusic: EXIT SUB
 		riotsincity: ' line label
 		IF gRealism = 0 THEN RETURN
 		IF gCityController(who) = 1 THEN EXIT SUB
@@ -3420,17 +3420,17 @@ SUB SpecialEvents
 		IF gNavySize(1) > 10 THEN gNavySize(1) = 10
 		x = gNavySize(1) - LEN(gFleet$(1))
 		gFleet$(1) = gFleet$(1) + STRING$(x, "W")
-		GOTO northeventmusic
+		CALL UnionSpecialEventMusic:EXIT SUB
 		unionvolunteers:
 		IF RND < .7 GOTO emancipated
 		CALL scribe("Volunteer troops swell the Union ranks", 2)
 		x = 0
 		FOR i = 1 TO 20
 			x = x + 1
-			IF x > 5 GOTO northeventmusic
+			IF x > 5 THEN CALL UnionSpecialEventMusic: EXIT SUB
 			IF gArmySize(i) > 0 AND RND > .5 THEN gArmySize(i) = gArmySize(i) * 1.1 + plus
 		NEXT i
-		GOTO northeventmusic
+		CALL UnionSpecialEventMusic: EXIT SUB
 		emancipated:
 		IF gEmancipate = 0 AND gCurrentYear > 1862 THEN
 			gEmancipate = 1
@@ -3438,24 +3438,24 @@ SUB SpecialEvents
 			gVictoryPoints(1) = gVictoryPoints(1) + 100
 			gVictoryPoints(2) = gVictoryPoints(2) - 100
 			CALL DrawMap
-			GOTO northeventmusic
+			CALL UnionSpecialEventMusic: EXIT SUB
 		END IF
 		IF gCurrentYear = 1864 AND gCurrentMonth = 11 THEN
 			CALL scribe("Lincoln has been reelected", 2)
 			gVictoryPoints(2) = .5 * gVictoryPoints(2)
-			GOTO northeventmusic
+			CALL UnionSpecialEventMusic: EXIT SUB
 		END IF
 		IF RND > .5 THEN
 			CALL scribe("Wealthy Unionists give generously to the Federal Cause", 2)
 			gCurrentCash(1) = gCurrentCash(1) + 100 * plus
-			GOTO northeventmusic
+			CALL UnionSpecialEventMusic: EXIT SUB
 		END IF
 		IF RND > .5 AND gCurrentYear > 1861 THEN
 			CALL scribe("Rebel deserters leave the battlefield to go home", 2)
 			FOR i = 21 TO 40
 				gArmySize(i) = .92 * gArmySize(i)
 			NEXT i
-			GOTO northeventmusic
+			CALL UnionSpecialEventMusic: EXIT SUB
 		END IF
 		IF RND > .5 AND gCurrentYear > 1861 THEN
 			CALL scribe("Union soldiers now have repeating rifles", 2)
@@ -3464,15 +3464,19 @@ SUB SpecialEvents
 			NEXT i
 		END IF
 			CALL scribe("Secretary of War Stanton predicts the end of the Rebellion", 2)
-			gVictoryPoints(1) = gVictoryPoints(1) + 10: GOTO northeventmusic
+			gVictoryPoints(1) = gVictoryPoints(1) + 10
+			CALL UnionSpecialEventMusic: EXIT SUB
 		CASE ELSE
 	END SELECT
+END SUB
 
-	northeventmusic:
-	IF gSoundEffects = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-	DO WHILE INKEY$ = "": LOOP: EXIT SUB
-	southeventmusic:
+SUB SouthSpecialEventMusic
 	IF gSoundEffects = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+	DO WHILE INKEY$ = "": LOOP
+END SUB
+
+SUB UnionSpecialEventMusic
+	IF gSoundEffects = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	DO WHILE INKEY$ = "": LOOP
 END SUB
 
