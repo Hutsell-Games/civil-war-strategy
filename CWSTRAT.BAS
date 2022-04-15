@@ -4094,33 +4094,40 @@ END SUB
 
 SUB ships
 	FOR s = 1 TO 2
-	IF gNavySize(s) = 0 OR gNavyLocation(s) = 0 THEN gNavyLocation(s) = 0: GOTO sink
-	IF gNavyLocation(s) = 30 THEN x = 515: y = 268: GOTO float
-	IF gNavyLocation(s) = 28 THEN x = 517: y = 172: GOTO float
-	IF gNavyLocation(s) = 17 THEN x = 380: y = 425: GOTO float
-	IF gNavyLocation(s) = 99 THEN x = 495: y = 310: GOTO float
-	x = gCityX(gNavyLocation(s)) + 25: y = gCityY(gNavyLocation(s)) + 25
-	IF gNavyLocation(s) = 24 THEN y = y + 5: x = x - 5
-	float:
-		PSET (x, y), 1
-		a = 1: IF LEFT$(gFleet$(s), 1) = "I" THEN a = 2
-		CALL DrawShipIcon(s, a)
-	sink:
+		IF gNavySize(s) = 0 OR gNavyLocation(s) = 0 THEN 
+			gNavyLocation(s) = 0
+			CONTINUE ' Replaces GOTO sink
+		END IF
+		IF gNavyLocation(s) = 30 THEN x = 515: y = 268: GOTO float
+		IF gNavyLocation(s) = 28 THEN x = 517: y = 172: GOTO float
+		IF gNavyLocation(s) = 17 THEN x = 380: y = 425: GOTO float
+		IF gNavyLocation(s) = 99 THEN x = 495: y = 310: GOTO float
+		x = gCityX(gNavyLocation(s)) + 25: y = gCityY(gNavyLocation(s)) + 25
+		IF gNavyLocation(s) = 24 THEN y = y + 5: x = x - 5
+		float:
+			PSET (x, y), 1
+			a = 1: IF LEFT$(gFleet$(s), 1) = "I" THEN a = 2
+			CALL DrawShipIcon(s, a)
 	NEXT s
 END SUB
 
 SUB StartToFinish (start%, fin%, who%)
-	start = 1: fin = 20: IF who = 2 THEN start = 21: fin = 40
+	start = 1
+	fin = 20
+	IF who = 2 THEN 
+		start = 21
+		fin = 40
+	END IF
 END SUB
 
 SUB stax (who%)
 	CALL StartToFinish(start, fin, who)
 	FOR i = start TO fin
-	IF gArmySize(i) > 0 AND gIsOccupied(gArmyLocation(i)) <> i THEN
-		target = gArmyLocation(i)
-		x = gCityX(target) - 12: y = gCityY(target) - 12
-		CIRCLE (x, y), 3, 14
-	END IF
+		IF gArmySize(i) > 0 AND gIsOccupied(gArmyLocation(i)) <> i THEN
+			target = gArmyLocation(i)
+			x = gCityX(target) - 12: y = gCityY(target) - 12
+			CIRCLE (x, y), 3, 14
+		END IF
 	NEXT i
 END SUB
 
@@ -4135,14 +4142,15 @@ SUB DrawTopBar
 		LOCATE 1, 10: PRINT "Input your decisions now for "; gNationName$(gCurrentSide); " side "; : COLOR 14: PRINT gMonthes$(gCurrentMonth); ","; gCurrentYear; "  "
 
 		CALL DrawFlags((gCurrentSide), 0, 0)
-		COLOR 4: IF gBorderWidth > 0 THEN COLOR 7
+		IF gBorderWidth > 0 THEN COLOR 7 ELSE COLOR 4
 		LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(gDifficultyLevel)))
 		LOCATE 7, 68: PRINT "Funds:"; gCurrentCash(gCurrentSide);
 
-		FOR i = 1 TO 2: IF gVictoryPoints(i) < 0 THEN gVictoryPoints(i) = 0
+		FOR i = 1 TO 2
+			IF gVictoryPoints(i) < 0 THEN gVictoryPoints(i) = 0
 		NEXT i
 		x = gVictoryPoints(1) + gVictoryPoints(2): y = 0
-		c = 9: IF gCurrentSide = 2 THEN c = 7
+		IF gCurrentSide = 2 THEN c = 7 ELSE c = 9
 		LINE (580, 15)-(580, 35), 15
 		LINE (530, 20)-(630, 30), 8 - c, BF
 		IF x > 0 THEN y = 100 * (gVictoryPoints(gCurrentSide) / x)
@@ -4152,7 +4160,8 @@ SUB DrawTopBar
 
 		LOCATE 5, 68: PRINT "("; y; "%)"
 
-	someString$ = "  Snd": IF gSoundEffects < 2 THEN someString$ = "   Snd": IF gSoundEffects = 0 THEN someString$ = "      "
+	someString$ = "  Snd"
+	IF gSoundEffects < 2 THEN someString$ = "   Snd": IF gSoundEffects = 0 THEN someString$ = "      "
 	IF gGraphicLevel > 0 THEN someString$ = someString$ + " G" + LTRIM$(STR$(gGraphicLevel))
 	someString$ = someString$ + STR$(gHumanPlayers)
 	COLOR c
@@ -4162,7 +4171,6 @@ SUB DrawTopBar
 END SUB
 
 SUB TouchupMap
-
 	LINE (500, 170)-(490, 165), 10 'Norfolk Coast
 	LINE -(495, 160), 10
 	LINE -(490, 155), 10
@@ -4224,8 +4232,11 @@ SUB TouchupMap
 END SUB
 
 SUB traincapacity (who%, limit%)
-	IF gRealism = 0 THEN limit = gTrainCapacity(who): EXIT SUB
-	x = 11: IF gCurrentSide = 2 THEN x = 23
+	IF gRealism = 0 THEN 
+		limit = gTrainCapacity(who)
+		EXIT SUB
+	END IF
+	IF gCurrentSide = 2 THEN x = 23 ELSE x = 11
 	limit = gTrainCapacity(who) + 5 * (gCityController(who) - x)
 	x = 2 * gTrainCapacity(who)
 	IF limit > x THEN limit = x
@@ -4613,7 +4624,8 @@ SUB DrawArmyUnit (which%)
 	y = gCityY(gArmyLocation(which)) - 11
 	CALL armyxy(x, y, who)
 	IF gArmySupply(which) < 1 THEN
-		x = x - 3: y = y + 4
+		x = x - 3
+		y = y + 4
 		PSET (x, y), 13: DRAW "C11S8"
 		DRAW gFont$(19)
 		DRAW "S4"
