@@ -2312,140 +2312,159 @@ END SUB
 
 SUB ComputerPlayer
 	CALL SpecialEvents
-	slush = 0: who = 3 - gCurrentSide
-	c = 9: IF gCurrentSide = 1 THEN c = 15
+	slush = 0
+	who = 3 - gCurrentSide
+	IF gCurrentSide = 1 THEN c = 15 ELSE c = 9
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR c: LOCATE 1, 10: PRINT gNationName$(who); " Side is making decisions";
 	CALL StartToFinish(start, fin, who)
-	'==========================================================================
+
 	'                       Check Supply
-	'==========================================================================
-	FOR i = start TO fin: IF gArmyLocation(i) > 0 AND gArmySupply(i) < 1 THEN CALL ResupplyArmy(i)
+	FOR i = start TO fin
+		IF gArmyLocation(i) > 0 AND gArmySupply(i) < 1 THEN CALL ResupplyArmy(i)
 	NEXT i
-	'==========================================================================
+
 	'                       Fortify Capital or Other City
-	'==========================================================================
 	cost = 200
 	IF cost > gCurrentCash(who) GOTO signup
 
-	target = 0: IF gIsOccupied(gCapitalCity(who)) = 0 OR gFortLevel(gCapitalCity(who)) > 1 GOTO city2
+	target = 0
+	IF gIsOccupied(gCapitalCity(who)) = 0 OR gFortLevel(gCapitalCity(who)) > 1 GOTO city2
 	target = gCapitalCity(who)
 	IF gCityOwner(target) = who GOTO capital ELSE GOTO city2
 	IF target > 0 GOTO capital
 
 	city2:
 	IF 1 + RND < gAIBoldness + gAggress! GOTO signup
-	target = 0: FOR i = start TO fin
-	x = gArmyLocation(i): IF x = 0 OR gArmyMove(gIsOccupied(x)) < 0 OR gArmyMove(i) < 0 GOTO endlook
-	IF gFortLevel(x) > 1 GOTO endlook
-		CALL void(x, defend): IF defend > gArmySize(i) THEN target = gArmyLocation(i): GOTO capital
-	endlook:
+	target = 0
+	FOR i = start TO fin
+		x = gArmyLocation(i)
+		IF x = 0 OR gArmyMove(gIsOccupied(x)) < 0 OR gArmyMove(i) < 0 GOTO endlook
+		IF gFortLevel(x) > 1 GOTO endlook
+		CALL void(x, defend)
+		IF defend > gArmySize(i) THEN target = gArmyLocation(i): GOTO capital
+		endlook:
 	NEXT i
 
 	capital:
-		IF target = 0 GOTO signup
-		IF gFortLevel(target) > 1 GOTO signup
-		gFortLevel(target) = gFortLevel(target) + 1
-		x = gIsOccupied(target): gArmyMove(x) = -1
-		gCurrentCash(who) = gCurrentCash(who) - cost
-		CALL ClearBottom: PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
-		CALL MoveUnitIcon(target, 0, 6)
-		CALL DrawCities
-		IF who = 1 AND gNavySize(1) < 1 AND RND > .5 AND gCurrentCash < 222 GOTO signup
-		IF 3 * RND > 1 + gAggress! AND gCurrentCash(who) >= cost GOTO city2
+	IF target = 0 GOTO signup
+	IF gFortLevel(target) > 1 GOTO signup
+	gFortLevel(target) = gFortLevel(target) + 1
+	x = gIsOccupied(target): gArmyMove(x) = -1
+	gCurrentCash(who) = gCurrentCash(who) - cost
+	CALL ClearBottom: PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
+	CALL MoveUnitIcon(target, 0, 6)
+	CALL DrawCities
+	IF who = 1 AND gNavySize(1) < 1 AND RND > .5 AND gCurrentCash < 222 GOTO signup
+	IF 3 * RND > 1 + gAggress! AND gCurrentCash(who) >= cost GOTO city2
 	'==========================================================================
 	'                       Recruit New Armies
 	'==========================================================================
 	signup:
-	IF who = 1 AND gNavySize(1) < 1 AND gCurrentCash(1) > 100 THEN CALL ManageNavy(1, 1): IF gCurrentCash(who) < 100 GOTO isok
+	IF who = 1 AND gNavySize(1) < 1 AND gCurrentCash(1) > 100 THEN 
+		CALL ManageNavy(1, 1)
+		IF gCurrentCash(who) < 100 GOTO isok
+	END IF
 	GOSUB enufarmies
 	IF x > 2 + 3 * gCurrentSide + 3 * RND GOTO isok
-	IF gNavySize(who) < 5 AND gCurrentCash(who) > 100 AND gNavyLocation(who) <> 99 THEN IF gCityOwner(gNavyLocation(who)) = who THEN slush = slush + 100: gCurrentCash(who) = gCurrentCash(who) - 100: IF gCurrentCash(who) < 100 GOTO isok
+	IF gNavySize(who) < 5 AND gCurrentCash(who) > 100 AND gNavyLocation(who) <> 99 THEN 
+		IF gCityOwner(gNavyLocation(who)) = who THEN 
+			slush = slush + 100
+			gCurrentCash(who) = gCurrentCash(who) - 100
+			IF gCurrentCash(who) < 100 GOTO isok
+		END IF
+	END IF
 	CALL RecruitArmy(who)
-	'==========================================================================
+
 	'                         Naval Commands
-	'==========================================================================
 	isok:
-		gCurrentCash(who) = gCurrentCash(who) + slush
-		IF gCurrentSide = 2 AND gNavyLocation(1) = 0 AND gNavySize(1) < 1 AND gCityOwner(30) = 1 AND gCurrentCash(1) > 100 THEN gNavyLocation(1) = 30: CALL ManageNavy(1, 1): GOTO movenavy
-		IF gNavyLocation(who) = 99 THEN
-			IF RND < .9 THEN CALL ManageNavy(who, 3)
-			GOTO movearmy
-		END IF
-		IF gCurrentCash(who) < 100 OR gNavySize(who) > 9 OR gCityOwner(gNavyLocation(who)) <> who GOTO movenavy
-		CALL ManageNavy(who, 1)
-	'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	gCurrentCash(who) = gCurrentCash(who) + slush
+	IF gCurrentSide = 2 AND gNavyLocation(1) = 0 AND gNavySize(1) < 1 AND gCityOwner(30) = 1 AND gCurrentCash(1) > 100 THEN
+		gNavyLocation(1) = 30: CALL ManageNavy(1, 1): GOTO movenavy
+	END IF
+	IF gNavyLocation(who) = 99 THEN
+		IF RND < .9 THEN CALL ManageNavy(who, 3)
+		GOTO movearmy
+	END IF
+	IF gCurrentCash(who) < 100 OR gNavySize(who) > 9 OR gCityOwner(gNavyLocation(who)) <> who GOTO movenavy
+	CALL ManageNavy(who, 1)
 	movenavy:
-		IF gNavySize(who) = 0 THEN gNavyLocation(who) = 0
-		IF gNavyLocation(who) = 0 GOTO movearmy
-	'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	IF gNavySize(who) = 0 THEN gNavyLocation(who) = 0
+	IF gNavyLocation(who) = 0 GOTO movearmy
+
 	'                     move ships & prohibit further action this turn
-	'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		IF gNavyLocation(who) <> 99 THEN
-			IF gCityOwner(gNavyLocation(who)) = who THEN CALL ManageNavy(who, 3): GOTO movearmy   'move ships & prohibit further action this turn
-			IF gCityOwner(gNavyLocation(who)) = 0 THEN CALL ManageNavy(who, 3): GOTO movearmy
+	IF gNavyLocation(who) <> 99 THEN
+		IF gCityOwner(gNavyLocation(who)) = who THEN CALL ManageNavy(who, 3): GOTO movearmy
+		IF gCityOwner(gNavyLocation(who)) = 0 THEN CALL ManageNavy(who, 3): GOTO movearmy
+	ELSE
+		IF RND < .5 THEN CALL ManageNavy(who, 3)
+		GOTO movearmy
+	END IF
+
+	IF gCityOwner(gNavyLocation(who)) <> who THEN
+		IF gIsOccupied(gNavyLocation(who)) = 0 OR RND > .3 THEN
+			CALL ManageNavy(who, 2) 'attack
 		ELSE
-			IF RND < .5 THEN CALL ManageNavy(who, 3)
-			GOTO movearmy
+			CALL ManageNavy(who, 3) 'move
 		END IF
+	END IF
 
-		IF gCityOwner(gNavyLocation(who)) <> who THEN
-			IF gIsOccupied(gNavyLocation(who)) = 0 OR RND > .3 THEN
-				CALL ManageNavy(who, 2) 'attack
-			ELSE
-				CALL ManageNavy(who, 3) 'move
-			END IF
-		END IF
-	'==========================================================================
-	'                       Give Move Orders to Each Army
-	'==========================================================================
-	movearmy:
-		CALL ships
-	'---------------------------------------------------------------------------
+	movearmy: ' Give Move Orders to Each Army
+	CALL ships
+
 	'                               Check to Combine
-	'---------------------------------------------------------------------------
-	a = who: CALL CombineArmies(a)
+	a = who
+	CALL CombineArmies(a)
 	CALL railroad(who)
-	'---------------------------------------------------------------------------
+
 	'                               Top Priority
-	'---------------------------------------------------------------------------
 	FOR i = start TO fin
-	target = gArmyLocation(i)
-	IF gArmyLocation(i) < 1 OR gArmyMove(i) < 0 GOTO deadman
-	x = gArmySize(i): IF gArmySupply(i) < 1 AND RND > .1 GOTO deadman
+		target = gArmyLocation(i)
+		IF gArmyLocation(i) < 1 OR gArmyMove(i) < 0 GOTO deadman
+		x = gArmySize(i)
+		IF gArmySupply(i) < 1 AND RND > .1 GOTO deadman
 
-	gChosenOption = 0
+		gChosenOption = 0
 
-	CALL void(target, defend)
+		CALL void(target, defend)
 
-	IF defend > 0 AND target = gCapitalCity(who) AND gIsOccupied(target) = i GOTO deadman   'hold capital
-	IF target <> gCapitalCity(who) GOTO nocap
-	IF gVictoryFlags(5) = 0 GOTO nocap
-		FOR j = 1 TO 6
-		k = gMatrix(target, j): IF j = 0 GOTO nocap
-		CALL void(k, flag): IF flag > 0 GOTO deadman
-		NEXT j
-	nocap:
-	CALL evaluate(i, best): IF best = 0 GOTO deadman
-	move9:
+		IF defend > 0 AND target = gCapitalCity(who) AND gIsOccupied(target) = i GOTO deadman   'hold capital
+		IF target <> gCapitalCity(who) GOTO nocap
+		IF gVictoryFlags(5) = 0 GOTO nocap
+			FOR j = 1 TO 6
+				k = gMatrix(target, j)
+				IF j = 0 GOTO nocap
+				CALL void(k, flag)
+				IF flag > 0 GOTO deadman
+			NEXT j
+		nocap:
+		CALL evaluate(i, best)
+		IF best = 0 GOTO deadman
+		move9:
 		IF best = 0 THEN gChosenOption = 1 + INT((j - 1) * RND)
 		IF gChosenOption = 0 THEN gChosenOption = best
 		gArmyMove(i) = gMatrix(target, gChosenOption)
 
-		IF gCityOwner(gArmyMove(i)) = who THEN y = gIsOccupied(gArmyMove(i)): IF y > 0 THEN IF gArmyMove(y) = x THEN gArmyMove(i) = 0: GOTO deadman  ' eliminate crossing moves
+		IF gCityOwner(gArmyMove(i)) = who THEN 
+			y = gIsOccupied(gArmyMove(i))
+			IF y > 0 THEN 
+				IF gArmyMove(y) = x THEN gArmyMove(i) = 0: GOTO deadman  ' eliminate crossing moves
+			END IF
+		END IF
 		IF gCurrentMonth = 1 AND gJanuaryCampaign = 0 AND gCityOwner(gArmyMove(i)) <> who THEN gArmyMove(i) = 0: GOTO deadman
 
 		IF gTurbo! > 1 THEN
-			COLOR c: CALL ClearBottom
+			COLOR c
+			CALL ClearBottom
 			PRINT gArmyName$(i); " plans to move from "; gCityName$(gArmyLocation(i)); " to "; gCityName$(gArmyMove(i));
 		END IF
 			CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 1)
 			CALL MoveUnitIcon(gArmyLocation(i), gArmyMove(i), 9)
-		CALL TICK(gTurbo! - 1)
-		PUT (gCityX(gArmyLocation(i)) - 20, gCityY(gArmyLocation(i)) - 19), gGraphicImage, PSET
-	deadman:
+			CALL TICK(gTurbo! - 1)
+			PUT (gCityX(gArmyLocation(i)) - 20, gCityY(gArmyLocation(i)) - 19), gGraphicImage, PSET
+		deadman:
 	NEXT i
-		FOR i = start TO fin
+	FOR i = start TO fin
 		IF gArmyMove(i) = 0 AND gArmyExp(i) < 6 AND gArmyExp(i) < gArmyCommander(i) THEN
 			gArmyExp(i) = gArmyExp(i) + 1
 
@@ -2456,21 +2475,26 @@ SUB ComputerPlayer
 			gArmyMove(i) = -1
 			CALL TICK(gTurbo! - 1)
 		END IF
-		NEXT i
+	NEXT i
 	EXIT SUB
-	'---------------------------------------------------------------------------
+
 	enufarmies:
 	CALL StartToFinish(start, fin, 3 - who)
 	FOR i = start TO fin
 		IF gArmyLocation(i) > 0 THEN y = y + .1 * gArmySize(i)
 	NEXT i
 	CALL StartToFinish(start, fin, who)
-	x = 0: z = 0: FOR i = start TO fin: IF gArmyLocation(i) > 0 THEN x = x + 1: z = z + .1 * gArmySize(i)
+	x = 0
+	z = 0
+	FOR i = start TO fin
+		IF gArmyLocation(i) > 0 THEN 
+			x = x + 1
+			z = z + .1 * gArmySize(i)
+		END IF
 	NEXT i
 	IF y > z THEN x = x - 2
 	IF y > 2 * z THEN x = 0
 	RETURN
-	'---------------------------------------------------------------------------
 END SUB
 
 SUB snapshot (x%, y%, flag%)
@@ -2484,17 +2508,18 @@ SUB CorrectArmySize (index%)
 END SUB
 
 SUB tinytrain (who%, flag%)
-		IF gArmyOnRailroad(who) = 0 THEN EXIT SUB
-		from = gArmyOnRailroad(who)
-		x = gCityX(from) - 12: y = gCityY(from) - 11
+	IF gArmyOnRailroad(who) = 0 THEN EXIT SUB
+	from = gArmyOnRailroad(who)
+	x = gCityX(from) - 12
+	y = gCityY(from) - 11
 	SELECT CASE flag
 		CASE IS > 0
-		LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-		PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
-		DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
-		x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
+			LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
+			PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
+			DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
+			x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
 		CASE ELSE
-		LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+			LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 	END SELECT
 END SUB
 
