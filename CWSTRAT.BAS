@@ -13,7 +13,7 @@ DIM SHARED gRR(2), gRRFrom(2), gRealism, gNavalRaider
 DIM SHARED gRecruitCity(5), gRecruitFlag, gSavedGameExists, gSoundEffects, gStarX(8), gStarY(8), gThrill, gTurbo!
 DIM SHARED gTLX%, gTLY%, gTrainCapacity(2), gTimesPlayed
 DIM SHARED gUSAdvantage, gVictoryFlags(6), gVictoryPoints(2), gWindowType%, gVPTotal
-DIM SHARED gReplaying
+DIM SHARED gReplaying, gAnima(300)
 
 gReplaying = 0
 
@@ -2521,13 +2521,13 @@ SUB RecruitArmy (who%)
 	from = gArmyLocation(i)
 	x = gCityX(from) - 12
 	y = gCityY(from) - 11
-	GET (x - 9, y - 7)-(x + 9, y + 6), anima
+	GET (x - 9, y - 7)-(x + 9, y + 6), gAnima
 	CALL MoveUnitIcon(gArmyLocation(i), 0, 2)
 	IF gSoundEffects > 0 THEN SOUND 2222, 1
 	CALL ClearBottom
 	COLOR 11: PRINT "Army "; i; gArmyName$(i); " in "; gCityName$(gArmyLocation(i)); " strength increased to "; : CALL CorrectArmySize(i)
 	IF someString$ <> "" THEN PRINT someString$;
-	PUT (x - 9, y - 7), anima, PSET
+	PUT (x - 9, y - 7), gAnima, PSET
 	CALL TICK(gTurbo! - .5)
 	GOTO levy
 	randsel:
@@ -4933,7 +4933,7 @@ SUB AnimateMovement (index%, flag%)
 	IF gIsOccupied(from) > 0 THEN CALL DrawArmyUnit(gIsOccupied(from))
 		
 	IF flag > 0 GOTO already
-		GET (x - 9, y - 7)-(x + 9, y + 6), anima
+		GET (x - 9, y - 7)-(x + 9, y + 6), gAnima
 		IF gIsOccupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 	already: ' line label
 
@@ -4941,7 +4941,7 @@ SUB AnimateMovement (index%, flag%)
 			x1 = .1 * (i * gCityX(to2) + (10 - i) * gCityX(from))
 			y1 = .1 * (i * gCityY(to2) + (10 - i) * gCityY(from))
 			GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), gGraphicImage
-			PUT (x1 - 10, y1 - 10), anima, PSET
+			PUT (x1 - 10, y1 - 10), gAnima, PSET
 			IF gTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
 			IF gSoundEffects > 0 THEN SOUND 200, .1: SOUND 50, .1
 			PUT (x1 - 10, y1 - 10), gGraphicImage, PSET
