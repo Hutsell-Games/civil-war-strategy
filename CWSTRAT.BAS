@@ -2029,67 +2029,85 @@ SUB ManageNavy (who%, chx%)
 END SUB
 
 SUB CreateNewArmy (who%, empty%, target%)
-	gArmySupply(empty) = 3 + 5 * RND: IF who = 1 THEN gArmySupply(empty) = gArmySupply(empty) + 2
-	gArmyExp(empty) = 1: IF who = 2 THEN gArmyExp(empty) = 2
+	gArmySupply(empty) = 3 + 5 * RND
+	IF who = 1 THEN gArmySupply(empty) = gArmySupply(empty) + 2
+	gArmyExp(empty) = 1
+	IF who = 2 THEN gArmyExp(empty) = 2
 	gArmyCommander(empty) = gLeaderRating(empty)
 	gArmyName$(empty) = gLeaderName$(empty): gLeaderName$(empty) = ""
-	COLOR 12: CALL ClearBottom: PRINT "Placing NEW army "; empty; gArmyName$(empty); " in "; gCityName$(target);
+	CALL ClearBottom
+	COLOR 12: PRINT "Placing NEW army "; empty; gArmyName$(empty); " in "; gCityName$(target);
 
-	x = 70: IF gRealism > 0 THEN x = 3 * gCityValue(target) + 33
-	CALL cutoff(who, target, a): IF a < 1 THEN x = x \ 3
-	gIsOccupied(target) = empty: gArmySize(empty) = x
+	x = 70
+	IF gRealism > 0 THEN x = 3 * gCityValue(target) + 33
+	CALL cutoff(who, target, a)
+	IF a < 1 THEN x = x \ 3
+	gIsOccupied(target) = empty
+	gArmySize(empty) = x
 	PRINT " Size = "; : CALL CorrectArmySize(empty)
-	gCurrentCash(who) = gCurrentCash(who) - 100: IF gSoundEffects > 0 THEN SOUND 2222, .5
-	gArmyLocation(empty) = target: CALL DrawArmyUnit(empty)
+	gCurrentCash(who) = gCurrentCash(who) - 100
+	IF gSoundEffects > 0 THEN SOUND 2222, .5
+	gArmyLocation(empty) = target
+	CALL DrawArmyUnit(empty)
 	CALL TICK(gTurbo! - .5)
 	gArmyMove(empty) = -1
 END SUB
 
 SUB newcity (index%)
-			gMenuText$(1) = "  "
-			gMenuText$(3) = "  "
-			gMenuRows = 3: someString$ = gCityName$(index)
+	gMenuText$(1) = "  "
+	gMenuText$(3) = "  "
+	gMenuRows = 3
+	someString$ = gCityName$(index)
 	morecap:
-			gTLX = 68: gTLY = 15: gColour = 3: gChosenOption = 23
-			gMenuText$(2) = gCityName$(index)
-			CALL ShowMenu(3): CALL ClearRight
-			SELECT CASE gChosenOption
-			CASE IS = -27
-			index = 0: EXIT SUB
-			CASE IS < 1
+	gTLX = 68: gTLY = 15: gColour = 3: gChosenOption = 23
+	gMenuText$(2) = gCityName$(index)
+	CALL ShowMenu(3)
+	CALL ClearRight
+	SELECT CASE gChosenOption
+		CASE IS = -27
+			index = 0
+			EXIT SUB
+		CASE IS < 1
 			someString$ = CHR$(ABS(gChosenOption))
 			x = 0
 			FOR k = 1 TO 40
-			IF LEFT$(gCityName$(k), 1) = someString$ THEN
-				y = index: index = k
-	spin2:
-				IF gCityOwner(index) = gCurrentSide GOTO morecap
+				IF LEFT$(gCityName$(k), 1) = someString$ THEN
+					y = index
+					index = k
+					spin2:
+					IF gCityOwner(index) = gCurrentSide GOTO morecap
 					index = index + 1
 					IF index > 40 THEN index = 1
-					x = x + 1: IF x < 39 GOTO spin2
-					index = y: GOTO morecap
-			END IF
+					x = x + 1
+					IF x < 39 GOTO spin2
+					index = y
+					GOTO morecap
+				END IF
 			NEXT k
 			GOTO morecap
-			CASE 1
-	minus1:
-			index = index - 1: IF index < 1 THEN index = 40
+		CASE 1
+			minus1:
+			index = index - 1
+			IF index < 1 THEN index = 40
 			IF gCityOwner(index) <> gCurrentSide GOTO minus1 ELSE GOTO morecap
-			CASE 2
+		CASE 2
 			EXIT SUB
-			CASE 3
-	plus1:
-			index = index + 1: IF index > 40 THEN index = 1
+		CASE 3
+			plus1:
+			index = index + 1
+			IF index > 40 THEN index = 1
 			IF gCityOwner(index) <> gCurrentSide GOTO plus1 ELSE GOTO morecap
-			CASE ELSE
+		CASE ELSE
 			index = 0
-			END SELECT
+		END SELECT
 END SUB
 
 SUB normal (xbar%, vary%, result%)
 	' NOTE : vary is VARIANCE
 	pct! = 0
-	FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
+	FOR k = 1 TO 12
+		pct! = pct! + RND
+	NEXT k
 	pct! = pct! - 5.5
 	result = xbar + pct! * SQR(vary)
 END SUB
@@ -2097,117 +2115,180 @@ END SUB
 SUB railroad (who%)
 	SELECT CASE gRR(who)
 		CASE 0
-		IF who = gCurrentSide GOTO human
-		CALL StartToFinish(start, fin, who): max = 32767
-		index = 0
-		FOR i = start TO fin: IF gArmyLocation(i) = 0 OR gArmyMove(i) <> 0 GOTO puter
-		x = 0: FOR j = 1 TO 6: from = gMatrix(gArmyLocation(i), j): IF from > 0 AND gCityOwner(from) <> who THEN x = x + 1
-		NEXT j
-		IF gIsOccupied(gCapitalCity(who)) > 0 AND x > 1 GOTO puter
-		CALL void(gArmyLocation(i), defend)
-		IF gVictoryFlags(5) > 0 AND gIsOccupied(gCapitalCity(who)) = 0 THEN IF defend > max THEN defend = max - 1
-		IF defend < max THEN target = gArmyLocation(i): GOSUB route: IF x > 1 THEN max = defend: index = i
-	puter:  NEXT i
-		IF index = 0 OR max > .3 * gArmySize(index) GOTO toot
-		CALL traincapacity(who, limit)
-		IF gArmySize(index) > limit THEN GOTO toot
-		from = gArmyLocation(index)
-		x1 = 0: FOR i = 1 TO 40: IF gCityOwner(i) <> who GOTO puted
-		CALL void(i, defend): IF defend = 0 OR defend > 3 * gArmySize(index) GOTO puted
-		IF gIsOccupied(i) > 0 GOTO puted
-		target = i
-		GOSUB route: IF x = 0 GOTO puted
-		IF gCurrentSide = 1 AND gCityY(i) < gCityY(from) THEN x1 = i
-		IF gCurrentSide = 2 AND gCityY(i) > gCityY(from) THEN x1 = i
-		IF gFortLevel(i) > 0 AND gIsOccupied(i) = 0 THEN x1 = i: EXIT FOR
-	puted:  NEXT i
-		IF gVictoryFlags(5) > 0 AND gIsOccupied(gCapitalCity(who)) = 0 THEN
-			GOSUB route
-			IF x > 0 THEN
-				CALL void(gCapitalCity(who), defend)
-				IF defend > 0 THEN x1 = gCapitalCity(who)
+			IF who = gCurrentSide GOTO human
+			CALL StartToFinish(start, fin, who)
+			max = 32767
+			index = 0
+			FOR i = start TO fin
+				IF gArmyLocation(i) = 0 OR gArmyMove(i) <> 0 GOTO puter
+				x = 0
+				FOR j = 1 TO 6
+					from = gMatrix(gArmyLocation(i), j)
+					IF from > 0 AND gCityOwner(from) <> who THEN x = x + 1
+				NEXT j
+				IF gIsOccupied(gCapitalCity(who)) > 0 AND x > 1 GOTO puter
+				CALL void(gArmyLocation(i), defend)
+				IF gVictoryFlags(5) > 0 AND gIsOccupied(gCapitalCity(who)) = 0 THEN 
+					IF defend > max THEN defend = max - 1
+				END IF
+				IF defend < max THEN 
+					target = gArmyLocation(i): GOSUB route: IF x > 1 THEN max = defend: index = i
+				END IF
+			puter:
+			NEXT i
+			IF index = 0 OR max > .3 * gArmySize(index) GOTO toot
+			CALL traincapacity(who, limit)
+			IF gArmySize(index) > limit THEN GOTO toot
+			from = gArmyLocation(index)
+			x1 = 0
+			FOR i = 1 TO 40
+				IF gCityOwner(i) <> who GOTO puted
+				CALL void(i, defend)
+				IF defend = 0 OR defend > 3 * gArmySize(index) GOTO puted
+				IF gIsOccupied(i) > 0 GOTO puted
+				target = i
+				GOSUB route
+				IF x = 0 GOTO puted
+				IF gCurrentSide = 1 AND gCityY(i) < gCityY(from) THEN x1 = i
+				IF gCurrentSide = 2 AND gCityY(i) > gCityY(from) THEN x1 = i
+				IF gFortLevel(i) > 0 AND gIsOccupied(i) = 0 THEN x1 = i: EXIT FOR
+			puted:  
+			NEXT i
+			IF gVictoryFlags(5) > 0 AND gIsOccupied(gCapitalCity(who)) = 0 THEN
+				GOSUB route
+				IF x > 0 THEN
+					CALL void(gCapitalCity(who), defend)
+					IF defend > 0 THEN x1 = gCapitalCity(who)
+				END IF
 			END IF
-		END IF
-		IF x1 > 0 GOTO confirmrrdestination ELSE GOTO toot
-	human:
-		CALL MoveFrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL ClearBottom: PRINT "Railroad move not allowed"; : GOTO toot
-		x = 1: IF index > 20 THEN x = 2
-		CALL traincapacity(who, limit)
-		IF gArmySize(index) > limit THEN CALL ClearBottom: PRINT "Too many troops for railroad capacity"; : GOTO toot
-		
-		target = gArmyLocation(index): GOSUB route: IF x > 1 GOTO chooserrdestination
-		CALL ClearBottom: PRINT "Track from "; gCityName$(target); " is blocked"; : GOTO toot
-	chooserrdestination:
-		CALL ClearBottom: PRINT "Select destination for "; gArmyName$(index); " from "; gCityName$(target);
-		gMenuText$(0) = "To": from = target: x1 = from: IF from = 0 GOTO toot
-		CALL newcity(x1): IF x1 = from OR x1 = 0 GOTO toot
+			IF x1 > 0 GOTO confirmrrdestination ELSE GOTO toot
+			human:
+			CALL MoveFrom(index, a)
+			IF a < 1 OR index < 1 THEN 
+				CALL ClearBottom
+				COLOR 11: PRINT "Railroad move not allowed";
+				GOTO toot
+			END IF
+			x = 1
+			IF index > 20 THEN x = 2
+			CALL traincapacity(who, limit)
+			IF gArmySize(index) > limit THEN 
+				CALL ClearBottom
+				PRINT "Too many troops for railroad capacity";
+				GOTO toot
+			END IF
+			
+			target = gArmyLocation(index)
+			GOSUB route
+			IF x > 1 GOTO chooserrdestination
+			CALL ClearBottom
+			PRINT "Track from "; gCityName$(target); " is blocked";
+			GOTO toot
+			chooserrdestination:
+			CALL ClearBottom
+			PRINT "Select destination for "; gArmyName$(index); " from "; gCityName$(target);
+			gMenuText$(0) = "To"
+			from = target
+			x1 = from
+			IF from = 0 GOTO toot
+			CALL newcity(x1)
+			IF x1 = from OR x1 = 0 GOTO toot
 
-		target = x1: GOSUB route: IF x > 1 GOTO confirmrrdestination
-		CALL ClearBottom: PRINT gArmyName$(index); "'s train cannot go to "; gCityName$(x1); " - select another city"; : CALL TICK(9)
-		GOTO chooserrdestination
-	confirmrrdestination:
-		COLOR 11: CALL ClearBottom: PRINT gArmyName$(index); " is taking the train from "; gCityName$(from); " to "; gCityName$(x1);
-		gArmyOnRailroad(who) = gArmyLocation(index)
-		from = gArmyLocation(index)
-		gRRFrom(who) = from
-		gRR(who) = index: gArmyLocation(index) = 0: gArmyMove(index) = x1
-		CALL tinytrain(who, 1)
-		IF gSoundEffects > 0 THEN SOUND 2222, 1
-		CALL engine
+			target = x1
+			GOSUB route
+			IF x > 1 GOTO confirmrrdestination
+			CALL ClearBottom
+			PRINT gArmyName$(index); "'s train cannot go to "; gCityName$(x1); " - select another city";
+			CALL TICK(9)
+			GOTO chooserrdestination
+			confirmrrdestination:
+			CALL ClearBottom
+			COLOR 11: PRINT gArmyName$(index); " is taking the train from "; gCityName$(from); " to "; gCityName$(x1);
+			gArmyOnRailroad(who) = gArmyLocation(index)
+			from = gArmyLocation(index)
+			gRRFrom(who) = from
+			gRR(who) = index
+			gArmyLocation(index) = 0
+			gArmyMove(index) = x1
+			CALL tinytrain(who, 1)
+			IF gSoundEffects > 0 THEN SOUND 2222, 1
+			CALL engine
 
-		CALL occupy(from)
-		IF gIsOccupied(from) > 0 THEN CALL DrawArmyUnit(gIsOccupied(from))
-		GOTO toot
-
+			CALL occupy(from)
+			IF gIsOccupied(from) > 0 THEN 
+				CALL DrawArmyUnit(gIsOccupied(from))
+			END IF
+			GOTO toot
 		CASE IS > 0
-		CALL tinytrain(who, 0)
-		CALL occupy(gRRFrom(who))
-		IF gIsOccupied(gRRFrom(who)) > 0 THEN CALL DrawArmyUnit(gIsOccupied(gRRFrom(who)))
+			CALL tinytrain(who, 0)
+			CALL occupy(gRRFrom(who))
+			IF gIsOccupied(gRRFrom(who)) > 0 THEN CALL DrawArmyUnit(gIsOccupied(gRRFrom(who)))
 
-		index = gRR(who)
-		gArmyOnRailroad(who) = gArmyMove(index)
-		CALL tinytrain(who, 1)
+			index = gRR(who)
+			gArmyOnRailroad(who) = gArmyMove(index)
+			CALL tinytrain(who, 1)
 
-		gRR(who) = 0: gArmyLocation(index) = gArmyMove(index): gArmyMove(index) = -1
-		COLOR 11: CALL ClearBottom: PRINT "Train with "; gArmyName$(index); " has arrived in "; gCityName$(gArmyLocation(index)); : IF gSoundEffects > 0 THEN SOUND 1200, 2
-		CALL TICK(gTurbo!)
-		x = gCityX(gArmyLocation(index)) - 12: y = gCityY(gArmyLocation(index)) - 11
-		LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-		IF gCityOwner(gArmyLocation(index)) <> who THEN CALL DrawCityCaptured(index, gArmyLocation(index), who, 0)
-		CALL DrawArmyUnit(index)
-		IF gIsOccupied(gArmyLocation(index)) > 0 THEN CALL stax(who): GOTO toot
-		CALL occupy(gArmyLocation(index)): CALL DrawArmyUnit(index)
-		GOTO toot
+			gRR(who) = 0
+			gArmyLocation(index) = gArmyMove(index)
+			gArmyMove(index) = -1
+			CALL ClearBottom
+			COLOR 11: PRINT "Train with "; gArmyName$(index); " has arrived in "; gCityName$(gArmyLocation(index));
+			IF gSoundEffects > 0 THEN SOUND 1200, 2
+			CALL TICK(gTurbo!)
+			x = gCityX(gArmyLocation(index)) - 12
+			y = gCityY(gArmyLocation(index)) - 11
+			LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+			IF gCityOwner(gArmyLocation(index)) <> who THEN 
+				CALL DrawCityCaptured(index, gArmyLocation(index), who, 0)
+			END IF
+			CALL DrawArmyUnit(index)
+			IF gIsOccupied(gArmyLocation(index)) > 0 THEN 
+				CALL stax(who)
+				GOTO toot
+			END IF
+			CALL occupy(gArmyLocation(index))
+			CALL DrawArmyUnit(index)
+			GOTO toot
 	END SELECT
 
 	route:
-		x = 0: FOR j = 1 TO 6
+	x = 0
+	FOR j = 1 TO 6
 		y = gMatrix(target, j)
 		IF y > 0 AND gCityOwner(y) = who THEN
 		x = x + 1
 			FOR m = 1 TO 6
-			z = gMatrix(y, m)
-			IF z > 0 AND z <> target AND gCityOwner(z) = who THEN x = x + 1
+				z = gMatrix(y, m)
+				IF z > 0 AND z <> target AND gCityOwner(z) = who THEN x = x + 1
 			NEXT m
 		END IF
 	NEXT j
 	RETURN
 
 	toot:
-		IF who = gCurrentSide THEN CALL TICK(9)
-		CALL ClearRight
-		ClearBottom
+	IF who = gCurrentSide THEN CALL TICK(9)
+	CALL ClearRight
+	CALL ClearBottom
 END SUB
 
 SUB RecruitArmy (who%)
-		IF gCurrentCash(who) < 100 THEN EXIT SUB
-		gMenuRows = 0: COLOR 12
-		gMenuText$(0) = "Recruit"
-		IF who = gCurrentSide AND gRecruitFlag > 0 THEN FOR i = 1 TO gRecruitFlag: x = gRecruitCity(i): gMenuText$(i) = gCityName$(x): gArray(i) = x: NEXT i: gMenuRows = gRecruitFlag: GOTO alldone
-		max = 4: IF RND > .8 THEN max = max - 1
-		IF gDifficultyLevel < 3 THEN max = max + 1
-
-		FOR i = 1 TO 40
+	IF gCurrentCash(who) < 100 THEN EXIT SUB
+	gMenuRows = 0
+	COLOR 12
+	gMenuText$(0) = "Recruit"
+	IF who = gCurrentSide AND gRecruitFlag > 0 THEN 
+		FOR i = 1 TO gRecruitFlag
+			x = gRecruitCity(i)
+			gMenuText$(i) = gCityName$(x)
+			gArray(i) = x
+		NEXT i
+		gMenuRows = gRecruitFlag
+		GOTO alldone
+	END IF
+	max = 4
+	IF RND > .8 THEN max = max - 1
+	IF gDifficultyLevel < 3 THEN max = max + 1
+	FOR i = 1 TO 40
 		IF gCityController(who) > 0 THEN pct! = .6 * max / gCityController(who) ELSE pct! = .3
 		IF gMenuRows = 0 AND i > 20 THEN pct! = .3
 		IF gMenuRows < 2 AND i > 30 THEN pct! = .3
@@ -2221,69 +2302,85 @@ SUB RecruitArmy (who%)
 			IF gMenuRows > max - 1 GOTO alldone
 		END IF
 	foe:
-		NEXT i
+	NEXT i
 	alldone:
-		IF gMenuRows = 0 THEN EXIT SUB
-		IF who = gCurrentSide AND gRecruitFlag = 0 THEN FOR i = 1 TO gMenuRows: gRecruitCity(i) = gArray(i): NEXT i: gRecruitFlag = gMenuRows
+	IF gMenuRows = 0 THEN EXIT SUB
+	IF who = gCurrentSide AND gRecruitFlag = 0 THEN 
+		FOR i = 1 TO gMenuRows
+			gRecruitCity(i) = gArray(i)
+		NEXT i
+		gRecruitFlag = gMenuRows
+	END IF
 		CALL bubble(gMenuRows)
-	'............................................................................
+
 	levy:
-		IF gCurrentCash(who) < 100 THEN EXIT SUB
-		IF (who = gCurrentSide) OR (gHumanPlayers = 2) THEN CALL ClearBottom: PRINT gNationName$(who); " funds available "; gCurrentCash(who);
-		gTLX = 67: gTLY = 12: gColour = 3
-		IF who <> gCurrentSide THEN GOSUB randsel: GOTO auto1
+	IF gCurrentCash(who) < 100 THEN EXIT SUB
+	IF (who = gCurrentSide) OR (gHumanPlayers = 2) THEN 
+		CALL ClearBottom
+		PRINT gNationName$(who); " funds available "; gCurrentCash(who);
+	END IF
+	gTLX = 67: gTLY = 12: gColour = 3
+	IF who <> gCurrentSide THEN GOSUB randsel: GOTO auto1
 		
-		IF gChosenOption > 0 THEN gChosenOption = 21 + gChosenOption
-		CALL ShowMenu(2): CALL ClearRight
-		IF gChosenOption < 1 THEN EXIT SUB
+	IF gChosenOption > 0 THEN gChosenOption = 21 + gChosenOption
+	CALL ShowMenu(2)
+	CALL ClearRight
+	IF gChosenOption < 1 THEN EXIT SUB
 	auto1:
-		empty = 0
-		index = gArray(gChosenOption)
-		CALL occupy(index)
-		IF gIsOccupied(index) > 0 THEN i = gIsOccupied(index): GOTO add2
-		CALL commander((who), empty)
+	empty = 0
+	index = gArray(gChosenOption)
+	CALL occupy(index)
+	IF gIsOccupied(index) > 0 THEN 
+		i = gIsOccupied(index)
+		GOTO add2
+	END IF
+	CALL commander((who), empty)
 		
-		IF who <> gCurrentSide AND empty = 0 THEN EXIT SUB
-		IF empty = 0 GOTO levy
-		gArmyLocation(empty) = index
-		GOSUB playb
-		CALL CreateNewArmy(who, empty, index)
-		GOTO levy
-	'............................................................................
+	IF who <> gCurrentSide AND empty = 0 THEN EXIT SUB
+	IF empty = 0 GOTO levy
+	gArmyLocation(empty) = index
+	GOSUB playb
+	CALL CreateNewArmy(who, empty, index)
+	GOTO levy
+
 	add2:
-		target = gArray(gChosenOption)
-		x = 45: someString$ = ""
-		IF gRealism > 0 THEN
-			x = 2 * gCityValue(gArmyLocation(i)) + 20
-			CALL cutoff(who, target, a)
-			IF a < 1 THEN x = x \ 3: someString$ = " ISOLATED !"
-		END IF
-		gArmySize(i) = gArmySize(i) + x
+	target = gArray(gChosenOption)
+	x = 45: someString$ = ""
+	IF gRealism > 0 THEN
+		x = 2 * gCityValue(gArmyLocation(i)) + 20
+		CALL cutoff(who, target, a)
+		IF a < 1 THEN x = x \ 3: someString$ = " ISOLATED !"
+	END IF
+	gArmySize(i) = gArmySize(i) + x
 
-		GOSUB playb
-		gCurrentCash(who) = gCurrentCash(who) - 100
-		from = gArmyLocation(i): x = gCityX(from) - 12: y = gCityY(from) - 11
-		GET (x - 9, y - 7)-(x + 9, y + 6), anima
-		CALL MoveUnitIcon(gArmyLocation(i), 0, 2)
-		IF gSoundEffects > 0 THEN SOUND 2222, 1
-		COLOR 11: CALL ClearBottom: PRINT "Army "; i; gArmyName$(i); " in "; gCityName$(gArmyLocation(i)); " strength increased to "; : CALL CorrectArmySize(i)
-		IF someString$ <> "" THEN PRINT someString$;
-		PUT (x - 9, y - 7), anima, PSET
-		CALL TICK(gTurbo! - .5)
-		GOTO levy
+	GOSUB playb
+	gCurrentCash(who) = gCurrentCash(who) - 100
+	from = gArmyLocation(i)
+	x = gCityX(from) - 12
+	y = gCityY(from) - 11
+	GET (x - 9, y - 7)-(x + 9, y + 6), anima
+	CALL MoveUnitIcon(gArmyLocation(i), 0, 2)
+	IF gSoundEffects > 0 THEN SOUND 2222, 1
+	CALL ClearBottom
+	COLOR 11: PRINT "Army "; i; gArmyName$(i); " in "; gCityName$(gArmyLocation(i)); " strength increased to "; : CALL CorrectArmySize(i)
+	IF someString$ <> "" THEN PRINT someString$;
+	PUT (x - 9, y - 7), anima, PSET
+	CALL TICK(gTurbo! - .5)
+	GOTO levy
 	randsel:
-			gChosenOption = 0: x = 0
-			FOR i = 1 TO gMenuRows
-			target = gArray(i)
-			LOCATE 14 + i, 69
-			x = gIsOccupied(target)
-			IF x = 0 XOR gArmySize(x) < 155 THEN gChosenOption = i
-			NEXT i
+	gChosenOption = 0
+	x = 0
+	FOR i = 1 TO gMenuRows
+		target = gArray(i)
+		LOCATE 14 + i, 69
+		x = gIsOccupied(target)
+		IF x = 0 XOR gArmySize(x) < 155 THEN gChosenOption = i
+	NEXT i
 
-		IF gChosenOption = 0 THEN gChosenOption = 1 + INT(RND * gMenuRows)
-		IF gRealism > 0 THEN
-			x = 0
-			FOR i = 1 TO gMenuRows
+	IF gChosenOption = 0 THEN gChosenOption = 1 + INT(RND * gMenuRows)
+	IF gRealism > 0 THEN
+		x = 0
+		FOR i = 1 TO gMenuRows
 			target = gArray(i)
 			IF gIsOccupied(target) = 0 THEN
 				y = 3 * gCityValue(target) + 33
@@ -2295,18 +2392,18 @@ SUB RecruitArmy (who%)
 				IF a < 1 THEN y = y \ 3
 			END IF
 			IF y > x AND RND > .5 THEN x = y: gChosenOption = i
-			NEXT i
-		END IF
-		IF gCurrentCash(who) < 100 THEN gChosenOption = gMenuRows
-		RETURN
+		NEXT i
+	END IF
+	IF gCurrentCash(who) < 100 THEN gChosenOption = gMenuRows
+	RETURN
 	playb:
-		IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN gArmySize(empty) = gArmySize(empty) + 15 - 5 * gDifficultyLevel
-		IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN gArmySize(empty) = gArmySize(empty) + 5 * gDifficultyLevel - 15
-		RETURN
+	IF gCurrentSide = 1 AND gDifficultyLevel < 3 THEN gArmySize(empty) = gArmySize(empty) + 15 - 5 * gDifficultyLevel
+	IF gCurrentSide = 2 AND gDifficultyLevel > 3 THEN gArmySize(empty) = gArmySize(empty) + 5 * gDifficultyLevel - 15
+	RETURN
 END SUB
 
 SUB ShipType (who%, i%)
-	a = 1: IF MID$(gFleet$(who), i, 1) = "I" THEN a = 2
+	IF MID$(gFleet$(who), i, 1) = "I" THEN a = 2 ELSE a = 1
 	CALL DrawShipIcon(who, a)
 END SUB
 
