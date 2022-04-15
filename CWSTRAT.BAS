@@ -4014,8 +4014,11 @@ END SUB
 
 SUB scribe (someString$, flag%)
 	SELECT CASE flag
-			CASE 1: CALL ClearBottom: PRINT someString$;
-			CASE 2: CALL image2(someString$, 4)
+			CASE 1
+				CALL ClearBottom
+				PRINT someString$;
+			CASE 2
+				CALL image2(someString$, 4)
 	END SELECT
 	IF gHistory > 0 THEN
 		OPEN "A", 2, "cws.his"
@@ -4060,34 +4063,33 @@ SUB UnionSong
 END SUB
 
 SUB DrawShipIcon (who%, flag%)
-		x = POINT(0) - 10: y = POINT(1) - 10
-		CIRCLE (x, y), 18, 9, , , .4
-		PAINT (x + 3, y + 4), 9, 9
-		CIRCLE (x, y), 18, 10, , , .4
+	x = POINT(0) - 10: y = POINT(1) - 10
+	CIRCLE (x, y), 18, 9, , , .4
+	PAINT (x + 3, y + 4), 9, 9
+	CIRCLE (x, y), 18, 10, , , .4
 	SELECT CASE flag
-	CASE 1                          'wooden ship
-		DRAW "BF5R5D1C4L20C0H1R22E1L9": DRAW "BL6": DRAW "C0L10H1L1H2": DRAW "BR9D2"
-		DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
-		DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
-		PSET (x + 8, y - 1)
-		GOSUB jack
-
-	CASE 2                          'ironclad
-		DRAW "BL15BD4E1"
-		DRAW "C0R30H1L2C8L24E1R1"
-		DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1": DRAW "C0R2BR3C0R2BR3C0R2"
-		DRAW "BU3BL10D1": DRAW "C0U4R1D4BR9"
-		PSET (x + 8, y - 1)
-		GOSUB jack
-	CASE ELSE
+		CASE 1                          'wooden ship
+			DRAW "BF5R5D1C4L20C0H1R22E1L9": DRAW "BL6": DRAW "C0L10H1L1H2": DRAW "BR9D2"
+			DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
+			DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
+			PSET (x + 8, y - 1)
+			GOSUB jack
+		CASE 2                          'ironclad
+			DRAW "BL15BD4E1"
+			DRAW "C0R30H1L2C8L24E1R1"
+			DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1": DRAW "C0R2BR3C0R2BR3C0R2"
+			DRAW "BU3BL10D1": DRAW "C0U4R1D4BR9"
+			PSET (x + 8, y - 1)
+			GOSUB jack
+		CASE ELSE
 	END SELECT
 	EXIT SUB
-	jack:
+	jack: ' line label
 		SELECT CASE who
-		CASE 1
-		DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
-		CASE 2
-		DRAW "C4R4U1L4U1R4U1L4C3F4BU4C3G4BD2BR2BU1"
+			CASE 1
+				DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
+			CASE 2
+				DRAW "C4R4U1L4U1R4U1L4C3F4BU4C3G4BD2BR2BU1"
 		END SELECT
 		RETURN
 END SUB
@@ -4106,7 +4108,7 @@ SUB ships
 		IF gNavyLocation(s) = 24 THEN y = y + 5: x = x - 5
 		float:
 			PSET (x, y), 1
-			a = 1: IF LEFT$(gFleet$(s), 1) = "I" THEN a = 2
+			IF LEFT$(gFleet$(s), 1) = "I" THEN a = 2 ELSE a = 1
 			CALL DrawShipIcon(s, a)
 	NEXT s
 END SUB
