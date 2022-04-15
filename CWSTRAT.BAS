@@ -3316,84 +3316,91 @@ SUB evaluate (index%, x%)
 END SUB
 
 SUB SpecialEvents
-	'==========================================================================
-	'                              Special Events
-	'==========================================================================
 	IF gRealism > 0 AND gCurrentYear = 1862 AND gCurrentMonth < 3 THEN
-		COLOR 14: CALL ClearBottom
+		COLOR 14
+		CALL ClearBottom
 		PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
-		IF gSoundEffects > 0 THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
+		IF gSoundEffects > 0 THEN 
+			FOR k = 1 TO 5
+				SOUND 140, 1: SOUND 37, 1
+			NEXT k
+		END IF
 		DO WHILE INKEY$ = "": LOOP
 		EXIT SUB
 	END IF
 	IF gEventsBalance = 0 THEN EXIT SUB
-	plus = gDifficultyLevel: IF gCurrentSide = 1 THEN plus = 6 - gDifficultyLevel
-	pct! = .005 * (gCurrentYear - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
+	IF gCurrentSide = 1 THEN plus = 6 - gDifficultyLevel ELSE plus = gDifficultyLevel
+	pct! = .005 * (gCurrentYear - 1860) * plus * plus
+	IF pct! > .9 THEN pct! = .9
 	IF RND > pct! THEN EXIT SUB
 
-	CALL ClearBottom: COLOR 14: PRINT "SPECIAL EVENT...";
-	who = 1: IF RND > .1 * gEventsBalance THEN who = 2
+	CALL ClearBottom
+	COLOR 14: PRINT "SPECIAL EVENT...";
+	IF RND > .1 * gEventsBalance THEN who = 2 ELSE who = 1
 
 	SELECT CASE who
-	'----------------------------------------------------------------------------
-	'                               good for South
-	'----------------------------------------------------------------------------
-		CASE 1
-		IF gCurrentYear = 1864 AND gCurrentMonth = 1 THEN gVictoryPoints(2) = gVictoryPoints(2) + 50
-		IF gCurrentYear = 1865 AND gCurrentMonth = 1 THEN gVictoryPoints(2) = gVictoryPoints(2) + 100
-		IF RND > .9 THEN GOSUB riotsincity: EXIT SUB
+		CASE 1 ' Good for South
+			IF gCurrentYear = 1864 AND gCurrentMonth = 1 THEN gVictoryPoints(2) = gVictoryPoints(2) + 50
+			IF gCurrentYear = 1865 AND gCurrentMonth = 1 THEN gVictoryPoints(2) = gVictoryPoints(2) + 100
+			IF RND > .9 THEN GOSUB riotsincity: EXIT SUB
 
-		CALL ClearBottom
-		IF RND > .2 OR gNavySize(2) > 9 GOTO mercenariesjoin
-		IF gNavySize(2) > 0 AND gNavyLocation(2) <> 99 THEN empty = gNavyLocation(2): GOTO englandgivesships
+			CALL ClearBottom
+			IF RND > .2 OR gNavySize(2) > 9 GOTO mercenariesjoin
+			IF gNavySize(2) > 0 AND gNavyLocation(2) <> 99 THEN 
+				empty = gNavyLocation(2): GOTO englandgivesships
+			END IF
 			empty = 0
 			FOR i = 1 TO 40
-			IF gCityOwner(i) = 2 AND gMatrix(i, 7) = 99 AND gNavyLocation(1) <> i THEN empty = i: EXIT FOR
+				IF gCityOwner(i) = 2 AND gMatrix(i, 7) = 99 AND gNavyLocation(1) <> i THEN 
+					empty = i
+					EXIT FOR
+				END IF
 			NEXT i
-		IF empty = 0 GOTO mercenariesjoin
-	englandgivesships:
-		CALL scribe("England has given ships to the South", 2)
-		gNavySize(2) = gNavySize(2) + 2 * plus
-		IF gNavySize(2) > 10 THEN gNavySize(2) = 10
-		x = gNavySize(2) - LEN(gFleet$(2))
-		gFleet$(2) = gFleet$(2) + STRING$(x, "W")
-		gNavyLocation(2) = empty: CALL ships
-		GOTO southeventmusic
-	mercenariesjoin:
-		IF RND > .1 OR gCityController(2) < 30 GOTO europeloan
-		someString$ = "French": IF RND > .5 THEN someString$ = "British"
-		CALL scribe(someString$ + " mercenaries join " + gArmyName$(index) + "'s army", 2)
-		gArmySize(index) = gArmySize(index) + 100 * plus
-		gArmyExp(index) = 10: gArmySupply(index) = 10
-		GOTO southeventmusic
-	europeloan:
-		IF RND > .3 OR gCityController(2) < 12 GOTO cottonsales
+			IF empty = 0 GOTO mercenariesjoin
+			englandgivesships: ' line label
+			CALL scribe("England has given ships to the South", 2)
+			gNavySize(2) = gNavySize(2) + 2 * plus
+			IF gNavySize(2) > 10 THEN gNavySize(2) = 10
+			x = gNavySize(2) - LEN(gFleet$(2))
+			gFleet$(2) = gFleet$(2) + STRING$(x, "W")
+			gNavyLocation(2) = empty
+			CALL ships
+			GOTO southeventmusic
+			mercenariesjoin: ' line label
+			IF RND > .1 OR gCityController(2) < 30 GOTO europeloan
+			IF RND > .5 THEN someString$ = "British" ELSE someString$ = "French"
+			CALL scribe(someString$ + " mercenaries join " + gArmyName$(index) + "'s army", 2)
+			gArmySize(index) = gArmySize(index) + 100 * plus
+			gArmyExp(index) = 10
+			gArmySupply(index) = 10
+			GOTO southeventmusic
+			europeloan: ' line label
+			IF RND > .3 OR gCityController(2) < 12 GOTO cottonsales
 			CALL scribe("The South has obtained a loan from Europe", 2)
 			GOTO skipcottonsales
-	cottonsales:
-		IF RND > .5 OR gCityController(2) < 12 GOTO nativeuprising
-		CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
-	skipcottonsales:
-		gCurrentCash(2) = gCurrentCash(2) + 100 * plus
-		GOTO southeventmusic
-	nativeuprising:
-		pct! = .9
-		someString$ = "Union troops diverted to fight Western Indian uprisings"
-		IF RND > .5 THEN someString$ = "Union 90-day enlistees return home"
-		IF gCurrentYear = 1864 AND gCurrentMonth > 5 THEN someString$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
-		CALL scribe(someString$, 2)
-		FOR k = 1 TO 20
-		gArmySize(k) = pct! * gArmySize(k)
-		NEXT k
-		GOTO southeventmusic
-	'----------------------------------------------------------------------------
-	riotsincity:
+			cottonsales: ' line label
+			IF RND > .5 OR gCityController(2) < 12 GOTO nativeuprising
+			CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
+			skipcottonsales: ' line label
+			gCurrentCash(2) = gCurrentCash(2) + 100 * plus
+			GOTO southeventmusic
+			nativeuprising: ' line label
+			pct! = .9
+			IF RND > .5 THEN someString$ = "Union 90-day enlistees return home" ELSE someString$ = "Union troops diverted to fight Western Indian uprisings"
+			IF gCurrentYear = 1864 AND gCurrentMonth > 5 THEN someString$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
+			CALL scribe(someString$, 2)
+			FOR k = 1 TO 20
+				gArmySize(k) = pct! * gArmySize(k)
+			NEXT k
+			GOTO southeventmusic
+		riotsincity: ' line label
 		IF gRealism = 0 THEN RETURN
 		IF gCityController(who) = 1 THEN EXIT SUB
 		FOR k = 1 TO 99
-		x = 1 + INT(40 * RND)
+			x = 1 + INT(40 * RND)
 			IF gCityO(x) <> who AND gCityOwner(x) = who AND gIsOccupied(x) = 0 THEN
-				CALL ClearBottom: COLOR 15
+				CALL ClearBottom
+				COLOR 15
 				PRINT " Riots have broken out in "; gCityName$(x);
 				gCityOwner(x) = 0
 				CALL DrawCities
@@ -3405,10 +3412,7 @@ SUB SpecialEvents
 			END IF
 		NEXT k
 		RETURN
-	'----------------------------------------------------------------------------
-	'                               good for Union
-	'----------------------------------------------------------------------------
-		CASE 2
+	CASE 2 ' Good for Union
 		IF RND > .1 OR gNavyLocation(1) = 0 OR gNavySize(1) > 9 GOTO unionvolunteers
 		IF RND > .95 THEN GOSUB riotsincity: EXIT SUB
 		CALL scribe("Union shipworks have produced extra ships", 2)
@@ -3417,18 +3421,22 @@ SUB SpecialEvents
 		x = gNavySize(1) - LEN(gFleet$(1))
 		gFleet$(1) = gFleet$(1) + STRING$(x, "W")
 		GOTO northeventmusic
-	unionvolunteers:
+		unionvolunteers:
 		IF RND < .7 GOTO emancipated
 		CALL scribe("Volunteer troops swell the Union ranks", 2)
-		x = 0: FOR i = 1 TO 20: x = x + 1: IF x > 5 GOTO northeventmusic
-		IF gArmySize(i) > 0 AND RND > .5 THEN gArmySize(i) = gArmySize(i) * 1.1 + plus
-		NEXT i: GOTO northeventmusic
-	emancipated:
+		x = 0
+		FOR i = 1 TO 20
+			x = x + 1
+			IF x > 5 GOTO northeventmusic
+			IF gArmySize(i) > 0 AND RND > .5 THEN gArmySize(i) = gArmySize(i) * 1.1 + plus
+		NEXT i
+		GOTO northeventmusic
+		emancipated:
 		IF gEmancipate = 0 AND gCurrentYear > 1862 THEN
-
 			gEmancipate = 1
 			CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
-			gVictoryPoints(1) = gVictoryPoints(1) + 100: gVictoryPoints(2) = gVictoryPoints(2) - 100
+			gVictoryPoints(1) = gVictoryPoints(1) + 100
+			gVictoryPoints(2) = gVictoryPoints(2) - 100
 			CALL DrawMap
 			GOTO northeventmusic
 		END IF
@@ -3444,7 +3452,10 @@ SUB SpecialEvents
 		END IF
 		IF RND > .5 AND gCurrentYear > 1861 THEN
 			CALL scribe("Rebel deserters leave the battlefield to go home", 2)
-			FOR i = 21 TO 40: gArmySize(i) = .92 * gArmySize(i): NEXT i: GOTO northeventmusic
+			FOR i = 21 TO 40
+				gArmySize(i) = .92 * gArmySize(i)
+			NEXT i
+			GOTO northeventmusic
 		END IF
 		IF RND > .5 AND gCurrentYear > 1861 THEN
 			CALL scribe("Union soldiers now have repeating rifles", 2)
@@ -3458,11 +3469,11 @@ SUB SpecialEvents
 	END SELECT
 
 	northeventmusic:
-		IF gSoundEffects = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-		DO WHILE INKEY$ = "": LOOP: EXIT SUB
+	IF gSoundEffects = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+	DO WHILE INKEY$ = "": LOOP: EXIT SUB
 	southeventmusic:
-		IF gSoundEffects = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-		DO WHILE INKEY$ = "": LOOP
+	IF gSoundEffects = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+	DO WHILE INKEY$ = "": LOOP
 END SUB
 
 SUB DrawFlags (who%, w%, a%)
