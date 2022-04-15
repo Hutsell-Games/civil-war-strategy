@@ -3700,7 +3700,8 @@ SUB ShowReports (who%)
 	IF gChosenOption < 0 GOTO endrep
 	IF gChosenOption = 4 GOTO forcesummary
 	CALL StartToFinish(start, fin, who)
-	CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
+	CLS
+	LOCATE 1, 1: IF who = 2 THEN c = 15 ELSE c = 9
 	COLOR c
 	PRINT " Report for "; gNationName$(who); " Forces"; TAB(30); gMonthes$(gCurrentMonth); ","; gCurrentYear; TAB(49); : COLOR 14: PRINT " Victory Points "; gVictoryPoints(who);
 	IF c = 15 THEN c = 7
@@ -3714,21 +3715,23 @@ SUB ShowReports (who%)
 	CALL armyxy(215, 8, who)
 	COLOR c: PRINT gCityController(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(gCityController(who) * 2.5 + .5): PRINT x; "%)";
 	PRINT TAB(50); : COLOR 12: PRINT "Capital: "; gCityName$(gCapitalCity(who))
-	y = gVPTotal: IF gCapitalCity(1) > 0 THEN y = y + 100
+	y = gVPTotal
+	IF gCapitalCity(1) > 0 THEN y = y + 100
 	IF gCapitalCity(2) > 0 THEN y = y + 100
 	PRINT gCurrentIncome(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (gCurrentIncome(who) / gVPTotal) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; gCurrentCash(who)
 	COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
-	x = 0: FOR i = start TO fin
-	COLOR c
-	IF gArmyLocation(i) < 1 GOTO deadeye
-	x = x + gArmySize(i)
-	PRINT i; TAB(5); gArmyName$(i); TAB(25); : y = CSRLIN
-	CALL CorrectArmySize(i): PRINT TAB(32); gCityName$(gArmyLocation(i));
-	IF who <> gCurrentSide THEN PRINT : GOTO deadeye
-	PRINT TAB(43); gArmyCommander(i); TAB(47); gArmyExp(i); TAB(52); gArmySupply(i);
-	PRINT TAB(57); : IF gArmyMove(i) > -1 THEN PRINT gCityName$(gArmyMove(i)) ELSE PRINT "Resting"
-	IF gFortLevel(gArmyLocation(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; gFortLevel(gArmyLocation(i))
-	deadeye:
+	x = 0
+	FOR i = start TO fin
+		COLOR c
+		IF gArmyLocation(i) < 1 GOTO deadeye
+		x = x + gArmySize(i)
+		PRINT i; TAB(5); gArmyName$(i); TAB(25); : y = CSRLIN
+		CALL CorrectArmySize(i): PRINT TAB(32); gCityName$(gArmyLocation(i));
+		IF who <> gCurrentSide THEN PRINT : GOTO deadeye
+		PRINT TAB(43); gArmyCommander(i); TAB(47); gArmyExp(i); TAB(52); gArmySupply(i);
+		PRINT TAB(57); : IF gArmyMove(i) > -1 THEN PRINT gCityName$(gArmyMove(i)) ELSE PRINT "Resting"
+		IF gFortLevel(gArmyLocation(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; gFortLevel(gArmyLocation(i))
+		deadeye:
 	NEXT i
 	PRINT " "; STRING$(70, "+")
 	PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(gAggress! * x))); "00 ]"
@@ -3739,8 +3742,14 @@ SUB ShowReports (who%)
 		IF MID$(gFleet$(who), k, 1) = "I" THEN x = x + 1
 	NEXT k
 	IF x > 0 THEN PRINT "("; x; "Ironclads) ";
-	IF gNavyLocation(who) > 0 AND gNavyLocation(who) < 99 THEN PRINT "in "; gCityName$(gNavyLocation(who)) ELSE PRINT
-	IF gRR(who) > 0 THEN COLOR 14: PRINT " Army #"; gRR(who); gArmyName$(gRR(who)); " on train to "; gCityName$(gArmyMove(gRR(who)));
+	IF gNavyLocation(who) > 0 AND gNavyLocation(who) < 99 THEN 
+		PRINT "in "; gCityName$(gNavyLocation(who)) 
+	ELSE 
+		PRINT
+	END IF
+	IF gRR(who) > 0 THEN 
+		COLOR 14: PRINT " Army #"; gRR(who); gArmyName$(gRR(who)); " on train to "; gCityName$(gArmyMove(gRR(who)));
+	END IF
 	LINE (0, 0)-(639, 449), 15, B
 	LINE (0, 62)-(639, 62), 15
 	GOTO endrep
@@ -3748,18 +3757,24 @@ SUB ShowReports (who%)
 	'                               City Report
 	'..........................................................................
 	cityreport:
-	CLS : LOCATE 1, 1: COLOR 14
+	CLS
+	LOCATE 1, 1: COLOR 14
 	PRINT "City Report"; TAB(20); gMonthes$(gCurrentMonth); ","; gCurrentYear: COLOR 15
 	PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
 	LINE (1, 30)-(630, 30), 15
-	FOR i = 1 TO 20: COLOR 4: someString$ = "neutral": IF gCityOwner(i) = 1 THEN COLOR 9: someString$ = "UNION"
-	IF gCityOwner(i) = 2 THEN COLOR 7: someString$ = "REBEL"
-	LOCATE 2 + i, 1: PRINT i; TAB(6); gCityName$(i); TAB(18); someString$; TAB(29); gCityValue(i)
+	FOR i = 1 TO 20
+		COLOR 4
+		someString$ = "neutral"
+		IF gCityOwner(i) = 1 THEN COLOR 9: someString$ = "UNION"
+		IF gCityOwner(i) = 2 THEN COLOR 7: someString$ = "REBEL"
+		LOCATE 2 + i, 1: PRINT i; TAB(6); gCityName$(i); TAB(18); someString$; TAB(29); gCityValue(i)
 	NEXT i
 
-	FOR i = 21 TO 40: COLOR 4: someString$ = "neutral": IF gCityOwner(i) = 1 THEN COLOR 9: someString$ = "UNION"
-	IF gCityOwner(i) = 2 THEN COLOR 7: someString$ = "REBEL"
-	LOCATE i - 18, 41: PRINT i; TAB(46); gCityName$(i); TAB(58); someString$; TAB(69); gCityValue(i)
+	FOR i = 21 TO 40
+		COLOR 4: someString$ = "neutral"
+		IF gCityOwner(i) = 1 THEN COLOR 9: someString$ = "UNION"
+		IF gCityOwner(i) = 2 THEN COLOR 7: someString$ = "REBEL"
+		LOCATE i - 18, 41: PRINT i; TAB(46); gCityName$(i); TAB(58); someString$; TAB(69); gCityValue(i)
 	NEXT i
 	LINE (1, 360)-(630, 360), 15
 	COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
@@ -3772,27 +3787,28 @@ SUB ShowReports (who%)
 	'                               Intelligence
 	'..........................................................................
 	srep:
-	c = 9: IF gCurrentSide = 2 THEN c = 7
+	IF gCurrentSide = 2 THEN c = 7 ELSE c = 9
 	CALL DrawMap
 	CALL StartToFinish(start, fin, gCurrentSide)
 	FOR k = start TO fin
 		IF gArmySize(k) > 0 THEN
-		COLOR c
-		x = gCityX(gArmyLocation(k))
-		y = gCityY(gArmyLocation(k))
-		z = 10: IF gArmySize(k) < 1000 THEN z = 9
-		x = x / 8 - 2: y = y / 16
-		IF y > 26 THEN y = 26
-		FOR j = 0 TO 3
-		LOCATE y + j, x: PRINT SPACE$(z);
-		NEXT j
-		LOCATE y, x: PRINT "Siz:"; : CALL CorrectArmySize(k)
-		LOCATE y + 1, x: PRINT "Ldr:"; gArmyCommander(k)
-		LOCATE y + 2, x: PRINT "Xpr:"; gArmyExp(k)
-		LOCATE y + 3, x: PRINT "Sup:"; gArmySupply(k);
-		LINE (8 * (x - 1) - 1, 16 * (y - 1) - 1)-(8 * (x + z - 1) + 1, 16 * (y + 3) + 1), 15, B
-		TICK 1
-	END IF
+			COLOR c
+			x = gCityX(gArmyLocation(k))
+			y = gCityY(gArmyLocation(k))
+			z = 10IF gArmySize(k) < 1000 THEN z = 9 ELSE z = 10
+			x = x / 8 - 2
+			y = y / 16
+			IF y > 26 THEN y = 26
+			FOR j = 0 TO 3
+				LOCATE y + j, x: PRINT SPACE$(z);
+			NEXT j
+			LOCATE y, x: PRINT "Siz:"; : CALL CorrectArmySize(k)
+			LOCATE y + 1, x: PRINT "Ldr:"; gArmyCommander(k)
+			LOCATE y + 2, x: PRINT "Xpr:"; gArmyExp(k)
+			LOCATE y + 3, x: PRINT "Sup:"; gArmySupply(k);
+			LINE (8 * (x - 1) - 1, 16 * (y - 1) - 1)-(8 * (x + z - 1) + 1, 16 * (y + 3) + 1), 15, B
+			TICK 1
+		END IF
 	NEXT k
 	GOTO endrep
 	'..........................................................................
@@ -3802,18 +3818,19 @@ SUB ShowReports (who%)
 	FOR k = 1 TO 40
 		IF gIsOccupied(k) > 0 THEN
 			FOR j = 1 TO 40
-			IF gArmyLocation(j) = k THEN summ(k) = summ(k) + gArmySize(j)
+				IF gArmyLocation(j) = k THEN summ(k) = summ(k) + gArmySize(j)
 			NEXT j
 		END IF
 	NEXT k
 
-	CLS : CALL DrawMap
+	CLS
+	CALL DrawMap
 	FOR k = 1 TO 40
-	IF summ(k) > 0 THEN
-		c = 9: IF gCityOwner(k) = 2 THEN c = 7
-		COLOR c
-		LOCATE INT(gCityY(k) / 16 + 1), gCityX(k) / 8: PRINT summ(k)
-	END IF
+		IF summ(k) > 0 THEN
+			IF gCityOwner(k) = 2 THEN c = 7 ELSE c = 9
+			COLOR c
+			LOCATE INT(gCityY(k) / 16 + 1), gCityX(k) / 8: PRINT summ(k)
+		END IF
 	NEXT k
 	COLOR 14: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
 	GOTO endrep
@@ -3844,8 +3861,9 @@ SUB ShowReports (who%)
 		OPEN "O", #1, "battsumm"
 		PRINT #1, " SIDE      BATTLES WON       LOSSES"
 		FOR k = 1 TO 2
-		someString$ = " ": IF gThrill = k THEN someString$ = "*"
-		PRINT #1, someString$; gNationName$(k), gBattleStats(k), 100 * gCasualty&(k)
+			someString$ = " "
+			IF gThrill = k THEN someString$ = "*"
+			PRINT #1, someString$; gNationName$(k), gBattleStats(k), 100 * gCasualty&(k)
 		NEXT k
 		CLOSE #1
 	END IF
@@ -3854,11 +3872,12 @@ SUB ShowReports (who%)
 	'                               Recap (History)
 	'..........................................................................
 	recap:
-	CLS : x = 0
+	CLS
+	x = 0
 	OPEN "I", 2, "cws.his"
 	DO WHILE NOT EOF(2)
 	INPUT #2, someString$
-	COLOR 7: IF INSTR(someString$, "[") THEN COLOR 15
+	IF INSTR(someString$, "[") THEN COLOR 15 ELSE COLOR 7
 	IF INSTR(someString$, ">") THEN COLOR 14
 	IF INSTR(someString$, "..") THEN COLOR 11
 	IF INSTR(someString$, "!") THEN COLOR 12
@@ -3878,18 +3897,26 @@ SUB ShowReports (who%)
 END SUB
 
 SUB ResupplyArmy (index%)
-			who = 1: IF index > 20 THEN who = 2
-			IF gRealism > 0 THEN
-				CALL cutoff(who, gArmyLocation(index), a)
-				IF a < 1 THEN EXIT SUB
-			END IF
-			IF gArmySize(index) > 0 THEN x = gCurrentCash(who) / gArmySize(index) * 10
-			y = x + gArmySupply(index): IF y > 5 THEN x = 5 - gArmySupply(index)
-			IF x < 1 THEN CALL ClearBottom: PRINT "Not enough funds in the Treasury to supply "; gArmyName$(index); : GOTO nocash
-			gArmySupply(index) = gArmySupply(index) + x: gCurrentCash(who) = gCurrentCash(who) - .1 * x * gArmySize(index)
-			CALL ClearBottom: PRINT gArmyName$(index); " has received supplies "; : IF gSoundEffects > 0 THEN SOUND 4500, .5
-	nocash:
-			CALL TICK(gTurbo!): IF gCurrentCash(who) < 0 THEN gCurrentCash(who) = 0
+	IF index > 20 THEN who = 2 ELSE who = 1
+	IF gRealism > 0 THEN
+		CALL cutoff(who, gArmyLocation(index), a)
+		IF a < 1 THEN EXIT SUB
+	END IF
+	IF gArmySize(index) > 0 THEN x = gCurrentCash(who) / gArmySize(index) * 10
+	y = x + gArmySupply(index)
+	IF y > 5 THEN x = 5 - gArmySupply(index)
+	IF x < 1 THEN 
+		CALL ClearBottom
+		PRINT "Not enough funds in the Treasury to supply "; gArmyName$(index);
+		GOTO nocash
+	END IF
+	gArmySupply(index) = gArmySupply(index) + x
+	gCurrentCash(who) = gCurrentCash(who) - .1 * x * gArmySize(index)
+	CALL ClearBottom
+	PRINT gArmyName$(index); " has received supplies ";
+	IF gSoundEffects > 0 THEN SOUND 4500, .5
+	nocash: ' line label
+	CALL TICK(gTurbo!): IF gCurrentCash(who) < 0 THEN gCurrentCash(who) = 0
 END SUB
 
 SUB retreat (defend%, x%)
@@ -3900,44 +3927,56 @@ SUB retreat (defend%, x%)
 
 	gHighlight = 13: gColour = 3: gTLX = 67: gTLY = 5: gMenuRows = 0
 	y = gArmyLocation(defend)
-	who = 1: IF defend > 20 THEN who = 2
+	IF defend > 20 THEN who = 2 ELSE who = 1
 	FOR k = 1 TO 6
-		IF gMatrix(y, k) > 0 AND gCityOwner(gMatrix(y, k)) = who THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = gCityName$(gMatrix(y, k)): gArray(gMenuRows) = gMatrix(y, k)
+		IF gMatrix(y, k) > 0 AND gCityOwner(gMatrix(y, k)) = who THEN 
+			gMenuRows = gMenuRows + 1
+			gMenuText$(gMenuRows) = gCityName$(gMatrix(y, k))
+			gArray(gMenuRows) = gMatrix(y, k)
+		END IF
 	NEXT k
 		IF gMenuRows = 0 THEN EXIT SUB
-		IF gMenuRows = 1 THEN x = gArray(1): EXIT SUB
+		IF gMenuRows = 1 THEN 
+			x = gArray(1)
+			EXIT SUB
+		END IF
 		gMenuText$(0) = "Retreat"
 		CALL bubble(gMenuRows)
 		CALL ShowMenu(9)
 		CALL ClearRight
-		IF gChosenOption < 0 OR gChosenOption > gMenuRows THEN x = 0: EXIT SUB
+		IF gChosenOption < 0 OR gChosenOption > gMenuRows THEN 
+			x = 0
+			EXIT SUB
+		END IF
 		x = gArray(gChosenOption)
 END SUB
 
 SUB MakeRomanNumerals (target%, someString$)
-	someString$ = "Union ": IF target > 20 THEN someString$ = "Rebel "
+	IF target > 20 THEN someString$ = "Rebel " ELSE someString$ = "Union "
 	IF target > 20 THEN target = target - 20
-	IF target > 10 THEN someString$ = someString$ + "X": target = target - 10
+	IF target > 10 THEN 
+		someString$ = someString$ + "X"
+		target = target - 10
+	END IF
 	SELECT CASE target
 		CASE IS < 4
-		x = target: GOSUB add1s
+			x = target: GOSUB add1s
 		CASE 4
-		someString$ = someString$ + "IV"
+			someString$ = someString$ + "IV"
 		CASE 5 TO 8
-		someString$ = someString$ + "V"
-		x = target - 5
-		GOSUB add1s
+			someString$ = someString$ + "V"
+			x = target - 5
+			GOSUB add1s
 		CASE 9
-		someString$ = someString$ + "IX"
+			someString$ = someString$ + "IX"
 		CASE 10
-		someString$ = someString$ + "X"
+			someString$ = someString$ + "X"
 	END SELECT
 	EXIT SUB
 
 	add1s:
 	IF x > 0 THEN FOR k = 1 TO x: someString$ = someString$ + "I": NEXT k
 	RETURN
-
 END SUB
 
 SUB DrawRebelWin
@@ -4000,14 +4039,14 @@ SUB DrawRebelWin
 
 	stars:
 	FOR i = 1 TO 8
-	x = gStarX(i): y = gStarY(i)
-	PSET (x, y), 0
-	LINE (x + 2, y - 1)-(x + 8, y + 16), 15
-	LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
-	LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
-	LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
-	LINE -(x, y - 9): LINE -(x + 16, y - 9)
-	LINE -(x + 2, y - 1): PAINT (x, y), 15
+		x = gStarX(i): y = gStarY(i)
+		PSET (x, y), 0
+		LINE (x + 2, y - 1)-(x + 8, y + 16), 15
+		LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
+		LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
+		LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
+		LINE -(x, y - 9): LINE -(x + 16, y - 9)
+		LINE -(x + 2, y - 1): PAINT (x, y), 15
 	NEXT i
 	RETURN
 END SUB
