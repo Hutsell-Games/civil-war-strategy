@@ -3263,7 +3263,7 @@ PSET (580, 380), 0
 
 DRAW "BR15"
 x = POINT(0): y = POINT(1): CIRCLE (x, y), 25, 1, , , 1.4
-CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4
+CIRCLE (x + 5, y), 27, 1, 4, 1.5, 1.4
 CIRCLE (x, y), 29, 1, , , 1.4
 DRAW "BR20"
 x = POINT(0): y = POINT(1): PAINT (x, y), 3, 1
