@@ -3229,33 +3229,65 @@ END SUB
 
 SUB evaluate (index%, x%)
 	from = gArmyLocation(index)
-	x = 200: IF gAggress! > 1.5 THEN x = 80: IF gAggress! > 2 THEN x = 20: IF gAggress! > 3 THEN x = 5
-	CALL void(from, defend): IF defend = 0 THEN x = 0
+	x = 200
+	IF gAggress! > 1.5 THEN 
+		x = 80
+		IF gAggress! > 2 THEN 
+			x = 20
+			IF gAggress! > 3 THEN x = 5
+		END IF
+	END IF
+	CALL void(from, defend)
+	IF defend = 0 THEN x = 0
 	IF gAIBoldness > 1 THEN x = .5 * x
 
 	best = gArmySize(index)
 
-	FOR j = 1 TO 6: gArray(j) = -1
-	a = gMatrix(from, j): IF a > 0 THEN IF gIsOccupied(a) > 0 THEN best = best - gArmySize(gIsOccupied(a)): y = 1
-	NEXT j: best = .01 * best
+	FOR j = 1 TO 6
+		gArray(j) = -1
+		a = gMatrix(from, j)
+		IF a > 0 THEN IF gIsOccupied(a) > 0 THEN best = best - gArmySize(gIsOccupied(a)): y = 1
+	NEXT j
+	best = .01 * best
 	IF gAIBoldness > 0 THEN best = best + 20 * gAIBoldness
 
 	CALL StartToFinish(start, fin, 3 - gCurrentSide)
 
 	FOR j = 1 TO 6
-		y = -1: a = gMatrix(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
+		y = -1
+		a = gMatrix(from, j)
+		IF a = 0 THEN max = j - 1: GOTO alleval
 		
 		c = gIsOccupied(a)
-		FOR k = start TO fin: IF gArmyLocation(k) > 0 THEN IF gArmyMove(k) = a AND c = 0 GOTO alle
+		FOR k = start TO fin
+			IF gArmyLocation(k) > 0 THEN 
+				IF gArmyMove(k) = a AND c = 0 GOTO alle
+			END IF
 		NEXT k
 		
 		y = best - x * gFortLevel(from) - gCityValue(from) + 30 * RND
-		IF gFortLevel(from) > 0 THEN IF index = gIsOccupied(from) THEN y = y - 25: IF gRealism > 0 THEN y = y - 50
-		IF a = gCapitalCity(gCurrentSide) THEN IF gVictoryFlags(5) > 0 THEN y = y + 200
-		IF gCityOwner(a) <> 3 - gCurrentSide THEN y = y + 5 * gCityValue(a) + 10 * gFortLevel(a)
-		IF gCityOwner(a) <> gCurrentSide GOTO ourn
-		IF c = 0 THEN y = y + 10 * gCityValue(a): GOTO ourn
-		x1 = 1: IF gFortLevel(a) = 1 THEN x1 = 2: IF gFortLevel(a) = 3 THEN x1 = 3
+		IF gFortLevel(from) > 0 THEN 
+			IF index = gIsOccupied(from) THEN 
+				y = y - 25
+				IF gRealism > 0 THEN y = y - 50
+			END IF
+		END IF
+		IF a = gCapitalCity(gCurrentSide) THEN 
+			IF gVictoryFlags(5) > 0 THEN y = y + 200
+		END IF
+		IF gCityOwner(a) <> 3 - gCurrentSide THEN 
+			y = y + 5 * gCityValue(a) + 10 * gFortLevel(a)
+		END IF
+		IF gCityOwner(a) <> gCurrentSide THEN GOTO ourn
+		IF c = 0 THEN 
+			y = y + 10 * gCityValue(a)
+			GOTO ourn
+		END IF
+		x1 = 1
+		IF gFortLevel(a) = 1 THEN 
+			x1 = 2
+			IF gFortLevel(a) = 3 THEN x1 = 3
+		END IF
 
 		IF gArmySize(c) > 0 THEN
 			odds! = gArmySize(index) / (x1 * gArmySize(c))
@@ -3264,55 +3296,67 @@ SUB evaluate (index%, x%)
 			odds! = 5
 		END IF
 
-		IF gArmySize(index) < 15 THEN y = y - 300: odds! = .1
+		IF gArmySize(index) < 15 THEN 
+			y = y - 300
+			odds! = .1
+		END IF
 		IF gAIBoldness < 3 AND gArmySize(index) < 40 AND odds! < .8 THEN y = 0
 		IF gRealism > 0 THEN y = y - 15
 		IF odds! < .5 THEN y = y - 200
-		IF gAIBoldness = 0 AND RND > .9 THEN y = y + 10 * (gArmyCommander(index) - gArmyCommander(c) + gArmyExp(index) - gArmyCommander(index))
+		IF gAIBoldness = 0 AND RND > .9 THEN 
+			y = y + 10 * (gArmyCommander(index) - gArmyCommander(c) + gArmyExp(index) - gArmyCommander(index))
+		END IF
 		IF gArmySupply(index) < 1 THEN y = y - 100
 		SELECT CASE odds! + .5 * gAIBoldness
 			CASE IS < .3
-			y = -9999
+				y = -9999
 			CASE IS < .5
-			y = y - 300
+				y = y - 300
 			CASE IS <= .8
-			y = y - 20
+				y = y - 20
 			CASE .8 TO 1.2
-			y = y - 5
+				y = y - 5
 			CASE 1.2 TO 1.5
-			y = y + 10
+				y = y + 10
 			CASE ELSE
-			y = y + .5 * (gArmySize(index) - gArmySize(c)) + 50 * RND
+				y = y + .5 * (gArmySize(index) - gArmySize(c)) + 50 * RND
 		END SELECT
-	ourn:
+		ourn: ' line label
 		IF gCityOwner(a) = 3 - gCurrentSide AND c > 0 AND gArmyMove(c) = 0 THEN y = y - gArmySize(c)
 		IF gCurrentSide = 1 AND gCityY(a) < gCityY(from) THEN y = y + 2
 		IF gCurrentSide = 2 AND gCityY(a) > gCityY(from) THEN y = y + 2
-	'---------------------------------------------------------------------------
-		FOR k = 1 TO 6: m = gMatrix(a, k): IF m = 0 GOTO tally3
-		IF gCityOwner(m) = 0 THEN y = y + 3 * gCityValue(m) + 4 * gFortLevel(m)
-		IF gCityOwner(m) = gCurrentSide THEN y = y + 3 * gCityValue(m) + 4 * gFortLevel(m)
-		IF gCityOwner(m) = gCurrentSide AND c > 0 THEN
-			odds! = 5 - 4 * RND
-			IF gArmySize(c) > 0 THEN odds! = gArmySize(index) / gArmySize(c) ELSE odds! = 5
-			IF odds! < 1 THEN y = y - 2
-		END IF
-		IF gCityOwner(m) = gCapitalCity(gCurrentSide) THEN y = y + 50
-	tally3:
+
+		FOR k = 1 TO 6
+			m = gMatrix(a, k)
+			IF m = 0 GOTO tally3
+			IF gCityOwner(m) = 0 THEN y = y + 3 * gCityValue(m) + 4 * gFortLevel(m)
+			IF gCityOwner(m) = gCurrentSide THEN y = y + 3 * gCityValue(m) + 4 * gFortLevel(m)
+			IF gCityOwner(m) = gCurrentSide AND c > 0 THEN
+				odds! = 5 - 4 * RND
+				IF gArmySize(c) > 0 THEN odds! = gArmySize(index) / gArmySize(c) ELSE odds! = 5
+				IF odds! < 1 THEN y = y - 2
+			END IF
+			IF gCityOwner(m) = gCapitalCity(gCurrentSide) THEN y = y + 50
+		tally3: ' line label
 		NEXT k
-	'---------------------------------------------------------------------------
+
 		gArray(j) = y
-	alle:
-	NEXT j: max = 6
-	alleval:
-	x = 0: best = 0
-	FOR j = 1 TO max
-	IF gArray(j) < 0 GOTO allof
-		IF gArray(j) > x THEN x = gArray(j): best = j
-	allof:
+		alle:
 	NEXT j
-		IF defend > gArmySize(index) AND gArray(best) < 50 THEN best = 0
-		x = best
+	max = 6
+	alleval:
+	x = 0
+	best = 0
+	FOR j = 1 TO max
+		IF gArray(j) < 0 GOTO allof
+			IF gArray(j) > x THEN 
+				x = gArray(j)
+				best = j
+			END IF
+		allof:
+	NEXT j
+	IF defend > gArmySize(index) AND gArray(best) < 50 THEN best = 0
+	x = best
 END SUB
 
 SUB SpecialEvents
