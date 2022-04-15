@@ -2511,15 +2511,17 @@ SUB TurnUpdate
 	END IF
 	COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
 	LOCATE 1, 20: PRINT "Update for "; gMonthes$(gCurrentMonth); ","; gCurrentYear
-	CALL ClearBottom: PRINT "press any key for "; gMonthes$(gCurrentMonth); ","; gCurrentYear; " events";
+	CALL ClearBottom
+	PRINT "press any key for "; gMonthes$(gCurrentMonth); ","; gCurrentYear; " events";
 	DO WHILE INKEY$ = "": LOOP
 	CALL TurnUpdateBox
-	'==========================================================================
+
 	'                       Assign Time of Action
-	'==========================================================================
 	FOR i = 1 TO 2
 		IF gRR(i) > 0 THEN 
-			CALL railroad(i): LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B: CALL engine
+			CALL railroad(i)
+			LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B
+			CALL engine
 		END IF
 	NEXT i
 
@@ -2558,107 +2560,108 @@ SUB TurnUpdate
 	NEXT i
 
 	CALL SortArmyMoves(40)
-	'==========================================================================
+
 	'                       Begin Main Loop
-	'==========================================================================
 	FOR j = 1 TO 40
 		flag = 0
 		IF gOrderOfMoves(j) = 999 GOTO allthru
 		active = INT(gOrderOfMoves(j) / 100)
 		active = gOrderOfMoves(j) - 100 * active
 		IF active > 20 THEN s = 2 ELSE s = 1
-	IF gArmyMove(active) < 1 GOTO digin
-	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " is moving to "; gCityName$(gArmyMove(active));
+		IF gArmyMove(active) < 1 GOTO digin
+		CALL ClearBottom
+		COLOR 11: PRINT gArmyName$(active); " is moving to "; gCityName$(gArmyMove(active));
 
-	gArmySupply(active) = gArmySupply(active) - 1
-	IF gArmySupply(active) < 0 THEN 
-		gArmySupply(active) = 0
+		gArmySupply(active) = gArmySupply(active) - 1
+		IF gArmySupply(active) < 0 THEN 
+			gArmySupply(active) = 0
+			CALL TICK(gTurbo!)
+			CALL ClearBottom
+			PRINT gArmyName$(active); " is out of supplies !";
+		END IF
+
+		CALL DrawArmyUnit(active)
+		CALL MoveUnitIcon(gArmyLocation(active), gArmyMove(active), 5)
+
+		CALL AnimateMovement(active, 0)
+	
+		target = gArmyMove(active)
+		IF gIsOccupied(target) = 0 GOTO moveintonewcity
+		IF (s = 1 AND gIsOccupied(target) < 21) OR (s = 2 AND gIsOccupied(target) > 20) THEN
+			GOTO friendlyarmiesmeet 
+		ELSE 
+			GOTO enemyarmiesbattle
+		END IF
+		
+		'                         Join Forces
+		friendlyarmiesmeet:
+		COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " and "; gArmyName$(gIsOccupied(target)); " meet in "; gCityName$(target);
 		CALL TICK(gTurbo!)
+		CALL MoveUnitIcon(gArmyMove(active), 0, 6)
 		CALL ClearBottom
-		PRINT gArmyName$(active); " is out of supplies !";
-	END IF
+		GOTO moveintonewcity
 
-	CALL DrawArmyUnit(active)
-	CALL MoveUnitIcon(gArmyLocation(active), gArmyMove(active), 5)
+		'                       Attack
+		enemyarmiesbattle:
+		CALL MoveUnitIcon(target, 0, 3)
+		defend = gIsOccupied(target)
 
-	CALL AnimateMovement(active, 0)
-	'==========================================================================
-	target = gArmyMove(active)
-	IF gIsOccupied(target) = 0 GOTO moveintonewcity
-	IF (s = 1 AND gIsOccupied(target) < 21) OR (s = 2 AND gIsOccupied(target) > 20) THEN
-		GOTO friendlyarmiesmeet 
-	ELSE 
-		GOTO enemyarmiesbattle
-	END IF
-	'==========================================================================
-	'                         Join Forces
-	'==========================================================================
-	friendlyarmiesmeet:
-	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " and "; gArmyName$(gIsOccupied(target)); " meet in "; gCityName$(target);
-	CALL TICK(gTurbo!)
-	CALL MoveUnitIcon(gArmyMove(active), 0, 6)
-	CALL ClearBottom
-	GOTO moveintonewcity
-	'==========================================================================
-	'                       Attack
-	'==========================================================================
-	enemyarmiesbattle:
-	CALL MoveUnitIcon(target, 0, 3)
-	defend = gIsOccupied(target)
-
-	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " attacks "; gArmyName$(defend); " in "; gCityName$(gArmyLocation(defend));
-	CALL TICK(gTurbo! - 1)
-	IF gArmySize(defend) > 0 THEN 
-		CALL ComputeBattle(active, defend, win, lose)
-		flag = 1
-		IF gGraphicLevel > 0 THEN CALL TurnUpdateBox
-	END IF
-	IF gArmyExp(win) < 10 THEN gArmyExp(win) = gArmyExp(win) + 1
-
-	IF gArmySize(lose) < 2 THEN
 		CALL ClearBottom
-		someString$ = gArmyName$(lose) + "'s army is crushed in " + gCityName$(gArmyLocation(defend))
-		CALL scribe(someString$, 2)
-		index = lose
-		GOTO crushed
-	END IF
+		COLOR 11: PRINT gArmyName$(active); " attacks "; gArmyName$(defend); " in "; gCityName$(gArmyLocation(defend));
+		CALL TICK(gTurbo! - 1)
+		IF gArmySize(defend) > 0 THEN 
+			CALL ComputeBattle(active, defend, win, lose)
+			flag = 1
+			IF gGraphicLevel > 0 THEN CALL TurnUpdateBox
+		END IF
+		IF gArmyExp(win) < 10 THEN gArmyExp(win) = gArmyExp(win) + 1
 
-	CALL ClearRight
-	'==========================================================================
-	'                       Attacker Loses
-	'==========================================================================
-	IF win = active GOTO defenderretreats
-	gArmyMove(active) = gArmyLocation(active)
-	gArmyLocation(active) = target
-	COLOR 11: CALL ClearBottom: PRINT gArmyName$(active); " withdrew to "; gCityName$(gArmyMove(active));
+		IF gArmySize(lose) < 2 THEN
+			CALL ClearBottom
+			someString$ = gArmyName$(lose) + "'s army is crushed in " + gCityName$(gArmyLocation(defend))
+			CALL scribe(someString$, 2)
+			index = lose
+			GOTO crushed
+		END IF
 
-	CALL DrawArmyUnit(gArmyLocation(active))
-	CALL AnimateMovement(active, 1)
+		CALL ClearRight
 
-	gArmyLocation(active) = gArmyMove(active)
-	CALL DrawArmyUnit(gArmyLocation(active))
-	CALL DrawArmyUnit(active)
-	gIsOccupied(gArmyLocation(active)) = active
-	gArmyMove(active) = -2
-			
-	IF 11 * RND > gArmyCommander(defend) THEN 
-		CALL MoveUnitIcon(gArmyLocation(defend), gArmyMove(defend), 4)
-		IF gArmyMove(defend) > 0 THEN gArmyMove(defend) = -2
-	END IF
+		'                       Attacker Loses
+		IF win = active GOTO defenderretreats
+		gArmyMove(active) = gArmyLocation(active)
+		gArmyLocation(active) = target
+		CALL ClearBottom
+		COLOR 11: PRINT gArmyName$(active); " withdrew to "; gCityName$(gArmyMove(active));
 
-	CALL TICK(gTurbo!)
-	GOTO digin
-	'==========================================================================
-	'                       Defender Retreats
-	'==========================================================================
-	defenderretreats:
+		CALL DrawArmyUnit(gArmyLocation(active))
+		CALL AnimateMovement(active, 1)
+
+		gArmyLocation(active) = gArmyMove(active)
+		CALL DrawArmyUnit(gArmyLocation(active))
+		CALL DrawArmyUnit(active)
+		gIsOccupied(gArmyLocation(active)) = active
+		gArmyMove(active) = -2
+				
+		IF 11 * RND > gArmyCommander(defend) THEN 
+			CALL MoveUnitIcon(gArmyLocation(defend), gArmyMove(defend), 4)
+			IF gArmyMove(defend) > 0 THEN gArmyMove(defend) = -2
+		END IF
+
+		CALL TICK(gTurbo!)
+		GOTO digin
+
+		'                       Defender Retreats
+		defenderretreats:
 		CALL MoveUnitIcon(gArmyLocation(active), target, 4)
 		IF gArmyMove(defend) > 0 THEN 
 			CALL MoveUnitIcon(target, gArmyMove(defend), 4)
 		END IF
 
 		CALL retreat(defend, flee)
-		IF flee > 0 THEN move2 = flee: GOTO outta
+		IF flee > 0 THEN 
+			move2 = flee
+			GOTO outta
+		END IF
 
 		best = 0
 		flee = 0
@@ -2678,28 +2681,27 @@ SUB TurnUpdate
 		NEXT i
 		IF flee = 0 GOTO defendersurrenders
 		move2 = gMatrix(target, flee)
-	outta:
+		outta:
 		CALL DrawArmyUnit(defend)                  ' in old city
-
 		gArmyMove(defend) = move2
 		CALL AnimateMovement(defend, 0)                 ' animate retreat
-		
+			
 		gArmyLocation(defend) = move2
 		gIsOccupied(move2) = defend
 		CALL ClearBottom
 		PRINT gArmyName$(defend) + " is withdrawing to " + gCityName$(move2);
 
 		CALL DrawArmyUnit(defend)                  ' in new city
-		
+			
 		CALL MoveUnitIcon(target, 0, 6)
 		gArmyMove(defend) = -2
 		GOTO checkmoredefenders
 
-	defendersurrenders:
+		defendersurrenders:
 		index = defend
 		someString$ = gArmyName$(index) + " surrenders to " + gArmyName$(active) + " in " + gCityName$(gArmyLocation(index))
 		CALL scribe(someString$, 2)
-	crushed:
+		crushed:
 		IF gGraphicLevel > 2 THEN 
 			CALL DrawArmySurrender(index)
 			COLOR 14: LOCATE 3, 68: PRINT gArmyName$(index): LOCATE 4, 68: PRINT "surrenders !"
@@ -2724,26 +2726,25 @@ SUB TurnUpdate
 		CALL TICK(9)
 		CALL ClearRight
 		IF gArmyLocation(active) = 0 GOTO digin
-	'---------------------------------------------------------------------------
-	'                       check for more defenders !
-	'---------------------------------------------------------------------------
-	checkmoredefenders:
+
+		'                       check for more defenders !
+		checkmoredefenders:
 		CALL occupy(target)
 		IF gIsOccupied(target) = 0 GOTO moveintonewcity
-		COLOR 11: CALL ClearBottom: PRINT "There are still defenders in "; gCityName$(target);
+		CALL ClearBottom
+		COLOR 11: PRINT "There are still defenders in "; gCityName$(target);
 		CALL TICK(99)
 		GOTO enemyarmiesbattle
-	'==========================================================================
-	'                       Move Into New City
-	'==========================================================================
-	moveintonewcity:
-	CALL MoveUnitIcon(gArmyLocation(active), target, 4)
-	gArmyLocation(active) = target: gArmyMove(active) = -2
-	CALL occupy(gArmyLocation(active))
-	CALL DrawArmyUnit(active)
-	'---------------------------------------------------------------------------
-	'                            City Capture
-	'---------------------------------------------------------------------------
+
+		'                       Move Into New City
+		moveintonewcity:
+		CALL MoveUnitIcon(gArmyLocation(active), target, 4)
+		gArmyLocation(active) = target
+		gArmyMove(active) = -2
+		CALL occupy(gArmyLocation(active))
+		CALL DrawArmyUnit(active)
+
+		'                            City Capture
 		IF gCityOwner(gArmyLocation(active)) = s GOTO horde
 		c = gArmyLocation(active)
 		IF gHumanPlayers = 1 AND s = gCurrentSide AND gFortLevel(c) > 0 AND flag = 0 THEN
@@ -2759,7 +2760,7 @@ SUB TurnUpdate
 		END IF
 		IF gHumanPlayers = 1 AND s <> gCurrentSide AND gFortLevel(c) > 0 AND flag = 0 THEN
 			IF gRealism > 0 AND gCityY(c) > 150 THEN
-	razefort:
+			razefort:
 				gFortLevel(c) = 0
 				x = gCityX(c)
 				y = gCityY(c)
@@ -2771,12 +2772,12 @@ SUB TurnUpdate
 			END IF
 		END IF
 		CALL DrawCityCaptured(active, c, s, flag)
-	horde:
-	IF gArmySupply(active) < 10 THEN 
-		gArmySupply(active) = gArmySupply(active) + 1
-		IF RND > .8 GOTO horde
-	END IF
-	digin:
+		horde:
+		IF gArmySupply(active) < 10 THEN 
+			gArmySupply(active) = gArmySupply(active) + 1
+			IF RND > .8 GOTO horde
+		END IF
+		digin:
 	NEXT j
 	GOTO allthru
 
@@ -2792,7 +2793,8 @@ SUB TurnUpdate
 			END IF
 			COLOR 15: PRINT gNationName$(gNavalCommerce); " raiders have sunk $"; gNavalRaider; " of "; gNationName$(3 - gNavalCommerce); " commerce";
 			IF LEFT$(gFleet$(gNavalCommerce), 1) = "I" THEN a = 2 ELSE a = 1
-			PSET (500, 465), 0: CALL DrawShipIcon(gNavalCommerce, a)
+			PSET (500, 465), 0
+			CALL DrawShipIcon(gNavalCommerce, a)
 			IF gSoundEffects > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
 			IF gNavalCommerce = gCurrentSide THEN gGrudge = 1
 			TICK 9
@@ -2807,7 +2809,9 @@ SUB TurnUpdate
 			ELSE
 				gNavalCommerce = 0
 				LINE (447, 291)-(525, 335), 1, BF
-				FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
+				FOR k = 1 TO 5
+					CIRCLE (480, 315), 4 * k, 11
+				NEXT k
 				TICK 9
 				LINE (447, 291)-(525, 335), 1, BF
 			END IF
@@ -2835,7 +2839,10 @@ SUB TurnUpdate
 		IF gCityController(2) > 34 THEN gVictoryPoints(2) = gVictoryPoints(1) + 100
 	END IF
 	IF gCurrentSide = 1 AND gCityController(2) < 11 THEN gAggress! = gAggress! + .7
-	IF gHumanPlayers = 2 THEN CALL ClearBottom: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+	IF gHumanPlayers = 2 THEN 
+		CALL ClearBottom
+		COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+	END IF
 END SUB
 
 SUB TurnUpdateBox
@@ -2864,7 +2871,11 @@ END SUB
 '               if >10 then 10's digit=box color  1's digit= window type
 
 SUB GenericMenu (b1%, wide%)
-	boxc = gColour: IF gWindowType > 10 THEN boxc = INT(gWindowType / 10): gWindowType = gWindowType - 10 * boxc
+	boxc = gColour
+	IF gWindowType > 10 THEN 
+		boxc = INT(gWindowType / 10)
+		gWindowType = gWindowType - 10 * boxc
+	END IF
 	COLOR boxc
 	VIEW (8 * gTLX - 6, 16 * gTLY - 11)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + gMenuRows + 2) + 8)
 	CLS 1
@@ -2872,60 +2883,67 @@ SUB GenericMenu (b1%, wide%)
 	LINE (8 * gTLX - 6, 16 * gTLY - 11)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + gMenuRows + 2) + 8), gColour, B
 	LINE (8 * gTLX - 2, 16 * (gTLY + 1) + 3)-(8 * (gTLX + wide + 1) + 3, 16 * (gTLY + 1) + 6), gColour, B
 	IF ABS(gWindowType) = 2 THEN
-	LINE (8 * gTLX - 2, 16 * gTLY - 8)-(8 * (gTLX + wide + 1) + 3, 16 * (gTLY + gMenuRows + 2) + 4), gColour, B
+		LINE (8 * gTLX - 2, 16 * gTLY - 8)-(8 * (gTLX + wide + 1) + 3, 16 * (gTLY + gMenuRows + 2) + 4), gColour, B
 	END IF
 	COLOR gColour
 
 	LOCATE gTLY + 1, gTLX + b1: PRINT gMenuText$(0)
 	FOR i = 1 TO gMenuRows
-	LOCATE gTLY + 2 + i, gTLX + 2: PRINT gMenuText$(i);
+		LOCATE gTLY + 2 + i, gTLX + 2: PRINT gMenuText$(i);
 	NEXT i
 END SUB
 
 SUB ShowMenu (switch%)
-		IF gColour = 0 THEN gColour = 7
-		LOCATE 1, 1, 0
-		IF gMenuText$(0) = "" THEN gMenuText$(0) = "M E N U"
+	IF gColour = 0 THEN gColour = 7
+	LOCATE 1, 1, 0
+	IF gMenuText$(0) = "" THEN gMenuText$(0) = "M E N U"
 
-		IF wide = 0 THEN CALL MenuMaxWidth(wide)
-		IF gTLX = 0 THEN GOSUB noadjust
-		IF gChosenOption < 21 THEN gChosenOption = 1
-		IF gChosenOption > 21 THEN gChosenOption = gChosenOption - 21
-		IF gChosenOption > 21 THEN gChosenOption = 1
-		row = gChosenOption: IF row < 1 THEN row = 1
-		IF row > gMenuRows THEN row = 1
-		gChosenOption = row
-		row1 = row
+	IF wide = 0 THEN CALL MenuMaxWidth(wide)
+	IF gTLX = 0 THEN GOSUB noadjust
+	IF gChosenOption < 21 THEN gChosenOption = 1
+	IF gChosenOption > 21 THEN gChosenOption = gChosenOption - 21
+	IF gChosenOption > 21 THEN gChosenOption = 1
+	row = gChosenOption
+	IF row < 1 THEN row = 1
+	IF row > gMenuRows THEN row = 1
+	gChosenOption = row
+	row1 = row
 		
-		IF gTLY = 0 THEN gTLY = INT(11.5 - .5 * gMenuRows)
-		IF gTLY + gMenuRows > 26 THEN gTLY = 26 - gMenuRows
+	IF gTLY = 0 THEN gTLY = INT(11.5 - .5 * gMenuRows)
+	IF gTLY + gMenuRows > 26 THEN gTLY = 26 - gMenuRows
 		
-		brx = gTLX + wide + 1
-		bry = gTLY + gMenuRows + 3
+	brx = gTLX + wide + 1
+	bry = gTLY + gMenuRows + 3
 		
-		boxc = gColour: IF gWindowType > 10 THEN boxc = INT(gWindowType / 10): gWindowType = gWindowType - 10 * boxc
+	boxc = gColour
+	IF gWindowType > 10 THEN 
+		boxc = INT(gWindowType / 10)
+		gWindowType = gWindowType - 10 * boxc
+	END IF
 
-		COLOR boxc
+	COLOR boxc
 
-		VIEW (8 * gTLX - 6, 16 * gTLY - 11)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + gMenuRows + 2) + 8)
-		CLS 1
-		VIEW
-		LINE (8 * gTLX - 6, 16 * gTLY - 11)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + gMenuRows + 2) + 8), gColour, B
-		LINE (8 * gTLX - 2, 16 * (gTLY + 1) + 3)-(8 * (gTLX + wide + 1) + 3, 16 * (gTLY + 1) + 6), gColour, B
-		IF ABS(gWindowType) = 2 THEN
-			LINE (8 * gTLX - 2, 16 * gTLY - 8)-(8 * (gTLX + wide + 1) + 3, 16 * (gTLY + gMenuRows + 2) + 4), gColour, B
-		END IF
+	VIEW (8 * gTLX - 6, 16 * gTLY - 11)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + gMenuRows + 2) + 8)
+	CLS 1
+	VIEW
+	LINE (8 * gTLX - 6, 16 * gTLY - 11)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + gMenuRows + 2) + 8), gColour, B
+	LINE (8 * gTLX - 2, 16 * (gTLY + 1) + 3)-(8 * (gTLX + wide + 1) + 3, 16 * (gTLY + 1) + 6), gColour, B
+	IF ABS(gWindowType) = 2 THEN
+		LINE (8 * gTLX - 2, 16 * gTLY - 8)-(8 * (gTLX + wide + 1) + 3, 16 * (gTLY + gMenuRows + 2) + 4), gColour, B
+	END IF
 
-		COLOR gColour
-		b1 = INT(.5 * (wide - LEN(gMenuText$(0))) + .5) + 1
+	COLOR gColour
+	b1 = INT(.5 * (wide - LEN(gMenuText$(0))) + .5) + 1
 
-		CALL GenericMenu(b1, wide)
+	CALL GenericMenu(b1, wide)
 	sel1:
-		SELECT CASE switch
-			CASE 1: CALL MoveUnitIcon(gArray(row), 0, 7)
-			CASE 2: CALL MoveUnitIcon(gArray(row), 0, 9)
-				target = gIsOccupied(gArray(row))
-				IF target > 0 THEN
+	SELECT CASE switch
+		CASE 1
+			CALL MoveUnitIcon(gArray(row), 0, 7)
+		CASE 2
+			CALL MoveUnitIcon(gArray(row), 0, 9)
+			target = gIsOccupied(gArray(row))
+			IF target > 0 THEN
 				flag = 1
 				anotherString$ = gArmyName$(target)
 				IF LEN(anotherString$) > wide THEN anotherString$ = LEFT$(anotherString$, wide)
@@ -2934,18 +2952,25 @@ SUB ShowMenu (switch%)
 				LOCATE gTLY + 2 + row, gTLX + 2: PRINT anotherString$;
 				LOCATE gTLY + 4 + gMenuRows, gTLX + 1: PRINT SPACE$(12);
 				LOCATE gTLY + 4 + gMenuRows, gTLX + 1: PRINT "Size"; gArmySize(target);
-				x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
-				ELSE
+				x = POS(0)
+				y = CSRLIN
+				LOCATE y, x - 1: PRINT "00";
+			ELSE
 				flag = 0
 				LOCATE gTLY + 4 + gMenuRows, gTLX + 1: PRINT SPACE$(12);
-				END IF
-			CASE 4: CALL ShowArmyStats(gArray(row))
-			CASE 5: COLOR 11: CALL ClearBottom: PRINT gArmyName$(index); "  Exp="; gArmyExp(index); " Cash="; gCurrentCash(gCurrentSide);
-			CASE 6: CALL MoveUnitIcon(gArmyLocation(gArray(row)), 0, 9)
+			END IF
+			CASE 4
+				CALL ShowArmyStats(gArray(row))
+			CASE 5
+				CALL ClearBottom
+				COLOR 11 PRINT gArmyName$(index); "  Exp="; gArmyExp(index); " Cash="; gCurrentCash(gCurrentSide);
+			CASE 6
+				CALL MoveUnitIcon(gArmyLocation(gArray(row)), 0, 9)
 			CASE 8
 				IF gGraphicLevel > 2 AND row > 0 THEN
 					LINE (548, 148)-(592, 216), 15, B
-					a = row: IF gCurrentSide = 1 THEN a = 6 - row
+					a = row
+					IF gCurrentSide = 1 THEN a = 6 - row
 					anotherString$ = "face" + LTRIM$(STR$(a)) + ".vga"
 					IF _FILEEXISTS(anotherString$) THEN
 						DEF SEG = VARSEG(gFacesImage(1))
@@ -2958,20 +2983,32 @@ SUB ShowMenu (switch%)
 						END IF
 					END IF
 				END IF
-			CASE 9: CALL MoveUnitIcon(gArray(row), 0, 9)
+			CASE 9
+				CALL MoveUnitIcon(gArray(row), 0, 9)
 		END SELECT
 		IF flag = 0 THEN
 			COLOR gHighlight
 			LOCATE gTLY + 2 + row, gTLX + 2
 			PRINT gMenuText$(row)
-			IF gBorderWidth > 0 THEN LINE (8 * (gTLX + 1), 16 * (gTLY + row + 1))-(8 * (gTLX + LEN(gMenuText$(row)) + 1) - 1, 16 * (gTLY + row + 2) - 1), gHighlight, B
+			IF gBorderWidth > 0 THEN 
+				LINE (8 * (gTLX + 1), 16 * (gTLY + row + 1))-(8 * (gTLX + LEN(gMenuText$(row)) + 1) - 1, 16 * (gTLY + row + 2) - 1), gHighlight, B
+			END IF
 		END IF
 		GOSUB crsr
 		IF switch <> 3 GOTO reglr
-		IF someString$ = "H" THEN gChosenOption = 1: GOTO called
-		IF ASC(someString$) = 13 THEN gChosenOption = 2: GOTO called
-		IF someString$ = "P" THEN gChosenOption = 3: GOTO called
-	reglr:
+		IF someString$ = "H" THEN 
+			gChosenOption = 1
+			GOTO called
+		END IF
+		IF ASC(someString$) = 13 THEN 
+			gChosenOption = 2
+			GOTO called
+		END IF
+		IF someString$ = "P" THEN 
+			gChosenOption = 3
+			GOTO called
+		END IF
+		reglr:
 		IF ASC(someString$) = 13 GOTO called
 		IF switch = 2 THEN LOCATE gTLY + 2 + row1, gTLX + 2: PRINT SPACE$(wide);
 		COLOR gColour
@@ -2986,18 +3023,20 @@ SUB ShowMenu (switch%)
 
 		gChosenOption = row
 		GOTO sel1
-	crsr:   someString$ = INKEY$: IF someString$ = "" GOTO crsr
+		crsr:
+		someString$ = INKEY$
+		IF someString$ = "" GOTO crsr
 		IF ASC(someString$) = 13 THEN RETURN
 		IF LEN(someString$) = 2 GOTO arrows
 		IF switch = 3 THEN gChosenOption = -ASC(UCASE$(someString$)): GOTO called
 		IF ASC(someString$) = 27 THEN gChosenOption = -1: GOTO called
-			row1 = row
-			FOR k = 1 TO gMenuRows
+		row1 = row
+		FOR k = 1 TO gMenuRows
 			c1$ = UCASE$(LEFT$(LTRIM$(gMenuText$(k)), 1))
 			IF c1$ = UCASE$(someString$) THEN gChosenOption = k: GOSUB limits: GOTO called
-			NEXT k
+		NEXT k
 		GOTO crsr
-	arrows:
+		arrows:
 		someString$ = RIGHT$(someString$, 1)
 		row1 = row
 		IF someString$ = "H" THEN row = row - 1: GOSUB limits: RETURN
@@ -3007,7 +3046,8 @@ SUB ShowMenu (switch%)
 		IF someString$ = ";" AND switch = 0 THEN
 			SCREEN 0: CLS
 			SHELL "cwsdoc.com"
-			SCREEN 12: CALL DrawMap
+			SCREEN 12
+			CALL DrawMap
 			CALL GenericMenu(b1, wide)
 			CALL DrawTopBar
 			RETURN
@@ -3032,14 +3072,14 @@ SUB ShowMenu (switch%)
 		END IF
 		RETURN
 
-	limits:
+		limits:
 		IF row > gMenuRows THEN row = 1
 		IF row < 1 THEN row = gMenuRows
 		RETURN
-	noadjust:
+		noadjust:
 		IF gTLX = 0 THEN gTLX = INT(40.5 - .5 * wide)
 		RETURN
-	called:
+		called:
 		IF gSoundEffects > 0 THEN SOUND 700, .5
 		COLOR gColour
 		gTLX = 0: gTLY = 0
@@ -3055,8 +3095,8 @@ END SUB
 SUB MenuMaxWidth (wide%)
 	wide = LEN(gMenuText$(0)) + 1
 	FOR i = 1 TO gMenuRows
-	x = LEN(gMenuText$(i))
-	IF x > wide THEN wide = x
+		x = LEN(gMenuText$(i))
+		IF x > wide THEN wide = x
 	NEXT i
 END SUB
 
@@ -3064,18 +3104,18 @@ SUB armyxy (x%, y%, z%)
 	LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
 	SELECT CASE z
 		CASE 1
-		LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
-		LINE (x - 7, y - 5)-(x - 1, y), 1, BF
-		LINE (x, y - 2)-(x + 7, y - 1), 7, B
-		LINE (x - 7, y + 2)-(x + 7, y + 3), 7, B
-		LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
+			LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
+			LINE (x - 7, y - 5)-(x - 1, y), 1, BF
+			LINE (x, y - 2)-(x + 7, y - 1), 7, B
+			LINE (x - 7, y + 2)-(x + 7, y + 3), 7, B
+			LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
 		CASE 2
-		LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
-		LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
-		LINE (x - 7, y - 4)-(x + 6, y + 5), 9
-		LINE (x - 7, y + 4)-(x + 6, y - 5), 9
-		LINE (x - 7, y - 5)-(x + 7, y + 5), 9
-		LINE (x - 7, y + 5)-(x + 7, y - 5), 9
+			LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
+			LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
+			LINE (x - 7, y - 4)-(x + 6, y + 5), 9
+			LINE (x - 7, y + 4)-(x + 6, y - 5), 9
+			LINE (x - 7, y - 5)-(x + 7, y + 5), 9
+			LINE (x - 7, y + 5)-(x + 7, y - 5), 9
 		CASE ELSE
 	END SELECT
 END SUB
@@ -3083,11 +3123,11 @@ END SUB
 SUB SortArmyMoves (limit%)
 	DO
 		swaps% = FALSE
-		FOR i = 1 TO limit - 1
-		IF gOrderOfMoves(i) > gOrderOfMoves(i + 1) THEN
-			SWAP gOrderOfMoves(i), gOrderOfMoves(i + 1)
-			swaps% = i
-		END IF
+			FOR i = 1 TO limit - 1
+			IF gOrderOfMoves(i) > gOrderOfMoves(i + 1) THEN
+				SWAP gOrderOfMoves(i), gOrderOfMoves(i + 1)
+				swaps% = i
+			END IF
 		NEXT i
 	LOOP WHILE swaps%
 END SUB
@@ -3096,11 +3136,11 @@ SUB bubble (limit%)
 	DO
 		swaps% = FALSE
 		FOR i = 1 TO limit - 1
-		IF gMenuText$(i) > gMenuText$(i + 1) THEN
-			SWAP gMenuText$(i), gMenuText$(i + 1)
-			SWAP gArray(i), gArray(i + 1)
-			swaps% = i
-		END IF
+			IF gMenuText$(i) > gMenuText$(i + 1) THEN
+				SWAP gMenuText$(i), gMenuText$(i + 1)
+				SWAP gArray(i), gArray(i + 1)
+				swaps% = i
+			END IF
 		NEXT i
 	LOOP WHILE swaps%
 END SUB
@@ -3150,8 +3190,8 @@ SUB CancelArmyMovement (gCurrentSide%)
 			IF gSoundEffects > 0 THEN SOUND 2999, .5
 			CALL stax(gCurrentSide)
 		CASE ELSE
-		END SELECT
-		CALL ClearRight
+	END SELECT
+	CALL ClearRight
 END SUB
 
 SUB center (y%, someString$)
