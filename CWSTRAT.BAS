@@ -1717,7 +1717,7 @@ SUB ManageNavy (who%, chx%)
 	IF chx > 0 THEN 
 		gChosenOption = chx
 		GOTO anchor
-	EN DIF
+	END IF
 	IF gHasNavy > 0 AND gChosenOption <> 1 THEN EXIT SUB
 	CALL ShowMenu(0)
 	CALL ClearRight
@@ -3248,7 +3248,7 @@ SUB ShowMenu (switch%)
 				CALL ShowArmyStats(gArray(row))
 			CASE 5
 				CALL ClearBottom
-				COLOR 11 PRINT gArmyName$(index); "  Exp="; gArmyExp(index); " Cash="; gCurrentCash(gCurrentSide);
+				COLOR 11: PRINT gArmyName$(index); "  Exp="; gArmyExp(index); " Cash="; gCurrentCash(gCurrentSide);
 			CASE 6
 				CALL MoveUnitIcon(gArmyLocation(gArray(row)), 0, 9)
 			CASE 8
@@ -4235,7 +4235,7 @@ SUB ShowReports (who%)
 			COLOR c
 			x = gCityX(gArmyLocation(k))
 			y = gCityY(gArmyLocation(k))
-			z = 10IF gArmySize(k) < 1000 THEN z = 9 ELSE z = 10
+			IF gArmySize(k) < 1000 THEN z = 9 ELSE z = 10
 			x = x / 8 - 2
 			y = y / 16
 			IF y > 26 THEN y = 26
@@ -4577,7 +4577,7 @@ SUB ships
 	FOR s = 1 TO 2
 		IF gNavySize(s) = 0 OR gNavyLocation(s) = 0 THEN 
 			gNavyLocation(s) = 0
-			CONTINUE ' Replaces GOTO sink
+			_CONTINUE ' Replaces GOTO sink
 		END IF
 		IF gNavyLocation(s) = 30 THEN x = 515: y = 268: GOTO float
 		IF gNavyLocation(s) = 28 THEN x = 517: y = 172: GOTO float
