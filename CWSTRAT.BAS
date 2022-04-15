@@ -817,7 +817,8 @@ END SUB
 
 SUB blanken
 	IF gCurrentSide = 2 THEN c = 7 ELSE c = 1
-	CLS : LINE (100, 200)-(500, 300), c, BF
+	CLS
+	LINE (100, 200)-(500, 300), c, BF
 	LINE (100, 200)-(500, 300), 8 - c, B
 	COLOR 7: LOCATE 14, 31: PRINT " "; gMonthes$(gCurrentMonth); gCurrentYear
 	COLOR 11: LOCATE 17, 30: PRINT gNationName$(gCurrentSide); " PLAYER TURN"
@@ -890,7 +891,9 @@ SUB ShipDestroyed (who%)
 	IF gNavySize(who) > 0 THEN
 		gFleet$(who) = LEFT$(gFleet$(who), gNavySize(who))
 	ELSE
-		gFleet$(who) = "": gNavyLocation(who) = 0: gNavySize(who) = 0
+		gFleet$(who) = ""
+		gNavyLocation(who) = 0
+		gNavySize(who) = 0
 	END IF
 END SUB
 
@@ -1291,31 +1294,48 @@ SUB FileManager (switch%)
 	SELECT CASE switch
 		CASE 1
 			OPEN "I", 1, "cwslead.dat"
-			FOR i = 1 TO 40: INPUT #1, gLeaderName$(i), gLeaderRating(i): NEXT i
+			FOR i = 1 TO 40
+				INPUT #1, gLeaderName$(i), gLeaderRating(i)
+			NEXT i
 			CLOSE #1
 			OPEN "I", 1, "cws.ini"
-			FOR i = 0 TO 2: INPUT #1, gNationName$(i): NEXT i
-			FOR i = 1 TO 12: INPUT #1, gMonthes$(i): NEXT i
+			FOR i = 0 TO 2
+				INPUT #1, gNationName$(i)
+			NEXT i
+			FOR i = 1 TO 12
+				INPUT #1, gMonthes$(i)
+			NEXT i
 			INPUT #1, gCurrentMonth, gCurrentYear
 			'               set end game conditions
 			FOR i = 1 TO 6: INPUT #1, gVictoryFlags(i): NEXT i
 			gVictoryFlags(3) = .4 * gVictoryFlags(3)
 			INPUT #1, a             ' number of Yankee armies
 			FOR i = 1 TO a
-				INPUT #1, gArmyLocation(i), gArmySize(i), gArmyExp(i), gArmySupply(i): gIsOccupied(gArmyLocation(i)) = i: gArmyName$(i) = gLeaderName$(i): gArmyCommander(i) = gLeaderRating(i): gLeaderName$(i) = ""
+				INPUT #1, gArmyLocation(i), gArmySize(i), gArmyExp(i), gArmySupply(i)
+				gIsOccupied(gArmyLocation(i)) = i
+				gArmyName$(i) = gLeaderName$(i)
+				gArmyCommander(i) = gLeaderRating(i)
+				gLeaderName$(i) = ""
 			NEXT i
 			INPUT #1, a             ' number of Rebel armies
 			FOR i = 21 TO 20 + a
 				INPUT #1, gArmyLocation(i), gArmySize(i), gArmyExp(i), gArmySupply(i)
-				gIsOccupied(gArmyLocation(i)) = i: gArmyName$(i) = gLeaderName$(i): gArmyCommander(i) = gLeaderRating(i): gLeaderName$(i) = ""
+				gIsOccupied(gArmyLocation(i)) = i
+				gArmyName$(i) = gLeaderName$(i)
+				gArmyCommander(i) = gLeaderRating(i)
+				gLeaderName$(i) = ""
 			NEXT i
 			FOR i = 1 TO 2: INPUT #1, gCurrentCash(i): NEXT i
 			INPUT #1, gATKFAC, gDEFAC, gTCR
 			INPUT #1, gFleet$(1), gNavyLocation(1), gFleet$(2), gNavyLocation(2)
-			FOR k = 1 TO 2: gNavySize(k) = LEN(gFleet$(k)): NEXT k
+			FOR k = 1 TO 2
+				gNavySize(k) = LEN(gFleet$(k))
+			NEXT k
 			INPUT #1, gCapitalCity(1), gCapitalCity(2)
 
-			FOR i = 1 TO 8: INPUT #1, gStarX(i), gStarY(i): NEXT i  ' star locations on flag
+			FOR i = 1 TO 8
+				INPUT #1, gStarX(i), gStarY(i)
+			NEXT i  ' star locations on flag
 			CLOSE #1
 			OPEN "I", 1, "cws.cfg"
 			INPUT #1, gCurrentSide, gGraphicLevel, gSoundEffects, gDifficultyLevel, gHumanPlayers, gTurbo!, gEventsBalance, gTrainCapacity(1), gTrainCapacity(2), gJanuaryCampaign, gRealism, gBattleStats(1), gBattleStats(2), gCasualty&(1), gCasualty&(2), gHistory, gAIBoldness
@@ -1327,7 +1347,9 @@ SUB FileManager (switch%)
 			FOR k = 1 TO 9
 				anotherString$ = "cws" + LTRIM$(STR$(k)) + ".sav"
 				IF _FILEEXISTS(anotherString$) THEN
-					gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = anotherString$: gArray(gMenuRows) = k
+					gMenuRows = gMenuRows + 1
+					gMenuText$(gMenuRows) = anotherString$
+					gArray(gMenuRows) = k
 				END IF
 			NEXT k
 			CALL bubble((gMenuRows))
@@ -1339,23 +1361,25 @@ SUB FileManager (switch%)
 			CALL ClearBottom
 			COLOR 11: PRINT "Loading";
 			INPUT #1, gCurrentMonth, gCurrentYear, gUSAdvantage, a
-			FOR i = 1 TO 40: INPUT #1, gArmyName$(i), gArmySize(i), gArmyCommander(i), gArmyLocation(i), gArmyExp(i), gArmySupply(i), gArmyMove(i)
-			IF gArmyLocation(i) > 0 THEN
-				IF gArmyName$(i) = gLeaderName$(i) THEN
-					gLeaderName$(i) = ""
-				ELSE
-					IF i > 20 THEN who = 2 ELSE who = 1
-					CALL StartToFinish(start, fin, who)
-					FOR k = start TO fin
-					IF gArmyName$(i) = gLeaderName$(k) THEN gLeaderName$(k) = "": EXIT FOR
-					NEXT k
+			FOR i = 1 TO 40
+				INPUT #1, gArmyName$(i), gArmySize(i), gArmyCommander(i), gArmyLocation(i), gArmyExp(i), gArmySupply(i), gArmyMove(i)
+				IF gArmyLocation(i) > 0 THEN
+					IF gArmyName$(i) = gLeaderName$(i) THEN
+						gLeaderName$(i) = ""
+					ELSE
+						IF i > 20 THEN who = 2 ELSE who = 1
+						CALL StartToFinish(start, fin, who)
+						FOR k = start TO fin
+							IF gArmyName$(i) = gLeaderName$(k) THEN gLeaderName$(k) = "": EXIT FOR
+						NEXT k
+					END IF
 				END IF
-			END IF
 			NEXT i
 			FOR i = 1 TO 40: INPUT #1, gIsOccupied(i), gCityOwner(i), gFortLevel(i): PRINT "."; : NEXT i
-			FOR i = 1 TO 2: INPUT #1, gCurrentCash(i), gCityController(i), gCurrentIncome(i), gVictoryPoints(i), gCapitalCity(i)
-			INPUT #1, gFleet$(i), gNavyLocation(i), gNavyMove(i), gRR(i), gArmyOnRailroad(i)
-			gNavySize(i) = LEN(gFleet$(i))
+			FOR i = 1 TO 2
+				INPUT #1, gCurrentCash(i), gCityController(i), gCurrentIncome(i), gVictoryPoints(i), gCapitalCity(i)
+				INPUT #1, gFleet$(i), gNavyLocation(i), gNavyMove(i), gRR(i), gArmyOnRailroad(i)
+				gNavySize(i) = LEN(gFleet$(i))
 			NEXT i
 			
 			CLOSE #1
@@ -1367,14 +1391,14 @@ SUB FileManager (switch%)
 			CALL DrawMap
 			CALL ClearBottom
 			FOR k = 1 TO 2
-			IF gRR(k) > 0 THEN CALL tinytrain(k, 1)
+				IF gRR(k) > 0 THEN CALL tinytrain(k, 1)
 			NEXT k
 			gCurrentSide = a
 		CASE 3
 			gMenuText$(0) = "Save Game"
 			FOR k = 1 TO 9
-			gMenuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-			IF _FILEEXISTS(gMenuText$(k)) THEN gMenuText$(k) = gMenuText$(k) + " +"
+				gMenuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
+				IF _FILEEXISTS(gMenuText$(k)) THEN gMenuText$(k) = gMenuText$(k) + " +"
 			NEXT k
 			gTLX = 67: gMenuRows = 9
 			CALL ShowMenu(0)
@@ -1384,11 +1408,15 @@ SUB FileManager (switch%)
 
 			OPEN "O", 1, "cws" + LTRIM$(STR$(gChosenOption)) + ".sav"
 			WRITE #1, gCurrentMonth, gCurrentYear, gUSAdvantage, gCurrentSide
-			FOR i = 1 TO 40: WRITE #1, gArmyName$(i), gArmySize(i), gArmyCommander(i), gArmyLocation(i), gArmyExp(i), gArmySupply(i), gArmyMove(i)
+			FOR i = 1 TO 40
+				WRITE #1, gArmyName$(i), gArmySize(i), gArmyCommander(i), gArmyLocation(i), gArmyExp(i), gArmySupply(i), gArmyMove(i)
 			NEXT i
-			FOR i = 1 TO 40: WRITE #1, gIsOccupied(i), gCityOwner(i), gFortLevel(i): PRINT "."; : NEXT i
-			FOR i = 1 TO 2: WRITE #1, gCurrentCash(i), gCityController(i), gCurrentIncome(i), gVictoryPoints(i), gCapitalCity(i)
-			WRITE #1, gFleet$(i), gNavyLocation(i), gNavyMove(i), gRR(i), gArmyOnRailroad(i)
+			FOR i = 1 TO 40
+				WRITE #1, gIsOccupied(i), gCityOwner(i), gFortLevel(i): PRINT ".";
+			NEXT i
+			FOR i = 1 TO 2
+				WRITE #1, gCurrentCash(i), gCityController(i), gCurrentIncome(i), gVictoryPoints(i), gCapitalCity(i)
+				WRITE #1, gFleet$(i), gNavyLocation(i), gNavyMove(i), gRR(i), gArmyOnRailroad(i)
 			NEXT i
 			CLOSE #1
 			
@@ -1397,7 +1425,8 @@ SUB FileManager (switch%)
 			OPEN "O", 1, "cws.cfg"
 			WRITE #1, playersSide, gGraphicLevel, gSoundEffects, gDifficultyLevel, gHumanPlayers, gTurbo!, gEventsBalance, gTrainCapacity(1), gTrainCapacity(2), gJanuaryCampaign, gRealism, gBattleStats(1), gBattleStats(2), gCasualty&(1), gCasualty&(2), gHistory, gAIBoldness
 			CLOSE #1
-			CLS : CALL DrawMap
+			CLS 
+			CALL DrawMap
 	END SELECT
 END SUB
 
@@ -1414,26 +1443,45 @@ SUB FortifyCity (target%)
 		gArray(gMenuRows) = gArmyLocation(i)
 	END IF
 	NEXT i
-	IF gMenuRows = 0 THEN CALL ClearBottom: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
+	IF gMenuRows = 0 THEN 
+		CALL ClearBottom
+		COLOR 11: PRINT "No cities eligible to fortify";
+		EXIT SUB
+	END IF
 	CALL bubble(gMenuRows)
 	gMenuText$(0) = "Fortify"
-		gChosenOption = 31
-		CALL ShowMenu(9): CALL ClearRight
-		IF gChosenOption < 0 THEN EXIT SUB
-		target = gArray(gChosenOption): CALL occupy(target): x = gIsOccupied(target): IF x < 0 THEN EXIT SUB
-		IF gFortLevel(target) > 1 THEN CALL ClearBottom: PRINT gCityName$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): EXIT SUB
-		cost = 200
-		IF gCurrentCash(gCurrentSide) < cost THEN CALL ClearBottom: PRINT "Fortifications for "; gCityName$(target); " cost "; cost; " and you only have "; gCurrentCash(gCurrentSide); : CALL TICK(4): EXIT SUB
-		COLOR 3
-		gFortLevel(target) = gFortLevel(target) + 1
-		gCurrentCash(gCurrentSide) = gCurrentCash(gCurrentSide) - cost
-		CALL ClearBottom: PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
-		CALL MoveUnitIcon(target, 0, 6)
-		CALL DrawCities
-		IF gArmyMove(x) > 0 THEN CALL MoveUnitIcon(gArmyLocation(x), gArmyMove(x), 5)
-		gArmyMove(x) = -1
-		CALL DrawArmyUnit(x)
-		CALL stax(who)
+	gChosenOption = 31
+	CALL ShowMenu(9)
+	CALL ClearRight
+	IF gChosenOption < 0 THEN EXIT SUB
+	target = gArray(gChosenOption)
+	CALL occupy(target)
+	x = gIsOccupied(target)
+	IF x < 0 THEN EXIT SUB
+	IF gFortLevel(target) > 1 THEN 
+		CALL ClearBottom
+		PRINT gCityName$(target); " at MAXIMUM fortification level of 2";
+		CALL TICK(4)
+		EXIT SUB
+	END IF
+	cost = 200
+	IF gCurrentCash(gCurrentSide) < cost THEN 
+		CALL ClearBottom
+		PRINT "Fortifications for "; gCityName$(target); " cost "; cost; " and you only have "; gCurrentCash(gCurrentSide);
+		CALL TICK(4)
+		EXIT SUB
+	END IF
+	COLOR 3
+	gFortLevel(target) = gFortLevel(target) + 1
+	gCurrentCash(gCurrentSide) = gCurrentCash(gCurrentSide) - cost
+	CALL ClearBottom
+	PRINT gCityName$(target); " fortifications increased to "; gFortLevel(target);
+	CALL MoveUnitIcon(target, 0, 6)
+	CALL DrawCities
+	IF gArmyMove(x) > 0 THEN CALL MoveUnitIcon(gArmyLocation(x), gArmyMove(x), 5)
+	gArmyMove(x) = -1
+	CALL DrawArmyUnit(x)
+	CALL stax(who)
 END SUB
 
 SUB MoveUnitIcon (from%, dest%, kind%)
@@ -1444,68 +1492,60 @@ SUB MoveUnitIcon (from%, dest%, kind%)
 	x1 = gCityX(dest): y1 = gCityY(dest)
 	SELECT CASE kind
 		CASE 1
-		LINE (x, y)-(x1, y1), 15, , &HF0F0
-		
+			LINE (x, y)-(x1, y1), 15, , &HF0F0
 		CASE 2
-		FOR i = 6 TO 8
-		LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
-		NEXT i
-		CALL TICK(.1)
-		
+			FOR i = 6 TO 8
+				LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
+			NEXT i
+			CALL TICK(.1)
 		CASE 3
-		x = gCityX(from): y = gCityY(from)
-		CALL snapshot(x, y, 0)
-		FOR j = 1 TO 3
-		FOR i = 4 TO 10 STEP 1
-		CIRCLE (x, y), i, 4
-		PAINT (x, y), 14, 4
-		IF gSoundEffects > 0 THEN SOUND 37 + 50 * RND, .03
-		NEXT i
-		CALL TICK(.1)
-		CALL snapshot(x, y, 1)
-		NEXT j
-		
+			x = gCityX(from): y = gCityY(from)
+			CALL snapshot(x, y, 0)
+			FOR j = 1 TO 3
+				FOR i = 4 TO 10 STEP 1
+					CIRCLE (x, y), i, 4
+					PAINT (x, y), 14, 4
+					IF gSoundEffects > 0 THEN SOUND 37 + 50 * RND, .03
+				NEXT i
+				CALL TICK(.1)
+				CALL snapshot(x, y, 1)
+			NEXT j
 		CASE 4
-		IF gIsOccupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
-		IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-		IF from = 27 OR from = 28 THEN CALL TouchupMap
-
+			IF gIsOccupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
+			IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
+			IF from = 27 OR from = 28 THEN CALL TouchupMap
 		CASE 5
-		IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-
+			IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
 		CASE 6
-		x = gCityX(from): y = gCityY(from)
-		CALL snapshot(x, y, 0)
-		LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
-		LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
-		IF gSoundEffects > 0 THEN SOUND 3999, .3
-		CALL TICK(gTurbo! - .5)
-		CALL snapshot(x, y, 1)
+			x = gCityX(from): y = gCityY(from)
+			CALL snapshot(x, y, 0)
+			LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
+			LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
+			IF gSoundEffects > 0 THEN SOUND 3999, .3
+			CALL TICK(gTurbo! - .5)
+			CALL snapshot(x, y, 1)
 		CASE 7          ' draw white box
-		x = gCityX(from) - 12: y = gCityY(from) - 11
-		GET (x - 8, y - 8)-(x + 8, y + 8), gGraphicImage
-		LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
-		LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
+			x = gCityX(from) - 12: y = gCityY(from) - 11
+			GET (x - 8, y - 8)-(x + 8, y + 8), gGraphicImage
+			LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
+			LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
 			CASE 8     ' replace old image
-		x = gCityX(from) - 12: y = gCityY(from) - 11
-		IF x > 0 THEN PUT (x - 8, y - 8), gGraphicImage, PSET
-		
+			x = gCityX(from) - 12: y = gCityY(from) - 11
+			IF x > 0 THEN PUT (x - 8, y - 8), gGraphicImage, PSET
 		CASE 9          ' draw arrow pointer
-		x = gCityX(from) - 12: y = gCityY(from) - 11
-		GET (x - 8, y - 8)-(x + 10, y + 7), gGraphicImage
-		x = x + 7: y = y + 5
-		LINE (x + 2, y)-(x + 2, y - 8), 12
-		LINE -(x, y - 6), 12
-		LINE -(x - 5, y - 11), 12
-		LINE -(x - 10, y - 6), 12
-		LINE -(x - 6, y - 2), 12
-		LINE -(x - 10, y), 12
-		LINE -(x + 1, y), 12
-		PAINT (x - 2, y - 1), 15, 12
-
+			x = gCityX(from) - 12: y = gCityY(from) - 11
+			GET (x - 8, y - 8)-(x + 10, y + 7), gGraphicImage
+			x = x + 7: y = y + 5
+			LINE (x + 2, y)-(x + 2, y - 8), 12
+			LINE -(x, y - 6), 12
+			LINE -(x - 5, y - 11), 12
+			LINE -(x - 10, y - 6), 12
+			LINE -(x - 6, y - 2), 12
+			LINE -(x - 10, y), 12
+			LINE -(x + 1, y), 12
+			PAINT (x - 2, y - 1), 15, 12
 		CASE 11
-		LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
-
+			LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
 		CASE ELSE
 	END SELECT
 END SUB
@@ -1533,23 +1573,25 @@ SUB ProcessTurn
 				gCurrentCash(s) = gCurrentCash(s) - .2 * gArmySize(i)
 			END IF
 		END IF
-	IF (gCurrentMonth < 7 OR gCurrentMonth > 10) AND gMatrix(gArmyLocation(i), 7) < 99 THEN 
-		gArmySupply(i) = gArmySupply(i) - 1
-	END IF
-	IF gMatrix(gArmyLocation(i), 7) = 99 AND gNavyLocation(3 - s) = gArmyLocation(i) THEN 
-		gArmySupply(i) = gArmySupply(i) - 1: CALL ClearBottom: PRINT gArmyName$(i); " is blockaded";
-		CALL TICK(gTurbo!)
-	END IF
-	COLOR 13
-	IF gArmySupply(i) < 1 THEN
-		gArmySupply(i) = 0
-		CALL ClearBottom
-		PRINT gArmyName$(i); " is out of supplies";
-		CALL DrawArmyUnit(i)
-		CALL TICK(gTurbo!)
-		IF RND > .8 AND gArmySize(i) > 50 THEN gArmySize(i) = .9 * gArmySize(i)
-	END IF
-	skiparmy:
+		IF (gCurrentMonth < 7 OR gCurrentMonth > 10) AND gMatrix(gArmyLocation(i), 7) < 99 THEN 
+			gArmySupply(i) = gArmySupply(i) - 1
+		END IF
+		IF gMatrix(gArmyLocation(i), 7) = 99 AND gNavyLocation(3 - s) = gArmyLocation(i) THEN 
+			gArmySupply(i) = gArmySupply(i) - 1
+			CALL ClearBottom
+			PRINT gArmyName$(i); " is blockaded";
+			CALL TICK(gTurbo!)
+		END IF
+		COLOR 13
+		IF gArmySupply(i) < 1 THEN
+			gArmySupply(i) = 0
+			CALL ClearBottom
+			PRINT gArmyName$(i); " is out of supplies";
+			CALL DrawArmyUnit(i)
+			CALL TICK(gTurbo!)
+			IF RND > .8 AND gArmySize(i) > 50 THEN gArmySize(i) = .9 * gArmySize(i)
+		END IF
+		skiparmy:
 	NEXT i
 	FOR k = 1 TO 2
 		CALL stax(k)
@@ -1568,28 +1610,42 @@ END SUB
 
 SUB MoveFrom (index%, target%)
 	gColour = 3: gTLX = 67: gTLY = 5: index = 0: gMenuRows = 0: target = 0
-	who = gCurrentSide: CALL StartToFinish(start, fin, who)
+	who = gCurrentSide
+	CALL StartToFinish(start, fin, who)
 	FOR i = start TO fin
-	IF gArmyLocation(i) > 0 AND gArmyMove(i) = 0 THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = gCityName$(gArmyLocation(i)): gArray(gMenuRows) = gArmyLocation(i)
+		IF gArmyLocation(i) > 0 AND gArmyMove(i) = 0 THEN
+			gMenuRows = gMenuRows + 1
+			gMenuText$(gMenuRows) = gCityName$(gArmyLocation(i))
+			gArray(gMenuRows) = gArmyLocation(i)
+		END IF
 	NEXT i
 	IF gMenuRows = 0 THEN index = -1: EXIT SUB
 	gMenuText$(0) = "From"
 	CALL bubble(gMenuRows)
 	gTLX = 67: gTLY = 5
-		gHighlight = 15: CALL ShowMenu(1): CALL ClearRight
-		IF gChosenOption < 0 THEN target = 0: EXIT SUB
-		target = gArray(gChosenOption)
+	gHighlight = 15
+	CALL ShowMenu(1)
+	CALL ClearRight
+	IF gChosenOption < 0 THEN target = 0: EXIT SUB
+	target = gArray(gChosenOption)
 
-		gMenuRows = 0
-		FOR i = start TO fin
-		IF gArmyLocation(i) = target AND gArmyMove(i) = 0 THEN index = i: gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = "Army" + STR$(i): gArray(gMenuRows) = i
-		NEXT i
-		IF gMenuRows = 1 THEN EXIT SUB
-		gMenuText$(0) = "Which"
-		CALL bubble(gMenuRows)
-		gTLX = 67: gTLY = 15: CALL ShowMenu(4): CALL ClearRight
-		IF gChosenOption < 0 THEN index = 0: EXIT SUB
-		index = gArray(gChosenOption)
+	gMenuRows = 0
+	FOR i = start TO fin
+		IF gArmyLocation(i) = target AND gArmyMove(i) = 0 THEN 	
+			index = i
+			gMenuRows = gMenuRows + 1
+			gMenuText$(gMenuRows) = "Army" + STR$(i)
+			gArray(gMenuRows) = i
+		END IF
+	NEXT i
+	IF gMenuRows = 1 THEN EXIT SUB
+	gMenuText$(0) = "Which"
+	CALL bubble(gMenuRows)
+	gTLX = 67: gTLY = 15
+	CALL ShowMenu(4)
+	CALL ClearRight
+	IF gChosenOption < 0 THEN index = 0: EXIT SUB
+	index = gArray(gChosenOption)
 END SUB
 
 SUB ManageNavy (who%, chx%)
@@ -1604,8 +1660,12 @@ SUB ManageNavy (who%, chx%)
 	END IF
 	COLOR 11
 	labelmanagenavy:
-	cost = 100: gCityOwner(0) = who
-	IF chx = 0 THEN CALL ClearBottom: PRINT "Funds available "; gCurrentCash(who);
+	cost = 100
+	gCityOwner(0) = who
+	IF chx = 0 THEN 
+		CALL ClearBottom
+		PRINT "Funds available "; gCurrentCash(who);
+	END IF
 	IF chx = 1 THEN
 		IF gCurrentCash(who) < cost THEN EXIT SUB
 		IF gNavySize(who) > 9 THEN EXIT SUB
@@ -1613,390 +1673,490 @@ SUB ManageNavy (who%, chx%)
 	gMenuText$(0) = "Ships"
 	gMenuText$(1) = "Build"
 	IF gNavyLocation(who) <> 99 THEN
-	IF gCurrentCash(who) < cost OR gNavySize(who) > 9 OR gCityOwner(gNavyLocation(who)) <> who THEN gMenuText$(1) = "-": gChosenOption = 23
+		IF gCurrentCash(who) < cost OR gNavySize(who) > 9 OR gCityOwner(gNavyLocation(who)) <> who THEN 
+			gMenuText$(1) = "-": gChosenOption = 23
+		END IF
 	END IF
 	gMenuText$(2) = "Attack"
 	IF gNavyLocation(who) <> 99 THEN
-	IF gCityOwner(gNavyLocation(who)) <> 3 - who THEN gMenuText$(2) = "-": gChosenOption = 22
+		IF gCityOwner(gNavyLocation(who)) <> 3 - who THEN 
+			gMenuText$(2) = "-"
+			gChosenOption = 22
+		END IF
 	ELSE
-	gMenuText$(1) = "-": gMenuText$(2) = "-": gChosenOption = 24
+		gMenuText$(1) = "-"
+		gMenuText$(2) = "-"
+		gChosenOption = 24
 	END IF
-	gMenuText$(3) = "Sail": IF gNavyLocation(who) < 1 THEN gMenuText$(3) = "-": IF chx = 3 THEN chx = 1
-	gMenuText$(4) = "Raid": IF gNavySize(who) < 1 OR gNavalCommerce = who THEN gMenuText$(4) = "-"
-	gTLX = 67: gTLY = 12: gMenuRows = 4
+	gMenuText$(3) = "Sail"
+	IF gNavyLocation(who) < 1 THEN 
+		gMenuText$(3) = "-"
+		IF chx = 3 THEN chx = 1
+	END IF
+	gMenuText$(4) = "Raid"
+	IF gNavySize(who) < 1 OR gNavalCommerce = who THEN 
+		gMenuText$(4) = "-"
+	END IF
+	gTLX = 67: gTLY = 12
+	gMenuRows = 4
 	IF gNavyLocation(who) <> 99 THEN
-	IF who = 1 AND gNavySize(who) > 1 AND gCityOwner(gNavyLocation(who)) = 0 THEN gMenuRows = 5: gMenuText$(5) = "Invasion": CALL void(gNavyLocation(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
-	IF gRealism = 0 AND who = 2 AND gNavySize(who) > 1 AND gCityOwner(gNavyLocation(who)) = 0 THEN gMenuRows = 5: gMenuText$(5) = "Invasion": CALL void(gNavyLocation(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
+		IF who = 1 AND gNavySize(who) > 1 AND gCityOwner(gNavyLocation(who)) = 0 THEN 
+			gMenuRows = 5
+			gMenuText$(5) = "Invasion"
+			CALL void(gNavyLocation(1), defend)
+			IF chx > 0 AND defend < 100 THEN chx = 5
+		END IF
+		IF gRealism = 0 AND who = 2 AND gNavySize(who) > 1 AND gCityOwner(gNavyLocation(who)) = 0 THEN 
+			gMenuRows = 5
+			gMenuText$(5) = "Invasion"
+			CALL void(gNavyLocation(1), defend)
+			IF chx > 0 AND defend < 100 THEN chx = 5
+		END IF
 	END IF
 
-	IF chx > 0 THEN gChosenOption = chx: GOTO anchor
+	IF chx > 0 THEN 
+		gChosenOption = chx
+		GOTO anchor
+	EN DIF
 	IF gHasNavy > 0 AND gChosenOption <> 1 THEN EXIT SUB
-	CALL ShowMenu(0): CALL ClearRight
+	CALL ShowMenu(0)
+	CALL ClearRight
 	anchor:
-	'---------------------------------------------------------------------------
 	SELECT CASE gChosenOption
-	'---------------------------------------------------------------------------
-	'                               Build Ship
-	'---------------------------------------------------------------------------
-		CASE 1
-		IF gCurrentCash(who) < cost OR gNavyLocation(who) = 99 GOTO labelmanagenavy
-		IF chx = 1 AND gNavySize(who) > 9 THEN EXIT SUB
-		IF chx = 0 AND gNavySize(who) > 9 THEN GOTO labelmanagenavy
+		CASE 1 ' Build Ship
+			IF gCurrentCash(who) < cost OR gNavyLocation(who) = 99 GOTO labelmanagenavy
+			IF chx = 1 AND gNavySize(who) > 9 THEN EXIT SUB
+			IF chx = 0 AND gNavySize(who) > 9 THEN GOTO labelmanagenavy
 
-		IF chx = 0 AND gNavyLocation(who) > 0 THEN
-			IF gCityOwner(gNavyLocation(who)) <> who GOTO labelmanagenavy
-			IF gMatrix(gNavyLocation(who), 7) < 99 GOTO labelmanagenavy
-		END IF
-		IF chx = 1 AND RND < .07 * gNavySize(who) THEN EXIT SUB
-		someString$ = "W"
-
-		IF gRealism > 0 AND ((gCurrentYear < 1862) OR (gCurrentYear = 1862 AND gCurrentMonth < 3)) GOTO noiron
-		IF gCurrentCash(who) >= 2 * cost THEN
-			gTLX = 67: gTLY = 12: gColour = 9
-			IF who = gCurrentSide THEN
-				gMenuText$(0) = "Type"
-				gMenuText$(1) = "Wooden"
-				gMenuText$(2) = "Ironclad"
-				gMenuRows = 2
-				CALL ShowMenu(0)
-				CALL ClearRight
-				IF gChosenOption < 1 GOTO labelmanagenavy
-				IF gChosenOption = 2 THEN someString$ = "I": cost = 2 * cost
-			ELSE
-				someString$ = "I"
+			IF chx = 0 AND gNavyLocation(who) > 0 THEN
+				IF gCityOwner(gNavyLocation(who)) <> who GOTO labelmanagenavy
+				IF gMatrix(gNavyLocation(who), 7) < 99 GOTO labelmanagenavy
 			END IF
-		END IF
+			IF chx = 1 AND RND < .07 * gNavySize(who) THEN EXIT SUB
+			someString$ = "W"
 
-	noiron:
-		gNavySize(who) = gNavySize(who) + 1
-		IF someString$ = "W" THEN
-			gFleet$(who) = gFleet$(who) + someString$: a = 1
-		ELSE
-			gFleet$(who) = someString$ + gFleet$(who): a = 2
-		END IF
-		IF gNavySize(who) > 1 GOTO add2ship
-	ships:
-		gMenuText$(0) = "Port": gMenuRows = 0: gTLX = 67: gTLY = 12
-		FOR i = 1 TO 40: IF gMatrix(i, 7) = 99 AND gCityOwner(i) = who AND gNavyLocation(3 - who) <> i THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = gCityName$(i): gArray(gMenuRows) = i
-		NEXT i
-		IF chx = 1 THEN gChosenOption = 1 + INT(gMenuRows * RND)
-		IF gMenuRows < 1 THEN
-			gNavySize(who) = 0: gFleet$(who) = ""
-			IF chx = 0 THEN CALL ClearBottom: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
-			IF chx = 1 THEN EXIT SUB
-		END IF
-		IF chx = 0 THEN CALL ShowMenu(9): CALL ClearRight
+			IF gRealism > 0 AND ((gCurrentYear < 1862) OR (gCurrentYear = 1862 AND gCurrentMonth < 3)) GOTO noiron
+			IF gCurrentCash(who) >= 2 * cost THEN
+				gTLX = 67: gTLY = 12: gColour = 9
+				IF who = gCurrentSide THEN
+					gMenuText$(0) = "Type"
+					gMenuText$(1) = "Wooden"
+					gMenuText$(2) = "Ironclad"
+					gMenuRows = 2
+					CALL ShowMenu(0)
+					CALL ClearRight
+					IF gChosenOption < 1 GOTO labelmanagenavy
+					IF gChosenOption = 2 THEN someString$ = "I": cost = 2 * cost
+				ELSE
+					someString$ = "I"
+				END IF
+			END IF
 
-		IF gChosenOption < 1 GOTO ships
-		gNavyLocation(who) = gArray(gChosenOption)
-		gCurrentCash(who) = gCurrentCash(who) - cost: gNavySize(who) = 1
-		x = gCityX(gArray(gChosenOption)) + 25: y = gCityY(gArray(gChosenOption)) + 25: CALL ships
-		CALL ClearBottom: COLOR 11: PRINT gNationName$(who); " is building NEW fleet in "; gCityName$(gArray(gChosenOption));
-		PSET (400, 465), 0: CALL DrawShipIcon(who, a)
-		IF gSoundEffects > 0 THEN SOUND 3000, 1
-		CALL TICK(gTurbo!)
-		GOTO labelmanagenavy
-	add2ship:
-		gCurrentCash(who) = gCurrentCash(who) - cost
-		CALL ClearBottom: PRINT gNationName$(who); " navy increased to "; gNavySize(who);
-		PSET (400, 465), 0: CALL DrawShipIcon(who, a)
-		CALL ships
-		IF gSoundEffects > 0 THEN SOUND 3000, 1
-		CALL TICK(gTurbo!)
-	'---------------------------------------------------------------------------
-	'                               Attack City
-	'---------------------------------------------------------------------------
-		CASE 2
-		IF gNavyLocation(who) = 99 GOTO labelmanagenavy
-		IF chx = 2 AND gCityOwner(gNavyLocation(who)) = who THEN EXIT SUB
-		IF chx = 2 AND gIsOccupied(gNavyLocation(who)) > 0 AND RND > .5 THEN chx = 3: GOTO anchor
-		IF chx = 2 AND gCityOwner(gNavyLocation(who)) = 0 THEN chx = 3: GOTO labelmanagenavy
-		IF gNavyLocation(who) < 1 THEN EXIT SUB
-		IF who = gCurrentSide THEN gHasNavy = 1
-		IF gCityOwner(gNavyLocation(who)) <> 3 - who GOTO labelmanagenavy
-		CALL ClearBottom: COLOR 12: PRINT gNationName$(who); " fleet bombards "; gCityName$(gNavyLocation(who));
-		CALL MoveUnitIcon(gNavyLocation(who), 0, 3)
+			noiron:
+			gNavySize(who) = gNavySize(who) + 1
+			IF someString$ = "W" THEN
+				gFleet$(who) = gFleet$(who) + someString$: a = 1
+			ELSE
+				gFleet$(who) = someString$ + gFleet$(who): a = 2
+			END IF
+			IF gNavySize(who) > 1 GOTO add2ship
+			ships:
+			gMenuText$(0) = "Port"
+			gMenuRows = 0
+			gTLX = 67: gTLY = 12
+			FOR i = 1 TO 40
+				IF gMatrix(i, 7) = 99 AND gCityOwner(i) = who AND gNavyLocation(3 - who) <> i THEN 
+					gMenuRows = gMenuRows + 1
+					gMenuText$(gMenuRows) = gCityName$(i)
+					gArray(gMenuRows) = i
+				END IF
+			NEXT i
+			IF chx = 1 THEN gChosenOption = 1 + INT(gMenuRows * RND)
+			IF gMenuRows < 1 THEN
+				gNavySize(who) = 0
+				gFleet$(who) = ""
+				IF chx = 0 THEN 
+					CALL ClearBottom
+					PRINT "NO SHIPYARDS AVAILABLE !";
+					EXIT SUB
+				END IF
+				IF chx = 1 THEN EXIT SUB
+			END IF
+			IF chx = 0 THEN 
+				CALL ShowMenu(9)
+				CALL ClearRight
+			END IF
+
+			IF gChosenOption < 1 GOTO ships
+			gNavyLocation(who) = gArray(gChosenOption)
+			gCurrentCash(who) = gCurrentCash(who) - cost: gNavySize(who) = 1
+			x = gCityX(gArray(gChosenOption)) + 25
+			y = gCityY(gArray(gChosenOption)) + 25
+			CALL ships
+			CALL ClearBottom
+			COLOR 11: PRINT gNationName$(who); " is building NEW fleet in "; gCityName$(gArray(gChosenOption));
+			PSET (400, 465), 0
+			CALL DrawShipIcon(who, a)
+			IF gSoundEffects > 0 THEN SOUND 3000, 1
+			CALL TICK(gTurbo!)
+			GOTO labelmanagenavy
+			add2ship:
+			gCurrentCash(who) = gCurrentCash(who) - cost
+			CALL ClearBottom
+			PRINT gNationName$(who); " navy increased to "; gNavySize(who);
+			PSET (400, 465), 0
+			CALL DrawShipIcon(who, a)
+			CALL ships
+			IF gSoundEffects > 0 THEN SOUND 3000, 1
+			CALL TICK(gTurbo!)
+		CASE 2 ' Attack City
+			IF gNavyLocation(who) = 99 GOTO labelmanagenavy
+			IF chx = 2 AND gCityOwner(gNavyLocation(who)) = who THEN EXIT SUB
+			IF chx = 2 AND gIsOccupied(gNavyLocation(who)) > 0 AND RND > .5 THEN chx = 3: GOTO anchor
+			IF chx = 2 AND gCityOwner(gNavyLocation(who)) = 0 THEN chx = 3: GOTO labelmanagenavy
+			IF gNavyLocation(who) < 1 THEN EXIT SUB
+			IF who = gCurrentSide THEN gHasNavy = 1
+			IF gCityOwner(gNavyLocation(who)) <> 3 - who GOTO labelmanagenavy
+			CALL ClearBottom
+			COLOR 12: PRINT gNationName$(who); " fleet bombards "; gCityName$(gNavyLocation(who));
+			CALL MoveUnitIcon(gNavyLocation(who), 0, 3)
+				
+			target = gNavyLocation(who)
+			index = gIsOccupied(target)
+			IF index = 0 GOTO deserted
+			pct! = .005 * gNavySize(who) + .02 * RND
+			DefendersKilled = gArmySize(index) * pct!
+			IF DefendersKilled < 1 THEN DefendersKilled = 1
+			CALL ClearBottom
+			PRINT gArmyName$(index); " suffered "; 100 * DefendersKilled; " casualties";
+			x = .5 * gNavySize(who) + 1
+			IF x > gArmySupply(index) THEN x = gArmySupply(index)
+			gArmySupply(index) = gArmySupply(index) - x
+			CALL TICK(gTurbo!)
+			gArmySize(index) = gArmySize(index) - DefendersKilled
+			IF gArmySize(index) < 1 THEN gArmySize(index) = 1
+			EXIT SUB
+			deserted:
+			IF gFortLevel(target) = 0 GOTO bombardcity
+			IF RND < .7 + .03 * (gNavySize(who) - gFortLevel(target)) GOTO damagedfortifications
+			CALL ShipDestroyed(who)
+			CALL ClearBottom
+			PRINT gNationName$(gCityOwner(target)); " shore battery sunk an attacking ship!"; gNavySize(who); "ship(s) left! ";
+			IF gSoundEffects > 0 THEN SOUND 77, .5: SOUND 59, .5
+			CALL TICK(gTurbo!)
+			IF gNavySize(who) < 1 THEN
+				gNavyLocation(who) = 0
+				gFleet$(who) = ""
+				GOSUB box2
+				LOCATE 12, 27: PRINT gNationName$(who); " fleet eliminated"
+				CALL TICK(9)
+				gVictoryPoints(3 - who) = gVictoryPoints(3 - who) + 5
+				IF who = gCurrentSide THEN gGrudge = 0
+				GOTO sail3
+			END IF
+			GOTO deserted
+			damagedfortifications:
+			CALL ClearBottom
+			PRINT gCityName$(target); " fortifications damaged";
+			gFortLevel(target) = gFortLevel(target) - 1
+			x = gCityX(target)
+			y = gCityY(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+			CALL DrawCities
+			CALL TICK(gTurbo!)
+			EXIT SUB
+			bombardcity:
+			IF RND > .25 + .07 * gNavySize(who) THEN 
+				CALL ClearBottom
+				PRINT "Citizens of "; gCityName$(target); " stand firm against the attack";
+				CALL TICK(gTurbo!)
+				EXIT SUB
+			END IF
+			IF gNavyLocation(who) = gCapitalCity(3 - who) THEN 
+				CALL ClearBottom
+				PRINT "The CAPITAL steadfastly stands loyal";
+				CALL TICK(gTurbo!)
+				EXIT SUB
+			END IF
+			gCityOwner(gNavyLocation(who)) = 0
+			CALL ClearBottom
+			PRINT gCityName$(gNavyLocation(who)); " is now  NEUTRAL";
+			CALL DrawCities
+			gVictoryPoints(who) = gVictoryPoints(who) + gCityValue(gNavyLocation(who))
+			EXIT SUB
+		CASE 3 ' Sail
+			gNavySize(who) = LEN(gFleet$(who))
+			IF gNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
+			IF gNavyLocation(who) < 1 OR gNavySize(who) < 1 THEN 
+				CALL ClearBottom
+				PRINT "No ships remain";
+				TICK 1
+				GOTO labelmanagenavy
+			END IF
+
+			gMenuRows = 0
+			FOR i = 1 TO 40
+				IF gMatrix(i, 7) > 90 AND gNavyLocation(who) <> i THEN 
+					gMenuRows = gMenuRows + 1
+					gMenuText$(gMenuRows) = gCityName$(i)
+					gArray(gMenuRows) = i
+				END IF
+			NEXT i
+			IF chx = 3 THEN
+				IF gMenuRows = 0 THEN EXIT SUB
+				IF gGrudge > 0 THEN 
+					gChosenOption = 1
+					gArray(1) = gNavyLocation(3 - who)
+					GOTO admiral
+				END IF
+				GOSUB nest
+				IF gChosenOption > 0 GOTO admiral ELSE EXIT SUB
+			END IF
+			COLOR 11: LOCATE 11, 68
+			IF gNavyLocation(who) < 41 THEN
+				PRINT gCityName$(gNavyLocation(who))
+			ELSE
+				PRINT "Raiding"
+			END IF
+			gMenuText$(0) = "To"
+			gColour = 3: gTLX = 67: gTLY = 12
 			
-		target = gNavyLocation(who): index = gIsOccupied(target): IF index = 0 GOTO deserted
-		pct! = .005 * gNavySize(who) + .02 * RND: DefendersKilled = gArmySize(index) * pct!: IF DefendersKilled < 1 THEN DefendersKilled = 1
-		CALL ClearBottom: PRINT gArmyName$(index); " suffered "; 100 * DefendersKilled; " casualties";
-		x = .5 * gNavySize(who) + 1: IF x > gArmySupply(index) THEN x = gArmySupply(index)
-		gArmySupply(index) = gArmySupply(index) - x
-		CALL TICK(gTurbo!)
-		gArmySize(index) = gArmySize(index) - DefendersKilled: IF gArmySize(index) < 1 THEN gArmySize(index) = 1
-		EXIT SUB
-	deserted:
-		IF gFortLevel(target) = 0 GOTO bombardcity
-		IF RND < .7 + .03 * (gNavySize(who) - gFortLevel(target)) GOTO damagedfortifications
-		CALL ShipDestroyed(who)
-		CALL ClearBottom
-		PRINT gNationName$(gCityOwner(target)); " shore battery sunk an attacking ship!"; gNavySize(who); "ship(s) left! ";
-		IF gSoundEffects > 0 THEN SOUND 77, .5: SOUND 59, .5
-		CALL TICK(gTurbo!)
-		IF gNavySize(who) < 1 THEN
-			gNavyLocation(who) = 0: gFleet$(who) = "": GOSUB box2
-			LOCATE 12, 27: PRINT gNationName$(who); " fleet eliminated"
-			CALL TICK(9)
-			gVictoryPoints(3 - who) = gVictoryPoints(3 - who) + 5
-			IF who = gCurrentSide THEN gGrudge = 0
+			CALL ShowMenu(9)
+			CALL ClearRight
+			IF gChosenOption < 1 THEN EXIT SUB
+			admiral:
+			IF gArray(gChosenOption) = gNavyLocation(who) THEN EXIT SUB
+			IF gArray(gChosenOption) < 1 THEN EXIT SUB
+			IF gNavySize(who) < 1 GOTO ships
+			IF who = gCurrentSide THEN gHasNavy = 1
+			GOSUB box2
+			LOCATE 10, 25: PRINT gNationName$(who); " fleet of"; gNavySize(who); "ship(s) is sailing"
+			LOCATE 11, 25: PRINT "From ";
+			IF gNavyLocation(who) < 41 THEN
+				PRINT gCityName$(gNavyLocation(who));
+			ELSE
+				PRINT "Raiding";
+			END IF
+			PRINT " to ";
+			IF gArray(gChosenOption) <> 99 THEN
+				PRINT gCityName$(gArray(gChosenOption));
+			ELSE
+				PRINT "Raid Commerce";
+			END IF
+
+			FOR i = 1 TO gNavySize(who)
+				PSET (120 + 41 * i, 210), 0
+				CALL ShipType(who, i)
+			NEXT i
+			IF gGraphicLevel > 2 THEN
+				a = ASC(LEFT$(gFleet$(who), 1))
+				SELECT CASE a
+					CASE 73
+						CALL DrawIronclad
+					CASE 87
+						CALL DrawSchooner
+				END SELECT
+				TICK 2 * gTurbo!
+			ELSE
+				TICK gTurbo!
+			END IF
+			gNavyLocation(who) = gArray(gChosenOption)
+			IF gNavyLocation(1) = gNavyLocation(2) GOTO navalbattle
 			GOTO sail3
-		END IF
-		GOTO deserted
-	damagedfortifications:
-		CALL ClearBottom: PRINT gCityName$(target); " fortifications damaged";
-		gFortLevel(target) = gFortLevel(target) - 1: x = gCityX(target): y = gCityY(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-		CALL DrawCities
-		CALL TICK(gTurbo!)
-		EXIT SUB
-	bombardcity:
-		IF RND > .25 + .07 * gNavySize(who) THEN CALL ClearBottom: PRINT "Citizens of "; gCityName$(target); " stand firm against the attack"; : CALL TICK(gTurbo!): EXIT SUB
-		IF gNavyLocation(who) = gCapitalCity(3 - who) THEN CALL ClearBottom: PRINT "The CAPITAL steadfastly stands loyal"; : CALL TICK(gTurbo!): EXIT SUB
-		gCityOwner(gNavyLocation(who)) = 0
-		CALL ClearBottom: PRINT gCityName$(gNavyLocation(who)); " is now  NEUTRAL";
-		CALL DrawCities
-		gVictoryPoints(who) = gVictoryPoints(who) + gCityValue(gNavyLocation(who))
-		EXIT SUB
-	'---------------------------------------------------------------------------
-	'                               Sail
-	'---------------------------------------------------------------------------
-		CASE 3
-		gNavySize(who) = LEN(gFleet$(who))
-		IF gNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
-		IF gNavyLocation(who) < 1 OR gNavySize(who) < 1 THEN CALL ClearBottom: PRINT "No ships remain"; : TICK 1: GOTO labelmanagenavy
+		CASE 4 ' Raid Commerce
+			gNavySize(who) = LEN(gFleet$(who))
+			IF gNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
+			IF gNavySize(who) < 1 OR gNavalCommerce = who GOTO labelmanagenavy
 
-		gMenuRows = 0
-		FOR i = 1 TO 40: IF gMatrix(i, 7) > 90 AND gNavyLocation(who) <> i THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = gCityName$(i): gArray(gMenuRows) = i
-		NEXT i
-		IF chx = 3 THEN
-			IF gMenuRows = 0 THEN EXIT SUB
-			IF gGrudge > 0 THEN gChosenOption = 1: gArray(1) = gNavyLocation(3 - who): GOTO admiral
-			GOSUB nest: IF gChosenOption > 0 GOTO admiral ELSE EXIT SUB
-		END IF
-		COLOR 11: LOCATE 11, 68
-		IF gNavyLocation(who) < 41 THEN
-			PRINT gCityName$(gNavyLocation(who))
-		ELSE
-			PRINT "Raiding"
-		END IF
-		gMenuText$(0) = "To"
-		gColour = 3: gTLX = 67: gTLY = 12
-		
-		CALL ShowMenu(9): CALL ClearRight: IF gChosenOption < 1 THEN EXIT SUB
-	admiral:
-		IF gArray(gChosenOption) = gNavyLocation(who) THEN EXIT SUB
-		IF gArray(gChosenOption) < 1 THEN EXIT SUB
-		IF gNavySize(who) < 1 GOTO ships
-		IF who = gCurrentSide THEN gHasNavy = 1
-		GOSUB box2
-		LOCATE 10, 25: PRINT gNationName$(who); " fleet of"; gNavySize(who); "ship(s) is sailing"
-		LOCATE 11, 25: PRINT "From ";
-		IF gNavyLocation(who) < 41 THEN
-			PRINT gCityName$(gNavyLocation(who));
-		ELSE
-			PRINT "Raiding";
-		END IF
-		PRINT " to ";
-		IF gArray(gChosenOption) <> 99 THEN
-			PRINT gCityName$(gArray(gChosenOption));
-		ELSE
-			PRINT "Raid Commerce";
-		END IF
+			IF who = gCurrentSide THEN gHasNavy = 1
+			GOSUB box2
+			LOCATE 10, 25: PRINT gNationName$(who); " fleet of"; gNavySize(who); "ship(s) is sailing"
+			LOCATE 11, 25: PRINT "to RAID "; gNationName$(3 - who); " COMMERCE !"
 
-		FOR i = 1 TO gNavySize(who)
-			PSET (120 + 41 * i, 210), 0
-			CALL ShipType(who, i)
-		NEXT i
-		IF gGraphicLevel > 2 THEN
-			a = ASC(LEFT$(gFleet$(who), 1))
-			SELECT CASE a
-				CASE 73
-					CALL DrawIronclad
-				CASE 87
-					CALL DrawSchooner
-			END SELECT
-			TICK 2 * gTurbo!
-		ELSE
-			TICK gTurbo!
-		END IF
-		gNavyLocation(who) = gArray(gChosenOption)
-		IF gNavyLocation(1) = gNavyLocation(2) GOTO navalbattle
-		GOTO sail3
-	'---------------------------------------------------------------------------
-	'                               Raid Commerce
-	'---------------------------------------------------------------------------
-		CASE 4
-		gNavySize(who) = LEN(gFleet$(who))
-		IF gNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
-		IF gNavySize(who) < 1 OR gNavalCommerce = who GOTO labelmanagenavy
-
-		IF who = gCurrentSide THEN gHasNavy = 1
-		GOSUB box2
-		LOCATE 10, 25: PRINT gNationName$(who); " fleet of"; gNavySize(who); "ship(s) is sailing"
-		LOCATE 11, 25: PRINT "to RAID "; gNationName$(3 - who); " COMMERCE !"
-
-		FOR i = 1 TO gNavySize(who)
-			PSET (120 + 41 * i, 210), 0
-			CALL ShipType(who, i)
-		NEXT i
-		IF gGraphicLevel > 2 THEN
-			a = ASC(LEFT$(gFleet$(who), 1))
-			SELECT CASE a
-				CASE 73
-					CALL DrawIronclad
-				CASE 87
-					CALL DrawSchooner
-			END SELECT
-			TICK 2 * gTurbo!
-		ELSE
-			TICK gTurbo!
-		END IF
-		gNavyLocation(who) = 99: gNavalCommerce = who
-		IF gNavyLocation(1) = gNavyLocation(2) GOTO navalbattle
-		CLS : CALL DrawMap
-		EXIT SUB
-	'---------------------------------------------------------------------------
-	'                               Invasion
-	'---------------------------------------------------------------------------
-		CASE 5
-		CALL commander((who), empty)
-		IF chx > 0 AND empty = 0 THEN chx = 3: GOTO anchor
-		x = 35
-		CALL ShipDestroyed(who)
-		c = gNavyLocation(who): CALL CreateNewArmy((who), empty, c)
-		gCurrentCash(who) = gCurrentCash(who) + 100     'compensate for cost of recruiting new army
-		CALL DrawCityCaptured(empty, c, who, 0)
-		gArmySize(empty) = x
-		IF who = gCurrentSide THEN gHasNavy = 1
-		EXIT SUB
-	'---------------------------------------------------------------------------
-	'                               Exit
-	'---------------------------------------------------------------------------
-		CASE ELSE
-		EXIT SUB
+			FOR i = 1 TO gNavySize(who)
+				PSET (120 + 41 * i, 210), 0
+				CALL ShipType(who, i)
+			NEXT i
+			IF gGraphicLevel > 2 THEN
+				a = ASC(LEFT$(gFleet$(who), 1))
+				SELECT CASE a
+					CASE 73
+						CALL DrawIronclad
+					CASE 87
+						CALL DrawSchooner
+				END SELECT
+				TICK 2 * gTurbo!
+			ELSE
+				TICK gTurbo!
+			END IF
+			gNavyLocation(who) = 99
+			gNavalCommerce = who
+			IF gNavyLocation(1) = gNavyLocation(2) GOTO navalbattle
+			CLS
+			CALL DrawMap
+			EXIT SUB
+		CASE 5 ' Invasion
+			CALL commander((who), empty)
+			IF chx > 0 AND empty = 0 THEN chx = 3: GOTO anchor
+			x = 35
+			CALL ShipDestroyed(who)
+			c = gNavyLocation(who)
+			CALL CreateNewArmy((who), empty, c)
+			gCurrentCash(who) = gCurrentCash(who) + 100     'compensate for cost of recruiting new army
+			CALL DrawCityCaptured(empty, c, who, 0)
+			gArmySize(empty) = x
+			IF who = gCurrentSide THEN gHasNavy = 1
+			EXIT SUB
+		CASE ELSE ' Exit
+			EXIT SUB
 	END SELECT
 	GOTO labelmanagenavy
-	'---------------------------------------------------------------------------
-	'                               Ship vs. Ship
-	'---------------------------------------------------------------------------
+	' Ship vs Ship
 	navalbattle:
-		CLS : LOCATE 1, 30: COLOR 11: PRINT "NAVAL COMBAT"
-		FOR k = 1 TO 2
+	CLS
+	LOCATE 1, 30: COLOR 11: PRINT "NAVAL COMBAT"
+	FOR k = 1 TO 2
 		hit(k) = 10
 		IF RIGHT$(gFleet$(k), 1) = "I" THEN hit(k) = 20
-		NEXT k
+	NEXT k
 	drawnavalbattle:
-		LOCATE 9, 1: PRINT SPACE$(79)
-		LOCATE 15, 1: PRINT SPACE$(79)
-		x = 10: y = 100
-		COLOR 9: LOCATE 5, 25: PRINT "UNION"; gNavySize(1); "ship(s)"
-		GOSUB boxes
-		COLOR 1
-		FOR i = 1 TO gNavySize(1)
+	LOCATE 9, 1: PRINT SPACE$(79)
+	LOCATE 15, 1: PRINT SPACE$(79)
+	x = 10: y = 100
+	COLOR 9: LOCATE 5, 25: PRINT "UNION"; gNavySize(1); "ship(s)"
+	GOSUB boxes
+	COLOR 1
+	FOR i = 1 TO gNavySize(1)
 		x = x + 50: PSET (x, y)
 		CALL ShipType(1, i)
-		NEXT i
-		COLOR 11: LOCATE 11, 22: PRINT "CONFEDERATES "; gNavySize(2); "ship(s)"
-		LINE (10, 180)-(530, 210), 1, BF
-		LINE (10, 180)-(530, 210), 11, B
-		x = 10: y = 200
-		COLOR 1
-		FOR i = 1 TO gNavySize(2)
+	NEXT i
+	COLOR 11: LOCATE 11, 22: PRINT "CONFEDERATES "; gNavySize(2); "ship(s)"
+	LINE (10, 180)-(530, 210), 1, BF
+	LINE (10, 180)-(530, 210), 11, B
+	x = 10: y = 200
+	COLOR 1
+	FOR i = 1 TO gNavySize(2)
 		x = x + 50: PSET (x, y)
 		CALL ShipType(2, i)
-		NEXT i
-		COLOR 11
+	NEXT i
+	COLOR 11
 	navalbattleoptions:
-		gMenuText$(0) = "Options"
-		gMenuText$(1) = "Attack"
-		gMenuText$(2) = "Retreat"
-		IF chx > 0 THEN gChosenOption = 1: GOTO powder
-		
-		gMenuRows = 2: gColour = 3: gHighlight = 14: gTLX = 50: gTLY = 18: CALL ShowMenu(0)
+	gMenuText$(0) = "Options"
+	gMenuText$(1) = "Attack"
+	gMenuText$(2) = "Retreat"
+	IF chx > 0 THEN gChosenOption = 1: GOTO powder
+	gMenuRows = 2: gColour = 3: gHighlight = 14: gTLX = 50: gTLY = 18
+	CALL ShowMenu(0)
 	powder:
-		SELECT CASE gChosenOption
+	SELECT CASE gChosenOption
 		CASE 1
-	firemore:
-		IF gSoundEffects > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
-		pct! = 0: someString$ = RIGHT$(gFleet$(who), 1)
-		IF someString$ <> RIGHT$(gFleet$(3 - who), 1) THEN
-			IF someString$ = "I" THEN pct! = .1 ELSE pct! = -.1
-		END IF
-		IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
-		GOTO firemore
-	hitem:
-		hit(3 - who) = hit(3 - who) - 1: GOSUB showhit: IF hit(3 - who) > 0 GOTO firemore
-		x = 10 + 50 * gNavySize(3 - who)
-		y = 90: IF who = 1 THEN y = 190
-		GOSUB xout
-		LOCATE 17, 5: PRINT gNationName$(3 - who); " ship SUNK!": CALL TICK(gTurbo! + 1): GOSUB clr1
-		CALL ShipDestroyed(3 - who)
-		IF gNavySize(3 - who) < 1 THEN
-			LOCATE 19, 5: COLOR 12
-			PRINT gNationName$(3 - who); " fleet DEFEATED"
+			firemore:
+			IF gSoundEffects > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
+			pct! = 0
+			someString$ = RIGHT$(gFleet$(who), 1)
+			IF someString$ <> RIGHT$(gFleet$(3 - who), 1) THEN
+				IF someString$ = "I" THEN pct! = .1 ELSE pct! = -.1
+			END IF
+			IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
+			GOTO firemore
+			hitem:
+			hit(3 - who) = hit(3 - who) - 1
+			GOSUB showhit
+			IF hit(3 - who) > 0 GOTO firemore
+			x = 10 + 50 * gNavySize(3 - who)
+			IF who = 1 THEN y = 190 ELSE y = 90
+			GOSUB xout
+			LOCATE 17, 5: PRINT gNationName$(3 - who); " ship SUNK!"
+			CALL TICK(gTurbo! + 1)
+			GOSUB clr1
+			CALL ShipDestroyed(3 - who)
+			IF gNavySize(3 - who) < 1 THEN
+				LOCATE 19, 5: COLOR 12
+				PRINT gNationName$(3 - who); " fleet DEFEATED"
+				CALL TICK(gTurbo!)
+				gNavyLocation(3 - who) = 0
+				gFleet$(3 - who) = ""
+				gVictoryPoints(3 - who) = gVictoryPoints(3 - who) + 10
+				IF who = gCurrentSide THEN gGrudge = 1 ELSE gGrudge = 0
+				GOTO sail3
+			END IF
+			hit(3 - who) = 10
+			IF RIGHT$(gFleet$(3 - who), 1) = "I" THEN hit(3 - who) = 20
+			GOTO drawnavalbattle
+			hitme1:
+			hit(who) = hit(who) - 1
+			GOSUB showhit
+			IF hit(who) > 0 GOTO firemore
+			x = 10 + 50 * gNavySize(who)
+			y = 190
+			IF who = 1 THEN y = 90
+			GOSUB xout
+			LOCATE 17, 5: PRINT "One of the "; gNationName$(who); " ships was SUNK!"
 			CALL TICK(gTurbo!)
-			gNavyLocation(3 - who) = 0: gFleet$(3 - who) = ""
-			gVictoryPoints(3 - who) = gVictoryPoints(3 - who) + 10
-			IF who = gCurrentSide THEN gGrudge = 1 ELSE gGrudge = 0
-			GOTO sail3
-		END IF
-		hit(3 - who) = 10
-		IF RIGHT$(gFleet$(3 - who), 1) = "I" THEN hit(3 - who) = 20
-		GOTO drawnavalbattle
-	hitme1:
-		hit(who) = hit(who) - 1: GOSUB showhit: IF hit(who) > 0 GOTO firemore
-		x = 10 + 50 * gNavySize(who)
-		y = 190: IF who = 1 THEN y = 90
-		GOSUB xout
-		LOCATE 17, 5: PRINT "One of the "; gNationName$(who); " ships was SUNK!": CALL TICK(gTurbo!): GOSUB clr1
-		CALL ShipDestroyed(who)
-		IF gNavySize(who) < 1 THEN
-			LOCATE 19, 5: COLOR 12
-			PRINT "Attacking "; gNationName$(who); " fleet has been ELIMINATED !"
-			CALL TICK(gTurbo!)
-			gNavyLocation(who) = 0: gFleet$(who) = ""
-			gVictoryPoints(who) = gVictoryPoints(who) + 10
-			IF who <> gCurrentSide THEN gGrudge = 1 ELSE gGrudge = 0
-			GOTO sail3
-		END IF
-		hit(who) = 10
-		IF RIGHT$(gFleet$(who), 1) = "I" THEN hit(who) = 20
-		GOTO drawnavalbattle
-
+			GOSUB clr1
+			CALL ShipDestroyed(who)
+			IF gNavySize(who) < 1 THEN
+				LOCATE 19, 5: COLOR 12
+				PRINT "Attacking "; gNationName$(who); " fleet has been ELIMINATED !"
+				CALL TICK(gTurbo!)
+				gNavyLocation(who) = 0: gFleet$(who) = ""
+				gVictoryPoints(who) = gVictoryPoints(who) + 10
+				IF who <> gCurrentSide THEN gGrudge = 1 ELSE gGrudge = 0
+				GOTO sail3
+			END IF
+			hit(who) = 10
+			IF RIGHT$(gFleet$(who), 1) = "I" THEN hit(who) = 20
+			GOTO drawnavalbattle
 		CASE 2
-		target = 0
-		FOR i = 1 TO 40
-		IF gCityOwner(i) = who THEN IF i <> gNavyLocation(who) AND gMatrix(i, 7) = 99 THEN target = i: IF RND > .3 GOTO found1
-		NEXT i
-	found1:
-		CALL ClearBottom: COLOR 11: PRINT gNationName$(who); " is retreating to "; gCityName$(target); : CALL TICK(gTurbo!)
-		gNavyLocation(who) = target
-		GOTO sail3
+			target = 0
+			FOR i = 1 TO 40
+				IF gCityOwner(i) = who THEN 
+					IF i <> gNavyLocation(who) AND gMatrix(i, 7) = 99 THEN 
+						target = i
+						IF RND > .3 GOTO found1
+					END IF
+				END IF
+			NEXT i
+			found1:
+			CALL ClearBottom
+			COLOR 11: PRINT gNationName$(who); " is retreating to "; gCityName$(target);
+			CALL TICK(gTurbo!)
+			gNavyLocation(who) = target
+			GOTO sail3
 		CASE ELSE
-		GOTO navalbattleoptions
+			GOTO navalbattleoptions
 		END SELECT
 		GOTO navalbattle
-	'---------------------------------------------------------------------------
-	'                               Subs
-	'---------------------------------------------------------------------------
-	showhit:
+
+		'                               Subs
+		showhit:
 		LOCATE 9, 6 * gNavySize(1): PRINT hit(1); " ";
 		LOCATE 15, 6 * gNavySize(2): PRINT hit(2); " ";
 		IF gSoundEffects = 0 THEN TICK .1 * gTurbo!
 		RETURN
-	clr1:
+		clr1:
 		LOCATE 17, 1: PRINT SPACE$(60): RETURN
-	nest:
-		best = 0: x = 0
+		nest:
+		best = 0
+		x = 0
 		FOR i = 1 TO gMenuRows
-		target = gArray(i)
-		IF gCityOwner(target) = 0 GOTO neutral
+			target = gArray(i)
+			IF gCityOwner(target) = 0 GOTO neutral
 
-		IF target = gNavyLocation(3 - who) THEN IF gNavySize(who) >= gNavySize(3 - who) AND RND > .1 THEN gChosenOption = i: RETURN
-		IF gCityOwner(target) <> who THEN
-			best = i: x = x + 1
-			IF RND > .8 THEN gChosenOption = best: RETURN
-		END IF
-	neutral:
+			IF target = gNavyLocation(3 - who) THEN 
+				IF gNavySize(who) >= gNavySize(3 - who) AND RND > .1 THEN 
+					gChosenOption = i
+					RETURN
+				END IF
+			END IF
+			IF gCityOwner(target) <> who THEN
+				best = i
+				x = x + 1
+				IF RND > .8 THEN 
+					gChosenOption = best
+					RETURN
+				END IF
+			END IF
+			neutral:
 		NEXT i
 		IF best = 0 THEN
 			gChosenOption = 1 + INT(RND * gMenuRows)
@@ -2004,28 +2164,31 @@ SUB ManageNavy (who%, chx%)
 			gChosenOption = best
 		END IF
 
-		IF who = 2 AND gNavyLocation(2) = 30 THEN IF RND > .5 THEN gChosenOption = 30: RETURN
+		IF who = 2 AND gNavyLocation(2) = 30 THEN 
+			IF RND > .5 THEN gChosenOption = 30: RETURN
+		END IF
 		RETURN
-	boxes:
+		boxes:
 		LINE (10, 80)-(530, 110), 1, BF
 		LINE (10, 80)-(530, 110), 11, B
 		RETURN
-	box2:
+		box2:
 		CLS
 		LINE (100, 110)-(550, 240), 1, B
 		LINE (95, 115)-(555, 235), 7, B
 		RETURN
-	xout:
-			PSET (x, y)
-			DRAW "S5C15G5F5G3H5G5H3E5H5E3F5E5F3"
-			PAINT (x - 3, y + 1), 12, 15
+		xout:
+		PSET (x, y)
+		DRAW "S5C15G5F5G3H5G5H3E5H5E3F5E5F3"
+		PAINT (x - 3, y + 1), 12, 15
 		RETURN
-	sail3:
+		sail3:
 		gNavalCommerce = 0
 		FOR k = 1 TO 2
-		IF gNavyLocation(k) = 99 THEN gNavalCommerce = k
+			IF gNavyLocation(k) = 99 THEN gNavalCommerce = k
 		NEXT k
-		CLS : CALL DrawMap
+		CLS
+		CALL DrawMap
 END SUB
 
 SUB CreateNewArmy (who%, empty%, target%)
