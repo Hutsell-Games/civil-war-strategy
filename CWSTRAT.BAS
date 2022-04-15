@@ -3109,32 +3109,48 @@ SUB CancelArmyMovement (gCurrentSide%)
 	CALL StartToFinish(start, fin, (gCurrentSide))
 
 	CALL ClearRight
-		gMenuRows = 0
-		FOR j = start TO fin
-		someString$ = gArmyName$(j): IF LEN(someString$) > 10 THEN x = INSTR(someString$, " "): someString$ = RIGHT$(someString$, LEN(someString$) - x)
-		IF gArmyLocation(j) > 0 AND gArmyMove(j) > 0 THEN gMenuRows = gMenuRows + 1: gMenuText$(gMenuRows) = someString$: gArray(gMenuRows) = gArmyLocation(j)
-		NEXT j
-		CALL bubble(gMenuRows)
-		gTLX = 67: gTLY = 2: gWindowType = 2
-		gMenuText$(0) = "Cancel"
-		IF gMenuRows < 1 THEN CALL ClearBottom: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
-		CALL ShowMenu(1)
-		SELECT CASE gChosenOption
+	gMenuRows = 0
+	FOR j = start TO fin
+		someString$ = gArmyName$(j)
+		IF LEN(someString$) > 10 THEN 
+			x = INSTR(someString$, " ")
+			someString$ = RIGHT$(someString$, LEN(someString$) - x)
+		END IF
+		IF gArmyLocation(j) > 0 AND gArmyMove(j) > 0 THEN 
+			gMenuRows = gMenuRows + 1
+			gMenuText$(gMenuRows) = someString$
+			gArray(gMenuRows) = gArmyLocation(j)
+		END IF
+	NEXT j
+	CALL bubble(gMenuRows)
+	gTLX = 67: gTLY = 2: gWindowType = 2
+	gMenuText$(0) = "Cancel"
+	IF gMenuRows < 1 THEN 
+		CALL ClearBottom
+		COLOR 11: PRINT "No units have orders to cancel";
+		EXIT SUB
+	END IF
+	CALL ShowMenu(1)
+	SELECT CASE gChosenOption
 		CASE 1 TO gMenuRows
 			target = gArray(gChosenOption)
 			
 			FOR i = start TO fin
-			IF gArmyLocation(i) = target THEN x = INSTR(gArmyName$(i), gMenuText$(gChosenOption)): IF x > 0 AND gArmyMove(i) > 0 THEN index = i
+				IF gArmyLocation(i) = target THEN 
+					x = INSTR(gArmyName$(i), gMenuText$(gChosenOption))
+					IF x > 0 AND gArmyMove(i) > 0 THEN index = i
+				END IF
 			NEXT i
 
-			CALL ClearBottom: COLOR 11: PRINT gArmyName$(index); " has cancelled move to "; gCityName$(gArmyMove(index)); : CALL TICK(turbo + 1)
+			CALL ClearBottom
+			COLOR 11: PRINT gArmyName$(index); " has cancelled move to "; gCityName$(gArmyMove(index));
+			CALL TICK(turbo + 1)
 			CALL MoveUnitIcon(gArmyLocation(index), gArmyMove(index), 4)
-			gArmyMove(index) = 0: IF gSoundEffects > 0 THEN SOUND 2999, .5
+			gArmyMove(index) = 0
+			IF gSoundEffects > 0 THEN SOUND 2999, .5
 			CALL stax(gCurrentSide)
 		CASE ELSE
-			GOTO finix
 		END SELECT
-	finix:
 		CALL ClearRight
 END SUB
 
@@ -3159,21 +3175,23 @@ SUB commander (who%, empty%)
 	empty = 0
 	CALL StartToFinish(start, fin, who)
 	FOR i = start TO fin
-	IF gArmyLocation(i) = 0 AND gLeaderName$(i) <> "" THEN empty = i: EXIT SUB
+		IF gArmyLocation(i) = 0 AND gLeaderName$(i) <> "" THEN empty = i: EXIT SUB
 	NEXT i
 
-	'                 generic leaders if set list is exhausted
+	' Generate Generic Leaders if Needed
 	FOR i = start TO fin
-	IF gArmyLocation(i) = 0 THEN
-		x = i
-		CALL MakeRomanNumerals(x, someString$)
-		empty = i
-		gLeaderName$(i) = someString$
-		gLeaderRating(i) = 1 + 8 * RND
-		EXIT SUB
-	END IF
+		IF gArmyLocation(i) = 0 THEN
+			x = i
+			CALL MakeRomanNumerals(x, someString$)
+			empty = i
+			gLeaderName$(i) = someString$
+			gLeaderRating(i) = 1 + 8 * RND
+			EXIT SUB
+		END IF
 	NEXT i
-	CALL ClearBottom: PRINT "No more "; gNationName$(who); " commanders available"; : CALL TICK(gTurbo!)
+	CALL ClearBottom
+	PRINT "No more "; gNationName$(who); " commanders available";
+	CALL TICK(gTurbo!)
 END SUB
 
 SUB VictoryConditionsMet
