@@ -3177,38 +3177,37 @@ SUB commander (who%, empty%)
 END SUB
 
 SUB VictoryConditionsMet
-		someString$ = STR$(ABS(gVictoryFlags(3)) * 2.5) + "% Cities"
-		anotherString$ = STR$(ABS(gVictoryFlags(3)) * 2.5) + "% Total Income"
-		gMenuText$(8) = "Time: " + gMonthes$(gVictoryFlags(1)) + STR$(ABS(gVictoryFlags(2)))
-		gMenuText$(9) = RTRIM$(STR$(ABS(gVictoryFlags(6)))) + ":1 Force Ratio"
-		COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
-		COLOR 14: PRINT "				ESC when done"
+	someString$ = STR$(ABS(gVictoryFlags(3)) * 2.5) + "% Cities"
+	anotherString$ = STR$(ABS(gVictoryFlags(3)) * 2.5) + "% Total Income"
+	gMenuText$(8) = "Time: " + gMonthes$(gVictoryFlags(1)) + STR$(ABS(gVictoryFlags(2)))
+	gMenuText$(9) = RTRIM$(STR$(ABS(gVictoryFlags(6)))) + ":1 Force Ratio"
+	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
+	COLOR 14: PRINT "				ESC when done"
 	showvictoryconditionsbox:
-		FOR i = 2 TO 6: IF gVictoryFlags(i) > 0 THEN gMenuText$(i - 1) = "+ " ELSE gMenuText$(i - 1) = "  "
-		NEXT i
-		gChosenOption = newChosenOption
-		gMenuText$(0) = "Victory Conditions"
-		gMenuText$(1) = gMenuText$(1) + gMenuText$(8)
-		gMenuText$(2) = gMenuText$(2) + someString$
-		gMenuText$(3) = gMenuText$(3) + anotherString$
-		gMenuText$(4) = gMenuText$(4) + "Capital Captured"
-		gMenuText$(5) = gMenuText$(5) + gMenuText$(9)
-		gMenuText$(6) = "DONE"
-		gWindowType = 2: gColour = 3: gMenuRows = 6: gHighlight = 14
-		CALL ShowMenu(0)
-		newChosenOption = 21 + gChosenOption
+	FOR i = 2 TO 6
+		IF gVictoryFlags(i) > 0 THEN gMenuText$(i - 1) = "+ " ELSE gMenuText$(i - 1) = "  "
+	NEXT i
+	gChosenOption = newChosenOption
+	gMenuText$(0) = "Victory Conditions"
+	gMenuText$(1) = gMenuText$(1) + gMenuText$(8)
+	gMenuText$(2) = gMenuText$(2) + someString$
+	gMenuText$(3) = gMenuText$(3) + anotherString$
+	gMenuText$(4) = gMenuText$(4) + "Capital Captured"
+	gMenuText$(5) = gMenuText$(5) + gMenuText$(9)
+	gMenuText$(6) = "DONE"
+	gWindowType = 2: gColour = 3: gMenuRows = 6: gHighlight = 14
+	CALL ShowMenu(0)
+	newChosenOption = 21 + gChosenOption
 	SELECT CASE gChosenOption
 		CASE 1
-		gVictoryFlags(2) = -gVictoryFlags(2)
+			gVictoryFlags(2) = -gVictoryFlags(2)
 		CASE 2 TO 5
-		gVictoryFlags(gChosenOption + 1) = -gVictoryFlags(gChosenOption + 1)
+			gVictoryFlags(gChosenOption + 1) = -gVictoryFlags(gChosenOption + 1)
 		CASE ELSE
-		GOTO cheer
+			CLS
+			CALL DrawMap
 	END SELECT
-		GOTO showvictoryconditionsbox
-	cheer:
-		CLS
-		CALL DrawMap
+	GOTO showvictoryconditionsbox
 END SUB
 
 SUB engine
