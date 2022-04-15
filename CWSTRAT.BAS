@@ -3466,36 +3466,37 @@ SUB SpecialEvents
 END SUB
 
 SUB DrawFlags (who%, w%, a%)
-	x = 585 + w: y = 200: IF w = 0 THEN y = 180
+	x = 585 + w
+	IF w = 0 THEN y = 180 ELSE y = 200
 	IF a <> 0 THEN y = a
 	SELECT CASE who
 		CASE 1
-		LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
-		FOR i = -13 TO 9 STEP 5
-		LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
-		NEXT i
-		LINE (x - 17, y - 15)-(x, y), 1, BF
-		IF w = 0 THEN COLOR 9: LOCATE 10, 70: PRINT "U N I O N"
-		FOR i = -16 TO -1 STEP 3
-			FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
-		NEXT i
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+			FOR i = -13 TO 9 STEP 5
+				LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
+			NEXT i
+			LINE (x - 17, y - 15)-(x, y), 1, BF
+			IF w = 0 THEN COLOR 9: LOCATE 10, 70: PRINT "U N I O N"
+			FOR i = -16 TO -1 STEP 3
+				FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
+			NEXT i
 		CASE 2
-		LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
-		LINE (x - 17, y - 13)-(x + 15, y + 7), 7
-		LINE (x - 15, y - 15)-(x + 17, y + 5), 7
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+			LINE (x - 17, y - 13)-(x + 15, y + 7), 7
+			LINE (x - 15, y - 15)-(x + 17, y + 5), 7
 
-		LINE (x - 17, y + 7)-(x + 17, y - 15), 1
-		LINE (x - 17, y + 6)-(x + 16, y - 15), 1
-		LINE (x - 16, y + 7)-(x + 17, y - 14), 1
-		LINE (x - 17, y + 5)-(x + 15, y - 15), 7
-		LINE (x - 15, y + 7)-(x + 17, y - 13), 7
+			LINE (x - 17, y + 7)-(x + 17, y - 15), 1
+			LINE (x - 17, y + 6)-(x + 16, y - 15), 1
+			LINE (x - 16, y + 7)-(x + 17, y - 14), 1
+			LINE (x - 17, y + 5)-(x + 15, y - 15), 7
+			LINE (x - 15, y + 7)-(x + 17, y - 13), 7
 
-		LINE (x - 17, y - 15)-(x + 17, y + 7), 1
-		LINE (x - 17, y - 14)-(x + 16, y + 7), 1
-		LINE (x - 16, y - 15)-(x + 17, y + 6), 1
-		LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 1
+			LINE (x - 17, y - 14)-(x + 16, y + 7), 1
+			LINE (x - 16, y - 15)-(x + 17, y + 6), 1
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
 
-		IF w = 0 THEN COLOR 4: LOCATE 10, 70: PRINT "R E B E L"
+			IF w = 0 THEN COLOR 4: LOCATE 10, 70: PRINT "R E B E L"
 		CASE ELSE
 	END SELECT
 END SUB
@@ -3504,38 +3505,49 @@ SUB image2 (someString$, s%)
 	DIM g2(1 TO 8000)
 	gMenuText$(1) = someString$
 	gTLX = 32 - LEN(someString$) \ 2
-	gTLY = 10: gMenuRows = 1
+	gTLY = 10
+	gMenuRows = 1
 	CALL MenuMaxWidth(wide)
-	IF wide > 59 THEN wide = 59: someString$ = LEFT$(someString$, 59)
+	IF wide > 59 THEN 
+		wide = 59
+		someString$ = LEFT$(someString$, 59)
+	END IF
 	x = 8 * (gTLX + wide)
 	y = 16 * (gTLY + 1)
-		GET (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 15, 16 * (gTLY + 3) + 7), g2
-		VIEW (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + 3) + 4)
-		CLS 1
-		VIEW
-		LINE (8 * gTLX, 16 * gTLY - 1)-(8 * (gTLX + wide + 1) + 15, 16 * (gTLY + 3) + 7), 0, BF
-		LINE (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + 3)), s, BF
-		LINE (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + 3)), 15, B
-		COLOR 14
-		LOCATE gTLY + 2, gTLX + 2: PRINT someString$
-		CALL TICK(9)
-		PUT (8 * gTLX - 4, 16 * gTLY - 3), g2, PSET
+	GET (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 15, 16 * (gTLY + 3) + 7), g2
+	VIEW (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + 3) + 4)
+	CLS 1
+	VIEW
+	LINE (8 * gTLX, 16 * gTLY - 1)-(8 * (gTLX + wide + 1) + 15, 16 * (gTLY + 3) + 7), 0, BF
+	LINE (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + 3)), s, BF
+	LINE (8 * gTLX - 4, 16 * gTLY - 3)-(8 * (gTLX + wide + 1) + 7, 16 * (gTLY + 3)), 15, B
+	COLOR 14
+	LOCATE gTLY + 2, gTLX + 2: PRINT someString$
+	CALL TICK(9)
+	PUT (8 * gTLX - 4, 16 * gTLY - 3), g2, PSET
 END SUB
 
 SUB CheckMapIntegrity
-	CLS : COLOR 15
+	CLS
+	COLOR 15
 	x = 0: y = 0
 	FOR i = 1 TO 40
-	FOR j = 1 TO 6: IF gMatrix(i, j) = 0 GOTO done
-		index = gMatrix(i, j)
-		FOR k = 1 TO 6
-		IF gMatrix(index, k) = i GOTO ret
-		IF gMatrix(index, k) = 0 THEN gMatrix(index, k) = i: PRINT "+ Adding return route from "; gCityName$(index); " to "; gCityName$(i): y = y + 1: GOTO ret
-		NEXT k
-		x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; gCityName$(index); ": no return route to "; gCityName$(i): TICK 1
-	ret:
-	NEXT j
-	done:
+		FOR j = 1 TO 6
+			IF gMatrix(i, j) = 0 GOTO done
+			index = gMatrix(i, j)
+			FOR k = 1 TO 6
+				IF gMatrix(index, k) = i GOTO ret
+				IF gMatrix(index, k) = 0 THEN 
+					gMatrix(index, k) = i
+					PRINT "+ Adding return route from "; gCityName$(index); " to "; gCityName$(i)
+					y = y + 1
+					GOTO ret
+				END IF
+			NEXT k
+			x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; gCityName$(index); ": no return route to "; gCityName$(i): TICK 1
+		ret: ' line label
+		NEXT j
+		done: ' line label
 	NEXT i
 	IF x + y = 0 THEN PRINT "ALL MAP LINKS ARE OK": EXIT SUB
 	IF y > 0 THEN PRINT "* "; y; " fixes made to provide RETURN ROUTES"
@@ -3545,17 +3557,17 @@ END SUB
 SUB maptext
 	FOR k = 1 TO 40
 		FOR j = 1 TO LEN(gCityName$(k))
-		a = gCityX(k) + 6 * (j - 4) - 3
-		x = ASC(MID$(UCASE$(gCityName$(k)), j, 1)) - 64
-		IF a > 527 GOTO nextc
-		PSET (a, gCityY(k) + 12), 10
-		
-		IF gMatrix(k, 7) < 90 THEN
-			IF gBorderWidth = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
-		ELSE
-			DRAW "C10"
-		END IF
-		IF x > 0 AND x < 27 THEN DRAW gFont$(x)
+			a = gCityX(k) + 6 * (j - 4) - 3
+			x = ASC(MID$(UCASE$(gCityName$(k)), j, 1)) - 64
+			IF a > 527 GOTO nextc
+			PSET (a, gCityY(k) + 12), 10
+			
+			IF gMatrix(k, 7) < 90 THEN
+				IF gBorderWidth = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
+			ELSE
+				DRAW "C10"
+			END IF
+			IF x > 0 AND x < 27 THEN DRAW gFont$(x)
 		NEXT j
 	nextc:
 	NEXT k
@@ -3567,50 +3579,64 @@ SUB HallOfFame
 
 	LOCATE 2, 7: PRINT STRING$(57, "+")
 	LOCATE 9, 7: PRINT STRING$(57, "+")
-	FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "+"; SPACE$(55); "+": NEXT i
+	FOR i = 1 TO 6
+		LOCATE 2 + i, 7: PRINT "+"; SPACE$(55); "+"
+	NEXT i
 
-			OPEN "I", 1, "hiscore.cws"
-			FOR s = 1 TO 2
-			COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT gNationName$(s); " HALL of FAME"
-			COLOR 15, 0: FOR i = 1 TO 5
+	OPEN "I", 1, "hiscore.cws"
+	FOR s = 1 TO 2
+		COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT gNationName$(s); " HALL of FAME"
+		COLOR 15, 0
+		FOR i = 1 TO 5
 			INPUT #1, gCityName$(5 * (s - 1) + i), gMatrix(s, i)
 			LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, gCityName$(5 * (s - 1) + i), gMatrix(s, i)
-			NEXT i: NEXT s: CLOSE #1
-				
-				FOR s = 1 TO 2: FOR i = 1 TO 5
-				IF gVictoryPoints(s) < gMatrix(s, i) GOTO oldskor
-					FOR j = 5 TO i + 1 STEP -1
-					gMatrix(s, j) = gMatrix(s, j - 1)
-					gCityName$(5 * (s - 1) + j) = gCityName$(5 * (s - 1) + j - 1)
-					NEXT j
-
-				COLOR 15, 1: IF s = 2 THEN COLOR 4, 7
-				FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
-				LOCATE 12, 1: PRINT "Congratulations ! Score of"; gVictoryPoints(s)
-				PRINT "New Entry into "; gNationName$(s); " HALL of FAME in place "; i
-				IF gHumanPlayers = 1 AND s <> gCurrentSide THEN someString$ = "COMPUTER": PRINT someString$; " was "; gNationName$(s); " commander": GOTO automate
-	who4:
-				PRINT "What is name of "; gNationName$(s); " commander"; : INPUT someString$: IF someString$ = "" GOTO who4
-	automate:
-				gCityName$(5 * (s - 1) + i) = someString$
-				gMatrix(s, i) = gVictoryPoints(s): GOTO foun
-	oldskor:
-				NEXT i
-	foun:
-				NEXT s
-			
-			OPEN "O", 1, "hiscore.cws"
-			FOR s = 1 TO 2
-				FOR i = 1 TO 5
-				WRITE #1, gCityName$(5 * (s - 1) + i), gMatrix(s, i)
-				NEXT i
-			NEXT s: CLOSE #1: PRINT "Game Over": DO WHILE INKEY$ = "": LOOP: gTimesPlayed = 1
+		NEXT i
+	NEXT s
+	CLOSE #1
+		
+	FOR s = 1 TO 2
+		FOR i = 1 TO 5
+			IF gVictoryPoints(s) < gMatrix(s, i) GOTO oldskor
+			FOR j = 5 TO i + 1 STEP -1
+				gMatrix(s, j) = gMatrix(s, j - 1)
+				gCityName$(5 * (s - 1) + j) = gCityName$(5 * (s - 1) + j - 1)
+			NEXT j
+			IF s = 2 THEN COLOR 4, 7 ELSE COLOR 15, 1
+			FOR k = 12 TO 14
+				LOCATE k, 1: PRINT SPACE$(80);
+			NEXT k
+			LOCATE 12, 1: PRINT "Congratulations ! Score of"; gVictoryPoints(s)
+			PRINT "New Entry into "; gNationName$(s); " HALL of FAME in place "; i
+			IF gHumanPlayers = 1 AND s <> gCurrentSide THEN
+				someString$ = "COMPUTER"
+				PRINT someString$; " was "; gNationName$(s); " commander"
+				GOTO automate
+			END IF
+			who4: ' line label
+			PRINT "What is name of "; gNationName$(s); " commander"; : INPUT someString$: IF someString$ = "" GOTO who4
+			automate: ' line label
+			gCityName$(5 * (s - 1) + i) = someString$
+			gMatrix(s, i) = gVictoryPoints(s): GOTO foun
+			oldskor: ' line label
+		NEXT i
+		foun: ' line label
+	NEXT s
+	
+	OPEN "O", 1, "hiscore.cws"
+	FOR s = 1 TO 2
+		FOR i = 1 TO 5
+		WRITE #1, gCityName$(5 * (s - 1) + i), gMatrix(s, i)
+		NEXT i
+	NEXT s
+	CLOSE #1
+	PRINT "Game Over": DO WHILE INKEY$ = "": LOOP
+	gTimesPlayed = 1
 END SUB
 
 SUB occupy (x%)
 	gIsOccupied(x) = 0
 	FOR i = 1 TO 40
-	IF gArmyLocation(i) = x THEN gIsOccupied(x) = i: EXIT SUB
+		IF gArmyLocation(i) = x THEN gIsOccupied(x) = i: EXIT SUB
 	NEXT i
 END SUB
 
@@ -3620,19 +3646,23 @@ SUB relieve (who%)
 	CALL StartToFinish(start, fin, who)
 	gMenuRows = 0
 	FOR i = start TO fin
-	IF gArmySize(i) > 0 AND gArmyLocation(i) > 0 AND gArmyMove(i) = 0 THEN
-		gMenuRows = gMenuRows + 1
-		gMenuText$(gMenuRows) = gArmyName$(i)
-		IF LEN(gMenuText$(gMenuRows)) > 11 THEN gMenuText$(gMenuRows) = LEFT$(gMenuText$(gMenuRows), 11)
-		gArray(gMenuRows) = i
-	END IF
+		IF gArmySize(i) > 0 AND gArmyLocation(i) > 0 AND gArmyMove(i) = 0 THEN
+			gMenuRows = gMenuRows + 1
+			gMenuText$(gMenuRows) = gArmyName$(i)
+			IF LEN(gMenuText$(gMenuRows)) > 11 THEN 
+				gMenuText$(gMenuRows) = LEFT$(gMenuText$(gMenuRows), 11)
+			END IF
+			gArray(gMenuRows) = i
+		END IF
 	NEXT i
 
 	IF gMenuRows = 0 THEN EXIT SUB
 	CALL bubble(gMenuRows)
 	gMenuText$(0) = "Relieve"
-	gChosenOption = 31: gHighlight = 11
-	CALL ShowMenu(6): CALL ClearRight
+	gChosenOption = 31
+	gHighlight = 11
+	CALL ShowMenu(6)
+	CALL ClearRight
 
 	IF gChosenOption < 1 THEN EXIT SUB
 	index = gArray(gChosenOption)
@@ -3646,7 +3676,9 @@ SUB relieve (who%)
 	IF gLeaderName$(i) <> "" THEN
 		gMenuRows = gMenuRows + 1
 		gMenuText$(gMenuRows) = gLeaderName$(i)
-		IF LEN(gMenuText$(gMenuRows)) > 11 THEN gMenuText$(gMenuRows) = LEFT$(gMenuText$(gMenuRows), 11)
+		IF LEN(gMenuText$(gMenuRows)) > 11 THEN 
+			gMenuText$(gMenuRows) = LEFT$(gMenuText$(gMenuRows), 11)
+		END IF
 		gArray(gMenuRows) = i
 	END IF
 	NEXT i
@@ -3655,13 +3687,19 @@ SUB relieve (who%)
 	selectnewleader:
 	gMenuText$(0) = "New Leader"
 	gTLX = 67: gTLY = 2
-	CALL ShowMenu(0): CALL ClearRight
+	CALL ShowMenu(0)
+	CALL ClearRight
 	IF gChosenOption < 1 GOTO selectnewleader
 	gArmyMove(index) = -1
 	gArmyCommander(index) = gLeaderRating(gArray(gChosenOption))
-	IF gArmyCommander(index) > 0 THEN gArmyCommander(index) = gArmyCommander(index) - 1
-	IF gArmyExp(index) > 0 THEN gArmyExp(index) = gArmyExp(index) - 1
-	COLOR 15: CALL ClearBottom: PRINT gLeaderName$(gArray(gChosenOption)); " has replaced "; anotherString$; " in "; gCityName$(gArmyLocation(index)); : TICK 9
+	IF gArmyCommander(index) > 0 THEN 
+		gArmyCommander(index) = gArmyCommander(index) - 1
+	END IF
+	IF gArmyExp(index) > 0 THEN 
+		gArmyExp(index) = gArmyExp(index) - 1
+	END IF
+	CALL ClearBottom
+	COLOR 15: PRINT gLeaderName$(gArray(gChosenOption)); " has replaced "; anotherString$; " in "; gCityName$(gArmyLocation(index)); : TICK 9
 	gArmyName$(index) = gLeaderName$(gArray(gChosenOption))
 	gLeaderName$(gArray(gChosenOption)) = ""
 	CALL MoveUnitIcon(gArmyLocation(index), 0, 8)
