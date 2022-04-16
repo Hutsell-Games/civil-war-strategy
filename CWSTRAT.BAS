@@ -1219,7 +1219,14 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 
 	CASE 2
-	IF _FILEEXISTS("*.sav") = 0 THEN choose = -1: EXIT SUB
+	FOR j = 1 to 9
+		t$ = "cws" + LTRIM$(STR$(j)) + ".sav"
+		IF _FILEEXISTS(t$) THEN 
+			EXIT FOR
+		ELSE
+			choose = -1: EXIT SUB
+		END IF
+	NEXT j
 	mtx$(0) = "Load"
 	size = 0
 	FOR k = 1 TO 9

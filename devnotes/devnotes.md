@@ -1,6 +1,19 @@
 # Introduction
 Fairly detailed notes on the changes to the code base.
 
+# Changes to Code
+1. Update logic in another place that checks if saved games exist, see next entry for more details on why this is necessary.
+    - Replace `IF _FILEEXISTS("*.sav") = 0 THEN choose = -1: EXIT SUB` with:
+        ```vb
+        FOR j = 1 to 9
+            t$ = "cws" + LTRIM$(STR$(j)) + ".sav"
+            IF _FILEEXISTS(t$) THEN 
+                EXIT FOR
+            ELSE
+                choose = -1: EXIT SUB
+            END IF
+    	NEXT j
+        ```
 1. Update the logic for checking if saved games exist.
     - It seems that QB64 may have changed how `_FILEEXISTS` works. In the past passing in `*.sav` would treat `*` as a wildcard. This is no longer the case.
     - Replace `IF _FILEEXISTS("*.sav") = 0 THEN filel = 0` with:
