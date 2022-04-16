@@ -746,7 +746,14 @@ utile:
 '                               Files
 '==========================================================================
 	CASE 9
-	IF _FILEEXISTS("*.sav") = 0 THEN filel = 0
+		FOR j = 1 to 9
+			t$ = "cws" + LTRIM$(STR$(j)) + ".sav"
+			IF _FILEEXISTS(t$) THEN 
+				filel = 1: EXIT FOR
+			ELSE
+				filel = 0
+			END IF
+		NEXT j
 filex:
 	choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
 	mtx$(0) = "Options"
