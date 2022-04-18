@@ -2,6 +2,7 @@
 Fairly detailed notes on the changes to the code base.
 
 # Changes to Code
+1. Remove code related to pressing F1 for help. This no longer works on modern OS'es.
 1. Update logic in another place that checks if saved games exist, see next entry for more details on why this is necessary.
     - Replace `IF _FILEEXISTS("*.sav") = 0 THEN choose = -1: EXIT SUB` with:
         ```vb
