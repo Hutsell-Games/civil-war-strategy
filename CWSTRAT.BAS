@@ -2978,14 +2978,6 @@ arrows:
 	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
 	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
 	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
-	 IF a$ = ";" AND switch = 0 THEN
-		SCREEN 0: CLS
-		SHELL "cwsdoc.com"
-		SCREEN 12: CALL usa
-		CALL choices(b1, wide)
-		CALL topbar
-		RETURN
-	  END IF
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL usa
@@ -4535,7 +4527,6 @@ SUB topbar
 a$ = "  Snd": IF noise < 2 THEN a$ = "   Snd": IF noise = 0 THEN a$ = "      "
 IF graf > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(graf))
 a$ = a$ + STR$(player)
-COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
 COLOR c
 LOCATE 26, 68: PRINT "F3 Redrw Scrn"
 LOCATE 27, 68: PRINT "F7 End Turn"
