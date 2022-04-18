@@ -152,8 +152,8 @@ SCREEN 12
 CLS
 COLOR 11: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
 COLOR 4: LOCATE 15, 32: PRINT "Registered Edition"
-COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
-LOCATE 28, 60: PRINT "v1.57"
+COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998-2022 W. R. Hutsell, David Mackey"
+LOCATE 28, 60: PRINT "v1.6"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
 CALL flags(1, -440, 0): CALL flags(2, -100, 0)
@@ -197,7 +197,7 @@ wtype = 2
 hilite = 15
 replay = 1
 IF player = 2 THEN GOSUB blanken
-mtx$(0) = "VGA CIVILWAR STRATEGY"
+mtx$(0) = "VGA CIVIL WAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
 mtx$(3) = "Quit"

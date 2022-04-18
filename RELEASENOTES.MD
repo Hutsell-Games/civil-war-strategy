@@ -1,3 +1,20 @@
+# Changes to Version 1.6 (April 2021)
+
+1. Application has been converted from a Microsoft Basic for DOS (QuickBasic/PDS BASIC) to a QB64 application.
+1. Removes screensaver as monitors generally aren't at risk of burn-in like they were in the past.
+1. Removes some old files and images related to DOS that don't alter gameplay.
+1. Fixes a few small bugs that arise due to differences in how QB64 vs MS Basic interprets various instructions.
+
+- For a detailed list of code changes see devnotes/devnotes.md
+
+# Changes to Version 1.57 (circa 1998)
+
+1. Unknown
+
+# Changes to Version 1.56 (circa 1998)
+
+1. Unknown
+
 # Changes to Version 1.55 (circa 1998)
 
 1. Graphics for capital cities improved. Fortification level
