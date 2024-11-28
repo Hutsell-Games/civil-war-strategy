@@ -736,57 +736,58 @@ DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
-SUB animate (index, flag)
-from = armyloc(index): to2 = armymove(index): armyloc(index) = 0
-x = cityx(from) - 12
-y = cityy(from) - 11
-x1 = .5 * (cityx(to2) + cityx(from))
-y1 = .5 * (cityy(to2) + cityy(from))
+SUB animate (armyIndex, animationFlag)
+	startLocation = armyloc(armyIndex)
+	endLocation = armymove(armyIndex): armyloc(armyIndex) = 0
+	x = cityx(startLocation) - 12
+	y = cityy(startLocation) - 11
+	x1 = .5 * (cityx(endLocation) + cityx(startLocation))
+	y1 = .5 * (cityy(endLocation) + cityy(startLocation))
 
-CALL occupy(from): IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
-       
-IF flag > 0 GOTO already
-	GET (x - 9, y - 7)-(x + 9, y + 6), anima
-	IF occupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-already:
+	CALL occupy(startLocation): IF occupied(startLocation) > 0 THEN CALL placearmy(occupied(startLocation))
+		
+	IF animationFlag > 0 GOTO already
+		GET (x - 9, y - 7)-(x + 9, y + 6), anima
+		IF occupied(startLocation) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	already:
 
-	FOR i = 2 TO 8
-	x1 = .1 * (i * cityx(to2) + (10 - i) * cityx(from))
-	y1 = .1 * (i * cityy(to2) + (10 - i) * cityy(from))
-	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
-	PUT (x1 - 10, y1 - 10), anima, PSET
-	IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
-	IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
-	PUT (x1 - 10, y1 - 10), image, PSET
-	NEXT i
-	armyloc(index) = from
+		FOR i = 2 TO 8
+		x1 = .1 * (i * cityx(endLocation) + (10 - i) * cityx(startLocation))
+		y1 = .1 * (i * cityy(endLocation) + (10 - i) * cityy(startLocation))
+		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
+		PUT (x1 - 10, y1 - 10), anima, PSET
+		IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
+		IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
+		PUT (x1 - 10, y1 - 10), image, PSET
+		NEXT i
+		armyloc(armyIndex) = startLocation
 END SUB
 
 SUB armies
-CALL movefrom(index, target): IF target > 0 AND index > 0 GOTO tent
-	IF index = -1 THEN mflag = 1
-	GOTO dudd
-tent:
-tlx = 67: tly = 12
+	CALL movefrom(armyIndex, targetCity): IF targetCity > 0 AND armyIndex > 0 GOTO tent
+		IF armyIndex = -1 THEN mflag = 1
+		GOTO dudd
+	tent:
+	tlx = 67: tly = 12
 
-CALL armystat(index)
-COLOR 11: LOCATE 11, 68: PRINT city$(target)
-size = 0
-mtx$(0) = "To"
-FOR i = 1 TO 6: IF matrix(target, i) > 0 THEN size = size + 1: mtx$(size) = city$(matrix(target, i)): array(size) = matrix(target, i)
-NEXT i
-CALL bubble(size)
+	CALL armystat(index)
+	COLOR 11: LOCATE 11, 68: PRINT city$(targetCity)
+	size = 0
+	mtx$(0) = "To"
+	FOR i = 1 TO 6: IF matrix(targetCity, i) > 0 THEN size = size + 1: mtx$(size) = city$(matrix(targetCity, i)): array(size) = matrix(targetCity, i)
+	NEXT i
+	CALL bubble(size)
 
-hilite = 10: colour = 3: CALL menu(2): CALL clrrite
-IF choose < 0 GOTO dudd
-IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: GOTO dudd
+	hilite = 10: colour = 3: CALL menu(2): CALL clrrite
+	IF choose < 0 GOTO dudd
+	IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: GOTO dudd
 
-CALL clrbot: PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(target); " to "; city$(array(choose));
-IF noise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
-CALL icon(target, array(choose), 1)
-armymove(index) = array(choose): CALL TICK(turbo!): CALL clrbot
-CALL clrrite
-dudd:
+	CALL clrbot: PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(targetCity); " to "; city$(array(choose));
+	IF noise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
+	CALL icon(targetCity, array(choose), 1)
+	armymove(index) = array(choose): CALL TICK(turbo!): CALL clrbot
+	CALL clrrite
+	dudd:
 END SUB
 
 SUB armystat (index)
