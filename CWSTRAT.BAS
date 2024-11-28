@@ -18,15 +18,20 @@ DIM SHARED graphic(1 TO 1564), Ncap(60)
 
 replay = 0
 newgame:
-pcode = 0: rflag = 0
-FOR k = 1 TO 40: armysize(k) = 0: armyloc(k) = 0: armymove(k) = 0: armylead(k) = 0: armyname$(k) = "": NEXT k
-usadv = 0: emancipate = 0
+pcode = 0
+rflag = 0
+FOR k = 1 TO 40
+	armysize(k) = 0: armyloc(k) = 0: armymove(k) = 0: armylead(k) = 0: armyname$(k) = ""
+NEXT k
+usadv = 0
+emancipate = 0
 FOR k = 1 TO 2
-navysize(k) = 0: navyloc(k) = 0: navymove(k) = 0
-rr(k) = 0: victory(k) = 0: tracks(k) = 0
+	navysize(k) = 0: navyloc(k) = 0: navymove(k) = 0
+	rr(k) = 0: victory(k) = 0: tracks(k) = 0
 NEXT k
 
-filel = 1: vicflag(1) = 1
+filel = 1
+vicflag(1) = 1
 CALL filer(1)
 IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
@@ -37,7 +42,9 @@ ELSE
 END IF
 
 RESTORE
-FOR k = 1 TO 26: READ font$(k): NEXT k
+FOR k = 1 TO 26
+	READ font$(k)
+NEXT k
 
 IF realism > 0 AND year < 1862 THEN
 		FOR i = 1 TO 2
@@ -55,7 +62,9 @@ IF side = 2 THEN randbal = 3
 	IF side = 2 AND difficult > 3 THEN cash(1) = cash(1) + 100 * difficult
 
 
-FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
+FOR i = 1 TO 2
+	income(i) = cash(i): cash(i) = cash(i) + 50 * RND
+NEXT i
 choose = 0
 
 SCREEN 12
@@ -97,15 +106,20 @@ GOSUB unionplus
 city$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 vptotal = usadv + 200
-FOR i = 1 TO 40: INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
-cityo(i) = cityp(i)
-CALL occupy(i)
-FOR j = 1 TO 7: INPUT #1, matrix(i, j): NEXT j: INPUT #1, fort(i)
-IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: victory(x) = victory(x) + cityv(i)
-IF cityp(i) > 0 THEN cash(cityp(i)) = cash(cityp(i)) + cityv(i)
-vptotal = vptotal + cityv(i)
+FOR i = 1 TO 40
+	INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
+	cityo(i) = cityp(i)
+	CALL occupy(i)
+	FOR j = 1 TO 7
+		INPUT #1, matrix(i, j)
+	NEXT j
+	INPUT #1, fort(i)
+	IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: victory(x) = victory(x) + cityv(i)
+	IF cityp(i) > 0 THEN cash(cityp(i)) = cash(cityp(i)) + cityv(i)
+	vptotal = vptotal + cityv(i)
 NEXT i
-CLOSE #1: CALL clrbot
+CLOSE #1
+CALL clrbot
 
 RANDOMIZE TIMER
 TICK .3
@@ -145,7 +159,8 @@ IF side > 2 THEN side = 1
 a$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
 CALL scribe(a$, 0)
 CALL tupdate
-control(1) = 0: control(2) = 0
+control(1) = 0
+control(2) = 0
 
 FOR i = 1 TO 2
 income(i) = 0
@@ -155,22 +170,33 @@ NEXT i
 IF player = 1 AND side = 2 THEN income(1) = income(1) + usadv
 
 FOR i = 1 TO 40
-IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: income(x) = income(x) + cityv(i)
-armymove(i) = 0
+	IF cityp(i) > 0 THEN 
+		x = cityp(i): control(x) = control(x) + 1: income(x) = income(x) + cityv(i)
+	END IF
+	armymove(i) = 0
 NEXT i
 
-FOR i = 1 TO 2: navymove(i) = 0: IF capcity(i) > 0 THEN income(i) = income(i) + 100
-cash(i) = cash(i) + income(i)
-IF commerce > 0 AND i <> commerce THEN cash(i) = cash(i) - raider
+FOR i = 1 TO 2
+	navymove(i) = 0
+	IF capcity(i) > 0 THEN 
+		income(i) = income(i) + 100
+	END IF
+	cash(i) = cash(i) + income(i)
+	IF commerce > 0 AND i <> commerce THEN cash(i) = cash(i) - raider
 NEXT i
 vptotal = income(1) + income(2)
 
 chosit = 22
-IF player = 2 THEN GOSUB blanken: CALL usa
+IF player = 2 THEN 
+	GOSUB blanken
+	CALL usa
+END IF
 CALL victor
 ON ERROR GOTO 0
 IF pcode > 0 THEN
-	FOR k = 1 TO 40: armyloc(k) = 0: NEXT k
+	FOR k = 1 TO 40
+		armyloc(k) = 0
+	NEXT k
 	GOTO newgame
 END IF
 
@@ -198,13 +224,17 @@ mtx$(9) = "Files"
 
 size = 9
 choose = chosit
-CALL menu(0): CALL clrrite
+CALL menu(0)
+CALL clrrite
 '==========================================================================
 '                            Main Menu
 '==========================================================================
 SELECT CASE choose
 	CASE 1
-	IF cash(side) < 100 OR rflag < 0 THEN rflag = -1: GOTO menu0
+	IF cash(side) < 100 OR rflag < 0 THEN 
+		rflag = -1
+		GOTO menu0
+	END IF
 	CALL recruit((side))
 	chosit = 23
 	GOTO menu0
@@ -230,7 +260,9 @@ IF rr(side) = 0 THEN
 	CALL clrbot: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 	CALL railroad(side)
 ELSE
-	CALL clrbot: COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO menu0
+	CALL clrbot
+	COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side)));
+	GOTO menu0
 END IF
 '==========================================================================
 	CASE 5
@@ -239,17 +271,33 @@ END IF
 	mtx$(0) = "End Turn"
 	mtx$(1) = "Yes"
 	mtx$(2) = "NOT YET"
-	size = 2: CALL menu(0): CALL clrrite: IF choose <> 1 THEN chosit = 24: GOTO menu0
+	size = 2
+	CALL menu(0)
+	CALL clrrite
+	IF choose <> 1 THEN 
+		chosit = 24
+		GOTO menu0
+	END IF
 endrnd:
-	rflag = 0: mflag = 0: nflag = 0
-	IF player = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
+	rflag = 0
+	mflag = 0
+	nflag = 0
+	IF player = 2 THEN 
+		side = side + 1
+		IF side = 2 THEN 
+			GOSUB blanken
+			CALL usa
+			GOTO menu0
+		END IF
+	END IF
 	GOTO newmonth
 '==========================================================================
 	CASE 6
-	CALL report((side)): chosit = 27
+	CALL report((side))
+	chosit = 27
 	CALL starfin(star, fin, side)
 	FOR i = star TO fin
-	IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
+		IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
 	NEXT i
 '==========================================================================
 '                            Commands
@@ -270,20 +318,27 @@ optmen:
 	mtx$(8) = "Relieve"
 	mtx$(9) = "MAIN MENU"
 	size = 9
-	CALL menu(0): CALL clrrite
+	CALL menu(0)
+	CALL clrrite
 	chosit = 28
      SELECT CASE choose
 '---------------------------------------------------------------------------
 '                               Cancel
 '---------------------------------------------------------------------------
 		CASE 1
-	CALL cancel(side): mflag = 0
+	CALL cancel(side)
+	mflag = 0
 	choose = 22
 '---------------------------------------------------------------------------
 '                               Fortify
 '---------------------------------------------------------------------------
 		CASE 2
-	IF cash(side) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
+	IF cash(side) < 200 THEN 
+		COLOR 11
+		CALL clrbot
+		PRINT "Not enough money for fort";
+		GOTO menu0
+	END IF
 	CALL fortify(target)
 	IF cash(side) < 200 GOTO menu0
 	choose = 23
@@ -312,19 +367,31 @@ optmen:
 		tlx = 67: tly = 5: colour = 5
 		size = 0
 		FOR i = star TO fin
-		IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
-		IF realism > 0 THEN
-			CALL cutoff(side, armyloc(i), a)
-			IF a < 1 THEN CALL clrbot: COLOR 15: PRINT force$(side); " army in "; city$(armyloc(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
-		END IF
-		size = size + 1
-		max = 11: IF LEN(armyname$(i)) < 11 THEN max = LEN(armyname$(i))
-		mtx$(size) = LEFT$(armyname$(i), max)
-		array(size) = i
-alone:
+			IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
+			IF realism > 0 THEN
+				CALL cutoff(side, armyloc(i), a)
+				IF a < 1 THEN 
+					CALL clrbot
+					COLOR 15: PRINT force$(side); " army in "; city$(armyloc(i)); " is CUT OFF !";
+					TICK turbo!
+					GOTO alone
+				END IF
+			END IF
+			size = size + 1
+			max = 11
+			IF LEN(armyname$(i)) < 11 THEN max = LEN(armyname$(i))
+			mtx$(size) = LEFT$(armyname$(i), max)
+			array(size) = i
+	alone:
 		NEXT i
-		IF size = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; force$(side); " armies have supplies"; : GOTO menu0
-		CALL menu(6): CALL clrrite
+		IF size = 0 THEN 
+			COLOR 11
+			CALL clrbot
+			PRINT "All eligible "; force$(side); " armies have supplies";
+			GOTO menu0
+		END IF
+		CALL menu(6)
+		CALL clrrite
 		IF choose < 0 GOTO menu0
 		index = array(choose)
 		IF supply(index) < 2 THEN
@@ -337,16 +404,22 @@ alone:
 '                               Move Capital
 '-------------------------------------------------------------------------
 		CASE 5
-	IF capcity(side) = 0 OR cash(side) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
+	IF capcity(side) = 0 OR cash(side) < 500 THEN 
+		CALL clrbot
+		COLOR 11: PRINT "Cannot move capital";
+		GOTO menu0
+	END IF
 	cash(side) = cash(side) - 500
 	victory(3 - side) = victory(3 - side) + 50
 	CALL clrrite
 	mtx$(0) = "Capital"
 	a$ = city$(capcity(side))
-	index = capcity(side): CALL newcity(index)
+	index = capcity(side)
+	CALL newcity(index)
 	IF index = 0 GOTO menu0
 	capcity(side) = index
-	CALL clrbot: PRINT force$(side); " capital moved from "; a$; " to "; city$(capcity(side));
+	CALL clrbot
+	PRINT force$(side); " capital moved from "; a$; " to "; city$(capcity(side));
 	CALL clrrite
 	CALL showcity
 	CALL TICK(9): CALL clrbot
@@ -354,18 +427,38 @@ alone:
 '                               Detach
 '-------------------------------------------------------------------------
 		CASE 6
-	IF side = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
+	IF side = 1 THEN 
+		CALL clrbot
+		COLOR 11: PRINT "Option not available to Union";
+		GOTO menu0
+	END IF
 	COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-	CALL movefrom(index, target): IF target < 1 OR index < 1 GOTO menu0
-	IF armysize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
-	CALL commander(2, empty): IF empty = 0 GOTO menu0
-	supply(empty) = .3 * supply(index): supply(index) = supply(index) - supply(empty): IF supply(index) < 0 THEN supply(index) = 0
-	armysize(empty) = .3 * armysize(index): armysize(index) = armysize(index) - armysize(empty)
-	armyloc(empty) = target: armyexper(empty) = armyexper(index): armymove(empty) = 0
+	CALL movefrom(index, target)
+	IF target < 1 OR index < 1 GOTO menu0
+	IF armysize(index) < 65 THEN 
+		CALL clrbot
+		PRINT "Too small to detach";
+		CALL TICK(turbo!)
+		GOTO menu0
+	END IF
+	CALL commander(2, empty)
+	IF empty = 0 GOTO menu0
+	supply(empty) = .3 * supply(index)
+	supply(index) = supply(index) - supply(empty)
+	IF supply(index) < 0 THEN supply(index) = 0
+	armysize(empty) = .3 * armysize(index)
+	armysize(index) = armysize(index) - armysize(empty)
+	armyloc(empty) = target
+	armyexper(empty) = armyexper(index): armymove(empty) = 0
 	armylead(empty) = rating(empty)
-	armyname$(empty) = lname$(empty): lname$(empty) = ""
+	armyname$(empty) = lname$(empty)
+	lname$(empty) = ""
 	armyexper(empty) = armyexper(index)
-	COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; armyname$(empty); : CALL TICK(turbo!): IF noise > 0 THEN SOUND 2222, 1
+	COLOR 11
+	CALL clrbot
+	PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; armyname$(empty);
+	CALL TICK(turbo!)
+	IF noise > 0 THEN SOUND 2222, 1
 	CALL stax(side)
 	choose = 27
 	GOTO optmen
@@ -375,11 +468,24 @@ alone:
 		CASE 7
 	COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
 	CALL movefrom(index, target)
-	IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; month$(month); : GOTO menu0
-	IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN COLOR 12: CALL clrbot: PRINT armyname$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
+	IF target < 1 OR index < 1 THEN 
+		COLOR 11
+		CALL clrbot
+		PRINT "No armies remain eligible for drills in "; month$(month);
+		GOTO menu0
+	END IF
+	IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN 
+		COLOR 12
+		CALL clrbot
+		PRINT armyname$(index); ": Army has reached maximum improvement through drilling";
+		GOTO optmen
+	END IF
 	armyexper(index) = armyexper(index) + 1
-	CALL clrbot: PRINT armyname$(index); " has drilled to reach experience level "; armyexper(index); : IF noise > 0 THEN SOUND 2222, 1
-	CALL TICK(turbo!): clrbot
+	CALL clrbot
+	PRINT armyname$(index); " has drilled to reach experience level "; armyexper(index);
+	IF noise > 0 THEN SOUND 2222, 1
+	CALL TICK(turbo!)
+	clrbot
 	armymove(index) = -1
 	choose = 28
 	GOTO optmen
@@ -395,7 +501,8 @@ alone:
 		chosit = 28
 		GOTO menu0
       END SELECT
-	choose = 21 + choose: GOTO optmen
+	choose = 21 + choose
+	GOTO optmen
 '==========================================================================
 '                               Utility Menu
 '==========================================================================
@@ -431,8 +538,12 @@ utile:
 '-------------------------------------------------------------------------
 	    CASE 1
 		IF player = 2 GOTO menu0
-		side = 3 - side: COLOR 9: IF side = 2 THEN COLOR 7
-		CALL clrbot: PRINT "Now playing "; force$(side); " side"; : IF noise > 0 THEN SOUND 999, 1
+		side = 3 - side
+		COLOR 9
+		IF side = 2 THEN COLOR 7
+		CALL clrbot
+		PRINT "Now playing "; force$(side); " side";
+		IF noise > 0 THEN SOUND 999, 1
 		IF side = 1 THEN randbal = 7
 		IF side = 2 THEN randbal = 3
 		CALL topbar
@@ -441,9 +552,12 @@ utile:
 '                               Solo or 2 Player
 '-------------------------------------------------------------------------
 	    CASE 2
-		player = 3 - player: CALL clrbot: COLOR 12
+		player = 3 - player
+		CALL clrbot
+		COLOR 12
 		IF noise > 0 THEN SOUND 999, 1
-		a$ = "Solo": IF player = 2 THEN a$ = "2 Player"
+		a$ = "Solo"
+		IF player = 2 THEN a$ = "2 Player"
 		PRINT a$; " Game";
 		choose = 23: GOTO utile
 '-------------------------------------------------------------------------
@@ -458,7 +572,9 @@ utile:
 		IF graf = 3 THEN a$ = "FULL"
 		CLS
 		CALL usa
-		CALL clrbot: COLOR 11: PRINT "Graphics : "; a$; : IF noise > 0 THEN SOUND 2700, 1
+		CALL clrbot
+		COLOR 11: PRINT "Graphics : "; a$;
+		IF noise > 0 THEN SOUND 2700, 1
 		choose = 24: GOTO utile
 '-------------------------------------------------------------------------
 '                               Sounds
@@ -470,12 +586,16 @@ utile:
 		mtx$(2) = "Sound"
 		mtx$(3) = " & Sound"
 		size = 3: tlx = 67: tly = 12
-		CALL menu(0): CALL clrrite
+		CALL menu(0)
+		CALL clrrite
 		IF choose < 1 GOTO menu0
-		COLOR 11: CALL clrbot: PRINT "Sound Option : "; mtx$(choose);
+		COLOR 11
+		CALL clrbot
+		PRINT "Sound Option : "; mtx$(choose);
 		noise = choose - 1
 		IF noise > 0 THEN SOUND 999, 1
-		choose = 25: GOTO utile
+		choose = 25
+		GOTO utile
 '-------------------------------------------------------------------------
 '                               Display Speed
 '-------------------------------------------------------------------------
@@ -488,7 +608,8 @@ utile:
 		mtx$(4) = "Very Slow"
 		mtx$(5) = "Reg Color": IF bw > 0 THEN mtx$(5) = "Alt Color"
 		tlx = 67: tly = 15: size = 5
-		CALL menu(0): CALL clrrite
+		CALL menu(0)
+		CALL clrrite
 		SELECT CASE choose
 			CASE IS < 1
 			CASE IS < 5
@@ -502,7 +623,8 @@ utile:
 				CALL usa
 				CALL topbar
 		END SELECT
-		choose = 26: GOTO utile
+		choose = 26
+		GOTO utile
 '-------------------------------------------------------------------------
 '                               Play Balance
 '-------------------------------------------------------------------------
@@ -515,19 +637,24 @@ utile:
 		mtx$(4) = "Union +"
 		mtx$(5) = "Union ++"
 		tlx = 67: tly = 15: size = 5
-		CALL menu(8): CALL clrrite
+		CALL menu(8)
+		CALL clrrite
 		IF choose < 1 GOTO menu0
 		CALL clrbot
-		COLOR 11: CALL clrbot: PRINT "Play Balance : "; mtx$(choose);
+		COLOR 11
+		CALL clrbot
+		PRINT "Play Balance : "; mtx$(choose);
 		difficult = choose
 		GOSUB unionplus
-		choose = 27: GOTO utile
+		choose = 27
+		GOTO utile
 '-------------------------------------------------------------------------
 '                               Ending Conditions
 '-------------------------------------------------------------------------
 	   CASE 7
 		CALL endit
-		choose = 28: GOTO utile
+		choose = 28
+		GOTO utile
 '-------------------------------------------------------------------------
 '                           Random Events Options
 '-------------------------------------------------------------------------
@@ -544,7 +671,8 @@ utile:
 
 		 SELECT CASE choose
 		 CASE 1
-		 randbal = 0: t$ = ""
+		 randbal = 0
+		 t$ = ""
 		 CASE 2
 		 randbal = 3
 		 CASE 3
@@ -555,7 +683,8 @@ utile:
 		 END SELECT
 		 IF choose > 1 AND choose < 5 THEN t$ = mtx$(choose)
 		 CALL clrbot
-		 a$ = "": IF randbal = 0 THEN a$ = "OFF"
+		 a$ = ""
+		 IF randbal = 0 THEN a$ = "OFF"
 		 COLOR 11: PRINT "Random Events : "; a$; " "; t$;
 		 COLOR 14: PRINT "			press a key";
 		 DO WHILE INKEY$ = "": LOOP
@@ -573,51 +702,63 @@ utile:
 		bold = 5 * RND
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
-			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+				armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
+				armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
 			END IF
 		NEXT k
 		FOR k = 21 TO 6
 			IF RND > .6 THEN
-			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+				armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
+				armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
 			END IF
 		NEXT k
-		FOR k = 1 TO 40: CALL occupy(k): NEXT k
-		navysize(1) = 10 * RND: IF navysize(1) = 0 THEN navyloc(1) = 0
-		navysize(2) = 10 * RND: IF navysize(2) > 0 THEN navyloc(2) = 27
+		FOR k = 1 TO 40
+			CALL occupy(k)
+		NEXT k
+		navysize(1) = 10 * RND
+		IF navysize(1) = 0 THEN navyloc(1) = 0
+		navysize(2) = 10 * RND
+		IF navysize(2) > 0 THEN navyloc(2) = 27
 		FOR i = 1 TO 2
 			fleet$(i) = ""
 			FOR j = 1 TO navysize(i)
-			a$ = "W": IF RND > .45 * side THEN a$ = "I"
-			fleet$(i) = fleet$(i) + a$
-		NEXT j
+				a$ = "W"
+				IF RND > .45 * side THEN a$ = "I"
+				fleet$(i) = fleet$(i) + a$
+			NEXT j
 		NEXT i
 		IF RND > .7 THEN capcity(2) = 25
 
 		FOR k = 1 TO 40
-		IF RND > .8 THEN rating(k) = rating(k) - 3 + 6 * RND: IF rating(k) > 9 THEN rating(k) = 9
-		IF rating(k) < 1 THEN rating(k) = 1
+			IF RND > .8 THEN
+				rating(k) = rating(k) - 3 + 6 * RND
+				IF rating(k) > 9 THEN rating(k) = 9
+			END IF
+			IF rating(k) < 1 THEN rating(k) = 1
 		NEXT k
 		CLS
 		CALL usa
-		choose = 30: GOTO utile
+		choose = 30
+		GOTO utile
 '-------------------------------------------------------------------------
 '                               January Campaigns
 '-------------------------------------------------------------------------
 	   CASE 10
 		jancam = 1 - jancam
-		a$ = "PROHIBITED": IF jancam = 1 THEN a$ = "ALLOWED"
+		a$ = "PROHIBITED"
+		IF jancam = 1 THEN a$ = "ALLOWED"
 		COLOR 11
 		CALL clrbot
 		PRINT "January Campaigns : "; a$;
-		choose = 31: GOTO utile
+		choose = 31
+		GOTO utile
 '-------------------------------------------------------------------------
 '                               Realism Switch
 '-------------------------------------------------------------------------
 	   CASE 11
 		realism = 1 - realism
-		CALL clrbot: COLOR 11
+		CALL clrbot
+		COLOR 11
 	IF realism = 0 THEN
 		PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
 	ELSE
@@ -625,7 +766,8 @@ utile:
 		IF side = 2 AND randbal = 1 AND randbal < 5 THEN randbal = randbal + 2
 		GOSUB unionplus
 	END IF
-		choose = 32: GOTO utile
+		choose = 32
+		GOTO utile
 '-------------------------------------------------------------------------
 '                               Check Map Linakges
 '-------------------------------------------------------------------------
@@ -638,26 +780,31 @@ utile:
 '-------------------------------------------------------------------------
 	   CASE 13
 		history = 1 - history
-		a$ = "OFF": IF history = 1 THEN a$ = "ON"
-		CALL clrbot: PRINT "History is now "; a$;
-		choose = 34: GOTO utile
+		a$ = "OFF"
+		IF history = 1 THEN a$ = "ON"
+		CALL clrbot
+		PRINT "History is now "; a$;
+		choose = 34
+		GOTO utile
 '-------------------------------------------------------------------------
 '                               Aggression
 '-------------------------------------------------------------------------
 	   CASE 14
-		bold = bold + 1: IF bold > 5 THEN bold = 0
+		bold = bold + 1
+		IF bold > 5 THEN bold = 0
 		SELECT CASE bold
-		CASE 0: a$ = "PASSIVE"
-		CASE 1: a$ = "TIMID"
-		CASE 2: a$ = "CAUTIOUS"
-		CASE 3: a$ = "NORMAL"
-		CASE 4: a$ = "BOLD"
-		CASE 5: a$ = "RECKLESS"
+			CASE 0: a$ = "PASSIVE"
+			CASE 1: a$ = "TIMID"
+			CASE 2: a$ = "CAUTIOUS"
+			CASE 3: a$ = "NORMAL"
+			CASE 4: a$ = "BOLD"
+			CASE 5: a$ = "RECKLESS"
 		END SELECT
 		CALL clrbot
 		COLOR 11
 		PRINT "Enemy Aggression : "; a$; " ("; bold; ")";
-		choose = 35: GOTO utile
+		choose = 35
+		GOTO utile
 		CASE ELSE
 	   END SELECT
 '==========================================================================
@@ -666,16 +813,20 @@ utile:
 	CASE 9
 	IF _FILEEXISTS("*.sav") = 0 THEN filel = 0
 filex:
-	choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
+	choose = 23
+	chosit = 30
+	IF year = 1861 THEN choose = 22
 	mtx$(0) = "Options"
 	mtx$(1) = "Load": IF filel = 0 THEN mtx$(1) = "-": choose = 23
 	mtx$(2) = "Save"
 	mtx$(3) = "New Game"
 	mtx$(4) = "Quit"
 	size = 4: tlx = 67: tly = 15
-	CALL menu(0): CALL clrrite
+	CALL menu(0)
+	CALL clrrite
 	SELECT CASE choose
-		CASE IS < 1: GOTO menu0
+		CASE IS < 1:
+			GOTO menu0
 		CASE 1, 2
 loader:
 			IF choose = 1 AND filel = 0 GOTO filex
@@ -714,13 +865,19 @@ mtx$(1) = "Yes"
 mtx$(2) = "No"
 size = 2: colour = 5
 tlx = 67: tly = 15
-CALL menu(0): CALL clrrite: IF choose = 1 THEN END ELSE GOTO menu0
+CALL menu(0)
+CALL clrrite
+IF choose = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: usadv = 120 * difficult: IF player = 2 THEN usadv = 50 * difficult
+unionplus:
+usadv = 120 * difficult
+IF player = 2 THEN usadv = 50 * difficult
 	   IF realism > 0 THEN usadv = usadv * .7
 	   RETURN
 '............................................................................
-blanken:        c = 1: IF side = 2 THEN c = 7
+blanken:        
+c = 1
+IF side = 2 THEN c = 7
 		CLS : LINE (100, 200)-(500, 300), c, BF
 		LINE (100, 200)-(500, 300), 8 - c, B
 		COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
@@ -744,7 +901,10 @@ SUB animate (armyIndex, animationFlag)
 	x1 = .5 * (cityx(endLocation) + cityx(startLocation))
 	y1 = .5 * (cityy(endLocation) + cityy(startLocation))
 
-	CALL occupy(startLocation): IF occupied(startLocation) > 0 THEN CALL placearmy(occupied(startLocation))
+	CALL occupy(startLocation)
+	IF occupied(startLocation) > 0 THEN 
+		CALL placearmy(occupied(startLocation))
+	END IF
 		
 	IF animationFlag > 0 GOTO already
 		GET (x - 9, y - 7)-(x + 9, y + 6), anima
@@ -752,19 +912,20 @@ SUB animate (armyIndex, animationFlag)
 	already:
 
 		FOR i = 2 TO 8
-		x1 = .1 * (i * cityx(endLocation) + (10 - i) * cityx(startLocation))
-		y1 = .1 * (i * cityy(endLocation) + (10 - i) * cityy(startLocation))
-		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
-		PUT (x1 - 10, y1 - 10), anima, PSET
-		IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
-		IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
-		PUT (x1 - 10, y1 - 10), image, PSET
+			x1 = .1 * (i * cityx(endLocation) + (10 - i) * cityx(startLocation))
+			y1 = .1 * (i * cityy(endLocation) + (10 - i) * cityy(startLocation))
+			GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
+			PUT (x1 - 10, y1 - 10), anima, PSET
+			IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
+			IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
+			PUT (x1 - 10, y1 - 10), image, PSET
 		NEXT i
 		armyloc(armyIndex) = startLocation
 END SUB
 
 SUB armies
-	CALL movefrom(armyIndex, targetCity): IF targetCity > 0 AND armyIndex > 0 GOTO tent
+	CALL movefrom(armyIndex, targetCity)
+	IF targetCity > 0 AND armyIndex > 0 GOTO tent
 		IF armyIndex = -1 THEN mflag = 1
 		GOTO dudd
 	tent:
@@ -774,18 +935,36 @@ SUB armies
 	COLOR 11: LOCATE 11, 68: PRINT city$(targetCity)
 	size = 0
 	mtx$(0) = "To"
-	FOR i = 1 TO 6: IF matrix(targetCity, i) > 0 THEN size = size + 1: mtx$(size) = city$(matrix(targetCity, i)): array(size) = matrix(targetCity, i)
+	FOR i = 1 TO 6
+		IF matrix(targetCity, i) > 0 THEN 
+			size = size + 1
+			mtx$(size) = city$(matrix(targetCity, i))
+			array(size) = matrix(targetCity, i)
+		END IF
 	NEXT i
 	CALL bubble(size)
 
-	hilite = 10: colour = 3: CALL menu(2): CALL clrrite
+	hilite = 10
+	colour = 3
+	CALL menu(2)
+	CALL clrrite
 	IF choose < 0 GOTO dudd
-	IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: GOTO dudd
+	IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN 
+		COLOR 11
+		CALL clrbot
+		PRINT "No campaigns in January";
+		CALL TICK(9)
+		CALL clrbot
+		GOTO dudd
+	END IF
 
-	CALL clrbot: PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(targetCity); " to "; city$(array(choose));
+	CALL clrbot
+	PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(targetCity); " to "; city$(array(choose));
 	IF noise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
 	CALL icon(targetCity, array(choose), 1)
-	armymove(index) = array(choose): CALL TICK(turbo!): CALL clrbot
+	armymove(index) = array(choose)
+	CALL TICK(turbo!)
+	CALL clrbot
 	CALL clrrite
 	dudd:
 END SUB
@@ -817,23 +996,44 @@ IF armysize(attack) < 1 THEN armysize(attack) = 1
 
 CALL icon(armyloc(defend), 0, 9)
 LOCATE 1, 1: PRINT SPACE$(80)
-CALL clrrite: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
-c = 9: IF attack > 20 THEN c = 7
+CALL clrrite
+y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
+c = 9
+IF attack > 20 THEN c = 7
 COLOR c: LOCATE 2, y: PRINT armyname$(attack)
 LOCATE 3, y: CALL strong(attack)
-x = .01 * armysize(attack): IF x > TCR THEN x = TCR
+x = .01 * armysize(attack)
+IF x > TCR THEN x = TCR
 LOCATE 4, y: PRINT "Base    "; x
-IF armysize(attack) / armysize(defend) > .2 THEN x = x + .3 * armylead(attack) + .3 * armyexper(attack): IF x > TCR THEN x = TCR
-IF armyexper(attack) > 8 THEN x = x + 1: IF x > TCR THEN x = TCR
+IF armysize(attack) / armysize(defend) > .2 THEN 
+	x = x + .3 * armylead(attack) + .3 * armyexper(attack)
+	IF x > TCR THEN x = TCR
+END IF
+IF armyexper(attack) > 8 THEN 
+	x = x + 1
+	IF x > TCR THEN x = TCR
+END IF
 LOCATE 5, y: PRINT "Ldr/Exp "; x
-IF armysize(attack) < 15 THEN x = .5 * x: IF x > TCR THEN x = TCR
+IF armysize(attack) < 15 THEN 
+	x = .5 * x
+	IF x > TCR THEN x = TCR
+END IF
 LOCATE 6, y: PRINT "Small   "; x
-IF armysize(attack) / armysize(defend) <= .5 THEN x = x - 2: IF x < 1 THEN x = 1
-IF armysize(attack) / armysize(defend) > 3 THEN x = x + 2: IF x > TCR THEN x = TCR
+IF armysize(attack) / armysize(defend) <= .5 THEN 
+	x = x - 2
+	IF x < 1 THEN x = 1
+END IF
+IF armysize(attack) / armysize(defend) > 3 THEN 
+	x = x + 2
+	IF x > TCR THEN x = TCR
+END IF
 IF armysize(attack) / armysize(defend) > 10 THEN x = TCR
 IF armysize(attack) / armysize(defend) <= .2 THEN x = 1
 LOCATE 7, y: PRINT "Outman  "; x
-IF supply(attack) < 1 THEN x = .5 * x: COLOR 13
+IF supply(attack) < 1 THEN
+	x = .5 * x
+	COLOR 13
+END IF
 LOCATE 8, y: PRINT "Supply  "; x: COLOR c
 IF x < 1 THEN x = 1
 '                       Adjust attack advantage
@@ -844,14 +1044,24 @@ IF x > TCR THEN x = TCR
 COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
 LINE (530, 155)-(635, 175), 11, B
 
-x1 = .013 * armysize(defend) + 1: IF realism = 1 THEN x1 = .02 * armysize(defend) + 2: IF x1 > 20 THEN x1 = 20
+x1 = .013 * armysize(defend) + 1
+IF realism = 1 THEN 
+	x1 = .02 * armysize(defend) + 2
+	IF x1 > 20 THEN x1 = 20
+END IF
 LOCATE 13, y: PRINT "Defender"
 COLOR 16 - c: LOCATE 14, y: PRINT armyname$(defend)
 LOCATE 15, y: CALL strong(defend)
 LOCATE 16, y: PRINT "Base    "; INT(.01 * armysize(defend))
 LOCATE 17, y: PRINT "Defense "; x1
-IF armysize(defend) / armysize(attack) > .2 THEN x1 = x1 + .3 * armylead(defend) + .3 * armyexper(defend): IF x1 > TCR THEN x1 = TCR
-IF armyexper(defend) > 8 THEN x1 = x1 + 1: IF x1 > TCR THEN x1 = TCR
+IF armysize(defend) / armysize(attack) > .2 THEN
+	x1 = x1 + .3 * armylead(defend) + .3 * armyexper(defend)
+	IF x1 > TCR THEN x1 = TCR
+END IF
+IF armyexper(defend) > 8 THEN 
+	x1 = x1 + 1
+	IF x1 > TCR THEN x1 = TCR
+END IF
 LOCATE 18, y: PRINT "Ldr/Exp "; x1
 IF armysize(defend) < 15 THEN x1 = .5 * x1
 LOCATE 19, y: PRINT "Small   "; x1
@@ -871,7 +1081,10 @@ END SELECT
 	IF x1 > TCR THEN x1 = TCR
 
 LOCATE 20, y: PRINT "Outman  "; x1
-IF supply(defend) < 1 THEN x1 = .5 * x1: COLOR 13
+IF supply(defend) < 1 THEN
+	x1 = .5 * x1
+	COLOR 13
+END IF
 LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
 IF x1 < 1 THEN x1 = 1
 '                       Adjust defend advantage
@@ -879,7 +1092,8 @@ IF defend < 21 AND side = 2 AND difficult > 3 THEN x1 = x1 + 2 * difficult - 6
 IF defend > 20 AND side = 1 AND difficult < 3 THEN x1 = x1 + 6 - 2 * difficult
 LOCATE 22, y: PRINT "Difclt  "; x1
 
-a$ = "Fort": IF armymove(defend) = 0 THEN x1 = x1 * (1 + fort(armyloc(defend)))
+a$ = "Fort"
+IF armymove(defend) = 0 THEN x1 = x1 * (1 + fort(armyloc(defend)))
 IF x1 > TCR THEN x1 = TCR
 IF fort(armyloc(defend)) > 0 AND armymove(defend) = 0 THEN
 	COLOR 13: a$ = "Fort+"
@@ -891,10 +1105,13 @@ COLOR 11: LOCATE 25, y: PRINT "Defend  "; x1
 LINE (530, 380)-(635, 400), 11, B
 
 spin = 0
-scale = x: IF x1 > scale THEN scale = x1
+scale = x
+IF x1 > scale THEN scale = x1
 scale = scale + 1
 
-odds! = x / (x + x1): a = INT(100 * odds!): IF a < 1 THEN a = 1
+odds! = x / (x + x1)
+a = INT(100 * odds!)
+IF a < 1 THEN a = 1
 a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
 COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
 LINE (530, 412)-(635, 435), 14, B
@@ -913,29 +1130,42 @@ IF graf > 2 THEN
 ELSE
 	CALL clrrite
 END IF
-FOR i = 1 TO 2: IF supply(i) > 0 THEN supply(i) = supply(i) - 1
+FOR i = 1 TO 2
+	IF supply(i) > 0 THEN supply(i) = supply(i) - 1
 NEXT i
 '---------------------------------------------------------------------------
 grapple:
-hit = 0: hit1 = 0
-star = scale * RND: fin = scale * RND
-IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
+hit = 0
+hit1 = 0
+star = scale * RND
+fin = scale * RND
+IF noise > 0 THEN 
+	SOUND 77, .5: SOUND 59, .5
+	CALL TICK(.1)
+END IF
 IF star <= x THEN hit = 1
 IF fin <= x1 THEN hit1 = 1
 
 IF hit = 0 AND hit1 = 0 GOTO grapple
 IF hit = 1 AND hit1 = 1 GOTO grapple
-win = defend: lose = attack: IF hit = 1 THEN win = attack: lose = defend
+win = defend
+lose = attack
+IF hit = 1 THEN win = attack: lose = defend
 '---------------------------------------------------------------------------
-a$ = "UNION": IF win > 20 THEN a$ = "REBEL"
+a$ = "UNION"
+IF win > 20 THEN a$ = "REBEL"
 COLOR 14: LOCATE 3, 68: PRINT a$; " VICTORY"
 LOCATE 4, 71: PRINT "in"
 LOCATE 5, 69: PRINT city$(armyloc(defend))
-a = 1: IF win > 20 THEN a = 2
+a = 1
+IF win > 20 THEN a = 2
 CALL flags(a, 0, 0)
-CALL clrbot: COLOR 11: PRINT armyname$(win); " defeats "; armyname$(lose); " in "; city$(armyloc(defend)); : CALL TICK(9)
+CALL clrbot
+COLOR 11: PRINT armyname$(win); " defeats "; armyname$(lose); " in "; city$(armyloc(defend));
+CALL TICK(9)
 '===========================================================================
-pct! = .01 * DEFAC - .03 * fort(armyloc(defend)): IF win = attack THEN pct! = 1.3 * pct!
+pct! = .01 * DEFAC - .03 * fort(armyloc(defend))
+IF win = attack THEN pct! = 1.3 * pct!
 SELECT CASE armysize(defend)
 	CASE IS > 300
 		pct! = .9 * pct!
@@ -946,7 +1176,8 @@ xbar = armysize(attack) * pct!
 vary = xbar * (1 - pct!)
 CALL normal(xbar, vary, killd)
 '...........................................................................
-pct! = .01 * ATKFAC + .02 * fort(armyloc(defend)): IF win = defend THEN pct! = 1.5 * pct!
+pct! = .01 * ATKFAC + .02 * fort(armyloc(defend))
+IF win = defend THEN pct! = 1.5 * pct!
 SELECT CASE armysize(attack)
 	CASE IS > 300
 		pct! = .9 * pct!
@@ -988,18 +1219,20 @@ a$ = city$(armyloc(defend)) + ": " + mtx$(3) + mtx$(1) + " defeats " + mtx$(4) +
 CALL scribe(a$, 0)
 
 IF player = 1 AND (side = 1 AND attack > 20) OR (side = 2 AND attack < 21) THEN
-COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
+	COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 END IF
 
 armysize(attack) = armysize(attack) - killa
 armysize(defend) = armysize(defend) - killd
 IF armysize(defend) < 1 THEN armysize(defend) = 1
 '---------------------------------------------------------------------------
-s = 1: IF attack > 2 THEN s = 2
+s = 1
+IF attack > 2 THEN s = 2
 casualty&(s) = casualty&(s) + killa
 casualty&(3 - s) = casualty&(3 - s) + killd
 '---------------------------------------------------------------------------
-s = 1: IF win > 20 THEN s = 2
+s = 1
+IF win > 20 THEN s = 2
 batwon(s) = batwon(s) + 1
 victory(s) = victory(s) + 1
 CALL icon(armyloc(defend), 0, 8)
