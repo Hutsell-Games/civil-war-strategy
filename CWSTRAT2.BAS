@@ -275,7 +275,7 @@ SUB endit
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
 what4:
-	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "û " ELSE mtx$(i - 1) = "  "
+	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "âˆš " ELSE mtx$(i - 1) = "  "
 	NEXT i
 	choose = chosit
 	mtx$(0) = "Victory Conditions"
@@ -659,9 +659,9 @@ SUB maxx
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
-LOCATE 2, 7: PRINT STRING$(57, "²")
-LOCATE 9, 7: PRINT STRING$(57, "²")
-FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
+LOCATE 2, 7: PRINT STRING$(57, "â–“")
+LOCATE 9, 7: PRINT STRING$(57, "â–“")
+FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "â–“"; SPACE$(55); "â–“": NEXT i
 
 		OPEN "I", 1, "hiscore.cws"
 		FOR s = 1 TO 2
@@ -825,9 +825,9 @@ PRINT TAB(57); : IF armymove(i) > -1 THEN PRINT city$(armymove(i)) ELSE PRINT "R
 IF fort(armyloc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; fort(armyloc(i))
 deadeye:
 NEXT i
-PRINT " "; STRING$(70, "Ä")
+PRINT " "; STRING$(70, "â”€")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(aggress! * x))); "00 ]"
-PRINT " "; STRING$(70, "Ä")
+PRINT " "; STRING$(70, "â”€")
 PRINT " "; force$(who); " NAVY has "; navysize(who); " ship(s) ";
 x = 0
 FOR k = 1 TO navysize(who)
