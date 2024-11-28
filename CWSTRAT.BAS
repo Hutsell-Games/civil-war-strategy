@@ -1218,14 +1218,23 @@ SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 	battleSummary$(1) = " (" + LTRIM$(RTRIM$(STR$(attackLosses) + "00")) + "/" + LTRIM$(STR$(armysize(attackingArmy)) + "00") + ") "
 	defenseSummary$ = " (" + LTRIM$(RTRIM$(STR$(defenseLosses) + "00")) + "/" + LTRIM$(STR$(armysize(defendingArmy)) + "00") + ")"
 	battleSummary$(2) = defenseSummary$
-	IF winningArmy = defendingArmy THEN battleSummary$(2) = battleSummary$(1): battleSummary$(1) = defenseSummary$
-	battleSummary$(3) = "*" + armyname$(winningArmy): battleSummary$(4) = armyname$(losingArmy)
-	IF winningArmy = defendingArmy THEN battleSummary$(3) = armyname$(winningArmy): battleSummary$(4) = "*" + armyname$(losingArmy)
+	IF winningArmy = defendingArmy THEN 
+		battleSummary$(2) = battleSummary$(1)
+		battleSummary$(1) = defenseSummary$
+	END IF
+	battleSummary$(3) = "*" + armyname$(winningArmy)
+	battleSummary$(4) = armyname$(losingArmy)
+	IF winningArmy = defendingArmy THEN 
+		battleSummary$(3) = armyname$(winningArmy)
+		battleSummary$(4) = "*" + armyname$(losingArmy)
+	END IF
 	text$ = city$(armyloc(defendingArmy)) + ": " + battleSummary$(3) + battleSummary$(1) + " defeats " + battleSummary$(4) + battleSummary$(2)
 	CALL scribe(text$, 0)
 
 	IF player = 1 AND (side = 1 AND attackingArmy > 20) OR (side = 2 AND attackingArmy < 21) THEN
-		COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
+		COLOR 14
+		CALL clrbot
+		PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 	END IF
 
 	armysize(attackingArmy) = armysize(attackingArmy) - attackLosses
