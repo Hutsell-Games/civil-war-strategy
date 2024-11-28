@@ -1174,7 +1174,7 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	END SELECT
 	xbar = armysize(attackingArmy) * pct!
 	vary = xbar * (1 - pct!)
-	CALL normal(xbar, vary, killd)
+	CALL normal(xbar, vary, defenseLosses)
 	'...........................................................................
 	pct! = .01 * ATKFAC + .02 * fort(armyloc(defendingArmy))
 	IF win = defendingArmy THEN pct! = 1.5 * pct!
@@ -1186,31 +1186,33 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	END SELECT
 	xbar = armysize(defendingArmy) * pct!
 	vary = xbar * (1 - pct!)
-	CALL normal(xbar, vary, killa)
+	CALL normal(xbar, vary, defenseLosses)
 	'===========================================================================
 
-	killa = .8 * killa + .2 * killd: IF killa < 1 THEN killa = 1
-	killd = .8 * killd + .2 * killa: IF killd < 1 THEN killd = 1
-	IF killa > 9 * killd THEN killa = 9 * killd
-	IF killd > 5 * killa THEN killd = 5 * killa
+	attackLosses = .8 * attackLosses + .2 * defenseLosses
+	IF attackLosses < 1 THEN attackLosses = 1
+	defenseLosses = .8 * defenseLosses + .2 * attackLosses
+	IF defenseLosses < 1 THEN defenseLosses = 1
+	IF attackLosses > 9 * defenseLosses THEN attackLosses = 9 * defenseLosses
+	IF defenseLosses > 5 * attackLosses THEN defenseLosses = 5 * attackLosses
 
-	IF killa >= armysize(attackingArmy) THEN killa = armysize(attackingArmy) - 1
-	IF killd >= armysize(defendingArmy) THEN killd = armysize(defendingArmy) - 1
+	IF attackLosses >= armysize(attackingArmy) THEN attackLosses = armysize(attackingArmy) - 1
+	IF defenseLosses >= armysize(defendingArmy) THEN defenseLosses = armysize(defendingArmy) - 1
 	'---------------------------------------------------------------------------
 	attackStrength = INT(100 * odds!): IF attackStrength < 1 THEN attackStrength = 1
 	a$ = LTRIM$(RTRIM$(STR$(attackStrength))) + "%"
 
 	COLOR c
 	LOCATE 1, 1: PRINT "Attack Loss: ";
-	PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
+	PRINT LTRIM$(RTRIM$(STR$(attackLosses)) + "00"); "/";
 	CALL strong(attackingArmy)
-	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attackingArmy)))))); "%) ▓";
-	COLOR 16 - c: PRINT "▓ Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (attackLosses / armysize(attackingArmy)))))); "%) ▓";
+	COLOR 16 - c: PRINT "▓ Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(defenseLosses)) + "00"); "/";
 	CALL strong(defendingArmy)
-	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / armysize(defendingArmy)))))); "%)"
+	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defenseLosses / armysize(defendingArmy)))))); "%)"
 	'---------------------------------------------------------------------------
-	mtx$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(armysize(attackingArmy)) + "00") + ") "
-	t$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(armysize(defendingArmy)) + "00") + ")"
+	mtx$(1) = " (" + LTRIM$(RTRIM$(STR$(attackLosses) + "00")) + "/" + LTRIM$(STR$(armysize(attackingArmy)) + "00") + ") "
+	t$ = " (" + LTRIM$(RTRIM$(STR$(defenseLosses) + "00")) + "/" + LTRIM$(STR$(armysize(defendingArmy)) + "00") + ")"
 	mtx$(2) = t$
 	IF win = defendingArmy THEN mtx$(2) = mtx$(1): mtx$(1) = t$
 	mtx$(3) = "*" + armyname$(win): mtx$(4) = armyname$(lose)
@@ -1222,14 +1224,14 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 		COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 	END IF
 
-	armysize(attackingArmy) = armysize(attackingArmy) - killa
-	armysize(defendingArmy) = armysize(defendingArmy) - killd
+	armysize(attackingArmy) = armysize(attackingArmy) - attackLosses
+	armysize(defendingArmy) = armysize(defendingArmy) - defenseLosses
 	IF armysize(defendingArmy) < 1 THEN armysize(defendingArmy) = 1
 	'---------------------------------------------------------------------------
 	s = 1
 	IF attackingArmy > 2 THEN s = 2
-	casualty&(s) = casualty&(s) + killa
-	casualty&(3 - s) = casualty&(3 - s) + killd
+	casualty&(s) = casualty&(s) + attackLosses
+	casualty&(3 - s) = casualty&(3 - s) + defenseLosses
 	'---------------------------------------------------------------------------
 	s = 1
 	IF win > 20 THEN s = 2
@@ -1758,12 +1760,12 @@ add2ship:
 	CALL icon(navyloc(who), 0, 3)
 	      
 	target = navyloc(who): index = occupied(target): IF index = 0 GOTO deserted
-	pct! = .005 * navysize(who) + .02 * RND: killd = armysize(index) * pct!: IF killd < 1 THEN killd = 1
-	CALL clrbot: PRINT armyname$(index); " suffered "; 100 * killd; " casualties";
+	pct! = .005 * navysize(who) + .02 * RND: defenseLosses = armysize(index) * pct!: IF defenseLosses < 1 THEN defenseLosses = 1
+	CALL clrbot: PRINT armyname$(index); " suffered "; 100 * defenseLosses; " casualties";
 	x = .5 * navysize(who) + 1: IF x > supply(index) THEN x = supply(index)
 	supply(index) = supply(index) - x
 	CALL TICK(turbo!)
-	armysize(index) = armysize(index) - killd: IF armysize(index) < 1 THEN armysize(index) = 1
+	armysize(index) = armysize(index) - defenseLosses: IF armysize(index) < 1 THEN armysize(index) = 1
 	EXIT SUB
 deserted:
 	IF fort(target) = 0 GOTO blast
