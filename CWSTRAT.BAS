@@ -1110,9 +1110,9 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	scale = scale + 1
 
 	odds! = attackStrength / (attackStrength + defenseStrength)
-	a = INT(100 * odds!)
-	IF a < 1 THEN a = 1
-	a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
+	oddsPercentage = INT(100 * odds!)
+	IF oddsPercentage < 1 THEN oddsPercentage = 1
+	a$ = LTRIM$(RTRIM$(STR$(oddsPercentage))) + "%"
 	COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
 	LINE (530, 412)-(635, 435), 14, B
 	LINE (528, 410)-(637, 437), 14, B
@@ -1157,9 +1157,9 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	COLOR 14: LOCATE 3, 68: PRINT a$; " VICTORY"
 	LOCATE 4, 71: PRINT "in"
 	LOCATE 5, 69: PRINT city$(armyloc(defendingArmy))
-	a = 1
-	IF win > 20 THEN a = 2
-	CALL flags(a, 0, 0)
+	victorySide = 1
+	IF win > 20 THEN victorySide = 2
+	CALL flags(victorySide, 0, 0)
 	CALL clrbot
 	COLOR 11: PRINT armyname$(win); " defeats "; armyname$(lose); " in "; city$(armyloc(defendingArmy));
 	CALL TICK(9)
