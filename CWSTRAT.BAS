@@ -4,7 +4,7 @@ DECLARE SUB barnacle (who%)
 DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB integrity ()
 DECLARE SUB ironclad ()
-DECLARE SUB normal (xbar%, vary%, result%)
+DECLARE SUB normal (attackCasualties%, attackCasualtyVariance%, result%)
 DECLARE SUB relieve (who%)
 DECLARE SUB retreat (active%, x%)
 DECLARE SUB schooner ()
@@ -1137,20 +1137,23 @@ SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 	grapple:
 	hit = 0
 	hit1 = 0
-	star = scale * RND
-	fin = scale * RND
+	startRandom = scale * RND
+	endRandom = scale * RND
 	IF noise > 0 THEN 
 		SOUND 77, .5: SOUND 59, .5
 		CALL TICK(.1)
 	END IF
-	IF star <= attackStrength THEN hit = 1
-	IF fin <= defenseStrength THEN hit1 = 1
+	IF startRandom <= attackStrength THEN hit = 1
+	IF endRandom <= defenseStrength THEN hit1 = 1
 
 	IF hit = 0 AND hit1 = 0 GOTO grapple
 	IF hit = 1 AND hit1 = 1 GOTO grapple
 	winningArmy = defendingArmy
 	losingArmy = attackingArmy
-	IF hit = 1 THEN winningArmy = attackingArmy: losingArmy = defendingArmy
+	IF hit = 1 THEN 
+		winningArmy = attackingArmy
+		losingArmy = defendingArmy
+	END IF
 	'---------------------------------------------------------------------------
 	text$ = "UNION"
 	IF winningArmy > 20 THEN text$ = "REBEL"
@@ -1164,43 +1167,44 @@ SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 	COLOR 11: PRINT armyname$(winningArmy); " defeats "; armyname$(losingArmy); " in "; city$(armyloc(defendingArmy));
 	CALL TICK(9)
 	'===========================================================================
-	pct! = .01 * DEFAC - .03 * fort(armyloc(defendingArmy))
-	IF winningArmy = attackingArmy THEN pct! = 1.3 * pct!
+	casualtyPercentage! = .01 * DEFAC - .03 * fort(armyloc(defendingArmy))
+	IF winningArmy = attackingArmy THEN casualtyPercentage! = 1.3 * casualtyPercentage!
 	SELECT CASE armysize(defendingArmy)
 		CASE IS > 300
-			pct! = .9 * pct!
+			casualtyPercentage! = .9 * casualtyPercentage!
 		CASE IS > 800
-			pct! = .8 * pct!
+			casualtyPercentage! = .8 * casualtyPercentage!
 	END SELECT
-	xbar = armysize(attackingArmy) * pct!
-	vary = xbar * (1 - pct!)
-	CALL normal(xbar, vary, defenseLosses)
+	attackCasualties = armysize(attackingArmy) * casualtyPercentage!
+	attackCasualtyVariance = attackCasualties * (1 - casualtyPercentage!)
+	CALL normal(attackCasualties, attackCasualtyVariance, defenseLosses)
 	'...........................................................................
-	pct! = .01 * ATKFAC + .02 * fort(armyloc(defendingArmy))
-	IF winningArmy = defendingArmy THEN pct! = 1.5 * pct!
+	casualtyPercentage! = .01 * ATKFAC + .02 * fort(armyloc(defendingArmy))
+	IF winningArmy = defendingArmy THEN casualtyPercentage! = 1.5 * casualtyPercentage!
 	SELECT CASE armysize(attackingArmy)
 		CASE IS > 300
-			pct! = .9 * pct!
+			casualtyPercentage! = .9 * casualtyPercentage!
 		CASE IS > 800
-			pct! = .8 * pct!
+			casualtyPercentage! = .8 * casualtyPercentage!
 	END SELECT
-	xbar = armysize(defendingArmy) * pct!
-	vary = xbar * (1 - pct!)
-	CALL normal(xbar, vary, defenseLosses)
+	defenseCasualties = armysize(defendingArmy) * casualtyPercentage!
+	defenseCasualtyVariance = defenseCasualties * (1 - casualtyPercentage!)
+	CALL normal(defenseCasualties, defenseCasualtyVariance, defenseLosses)
 	'===========================================================================
 
-	attackLosses = .8 * attackLosses + .2 * defenseLosses
-	IF attackLosses < 1 THEN attackLosses = 1
 	defenseLosses = .8 * defenseLosses + .2 * attackLosses
 	IF defenseLosses < 1 THEN defenseLosses = 1
-	IF attackLosses > 9 * defenseLosses THEN attackLosses = 9 * defenseLosses
-	IF defenseLosses > 5 * attackLosses THEN defenseLosses = 5 * attackLosses
+	attackLosses = .8 * attackLosses + .2 * defenseLosses
+	IF attackLosses < 1 THEN attackLosses = 1
+	IF defenseLosses > 9 * attackLosses THEN defenseLosses = 9 * attackLosses
+	IF attackLosses > 5 * defenseLosses THEN attackLosses = 5 * defenseLosses
 
 	IF attackLosses >= armysize(attackingArmy) THEN attackLosses = armysize(attackingArmy) - 1
 	IF defenseLosses >= armysize(defendingArmy) THEN defenseLosses = armysize(defendingArmy) - 1
 	'---------------------------------------------------------------------------
-	attackStrength = INT(100 * odds!): IF attackStrength < 1 THEN attackStrength = 1
-	text$ = LTRIM$(RTRIM$(STR$(attackStrength))) + "%"
+	oddsPercentage = INT(100 * odds!)
+	IF oddsPercentage < 1 THEN oddsPercentage = 1
+	text$ = LTRIM$(RTRIM$(STR$(oddsPercentage))) + "%"
 
 	COLOR c
 	LOCATE 1, 1: PRINT "Attack Loss: ";
@@ -1211,13 +1215,13 @@ SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 	CALL strong(defendingArmy)
 	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defenseLosses / armysize(defendingArmy)))))); "%)"
 	'---------------------------------------------------------------------------
-	mtx$(1) = " (" + LTRIM$(RTRIM$(STR$(attackLosses) + "00")) + "/" + LTRIM$(STR$(armysize(attackingArmy)) + "00") + ") "
-	t$ = " (" + LTRIM$(RTRIM$(STR$(defenseLosses) + "00")) + "/" + LTRIM$(STR$(armysize(defendingArmy)) + "00") + ")"
-	mtx$(2) = t$
-	IF winningArmy = defendingArmy THEN mtx$(2) = mtx$(1): mtx$(1) = t$
-	mtx$(3) = "*" + armyname$(winningArmy): mtx$(4) = armyname$(losingArmy)
-	IF winningArmy = defendingArmy THEN mtx$(3) = armyname$(winningArmy): mtx$(4) = "*" + armyname$(losingArmy)
-	text$ = city$(armyloc(defendingArmy)) + ": " + mtx$(3) + mtx$(1) + " defeats " + mtx$(4) + mtx$(2)
+	battleSummary$(1) = " (" + LTRIM$(RTRIM$(STR$(attackLosses) + "00")) + "/" + LTRIM$(STR$(armysize(attackingArmy)) + "00") + ") "
+	defenseSummary$ = " (" + LTRIM$(RTRIM$(STR$(defenseLosses) + "00")) + "/" + LTRIM$(STR$(armysize(defendingArmy)) + "00") + ")"
+	battleSummary$(2) = defenseSummary$
+	IF winningArmy = defendingArmy THEN battleSummary$(2) = battleSummary$(1): battleSummary$(1) = defenseSummary$
+	battleSummary$(3) = "*" + armyname$(winningArmy): battleSummary$(4) = armyname$(losingArmy)
+	IF winningArmy = defendingArmy THEN battleSummary$(3) = armyname$(winningArmy): battleSummary$(4) = "*" + armyname$(losingArmy)
+	text$ = city$(armyloc(defendingArmy)) + ": " + battleSummary$(3) + battleSummary$(1) + " defeats " + battleSummary$(4) + battleSummary$(2)
 	CALL scribe(text$, 0)
 
 	IF player = 1 AND (side = 1 AND attackingArmy > 20) OR (side = 2 AND attackingArmy < 21) THEN
@@ -1228,15 +1232,15 @@ SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 	armysize(defendingArmy) = armysize(defendingArmy) - defenseLosses
 	IF armysize(defendingArmy) < 1 THEN armysize(defendingArmy) = 1
 	'---------------------------------------------------------------------------
-	s = 1
-	IF attackingArmy > 2 THEN s = 2
-	casualty&(s) = casualty&(s) + attackLosses
-	casualty&(3 - s) = casualty&(3 - s) + defenseLosses
+	sideIndex = 1
+	IF attackingArmy > 2 THEN sideIndex = 2
+	casualty&(sideIndex) = casualty&(sideIndex) + attackLosses
+	casualty&(3 - sideIndex) = casualty&(3 - sideIndex) + defenseLosses
 	'---------------------------------------------------------------------------
-	s = 1
-	IF winningArmy > 20 THEN s = 2
-	batwon(s) = batwon(s) + 1
-	victory(s) = victory(s) + 1
+	sideIndex = 1
+	IF winningArmy > 20 THEN sideIndex = 2
+	batwon(sideIndex) = batwon(sideIndex) + 1
+	victory(sideIndex) = victory(sideIndex) + 1
 	CALL icon(armyloc(defendingArmy), 0, 8)
 	END SUB
 
@@ -1282,9 +1286,9 @@ SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 
 			armysize(0) = armysize(0) + armysize(j)
 			IF armysize(0) < 1 GOTO dork1
-			pct! = (armysize(j) / armysize(0))
+			casualtyPercentage! = (armysize(j) / armysize(0))
 			spin = spin + 1
-			armyexper(0) = (1 - pct!) * armyexper(0) + pct! * armyexper(j)
+			armyexper(0) = (1 - casualtyPercentage!) * armyexper(0) + casualtyPercentage! * armyexper(j)
 			CALL clrbot: PRINT armyname$(j); " is combining his "; : CALL strong(j): PRINT " forces"; : CALL TICK(turbo!)
 			supply(0) = supply(0) + supply(j)
 			IF supply(0) > 10 THEN supply(0) = 10
@@ -1760,7 +1764,7 @@ add2ship:
 	CALL icon(navyloc(who), 0, 3)
 	      
 	target = navyloc(who): index = occupied(target): IF index = 0 GOTO deserted
-	pct! = .005 * navysize(who) + .02 * RND: defenseLosses = armysize(index) * pct!: IF defenseLosses < 1 THEN defenseLosses = 1
+	casualtyPercentage! = .005 * navysize(who) + .02 * RND: defenseLosses = armysize(index) * casualtyPercentage!: IF defenseLosses < 1 THEN defenseLosses = 1
 	CALL clrbot: PRINT armyname$(index); " suffered "; 100 * defenseLosses; " casualties";
 	x = .5 * navysize(who) + 1: IF x > supply(index) THEN x = supply(index)
 	supply(index) = supply(index) - x
@@ -1959,11 +1963,11 @@ powder:
 	 CASE 1
 firemore:
 	 IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
-	 pct! = 0: text$ = RIGHT$(fleet$(who), 1)
+	 casualtyPercentage! = 0: text$ = RIGHT$(fleet$(who), 1)
 	 IF text$ <> RIGHT$(fleet$(3 - who), 1) THEN
-		IF text$ = "I" THEN pct! = .1 ELSE pct! = -.1
+		IF text$ = "I" THEN casualtyPercentage! = .1 ELSE casualtyPercentage! = -.1
 	 END IF
-	 IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
+	 IF RND <= .5 + casualtyPercentage! GOTO hitem ELSE GOTO hitme1
 	 GOTO firemore
 hitem:
 	 hit(3 - who) = hit(3 - who) - 1: GOSUB showhit: IF hit(3 - who) > 0 GOTO firemore
@@ -2129,12 +2133,11 @@ plus1:
 fnew:
 END SUB
 
-SUB normal (xbar, vary, result)
-' NOTE : vary is VARIANCE
+SUB normal (attackCasualties, attackCasualtyVariance, result)
 pct! = 0
 FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
 pct! = pct! - 5.5
-result = xbar + pct! * SQR(vary)
+result = attackCasualties + pct! * SQR(attackCasualtyVariance)
 END SUB
 
 SUB placearmy (which)
