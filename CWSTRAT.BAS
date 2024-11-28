@@ -1002,114 +1002,114 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	IF attackingArmy > 20 THEN c = 7
 	COLOR c: LOCATE 2, y: PRINT armyname$(attackingArmy)
 	LOCATE 3, y: CALL strong(attackingArmy)
-	x = .01 * armysize(attackingArmy)
-	IF x > TCR THEN x = TCR
-	LOCATE 4, y: PRINT "Base    "; x
+	attackStrength = .01 * armysize(attackingArmy)
+	IF attackStrength > TCR THEN attackStrength = TCR
+	LOCATE 4, y: PRINT "Base    "; attackStrength
 	IF armysize(attackingArmy) / armysize(defendingArmy) > .2 THEN 
-		x = x + .3 * armylead(attackingArmy) + .3 * armyexper(attackingArmy)
-		IF x > TCR THEN x = TCR
+		attackStrength = attackStrength + .3 * armylead(attackingArmy) + .3 * armyexper(attackingArmy)
+		IF attackStrength > TCR THEN attackStrength = TCR
 	END IF
 	IF armyexper(attackingArmy) > 8 THEN 
-		x = x + 1
-		IF x > TCR THEN x = TCR
+		attackStrength = attackStrength + 1
+		IF attackStrength > TCR THEN attackStrength = TCR
 	END IF
-	LOCATE 5, y: PRINT "Ldr/Exp "; x
+	LOCATE 5, y: PRINT "Ldr/Exp "; attackStrength
 	IF armysize(attackingArmy) < 15 THEN 
-		x = .5 * x
-		IF x > TCR THEN x = TCR
+		attackStrength = .5 * attackStrength
+		IF attackStrength > TCR THEN attackStrength = TCR
 	END IF
-	LOCATE 6, y: PRINT "Small   "; x
+	LOCATE 6, y: PRINT "Small   "; attackStrength
 	IF armysize(attackingArmy) / armysize(defendingArmy) <= .5 THEN 
-		x = x - 2
-		IF x < 1 THEN x = 1
+		attackStrength = attackStrength - 2
+		IF attackStrength < 1 THEN attackStrength = 1
 	END IF
 	IF armysize(attackingArmy) / armysize(defendingArmy) > 3 THEN 
-		x = x + 2
-		IF x > TCR THEN x = TCR
+		attackStrength = attackStrength + 2
+		IF attackStrength > TCR THEN attackStrength = TCR
 	END IF
-	IF armysize(attackingArmy) / armysize(defendingArmy) > 10 THEN x = TCR
-	IF armysize(attackingArmy) / armysize(defendingArmy) <= .2 THEN x = 1
-	LOCATE 7, y: PRINT "Outman  "; x
+	IF armysize(attackingArmy) / armysize(defendingArmy) > 10 THEN attackStrength = TCR
+	IF armysize(attackingArmy) / armysize(defendingArmy) <= .2 THEN attackStrength = 1
+	LOCATE 7, y: PRINT "Outman  "; attackStrength
 	IF supply(attackingArmy) < 1 THEN
-		x = .5 * x
+		attackStrength = .5 * attackStrength
 		COLOR 13
 	END IF
-	LOCATE 8, y: PRINT "Supply  "; x: COLOR c
-	IF x < 1 THEN x = 1
+	LOCATE 8, y: PRINT "Supply  "; attackStrength: COLOR c
+	IF attackStrength < 1 THEN attackStrength = 1
 	'                       Adjust attack advantage
-	IF attackingArmy < 21 AND side = 2 AND difficult > 3 THEN x = x + 2 * difficult - 6
-	IF attackingArmy > 20 AND side = 1 AND difficult < 3 THEN x = x + 6 - 2 * difficult
-	LOCATE 9, y: PRINT "Difclt  "; x
-	IF x > TCR THEN x = TCR
-	COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
+	IF attackingArmy < 21 AND side = 2 AND difficult > 3 THEN attackStrength = attackStrength + 2 * difficult - 6
+	IF attackingArmy > 20 AND side = 1 AND difficult < 3 THEN attackStrength = attackStrength + 6 - 2 * difficult
+	LOCATE 9, y: PRINT "Difclt  "; attackStrength
+	IF attackStrength > TCR THEN attackStrength = TCR
+	COLOR 11: LOCATE 11, y: PRINT "Attack  "; attackStrength
 	LINE (530, 155)-(635, 175), 11, B
 
-	x1 = .013 * armysize(defendingArmy) + 1
+	defenseStrength = .013 * armysize(defendingArmy) + 1
 	IF realism = 1 THEN 
-		x1 = .02 * armysize(defendingArmy) + 2
-		IF x1 > 20 THEN x1 = 20
+		defenseStrength = .02 * armysize(defendingArmy) + 2
+		IF defenseStrength > 20 THEN defenseStrength = 20
 	END IF
 	LOCATE 13, y: PRINT "Defender"
 	COLOR 16 - c: LOCATE 14, y: PRINT armyname$(defendingArmy)
 	LOCATE 15, y: CALL strong(defendingArmy)
 	LOCATE 16, y: PRINT "Base    "; INT(.01 * armysize(defendingArmy))
-	LOCATE 17, y: PRINT "Defense "; x1
+	LOCATE 17, y: PRINT "Defense "; defenseStrength
 	IF armysize(defendingArmy) / armysize(attackingArmy) > .2 THEN
-		x1 = x1 + .3 * armylead(defendingArmy) + .3 * armyexper(defendingArmy)
-		IF x1 > TCR THEN x1 = TCR
+		defenseStrength = defenseStrength + .3 * armylead(defendingArmy) + .3 * armyexper(defendingArmy)
+		IF defenseStrength > TCR THEN defenseStrength = TCR
 	END IF
 	IF armyexper(defendingArmy) > 8 THEN 
-		x1 = x1 + 1
-		IF x1 > TCR THEN x1 = TCR
+		defenseStrength = defenseStrength + 1
+		IF defenseStrength > TCR THEN defenseStrength = TCR
 	END IF
-	LOCATE 18, y: PRINT "Ldr/Exp "; x1
-	IF armysize(defendingArmy) < 15 THEN x1 = .5 * x1
-	LOCATE 19, y: PRINT "Small   "; x1
+	LOCATE 18, y: PRINT "Ldr/Exp "; defenseStrength
+	IF armysize(defendingArmy) < 15 THEN defenseStrength = .5 * defenseStrength
+	LOCATE 19, y: PRINT "Small   "; defenseStrength
 
 	R! = armysize(defendingArmy) / armysize(attackingArmy)
 	SELECT CASE R!
 		CASE IS > 10
-			x1 = TCR
+			defenseStrength = TCR
 		CASE IS > 1.5
-			x1 = x1 + 2
+			defenseStrength = defenseStrength + 2
 		CASE IS < .5
-			x1 = .8 * x1
+			defenseStrength = .8 * defenseStrength
 		CASE IS < .2
-			x1 = .5 * x1
+			defenseStrength = .5 * defenseStrength
 	END SELECT
-		IF x1 < 1 THEN x1 = 1
-		IF x1 > TCR THEN x1 = TCR
+		IF defenseStrength < 1 THEN defenseStrength = 1
+		IF defenseStrength > TCR THEN defenseStrength = TCR
 
-	LOCATE 20, y: PRINT "Outman  "; x1
+	LOCATE 20, y: PRINT "Outman  "; defenseStrength
 	IF supply(defendingArmy) < 1 THEN
-		x1 = .5 * x1
+		defenseStrength = .5 * defenseStrength
 		COLOR 13
 	END IF
-	LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
-	IF x1 < 1 THEN x1 = 1
+	LOCATE 21, y: PRINT "Supply  "; defenseStrength: COLOR 16 - c
+	IF defenseStrength < 1 THEN defenseStrength = 1
 	'                       Adjust defend advantage
-	IF defendingArmy < 21 AND side = 2 AND difficult > 3 THEN x1 = x1 + 2 * difficult - 6
-	IF defendingArmy > 20 AND side = 1 AND difficult < 3 THEN x1 = x1 + 6 - 2 * difficult
-	LOCATE 22, y: PRINT "Difclt  "; x1
+	IF defendingArmy < 21 AND side = 2 AND difficult > 3 THEN defenseStrength = defenseStrength + 2 * difficult - 6
+	IF defendingArmy > 20 AND side = 1 AND difficult < 3 THEN defenseStrength = defenseStrength + 6 - 2 * difficult
+	LOCATE 22, y: PRINT "Difclt  "; defenseStrength
 
 	a$ = "Fort"
-	IF armymove(defendingArmy) = 0 THEN x1 = x1 * (1 + fort(armyloc(defendingArmy)))
-	IF x1 > TCR THEN x1 = TCR
+	IF armymove(defendingArmy) = 0 THEN defenseStrength = defenseStrength * (1 + fort(armyloc(defendingArmy)))
+	IF defenseStrength > TCR THEN defenseStrength = TCR
 	IF fort(armyloc(defendingArmy)) > 0 AND armymove(defendingArmy) = 0 THEN
 		COLOR 13: a$ = "Fort+"
 		IF fort(armyloc(defendingArmy)) = 2 THEN a$ = "Fort++"
 	END IF
-	LOCATE 23, y: PRINT a$; TAB(76); x1
-	IF x1 > TCR THEN x1 = TCR
-	COLOR 11: LOCATE 25, y: PRINT "Defend  "; x1
+	LOCATE 23, y: PRINT a$; TAB(76); defenseStrength
+	IF defenseStrength > TCR THEN defenseStrength = TCR
+	COLOR 11: LOCATE 25, y: PRINT "Defend  "; defenseStrength
 	LINE (530, 380)-(635, 400), 11, B
 
 	spin = 0
-	scale = x
-	IF x1 > scale THEN scale = x1
+	scale = attackStrength
+	IF defenseStrength > scale THEN scale = defenseStrength
 	scale = scale + 1
 
-	odds! = x / (x + x1)
+	odds! = attackStrength / (attackStrength + defenseStrength)
 	a = INT(100 * odds!)
 	IF a < 1 THEN a = 1
 	a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
@@ -1143,8 +1143,8 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 		SOUND 77, .5: SOUND 59, .5
 		CALL TICK(.1)
 	END IF
-	IF star <= x THEN hit = 1
-	IF fin <= x1 THEN hit1 = 1
+	IF star <= attackStrength THEN hit = 1
+	IF fin <= defenseStrength THEN hit1 = 1
 
 	IF hit = 0 AND hit1 = 0 GOTO grapple
 	IF hit = 1 AND hit1 = 1 GOTO grapple
@@ -1197,8 +1197,8 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	IF killa >= armysize(attackingArmy) THEN killa = armysize(attackingArmy) - 1
 	IF killd >= armysize(defendingArmy) THEN killd = armysize(defendingArmy) - 1
 	'---------------------------------------------------------------------------
-	x = INT(100 * odds!): IF x < 1 THEN x = 1
-	a$ = LTRIM$(RTRIM$(STR$(x))) + "%"
+	attackStrength = INT(100 * odds!): IF attackStrength < 1 THEN attackStrength = 1
+	a$ = LTRIM$(RTRIM$(STR$(attackStrength))) + "%"
 
 	COLOR c
 	LOCATE 1, 1: PRINT "Attack Loss: ";
