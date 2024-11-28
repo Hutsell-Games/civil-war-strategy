@@ -990,7 +990,7 @@ ELSE
 END IF
 END SUB
 
-SUB battle (attackingArmy, defendingArmy, win, lose)
+SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 	IF armysize(defendingArmy) < 1 THEN armysize(defendingArmy) = 1
 	IF armysize(attackingArmy) < 1 THEN armysize(attackingArmy) = 1
 
@@ -1148,24 +1148,24 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 
 	IF hit = 0 AND hit1 = 0 GOTO grapple
 	IF hit = 1 AND hit1 = 1 GOTO grapple
-	win = defendingArmy
-	lose = attackingArmy
-	IF hit = 1 THEN win = attackingArmy: lose = defendingArmy
+	winningArmy = defendingArmy
+	losingArmy = attackingArmy
+	IF hit = 1 THEN winningArmy = attackingArmy: losingArmy = defendingArmy
 	'---------------------------------------------------------------------------
 	text$ = "UNION"
-	IF win > 20 THEN text$ = "REBEL"
+	IF winningArmy > 20 THEN text$ = "REBEL"
 	COLOR 14: LOCATE 3, 68: PRINT text$; " VICTORY"
 	LOCATE 4, 71: PRINT "in"
 	LOCATE 5, 69: PRINT city$(armyloc(defendingArmy))
 	victorySide = 1
-	IF win > 20 THEN victorySide = 2
+	IF winningArmy > 20 THEN victorySide = 2
 	CALL flags(victorySide, 0, 0)
 	CALL clrbot
-	COLOR 11: PRINT armyname$(win); " defeats "; armyname$(lose); " in "; city$(armyloc(defendingArmy));
+	COLOR 11: PRINT armyname$(winningArmy); " defeats "; armyname$(losingArmy); " in "; city$(armyloc(defendingArmy));
 	CALL TICK(9)
 	'===========================================================================
 	pct! = .01 * DEFAC - .03 * fort(armyloc(defendingArmy))
-	IF win = attackingArmy THEN pct! = 1.3 * pct!
+	IF winningArmy = attackingArmy THEN pct! = 1.3 * pct!
 	SELECT CASE armysize(defendingArmy)
 		CASE IS > 300
 			pct! = .9 * pct!
@@ -1177,7 +1177,7 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	CALL normal(xbar, vary, defenseLosses)
 	'...........................................................................
 	pct! = .01 * ATKFAC + .02 * fort(armyloc(defendingArmy))
-	IF win = defendingArmy THEN pct! = 1.5 * pct!
+	IF winningArmy = defendingArmy THEN pct! = 1.5 * pct!
 	SELECT CASE armysize(attackingArmy)
 		CASE IS > 300
 			pct! = .9 * pct!
@@ -1214,9 +1214,9 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	mtx$(1) = " (" + LTRIM$(RTRIM$(STR$(attackLosses) + "00")) + "/" + LTRIM$(STR$(armysize(attackingArmy)) + "00") + ") "
 	t$ = " (" + LTRIM$(RTRIM$(STR$(defenseLosses) + "00")) + "/" + LTRIM$(STR$(armysize(defendingArmy)) + "00") + ")"
 	mtx$(2) = t$
-	IF win = defendingArmy THEN mtx$(2) = mtx$(1): mtx$(1) = t$
-	mtx$(3) = "*" + armyname$(win): mtx$(4) = armyname$(lose)
-	IF win = defendingArmy THEN mtx$(3) = armyname$(win): mtx$(4) = "*" + armyname$(lose)
+	IF winningArmy = defendingArmy THEN mtx$(2) = mtx$(1): mtx$(1) = t$
+	mtx$(3) = "*" + armyname$(winningArmy): mtx$(4) = armyname$(losingArmy)
+	IF winningArmy = defendingArmy THEN mtx$(3) = armyname$(winningArmy): mtx$(4) = "*" + armyname$(losingArmy)
 	text$ = city$(armyloc(defendingArmy)) + ": " + mtx$(3) + mtx$(1) + " defeats " + mtx$(4) + mtx$(2)
 	CALL scribe(text$, 0)
 
@@ -1234,7 +1234,7 @@ SUB battle (attackingArmy, defendingArmy, win, lose)
 	casualty&(3 - s) = casualty&(3 - s) + defenseLosses
 	'---------------------------------------------------------------------------
 	s = 1
-	IF win > 20 THEN s = 2
+	IF winningArmy > 20 THEN s = 2
 	batwon(s) = batwon(s) + 1
 	victory(s) = victory(s) + 1
 	CALL icon(armyloc(defendingArmy), 0, 8)
@@ -2660,21 +2660,21 @@ CALL icon(target, 0, 3)
 defend = occupied(target)
 
 COLOR 11: CALL clrbot: PRINT armyname$(active); " attacks "; armyname$(defend); " in "; city$(armyloc(defend)); : CALL TICK(turbo! - 1)
-IF armysize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF graf > 0 THEN GOSUB upbox
-IF armyexper(win) < 10 THEN armyexper(win) = armyexper(win) + 1
+IF armysize(defend) > 0 THEN CALL battle(active, defend, winningArmy, losingArmy): flag = 1: IF graf > 0 THEN GOSUB upbox
+IF armyexper(winningArmy) < 10 THEN armyexper(winningArmy) = armyexper(winningArmy) + 1
 
-IF armysize(lose) < 2 THEN
+IF armysize(losingArmy) < 2 THEN
 	CALL clrbot
-	text$ = armyname$(lose) + "'s army is crushed in " + city$(armyloc(defend))
+	text$ = armyname$(losingArmy) + "'s army is crushed in " + city$(armyloc(defend))
 	CALL scribe(text$, 2)
-	index = lose: GOTO crushed
+	index = losingArmy: GOTO crushed
 END IF
 
 CALL clrrite
 '==========================================================================
 '                       Attacker Loses
 '==========================================================================
-IF win = active GOTO kickbutt
+IF winningArmy = active GOTO kickbutt
 armymove(active) = armyloc(active)
 armyloc(active) = target
 COLOR 11: CALL clrbot: PRINT armyname$(active); " withdrew to "; city$(armymove(active));
