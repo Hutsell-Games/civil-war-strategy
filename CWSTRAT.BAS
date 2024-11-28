@@ -1261,22 +1261,37 @@ SUB battle (attackingArmy, defendingArmy, winningArmy, losingArmy)
 		FOR i = 1 TO 40
 			IF cityp(i) = who AND occupied(i) > 0 THEN
 				FOR j = star TO fin
-				IF armyloc(j) = i AND occupied(i) <> j AND armymove(j) = 0 THEN size = size + 1: mtx$(size) = city$(i): array(size) = i: EXIT FOR
+				IF armyloc(j) = i AND occupied(i) <> j AND armymove(j) = 0 THEN 
+					size = size + 1
+					mtx$(size) = city$(i)
+					array(size) = i
+					EXIT FOR
+				END IF
 				NEXT j
 			END IF
 		NEXT i
 		
-		IF size = 0 THEN who = -1: EXIT SUB
+		IF size = 0 THEN 
+			who = -1
+			EXIT SUB
+		END IF
 		CALL bubble(size)
 
-		IF who <> side THEN choose = 1 + INT(size * RND): GOTO join
+		IF who <> side THEN 
+			choose = 1 + INT(size * RND)
+			GOTO join
+		END IF
 		mtx$(0) = "Join"
-			choose = 31: hilite = 11
-			CALL menu(9): CALL clrrite
+			choose = 31
+			hilite = 11
+			CALL menu(9)
+			CALL clrrite
 	join:
 			IF choose < 1 GOTO nocity2
 			target = array(choose)
-			CALL clrbot: PRINT "Combining "; force$(who); " armies in "; city$(target); :  CALL TICK(turbo!)
+			CALL clrbot
+			PRINT "Combining "; force$(who); " armies in "; city$(target);
+			CALL TICK(turbo!)
 
 			armysize(0) = 0: armylead(0) = 0: armyexper(0) = 0: armyloc(0) = target
 			armyname$(0) = "": supply(0) = 0: armymove(0) = 0
