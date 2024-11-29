@@ -28,7 +28,7 @@ NEXT k
 
 filel = 1: vicflag(1) = 1
 CALL filer(1)
-IF LEN(DIR$("mtn.vga")) > 0 THEN
+IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
 	BLOAD "mtn.vga", VARPTR(mtn(1))
 	DEF SEG
@@ -57,10 +57,7 @@ IF side = 2 THEN randbal = 3
 
 FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
 choose = 0
-a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 
-band:           SHELL "cwstitle.exe"
-notitle2:
 SCREEN 12
 	DEF SEG = VARSEG(graphic(1))
 	BLOAD "cwsicon.vga", VARPTR(graphic(1))
@@ -119,7 +116,7 @@ IF player = 2 THEN GOSUB blanken
 mtx$(0) = "VGA CIVILWAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
-mtx$(3) = "Quit to DOS"
+mtx$(3) = "Quit"
 tlx = 33: tly = 20: colour = 5: size = 3
 choose = 23
 CALL menu(0)
@@ -131,7 +128,7 @@ END IF
 IF choose = 3 THEN CLS : END
 IF history = 1 THEN
 	CLS
-	IF LEN(DIR$("cws.his")) > 0 THEN SHELL "copy cws.his oldhist.ory"
+	IF _FILEEXISTS("cws.his") THEN SHELL "copy cws.his oldhist.ory"
 	OPEN "O", 2, "cws.his"
 	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; DATE$; " ]"
 	CLOSE #2
@@ -667,14 +664,14 @@ utile:
 '                               Files
 '==========================================================================
 	CASE 9
-	IF LEN(DIR$("*.sav")) = 0 THEN filel = 0
+	IF _FILEEXISTS("*.sav") = 0 THEN filel = 0
 filex:
 	choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
 	mtx$(0) = "Options"
 	mtx$(1) = "Load": IF filel = 0 THEN mtx$(1) = "-": choose = 23
 	mtx$(2) = "Save"
 	mtx$(3) = "New Game"
-	mtx$(4) = "Quit to DOS"
+	mtx$(4) = "Quit"
 	size = 4: tlx = 67: tly = 15
 	CALL menu(0): CALL clrrite
 	SELECT CASE choose
@@ -906,7 +903,7 @@ IF graf > 2 THEN
 	CALL cannon
 	k = fort(armyloc(defend))
 	t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
-	IF LEN(DIR$(t$)) > 0 THEN
+	IF _FILEEXISTS(t$) THEN
 		DEF SEG = VARSEG(graphic(1))
 		BLOAD t$, VARPTR(graphic(1))
 		DEF SEG
@@ -1005,12 +1002,6 @@ s = 1: IF win > 20 THEN s = 2
 batwon(s) = batwon(s) + 1
 victory(s) = victory(s) + 1
 CALL icon(armyloc(defend), 0, 8)
-END SUB
-
-SUB burn (who)
-SHELL "cityburn.exe"
-SCREEN 12
-CALL usa
 END SUB
 
 SUB combine (who)
@@ -1139,12 +1130,12 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 
 	CASE 2
-	IF LEN(DIR$("*.sav")) = 0 THEN choose = -1: EXIT SUB
+	IF _FILEEXISTS("*.sav") = 0 THEN choose = -1: EXIT SUB
 	mtx$(0) = "Load"
 	size = 0
 	FOR k = 1 TO 9
 		t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
-		IF LEN(DIR$(t$)) > 0 THEN
+		IF _FILEEXISTS(t$) THEN
 			size = size + 1: mtx$(size) = t$: array(size) = k
 		END IF
 	NEXT k
@@ -1190,7 +1181,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	mtx$(0) = "Save Game"
 	FOR k = 1 TO 9
 	mtx$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF LEN(DIR$(mtx$(k))) > 0 THEN mtx$(k) = mtx$(k) + " û"
+	IF _FILEEXISTS(mtx$(k)) THEN mtx$(k) = mtx$(k) + " û"
 	NEXT k
 	tlx = 67: size = 9
 	CALL menu(0)
