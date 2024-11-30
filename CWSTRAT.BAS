@@ -354,7 +354,7 @@ endrnd:
 '                            Commands
 '==========================================================================
 	CASE 7
-optmen:
+optionsMenu:
 	tlx = 67: tly = 13
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
 	hilite = 15: colour = 3: chosit = 24
@@ -387,7 +387,7 @@ optmen:
 	CALL fortify(target)
 	IF cash(side) < 200 GOTO menu0
 	choose = 23
-	GOTO optmen
+	GOTO optionsMenu
 '---------------------------------------------------------------------------
 '                               Combine
 '---------------------------------------------------------------------------
@@ -402,7 +402,7 @@ optmen:
 		GOTO menu0
 	END IF
 	choose = 24
-	GOTO optmen
+	GOTO optionsMenu
 '---------------------------------------------------------------------------
 '                               Supply
 '---------------------------------------------------------------------------
@@ -432,7 +432,7 @@ alone:
 		CALL placearmy(index)
 		END IF
 		choose = 25
-		GOTO optmen
+		GOTO optionsMenu
 '-------------------------------------------------------------------------
 '                               Move Capital
 '-------------------------------------------------------------------------
@@ -468,7 +468,7 @@ alone:
 	COLOR 11: CALL clearBottom: PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; armyname$(empty); : CALL TICK(turbo!): IF noise > 0 THEN SOUND 2222, 1
 	CALL stax(side)
 	choose = 27
-	GOTO optmen
+	GOTO optionsMenu
 '-------------------------------------------------------------------------
 '                               Drill
 '-------------------------------------------------------------------------
@@ -476,26 +476,26 @@ alone:
 	COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
 	CALL movefrom(index, target)
 	IF target < 1 OR index < 1 THEN COLOR 11: CALL clearBottom: PRINT "No armies remain eligible for drills in "; month$(month); : GOTO menu0
-	IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN COLOR 12: CALL clearBottom: PRINT armyname$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
+	IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN COLOR 12: CALL clearBottom: PRINT armyname$(index); ": Army has reached maximum improvement through drilling"; : GOTO optionsMenu
 	armyexper(index) = armyexper(index) + 1
 	CALL clearBottom: PRINT armyname$(index); " has drilled to reach experience level "; armyexper(index); : IF noise > 0 THEN SOUND 2222, 1
 	CALL TICK(turbo!): clearBottom
 	armymove(index) = -1
 	choose = 28
-	GOTO optmen
+	GOTO optionsMenu
 '-------------------------------------------------------------------------
 '                               Relieve
 '-------------------------------------------------------------------------
 		CASE 8
 		CALL relieve(side)
 		choose = 29
-		GOTO optmen
+		GOTO optionsMenu
 '-------------------------------------------------------------------------
 		CASE ELSE
 		chosit = 28
 		GOTO menu0
       END SELECT
-	choose = 21 + choose: GOTO optmen
+	choose = 21 + choose: GOTO optionsMenu
 '==========================================================================
 '                               Utility Menu
 '==========================================================================
@@ -738,7 +738,8 @@ utilityMenu:
 '-------------------------------------------------------------------------
 	   CASE 13
 		history = 1 - history
-		a$ = "OFF": IF history = 1 THEN a$ = "ON"
+		a$ = "OFF"
+		IF history = 1 THEN a$ = "ON"
 		CALL clearBottom: PRINT "History is now "; a$;
 		choose = 34: GOTO utilityMenu
 '-------------------------------------------------------------------------
@@ -788,7 +789,16 @@ loader:
 			CLOSE #1
 			CLS
 			GOTO newgame
-		CASE 4: GOTO rusure
+		CASE 4
+		    choose = 23
+            menuText$(0) = "Quit"
+            menuText$(1) = "Yes"
+            menuText$(2) = "No"
+            size = 2: colour = 5
+            tlx = 67: tly = 15
+            CALL menu(0)
+            CALL clearRight
+            IF choose = 1 THEN END ELSE GOTO menu0
 	END SELECT
 '==========================================================================
 	CASE 99
@@ -806,15 +816,6 @@ LOCATE 1, 1: PRINT SPACE$(80);
 COLOR 11
 LOCATE 1, 10: PRINT "Input your decisions now for "; force$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
 RETURN
-'............................................................................
-rusure:
-choose = 23
-menuText$(0) = "Quit"
-menuText$(1) = "Yes"
-menuText$(2) = "No"
-size = 2: colour = 5
-tlx = 67: tly = 15
-CALL menu(0): CALL clearRight: IF choose = 1 THEN END ELSE GOTO menu0
 '............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
