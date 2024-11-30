@@ -740,19 +740,30 @@ DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
 SUB animate (index, flag)
-from = armyloc(index): to2 = armymove(index): armyloc(index) = 0
-x = cityx(from) - 12
-y = cityy(from) - 11
-x1 = .5 * (cityx(to2) + cityx(from))
-y1 = .5 * (cityy(to2) + cityy(from))
+    ' Store the current and target locations of the army
+    from = armyloc(index)
+    to2 = armymove(index)
+    armyloc(index) = 0
 
-CALL occupy(from): IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
+    ' Calculate the initial coordinates for animation
+    x = cityx(from) - 12
+    y = cityy(from) - 11
+    x1 = .5 * (cityx(to2) + cityx(from))
+    y1 = .5 * (cityy(to2) + cityy(from))
+
+    ' Place the army in the current location if occupied
+    CALL occupy(from)
+    IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
        
-IF flag > 0 GOTO already
+    ' Skip the animation setup if flag is set
+    IF flag > 0 GOTO already
+
+    ' Capture the current screen area for animation
 	GET (x - 9, y - 7)-(x + 9, y + 6), anima
 	IF occupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-already:
 
+    already:
+    ' Animate the movement of the army
 	FOR i = 2 TO 8
 	x1 = .1 * (i * cityx(to2) + (10 - i) * cityx(from))
 	y1 = .1 * (i * cityy(to2) + (10 - i) * cityy(from))
@@ -762,33 +773,72 @@ already:
 	IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
 	PUT (x1 - 10, y1 - 10), image, PSET
 	NEXT i
+
+    ' Restore the army's original location
 	armyloc(index) = from
 END SUB
 
+' This subroutine handles the movement of armies from one city to another.
+' It first determines the target city and then displays a menu of possible destinations.
+' If a valid destination is chosen, it updates the army's location and animates the movement.
+
 SUB armies
-CALL movefrom(index, target): IF target > 0 AND index > 0 GOTO tent
+    ' Determine the target city for the army movement
+    CALL movefrom(index, target)
+    IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN mflag = 1
 	GOTO dudd
-tent:
-tlx = 67: tly = 12
 
-CALL armystat(index)
-COLOR 11: LOCATE 11, 68: PRINT city$(target)
-size = 0
-menuText$(0) = "To"
-FOR i = 1 TO 6: IF matrix(target, i) > 0 THEN size = size + 1: menuText$(size) = city$(matrix(target, i)): array(size) = matrix(target, i)
-NEXT i
-CALL bubble(size)
+    tent:
+    tlx = 67
+    tly = 12
 
-hilite = 10: colour = 3: CALL menu(2): CALL clrrite
-IF choose < 0 GOTO dudd
-IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: GOTO dudd
+    ' Display the army's status
+    CALL armystat(index)
+    COLOR 11
+    LOCATE 11, 68
+    PRINT city$(target)
+    size = 0
+    menuText$(0) = "To"
 
-CALL clrbot: PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(target); " to "; city$(array(choose));
-IF noise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
-CALL icon(target, array(choose), 1)
-armymove(index) = array(choose): CALL TICK(turbo!): CALL clrbot
-CALL clrrite
+    ' Populate the menu with possible destination cities
+    FOR i = 1 TO 6
+        IF matrix(target, i) > 0 THEN
+            size = size + 1
+            menuText$(size) = city$(matrix(target, i))
+            array(size) = matrix(target, i)
+        END IF
+    NEXT i
+    CALL bubble(size)
+
+    ' Display the menu and handle the user's choice
+    hilite = 10
+    colour = 3
+    CALL menu(2)
+    CALL clrrite
+    IF choose < 0 GOTO dudd
+    IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN
+        COLOR 11
+        CALL clrbot
+        PRINT "No campaigns in January"
+        CALL TICK(9)
+        CALL clrbot
+        GOTO dudd
+    END IF
+
+    ' Update the army's location and animate the movement
+    CALL clrbot
+    PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(target); " to "; city$(array(choose))
+    IF noise > 0 THEN
+        SOUND 2200, .5
+        SOUND 2900, .7
+    END IF
+    CALL icon(target, array(choose), 1)
+    armymove(index) = array(choose)
+    CALL TICK(turbo!)
+    CALL clrbot
+    CALL clrrite
+
 dudd:
 END SUB
 
