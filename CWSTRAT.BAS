@@ -36,7 +36,7 @@ DECLARE SUB maptext ()
 DECLARE SUB maxx ()
 DECLARE SUB menu (switch%)
 DECLARE SUB movefrom (index%, target%)
-DECLARE SUB mxw (wide%)
+DECLARE SUB maxWidth (wide%)
 DECLARE SUB navy (who%, x%)
 DECLARE SUB newarmy (who%, empty%, target%)
 DECLARE SUB newcity (index%)
@@ -102,15 +102,15 @@ replay = 0
 newgame:
 pcode = 0
 rflag = 0
-FOR k = 1 TO 40
-	armysize(k) = 0: armyloc(k) = 0: armymove(k) = 0: armylead(k) = 0: armyname$(k) = ""
-NEXT k
+FOR cityIndex = 1 TO 40
+	armysize(cityIndex) = 0: armyloc(cityIndex) = 0: armymove(cityIndex) = 0: armylead(cityIndex) = 0: armyname$(cityIndex) = ""
+NEXT cityIndex
 usadv = 0
 emancipate = 0
-FOR k = 1 TO 2
-	navysize(k) = 0: navyloc(k) = 0: navymove(k) = 0
-	rr(k) = 0: victory(k) = 0: tracks(k) = 0
-NEXT k
+FOR sideIndex = 1 TO 2
+	navysize(sideIndex) = 0: navyloc(sideIndex) = 0: navymove(sideIndex) = 0
+	rr(sideIndex) = 0: victory(sideIndex) = 0: tracks(sideIndex) = 0
+NEXT sideIndex
 
 filel = 1
 vicflag(1) = 1
@@ -272,7 +272,7 @@ IF player = 2 THEN GOSUB blanken: CALL usa
 CALL victor
 ON ERROR GOTO 0
 IF pcode > 0 THEN
-	FOR k = 1 TO 40: armyloc(k) = 0: NEXT k
+	FOR cityIndex = 1 TO 40: armyloc(cityIndex) = 0: NEXT cityIndex
 	GOTO newgame
 END IF
 
@@ -667,7 +667,7 @@ SELECT CASE choose ' Main Menu
 					armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
 					END IF
 				NEXT k
-				FOR k = 1 TO 40: CALL occupy(k): NEXT k
+				FOR cityIndex = 1 TO 40: CALL occupy(cityIndex): NEXT cityIndex
 				navysize(1) = 10 * RND: IF navysize(1) = 0 THEN navyloc(1) = 0
 				navysize(2) = 10 * RND: IF navysize(2) > 0 THEN navyloc(2) = 27
 				FOR sideIndex = 1 TO 2
@@ -679,10 +679,10 @@ SELECT CASE choose ' Main Menu
 				NEXT sideIndex
 				IF RND > .7 THEN capcity(2) = 25
 
-				FOR k = 1 TO 40
-				IF RND > .8 THEN rating(k) = rating(k) - 3 + 6 * RND: IF rating(k) > 9 THEN rating(k) = 9
-				IF rating(k) < 1 THEN rating(k) = 1
-				NEXT k
+				FOR cityIndex = 1 TO 40
+				IF RND > .8 THEN rating(cityIndex) = rating(cityIndex) - 3 + 6 * RND: IF rating(cityIndex) > 9 THEN rating(cityIndex) = 9
+				IF rating(cityIndex) < 1 THEN rating(cityIndex) = 1
+				NEXT cityIndex
 				CLS
 				CALL usa
 				choose = 30: GOTO utile
@@ -1238,9 +1238,9 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 	SCREEN 12: CLS
 	CLOSE #1: CALL usa: CALL clearBottom
-	FOR k = 1 TO 2
-	IF rr(k) > 0 THEN CALL tinytrain(k, 1)
-	NEXT k
+	FOR sideIndex = 1 TO 2
+	IF rr(sideIndex) > 0 THEN CALL tinytrain(sideIndex, 1)
+	NEXT sideIndex
 	side = a
 
 	CASE 3
@@ -1752,10 +1752,10 @@ GOTO ahoy
 '---------------------------------------------------------------------------
 pirate:
 	CLS : LOCATE 1, 30: COLOR 11: PRINT "NAVAL COMBAT"
-	FOR k = 1 TO 2
-	hit(k) = 10
-	IF RIGHT$(fleet$(k), 1) = "I" THEN hit(k) = 20
-	NEXT k
+	FOR sideIndex = 1 TO 2
+	hit(sideIndex) = 10
+	IF RIGHT$(fleet$(sideIndex), 1) = "I" THEN hit(sideIndex) = 20
+	NEXT sideIndex
 cannon:
 	LOCATE 9, 1: PRINT SPACE$(79)
 	LOCATE 15, 1: PRINT SPACE$(79)
@@ -1894,9 +1894,9 @@ xout:
 	RETURN
 sail3:
 	commerce = 0
-	FOR k = 1 TO 2
-	IF navyloc(k) = 99 THEN commerce = k
-	NEXT k
+	FOR sideIndex = 1 TO 2
+	IF navyloc(sideIndex) = 99 THEN commerce = sideIndex
+	NEXT sideIndex
 	CLS : CALL usa
 END SUB
 
@@ -1931,9 +1931,9 @@ morecap:
 		CASE IS < 1
 		a$ = CHR$(ABS(choose))
 		x = 0
-		FOR k = 1 TO 40
-		IF LEFT$(cityName$(k), 1) = a$ THEN
-			y = index: index = k
+		FOR cityIndex = 1 TO 40
+		IF LEFT$(cityName$(cityIndex), 1) = a$ THEN
+			y = index: index = cityIndex
 spin2:
 			IF cityp(index) = side GOTO morecap
 				index = index + 1
@@ -1941,7 +1941,7 @@ spin2:
 				x = x + 1: IF x < 39 GOTO spin2
 				index = y: GOTO morecap
 		END IF
-		NEXT k
+		NEXT cityIndex
 		GOTO morecap
 		CASE 1
 minus1:
@@ -2832,7 +2832,7 @@ remenu:
 	LOCATE 1, 1, 0
 	IF mtx$(0) = "" THEN mtx$(0) = "M E N U"
 
-	IF wide = 0 THEN CALL mxw(wide)
+	IF wide = 0 THEN CALL maxWidth(wide)
 	IF tlx = 0 THEN GOSUB noadjust
 	IF choose < 21 THEN choose = 1
 	IF choose > 21 THEN choose = choose - 21
@@ -2949,14 +2949,6 @@ arrows:
 	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
 	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
 	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
-	 IF a$ = ";" AND switch = 0 THEN
-		SCREEN 0: CLS
-		SHELL "cwsdoc.com"
-		SCREEN 12: CALL usa
-		CALL choices(b1, wide)
-		CALL topbar
-		RETURN
-	  END IF
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL usa
@@ -2997,7 +2989,7 @@ called:
 	VIEW
 END SUB
 
-SUB mxw (wide)
+SUB maxWidth (wide)
 	wide = LEN(mtx$(0)) + 1
 	FOR i = 1 TO size
 	x = LEN(mtx$(i))
@@ -3744,7 +3736,7 @@ DIM g2(1 TO 8000)
 mtx$(1) = a$
 tlx = 32 - LEN(a$) \ 2
 tly = 10: size = 1
-CALL mxw(wide)
+CALL maxWidth(wide)
 IF wide > 59 THEN wide = 59: a$ = LEFT$(a$, 59)
 x = 8 * (tlx + wide)
 y = 16 * (tly + 1)
@@ -3782,14 +3774,14 @@ IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB
 
 SUB maptext
-FOR k = 1 TO 40
-	FOR j = 1 TO LEN(cityName$(k))
-	a = cityX(k) + 6 * (j - 4) - 3
-	x = ASC(MID$(UCASE$(cityName$(k)), j, 1)) - 64
+FOR cityIndex = 1 TO 40
+	FOR j = 1 TO LEN(cityName$(cityIndex))
+	a = cityX(cityIndex) + 6 * (j - 4) - 3
+	x = ASC(MID$(UCASE$(cityName$(cityIndex)), j, 1)) - 64
 	IF a > 527 GOTO nextc
-	PSET (a, cityY(k) + 12), 10
+	PSET (a, cityY(cityIndex) + 12), 10
 	
-	IF matrix(k, 7) < 90 THEN
+	IF matrix(cityIndex, 7) < 90 THEN
 		IF bw = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
 	ELSE
 		DRAW "C10"
@@ -3797,7 +3789,7 @@ FOR k = 1 TO 40
 	IF x > 0 AND x < 27 THEN DRAW font$(x)
 	NEXT j
 nextc:
-NEXT k
+NEXT cityIndex
 END SUB
 
 SUB maxx
@@ -4040,22 +4032,22 @@ GOTO endrep
 '                               Force Summary
 '..........................................................................
 frep:
-FOR k = 1 TO 40
-	IF occupied(k) > 0 THEN
+FOR cityIndex = 1 TO 40
+	IF occupied(cityIndex) > 0 THEN
 		FOR j = 1 TO 40
-		IF armyloc(j) = k THEN summ(k) = summ(k) + armysize(j)
+		IF armyloc(j) = cityIndex THEN summ(cityIndex) = summ(cityIndex) + armysize(j)
 		NEXT j
 	END IF
-NEXT k
+NEXT cityIndex
 
 CLS : CALL usa
-FOR k = 1 TO 40
-IF summ(k) > 0 THEN
-	c = 9: IF cityp(k) = 2 THEN c = 7
+FOR cityIndex = 1 TO 40
+IF summ(cityIndex) > 0 THEN
+	c = 9: IF cityp(cityIndex) = 2 THEN c = 7
 	COLOR c
-	LOCATE INT(cityY(k) / 16 + 1), cityX(k) / 8: PRINT summ(k)
+	LOCATE INT(cityY(cityIndex) / 16 + 1), cityX(cityIndex) / 8: PRINT summ(cityIndex)
 END IF
-NEXT k
+NEXT cityIndex
 COLOR 14: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
 GOTO endrep
 '..........................................................................
@@ -4084,10 +4076,10 @@ LOCATE 17, 45: PRINT INT(.1 * casualty&(2))
 IF history > 0 AND who > 2 THEN
 	OPEN "O", #1, "battsumm"
 	PRINT #1, " SIDE      BATTLES WON       LOSSES"
-	FOR k = 1 TO 2
-	a$ = " ": IF thrill = k THEN a$ = "*"
-	PRINT #1, a$; force$(k), batwon(k), 100 * casualty&(k)
-	NEXT k
+	FOR sideIndex = 1 TO 2
+	a$ = " ": IF thrill = sideIndex THEN a$ = "*"
+	PRINT #1, a$; force$(sideIndex), batwon(sideIndex), 100 * casualty&(sideIndex)
+	NEXT sideIndex
 	CLOSE #1
 END IF
 GOTO endrep
