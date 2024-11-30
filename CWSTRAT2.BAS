@@ -6,7 +6,7 @@ DECLARE SUB displayMessageBox (a$, s%)
 DECLARE SUB maptext ()
 DECLARE SUB mountain (xx%, yy%)
 DECLARE SUB maxWidth (wide%)
-DECLARE SUB roman (target%, a$)
+DECLARE SUB generateRomanNumeralArmy (target%, a$)
 DECLARE SUB stax (who%)
 ' $INCLUDE: 'cws14.bi'
 
@@ -256,7 +256,7 @@ SUB commander (who, empty)
 	FOR i = star TO fin
 	IF armyloc(i) = 0 THEN
 		x = i
-		CALL roman(x, a$)
+		CALL generateRomanNumeralArmy(x, a$)
 		empty = i
 		lname$(i) = a$
 		rating(i) = 1 + 8 * RND
@@ -1007,7 +1007,7 @@ NEXT k
 	x = array(choose)
 END SUB
 
-SUB roman (target, a$)
+SUB generateRomanNumeralArmy (target, a$)
 a$ = "Union ": IF target > 20 THEN a$ = "Rebel "
 IF target > 20 THEN target = target - 20
 IF target > 10 THEN a$ = a$ + "X": target = target - 10
