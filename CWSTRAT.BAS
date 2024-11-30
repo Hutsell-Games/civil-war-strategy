@@ -82,7 +82,7 @@ DECLARE SUB choices (b1%, wide%)
 DECLARE SUB topbar ()
 DIM SHARED graft(1 TO 1564)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
-'==========================================================================
+
 COMMON SHARED choose%, tlx%, tly%, size%, menuText$(), wtype%, colour%, hilite%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
 COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), recruitMenuFlag
@@ -95,7 +95,7 @@ COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
 COMMON SHARED victory(), graf, noise, capcity(), difficult, usadv, bw
 COMMON SHARED train(), font$(), brray(), jancam, randbal, realism, casualty&()
 COMMON SHARED pcode, history, thrill, fleet$(), commerce, raider, grudge
-'==========================================================================
+
 DIM SHARED cityx(40), cityy(40), cityv(40), cityp(40), city$(40), lname$(40), rcity(5)
 DIM SHARED cash(2), control(2), matrix(40, 7), income(2), anima(300), rating(40)
 DIM SHARED menuText$(21), image(300), force$(2), armyloc(40), armyname$(40), vicflag(6)
@@ -230,10 +230,8 @@ ELSE
 END IF
 CALL usa
 GOTO menu0
-'==========================================================================
-'                              New Month
-'==========================================================================
-newmonth:
+
+newmonth: ' Begin New Month
 IF side > 2 THEN side = 1
 a$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
 CALL scribe(a$, 0)
@@ -267,10 +265,7 @@ IF pcode > 0 THEN
 	GOTO newgame
 END IF
 
-'±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-'                              Main Menu
-'±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-menu0:
+menu0: ' Main Menu
 CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
 IF cash(side) < 100 AND navyloc(side) = 0 THEN navyMenuFlag = 1
@@ -293,529 +288,440 @@ size = 9
 choose = chosit
 CALL menu(0)
 CALL clearRight
-'==========================================================================
-'                            Main Menu
-'==========================================================================
+
 SELECT CASE choose
-	CASE 1
-	IF cash(side) < 100 OR recruitMenuFlag < 0 THEN recruitMenuFlag = -1: GOTO menu0
-	CALL recruit((side))
-	chosit = 23
-	GOTO menu0
-'==========================================================================
-	CASE 2
-	CALL armies
-	chosit = 23
-	GOTO menu0
-'==========================================================================
-	CASE 3
-	IF navyMenuFlag = 0 THEN CALL navy((side), 0)
-	chosit = 25
-	CASE 4
-IF rr(side) = 0 THEN
-	COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
-	PSET (550, 20), 0
-	DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
-	z = 9: IF side = 2 THEN z = 7
-	x = POINT(0): y = POINT(1)
-	PAINT (x, y), z, 15
-	COLOR 15: IF side = 1 THEN COLOR 11
-	CALL traincapacity(side, limit)
-	CALL clearBottom
-	PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
-	CALL railroad(side)
-ELSE
-	CALL clearBottom
-	COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO menu0
-END IF
-'==========================================================================
-	CASE 5
-	tlx = 67: tly = 15
-	hilite = 15: colour = 3: choose = 23
-	menuText$(0) = "End Turn"
-	menuText$(1) = "Yes"
-	menuText$(2) = "NOT YET"
-	size = 2
-	CALL menu(0)
-	CALL clearRight
-	IF choose <> 1 THEN chosit = 24: GOTO menu0
-endrnd:
-	recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
-	IF player = 2 THEN side = side + 1: IF side = 2 THEN CALL blanken: CALL usa: GOTO menu0
-	GOTO newmonth
-'==========================================================================
-	CASE 6
-	CALL report((side)): chosit = 27
-	CALL starfin(star, fin, side)
-	FOR i = star TO fin
-	IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
-	NEXT i
-'==========================================================================
-'                            Commands
-'==========================================================================
-	CASE 7
-optionsMenu:
-	tlx = 67: tly = 13
-	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	hilite = 15: colour = 3: chosit = 24
-	menuText$(0) = "Commands"
-	menuText$(1) = "Cancel"
-	menuText$(2) = "Fortify": IF cash(side) < 200 THEN menuText$(2) = "-"
-	menuText$(3) = "Join"
-	menuText$(4) = "Supply"
-	menuText$(5) = "Capital": IF capcity(side) = 0 OR cash(side) < 500 THEN menuText$(5) = "-"
-	menuText$(6) = "Detach": IF side = 1 THEN menuText$(6) = "-"
-	menuText$(7) = "Army Drill"
-	menuText$(8) = "Relieve"
-	menuText$(9) = "MAIN MENU"
-	size = 9
-	CALL menu(0): CALL clearRight
-	chosit = 28
-     SELECT CASE choose
-'---------------------------------------------------------------------------
-'                               Cancel
-'---------------------------------------------------------------------------
-		CASE 1
-	CALL cancel(side)
-	moveMenuFlag = 0
-	choose = 22
-'---------------------------------------------------------------------------
-'                               Fortify
-'---------------------------------------------------------------------------
-		CASE 2
-	IF cash(side) < 200 THEN COLOR 11: CALL clearBottom: PRINT "Not enough money for fort"; : GOTO menu0
-	CALL fortify(target)
-	IF cash(side) < 200 GOTO menu0
-	choose = 23
-	GOTO optionsMenu
-'---------------------------------------------------------------------------
-'                               Combine
-'---------------------------------------------------------------------------
-		CASE 3
-	x = side
-	CALL combine(x)
-	IF x < 0 THEN
-		CALL clearBottom
-		COLOR 11
-		PRINT "No eligible armies in same city to combine";
-		CALL stax(side)
-		GOTO menu0
-	END IF
-	choose = 24
-	GOTO optionsMenu
-'---------------------------------------------------------------------------
-'                               Supply
-'---------------------------------------------------------------------------
-		CASE 4
-		CALL starfin(star, fin, (side))
-		menuText$(0) = "Supply"
-		tlx = 67: tly = 5: colour = 5
-		size = 0
-		FOR i = star TO fin
-		IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
-		IF realism > 0 THEN
-			CALL cutoff(side, armyloc(i), a)
-			IF a < 1 THEN CALL clearBottom: COLOR 15: PRINT force$(side); " army in "; city$(armyloc(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
-		END IF
-		size = size + 1
-		max = 11: IF LEN(armyname$(i)) < 11 THEN max = LEN(armyname$(i))
-		menuText$(size) = LEFT$(armyname$(i), max)
-		array(size) = i
-alone:
-		NEXT i
-		IF size = 0 THEN COLOR 11: CALL clearBottom: PRINT "All eligible "; force$(side); " armies have supplies"; : GOTO menu0
-		CALL menu(6): CALL clearRight
-		IF choose < 0 GOTO menu0
-		index = array(choose)
-		IF supply(index) < 2 THEN
-		CALL resupplyArmy(index)
-		CALL placearmy(index)
-		END IF
-		choose = 25
-		GOTO optionsMenu
-'-------------------------------------------------------------------------
-'                               Move Capital
-'-------------------------------------------------------------------------
-		CASE 5
-	IF capcity(side) = 0 OR cash(side) < 500 THEN CALL clearBottom: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
-	cash(side) = cash(side) - 500
-	victory(3 - side) = victory(3 - side) + 50
-	CALL clearRight
-	menuText$(0) = "Capital"
-	a$ = city$(capcity(side))
-	index = capcity(side): CALL newcity(index)
-	IF index = 0 GOTO menu0
-	capcity(side) = index
-	CALL clearBottom: PRINT force$(side); " capital moved from "; a$; " to "; city$(capcity(side));
-	CALL clearRight
-	CALL showcity
-	CALL TICK(9): CALL clearBottom
-'-------------------------------------------------------------------------
-'                               Detach
-'-------------------------------------------------------------------------
-		CASE 6
-	IF side = 1 THEN CALL clearBottom: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
-	COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-	CALL movefrom(index, target): IF target < 1 OR index < 1 GOTO menu0
-	IF armysize(index) < 65 THEN CALL clearBottom: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
-	CALL commander(2, empty): IF empty = 0 GOTO menu0
-	supply(empty) = .3 * supply(index): supply(index) = supply(index) - supply(empty): IF supply(index) < 0 THEN supply(index) = 0
-	armysize(empty) = .3 * armysize(index): armysize(index) = armysize(index) - armysize(empty)
-	armyloc(empty) = target: armyexper(empty) = armyexper(index): armymove(empty) = 0
-	armylead(empty) = rating(empty)
-	armyname$(empty) = lname$(empty): lname$(empty) = ""
-	armyexper(empty) = armyexper(index)
-	COLOR 11: CALL clearBottom: PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; armyname$(empty); : CALL TICK(turbo!): IF noise > 0 THEN SOUND 2222, 1
-	CALL stax(side)
-	choose = 27
-	GOTO optionsMenu
-'-------------------------------------------------------------------------
-'                               Drill
-'-------------------------------------------------------------------------
-		CASE 7
-	COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
-	CALL movefrom(index, target)
-	IF target < 1 OR index < 1 THEN COLOR 11: CALL clearBottom: PRINT "No armies remain eligible for drills in "; month$(month); : GOTO menu0
-	IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN COLOR 12: CALL clearBottom: PRINT armyname$(index); ": Army has reached maximum improvement through drilling"; : GOTO optionsMenu
-	armyexper(index) = armyexper(index) + 1
-	CALL clearBottom: PRINT armyname$(index); " has drilled to reach experience level "; armyexper(index); : IF noise > 0 THEN SOUND 2222, 1
-	CALL TICK(turbo!): clearBottom
-	armymove(index) = -1
-	choose = 28
-	GOTO optionsMenu
-'-------------------------------------------------------------------------
-'                               Relieve
-'-------------------------------------------------------------------------
-		CASE 8
-		CALL relieve(side)
-		choose = 29
-		GOTO optionsMenu
-'-------------------------------------------------------------------------
-		CASE ELSE
-		chosit = 28
-		GOTO menu0
-      END SELECT
-	choose = 21 + choose: GOTO optionsMenu
-'==========================================================================
-'                               Utility Menu
-'==========================================================================
-	CASE 8
-utilityMenu:
-	chosit = 29
-	menuText$(0) = "Utility"
-	menuText$(1) = "Side": IF player = 2 THEN menuText$(2) = ""
-	menuText$(2) = "1 Player": IF player = 2 THEN menuText$(2) = "2 Player"
-	menuText$(3) = "Graphics" + STR$(graf)
-	menuText$(4) = "Noise": IF noise > 0 THEN menuText$(4) = menuText$(4) + STRING$(noise, "*")
-	menuText$(5) = "Display" + STR$(turbo!)
-	a$ = STR$(difficult): IF side = 1 THEN a$ = STR$(6 - difficult)
-	menuText$(6) = "Balance" + a$
-	menuText$(7) = "End Cond"
-	a$ = "û": IF randbal = 0 THEN a$ = ""
-	menuText$(8) = "Rndom Evt " + a$
-	menuText$(9) = "Vary Start"
-	a$ = "": IF jancam = 1 THEN a$ = "û"
-	menuText$(10) = "Jan Campgn" + a$
-	a$ = "": IF realism = 1 THEN a$ = "û"
-	menuText$(11) = "Realism " + a$
-	menuText$(12) = "Chk Links"
-	a$ = "": IF history = 1 THEN a$ = "û"
-	menuText$(13) = "History" + a$
-	size = 13: tlx = 67: tly = 11
-	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-	IF player = 1 THEN size = 14: menuText$(14) = "Aggress" + STR$(bold)
-	CALL menu(-1): CALL clearRight
-	    SELECT CASE choose
-'-------------------------------------------------------------------------
-'                               Swap Sides
-'-------------------------------------------------------------------------
-	    CASE 1
-		IF player = 2 GOTO menu0
-		side = 3 - side: COLOR 9: IF side = 2 THEN COLOR 7
-		CALL clearBottom: PRINT "Now playing "; force$(side); " side"; : IF noise > 0 THEN SOUND 999, 1
-		IF side = 1 THEN randbal = 7
-		IF side = 2 THEN randbal = 3
-		CALL topbar
-		GOTO menu0
-'-------------------------------------------------------------------------
-'                               Solo or 2 Player
-'-------------------------------------------------------------------------
-	    CASE 2
-		player = 3 - player: CALL clearBottom: COLOR 12
-		IF noise > 0 THEN SOUND 999, 1
-		a$ = "Solo": IF player = 2 THEN a$ = "2 Player"
-		PRINT a$; " Game";
-		choose = 23: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Graphics
-'-------------------------------------------------------------------------
-	    CASE 3
-		graf = graf + 1
-		IF graf > 3 THEN graf = 0
-		a$ = "ROADS"
-		IF graf = 0 THEN a$ = "DISABLED"
-		IF graf = 2 THEN a$ = "CITY NAMES"
-		IF graf = 3 THEN a$ = "FULL"
-		CLS
-		CALL usa
-		CALL clearBottom: COLOR 11: PRINT "Graphics : "; a$; : IF noise > 0 THEN SOUND 2700, 1
-		choose = 24: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Sounds
-'-------------------------------------------------------------------------
-	    CASE 4
-		CALL clearRight: choose = noise + 22
-		menuText$(0) = "SOUNDS"
-		menuText$(1) = "Quiet"
-		menuText$(2) = "Sound"
-		menuText$(3) = " & Sound"
-		size = 3: tlx = 67: tly = 12
-		CALL menu(0): CALL clearRight
-		IF choose < 1 GOTO menu0
-		COLOR 11: CALL clearBottom: PRINT "Sound Option : "; menuText$(choose);
-		noise = choose - 1
-		IF noise > 0 THEN SOUND 999, 1
-		choose = 25: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Display Speed
-'-------------------------------------------------------------------------
-	    CASE 5
-		choose = turbo! + 21
-		menuText$(0) = "Display"
-		menuText$(1) = "Fast"
-		menuText$(2) = "Normal"
-		menuText$(3) = "Slow"
-		menuText$(4) = "Very Slow"
-		menuText$(5) = "Reg Color": IF bw > 0 THEN menuText$(5) = "Alt Color"
-		tlx = 67: tly = 15: size = 5
-		CALL menu(0): CALL clearRight
-		SELECT CASE choose
-			CASE IS < 1
-			CASE IS < 5
-				turbo! = choose
-				IF turbo! = 4 THEN turbo! = 8
-				CALL clearBottom: COLOR 11
-				PRINT "Display Speed : "; menuText$(choose);
-			CASE 5
-				bw = 1 - bw
-				CLS
-				CALL usa
-				CALL topbar
-		END SELECT
-		choose = 26: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Play Balance
-'-------------------------------------------------------------------------
-	   CASE 6
-		choose = difficult + 21
-		menuText$(0) = "Balance"
-		menuText$(1) = "Rebel ++"
-		menuText$(2) = "Rebel +"
-		menuText$(3) = "Balanced"
-		menuText$(4) = "Union +"
-		menuText$(5) = "Union ++"
-		tlx = 67: tly = 15: size = 5
-		CALL menu(8): CALL clearRight
-		IF choose < 1 GOTO menu0
-		CALL clearBottom
-		COLOR 11: CALL clearBottom: PRINT "Play Balance : "; menuText$(choose);
-		difficult = choose
-		CALL unionplus
-		choose = 27: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Ending Conditions
-'-------------------------------------------------------------------------
-	   CASE 7
-		CALL endit
-		choose = 28: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                           Random Events Options
-'-------------------------------------------------------------------------
-	   CASE 8
-		 menuText$(0) = "Random Events"
-		 size = 4: tlx = 30: tly = 8
-		 menuText$(1) = "OFF"
-		 menuText$(2) = "Favor Union ": IF randbal = 3 THEN menuText$(2) = menuText$(2) + " "
-		 menuText$(3) = "Neutral     ": IF randbal = 5 THEN menuText$(3) = menuText$(3) + " "
-		 menuText$(4) = "Favor Rebels": IF randbal = 7 THEN menuText$(4) = menuText$(4) + " "
-		 colour = 5
-		 CALL menu(0)
-		 colour = 4
-
-		 SELECT CASE choose
-		 CASE 1
-		 randbal = 0: t$ = ""
-		 CASE 2
-		 randbal = 3
-		 CASE 3
-		 randbal = 5
-		 CASE 4
-		 randbal = 7
-		 CASE ELSE
-		 END SELECT
-		 IF choose > 1 AND choose < 5 THEN t$ = menuText$(choose)
-		 CALL clearBottom
-		 a$ = "": IF randbal = 0 THEN a$ = "OFF"
-		 COLOR 11: PRINT "Random Events : "; a$; " "; t$;
-		 COLOR 14: PRINT "			press a key";
-		 DO WHILE INKEY$ = "": LOOP
-		 CLS
-		 CALL usa
-		 choose = 29
-		 GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                              Vary Start Conditions
-'-------------------------------------------------------------------------
-	   CASE 9
-		CALL filer(1)
-		cash(1) = cash(1) - 100 + 200 * RND
-		cash(2) = cash(2) + 100 + 200 * RND
-		bold = 5 * RND
-		FOR k = 1 TO 6
-			IF RND > .6 THEN
-			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 21 TO 6
-			IF RND > .6 THEN
-			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 1 TO 40: CALL occupy(k): NEXT k
-		navysize(1) = 10 * RND: IF navysize(1) = 0 THEN navyloc(1) = 0
-		navysize(2) = 10 * RND: IF navysize(2) > 0 THEN navyloc(2) = 27
-		FOR i = 1 TO 2
-			fleet$(i) = ""
-			FOR j = 1 TO navysize(i)
-			a$ = "W": IF RND > .45 * side THEN a$ = "I"
-			fleet$(i) = fleet$(i) + a$
-		NEXT j
-		NEXT i
-		IF RND > .7 THEN capcity(2) = 25
-
-		FOR k = 1 TO 40
-		IF RND > .8 THEN rating(k) = rating(k) - 3 + 6 * RND: IF rating(k) > 9 THEN rating(k) = 9
-		IF rating(k) < 1 THEN rating(k) = 1
-		NEXT k
-		CLS
-		CALL usa
-		choose = 30: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               January Campaigns
-'-------------------------------------------------------------------------
-	   CASE 10
-		jancam = 1 - jancam
-		a$ = "PROHIBITED": IF jancam = 1 THEN a$ = "ALLOWED"
-		COLOR 11
-		CALL clearBottom
-		PRINT "January Campaigns : "; a$;
-		choose = 31: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Realism Switch
-'-------------------------------------------------------------------------
-	   CASE 11
-		realism = 1 - realism
-		CALL clearBottom: COLOR 11
-	IF realism = 0 THEN
-		PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
-	ELSE
-		PRINT "REALISM ON: Recruiting based on CITY SIZE";
-		IF side = 2 AND randbal = 1 AND randbal < 5 THEN randbal = randbal + 2
-		CALL unionplus
-	END IF
-		choose = 32: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Check Map Linakges
-'-------------------------------------------------------------------------
-	   CASE 12
-		CALL integrity
-		CALL TICK(99)
-		CALL usa
-'-------------------------------------------------------------------------
-'                               History
-'-------------------------------------------------------------------------
-	   CASE 13
-		history = 1 - history
-		a$ = "OFF"
-		IF history = 1 THEN a$ = "ON"
-		CALL clearBottom: PRINT "History is now "; a$;
-		choose = 34: GOTO utilityMenu
-'-------------------------------------------------------------------------
-'                               Aggression
-'-------------------------------------------------------------------------
-	   CASE 14
-		bold = bold + 1: IF bold > 5 THEN bold = 0
-		SELECT CASE bold
-		CASE 0: a$ = "PASSIVE"
-		CASE 1: a$ = "TIMID"
-		CASE 2: a$ = "CAUTIOUS"
-		CASE 3: a$ = "NORMAL"
-		CASE 4: a$ = "BOLD"
-		CASE 5: a$ = "RECKLESS"
-		END SELECT
-		CALL clearBottom
-		COLOR 11
-		PRINT "Enemy Aggression : "; a$; " ("; bold; ")";
-		choose = 35: GOTO utilityMenu
-		CASE ELSE
+	CASE 1 ' Recruit Menu
+        IF cash(side) < 100 OR recruitMenuFlag < 0 THEN recruitMenuFlag = -1: GOTO menu0
+        CALL recruit((side))
+        chosit = 23
+        GOTO menu0
+	CASE 2 ' Armies Menu
+        CALL armies
+        chosit = 23
+        GOTO menu0
+	CASE 3 ' Navy Menu
+        IF navyMenuFlag = 0 THEN CALL navy((side), 0)
+        chosit = 25
+	CASE 4 ' Railroad Menu
+        IF rr(side) = 0 THEN
+            COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
+            PSET (550, 20), 0
+            DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
+            z = 9: IF side = 2 THEN z = 7
+            x = POINT(0): y = POINT(1)
+            PAINT (x, y), z, 15
+            COLOR 15: IF side = 1 THEN COLOR 11
+            CALL traincapacity(side, limit)
+            CALL clearBottom
+            PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
+            CALL railroad(side)
+        ELSE
+            CALL clearBottom
+            COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO menu0
+        END IF
+	CASE 5 ' End Turn Menu
+        tlx = 67: tly = 15
+        hilite = 15: colour = 3: choose = 23
+        menuText$(0) = "End Turn"
+        menuText$(1) = "Yes"
+        menuText$(2) = "NOT YET"
+        size = 2
+        CALL menu(0)
+        CALL clearRight
+        IF choose <> 1 THEN chosit = 24: GOTO menu0
+        endrnd:
+        recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
+        IF player = 2 THEN side = side + 1: IF side = 2 THEN CALL blanken: CALL usa: GOTO menu0
+        GOTO newmonth
+	CASE 6 ' Report Menu
+        CALL report((side)): chosit = 27
+        CALL starfin(star, fin, side)
+        FOR i = star TO fin
+        IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
+        NEXT i
+	CASE 7 ' Options Menu
+        optionsMenu:
+        tlx = 67: tly = 13
+        COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
+        hilite = 15: colour = 3: chosit = 24
+        menuText$(0) = "Commands"
+        menuText$(1) = "Cancel"
+        menuText$(2) = "Fortify": IF cash(side) < 200 THEN menuText$(2) = "-"
+        menuText$(3) = "Join"
+        menuText$(4) = "Supply"
+        menuText$(5) = "Capital": IF capcity(side) = 0 OR cash(side) < 500 THEN menuText$(5) = "-"
+        menuText$(6) = "Detach": IF side = 1 THEN menuText$(6) = "-"
+        menuText$(7) = "Army Drill"
+        menuText$(8) = "Relieve"
+        menuText$(9) = "MAIN MENU"
+        size = 9
+        CALL menu(0): CALL clearRight
+        chosit = 28
+        SELECT CASE choose
+            CASE 1 ' Cancel Move
+                CALL cancel(side)
+                moveMenuFlag = 0
+                choose = 22
+		    CASE 2 ' Fortify
+                IF cash(side) < 200 THEN COLOR 11: CALL clearBottom: PRINT "Not enough money for fort"; : GOTO menu0
+                CALL fortify(target)
+                IF cash(side) < 200 GOTO menu0
+                choose = 23
+                GOTO optionsMenu
+		    CASE 3 ' Combine Armies
+                x = side
+                CALL combine(x)
+                IF x < 0 THEN
+                    CALL clearBottom
+                    COLOR 11
+                    PRINT "No eligible armies in same city to combine";
+                    CALL stax(side)
+                    GOTO menu0
+                END IF
+                choose = 24
+                GOTO optionsMenu
+		    CASE 4 ' Supply Armies
+                CALL starfin(star, fin, (side))
+                menuText$(0) = "Supply"
+                tlx = 67: tly = 5: colour = 5
+                size = 0
+                FOR i = star TO fin
+                IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
+                IF realism > 0 THEN
+                    CALL cutoff(side, armyloc(i), a)
+                    IF a < 1 THEN CALL clearBottom: COLOR 15: PRINT force$(side); " army in "; city$(armyloc(i)); " is CUT OFF !"; : TICK turbo!: GOTO alone
+                END IF
+                size = size + 1
+                max = 11: IF LEN(armyname$(i)) < 11 THEN max = LEN(armyname$(i))
+                menuText$(size) = LEFT$(armyname$(i), max)
+                array(size) = i
+                alone:
+                NEXT i
+                IF size = 0 THEN COLOR 11: CALL clearBottom: PRINT "All eligible "; force$(side); " armies have supplies"; : GOTO menu0
+                CALL menu(6): CALL clearRight
+                IF choose < 0 GOTO menu0
+                index = array(choose)
+                IF supply(index) < 2 THEN
+                CALL resupplyArmy(index)
+                CALL placearmy(index)
+                END IF
+                choose = 25
+                GOTO optionsMenu
+		    CASE 5 ' Move Capital
+                IF capcity(side) = 0 OR cash(side) < 500 THEN CALL clearBottom: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
+                cash(side) = cash(side) - 500
+                victory(3 - side) = victory(3 - side) + 50
+                CALL clearRight
+                menuText$(0) = "Capital"
+                a$ = city$(capcity(side))
+                index = capcity(side): CALL newcity(index)
+                IF index = 0 GOTO menu0
+                capcity(side) = index
+                CALL clearBottom: PRINT force$(side); " capital moved from "; a$; " to "; city$(capcity(side));
+                CALL clearRight
+                CALL showcity
+                CALL TICK(9): CALL clearBottom
+		    CASE 6 ' Detach Army
+                IF side = 1 THEN CALL clearBottom: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
+                COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
+                CALL movefrom(index, target): IF target < 1 OR index < 1 GOTO menu0
+                IF armysize(index) < 65 THEN CALL clearBottom: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
+                CALL commander(2, empty): IF empty = 0 GOTO menu0
+                supply(empty) = .3 * supply(index): supply(index) = supply(index) - supply(empty): IF supply(index) < 0 THEN supply(index) = 0
+                armysize(empty) = .3 * armysize(index): armysize(index) = armysize(index) - armysize(empty)
+                armyloc(empty) = target: armyexper(empty) = armyexper(index): armymove(empty) = 0
+                armylead(empty) = rating(empty)
+                armyname$(empty) = lname$(empty): lname$(empty) = ""
+                armyexper(empty) = armyexper(index)
+                COLOR 11: CALL clearBottom: PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; armyname$(empty); : CALL TICK(turbo!): IF noise > 0 THEN SOUND 2222, 1
+                CALL stax(side)
+                choose = 27
+                GOTO optionsMenu
+            CASE 7 ' Drill Army
+                COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
+                CALL movefrom(index, target)
+                IF target < 1 OR index < 1 THEN COLOR 11: CALL clearBottom: PRINT "No armies remain eligible for drills in "; month$(month); : GOTO menu0
+                IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN COLOR 12: CALL clearBottom: PRINT armyname$(index); ": Army has reached maximum improvement through drilling"; : GOTO optionsMenu
+                armyexper(index) = armyexper(index) + 1
+                CALL clearBottom: PRINT armyname$(index); " has drilled to reach experience level "; armyexper(index); : IF noise > 0 THEN SOUND 2222, 1
+                CALL TICK(turbo!): clearBottom
+                armymove(index) = -1
+                choose = 28
+                GOTO optionsMenu
+            CASE 8 ' Relieve Army Commander
+                CALL relieve(side)
+                choose = 29
+                GOTO optionsMenu
+            CASE ELSE
+                chosit = 28
+                GOTO menu0
+        END SELECT
+	    choose = 21 + choose
+	    GOTO optionsMenu
+	CASE 8 ' Utility Menu
+        utilityMenu:
+        chosit = 29
+        menuText$(0) = "Utility"
+        menuText$(1) = "Side": IF player = 2 THEN menuText$(2) = ""
+        menuText$(2) = "1 Player": IF player = 2 THEN menuText$(2) = "2 Player"
+        menuText$(3) = "Graphics" + STR$(graf)
+        menuText$(4) = "Noise": IF noise > 0 THEN menuText$(4) = menuText$(4) + STRING$(noise, "*")
+        menuText$(5) = "Display" + STR$(turbo!)
+        a$ = STR$(difficult): IF side = 1 THEN a$ = STR$(6 - difficult)
+        menuText$(6) = "Balance" + a$
+        menuText$(7) = "End Cond"
+        a$ = "ï¿½": IF randbal = 0 THEN a$ = ""
+        menuText$(8) = "Rndom Evt " + a$
+        menuText$(9) = "Vary Start"
+        a$ = "": IF jancam = 1 THEN a$ = "ï¿½"
+        menuText$(10) = "Jan Campgn" + a$
+        a$ = "": IF realism = 1 THEN a$ = "ï¿½"
+        menuText$(11) = "Realism " + a$
+        menuText$(12) = "Chk Links"
+        a$ = "": IF history = 1 THEN a$ = "ï¿½"
+        menuText$(13) = "History" + a$
+        size = 13: tlx = 67: tly = 11
+        COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
+        IF player = 1 THEN size = 14: menuText$(14) = "Aggress" + STR$(bold)
+        CALL menu(-1): CALL clearRight
+        SELECT CASE choose
+            CASE 1 ' Swap Sides
+                IF player = 2 GOTO menu0
+                side = 3 - side: COLOR 9: IF side = 2 THEN COLOR 7
+                CALL clearBottom: PRINT "Now playing "; force$(side); " side"; : IF noise > 0 THEN SOUND 999, 1
+                IF side = 1 THEN randbal = 7
+                IF side = 2 THEN randbal = 3
+                CALL topbar
+                GOTO menu0
+            CASE 2 ' Solo or 2 Player Setting
+                player = 3 - player: CALL clearBottom: COLOR 12
+                IF noise > 0 THEN SOUND 999, 1
+                a$ = "Solo": IF player = 2 THEN a$ = "2 Player"
+                PRINT a$; " Game";
+                choose = 23: GOTO utilityMenu
+	        CASE 3 ' Graphics Setting
+                graf = graf + 1
+                IF graf > 3 THEN graf = 0
+                a$ = "ROADS"
+                IF graf = 0 THEN a$ = "DISABLED"
+                IF graf = 2 THEN a$ = "CITY NAMES"
+                IF graf = 3 THEN a$ = "FULL"
+                CLS
+                CALL usa
+                CALL clearBottom: COLOR 11: PRINT "Graphics : "; a$; : IF noise > 0 THEN SOUND 2700, 1
+                choose = 24: GOTO utilityMenu
+	        CASE 4 ' Sounds Setting
+                CALL clearRight: choose = noise + 22
+                menuText$(0) = "SOUNDS"
+                menuText$(1) = "Quiet"
+                menuText$(2) = "Sound"
+                menuText$(3) = " & Sound"
+                size = 3: tlx = 67: tly = 12
+                CALL menu(0): CALL clearRight
+                IF choose < 1 GOTO menu0
+                COLOR 11: CALL clearBottom: PRINT "Sound Option : "; menuText$(choose);
+                noise = choose - 1
+                IF noise > 0 THEN SOUND 999, 1
+                choose = 25: GOTO utilityMenu
+	        CASE 5 ' Display Speed Setting
+                choose = turbo! + 21
+                menuText$(0) = "Display"
+                menuText$(1) = "Fast"
+                menuText$(2) = "Normal"
+                menuText$(3) = "Slow"
+                menuText$(4) = "Very Slow"
+                menuText$(5) = "Reg Color": IF bw > 0 THEN menuText$(5) = "Alt Color"
+                tlx = 67: tly = 15: size = 5
+                CALL menu(0): CALL clearRight
+                SELECT CASE choose
+                    CASE IS < 1
+                    CASE IS < 5
+                        turbo! = choose
+                        IF turbo! = 4 THEN turbo! = 8
+                        CALL clearBottom: COLOR 11
+                        PRINT "Display Speed : "; menuText$(choose);
+                    CASE 5
+                        bw = 1 - bw
+                        CLS
+                        CALL usa
+                        CALL topbar
+                END SELECT
+                choose = 26: GOTO utilityMenu
+	        CASE 6 ' Play Balance Setting
+                choose = difficult + 21
+                menuText$(0) = "Balance"
+                menuText$(1) = "Rebel ++"
+                menuText$(2) = "Rebel +"
+                menuText$(3) = "Balanced"
+                menuText$(4) = "Union +"
+                menuText$(5) = "Union ++"
+                tlx = 67: tly = 15: size = 5
+                CALL menu(8): CALL clearRight
+                IF choose < 1 GOTO menu0
+                CALL clearBottom
+                COLOR 11: CALL clearBottom: PRINT "Play Balance : "; menuText$(choose);
+                difficult = choose
+                CALL unionplus
+                choose = 27: GOTO utilityMenu
+	        CASE 7 ' Ending Conditions Settings
+                CALL endit
+                choose = 28: GOTO utilityMenu
+	        CASE 8 ' Random Events Options
+                 menuText$(0) = "Random Events"
+                 size = 4: tlx = 30: tly = 8
+                 menuText$(1) = "OFF"
+                 menuText$(2) = "Favor Union ": IF randbal = 3 THEN menuText$(2) = menuText$(2) + " "
+                 menuText$(3) = "Neutral     ": IF randbal = 5 THEN menuText$(3) = menuText$(3) + " "
+                 menuText$(4) = "Favor Rebels": IF randbal = 7 THEN menuText$(4) = menuText$(4) + " "
+                 colour = 5
+                 CALL menu(0)
+                 colour = 4
+        
+                 SELECT CASE choose
+                 CASE 1
+                 randbal = 0: t$ = ""
+                 CASE 2
+                 randbal = 3
+                 CASE 3
+                 randbal = 5
+                 CASE 4
+                 randbal = 7
+                 CASE ELSE
+                 END SELECT
+                 IF choose > 1 AND choose < 5 THEN t$ = menuText$(choose)
+                 CALL clearBottom
+                 a$ = "": IF randbal = 0 THEN a$ = "OFF"
+                 COLOR 11: PRINT "Random Events : "; a$; " "; t$;
+                 COLOR 14: PRINT "			press a key";
+                 DO WHILE INKEY$ = "": LOOP
+                 CLS
+                 CALL usa
+                 choose = 29
+                 GOTO utilityMenu
+	        CASE 9 ' Vary Start Conditions
+                CALL filer(1)
+                cash(1) = cash(1) - 100 + 200 * RND
+                cash(2) = cash(2) + 100 + 200 * RND
+                bold = 5 * RND
+                FOR k = 1 TO 6
+                    IF RND > .6 THEN
+                    armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
+                    armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+                    END IF
+                NEXT k
+                FOR k = 21 TO 6
+                    IF RND > .6 THEN
+                    armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
+                    armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+                    END IF
+                NEXT k
+                FOR k = 1 TO 40: CALL occupy(k): NEXT k
+                navysize(1) = 10 * RND: IF navysize(1) = 0 THEN navyloc(1) = 0
+                navysize(2) = 10 * RND: IF navysize(2) > 0 THEN navyloc(2) = 27
+                FOR i = 1 TO 2
+                    fleet$(i) = ""
+                    FOR j = 1 TO navysize(i)
+                    a$ = "W": IF RND > .45 * side THEN a$ = "I"
+                    fleet$(i) = fleet$(i) + a$
+                NEXT j
+                NEXT i
+                IF RND > .7 THEN capcity(2) = 25
+        
+                FOR k = 1 TO 40
+                IF RND > .8 THEN rating(k) = rating(k) - 3 + 6 * RND: IF rating(k) > 9 THEN rating(k) = 9
+                IF rating(k) < 1 THEN rating(k) = 1
+                NEXT k
+                CLS
+                CALL usa
+                choose = 30: GOTO utilityMenu
+	        CASE 10 ' January Campaigns Setting
+                jancam = 1 - jancam
+                a$ = "PROHIBITED": IF jancam = 1 THEN a$ = "ALLOWED"
+                COLOR 11
+                CALL clearBottom
+                PRINT "January Campaigns : "; a$;
+                choose = 31: GOTO utilityMenu
+	        CASE 11 ' Realism Switch
+                realism = 1 - realism
+                CALL clearBottom: COLOR 11
+                IF realism = 0 THEN
+                    PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
+                ELSE
+                    PRINT "REALISM ON: Recruiting based on CITY SIZE";
+                    IF side = 2 AND randbal = 1 AND randbal < 5 THEN randbal = randbal + 2
+                    CALL unionplus
+                END IF
+                choose = 32: GOTO utilityMenu
+	        CASE 12 ' Check Map Linkages
+                CALL integrity
+                CALL TICK(99)
+                CALL usa
+	        CASE 13 ' History Setting
+                history = 1 - history
+                a$ = "OFF"
+                IF history = 1 THEN a$ = "ON"
+                CALL clearBottom: PRINT "History is now "; a$;
+                choose = 34: GOTO utilityMenu
+	        CASE 14 ' Aggression Setting
+                bold = bold + 1: IF bold > 5 THEN bold = 0
+                SELECT CASE bold
+                CASE 0: a$ = "PASSIVE"
+                CASE 1: a$ = "TIMID"
+                CASE 2: a$ = "CAUTIOUS"
+                CASE 3: a$ = "NORMAL"
+                CASE 4: a$ = "BOLD"
+                CASE 5: a$ = "RECKLESS"
+                END SELECT
+                CALL clearBottom
+                COLOR 11
+                PRINT "Enemy Aggression : "; a$; " ("; bold; ")";
+                choose = 35: GOTO utilityMenu
+		    CASE ELSE
 	   END SELECT
-'==========================================================================
-'                               Files
-'==========================================================================
-	CASE 9
-	IF _FILEEXISTS("*.sav") THEN filel = 0
-filex:
-	choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
-	menuText$(0) = "Options"
-	menuText$(1) = "Load": IF filel = 0 THEN menuText$(1) = "-": choose = 23
-	menuText$(2) = "Save"
-	menuText$(3) = "New Game"
-	menuText$(4) = "Quit to DOS"
-	size = 4: tlx = 67: tly = 15
-	CALL menu(0): CALL clearRight
-	SELECT CASE choose
-		CASE IS < 1: GOTO menu0
-		CASE 1, 2
-loader:
-			IF choose = 1 AND filel = 0 GOTO filex
-			CALL filer(choose + 1)
-			IF choose = 1 THEN recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
-			GOTO menu0
-		CASE 3
-			OPEN "O", 1, "cws.cfg"
-			WRITE #1, side, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), jancam, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
-			CLOSE #1
-			CLS
-			GOTO newgame
-		CASE 4
-		    choose = 23
-            menuText$(0) = "Quit"
-            menuText$(1) = "Yes"
-            menuText$(2) = "No"
-            size = 2: colour = 5
-            tlx = 67: tly = 15
-            CALL menu(0)
-            CALL clearRight
-            IF choose = 1 THEN END ELSE GOTO menu0
-	END SELECT
-'==========================================================================
+	CASE 9 ' Files Menu
+        IF _FILEEXISTS("*.sav") THEN filel = 0
+        filex:
+        choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
+        menuText$(0) = "Options"
+        menuText$(1) = "Load": IF filel = 0 THEN menuText$(1) = "-": choose = 23
+        menuText$(2) = "Save"
+        menuText$(3) = "New Game"
+        menuText$(4) = "Quit to DOS"
+        size = 4: tlx = 67: tly = 15
+        CALL menu(0): CALL clearRight
+        SELECT CASE choose
+            CASE IS < 1: GOTO menu0
+            CASE 1, 2
+                loader:
+                IF choose = 1 AND filel = 0 GOTO filex
+                CALL filer(choose + 1)
+                IF choose = 1 THEN recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
+                GOTO menu0
+            CASE 3
+                OPEN "O", 1, "cws.cfg"
+                WRITE #1, side, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), jancam, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
+                CLOSE #1
+                CLS
+                GOTO newgame
+            CASE 4
+                choose = 23
+                menuText$(0) = "Quit"
+                menuText$(1) = "Yes"
+                menuText$(2) = "No"
+                size = 2: colour = 5
+                tlx = 67: tly = 15
+                CALL menu(0)
+                CALL clearRight
+                IF choose = 1 THEN END ELSE GOTO menu0
+	    END SELECT
 	CASE 99
-	GOTO endrnd
+	    GOTO endrnd
 CASE ELSE
 	chosit = 22
 	GOTO menu0
 END SELECT
 GOTO menu0
-'............................................................................
-'                               Subs
-'............................................................................
-topbar:
-LOCATE 1, 1: PRINT SPACE$(80);
-COLOR 11
-LOCATE 1, 10: PRINT "Input your decisions now for "; force$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
-RETURN
+
 '............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
@@ -826,8 +732,10 @@ DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
 SUB blanken ()
-    c = 1: IF side = 2 THEN c = 7
-	CLS : LINE (100, 200)-(500, 300), c, BF
+    c = 1
+	IF side = 2 THEN c = 7
+	CLS
+	LINE (100, 200)-(500, 300), c, BF
 	LINE (100, 200)-(500, 300), 8 - c, B
 	COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
 	COLOR 11: LOCATE 17, 30: PRINT force$(side); " PLAYER TURN"
@@ -882,7 +790,6 @@ END SUB
 ' This subroutine handles the movement of armies from one city to another.
 ' It first determines the target city and then displays a menu of possible destinations.
 ' If a valid destination is chosen, it updates the army's location and animates the movement.
-
 SUB armies
     ' Determine the target city for the army movement
     CALL movefrom(index, target)
@@ -1138,8 +1045,8 @@ SUB battle (attack, defend, win, lose)
     LOCATE 1, 1: PRINT "Attack Loss: ";
     PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
     CALL strong(attack)
-    PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) ²";
-    COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+    PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) ï¿½";
+    COLOR 16 - c: PRINT "ï¿½ Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
     CALL strong(defend)
     PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / armysize(defend)))))); "%)"
 
@@ -1370,7 +1277,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	menuText$(0) = "Save Game"
 	FOR k = 1 TO 9
 	menuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF _FILEEXISTS(menuText$(k)) THEN menuText$(k) = menuText$(k) + " û"
+	IF _FILEEXISTS(menuText$(k)) THEN menuText$(k) = menuText$(k) + " ï¿½"
 	NEXT k
 	tlx = 67: size = 9
 	CALL menu(0)
@@ -2756,9 +2663,9 @@ GOTO allthru
 upbox:
 LINE (450, 318)-(526, 420), 1, BF
 LINE (527, 315)-(527, 439), 10
-COLOR 14: LOCATE 23, 50: PRINT "ÉÍÍÍÍÍÍÍÍÍÍÍÍÍ»"
-LOCATE 24, 50: PRINT "º U P D A T E º"
-LOCATE 25, 50: PRINT "ÈÍÍÍÍÍÍÍÍÍÍÍÍÍ¼"
+COLOR 14: LOCATE 23, 50: PRINT "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»"
+LOCATE 24, 50: PRINT "ï¿½ U P D A T E ï¿½"
+LOCATE 25, 50: PRINT "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼"
 RETURN
 
 allthru:
@@ -3074,7 +2981,7 @@ SUB endit
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
 what4:
-	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN menuText$(i - 1) = "û " ELSE menuText$(i - 1) = "  "
+	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN menuText$(i - 1) = "ï¿½ " ELSE menuText$(i - 1) = "  "
 	NEXT i
 	choose = chosit
 	menuText$(0) = "Victory Conditions"
@@ -3457,9 +3364,9 @@ SUB maxx
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
-LOCATE 2, 7: PRINT STRING$(57, "²")
-LOCATE 9, 7: PRINT STRING$(57, "²")
-FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
+LOCATE 2, 7: PRINT STRING$(57, "ï¿½")
+LOCATE 9, 7: PRINT STRING$(57, "ï¿½")
+FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "ï¿½"; SPACE$(55); "ï¿½": NEXT i
 
 		OPEN "I", 1, "hiscore.cws"
 		FOR s = 1 TO 2
@@ -3623,9 +3530,9 @@ PRINT TAB(57); : IF armymove(i) > -1 THEN PRINT city$(armymove(i)) ELSE PRINT "R
 IF fort(armyloc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; fort(armyloc(i))
 deadeye:
 NEXT i
-PRINT " "; STRING$(70, "Ä")
+PRINT " "; STRING$(70, "ï¿½")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(aggress! * x))); "00 ]"
-PRINT " "; STRING$(70, "Ä")
+PRINT " "; STRING$(70, "ï¿½")
 PRINT " "; force$(who); " NAVY has "; navysize(who); " ship(s) ";
 x = 0
 FOR k = 1 TO navysize(who)
