@@ -809,7 +809,7 @@ SUB armies
             array(size) = matrix(target, i)
         END IF
     NEXT i
-    CALL bubble(size)
+    CALL bubbleSortMenuText(size)
 
     ' Display the menu and handle the user's choice
     hilite = 10
@@ -1096,7 +1096,7 @@ SUB combine (who)
 	
     ' Exit if no eligible armies found
 	IF size = 0 THEN who = -1: EXIT SUB
-	CALL bubble(size)
+	CALL bubbleSortMenuText(size)
 
     ' Randomly choose an army if not the player's side
 	IF who <> side THEN choose = 1 + INT(size * RND): GOTO join
@@ -1227,7 +1227,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 			size = size + 1: menuText$(size) = t$: array(size) = k
 		END IF
 	NEXT k
-	CALL bubble((size))
+	CALL bubbleSortMenuText((size))
 	tlx = 67: tly = 14 - .5 * size
 	CALL menu(0)
 	CALL clrrite
@@ -1323,7 +1323,7 @@ SUB fortify (target)
 	END IF
 	NEXT i
 	IF size = 0 THEN CALL clrbot: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
-	CALL bubble(size)
+	CALL bubbleSortMenuText(size)
 	menuText$(0) = "Fortify"
 		choose = 31
 		CALL menu(9): CALL clrrite
@@ -1466,7 +1466,7 @@ SUB movefrom (index, target)
 	NEXT i
 	IF size = 0 THEN index = -1: GOTO notarg
 	menuText$(0) = "From"
-	CALL bubble(size)
+	CALL bubbleSortMenuText(size)
 movopt:
 	tlx = 67: tly = 5
 		hilite = 15: CALL menu(1): CALL clrrite
@@ -1479,7 +1479,7 @@ movopt:
 		NEXT i
 		IF size = 1 GOTO notarg
 		menuText$(0) = "Which"
-		CALL bubble(size)
+		CALL bubbleSortMenuText(size)
 		tlx = 67: tly = 15: CALL menu(4): CALL clrrite
 		IF choose < 0 THEN index = 0: GOTO notarg
 		index = array(choose)
@@ -2135,7 +2135,7 @@ foe:
 alldone:
 	IF size = 0 GOTO menu1
 	IF who = side AND rflag = 0 THEN FOR i = 1 TO size: rcity(i) = array(i): NEXT i: rflag = size
-	CALL bubble(size)
+	CALL bubbleSortMenuText(size)
 '............................................................................
 levy:
 	IF cash(who) < 100 GOTO menu1

@@ -42,7 +42,7 @@ DO
 LOOP WHILE swaps%
 END SUB
 
-SUB bubble (limit)
+SUB bubbleSortMenuText (limit)
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -64,7 +64,7 @@ CALL clrrite
 	a$ = armyname$(j): IF LEN(a$) > 10 THEN x = INSTR(a$, " "): a$ = RIGHT$(a$, LEN(a$) - x)
 	IF armyloc(j) > 0 AND armymove(j) > 0 THEN size = size + 1: menuText$(size) = a$: array(size) = armyloc(j)
 	NEXT j
-	CALL bubble(size)
+	CALL bubbleSortMenuText(size)
 	tlx = 67: tly = 2: wtype = 2
 	menuText$(0) = "Cancel"
 	IF size < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
@@ -723,7 +723,7 @@ END IF
 NEXT i
 
 IF size = 0 THEN EXIT SUB
-CALL bubble(size)
+CALL bubbleSortMenuText(size)
 menuText$(0) = "Relieve"
 choose = 31: hilite = 11
 CALL menu(6): CALL clrrite
@@ -744,7 +744,7 @@ IF lname$(i) <> "" THEN
 	array(size) = i
 END IF
 NEXT i
-CALL bubble(size)
+CALL bubbleSortMenuText(size)
 
 have2:
 menuText$(0) = "New Leader"
@@ -1001,7 +1001,7 @@ NEXT k
 	IF size = 0 THEN EXIT SUB
 	IF size = 1 THEN x = array(1): EXIT SUB
 	menuText$(0) = "Retreat"
-	CALL bubble(size)
+	CALL bubbleSortMenuText(size)
 	CALL menu(9)
 	CALL clrrite
 	IF choose < 0 OR choose > size THEN x = 0: EXIT SUB
