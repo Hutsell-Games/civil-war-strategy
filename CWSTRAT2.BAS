@@ -1034,7 +1034,7 @@ RETURN
 
 END SUB
 
-SUB rwin
+SUB rebelWin
 LINE (2, 2)-(637, 239), 4, BF
 COLOR 15: LINE (2, 40)-(597, 239): LINE -(637, 239): LINE -(637, 199): LINE -(40, 2): LINE -(2, 2): LINE -(2, 40)
 COLOR 15: LINE (2, 199)-(2, 239): LINE -(40, 239): LINE -(637, 40): LINE -(637, 2): LINE -(597, 2): LINE -(2, 199)
@@ -1869,10 +1869,10 @@ play4ever:
 
 	thrill = i
 	CALL usa: CALL report(100 + side)
-	IF j = 2 THEN FOR k = 1 TO 2: victory(k) = .7 * victory(k): NEXT k: CALL rwin: GOTO death
+	IF j = 2 THEN FOR k = 1 TO 2: victory(k) = .7 * victory(k): NEXT k: CALL rebelWin: GOTO death
 
 	IF i = 1 THEN CALL capitol: COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(victory(1)): PRINT t$: GOTO death
-	IF i = 2 THEN CALL rwin: COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(victory(2)): PRINT t$
+	IF i = 2 THEN CALL rebelWin: COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(victory(2)): PRINT t$
 death:
 	COLOR 14: LOCATE 4, 40 - .5 * LEN(a$)
 	IF history > 0 THEN
@@ -1886,15 +1886,37 @@ stale:
 END SUB
 
 SUB void (a, y)
-  y = 0
-FOR j = 1 TO 6
-  x = matrix(a, j): IF x = 0 GOTO tally5
-  IF cityp(x) = side AND occupied(x) > 0 THEN y = y + armysize(occupied(x))
-	FOR k = 1 TO 6: m = matrix(x, k): IF m = 0 OR m = a GOTO tally4
-	IF cityp(m) = side AND occupied(m) > 0 THEN y = y + .1 * armysize(occupied(m))
-tally4:
-	NEXT k
-NEXT j
-tally5:
+    ' Initialize y to 0
+    y = 0
+  
+    ' Iterate over the 6 possible connections (or neighboring cities) of city a
+    FOR j = 1 TO 6
+        ' Get the neighboring city x
+        x = matrix(a, j)
+        
+        ' If x is 0, skip to the end of the subroutine
+        IF x = 0 GOTO tally5
+    
+        ' If city x is controlled by the same side and is occupied, add the size of the occupying army to y
+        IF cityp(x) = side AND occupied(x) > 0 THEN y = y + armysize(occupied(x))
+    
+        ' Iterate over the 6 possible connections of city x
+        FOR k = 1 TO 6
+        ' Get the neighboring city m of city x
+        m = matrix(x, k)
+      
+          ' If m is 0 or the same as city a, skip to the next iteration
+          IF m = 0 OR m = a GOTO tally4
+          
+         ' If city m is controlled by the same side and is occupied, add 10% of the size of the occupying army to y
+        IF cityp(m) = side AND occupied(m) > 0 THEN y = y + .1 * armysize(occupied(m))
+          
+          ' Label to skip to the next iteration of the inner loop
+        tally4:
+        NEXT k
+    NEXT j
+  
+    ' Label to skip to the end of the subroutine
+    tally5:
 END SUB
 
