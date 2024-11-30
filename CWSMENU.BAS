@@ -1,4 +1,4 @@
-DECLARE SUB mxw (wide%)
+DECLARE SUB maxWidth (wide%)
 DEFINT A-Z
 DECLARE SUB choices (b1%, wide%)
 DECLARE SUB topbar ()
@@ -12,9 +12,9 @@ DIM SHARED graft(1 TO 1564)
 '       tlx  = top left x  (if zero, automatically centered)
 '       tly = top left y   (if zero, automatically centered)
 '       size = # rows (current maximum=20)
-'       mtx$() = text for menu
-'                mtx$(0) = heading (blank defaults to M E N U)
-'                mtx$(1-size) are options
+'       menuText$() = text for menu
+'                menuText$(0) = heading (blank defaults to M E N U)
+'                menuText$(1-size) are options
 '       choose = option selected (row #)
 '            -1 indicates ESC key pressed
 '            entering with choose+21 causes choose to be default entry
@@ -51,7 +51,7 @@ remenu:
 	LOCATE 1, 1, 0
 	IF menuText$(0) = "" THEN menuText$(0) = "M E N U"
 
-	IF wide = 0 THEN CALL mxw(wide)
+	IF wide = 0 THEN CALL maxWidth(wide)
 	IF tlx = 0 THEN GOSUB noadjust
 	IF choose < 21 THEN choose = 1
 	IF choose > 21 THEN choose = choose - 21
@@ -257,7 +257,7 @@ called:
 	VIEW
 END SUB
 
-SUB mxw (wide)
+SUB maxWidth (wide)
 	wide = LEN(menuText$(0)) + 1
 	FOR i = 1 TO size
 	x = LEN(menuText$(i))

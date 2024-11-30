@@ -5,7 +5,7 @@ DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB image2 (a$, s%)
 DECLARE SUB maptext ()
 DECLARE SUB mountain (xx%, yy%)
-DECLARE SUB mxw (wide%)
+DECLARE SUB maxWidth (wide%)
 DECLARE SUB roman (target%, a$)
 DECLARE SUB stax (who%)
 ' $INCLUDE: 'cws14.bi'
@@ -599,7 +599,7 @@ DIM g2(1 TO 8000)
 menuText$(1) = a$
 tlx = 32 - LEN(a$) \ 2
 tly = 10: size = 1
-CALL mxw(wide)
+CALL maxWidth(wide)
 IF wide > 59 THEN wide = 59: a$ = LEFT$(a$, 59)
 x = 8 * (tlx + wide)
 y = 16 * (tly + 1)
