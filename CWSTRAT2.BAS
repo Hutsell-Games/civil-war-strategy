@@ -58,7 +58,7 @@ END SUB
 SUB cancel (side)
 CALL starfin(star, fin, (side))
 counter:
-CALL clrrite
+CALL clearRight
 	size = 0
 	FOR j = star TO fin
 	a$ = armyname$(j): IF LEN(a$) > 10 THEN x = INSTR(a$, " "): a$ = RIGHT$(a$, LEN(a$) - x)
@@ -67,7 +67,7 @@ CALL clrrite
 	CALL bubbleSortMenuText(size)
 	tlx = 67: tly = 2: wtype = 2
 	menuText$(0) = "Cancel"
-	IF size < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
+	IF size < 1 THEN CALL clearBottom: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
 	CALL menu(1)
 	SELECT CASE choose
 	 CASE 1 TO size
@@ -77,7 +77,7 @@ CALL clrrite
 		IF armyloc(i) = target THEN x = INSTR(armyname$(i), menuText$(choose)): IF x > 0 AND armymove(i) > 0 THEN index = i
 		NEXT i
 
-		CALL clrbot: COLOR 11: PRINT armyname$(index); " has cancelled move to "; city$(armymove(index)); : CALL TICK(turbo + 1)
+		CALL clearBottom: COLOR 11: PRINT armyname$(index); " has cancelled move to "; city$(armymove(index)); : CALL TICK(turbo + 1)
 		CALL icon(armyloc(index), armymove(index), 4)
 		armymove(index) = 0: IF noise > 0 THEN SOUND 2999, .5
 		CALL stax(side)
@@ -85,56 +85,56 @@ CALL clrrite
 		GOTO finix
 	END SELECT
 finix:
-	CALL clrrite
+	CALL clearRight
 END SUB
 
-SUB cannon
-CALL clrrite
-LINE (528, 80)-(639, 310), 3, BF
-LINE (528, 310)-(639, 435), 2, BF
-LINE (528, 405)-(639, 420), 0, BF
-PSET (580, 380), 0
-
-DRAW "BR15"
-x = POINT(0): y = POINT(1): CIRCLE (x, y), 25, 1, , , 1.4
-CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4
-CIRCLE (x, y), 29, 1, , , 1.4
-DRAW "BR20"
-x = POINT(0): y = POINT(1): PAINT (x, y), 3, 1
-DRAW "BR3BU7"
-x = POINT(0): y = POINT(1): PAINT (x, y), 5, 1
-DRAW "BL15C7G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BL2"
-DRAW "BH2C6"
-x = POINT(0): y = POINT(1): PAINT (x, y), 7
-DRAW "BD2R4C0G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BR5U3"
-DRAW "C8G2H2G6L15G1L32H1L1H1L19H3E2R2F1R6"
-DRAW "E2R4F1R6E1R58F1G2BL9BH2BU5BR3C15H1L48G1L13G1L4"
-DRAW "BD3BF3BR9"
-x = POINT(0): y = POINT(1): PAINT (x, y), 8
-DRAW "BR34BE1BR7BL5BD8C6R16F5D1F4D6F7R17D7L30H18L8H4L18H3U5R33BR17BD5"
-x = POINT(0): y = POINT(1): PAINT (x, y), 6
-DRAW "BU5C8F8D7F6R1F1R16D7E3U7G3E2BE2C8L16H6U8C8G3BE3C8H8G6BR5"
-x = POINT(0): y = POINT(1): PAINT (x, y), 8
-DRAW "BL38"
-x = POINT(0): y = POINT(1): CIRCLE (x, y), 30, 4, , , 1.4
-CIRCLE (x + 5, y), 35, 4, 4, 1.5, 1.4
-CIRCLE (x, y), 35, 4, , , 1.4
-CIRCLE (x, y), 8, 4, , , 1.4: PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
-DRAW "BR23"
-x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 4, 4
-DRAW "BR5BU7"
-x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
-DRAW "BU22BL28"
-DRAW "C4D20R1U19BD37C4D20L1U21BH2BL1BH1C4G12F1E11BU3BH2"
-DRAW "BU3BL1C4L13U1R15BR1BU3C4H12E1F11BF5BE4C4E11F1G11BD3C4R13D1L10D3BL3BD1C4"
-DRAW "F12G1H12BL33BH13BU3BH2BU1BE1BR2BU1BE1BR1"
-DRAW "BL5BU5C8E4U1"
-DRAW "H4E3H3U3E3H6L3G7F1H7E2U2E2H7L7G9D6F8G3L1H3L5G7D4F4R2D3F3R2G5D4L4G4D5F8D2"
-DRAW "R5F9E3F5R6E6H4E2F6R3E8F1E4H5U2H3U1H1U7E4H7BL5"
-x = POINT(0): y = POINT(1): PAINT (x, y), 8, 8
-DRAW "BR9BD6C15H8L1H2L12G1F5L8G4F4R3G3D1G2D3F2E5G1D8R4E3D6F3E12H1U1H1U6E5BH6BU4"
-DRAW "BD15"
-x = POINT(0): y = POINT(1): PAINT (x, y), 14, 15
+SUB drawCannon
+    CALL clearRight
+    LINE (528, 80)-(639, 310), 3, BF
+    LINE (528, 310)-(639, 435), 2, BF
+    LINE (528, 405)-(639, 420), 0, BF
+    PSET (580, 380), 0
+    
+    DRAW "BR15"
+    x = POINT(0): y = POINT(1): CIRCLE (x, y), 25, 1, , , 1.4
+    CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4
+    CIRCLE (x, y), 29, 1, , , 1.4
+    DRAW "BR20"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 3, 1
+    DRAW "BR3BU7"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 5, 1
+    DRAW "BL15C7G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BL2"
+    DRAW "BH2C6"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 7
+    DRAW "BD2R4C0G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BR5U3"
+    DRAW "C8G2H2G6L15G1L32H1L1H1L19H3E2R2F1R6"
+    DRAW "E2R4F1R6E1R58F1G2BL9BH2BU5BR3C15H1L48G1L13G1L4"
+    DRAW "BD3BF3BR9"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 8
+    DRAW "BR34BE1BR7BL5BD8C6R16F5D1F4D6F7R17D7L30H18L8H4L18H3U5R33BR17BD5"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 6
+    DRAW "BU5C8F8D7F6R1F1R16D7E3U7G3E2BE2C8L16H6U8C8G3BE3C8H8G6BR5"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 8
+    DRAW "BL38"
+    x = POINT(0): y = POINT(1): CIRCLE (x, y), 30, 4, , , 1.4
+    CIRCLE (x + 5, y), 35, 4, 4, 1.5, 1.4
+    CIRCLE (x, y), 35, 4, , , 1.4
+    CIRCLE (x, y), 8, 4, , , 1.4: PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
+    DRAW "BR23"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 4, 4
+    DRAW "BR5BU7"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
+    DRAW "BU22BL28"
+    DRAW "C4D20R1U19BD37C4D20L1U21BH2BL1BH1C4G12F1E11BU3BH2"
+    DRAW "BU3BL1C4L13U1R15BR1BU3C4H12E1F11BF5BE4C4E11F1G11BD3C4R13D1L10D3BL3BD1C4"
+    DRAW "F12G1H12BL33BH13BU3BH2BU1BE1BR2BU1BE1BR1"
+    DRAW "BL5BU5C8E4U1"
+    DRAW "H4E3H3U3E3H6L3G7F1H7E2U2E2H7L7G9D6F8G3L1H3L5G7D4F4R2D3F3R2G5D4L4G4D5F8D2"
+    DRAW "R5F9E3F5R6E6H4E2F6R3E8F1E4H5U2H3U1H1U7E4H7BL5"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 8, 8
+    DRAW "BR9BD6C15H8L1H2L12G1F5L8G4F4R3G3D1G2D3F2E5G1D8R4E3D6F3E12H1U1H1U6E5BH6BU4"
+    DRAW "BD15"
+    x = POINT(0): y = POINT(1): PAINT (x, y), 14, 15
 END SUB
 
 SUB capitol
@@ -186,7 +186,7 @@ IF noise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d
 END SUB
 
 SUB capture (active, c, s, flag)
-	cityp(c) = s: CALL clrbot
+	cityp(c) = s: CALL clearBottom
 	a$ = armyname$(active) + " has captured " + city$(c)
 	COLOR 11: PRINT armyname$(active) + " has captured " + city$(c);
 	IF active < 21 AND noise > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
@@ -212,34 +212,34 @@ LOCATE y, 7 + x: PRINT a$
 END SUB
 
 SUB chessie
-COLOR 10
-LINE (500, 185)-(505, 180): LINE -(505, 175)
-LINE -(500, 170): LINE -(490, 165)
-LINE -(495, 160): LINE -(490, 155)
-LINE -(485, 150): LINE -(495, 155)
-LINE -(495, 145): LINE -(490, 140)
-LINE -(485, 130): LINE -(470, 120)
-LINE -(470, 110): LINE -(475, 120)
-LINE -(485, 120): LINE -(485, 115)
-LINE -(480, 100): LINE -(485, 90)
-LINE -(495, 80): LINE -(500, 80)
-LINE -(500, 85): LINE -(495, 90)
-LINE -(495, 100): LINE -(495, 115)
-LINE -(500, 120): LINE -(500, 130)
-LINE -(515, 135): LINE -(515, 140)
-LINE -(510, 160): LINE -(520, 145)
-LINE -(525, 120): LINE -(525, 115)
-LINE -(515, 85): LINE -(527, 95)
-PAINT (500, 400), 1, 10
-PAINT (510, 110), 2
+    COLOR 10
+    LINE (500, 185)-(505, 180): LINE -(505, 175)
+    LINE -(500, 170): LINE -(490, 165)
+    LINE -(495, 160): LINE -(490, 155)
+    LINE -(485, 150): LINE -(495, 155)
+    LINE -(495, 145): LINE -(490, 140)
+    LINE -(485, 130): LINE -(470, 120)
+    LINE -(470, 110): LINE -(475, 120)
+    LINE -(485, 120): LINE -(485, 115)
+    LINE -(480, 100): LINE -(485, 90)
+    LINE -(495, 80): LINE -(500, 80)
+    LINE -(500, 85): LINE -(495, 90)
+    LINE -(495, 100): LINE -(495, 115)
+    LINE -(500, 120): LINE -(500, 130)
+    LINE -(515, 135): LINE -(515, 140)
+    LINE -(510, 160): LINE -(520, 145)
+    LINE -(525, 120): LINE -(525, 115)
+    LINE -(515, 85): LINE -(527, 95)
+    PAINT (500, 400), 1, 10
+    PAINT (510, 110), 2
 END SUB
 
-SUB clrbot
+SUB clearBottom
 LOCATE 29, 1: PRINT SPACE$(79);
 LOCATE 29, 1
 END SUB
 
-SUB clrrite
+SUB clearRight
 VIEW (528, 1)-(639, 450)
 CLS 1
 VIEW
@@ -263,7 +263,7 @@ SUB commander (who, empty)
 		EXIT SUB
 	END IF
 	NEXT i
-	CALL clrbot: PRINT "No more "; force$(who); " commanders available"; : CALL TICK(turbo!)
+	CALL clearBottom: PRINT "No more "; force$(who); " commanders available"; : CALL TICK(turbo!)
 END SUB
 
 SUB endit
@@ -412,7 +412,7 @@ SUB events
 '                              Special Events
 '==========================================================================
 IF realism > 0 AND year = 1862 AND month < 3 THEN
-	COLOR 14: CALL clrbot
+	COLOR 14: CALL clearBottom
 	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
 	IF noise > 0 THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
 	DO WHILE INKEY$ = "": LOOP
@@ -423,7 +423,7 @@ plus = difficult: IF side = 1 THEN plus = 6 - difficult
 pct! = .005 * (year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
 IF RND > pct! THEN EXIT SUB
 
-CALL clrbot: COLOR 14: PRINT "SPECIAL EVENT...";
+CALL clearBottom: COLOR 14: PRINT "SPECIAL EVENT...";
 who = 1: IF RND > .1 * randbal THEN who = 2
 
 SELECT CASE who
@@ -435,7 +435,7 @@ SELECT CASE who
 	IF year = 1865 AND month = 1 THEN victory(2) = victory(2) + 100
 	IF RND > .9 THEN GOSUB riot: EXIT SUB
 
-	CALL clrbot
+	CALL clearBottom
 	IF RND > .2 OR navysize(2) > 9 GOTO mercen
 	IF navysize(2) > 0 AND navyloc(2) <> 99 THEN empty = navyloc(2): GOTO float1
 		empty = 0
@@ -485,12 +485,12 @@ riot:
 	FOR k = 1 TO 99
 	x = 1 + INT(40 * RND)
 		IF cityo(x) <> who AND cityp(x) = who AND occupied(x) = 0 THEN
-			CALL clrbot: COLOR 15
+			CALL clearBottom: COLOR 15
 			PRINT " Riots have broken out in "; city$(x);
 			cityp(x) = 0
 			CALL showcity
 			TICK turbo!
-			CALL clrbot
+			CALL clearBottom
 			CALL image2(city$(x) + " is now NEUTRAL !", 4)
 			TICK turbo!
 			RETURN
@@ -726,7 +726,7 @@ IF size = 0 THEN EXIT SUB
 CALL bubbleSortMenuText(size)
 menuText$(0) = "Relieve"
 choose = 31: hilite = 11
-CALL menu(6): CALL clrrite
+CALL menu(6): CALL clearRight
 
 IF choose < 1 THEN EXIT SUB
 index = array(choose)
@@ -749,17 +749,17 @@ CALL bubbleSortMenuText(size)
 have2:
 menuText$(0) = "New Leader"
 tlx = 67: tly = 2
-CALL menu(0): CALL clrrite
+CALL menu(0): CALL clearRight
 IF choose < 1 GOTO have2
 armymove(index) = -1
 armylead(index) = rating(array(choose))
 IF armylead(index) > 0 THEN armylead(index) = armylead(index) - 1
 IF armyexper(index) > 0 THEN armyexper(index) = armyexper(index) - 1
-COLOR 15: CALL clrbot: PRINT lname$(array(choose)); " has replaced "; t$; " in "; city$(armyloc(index)); : TICK 9
+COLOR 15: CALL clearBottom: PRINT lname$(array(choose)); " has replaced "; t$; " in "; city$(armyloc(index)); : TICK 9
 armyname$(index) = lname$(array(choose))
 lname$(array(choose)) = ""
 CALL icon(armyloc(index), 0, 8)
-CALL clrbot
+CALL clearBottom
 END SUB
 
 SUB report (who)
@@ -979,9 +979,9 @@ SUB resupply (index)
 		END IF
 		IF armysize(index) > 0 THEN x = cash(who) / armysize(index) * 10
 		y = x + supply(index): IF y > 5 THEN x = 5 - supply(index)
-		IF x < 1 THEN CALL clrbot: PRINT "Not enough funds in the Treasury to supply "; armyname$(index); : GOTO nocash
+		IF x < 1 THEN CALL clearBottom: PRINT "Not enough funds in the Treasury to supply "; armyname$(index); : GOTO nocash
 		supply(index) = supply(index) + x: cash(who) = cash(who) - .1 * x * armysize(index)
-		CALL clrbot: PRINT armyname$(index); " has received supplies "; : IF noise > 0 THEN SOUND 4500, .5
+		CALL clearBottom: PRINT armyname$(index); " has received supplies "; : IF noise > 0 THEN SOUND 4500, .5
 nocash:
 		CALL TICK(turbo!): IF cash(who) < 0 THEN cash(who) = 0
 END SUB
@@ -1003,7 +1003,7 @@ NEXT k
 	menuText$(0) = "Retreat"
 	CALL bubbleSortMenuText(size)
 	CALL menu(9)
-	CALL clrrite
+	CALL clearRight
 	IF choose < 0 OR choose > size THEN x = 0: EXIT SUB
 	x = array(choose)
 END SUB
@@ -1109,7 +1109,7 @@ END SUB
 
 SUB scribe (a$, flag)
 SELECT CASE flag
-		CASE 1: CALL clrbot: PRINT a$;
+		CASE 1: CALL clearBottom: PRINT a$;
 		CASE 2: CALL image2(a$, 4)
 END SELECT
 IF history > 0 THEN
@@ -1762,7 +1762,7 @@ SUB victor
 	y = 0: FOR j = 21 TO 40: IF armyloc(j) > 0 THEN y = y + armysize(j)
 	NEXT j
 
-	CALL clrbot: COLOR 14
+	CALL clearBottom: COLOR 14
 	IF vicflag(2) > 0 AND year >= vicflag(2) AND month < vicflag(1) THEN
 		a$ = "Time almost expired (" + month$(vicflag(1)) + "," + STR$(vicflag(2)) + ")"
 		CALL image2(a$, 4)
@@ -1786,7 +1786,7 @@ SUB victor
 		END IF
 	END IF
 
-	CALL clrbot: COLOR 14
+	CALL clearBottom: COLOR 14
 	IF vicflag(3) > 0 AND control(i) >= .9 * vicflag(3) THEN
 		a$ = force$(i) + " side almost controls" + STR$(vicflag(3)) + " cities"
 		CALL image2(a$, 4)

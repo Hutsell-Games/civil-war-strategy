@@ -114,7 +114,7 @@ sel1:
 		    CALL armystat(array(row))
 		CASE 5
 		    COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
 		CASE 6
 		    CALL icon(armyloc(array(row)), 0, 9)
