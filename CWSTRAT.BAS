@@ -1583,7 +1583,7 @@ ships:
 	IF choose < 1 GOTO ships
 	navyloc(who) = array(choose)
 	cash(who) = cash(who) - cost: navysize(who) = 1
-	x = cityx(array(choose)) + 25: y = cityy(array(choose)) + 25: CALL ships
+	x = cityx(array(choose)) + 25: y = cityy(array(choose)) + 25: CALL drawShips
 	CALL clearBottom: COLOR 11: PRINT force$(who); " is building NEW fleet in "; city$(array(choose));
 	PSET (400, 465), 0: CALL shipicon(who, a)
 	IF noise > 0 THEN SOUND 3000, 1
@@ -1593,7 +1593,7 @@ add2ship:
 	cash(who) = cash(who) - cost
 	CALL clearBottom: PRINT force$(who); " navy increased to "; navysize(who);
 	PSET (400, 465), 0: CALL shipicon(who, a)
-	CALL ships
+	CALL drawShips
 	IF noise > 0 THEN SOUND 3000, 1
 	CALL TICK(turbo!)
 '---------------------------------------------------------------------------
@@ -2337,7 +2337,7 @@ movenavy:
 '                       Give Move Orders to Each Army
 '==========================================================================
 movearmy:
-	CALL ships
+	CALL drawShips
 '---------------------------------------------------------------------------
 '                               Check to Combine
 '---------------------------------------------------------------------------
@@ -2691,7 +2691,7 @@ IF commerce > 0 THEN
 	END IF
 END IF
 
-CALL touchup: CALL ships: CALL iterate
+CALL touchup: CALL drawShips: CALL iterate
 
 CALL clearBottom
 LINE (390, 350)-(520, 400), 1, BF

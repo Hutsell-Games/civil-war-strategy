@@ -449,7 +449,7 @@ float1:
 	IF navysize(2) > 10 THEN navysize(2) = 10
 	x = navysize(2) - LEN(fleet$(2))
 	fleet$(2) = fleet$(2) + STRING$(x, "W")
-	navyloc(2) = empty: CALL ships
+	navyloc(2) = empty: CALL drawShips
 	GOTO dull1
 mercen:
 	IF RND > .1 OR control(2) < 30 GOTO money
@@ -635,22 +635,22 @@ IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB
 
 SUB maptext
-FOR k = 1 TO 40
-	FOR j = 1 TO LEN(city$(k))
-	a = cityx(k) + 6 * (j - 4) - 3
-	x = ASC(MID$(UCASE$(city$(k)), j, 1)) - 64
-	IF a > 527 GOTO nextc
-	PSET (a, cityy(k) + 12), 10
-	
-	IF matrix(k, 7) < 90 THEN
-		IF bw = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
-	ELSE
-		DRAW "C10"
-	END IF
-	IF x > 0 AND x < 27 THEN DRAW font$(x)
-	NEXT j
-nextc:
-NEXT k
+    FOR k = 1 TO 40
+        FOR j = 1 TO LEN(city$(k))
+        a = cityx(k) + 6 * (j - 4) - 3
+        x = ASC(MID$(UCASE$(city$(k)), j, 1)) - 64
+        IF a > 527 GOTO nextc
+        PSET (a, cityy(k) + 12), 10
+        
+        IF matrix(k, 7) < 90 THEN
+            IF bw = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
+        ELSE
+            DRAW "C10"
+        END IF
+        IF x > 0 AND x < 27 THEN DRAW font$(x)
+        NEXT j
+        nextc:
+    NEXT k
 END SUB
 
 SUB maxx
@@ -1168,7 +1168,7 @@ jack:
 	RETURN
 END SUB
 
-SUB ships
+SUB drawShips
 FOR s = 1 TO 2
 IF navysize(s) = 0 OR navyloc(s) = 0 THEN navyloc(s) = 0: GOTO sink
 IF navyloc(s) = 30 THEN x = 515: y = 268: GOTO float
@@ -1750,7 +1750,7 @@ IF player = 2 GOTO nosee
 FOR i = 1 TO 40: IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
 NEXT i
 nosee:
-CALL ships
+CALL drawShips
 CALL engine
 COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month$(month), 3)); ","; year
 END SUB
