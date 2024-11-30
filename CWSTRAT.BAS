@@ -22,7 +22,7 @@ DECLARE SUB generateRomanNumeralArmy (target%, a$)
 DECLARE SUB stax (who%)
 DECLARE SUB animate (index%, flag%)
 DECLARE SUB armies ()
-DECLARE SUB armystat (index%)
+DECLARE SUB showArmyStatistics (index%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB blanken ()
 DECLARE SUB bub2 (limit%)
@@ -32,7 +32,7 @@ DECLARE SUB cannon ()
 DECLARE SUB capitol ()
 DECLARE SUB capture (active%, c%, s%, flag%)
 DECLARE SUB chessie ()
-DECLARE SUB combine (who%)
+DECLARE SUB combineArmies (who%)
 DECLARE SUB commander (who%, empty%)
 DECLARE SUB cutoff (who%, target%, a%)
 DECLARE SUB endit ()
@@ -370,7 +370,7 @@ SELECT CASE choose
                 GOTO optionsMenu
 		    CASE 3 ' Combine Armies
                 x = side
-                CALL combine(x)
+                CALL combineArmies(x)
                 IF x < 0 THEN
                     CALL clearBottom
                     COLOR 11
@@ -802,7 +802,7 @@ SUB armies
     tly = 12
 
     ' Display the army's status
-    CALL armystat(index)
+    CALL showArmyStatistics(index)
     COLOR 11
     LOCATE 11, 68
     PRINT city$(target)
@@ -846,11 +846,10 @@ SUB armies
     CALL TICK(turbo!)
     CALL clearBottom
     CALL clearRight
-
 dudd:
 END SUB
 
-SUB armystat (index)
+SUB showArmyStatistics (index)
 LINE (530, 60)-(639, 150), 0, BF
 COLOR 15
 LOCATE 5, 68: PRINT armyname$(index)
@@ -1081,7 +1080,7 @@ SUB battle (attack, defend, win, lose)
     CALL icon(armyloc(defend), 0, 8)
 END SUB
 
-SUB combine (who)
+SUB combineArmies (who)
     ' Initialize variables
 	colour = 3: target = 0: hilite = 3
 	tlx = 67: tly = 2
@@ -2350,7 +2349,7 @@ movearmy:
 '---------------------------------------------------------------------------
 '                               Check to Combine
 '---------------------------------------------------------------------------
-a = who: CALL combine(a)
+a = who: CALL combineArmies(a)
 CALL railroad(who)
 '---------------------------------------------------------------------------
 '                               Top Priority
@@ -4732,7 +4731,7 @@ sel1:
 			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
 			END IF
 		CASE 4
-		    CALL armystat(array(row))
+		    CALL showArmyStatistics(array(row))
 		CASE 5
 		    COLOR 11
 			CALL clearBottom
