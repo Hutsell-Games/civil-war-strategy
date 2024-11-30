@@ -1,5 +1,5 @@
 DEFINT A-Z
-DECLARE SUB armyxy (x%, y%, z%)
+DECLARE SUB drawArmy (x%, y%, z%)
 DECLARE SUB center (y%, a$)
 DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB displayMessageBox (a$, s%)
@@ -10,7 +10,7 @@ DECLARE SUB roman (target%, a$)
 DECLARE SUB stax (who%)
 ' $INCLUDE: 'cws14.bi'
 
-SUB armyxy (x, y, z)
+SUB drawArmy (x, y, z)
 LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
 SELECT CASE z
 	CASE 1
@@ -804,7 +804,7 @@ ELSE
 	y = (victory(who) / x) * 100
 	PRINT "("; y; " %)";
 END IF
-CALL armyxy(215, 8, who)
+CALL drawArmy(215, 8, who)
 COLOR c: PRINT control(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(control(who) * 2.5 + .5): PRINT x; "%)";
 PRINT TAB(50); : COLOR 12: PRINT "Capital: "; city$(capcity(who))
 y = vptotal: IF capcity(1) > 0 THEN y = y + 100
@@ -920,8 +920,8 @@ VIEW
 LINE (200, 123)-(400, 284), 15, B
 COLOR 14
 LOCATE 9, 32: PRINT "BATTLE SUMMARY"
-CALL armyxy(320, 160, 1)
-CALL armyxy(370, 160, 2)
+CALL drawArmy(320, 160, 1)
+CALL drawArmy(370, 160, 2)
 LINE (200, 176)-(400, 230), 15, B
 LINE (200, 230)-(400, 284), 15, B
 LINE (290, 176)-(345, 284), 15, B
@@ -970,7 +970,7 @@ IF who < 3 THEN
 END IF
 END SUB
 
-SUB resupply (index)
+SUB resupplyArmy (index)
 		who = 1: IF index > 20 THEN who = 2
 		IF realism > 0 THEN
 			CALL cutoff(who, armyloc(index), a)

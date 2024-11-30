@@ -1,5 +1,5 @@
 DEFINT A-Z
-DECLARE SUB armyxy (x%, y%, z%)
+DECLARE SUB drawArmy (x%, y%, z%)
 DECLARE SUB sinkShip (who%)
 DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB integrity ()
@@ -330,7 +330,7 @@ alone:
 		IF choose < 0 GOTO menu0
 		index = array(choose)
 		IF supply(index) < 2 THEN
-		CALL resupply(index)
+		CALL resupplyArmy(index)
 		CALL placearmy(index)
 		END IF
 		choose = 25
@@ -1994,7 +1994,7 @@ SUB placearmy (which)
 who = 1: IF which > 20 THEN who = 2
 x = cityx(armyloc(which)) - 12
 y = cityy(armyloc(which)) - 11
-CALL armyxy(x, y, who)
+CALL drawArmy(x, y, who)
 IF supply(which) < 1 THEN
 	x = x - 3: y = y + 4
 	PSET (x, y), 13: DRAW "C11S8"
@@ -2256,7 +2256,7 @@ CALL starfin(star, fin, who)
 '==========================================================================
 '                       Check Supply
 '==========================================================================
-FOR i = star TO fin: IF armyloc(i) > 0 AND supply(i) < 1 THEN CALL resupply(i)
+FOR i = star TO fin: IF armyloc(i) > 0 AND supply(i) < 1 THEN CALL resupplyArmy(i)
 NEXT i
 '==========================================================================
 '                       Fortify Capital or Other City
