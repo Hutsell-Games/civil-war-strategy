@@ -1,77 +1,88 @@
 DEFINT A-Z
+' Navy
+DECLARE SUB navy (who%, x%)
 DECLARE SUB sinkShip (who%)
-DECLARE SUB integrity ()
-DECLARE SUB generateNormalRandom (xbar%, variance%, result%)
-DECLARE SUB relieveArmyCommander (who%)
-DECLARE SUB retreat (active%, x%)
 DECLARE SUB shiptype (who%, i%)
-DECLARE SUB increaseArmyExperience (who%)
-DECLARE SUB traincapacity (who%, limit%)
-DECLARE SUB topbar ()
-DECLARE SUB center (y%, a$)
-DECLARE SUB displayMessageBox (a$, s%)
-DECLARE SUB maptext ()
-DECLARE SUB maxWidth (wide%)
-DECLARE SUB generateRomanNumeralArmy (target%, a$)
-DECLARE SUB moveArmy ()
-DECLARE SUB showArmyStatistics (index%)
-DECLARE SUB battle (attack%, defend%, win%, lose%)
-DECLARE SUB displayPlayerTurnScreen ()
+
+' Army
 DECLARE SUB cancelArmyMove (side%)
-DECLARE SUB capture (active%, c%, s%, flag%)
-DECLARE SUB chessie ()
 DECLARE SUB combineArmies (who%)
 DECLARE SUB commander (who%, empty%)
+DECLARE SUB generateRomanNumeralArmy (target%, a$)
+DECLARE SUB increaseArmyExperience (who%)
+DECLARE SUB moveArmy ()
+DECLARE SUB moveArmyFrom (index%, target%)
+DECLARE SUB newarmy (who%, empty%, target%)
+DECLARE SUB occupyCity (x%)
+DECLARE SUB placearmy (which%)
+DECLARE SUB railroad (who%)
+DECLARE SUB recruit (who%)
+DECLARE SUB relieveArmyCommander (who%)
+DECLARE SUB retreat (active%, x%)
+DECLARE SUB showArmyStatistics (index%)
+DECLARE SUB fortifyCity (target%)
+
+' Utility
+DECLARE SUB integrity ()
+DECLARE SUB filer (switch%)
+DECLARE SUB generateNormalRandom (xbar%, variance%, result%)
+DECLARE SUB setStartFinishIndexes (startIndex%, endIndex%, who%)
+
+' Reports
+DECLARE SUB report (who%)
+
+DECLARE SUB traincapacity (who%, limit%)
+DECLARE SUB center (y%, a$)
+DECLARE SUB maptext ()
+DECLARE SUB battle (attack%, defend%, win%, lose%)
+DECLARE SUB capture (active%, c%, s%, flag%)
+DECLARE SUB choices (b1%, wide%)
 DECLARE SUB cutoff (who%, target%, a%)
 DECLARE SUB endit ()
 DECLARE SUB engine ()
 DECLARE SUB evaluate (index%, x%)
 DECLARE SUB events ()
-DECLARE SUB filer (switch%)
-DECLARE SUB animateFlashingCity (which%)
-DECLARE SUB fortifyCity (target%)
-DECLARE SUB icon (from%, dest%, kind%)
 DECLARE SUB advanceToNextTurn ()
 DECLARE SUB maxx ()
-DECLARE SUB menu (switch%)
-DECLARE SUB moveArmyFrom (index%, target%)
-DECLARE SUB navy (who%, x%)
-DECLARE SUB newarmy (who%, empty%, target%)
 DECLARE SUB newcity (index%)
-DECLARE SUB occupyCity (x%)
-DECLARE SUB placearmy (which%)
-DECLARE SUB railroad (who%)
-DECLARE SUB recruit (who%)
-DECLARE SUB report (who%)
 DECLARE SUB rebelWin ()
 DECLARE SUB scribe (a$, flag%)
 DECLARE SUB shen ()
 DECLARE SUB smarts ()
 DECLARE SUB showcity ()
 DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB setStartFinishIndexes (startIndex%, endIndex%, who%)
 DECLARE SUB strong (index%)
 DECLARE SUB surrender (who%)
 DECLARE SUB TICK (sec!)
-DECLARE SUB touchup ()
 DECLARE SUB tupdate ()
 DECLARE SUB addUnionAdvantage ()
 DECLARE SUB usa ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
+
+' Menu
 DECLARE SUB maxWidth (wide%)
-DEFINT A-Z
-DECLARE SUB choices (b1%, wide%)
-DECLARE SUB topbar ()
+DECLARE SUB menu (switch%)
+
+
+' Draw and Animate
 DECLARE SUB animateArmyMove (index%, flag%)
+DECLARE SUB animateFlashingCity (which%)
 DECLARE SUB drawArmy (x%, y%, z%)
 DECLARE SUB drawCannon ()
 DECLARE SUB drawCapitol ()
+DECLARE SUB drawChessie ()
 DECLARE SUB drawFlags (who%, w%, a%)
+DECLARE SUB drawIcons (from%, dest%, kind%)
 DECLARE SUB drawIronclad ()
 DECLARE SUB drawSchooner ()
 DECLARE SUB drawShipIcon (who%, flag%)
 DECLARE SUB drawTinyTrain (who%, flag%)
+DECLARE SUB displayMessageBox (a$, s%)
+DECLARE SUB displayPlayerTurnScreen ()
+DECLARE SUB touchup ()
+DECLARE SUB topbar ()
+
 DIM SHARED graft(1 TO 1564)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
 
@@ -329,7 +340,7 @@ SELECT CASE choose
         CALL report((side)): chosit = 27
         CALL setStartFinishIndexes(startIndex, endIndex, side)
         FOR i = startIndex TO endIndex
-        IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
+        IF armymove(i) > 0 THEN CALL drawIcons(armyloc(i), armymove(i), 1)
         NEXT i
 	CASE 7 ' Options Menu
         optionsMenu:
@@ -794,7 +805,7 @@ SUB moveArmy
         SOUND 2200, .5
         SOUND 2900, .7
     END IF
-    CALL icon(target, array(choose), 1)
+    CALL drawIcons(target, array(choose), 1)
     armymove(index) = array(choose)
     CALL TICK(turbo!)
     CALL clearBottom
@@ -828,7 +839,7 @@ SUB battle (attack, defend, win, lose)
     IF armysize(attack) < 1 THEN armysize(attack) = 1
 
     ' Display attacker information
-    CALL icon(armyloc(defend), 0, 9)
+    CALL drawIcons(armyloc(defend), 0, 9)
     LOCATE 1, 1: PRINT SPACE$(80)
     CALL clearRight: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
     c = 9: IF attack > 20 THEN c = 7
@@ -1029,7 +1040,7 @@ SUB battle (attack, defend, win, lose)
     s = 1: IF win > 20 THEN s = 2
     batwon(s) = batwon(s) + 1
     victory(s) = victory(s) + 1
-    CALL icon(armyloc(defend), 0, 8)
+    CALL drawIcons(armyloc(defend), 0, 8)
 END SUB
 
 SUB combineArmies (who)
@@ -1128,7 +1139,7 @@ SUB combineArmies (who)
     	' Update city and army status
 		CALL showcity
 		CALL placearmy(best)
-		CALL icon(target, 0, 6)
+		CALL drawIcons(target, 0, 6)
 		occupied(target) = best
 		CALL increaseArmyExperience(who)
 END SUB
@@ -1280,86 +1291,12 @@ SUB fortifyCity (target)
 		fort(target) = fort(target) + 1
 		cash(side) = cash(side) - cost
 		CALL clearBottom: PRINT city$(target); " fortifications increased to "; fort(target);
-		CALL icon(target, 0, 6)
+		CALL drawIcons(target, 0, 6)
 		CALL showcity
-		IF armymove(x) > 0 THEN CALL icon(armyloc(x), armymove(x), 5)
+		IF armymove(x) > 0 THEN CALL drawIcons(armyloc(x), armymove(x), 5)
 		armymove(x) = -1
 		CALL placearmy(x)
 		CALL increaseArmyExperience(who)
-END SUB
-
-SUB icon (from, dest, kind)
-	IF from < 1 OR from > 40 THEN EXIT SUB
-	IF dest < 0 THEN EXIT SUB
-	IF from = 999 THEN EXIT SUB
-	x = cityx(from) - 12: y = cityy(from) - 11
-	x1 = cityx(dest): y1 = cityy(dest)
-	SELECT CASE kind
-		CASE 1
-		LINE (x, y)-(x1, y1), 15, , &HF0F0
-		
-		CASE 2
-		FOR i = 6 TO 8
-		LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
-		NEXT i
-		CALL TICK(.1)
-		
-		CASE 3
-		x = cityx(from): y = cityy(from)
-		CALL snapshot(x, y, 0)
-		FOR j = 1 TO 3
-		FOR i = 4 TO 10 STEP 1
-		CIRCLE (x, y), i, 4
-		PAINT (x, y), 14, 4
-		IF noise > 0 THEN SOUND 37 + 50 * RND, .03
-		NEXT i
-		CALL TICK(.1)
-		CALL snapshot(x, y, 1)
-		NEXT j
-		
-		CASE 4
-		IF occupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
-		IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-		IF from = 27 OR from = 28 THEN CALL touchup
-
-		CASE 5
-		IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-
-		CASE 6
-		x = cityx(from): y = cityy(from)
-		CALL snapshot(x, y, 0)
-		LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
-		LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
-		IF noise > 0 THEN SOUND 3999, .3
-		CALL TICK(turbo! - .5)
-		CALL snapshot(x, y, 1)
-		CASE 7          ' draw white box
-		x = cityx(from) - 12: y = cityy(from) - 11
-		GET (x - 8, y - 8)-(x + 8, y + 8), image
-		LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
-		LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
-			CASE 8     ' replace old image
-		x = cityx(from) - 12: y = cityy(from) - 11
-		IF x > 0 THEN PUT (x - 8, y - 8), image, PSET
-		
-		CASE 9          ' draw arrow pointer
-		x = cityx(from) - 12: y = cityy(from) - 11
-		GET (x - 8, y - 8)-(x + 10, y + 7), image
-		x = x + 7: y = y + 5
-		LINE (x + 2, y)-(x + 2, y - 8), 12
-		LINE -(x, y - 6), 12
-		LINE -(x - 5, y - 11), 12
-		LINE -(x - 10, y - 6), 12
-		LINE -(x - 6, y - 2), 12
-		LINE -(x - 10, y), 12
-		LINE -(x + 1, y), 12
-		PAINT (x - 2, y - 1), 15, 12
-
-		CASE 11
-		LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
-
-		CASE ELSE
-	END SELECT
 END SUB
 
 SUB advanceToNextTurn
@@ -1543,7 +1480,7 @@ SUB navy (who, chx)
 		IF who = side THEN navyMenuFlag = 1
 		IF cityp(navyloc(who)) <> 3 - who GOTO ahoy
 		CALL clearBottom: COLOR 12: PRINT force$(who); " fleet bombards "; city$(navyloc(who));
-		CALL icon(navyloc(who), 0, 3)
+		CALL drawIcons(navyloc(who), 0, 3)
 			
 		target = navyloc(who): index = occupied(target): IF index = 0 GOTO deserted
 		pct! = .005 * navysize(who) + .02 * RND: killd = armysize(index) * pct!: IF killd < 1 THEN killd = 1
@@ -2096,7 +2033,7 @@ SUB recruit (who)
 	cash(who) = cash(who) - 100
 	from = armyloc(i): x = cityx(from) - 12: y = cityy(from) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), anima
-	CALL icon(armyloc(i), 0, 2)
+	CALL drawIcons(armyloc(i), 0, 2)
 	IF noise > 0 THEN SOUND 2222, 1
 	COLOR 11: CALL clearBottom: PRINT "Army "; i; armyname$(i); " in "; city$(armyloc(i)); " strength increased to "; : CALL strong(i)
 	IF a$ <> "" THEN PRINT a$;
@@ -2162,7 +2099,7 @@ SUB showcity
 		PAINT (cityx(i), cityy(i)), c, c
 	END IF
 	IF graf = 0 GOTO nocon
-		FOR j = 1 TO 6: IF matrix(i, j) > 0 THEN CALL icon(i, matrix(i, j), 11)
+		FOR j = 1 TO 6: IF matrix(i, j) > 0 THEN CALL drawIcons(i, matrix(i, j), 11)
 		NEXT j
 	nocon:
 	NEXT i
@@ -2207,7 +2144,7 @@ SUB smarts
 		x = occupied(target): armymove(x) = -1
 		cash(who) = cash(who) - cost
 		CALL clearBottom: PRINT city$(target); " fortifications increased to "; fort(target);
-		CALL icon(target, 0, 6)
+		CALL drawIcons(target, 0, 6)
 		CALL showcity
 		IF who = 1 AND navysize(1) < 1 AND RND > .5 AND cash < 222 GOTO signup
 		IF 3 * RND > 1 + aggress! AND cash(who) >= cost GOTO city2
@@ -2287,8 +2224,8 @@ SUB smarts
 			COLOR c: CALL clearBottom
 			PRINT armyname$(i); " plans to move from "; city$(armyloc(i)); " to "; city$(armymove(i));
 		END IF
-			CALL icon(armyloc(i), armymove(i), 1)
-			CALL icon(armyloc(i), armymove(i), 9)
+			CALL drawIcons(armyloc(i), armymove(i), 1)
+			CALL drawIcons(armyloc(i), armymove(i), 9)
 		CALL TICK(turbo! - 1)
 		PUT (cityx(armyloc(i)) - 20, cityy(armyloc(i)) - 19), image, PSET
 	deadman:
@@ -2336,7 +2273,7 @@ SUB tupdate
 		CALL smarts
 	ELSE
 		FOR i = 1 TO 40
-		IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
+		IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL drawIcons(armyloc(i), armymove(i), 1)
 		NEXT i
 	END IF
 	COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
@@ -2383,7 +2320,7 @@ SUB tupdate
 	supply(active) = supply(active) - 1: IF supply(active) < 0 THEN supply(active) = 0: CALL TICK(turbo!): CALL clearBottom: PRINT armyname$(active); " is out of supplies !";
 
 	CALL placearmy(active)
-	CALL icon(armyloc(active), armymove(active), 5)
+	CALL drawIcons(armyloc(active), armymove(active), 5)
 
 	CALL animateArmyMove(active, 0)
 
@@ -2393,12 +2330,12 @@ SUB tupdate
 
 	friend: ' Join Forces
 	COLOR 11: CALL clearBottom: PRINT armyname$(active); " and "; armyname$(occupied(target)); " meet in "; city$(target); : CALL TICK(turbo!)
-	CALL icon(armymove(active), 0, 6)
+	CALL drawIcons(armymove(active), 0, 6)
 	CALL clearBottom
 	GOTO easy
 
 	enemy: ' Attack
-	CALL icon(target, 0, 3)
+	CALL drawIcons(target, 0, 3)
 	defend = occupied(target)
 
 	COLOR 11: CALL clearBottom: PRINT armyname$(active); " attacks "; armyname$(defend); " in "; city$(armyloc(defend)); : CALL TICK(turbo! - 1)
@@ -2429,13 +2366,13 @@ SUB tupdate
 	occupied(armyloc(active)) = active
 	armymove(active) = -2
 			
-	IF 11 * RND > armylead(defend) THEN CALL icon(armyloc(defend), armymove(defend), 4): IF armymove(defend) > 0 THEN armymove(defend) = -2
+	IF 11 * RND > armylead(defend) THEN CALL drawIcons(armyloc(defend), armymove(defend), 4): IF armymove(defend) > 0 THEN armymove(defend) = -2
 
 	CALL TICK(turbo!): GOTO digin
 
 	kickbutt: ' Defender Retreats
-		CALL icon(armyloc(active), target, 4)
-		IF armymove(defend) > 0 THEN CALL icon(target, armymove(defend), 4)
+		CALL drawIcons(armyloc(active), target, 4)
+		IF armymove(defend) > 0 THEN CALL drawIcons(target, armymove(defend), 4)
 
 		CALL retreat(defend, flee): IF flee > 0 THEN move2 = flee: GOTO outta
 
@@ -2465,7 +2402,7 @@ SUB tupdate
 
 		CALL placearmy(defend)                  ' in new city
 		
-		CALL icon(target, 0, 6)
+		CALL drawIcons(target, 0, 6)
 		armymove(defend) = -2
 		GOTO holdon
 
@@ -2477,7 +2414,7 @@ SUB tupdate
 		IF graf > 2 THEN CALL surrender(index): COLOR 14: LOCATE 3, 68: PRINT armyname$(index): LOCATE 4, 68: PRINT "surrenders !"
 		x = 1: IF index > 20 THEN x = 2
 		IF noise > 1 AND x <> side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
-		IF armymove(index) > 0 THEN CALL icon(armyloc(index), armymove(index), 4)
+		IF armymove(index) > 0 THEN CALL drawIcons(armyloc(index), armymove(index), 4)
 		victory(3 - s) = victory(3 - s) + 25
 		armyloc(index) = 0: lname$(index) = "": armyname$(index) = ""
 		armysize(index) = 0: armylead(index) = 0
@@ -2493,7 +2430,7 @@ SUB tupdate
 		GOTO enemy
 
 	easy: ' Move into new city
-	CALL icon(armyloc(active), target, 4)
+	CALL drawIcons(armyloc(active), target, 4)
 	armyloc(active) = target: armymove(active) = -2
 	CALL occupyCity(armyloc(active))
 	CALL placearmy(active)
@@ -2636,7 +2573,7 @@ SUB cancelArmyMove (side)
 		NEXT i
 
 		CALL clearBottom: COLOR 11: PRINT armyname$(index); " has cancelled move to "; city$(armymove(index)); : CALL TICK(turbo + 1)
-		CALL icon(armyloc(index), armymove(index), 4)
+		CALL drawIcons(armyloc(index), armymove(index), 4)
 		armymove(index) = 0: IF noise > 0 THEN SOUND 2999, .5
 		CALL increaseArmyExperience(side)
 	 CASE ELSE
@@ -2670,29 +2607,6 @@ SUB center (y, a$)
 	x = LEN(a$)
 	x = 26 - x \ 2
 	LOCATE y, 7 + x: PRINT a$
-END SUB
-
-SUB chessie
-    COLOR 10
-    LINE (500, 185)-(505, 180): LINE -(505, 175)
-    LINE -(500, 170): LINE -(490, 165)
-    LINE -(495, 160): LINE -(490, 155)
-    LINE -(485, 150): LINE -(495, 155)
-    LINE -(495, 145): LINE -(490, 140)
-    LINE -(485, 130): LINE -(470, 120)
-    LINE -(470, 110): LINE -(475, 120)
-    LINE -(485, 120): LINE -(485, 115)
-    LINE -(480, 100): LINE -(485, 90)
-    LINE -(495, 80): LINE -(500, 80)
-    LINE -(500, 85): LINE -(495, 90)
-    LINE -(495, 100): LINE -(495, 115)
-    LINE -(500, 120): LINE -(500, 130)
-    LINE -(515, 135): LINE -(515, 140)
-    LINE -(510, 160): LINE -(520, 145)
-    LINE -(525, 120): LINE -(525, 115)
-    LINE -(515, 85): LINE -(527, 95)
-    PAINT (500, 400), 1, 10
-    PAINT (510, 110), 2
 END SUB
 
 SUB clearBottom
@@ -3148,7 +3062,7 @@ SUB relieveArmyCommander (who)
     
     IF choose < 1 THEN EXIT SUB
     index = array(choose)
-    CALL icon(armyloc(index), 0, 9)
+    CALL drawIcons(armyloc(index), 0, 9)
     
     t$ = armyname$(index)
     lname$(index) = t$
@@ -3176,7 +3090,7 @@ SUB relieveArmyCommander (who)
     COLOR 15: CALL clearBottom: PRINT lname$(array(choose)); " has replaced "; t$; " in "; city$(armyloc(index)); : TICK 9
     armyname$(index) = lname$(array(choose))
     lname$(array(choose)) = ""
-    CALL icon(armyloc(index), 0, 8)
+    CALL drawIcons(armyloc(index), 0, 8)
     CALL clearBottom
 END SUB
 
@@ -3986,7 +3900,7 @@ SUB usa
     LINE -(510, 206)
     
     '=========================== Chesapeake ====================================
-    CALL chessie
+    CALL drawChessie
     '=============== Ohio, Pennslyvania, Maryland, Virginia =====================
     LINE (291, 111)-(301, 101), 1
     LINE -(316, 96), 1
@@ -4147,7 +4061,7 @@ SUB usa
     NEXT k
     
     IF player = 2 GOTO nosee
-    FOR i = 1 TO 40: IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
+    FOR i = 1 TO 40: IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL drawIcons(armyloc(i), armymove(i), 1)
     NEXT i
     nosee:
     CALL drawShips
@@ -4402,9 +4316,9 @@ SUB menu (switch%)
 	sel1:
 	SELECT CASE switch
 		CASE 1
-		    CALL icon(array(row), 0, 7)
+		    CALL drawIcons(array(row), 0, 7)
 		CASE 2
-		    CALL icon(array(row), 0, 9)
+		    CALL drawIcons(array(row), 0, 9)
 			target = occupied(array(row))
 			IF target > 0 THEN
 			flag = 1
@@ -4427,7 +4341,7 @@ SUB menu (switch%)
 			CALL clearBottom
 			PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
 		CASE 6
-		    CALL icon(armyloc(array(row)), 0, 9)
+		    CALL drawIcons(armyloc(array(row)), 0, 9)
 		CASE 8
 			IF graf > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
@@ -4446,7 +4360,7 @@ SUB menu (switch%)
 				END IF
 			END IF
 		CASE 9
-		    CALL icon(array(row), 0, 9)
+		    CALL drawIcons(array(row), 0, 9)
 	END SELECT
 	IF flag = 0 THEN
 		COLOR hilite
@@ -4476,9 +4390,9 @@ SUB menu (switch%)
 
 	SELECT CASE switch
 		CASE 1, 2, 9
-			IF menuText$(row1) <> "EXIT" THEN CALL icon(array(row1), 0, 8)
+			IF menuText$(row1) <> "EXIT" THEN CALL drawIcons(array(row1), 0, 8)
 		CASE 6
-			IF menuText$(row1) <> "EXIT" THEN CALL icon(armyloc(array(row1)), 0, 8)
+			IF menuText$(row1) <> "EXIT" THEN CALL drawIcons(armyloc(array(row1)), 0, 8)
 	END SELECT
 
 	choose = row
@@ -4562,9 +4476,9 @@ SUB menu (switch%)
 	tlx = 0: tly = 0
 	SELECT CASE switch
 	CASE 1, 2, 9
-		CALL icon(array(row), 0, 8)
+		CALL drawIcons(array(row), 0, 8)
 	CASE 6
-		CALL icon(armyloc(array(row)), 0, 8)
+		CALL drawIcons(armyloc(array(row)), 0, 8)
 	END SELECT
 	VIEW
 END SUB
@@ -5052,4 +4966,101 @@ SUB animateArmyMove (index, flag)
 
     ' Restore the army's original location
 	armyloc(index) = from
+END SUB
+
+SUB drawChessie
+    COLOR 10
+    LINE (500, 185)-(505, 180): LINE -(505, 175)
+    LINE -(500, 170): LINE -(490, 165)
+    LINE -(495, 160): LINE -(490, 155)
+    LINE -(485, 150): LINE -(495, 155)
+    LINE -(495, 145): LINE -(490, 140)
+    LINE -(485, 130): LINE -(470, 120)
+    LINE -(470, 110): LINE -(475, 120)
+    LINE -(485, 120): LINE -(485, 115)
+    LINE -(480, 100): LINE -(485, 90)
+    LINE -(495, 80): LINE -(500, 80)
+    LINE -(500, 85): LINE -(495, 90)
+    LINE -(495, 100): LINE -(495, 115)
+    LINE -(500, 120): LINE -(500, 130)
+    LINE -(515, 135): LINE -(515, 140)
+    LINE -(510, 160): LINE -(520, 145)
+    LINE -(525, 120): LINE -(525, 115)
+    LINE -(515, 85): LINE -(527, 95)
+    PAINT (500, 400), 1, 10
+    PAINT (510, 110), 2
+END SUB
+
+SUB drawIcons (from, dest, kind)
+	IF from < 1 OR from > 40 THEN EXIT SUB
+	IF dest < 0 THEN EXIT SUB
+	IF from = 999 THEN EXIT SUB
+	x = cityx(from) - 12: y = cityy(from) - 11
+	x1 = cityx(dest): y1 = cityy(dest)
+	SELECT CASE kind
+		CASE 1
+		LINE (x, y)-(x1, y1), 15, , &HF0F0
+		
+		CASE 2
+		FOR i = 6 TO 8
+		LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
+		NEXT i
+		CALL TICK(.1)
+		
+		CASE 3
+		x = cityx(from): y = cityy(from)
+		CALL snapshot(x, y, 0)
+		FOR j = 1 TO 3
+		FOR i = 4 TO 10 STEP 1
+		CIRCLE (x, y), i, 4
+		PAINT (x, y), 14, 4
+		IF noise > 0 THEN SOUND 37 + 50 * RND, .03
+		NEXT i
+		CALL TICK(.1)
+		CALL snapshot(x, y, 1)
+		NEXT j
+		
+		CASE 4
+		IF occupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
+		IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
+		IF from = 27 OR from = 28 THEN CALL touchup
+
+		CASE 5
+		IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
+
+		CASE 6
+		x = cityx(from): y = cityy(from)
+		CALL snapshot(x, y, 0)
+		LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
+		LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
+		IF noise > 0 THEN SOUND 3999, .3
+		CALL TICK(turbo! - .5)
+		CALL snapshot(x, y, 1)
+		CASE 7          ' draw white box
+		x = cityx(from) - 12: y = cityy(from) - 11
+		GET (x - 8, y - 8)-(x + 8, y + 8), image
+		LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
+		LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
+			CASE 8     ' replace old image
+		x = cityx(from) - 12: y = cityy(from) - 11
+		IF x > 0 THEN PUT (x - 8, y - 8), image, PSET
+		
+		CASE 9          ' draw arrow pointer
+		x = cityx(from) - 12: y = cityy(from) - 11
+		GET (x - 8, y - 8)-(x + 10, y + 7), image
+		x = x + 7: y = y + 5
+		LINE (x + 2, y)-(x + 2, y - 8), 12
+		LINE -(x, y - 6), 12
+		LINE -(x - 5, y - 11), 12
+		LINE -(x - 10, y - 6), 12
+		LINE -(x - 6, y - 2), 12
+		LINE -(x - 10, y), 12
+		LINE -(x + 1, y), 12
+		PAINT (x - 2, y - 1), 15, 12
+
+		CASE 11
+		LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
+
+		CASE ELSE
+	END SELECT
 END SUB
