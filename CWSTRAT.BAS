@@ -244,7 +244,8 @@ IF side > 2 THEN side = 1
 a$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
 CALL scribe(a$, 0)
 CALL tupdate
-control(1) = 0: control(2) = 0
+control(1) = 0
+control(2) = 0
 
 FOR sideIndex = 1 TO 2
 income(sideIndex) = 0
@@ -258,13 +259,15 @@ IF cityp(cityIndex) > 0 THEN x = cityp(cityIndex): control(x) = control(x) + 1: 
 armymove(cityIndex) = 0
 NEXT cityIndex
 
-FOR sideIndex = 1 TO 2: navymove(sideIndex) = 0: IF capcity(sideIndex) > 0 THEN income(sideIndex) = income(sideIndex) + 100
-cash(sideIndex) = cash(sideIndex) + income(sideIndex)
-IF commerce > 0 AND sideIndex <> commerce THEN cash(sideIndex) = cash(sideIndex) - raider
+FOR sideIndex = 1 TO 2
+	navymove(sideIndex) = 0
+	IF capcity(sideIndex) > 0 THEN income(sideIndex) = income(sideIndex) + 100
+	cash(sideIndex) = cash(sideIndex) + income(sideIndex)
+	IF commerce > 0 AND sideIndex <> commerce THEN cash(sideIndex) = cash(sideIndex) - raider
 NEXT sideIndex
 vptotal = income(1) + income(2)
 
-chosit = 22
+chosenOption = 22
 IF player = 2 THEN GOSUB blanken: CALL usa
 CALL victor
 ON ERROR GOTO 0
@@ -285,10 +288,10 @@ hilite = 11
 colour = 4
 tlx = 67: tly = 13
 mtx$(0) = "Main"
-mtx$(1) = "Troops": IF rflag < 0 OR cash(side) < 100 THEN mtx$(1) = "-": chosit = 23
-mtx$(2) = "Moves": IF mflag > 0 THEN mtx$(2) = "-": IF chosit = 23 THEN chosit = 24
-mtx$(3) = "Ships": IF nflag > 0 THEN mtx$(3) = "-": IF chosit = 24 THEN chosit = 25
-mtx$(4) = "Railroad": IF rr(side) > 0 THEN mtx$(4) = "-": IF chosit = 25 THEN chosit = 26
+mtx$(1) = "Troops": IF rflag < 0 OR cash(side) < 100 THEN mtx$(1) = "-": chosenOption = 23
+mtx$(2) = "Moves": IF mflag > 0 THEN mtx$(2) = "-": IF chosenOption = 23 THEN chosenOption = 24
+mtx$(3) = "Ships": IF nflag > 0 THEN mtx$(3) = "-": IF chosenOption = 24 THEN chosenOption = 25
+mtx$(4) = "Railroad": IF rr(side) > 0 THEN mtx$(4) = "-": IF chosenOption = 25 THEN chosenOption = 26
 mtx$(5) = "END TURN"
 mtx$(6) = "Inform"
 mtx$(7) = "COMMANDS"
@@ -296,7 +299,7 @@ mtx$(8) = "UTILITY"
 mtx$(9) = "Files"
 
 size = 9
-choose = chosit
+choose = chosenOption
 CALL menu(0)
 CALL clrrite
 
@@ -304,15 +307,15 @@ SELECT CASE choose ' Main Menu
 	CASE 1 ' Recruit
 		IF cash(side) < 100 OR rflag < 0 THEN rflag = -1: GOTO menu0
 		CALL recruit((side))
-		chosit = 23
+		chosenOption = 23
 		GOTO menu0
 	CASE 2 ' Armies
 		CALL armies
-		chosit = 23
+		chosenOption = 23
 		GOTO menu0
 	CASE 3 ' Navy
 		IF nflag = 0 THEN CALL navy((side), 0)
-		chosit = 25
+		chosenOption = 25
 	CASE 4 ' Railroad Move
 		IF rr(side) = 0 THEN
 			COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
@@ -334,13 +337,13 @@ SELECT CASE choose ' Main Menu
 		mtx$(0) = "End Turn"
 		mtx$(1) = "Yes"
 		mtx$(2) = "NOT YET"
-		size = 2: CALL menu(0): CALL clrrite: IF choose <> 1 THEN chosit = 24: GOTO menu0
+		size = 2: CALL menu(0): CALL clrrite: IF choose <> 1 THEN chosenOption = 24: GOTO menu0
 		endrnd:
 		rflag = 0: mflag = 0: nflag = 0
 		IF player = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
 		GOTO newmonth
 	CASE 6 ' Reports Menu
-		CALL report((side)): chosit = 27
+		CALL report((side)): chosenOption = 27
 		CALL starfin(star, fin, side)
 		FOR i = star TO fin
 		IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
@@ -349,7 +352,7 @@ SELECT CASE choose ' Main Menu
 		optmen:
 		tlx = 67: tly = 13
 		COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
-		hilite = 15: colour = 3: chosit = 24
+		hilite = 15: colour = 3: chosenOption = 24
 		mtx$(0) = "Commands"
 		mtx$(1) = "Cancel"
 		mtx$(2) = "Fortify": IF cash(side) < 200 THEN mtx$(2) = "-"
@@ -362,7 +365,7 @@ SELECT CASE choose ' Main Menu
 		mtx$(9) = "MAIN MENU"
 		size = 9
 		CALL menu(0): CALL clrrite
-		chosit = 28
+		chosenOption = 28
      	SELECT CASE choose
 			CASE 1 ' Cancel Move
 				CALL cancel(side): mflag = 0
@@ -458,13 +461,13 @@ SELECT CASE choose ' Main Menu
 				choose = 29
 				GOTO optmen
 			CASE ELSE
-				chosit = 28
+				chosenOption = 28
 				GOTO menu0
 			END SELECT
 			choose = 21 + choose: GOTO optmen
 	CASE 8 ' Utility Menu
 		utile:
-		chosit = 29
+		chosenOption = 29
 		mtx$(0) = "Utility"
 		mtx$(1) = "Side": IF player = 2 THEN mtx$(2) = ""
 		mtx$(2) = "1 Player": IF player = 2 THEN mtx$(2) = "2 Player"
@@ -685,7 +688,7 @@ SELECT CASE choose ' Main Menu
 	CASE 9 ' Files
 		IF _FILEEXISTS("*.sav") = 0 THEN filel = 0
 		filex:
-		choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
+		choose = 23: chosenOption = 30: IF year = 1861 THEN choose = 22
 		mtx$(0) = "Options"
 		mtx$(1) = "Load": IF filel = 0 THEN mtx$(1) = "-": choose = 23
 		mtx$(2) = "Save"
@@ -712,7 +715,7 @@ SELECT CASE choose ' Main Menu
 	CASE 99
 		GOTO endrnd
 	CASE ELSE
-		chosit = 22
+		chosenOption = 22
 		GOTO menu0
 END SELECT
 GOTO menu0
@@ -3376,7 +3379,7 @@ SUB endit
 what4:
 	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "� " ELSE mtx$(i - 1) = "  "
 	NEXT i
-	choose = chosit
+	choose = chosenOption
 	mtx$(0) = "Victory Conditions"
 	mtx$(1) = mtx$(1) + mtx$(8)
 	mtx$(2) = mtx$(2) + a$
@@ -3386,7 +3389,7 @@ what4:
 	mtx$(6) = "DONE"
 	wtype = 2: colour = 3: size = 6: hilite = 14
 	CALL menu(0)
-	chosit = 21 + choose
+	chosenOption = 21 + choose
 SELECT CASE choose
 	CASE 1
 	vicflag(2) = -vicflag(2)
