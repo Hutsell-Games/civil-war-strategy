@@ -2,7 +2,7 @@ DEFINT A-Z
 DECLARE SUB armyxy (x%, y%, z%)
 DECLARE SUB center (y%, a$)
 DECLARE SUB flags (who%, w%, a%)
-DECLARE SUB image2 (a$, s%)
+DECLARE SUB displayMessageBox (a$, s%)
 DECLARE SUB maptext ()
 DECLARE SUB mountain (xx%, yy%)
 DECLARE SUB maxWidth (wide%)
@@ -198,7 +198,7 @@ SUB capture (active, c, s, flag)
 		victory(3 - s) = victory(3 - s) - 100
 		a$ = force$(3 - s) + " CAPITAL captured !"
 		CALL scribe(a$, 1)
-		CALL image2(city$(capcity(3 - s)) + " has fallen!", 4)
+		CALL displayMessageBox(city$(capcity(3 - s)) + " has fallen!", 4)
 		capcity(3 - s) = 0
 		CALL flashcity(c)
 	END IF
@@ -491,7 +491,7 @@ riot:
 			CALL showcity
 			TICK turbo!
 			CALL clearBottom
-			CALL image2(city$(x) + " is now NEUTRAL !", 4)
+			CALL displayMessageBox(city$(x) + " is now NEUTRAL !", 4)
 			TICK turbo!
 			RETURN
 		END IF
@@ -592,7 +592,7 @@ SELECT CASE who
 END SELECT
 END SUB
 
-SUB image2 (a$, s)
+SUB displayMessageBox (a$, s)
 DIM g2(1 TO 8000)
 menuText$(1) = a$
 tlx = 32 - LEN(a$) \ 2
@@ -1109,7 +1109,7 @@ END SUB
 SUB scribe (a$, flag)
 SELECT CASE flag
 		CASE 1: CALL clearBottom: PRINT a$;
-		CASE 2: CALL image2(a$, 4)
+		CASE 2: CALL displayMessageBox(a$, 4)
 END SELECT
 IF history > 0 THEN
 	OPEN "A", 2, "cws.his"
@@ -1764,7 +1764,7 @@ SUB victor
 	CALL clearBottom: COLOR 14
 	IF vicflag(2) > 0 AND year >= vicflag(2) AND month < vicflag(1) THEN
 		a$ = "Time almost expired (" + month$(vicflag(1)) + "," + STR$(vicflag(2)) + ")"
-		CALL image2(a$, 4)
+		CALL displayMessageBox(a$, 4)
 	END IF
     FOR i = 1 TO 2
 	IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: victory(i) = victory(i) + 300: GOTO finis
@@ -1788,18 +1788,18 @@ SUB victor
 	CALL clearBottom: COLOR 14
 	IF vicflag(3) > 0 AND control(i) >= .9 * vicflag(3) THEN
 		a$ = force$(i) + " side almost controls" + STR$(vicflag(3)) + " cities"
-		CALL image2(a$, 4)
+		CALL displayMessageBox(a$, 4)
 	END IF
 
 	IF vicflag(4) > 0 AND income(i) / (income(1) + income(2)) >= .009 * vicflag(4) THEN
 		a$ = force$(i) + " side close to" + STR$(vicflag(4)) + " % of total income"
-		CALL image2(a$, 4)
+		CALL displayMessageBox(a$, 4)
 	END IF
 
 	IF vicflag(6) > 0 AND x > 0 AND y > 0 THEN
 		IF (i = 1 AND x / y > .9 * vicflag(6)) OR (i = 2 AND y / x > .9 * vicflag(6)) THEN
 		a$ = force$(i) + "side close to" + STR$(vicflag(6)) + ":1 strength ratio"
-		CALL image2(a$, 4)
+		CALL displayMessageBox(a$, 4)
 		END IF
 	END IF
 	GOTO stale
