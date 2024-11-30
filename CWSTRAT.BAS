@@ -24,6 +24,7 @@ DECLARE SUB animate (index%, flag%)
 DECLARE SUB armies ()
 DECLARE SUB armystat (index%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
+DECLARE SUB blanken ()
 DECLARE SUB bub2 (limit%)
 DECLARE SUB bubble (size%)
 DECLARE SUB cancel (side%)
@@ -70,6 +71,7 @@ DECLARE SUB surrender (who%)
 DECLARE SUB TICK (sec!)
 DECLARE SUB touchup ()
 DECLARE SUB tupdate ()
+DECLARE SUB unionplus ()
 DECLARE SUB usa ()
 DECLARE SUB usamap ()
 DECLARE SUB victor ()
@@ -83,12 +85,12 @@ DIM SHARED graphic(1 TO 1564), Ncap(60)
 '==========================================================================
 COMMON SHARED choose%, tlx%, tly%, size%, menuText$(), wtype%, colour%, hilite%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
-COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), rflag
-COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
+COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), recruitMenuFlag
+COMMON SHARED navyMenuFlag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
 COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
-COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
+COMMON SHARED armymove(), month, year, array(), moveMenuFlag, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
 COMMON SHARED victory(), graf, noise, capcity(), difficult, usadv, bw
 COMMON SHARED train(), font$(), brray(), jancam, randbal, realism, casualty&()
@@ -107,7 +109,7 @@ DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
 
 replay = 0
 newgame:
-pcode = 0: rflag = 0
+pcode = 0: recruitMenuFlag = 0
 FOR k = 1 TO 40: armysize(k) = 0: armyloc(k) = 0: armymove(k) = 0: armylead(k) = 0: armyname$(k) = "": NEXT k
 usadv = 0: emancipate = 0
 FOR k = 1 TO 2
@@ -183,7 +185,7 @@ IF side = 1 THEN
     END IF
 END IF
 notitle:
-GOSUB unionplus
+CALL unionplus
 
 city$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
@@ -203,7 +205,7 @@ TICK .3
 wtype = 2
 hilite = 15
 replay = 1
-IF player = 2 THEN GOSUB blanken
+IF player = 2 THEN CALL blanken
 mtx$(0) = "VGA CIVILWAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
@@ -257,7 +259,7 @@ NEXT i
 vptotal = income(1) + income(2)
 
 chosit = 22
-IF player = 2 THEN GOSUB blanken: CALL usa
+IF player = 2 THEN CALL blanken: CALL usa
 CALL victor
 ON ERROR GOTO 0
 IF pcode > 0 THEN
@@ -271,15 +273,15 @@ END IF
 menu0:
 CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
-IF cash(side) < 100 AND navyloc(side) = 0 THEN nflag = 1
+IF cash(side) < 100 AND navyloc(side) = 0 THEN navyMenuFlag = 1
 
 hilite = 11
 colour = 4
 tlx = 67: tly = 13
 menuText$(0) = "Main"
-menuText$(1) = "Troops": IF rflag < 0 OR cash(side) < 100 THEN menuText$(1) = "-": chosit = 23
-menuText$(2) = "Moves": IF mflag > 0 THEN menuText$(2) = "-": IF chosit = 23 THEN chosit = 24
-menuText$(3) = "Ships": IF nflag > 0 THEN menuText$(3) = "-": IF chosit = 24 THEN chosit = 25
+menuText$(1) = "Troops": IF recruitMenuFlag < 0 OR cash(side) < 100 THEN menuText$(1) = "-": chosit = 23
+menuText$(2) = "Moves": IF moveMenuFlag > 0 THEN menuText$(2) = "-": IF chosit = 23 THEN chosit = 24
+menuText$(3) = "Ships": IF navyMenuFlag > 0 THEN menuText$(3) = "-": IF chosit = 24 THEN chosit = 25
 menuText$(4) = "Railroad": IF rr(side) > 0 THEN menuText$(4) = "-": IF chosit = 25 THEN chosit = 26
 menuText$(5) = "END TURN"
 menuText$(6) = "Inform"
@@ -289,13 +291,14 @@ menuText$(9) = "Files"
 
 size = 9
 choose = chosit
-CALL menu(0): CALL clearRight
+CALL menu(0)
+CALL clearRight
 '==========================================================================
 '                            Main Menu
 '==========================================================================
 SELECT CASE choose
 	CASE 1
-	IF cash(side) < 100 OR rflag < 0 THEN rflag = -1: GOTO menu0
+	IF cash(side) < 100 OR recruitMenuFlag < 0 THEN recruitMenuFlag = -1: GOTO menu0
 	CALL recruit((side))
 	chosit = 23
 	GOTO menu0
@@ -306,7 +309,7 @@ SELECT CASE choose
 	GOTO menu0
 '==========================================================================
 	CASE 3
-	IF nflag = 0 THEN CALL navy((side), 0)
+	IF navyMenuFlag = 0 THEN CALL navy((side), 0)
 	chosit = 25
 	CASE 4
 IF rr(side) = 0 THEN
@@ -318,10 +321,12 @@ IF rr(side) = 0 THEN
 	PAINT (x, y), z, 15
 	COLOR 15: IF side = 1 THEN COLOR 11
 	CALL traincapacity(side, limit)
-	CALL clearBottom: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
+	CALL clearBottom
+	PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 	CALL railroad(side)
 ELSE
-	CALL clearBottom: COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO menu0
+	CALL clearBottom
+	COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO menu0
 END IF
 '==========================================================================
 	CASE 5
@@ -330,10 +335,13 @@ END IF
 	menuText$(0) = "End Turn"
 	menuText$(1) = "Yes"
 	menuText$(2) = "NOT YET"
-	size = 2: CALL menu(0): CALL clearRight: IF choose <> 1 THEN chosit = 24: GOTO menu0
+	size = 2
+	CALL menu(0)
+	CALL clearRight
+	IF choose <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
-	rflag = 0: mflag = 0: nflag = 0
-	IF player = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
+	recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
+	IF player = 2 THEN side = side + 1: IF side = 2 THEN CALL blanken: CALL usa: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
@@ -368,7 +376,8 @@ optmen:
 '                               Cancel
 '---------------------------------------------------------------------------
 		CASE 1
-	CALL cancel(side): mflag = 0
+	CALL cancel(side)
+	moveMenuFlag = 0
 	choose = 22
 '---------------------------------------------------------------------------
 '                               Fortify
@@ -491,7 +500,7 @@ alone:
 '                               Utility Menu
 '==========================================================================
 	CASE 8
-utile:
+utilityMenu:
 	chosit = 29
 	menuText$(0) = "Utility"
 	menuText$(1) = "Side": IF player = 2 THEN menuText$(2) = ""
@@ -536,7 +545,7 @@ utile:
 		IF noise > 0 THEN SOUND 999, 1
 		a$ = "Solo": IF player = 2 THEN a$ = "2 Player"
 		PRINT a$; " Game";
-		choose = 23: GOTO utile
+		choose = 23: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Graphics
 '-------------------------------------------------------------------------
@@ -550,7 +559,7 @@ utile:
 		CLS
 		CALL usa
 		CALL clearBottom: COLOR 11: PRINT "Graphics : "; a$; : IF noise > 0 THEN SOUND 2700, 1
-		choose = 24: GOTO utile
+		choose = 24: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Sounds
 '-------------------------------------------------------------------------
@@ -566,7 +575,7 @@ utile:
 		COLOR 11: CALL clearBottom: PRINT "Sound Option : "; menuText$(choose);
 		noise = choose - 1
 		IF noise > 0 THEN SOUND 999, 1
-		choose = 25: GOTO utile
+		choose = 25: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Display Speed
 '-------------------------------------------------------------------------
@@ -593,7 +602,7 @@ utile:
 				CALL usa
 				CALL topbar
 		END SELECT
-		choose = 26: GOTO utile
+		choose = 26: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Play Balance
 '-------------------------------------------------------------------------
@@ -611,14 +620,14 @@ utile:
 		CALL clearBottom
 		COLOR 11: CALL clearBottom: PRINT "Play Balance : "; menuText$(choose);
 		difficult = choose
-		GOSUB unionplus
-		choose = 27: GOTO utile
+		CALL unionplus
+		choose = 27: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Ending Conditions
 '-------------------------------------------------------------------------
 	   CASE 7
 		CALL endit
-		choose = 28: GOTO utile
+		choose = 28: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                           Random Events Options
 '-------------------------------------------------------------------------
@@ -653,7 +662,7 @@ utile:
 		 CLS
 		 CALL usa
 		 choose = 29
-		 GOTO utile
+		 GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                              Vary Start Conditions
 '-------------------------------------------------------------------------
@@ -692,7 +701,7 @@ utile:
 		NEXT k
 		CLS
 		CALL usa
-		choose = 30: GOTO utile
+		choose = 30: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               January Campaigns
 '-------------------------------------------------------------------------
@@ -702,7 +711,7 @@ utile:
 		COLOR 11
 		CALL clearBottom
 		PRINT "January Campaigns : "; a$;
-		choose = 31: GOTO utile
+		choose = 31: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Realism Switch
 '-------------------------------------------------------------------------
@@ -714,9 +723,9 @@ utile:
 	ELSE
 		PRINT "REALISM ON: Recruiting based on CITY SIZE";
 		IF side = 2 AND randbal = 1 AND randbal < 5 THEN randbal = randbal + 2
-		GOSUB unionplus
+		CALL unionplus
 	END IF
-		choose = 32: GOTO utile
+		choose = 32: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Check Map Linakges
 '-------------------------------------------------------------------------
@@ -731,7 +740,7 @@ utile:
 		history = 1 - history
 		a$ = "OFF": IF history = 1 THEN a$ = "ON"
 		CALL clearBottom: PRINT "History is now "; a$;
-		choose = 34: GOTO utile
+		choose = 34: GOTO utilityMenu
 '-------------------------------------------------------------------------
 '                               Aggression
 '-------------------------------------------------------------------------
@@ -748,7 +757,7 @@ utile:
 		CALL clearBottom
 		COLOR 11
 		PRINT "Enemy Aggression : "; a$; " ("; bold; ")";
-		choose = 35: GOTO utile
+		choose = 35: GOTO utilityMenu
 		CASE ELSE
 	   END SELECT
 '==========================================================================
@@ -771,7 +780,7 @@ filex:
 loader:
 			IF choose = 1 AND filel = 0 GOTO filex
 			CALL filer(choose + 1)
-			IF choose = 1 THEN rflag = 0: mflag = 0: nflag = 0
+			IF choose = 1 THEN recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
@@ -807,18 +816,6 @@ size = 2: colour = 5
 tlx = 67: tly = 15
 CALL menu(0): CALL clearRight: IF choose = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: usadv = 120 * difficult: IF player = 2 THEN usadv = 50 * difficult
-	   IF realism > 0 THEN usadv = usadv * .7
-	   RETURN
-'............................................................................
-blanken:        c = 1: IF side = 2 THEN c = 7
-		CLS : LINE (100, 200)-(500, 300), c, BF
-		LINE (100, 200)-(500, 300), 8 - c, B
-		COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
-		COLOR 11: LOCATE 17, 30: PRINT force$(side); " PLAYER TURN"
-		DO WHILE INKEY$ = "": LOOP
-		RETURN
-'............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
 DATA "U4BD2BR1R3U2BD3D1","R1U4L1R2BL1BD4R1","R1E1U3BG3F1","U4BR3G2F2"
@@ -826,6 +823,21 @@ DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
 DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+
+SUB blanken ()
+    c = 1: IF side = 2 THEN c = 7
+	CLS : LINE (100, 200)-(500, 300), c, BF
+	LINE (100, 200)-(500, 300), 8 - c, B
+	COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
+	COLOR 11: LOCATE 17, 30: PRINT force$(side); " PLAYER TURN"
+	DO WHILE INKEY$ = "": LOOP
+END SUB
+
+SUB unionplus ()
+    usadv = 120 * difficult
+    IF player = 2 THEN usadv = 50 * difficult
+	IF realism > 0 THEN usadv = usadv * .7
+END SUB
 
 SUB animate (index, flag)
     ' Store the current and target locations of the army
@@ -874,7 +886,7 @@ SUB armies
     ' Determine the target city for the army movement
     CALL movefrom(index, target)
     IF target > 0 AND index > 0 GOTO tent
-	IF index = -1 THEN mflag = 1
+	IF index = -1 THEN moveMenuFlag = 1
 	GOTO dudd
 
     tent:
@@ -1612,7 +1624,7 @@ IF realism = 0 AND who = 2 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THE
 END IF
 
 IF chx > 0 THEN choose = chx: GOTO anchor
-IF nflag > 0 AND choose <> 1 THEN EXIT SUB
+IF navyMenuFlag > 0 AND choose <> 1 THEN EXIT SUB
 CALL menu(0): CALL clearRight
 anchor:
 '---------------------------------------------------------------------------
@@ -1694,7 +1706,7 @@ add2ship:
 	IF chx = 2 AND occupied(navyloc(who)) > 0 AND RND > .5 THEN chx = 3: GOTO anchor
 	IF chx = 2 AND cityp(navyloc(who)) = 0 THEN chx = 3: GOTO ahoy
 	IF navyloc(who) < 1 THEN EXIT SUB
-	IF who = side THEN nflag = 1
+	IF who = side THEN navyMenuFlag = 1
 	IF cityp(navyloc(who)) <> 3 - who GOTO ahoy
 	CALL clearBottom: COLOR 12: PRINT force$(who); " fleet bombards "; city$(navyloc(who));
 	CALL icon(navyloc(who), 0, 3)
@@ -1768,7 +1780,7 @@ admiral:
 	IF array(choose) = navyloc(who) THEN EXIT SUB
 	IF array(choose) < 1 THEN EXIT SUB
 	IF navysize(who) < 1 GOTO ships
-	IF who = side THEN nflag = 1
+	IF who = side THEN navyMenuFlag = 1
 	GOSUB box2
 	LOCATE 10, 25: PRINT force$(who); " fleet of"; navysize(who); "ship(s) is sailing"
 	LOCATE 11, 25: PRINT "From ";
@@ -1811,7 +1823,7 @@ admiral:
 	IF navysize(who) < 1 AND chx > 0 THEN EXIT SUB
 	IF navysize(who) < 1 OR commerce = who GOTO ahoy
 
-	IF who = side THEN nflag = 1
+	IF who = side THEN navyMenuFlag = 1
 	GOSUB box2
 	LOCATE 10, 25: PRINT force$(who); " fleet of"; navysize(who); "ship(s) is sailing"
 	LOCATE 11, 25: PRINT "to RAID "; force$(3 - who); " COMMERCE !"
@@ -1848,7 +1860,7 @@ admiral:
 	cash(who) = cash(who) + 100     'compensate for cost of recruiting new army
 	CALL capture(empty, c, who, 0)
 	armysize(empty) = x
-	IF who = side THEN nflag = 1
+	IF who = side THEN navyMenuFlag = 1
 	EXIT SUB
 '---------------------------------------------------------------------------
 '                               Exit
@@ -2201,7 +2213,7 @@ SUB recruit (who)
 	IF cash(who) < 100 GOTO menu1
 	size = 0: COLOR 12
 	menuText$(0) = "Recruit"
-	IF who = side AND rflag > 0 THEN FOR i = 1 TO rflag: x = rcity(i): menuText$(i) = city$(x): array(i) = x: NEXT i: size = rflag: GOTO alldone
+	IF who = side AND recruitMenuFlag > 0 THEN FOR i = 1 TO recruitMenuFlag: x = rcity(i): menuText$(i) = city$(x): array(i) = x: NEXT i: size = recruitMenuFlag: GOTO alldone
 	max = 4: IF RND > .8 THEN max = max - 1
 	IF difficult < 3 THEN max = max + 1
 
@@ -2222,7 +2234,7 @@ foe:
 	NEXT i
 alldone:
 	IF size = 0 GOTO menu1
-	IF who = side AND rflag = 0 THEN FOR i = 1 TO size: rcity(i) = array(i): NEXT i: rflag = size
+	IF who = side AND recruitMenuFlag = 0 THEN FOR i = 1 TO size: rcity(i) = array(i): NEXT i: recruitMenuFlag = size
 	CALL bubbleSortMenuText(size)
 '............................................................................
 levy:
