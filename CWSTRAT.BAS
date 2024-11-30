@@ -65,7 +65,7 @@ DECLARE SUB shipicon (who%, flag%)
 DECLARE SUB smarts ()
 DECLARE SUB showcity ()
 DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB starfin (star%, fin%, who%)
+DECLARE SUB setStartFinishIndexes (star%, fin%, who%)
 DECLARE SUB strong (index%)
 DECLARE SUB surrender (who%)
 DECLARE SUB TICK (sec!)
@@ -335,7 +335,7 @@ SELECT CASE choose
         GOTO newmonth
 	CASE 6 ' Report Menu
         CALL report((side)): chosit = 27
-        CALL starfin(star, fin, side)
+        CALL setStartFinishIndexes(star, fin, side)
         FOR i = star TO fin
         IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
         NEXT i
@@ -381,7 +381,7 @@ SELECT CASE choose
                 choose = 24
                 GOTO optionsMenu
 		    CASE 4 ' Supply Armies
-                CALL starfin(star, fin, (side))
+                CALL setStartFinishIndexes(star, fin, (side))
                 menuText$(0) = "Supply"
                 tlx = 67: tly = 5: colour = 5
                 size = 0
@@ -1084,7 +1084,7 @@ SUB combineArmies (who)
     ' Initialize variables
 	colour = 3: target = 0: hilite = 3
 	tlx = 67: tly = 2
-	CALL starfin(star, fin, who)
+	CALL setStartFinishIndexes(star, fin, who)
 	size = 0
 
     ' Loop through cities to find eligible armies to combine
@@ -1248,7 +1248,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 			lname$(i) = ""
 		ELSE
 			who = 1: IF i > 20 THEN who = 2
-			CALL starfin(star, fin, who)
+			CALL setStartFinishIndexes(star, fin, who)
 			FOR k = star TO fin
 			IF armyname$(i) = lname$(k) THEN lname$(k) = "": EXIT FOR
 			NEXT k
@@ -1320,7 +1320,7 @@ SUB fortify (target)
 	target = 0: hilite = 11
 	tlx = 67: tly = 2
 	who = side
-	CALL starfin(star, fin, who)
+	CALL setStartFinishIndexes(star, fin, who)
 	size = 0
 	FOR i = star TO fin
 	IF armyloc(i) > 0 AND fort(armyloc(i)) < 2 THEN
@@ -1467,7 +1467,7 @@ END SUB
 
 SUB movefrom (index, target)
 	colour = 3: tlx = 67: tly = 5: index = 0: size = 0: target = 0
-	who = side: CALL starfin(star, fin, who)
+	who = side: CALL setStartFinishIndexes(star, fin, who)
 	FOR i = star TO fin
 	IF armyloc(i) > 0 AND armymove(i) = 0 THEN size = size + 1: menuText$(size) = city$(armyloc(i)): array(size) = armyloc(i)
 	NEXT i
@@ -2015,7 +2015,7 @@ SUB railroad (who)
 SELECT CASE rr(who)
 	CASE 0
 	IF who = side GOTO human
-	CALL starfin(star, fin, who): max = 32767
+	CALL setStartFinishIndexes(star, fin, who): max = 32767
 	index = 0
 	FOR i = star TO fin: IF armyloc(i) = 0 OR armymove(i) <> 0 GOTO puter
 	x = 0: FOR j = 1 TO 6: from = matrix(armyloc(i), j): IF from > 0 AND cityp(from) <> who THEN x = x + 1
@@ -2256,11 +2256,13 @@ END SUB
 
 SUB smarts
 CALL events
-slush = 0: who = 3 - side
-c = 9: IF side = 1 THEN c = 15
+slush = 0
+who = 3 - side
+c = 9
+IF side = 1 THEN c = 15
 LOCATE 1, 1: PRINT SPACE$(80);
 COLOR c: LOCATE 1, 10: PRINT force$(who); " Side is making decisions";
-CALL starfin(star, fin, who)
+CALL setStartFinishIndexes(star, fin, who)
 '==========================================================================
 '                       Check Supply
 '==========================================================================
@@ -2349,7 +2351,8 @@ movearmy:
 '---------------------------------------------------------------------------
 '                               Check to Combine
 '---------------------------------------------------------------------------
-a = who: CALL combineArmies(a)
+a = who
+CALL combineArmies(a)
 CALL railroad(who)
 '---------------------------------------------------------------------------
 '                               Top Priority
@@ -2405,11 +2408,11 @@ NEXT i
 EXIT SUB
 '---------------------------------------------------------------------------
 enufarmies:
-CALL starfin(star, fin, 3 - who)
+CALL setStartFinishIndexes(star, fin, 3 - who)
 FOR i = star TO fin
 	IF armyloc(i) > 0 THEN y = y + .1 * armysize(i)
 NEXT i
-CALL starfin(star, fin, who)
+CALL setStartFinishIndexes(star, fin, who)
 x = 0: z = 0: FOR i = star TO fin: IF armyloc(i) > 0 THEN x = x + 1: z = z + .1 * armysize(i)
 NEXT i
 IF y > z THEN x = x - 2
@@ -2762,7 +2765,7 @@ LOOP WHILE swaps%
 END SUB
 
 SUB cancel (side)
-CALL starfin(star, fin, (side))
+CALL setStartFinishIndexes(star, fin, (side))
 counter:
 CALL clearRight
 	size = 0
@@ -2953,7 +2956,7 @@ END SUB
 
 SUB commander (who, empty)
 	empty = 0
-	CALL starfin(star, fin, who)
+	CALL setStartFinishIndexes(star, fin, who)
 	FOR i = star TO fin
 	IF armyloc(i) = 0 AND lname$(i) <> "" THEN empty = i: EXIT SUB
 	NEXT i
@@ -3038,7 +3041,7 @@ a = matrix(from, j): IF a > 0 THEN IF occupied(a) > 0 THEN best = best - armysiz
 NEXT j: best = .01 * best
 IF bold > 0 THEN best = best + 20 * bold
 
-CALL starfin(star, fin, 3 - side)
+CALL setStartFinishIndexes(star, fin, 3 - side)
 
 FOR j = 1 TO 6
 	y = -1: a = matrix(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
@@ -3416,7 +3419,7 @@ END SUB
 SUB relieve (who)
 colour = 3: target = 0: hilite = 3
 tlx = 67: tly = 2
-CALL starfin(star, fin, who)
+CALL setStartFinishIndexes(star, fin, who)
 size = 0
 FOR i = star TO fin
 IF armysize(i) > 0 AND armyloc(i) > 0 AND armymove(i) = 0 THEN
@@ -3498,7 +3501,7 @@ END SELECT
 '..........................................................................
 IF choose < 0 GOTO endrep
 IF choose = 4 GOTO frep
-CALL starfin(star, fin, who)
+CALL setStartFinishIndexes(star, fin, who)
 CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
 COLOR c
 PRINT " Report for "; force$(who); " Forces"; TAB(30); month$(month); ","; year; TAB(49); : COLOR 14: PRINT " Victory Points "; victory(who);
@@ -3573,7 +3576,7 @@ GOTO endrep
 srep:
 c = 9: IF side = 2 THEN c = 7
 CALL usa
-CALL starfin(star, fin, side)
+CALL setStartFinishIndexes(star, fin, side)
 FOR k = star TO fin
 	IF armysize(k) > 0 THEN
 	COLOR c
@@ -3891,12 +3894,12 @@ sink:
 NEXT s
 END SUB
 
-SUB starfin (star, fin, who)
+SUB setStartFinishIndexes (star, fin, who)
 star = 1: fin = 20: IF who = 2 THEN star = 21: fin = 40
 END SUB
 
 SUB stax (who)
-CALL starfin(star, fin, who)
+CALL setStartFinishIndexes(star, fin, who)
 FOR i = star TO fin
 IF armysize(i) > 0 AND occupied(armyloc(i)) <> i THEN
 	target = armyloc(i)
