@@ -75,7 +75,7 @@ DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 '==========================================================================
 COMMON SHARED choose%, tlx%, tly%, size%, mtx$(), wtype%, colour%, hilite%
-COMMON SHARED cityX(), cityY(), cityv(), cityp(), cityName$(), lname$(), filel
+COMMON SHARED cityX(), cityY(), cityValue(), cityp(), cityName$(), lname$(), filel
 COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), rflag
 COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
@@ -87,7 +87,7 @@ COMMON SHARED victory(), graf, noise, capcity(), difficult, usadv, bw
 COMMON SHARED train(), font$(), brray(), jancam, randbal, realism, casualty&()
 COMMON SHARED pcode, history, thrill, fleet$(), commerce, raider, grudge
 '==========================================================================
-DIM SHARED cityX(40), cityY(40), cityv(40), cityp(40), cityName$(40), lname$(40), rcity(5)
+DIM SHARED cityX(40), cityY(40), cityValue(40), cityp(40), cityName$(40), lname$(40), rcity(5)
 DIM SHARED cash(2), control(2), matrix(40, 7), income(2), anima(300), rating(40)
 DIM SHARED mtx$(21), image(300), force$(2), armyloc(40), armyname$(40), vicflag(6)
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
@@ -188,7 +188,7 @@ cityName$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 vptotal = usadv + 200
 FOR cityIndex = 1 TO 40
-    INPUT #1, a, cityX(cityIndex), cityY(cityIndex), cityName$(cityIndex), cityp(cityIndex), cityv(cityIndex)
+    INPUT #1, a, cityX(cityIndex), cityY(cityIndex), cityName$(cityIndex), cityp(cityIndex), cityValue(cityIndex)
     cityo(cityIndex) = cityp(cityIndex)
     CALL occupy(cityIndex)
     FOR cityAttributeIndex = 1 TO 7
@@ -198,10 +198,10 @@ FOR cityIndex = 1 TO 40
     IF cityp(cityIndex) > 0 THEN 
         x = cityp(cityIndex)
         control(x) = control(x) + 1
-        victory(x) = victory(x) + cityv(cityIndex)
+        victory(x) = victory(x) + cityValue(cityIndex)
     END IF
-    IF cityp(cityIndex) > 0 THEN cash(cityp(cityIndex)) = cash(cityp(cityIndex)) + cityv(cityIndex)
-    vptotal = vptotal + cityv(cityIndex)
+    IF cityp(cityIndex) > 0 THEN cash(cityp(cityIndex)) = cash(cityp(cityIndex)) + cityValue(cityIndex)
+    vptotal = vptotal + cityValue(cityIndex)
 NEXT cityIndex
 CLOSE #1
 CALL clrbot
@@ -254,7 +254,7 @@ NEXT i
 IF player = 1 AND side = 2 THEN income(1) = income(1) + usadv
 
 FOR i = 1 TO 40
-IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: income(x) = income(x) + cityv(i)
+IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: income(x) = income(x) + cityValue(i)
 armymove(i) = 0
 NEXT i
 
@@ -1579,7 +1579,7 @@ blast:
 	cityp(navyloc(who)) = 0
 	CALL clrbot: PRINT cityName$(navyloc(who)); " is now  NEUTRAL";
 	CALL showcity
-	victory(who) = victory(who) + cityv(navyloc(who))
+	victory(who) = victory(who) + cityValue(navyloc(who))
 	EXIT SUB
 '---------------------------------------------------------------------------
 '                               Sail
@@ -1860,7 +1860,7 @@ SUB newarmy (who, empty, target)
 	armyname$(empty) = lname$(empty): lname$(empty) = ""
 	COLOR 12: CALL clrbot: PRINT "Placing NEW army "; empty; armyname$(empty); " in "; cityName$(target);
 
-	x = 70: IF realism > 0 THEN x = 3 * cityv(target) + 33
+	x = 70: IF realism > 0 THEN x = 3 * cityValue(target) + 33
 	CALL cutoff(who, target, a): IF a < 1 THEN x = x \ 3
 	occupied(target) = empty: armysize(empty) = x
 	PRINT " Size = "; : CALL strong(empty)
@@ -2093,7 +2093,7 @@ add2:
 	target = array(choose)
 	x = 45: a$ = ""
 	IF realism > 0 THEN
-		x = 2 * cityv(armyloc(i)) + 20
+		x = 2 * cityValue(armyloc(i)) + 20
 		CALL cutoff(who, target, a)
 		IF a < 1 THEN x = x \ 3: a$ = " ISOLATED !"
 	END IF
@@ -2125,11 +2125,11 @@ randsel:
 		FOR i = 1 TO size
 		target = array(i)
 		IF occupied(target) = 0 THEN
-			y = 3 * cityv(target) + 33
+			y = 3 * cityValue(target) + 33
 			CALL cutoff(who, target, a)
 			IF a < 1 THEN y = y \ 3
 		ELSE
-			y = 2 * cityv(target) + 20
+			y = 2 * cityValue(target) + 20
 			CALL cutoff(who, target, a)
 			IF a < 1 THEN y = y \ 3
 		END IF
@@ -2486,11 +2486,11 @@ kickbutt:
 	best = 0: flee = 0
 	FOR i = 1 TO 6
 	x = matrix(target, i)
-	IF x > 0 AND (cityp(x) = 3 - s) AND cityv(x) > best THEN
+	IF x > 0 AND (cityp(x) = 3 - s) AND cityValue(x) > best THEN
 		IF best = 0 THEN
-			flee = i: best = cityv(x)
+			flee = i: best = cityValue(x)
 		ELSE
-			IF occupied(x) = 0 THEN flee = i: best = cityv(x)
+			IF occupied(x) = 0 THEN flee = i: best = cityValue(x)
 		END IF
 	END IF
 	NEXT i
@@ -3291,7 +3291,7 @@ SUB capture (active, c, s, flag)
 	IF active < 21 AND noise > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	IF active > 20 AND noise > 1 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	IF c <> capcity(3 - s) THEN CALL flashcity(c)
-	victory(s) = victory(s) + cityv(c)
+	victory(s) = victory(s) + cityValue(c)
 	IF c = capcity(3 - s) THEN
 		victory(s) = victory(s) + 100
 		victory(3 - s) = victory(3 - s) - 100
@@ -3440,12 +3440,12 @@ FOR j = 1 TO 6
 	FOR k = star TO fin: IF armyloc(k) > 0 THEN IF armymove(k) = a AND c = 0 GOTO alle
 	NEXT k
 	
-	y = best - x * fort(from) - cityv(from) + 30 * RND
+	y = best - x * fort(from) - cityValue(from) + 30 * RND
 	IF fort(from) > 0 THEN IF index = occupied(from) THEN y = y - 25: IF realism > 0 THEN y = y - 50
 	IF a = capcity(side) THEN IF vicflag(5) > 0 THEN y = y + 200
-	IF cityp(a) <> 3 - side THEN y = y + 5 * cityv(a) + 10 * fort(a)
+	IF cityp(a) <> 3 - side THEN y = y + 5 * cityValue(a) + 10 * fort(a)
 	IF cityp(a) <> side GOTO ourn
-	   IF c = 0 THEN y = y + 10 * cityv(a): GOTO ourn
+	   IF c = 0 THEN y = y + 10 * cityValue(a): GOTO ourn
 	   x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3
 
 	   IF armysize(c) > 0 THEN
@@ -3481,8 +3481,8 @@ ourn:
 	IF side = 2 AND cityY(a) > cityY(from) THEN y = y + 2
 '---------------------------------------------------------------------------
 	FOR k = 1 TO 6: m = matrix(a, k): IF m = 0 GOTO tally3
-	IF cityp(m) = 0 THEN y = y + 3 * cityv(m) + 4 * fort(m)
-	IF cityp(m) = side THEN y = y + 3 * cityv(m) + 4 * fort(m)
+	IF cityp(m) = 0 THEN y = y + 3 * cityValue(m) + 4 * fort(m)
+	IF cityp(m) = side THEN y = y + 3 * cityValue(m) + 4 * fort(m)
 	IF cityp(m) = side AND c > 0 THEN
 		odds! = 5 - 4 * RND
 		IF armysize(c) > 0 THEN odds! = armysize(index) / armysize(c) ELSE odds! = 5
@@ -3946,12 +3946,12 @@ PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   V
 LINE (1, 30)-(630, 30), 15
 FOR i = 1 TO 20: COLOR 4: a$ = "neutral": IF cityp(i) = 1 THEN COLOR 9: a$ = "UNION"
 IF cityp(i) = 2 THEN COLOR 7: a$ = "REBEL"
-LOCATE 2 + i, 1: PRINT i; TAB(6); cityName$(i); TAB(18); a$; TAB(29); cityv(i)
+LOCATE 2 + i, 1: PRINT i; TAB(6); cityName$(i); TAB(18); a$; TAB(29); cityValue(i)
 NEXT i
 
 FOR i = 21 TO 40: COLOR 4: a$ = "neutral": IF cityp(i) = 1 THEN COLOR 9: a$ = "UNION"
 IF cityp(i) = 2 THEN COLOR 7: a$ = "REBEL"
-LOCATE i - 18, 41: PRINT i; TAB(46); cityName$(i); TAB(58); a$; TAB(69); cityv(i)
+LOCATE i - 18, 41: PRINT i; TAB(46); cityName$(i); TAB(58); a$; TAB(69); cityValue(i)
 NEXT i
 LINE (1, 360)-(630, 360), 15
 COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
