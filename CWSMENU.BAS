@@ -41,7 +41,7 @@ SUB choices (b1, wide)
     
     LOCATE tly + 1, tlx + b1: PRINT mtx$(0)
     FOR i = 1 TO size
-        LOCATE tly + 2 + i, tlx + 2: PRINT mtx$(i);
+        LOCATE tly + 2 + i, tlx + 2: PRINT menuText$(i);
     NEXT i
 END SUB
 
@@ -49,7 +49,7 @@ SUB menu (switch%)
 remenu:
 	IF colour = 0 THEN colour = 7
 	LOCATE 1, 1, 0
-	IF mtx$(0) = "" THEN mtx$(0) = "M E N U"
+	IF menuText$(0) = "" THEN menuText$(0) = "M E N U"
 
 	IF wide = 0 THEN CALL mxw(wide)
 	IF tlx = 0 THEN GOSUB noadjust
@@ -86,7 +86,7 @@ remenu:
 	END IF
 
 	COLOR colour
-	b1 = INT(.5 * (wide - LEN(mtx$(0))) + .5) + 1
+	b1 = INT(.5 * (wide - LEN(menuText$(0))) + .5) + 1
 
 	CALL choices(b1, wide)
 sel1:
@@ -139,8 +139,8 @@ sel1:
 	IF flag = 0 THEN
 		COLOR hilite
 		LOCATE tly + 2 + row, tlx + 2
-		PRINT mtx$(row)
-		IF bw > 0 THEN LINE (8 * (tlx + 1), 16 * (tly + row + 1))-(8 * (tlx + LEN(mtx$(row)) + 1) - 1, 16 * (tly + row + 2) - 1), hilite, B
+		PRINT menuText$(row)
+		IF bw > 0 THEN LINE (8 * (tlx + 1), 16 * (tly + row + 1))-(8 * (tlx + LEN(menuText$(row)) + 1) - 1, 16 * (tly + row + 2) - 1), hilite, B
 	END IF
 	GOSUB crsr
 	IF switch <> 3 GOTO reglr
@@ -160,13 +160,13 @@ reglr:
 	IF ASC(a$) = 13 GOTO called
 	IF switch = 2 THEN LOCATE tly + 2 + row1, tlx + 2: PRINT SPACE$(wide);
 	COLOR colour
-	LOCATE tly + 2 + row1, tlx + 2: PRINT mtx$(row1)
+	LOCATE tly + 2 + row1, tlx + 2: PRINT menuText$(row1)
 
 	SELECT CASE switch
 		CASE 1, 2, 9
-			IF mtx$(row1) <> "EXIT" THEN CALL icon(array(row1), 0, 8)
+			IF menuText$(row1) <> "EXIT" THEN CALL icon(array(row1), 0, 8)
 		CASE 6
-			IF mtx$(row1) <> "EXIT" THEN CALL icon(armyloc(array(row1)), 0, 8)
+			IF menuText$(row1) <> "EXIT" THEN CALL icon(armyloc(array(row1)), 0, 8)
 	END SELECT
 
 	choose = row
@@ -187,7 +187,7 @@ crsr:
 	END IF
 		row1 = row
 		FOR k = 1 TO size
-		    c1$ = UCASE$(LEFT$(LTRIM$(mtx$(k)), 1))
+		    c1$ = UCASE$(LEFT$(LTRIM$(menuText$(k)), 1))
 		    IF c1$ = UCASE$(a$) THEN 
 		        choose = k
 		        GOSUB limits
@@ -258,9 +258,9 @@ called:
 END SUB
 
 SUB mxw (wide)
-	wide = LEN(mtx$(0)) + 1
+	wide = LEN(menuText$(0)) + 1
 	FOR i = 1 TO size
-	x = LEN(mtx$(i))
+	x = LEN(menuText$(i))
 	IF x > wide THEN wide = x
 	NEXT i
 END SUB

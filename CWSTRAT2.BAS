@@ -46,8 +46,8 @@ SUB bubble (limit)
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
-	IF mtx$(i) > mtx$(i + 1) THEN
-		SWAP mtx$(i), mtx$(i + 1)
+	IF menuText$(i) > menuText$(i + 1) THEN
+		SWAP menuText$(i), menuText$(i + 1)
 		SWAP array(i), array(i + 1)
 		swaps% = i
 	END IF
@@ -62,11 +62,11 @@ CALL clrrite
 	size = 0
 	FOR j = star TO fin
 	a$ = armyname$(j): IF LEN(a$) > 10 THEN x = INSTR(a$, " "): a$ = RIGHT$(a$, LEN(a$) - x)
-	IF armyloc(j) > 0 AND armymove(j) > 0 THEN size = size + 1: mtx$(size) = a$: array(size) = armyloc(j)
+	IF armyloc(j) > 0 AND armymove(j) > 0 THEN size = size + 1: menuText$(size) = a$: array(size) = armyloc(j)
 	NEXT j
 	CALL bubble(size)
 	tlx = 67: tly = 2: wtype = 2
-	mtx$(0) = "Cancel"
+	menuText$(0) = "Cancel"
 	IF size < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
 	CALL menu(1)
 	SELECT CASE choose
@@ -74,7 +74,7 @@ CALL clrrite
 		target = array(choose)
 	       
 		FOR i = star TO fin
-		IF armyloc(i) = target THEN x = INSTR(armyname$(i), mtx$(choose)): IF x > 0 AND armymove(i) > 0 THEN index = i
+		IF armyloc(i) = target THEN x = INSTR(armyname$(i), menuText$(choose)): IF x > 0 AND armymove(i) > 0 THEN index = i
 		NEXT i
 
 		CALL clrbot: COLOR 11: PRINT armyname$(index); " has cancelled move to "; city$(armymove(index)); : CALL TICK(turbo + 1)
@@ -270,21 +270,21 @@ END SUB
 SUB endit
 	a$ = STR$(ABS(vicflag(3)) * 2.5) + "% Cities"
 	t$ = STR$(ABS(vicflag(3)) * 2.5) + "% Total Income"
-	mtx$(8) = "Time: " + month$(vicflag(1)) + STR$(ABS(vicflag(2)))
-	mtx$(9) = RTRIM$(STR$(ABS(vicflag(6)))) + ":1 Force Ratio"
+	menuText$(8) = "Time: " + month$(vicflag(1)) + STR$(ABS(vicflag(2)))
+	menuText$(9) = RTRIM$(STR$(ABS(vicflag(6)))) + ":1 Force Ratio"
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
 what4:
-	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "û " ELSE mtx$(i - 1) = "  "
+	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN menuText$(i - 1) = "û " ELSE menuText$(i - 1) = "  "
 	NEXT i
 	choose = chosit
-	mtx$(0) = "Victory Conditions"
-	mtx$(1) = mtx$(1) + mtx$(8)
-	mtx$(2) = mtx$(2) + a$
-	mtx$(3) = mtx$(3) + t$
-	mtx$(4) = mtx$(4) + "Capital Captured"
-	mtx$(5) = mtx$(5) + mtx$(9)
-	mtx$(6) = "DONE"
+	menuText$(0) = "Victory Conditions"
+	menuText$(1) = menuText$(1) + menuText$(8)
+	menuText$(2) = menuText$(2) + a$
+	menuText$(3) = menuText$(3) + t$
+	menuText$(4) = menuText$(4) + "Capital Captured"
+	menuText$(5) = menuText$(5) + menuText$(9)
+	menuText$(6) = "DONE"
 	wtype = 2: colour = 3: size = 6: hilite = 14
 	CALL menu(0)
 	chosit = 21 + choose
@@ -596,7 +596,7 @@ END SUB
 
 SUB image2 (a$, s)
 DIM g2(1 TO 8000)
-mtx$(1) = a$
+menuText$(1) = a$
 tlx = 32 - LEN(a$) \ 2
 tly = 10: size = 1
 CALL mxw(wide)
@@ -717,15 +717,15 @@ size = 0
 FOR i = star TO fin
 IF armysize(i) > 0 AND armyloc(i) > 0 AND armymove(i) = 0 THEN
 	size = size + 1
-	mtx$(size) = armyname$(i)
-	IF LEN(mtx$(size)) > 11 THEN mtx$(size) = LEFT$(mtx$(size), 11)
+	menuText$(size) = armyname$(i)
+	IF LEN(menuText$(size)) > 11 THEN menuText$(size) = LEFT$(menuText$(size), 11)
 	array(size) = i
 END IF
 NEXT i
 
 IF size = 0 THEN EXIT SUB
 CALL bubble(size)
-mtx$(0) = "Relieve"
+menuText$(0) = "Relieve"
 choose = 31: hilite = 11
 CALL menu(6): CALL clrrite
 
@@ -740,15 +740,15 @@ size = 0
 FOR i = star TO fin
 IF lname$(i) <> "" THEN
 	size = size + 1
-	mtx$(size) = lname$(i)
-	IF LEN(mtx$(size)) > 11 THEN mtx$(size) = LEFT$(mtx$(size), 11)
+	menuText$(size) = lname$(i)
+	IF LEN(menuText$(size)) > 11 THEN menuText$(size) = LEFT$(menuText$(size), 11)
 	array(size) = i
 END IF
 NEXT i
 CALL bubble(size)
 
 have2:
-mtx$(0) = "New Leader"
+menuText$(0) = "New Leader"
 tlx = 67: tly = 2
 CALL menu(0): CALL clrrite
 IF choose < 1 GOTO have2
@@ -767,14 +767,14 @@ SUB report (who)
 DIM summ(40)
 IF who = -1 GOTO frep
 IF who > 100 GOTO batrep
-mtx$(0) = "Information"
-mtx$(1) = force$(side) + " Armies"
-mtx$(2) = force$(3 - side) + " Armies"
-mtx$(3) = "Cities"
-mtx$(4) = "Force Summary"
-mtx$(5) = "Intelligence"
-mtx$(6) = "Battles": size = 6
-IF LEN(DIR$("cws.his")) > 0 THEN mtx$(7) = "Recap": size = 7
+menuText$(0) = "Information"
+menuText$(1) = force$(side) + " Armies"
+menuText$(2) = force$(3 - side) + " Armies"
+menuText$(3) = "Cities"
+menuText$(4) = "Force Summary"
+menuText$(5) = "Intelligence"
+menuText$(6) = "Battles": size = 6
+IF LEN(DIR$("cws.his")) > 0 THEN menuText$(7) = "Recap": size = 7
 CALL menu(0)
 SELECT CASE choose
 CASE IS < 0
@@ -997,11 +997,11 @@ hilite = 13: colour = 3: tlx = 67: tly = 5: size = 0
 y = armyloc(defend)
 who = 1: IF defend > 20 THEN who = 2
 FOR k = 1 TO 6
-	IF matrix(y, k) > 0 AND cityp(matrix(y, k)) = who THEN size = size + 1: mtx$(size) = city$(matrix(y, k)): array(size) = matrix(y, k)
+	IF matrix(y, k) > 0 AND cityp(matrix(y, k)) = who THEN size = size + 1: menuText$(size) = city$(matrix(y, k)): array(size) = matrix(y, k)
 NEXT k
 	IF size = 0 THEN EXIT SUB
 	IF size = 1 THEN x = array(1): EXIT SUB
-	mtx$(0) = "Retreat"
+	menuText$(0) = "Retreat"
 	CALL bubble(size)
 	CALL menu(9)
 	CALL clrrite
@@ -1838,9 +1838,9 @@ END SELECT
 	CALL center(12, t$)
 	CALL center(14, a$)
 
-	mtx$(0) = "End Game"
-	mtx$(1) = "Yes"
-	mtx$(2) = "No-Override"
+	menuText$(0) = "End Game"
+	menuText$(1) = "Yes"
+	menuText$(2) = "No-Override"
 	size = 2: colour = 4
 	tlx = 27: tly = 18
 	hilite = 15
@@ -1855,10 +1855,10 @@ play4ever:
 			CALL usa
 			EXIT SUB
 	END IF
-	mtx$(0) = "Options"
-	mtx$(1) = "Quit this Game"
-	mtx$(2) = "Play More"
-	IF player = 1 THEN mtx$(2) = "No - Press Onward to " + city$(capcity(3 - side))
+	menuText$(0) = "Options"
+	menuText$(1) = "Quit this Game"
+	menuText$(2) = "Play More"
+	IF player = 1 THEN menuText$(2) = "No - Press Onward to " + city$(capcity(3 - side))
 	size = 2: colour = 8
 	tlx = 27: tly = 18
 	IF j <> 7 THEN
