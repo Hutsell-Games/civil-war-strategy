@@ -187,22 +187,22 @@ GOSUB unionplus
 city$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 vptotal = usadv + 200
-FOR i = 1 TO 40
-    INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
-    cityo(i) = cityp(i)
-    CALL occupy(i)
-    FOR j = 1 TO 7
-        INPUT #1, matrix(i, j)
-    NEXT j
-    INPUT #1, fort(i)
-    IF cityp(i) > 0 THEN 
-        x = cityp(i)
+FOR cityIndex = 1 TO 40
+    INPUT #1, a, cityx(cityIndex), cityy(cityIndex), city$(cityIndex), cityp(cityIndex), cityv(cityIndex)
+    cityo(cityIndex) = cityp(cityIndex)
+    CALL occupy(cityIndex)
+    FOR cityAttributeIndex = 1 TO 7
+        INPUT #1, cityData(cityIndex, cityAttributeIndex)
+    NEXT cityAttributeIndex
+    INPUT #1, fort(cityIndex)
+    IF cityp(cityIndex) > 0 THEN 
+        x = cityp(cityIndex)
         control(x) = control(x) + 1
-        victory(x) = victory(x) + cityv(i)
+        victory(x) = victory(x) + cityv(cityIndex)
     END IF
-    IF cityp(i) > 0 THEN cash(cityp(i)) = cash(cityp(i)) + cityv(i)
-    vptotal = vptotal + cityv(i)
-NEXT i
+    IF cityp(cityIndex) > 0 THEN cash(cityp(cityIndex)) = cash(cityp(cityIndex)) + cityv(cityIndex)
+    vptotal = vptotal + cityv(cityIndex)
+NEXT cityIndex
 CLOSE #1
 CALL clrbot
 
