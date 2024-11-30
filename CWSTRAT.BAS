@@ -1074,38 +1074,55 @@ SUB battle (attack, defend, win, lose)
 END SUB
 
 SUB combine (who)
+    ' Initialize variables
 	colour = 3: target = 0: hilite = 3
 	tlx = 67: tly = 2
 	CALL starfin(star, fin, who)
 	size = 0
+
+    ' Loop through cities to find eligible armies to combine
 	FOR i = 1 TO 40
 		IF cityp(i) = who AND occupied(i) > 0 THEN
 			FOR j = star TO fin
-			IF armyloc(j) = i AND occupied(i) <> j AND armymove(j) = 0 THEN size = size + 1: menuText$(size) = city$(i): array(size) = i: EXIT FOR
+                IF armyloc(j) = i AND occupied(i) <> j AND armymove(j) = 0 THEN
+                    size = size + 1
+                    menuText$(size) = city$(i)
+                    array(size) = i
+                    EXIT FOR
+                END IF
 			NEXT j
 		END IF
 	NEXT i
 	
+    ' Exit if no eligible armies found
 	IF size = 0 THEN who = -1: EXIT SUB
 	CALL bubble(size)
 
+    ' Randomly choose an army if not the player's side
 	IF who <> side THEN choose = 1 + INT(size * RND): GOTO join
 	menuText$(0) = "Join"
 		choose = 31: hilite = 11
 		CALL menu(9): CALL clrrite
+
 join:
+    ' Exit if no valid choice made
 		IF choose < 1 GOTO nocity2
 		target = array(choose)
 		CALL clrbot: PRINT "Combining "; force$(who); " armies in "; city$(target); :  CALL TICK(turbo!)
 
+    ' Initialize temporary army variables
 		armysize(0) = 0: armylead(0) = 0: armyexper(0) = 0: armyloc(0) = target
 		armyname$(0) = "": supply(0) = 0: armymove(0) = 0
-'...........................................................................
+
+    ' Combine eligible armies
 		best = 0: x = 0: spin = 0
 		FOR j = star TO fin
 		IF armymove(j) <> 0 OR armyloc(j) <> target OR armysize(j) = 0 GOTO dork1
-		IF armysize(0) + armysize(j) > 1250 THEN CALL clrbot: PRINT "Cannot combine "; armyname$(j); "... TOO LARGE"; : CALL TICK(turbo!): GOTO dork1
+        IF armysize(0) + armysize(j) > 1250 THEN
+            CALL clrbot: PRINT "Cannot combine "; armyname$(j); "... TOO LARGE"; : CALL TICK(turbo!): GOTO dork1
+        END IF
 
+        ' Update best leader and combine army attributes
 		IF armylead(j) > x THEN
 			x = armylead(j)
 			armyname$(0) = armyname$(j)
@@ -1127,6 +1144,7 @@ join:
 dork1:
 		NEXT j
 
+    ' Finalize combined army
 		CALL clrbot
 		IF who <> side AND spin = 0 THEN EXIT SUB
 		IF spin = 0 THEN
@@ -1148,6 +1166,7 @@ dork1:
 		IF who = side THEN CALL TICK(turbo!)
 		IF noise > 0 THEN SOUND 4000, .7
 	       
+    ' Update city and army status
 		CALL showcity
 		CALL placearmy(best)
 		CALL icon(target, 0, 6)
