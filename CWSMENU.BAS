@@ -113,7 +113,9 @@ sel1:
 		CASE 4
 		    CALL armystat(array(row))
 		CASE 5
-		    COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
+		    COLOR 11
+			CALL clrbot
+			PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
 		CASE 6
 		    CALL icon(armyloc(array(row)), 0, 9)
 		CASE 8
@@ -122,7 +124,7 @@ sel1:
 				a = row
 				IF side = 1 THEN a = 6 - row
 				t$ = "face" + LTRIM$(STR$(a)) + ".vga"
-				IF LEN(DIR$(t$)) > 0 THEN
+				IF _FILEEXISTS(t$) THEN
 					DEF SEG = VARSEG(graft(1))
 					BLOAD t$, VARPTR(graft(1))
 					DEF SEG

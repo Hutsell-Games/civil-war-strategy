@@ -28,7 +28,7 @@ NEXT k
 
 filel = 1: vicflag(1) = 1
 CALL filer(1)
-IF LEN(DIR$("mtn.vga")) > 0 THEN
+IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
 	BLOAD "mtn.vga", VARPTR(mtn(1))
 	DEF SEG
@@ -131,7 +131,7 @@ END IF
 IF choose = 3 THEN CLS : END
 IF history = 1 THEN
 	CLS
-	IF LEN(DIR$("cws.his")) > 0 THEN SHELL "copy cws.his oldhist.ory"
+	IF _FILEEXISTS("cws.his") THEN SHELL "copy cws.his oldhist.ory"
 	OPEN "O", 2, "cws.his"
 	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; DATE$; " ]"
 	CLOSE #2
@@ -667,7 +667,7 @@ utile:
 '                               Files
 '==========================================================================
 	CASE 9
-	IF LEN(DIR$("*.sav")) = 0 THEN filel = 0
+	IF _FILEEXISTS("*.sav") THEN filel = 0
 filex:
 	choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
 	menuText$(0) = "Options"
@@ -906,7 +906,7 @@ IF graf > 2 THEN
 	CALL cannon
 	k = fort(armyloc(defend))
 	t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
-	IF LEN(DIR$(t$)) > 0 THEN
+	IF _FILEEXISTS(t$) THEN
 		DEF SEG = VARSEG(graphic(1))
 		BLOAD t$, VARPTR(graphic(1))
 		DEF SEG
@@ -1139,12 +1139,12 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 
 	CASE 2
-	IF LEN(DIR$("*.sav")) = 0 THEN choose = -1: EXIT SUB
+	IF _FILEEXISTS("*.sav") THEN choose = -1: EXIT SUB
 	menuText$(0) = "Load"
 	size = 0
 	FOR k = 1 TO 9
 		t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
-		IF LEN(DIR$(t$)) > 0 THEN
+		IF _FILEEXISTS(t$) THEN
 			size = size + 1: menuText$(size) = t$: array(size) = k
 		END IF
 	NEXT k
@@ -1190,7 +1190,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	menuText$(0) = "Save Game"
 	FOR k = 1 TO 9
 	menuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF LEN(DIR$(menuText$(k))) > 0 THEN menuText$(k) = menuText$(k) + " û"
+	IF _FILEEXISTS(menuText$(k))) THEN menuText$(k) = menuText$(k) + " û"
 	NEXT k
 	tlx = 67: size = 9
 	CALL menu(0)

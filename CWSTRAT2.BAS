@@ -774,7 +774,7 @@ menuText$(3) = "Cities"
 menuText$(4) = "Force Summary"
 menuText$(5) = "Intelligence"
 menuText$(6) = "Battles": size = 6
-IF LEN(DIR$("cws.his")) > 0 THEN menuText$(7) = "Recap": size = 7
+IF _FILEEXISTS("cws.his") THEN menuText$(7) = "Recap": size = 7
 CALL menu(0)
 SELECT CASE choose
 CASE IS < 0
@@ -1441,7 +1441,7 @@ LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
 COLOR 10
 '==========================  Mountains =================================
-IF LEN(DIR$("mtn.vga")) > 0 THEN
+IF _FILEEXISTS("mtn.vga") THEN
 	PUT (380, 30), mtn, PSET
 	PUT (270, 200), mtn, PSET
 	PUT (310, 160), mtn, PSET
