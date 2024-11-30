@@ -18,26 +18,30 @@ DIM SHARED graft(1 TO 1564)
 '       choose = option selected (row #)
 '            -1 indicates ESC key pressed
 '            entering with choose+21 causes choose to be default entry
-'       wtype = window type (0 = no line; 1=single line;
+'       windowType = window type (0 = no line; 1=single line;
 '                            2=double line
 '               if >10 then 10's digit=box color  1's digit= window type
 
 SUB choices (b1, wide)
-    boxc = colour: IF wtype > 10 THEN boxc = INT(wtype / 10): wtype = wtype - 10 * boxc
-    COLOR boxc
+    boxColor = colour
+    IF windowType > 10 THEN 
+        boxColor = INT(windowType / 10)
+        windowType = windowType - 10 * boxColor
+    END IF
+    COLOR boxColor
     VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8)
     CLS 1
     VIEW
     LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8), colour, B
     LINE (8 * tlx - 2, 16 * (tly + 1) + 3)-(8 * (tlx + wide + 1) + 3, 16 * (tly + 1) + 6), colour, B
-    IF ABS(wtype) = 2 THEN
-    LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + size + 2) + 4), colour, B
+    IF ABS(windowType) = 2 THEN
+        LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + size + 2) + 4), colour, B
     END IF
     COLOR colour
     
     LOCATE tly + 1, tlx + b1: PRINT mtx$(0)
     FOR i = 1 TO size
-    LOCATE tly + 2 + i, tlx + 2: PRINT mtx$(i);
+        LOCATE tly + 2 + i, tlx + 2: PRINT mtx$(i);
     NEXT i
 END SUB
 
@@ -52,7 +56,8 @@ remenu:
 	IF choose < 21 THEN choose = 1
 	IF choose > 21 THEN choose = choose - 21
 	IF choose > 21 THEN choose = 1
-	row = choose: IF row < 1 THEN row = 1
+	row = choose
+	IF row < 1 THEN row = 1
 	IF row > size THEN row = 1
 	choose = row
 	row1 = row
@@ -63,16 +68,20 @@ remenu:
 	brx = tlx + wide + 1
 	bry = tly + size + 3
        
-	boxc = colour: IF wtype > 10 THEN boxc = INT(wtype / 10): wtype = wtype - 10 * boxc
+	boxColor = colour
+	IF windowType > 10 THEN
+	    boxColor = INT(windowType / 10)
+	    windowType = windowType - 10 * boxColor
+	END IF
 
-	COLOR boxc
+	COLOR boxColor
 
 	VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8)
 	CLS 1
 	VIEW
 	LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8), colour, B
 	LINE (8 * tlx - 2, 16 * (tly + 1) + 3)-(8 * (tlx + wide + 1) + 3, 16 * (tly + 1) + 6), colour, B
-	IF ABS(wtype) = 2 THEN
+	IF ABS(windowType) = 2 THEN
 		LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + size + 2) + 4), colour, B
 	END IF
 
@@ -82,8 +91,10 @@ remenu:
 	CALL choices(b1, wide)
 sel1:
 	SELECT CASE switch
-		CASE 1: CALL icon(array(row), 0, 7)
-		CASE 2: CALL icon(array(row), 0, 9)
+		CASE 1
+		    CALL icon(array(row), 0, 7)
+		CASE 2
+		    CALL icon(array(row), 0, 9)
 			target = occupied(array(row))
 			IF target > 0 THEN
 			flag = 1
@@ -99,13 +110,17 @@ sel1:
 			flag = 0
 			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
 			END IF
-		CASE 4: CALL armystat(array(row))
-		CASE 5: COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
-		CASE 6: CALL icon(armyloc(array(row)), 0, 9)
+		CASE 4
+		    CALL armystat(array(row))
+		CASE 5
+		    COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
+		CASE 6
+		    CALL icon(armyloc(array(row)), 0, 9)
 		CASE 8
 			IF graf > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
-				a = row: IF side = 1 THEN a = 6 - row
+				a = row
+				IF side = 1 THEN a = 6 - row
 				t$ = "face" + LTRIM$(STR$(a)) + ".vga"
 				IF LEN(DIR$(t$)) > 0 THEN
 					DEF SEG = VARSEG(graft(1))
@@ -118,7 +133,8 @@ sel1:
 					END IF
 				END IF
 			END IF
-		CASE 9: CALL icon(array(row), 0, 9)
+		CASE 9
+		    CALL icon(array(row), 0, 9)
 	END SELECT
 	IF flag = 0 THEN
 		COLOR hilite
@@ -128,9 +144,18 @@ sel1:
 	END IF
 	GOSUB crsr
 	IF switch <> 3 GOTO reglr
-	IF a$ = "H" THEN choose = 1: GOTO called
-	IF ASC(a$) = 13 THEN choose = 2: GOTO called
-	IF a$ = "P" THEN choose = 3: GOTO called
+	IF a$ = "H" THEN 
+	    choose = 1
+	    GOTO called
+	END IF
+	IF ASC(a$) = 13 THEN 
+	    choose = 2
+	    GOTO called
+	END IF
+	IF a$ = "P" THEN 
+	    choose = 3
+	    GOTO called
+	END IF
 reglr:
 	IF ASC(a$) = 13 GOTO called
 	IF switch = 2 THEN LOCATE tly + 2 + row1, tlx + 2: PRINT SPACE$(wide);
@@ -146,33 +171,52 @@ reglr:
 
 	choose = row
 	GOTO sel1
-crsr:   a$ = INKEY$: IF a$ = "" GOTO crsr
+crsr:
+    a$ = INKEY$
+    IF a$ = "" GOTO crsr
 	IF ASC(a$) = 13 THEN RETURN
 	IF ASC(a$) = 2 THEN GOTO boss
 	IF LEN(a$) = 2 GOTO arrows
-	IF switch = 3 THEN choose = -ASC(UCASE$(a$)): GOTO called
-	IF ASC(a$) = 27 THEN choose = -1: GOTO called
+	IF switch = 3 THEN 
+	    choose = -ASC(UCASE$(a$))
+	    GOTO called
+	END IF
+	IF ASC(a$) = 27 THEN 
+	    choose = -1
+	    GOTO called
+	END IF
 		row1 = row
 		FOR k = 1 TO size
-		c1$ = UCASE$(LEFT$(LTRIM$(mtx$(k)), 1))
-		IF c1$ = UCASE$(a$) THEN choose = k: GOSUB limits: GOTO called
+		    c1$ = UCASE$(LEFT$(LTRIM$(mtx$(k)), 1))
+		    IF c1$ = UCASE$(a$) THEN 
+		        choose = k
+		        GOSUB limits
+		        GOTO called
+		    END IF
 		NEXT k
 	GOTO crsr
 arrows:
 	a$ = RIGHT$(a$, 1)
 	row1 = row
-	 IF a$ = "H" THEN row = row - 1: GOSUB limits: RETURN
-	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
-	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
-	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
-	 IF a$ = ";" AND switch = 0 THEN
-		SCREEN 0: CLS
-		SHELL "cwsdoc.com"
-		SCREEN 12: CALL usa
-		CALL choices(b1, wide)
-		CALL topbar
-		RETURN
-	  END IF
+	 IF a$ = "H" THEN
+	    row = row - 1
+	    GOSUB limits
+	    RETURN
+	 END IF
+	 IF a$ = "I" THEN row = 1
+	    GOSUB limits
+	    RETURN
+	 END IF
+	 IF a$ = "P" THEN 
+	    row = row + 1
+	    GOSUB limits
+	    RETURN
+	 END IF
+	 IF a$ = "Q" THEN 
+	    row = size
+	    GOSUB limits
+	    RETURN
+	 END IF
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL usa
