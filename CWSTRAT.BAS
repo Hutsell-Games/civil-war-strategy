@@ -4,7 +4,7 @@ DECLARE SUB sinkShip (who%)
 DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB integrity ()
 DECLARE SUB ironclad ()
-DECLARE SUB normal (xbar%, vary%, result%)
+DECLARE SUB generateNormalRandom (xbar%, variance%, result%)
 DECLARE SUB relieve (who%)
 DECLARE SUB retreat (active%, x%)
 DECLARE SUB schooner ()
@@ -1006,8 +1006,8 @@ SUB battle (attack, defend, win, lose)
             pct! = .8 * pct!
     END SELECT
     xbar = armysize(attack) * pct!
-    vary = xbar * (1 - pct!)
-    CALL normal(xbar, vary, killd)
+    variance = xbar * (1 - pct!)
+    CALL generateNormalRandom(xbar, variance, killd)
     
     pct! = .01 * ATKFAC + .02 * fort(armyloc(defend)): IF win = defend THEN pct! = 1.5 * pct!
     SELECT CASE armysize(attack)
@@ -1017,8 +1017,8 @@ SUB battle (attack, defend, win, lose)
             pct! = .8 * pct!
     END SELECT
     xbar = armysize(defend) * pct!
-    vary = xbar * (1 - pct!)
-    CALL normal(xbar, vary, killa)
+    variance = xbar * (1 - pct!)
+    CALL generateNormalRandom(xbar, variance, killa)
 
     ' Adjust casualties
     killa = .8 * killa + .2 * killd: IF killa < 1 THEN killa = 1
@@ -1981,12 +1981,14 @@ plus1:
 fnew:
 END SUB
 
-SUB normal (xbar, vary, result)
-' NOTE : vary is VARIANCE
-pct! = 0
-FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
-pct! = pct! - 5.5
-result = xbar + pct! * SQR(vary)
+' The normal subroutine generates a normally distributed random number 
+' based on the given mean (xbar) and variance. It uses the 
+' Box-Muller transform to approximate a normal distribution.
+SUB generateNormalRandom (xbar, variance, result)
+    pct! = 0
+    FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
+    pct! = pct! - 5.5
+    result = xbar + pct! * SQR(variance)
 END SUB
 
 SUB placearmy (which)
