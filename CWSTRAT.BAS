@@ -23,7 +23,7 @@ DECLARE SUB animate (index%, flag%)
 DECLARE SUB moveArmy ()
 DECLARE SUB showArmyStatistics (index%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
-DECLARE SUB blanken ()
+DECLARE SUB displayPlayerTurnScreen ()
 DECLARE SUB bub2 (limit%)
 DECLARE SUB bubble (size%)
 DECLARE SUB cancel (side%)
@@ -70,7 +70,7 @@ DECLARE SUB surrender (who%)
 DECLARE SUB TICK (sec!)
 DECLARE SUB touchup ()
 DECLARE SUB tupdate ()
-DECLARE SUB unionplus ()
+DECLARE SUB addUnionAdvantage ()
 DECLARE SUB usa ()
 DECLARE SUB usamap ()
 DECLARE SUB victor ()
@@ -184,7 +184,7 @@ IF side = 1 THEN
     END IF
 END IF
 notitle:
-CALL unionplus
+CALL addUnionAdvantage
 
 city$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
@@ -204,7 +204,7 @@ TICK .3
 wtype = 2
 hilite = 15
 replay = 1
-IF player = 2 THEN CALL blanken
+IF player = 2 THEN CALL displayPlayerTurnScreen
 mtx$(0) = "VGA CIVILWAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
@@ -256,7 +256,7 @@ NEXT i
 vptotal = income(1) + income(2)
 
 chosit = 22
-IF player = 2 THEN CALL blanken: CALL usa
+IF player = 2 THEN CALL displayPlayerTurnScreen: CALL usa
 CALL victor
 ON ERROR GOTO 0
 IF pcode > 0 THEN
@@ -330,7 +330,7 @@ SELECT CASE choose
         IF choose <> 1 THEN chosit = 24: GOTO menu0
         endrnd:
         recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
-        IF player = 2 THEN side = side + 1: IF side = 2 THEN CALL blanken: CALL usa: GOTO menu0
+        IF player = 2 THEN side = side + 1: IF side = 2 THEN CALL displayPlayerTurnScreen: CALL usa: GOTO menu0
         GOTO newmonth
 	CASE 6 ' Report Menu
         CALL report((side)): chosit = 27
@@ -560,7 +560,7 @@ SELECT CASE choose
                 CALL clearBottom
                 COLOR 11: CALL clearBottom: PRINT "Play Balance : "; menuText$(choose);
                 difficult = choose
-                CALL unionplus
+                CALL addUnionAdvantage
                 choose = 27: GOTO utilityMenu
 	        CASE 7 ' Ending Conditions Settings
                 CALL endit
@@ -648,7 +648,7 @@ SELECT CASE choose
                 ELSE
                     PRINT "REALISM ON: Recruiting based on CITY SIZE";
                     IF side = 2 AND randbal = 1 AND randbal < 5 THEN randbal = randbal + 2
-                    CALL unionplus
+                    CALL addUnionAdvantage
                 END IF
                 choose = 32: GOTO utilityMenu
 	        CASE 12 ' Check Map Linkages
@@ -730,7 +730,7 @@ DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
-SUB blanken ()
+SUB displayPlayerTurnScreen ()
     c = 1
 	IF side = 2 THEN c = 7
 	CLS
@@ -741,7 +741,7 @@ SUB blanken ()
 	DO WHILE INKEY$ = "": LOOP
 END SUB
 
-SUB unionplus ()
+SUB addUnionAdvantage ()
     usadv = 120 * difficult
     IF player = 2 THEN usadv = 50 * difficult
 	IF realism > 0 THEN usadv = usadv * .7
@@ -794,7 +794,7 @@ SUB moveArmy
     CALL movefrom(index, target)
     IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN moveMenuFlag = 1
-	GOTO dudd
+	EXIT SUB
 
     tent:
     tlx = 67
@@ -823,14 +823,14 @@ SUB moveArmy
     colour = 3
     CALL menu(2)
     CALL clearRight
-    IF choose < 0 GOTO dudd
+    IF choose < 0 THEN EXIT SUB
     IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN
         COLOR 11
         CALL clearBottom
         PRINT "No campaigns in January"
         CALL TICK(9)
         CALL clearBottom
-        GOTO dudd
+        EXIT SUB
     END IF
 
     ' Update the army's location and animate the movement
