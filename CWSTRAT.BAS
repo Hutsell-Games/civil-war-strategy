@@ -20,7 +20,7 @@ DECLARE SUB mountain (xx%, yy%)
 DECLARE SUB maxWidth (wide%)
 DECLARE SUB generateRomanNumeralArmy (target%, a$)
 DECLARE SUB animate (index%, flag%)
-DECLARE SUB armies ()
+DECLARE SUB moveArmy ()
 DECLARE SUB showArmyStatistics (index%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB blanken ()
@@ -43,7 +43,7 @@ DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB animateFlashingCity (which%)
 DECLARE SUB fortify (target%)
 DECLARE SUB icon (from%, dest%, kind%)
-DECLARE SUB iterate ()
+DECLARE SUB advanceToNextTurn ()
 DECLARE SUB maxx ()
 DECLARE SUB menu (switch%)
 DECLARE SUB movefrom (index%, target%)
@@ -295,7 +295,7 @@ SELECT CASE choose
         chosit = 23
         GOTO menu0
 	CASE 2 ' Armies Menu
-        CALL armies
+        CALL moveArmy
         chosit = 23
         GOTO menu0
 	CASE 3 ' Navy Menu
@@ -789,7 +789,7 @@ END SUB
 ' This subroutine handles the movement of armies from one city to another.
 ' It first determines the target city and then displays a menu of possible destinations.
 ' If a valid destination is chosen, it updates the army's location and animates the movement.
-SUB armies
+SUB moveArmy
     ' Determine the target city for the army movement
     CALL movefrom(index, target)
     IF target > 0 AND index > 0 GOTO tent
@@ -1426,42 +1426,42 @@ END SELECT
 noshow:
 END SUB
 
-SUB iterate
-'---------------------------------------------------------------------------
-FOR i = 1 TO 40: IF armyloc(i) > 0 THEN CALL placearmy(i)
-NEXT i
-'---------------------------------------------------------------------------
-month = month + 2
-IF month > 12 THEN month = 1: year = year + 1
-'---------------------------------------------------------------------------
-s = 1
-FOR i = 1 TO 40: IF armyloc(i) < 1 GOTO rip
-IF i > 20 THEN s = 2
-IF cash(s) >= .2 * armysize(i) THEN
-	a = 1: IF realism > 0 THEN CALL cutoff(s, armyloc(i), a)
-	IF a > 0 THEN
-		supply(i) = supply(i) + 1
-		cash(s) = cash(s) - .2 * armysize(i)
-	END IF
-END IF
-IF (month < 7 OR month > 10) AND matrix(armyloc(i), 7) < 99 THEN supply(i) = supply(i) - 1
-IF matrix(armyloc(i), 7) = 99 AND navyloc(3 - s) = armyloc(i) THEN supply(i) = supply(i) - 1: CALL clearBottom: PRINT armyname$(i); " is blockaded"; : CALL TICK(turbo!)
-COLOR 13
-IF supply(i) < 1 THEN
-	supply(i) = 0
-	CALL clearBottom
-	PRINT armyname$(i); " is out of supplies";
-	CALL placearmy(i)
-	CALL TICK(turbo!)
-	IF RND > .8 AND armysize(i) > 50 THEN armysize(i) = .9 * armysize(i)
-END IF
-rip:
-NEXT i
-FOR k = 1 TO 2: CALL increaseArmyExperience(k): NEXT k
-y = 0: FOR i = 1 TO 20: y = y + .1 * armysize(i): NEXT i
-x = 0: FOR i = 21 TO 40: x = x + .1 * armysize(i): NEXT i
-IF side = 2 AND x > 0 THEN aggress! = y / x ELSE aggress! = 1
-IF side = 1 AND y > 0 THEN aggress! = x / y ELSE IF side = 1 THEN aggress! = 1
+SUB advanceToNextTurn
+    '---------------------------------------------------------------------------
+    FOR i = 1 TO 40: IF armyloc(i) > 0 THEN CALL placearmy(i)
+    NEXT i
+    '---------------------------------------------------------------------------
+    month = month + 2
+    IF month > 12 THEN month = 1: year = year + 1
+    '---------------------------------------------------------------------------
+    s = 1
+    FOR i = 1 TO 40: IF armyloc(i) < 1 GOTO rip
+    IF i > 20 THEN s = 2
+    IF cash(s) >= .2 * armysize(i) THEN
+        a = 1: IF realism > 0 THEN CALL cutoff(s, armyloc(i), a)
+        IF a > 0 THEN
+            supply(i) = supply(i) + 1
+            cash(s) = cash(s) - .2 * armysize(i)
+        END IF
+    END IF
+    IF (month < 7 OR month > 10) AND matrix(armyloc(i), 7) < 99 THEN supply(i) = supply(i) - 1
+    IF matrix(armyloc(i), 7) = 99 AND navyloc(3 - s) = armyloc(i) THEN supply(i) = supply(i) - 1: CALL clearBottom: PRINT armyname$(i); " is blockaded"; : CALL TICK(turbo!)
+    COLOR 13
+    IF supply(i) < 1 THEN
+        supply(i) = 0
+        CALL clearBottom
+        PRINT armyname$(i); " is out of supplies";
+        CALL placearmy(i)
+        CALL TICK(turbo!)
+        IF RND > .8 AND armysize(i) > 50 THEN armysize(i) = .9 * armysize(i)
+    END IF
+    rip:
+    NEXT i
+    FOR k = 1 TO 2: CALL increaseArmyExperience(k): NEXT k
+    y = 0: FOR i = 1 TO 20: y = y + .1 * armysize(i): NEXT i
+    x = 0: FOR i = 21 TO 40: x = x + .1 * armysize(i): NEXT i
+    IF side = 2 AND x > 0 THEN aggress! = y / x ELSE aggress! = 1
+    IF side = 1 AND y > 0 THEN aggress! = x / y ELSE IF side = 1 THEN aggress! = 1
 END SUB
 
 SUB movefrom (index, target)
@@ -2701,7 +2701,7 @@ IF commerce > 0 THEN
 	END IF
 END IF
 
-CALL touchup: CALL drawShips: CALL iterate
+CALL touchup: CALL drawShips: CALL advanceToNextTurn
 
 CALL clearBottom
 LINE (390, 350)-(520, 400), 1, BF
