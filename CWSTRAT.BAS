@@ -3,11 +3,11 @@ DECLARE SUB drawArmy (x%, y%, z%)
 DECLARE SUB sinkShip (who%)
 DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB integrity ()
-DECLARE SUB ironclad ()
+DECLARE SUB drawIronclad ()
 DECLARE SUB generateNormalRandom (xbar%, variance%, result%)
 DECLARE SUB relieveArmyCommander (who%)
 DECLARE SUB retreat (active%, x%)
-DECLARE SUB schooner ()
+DECLARE SUB drawSchooner ()
 DECLARE SUB shiptype (who%, i%)
 DECLARE SUB increaseArmyExperience (who%)
 DECLARE SUB tinytrain (who%, flag%)
@@ -16,7 +16,6 @@ DECLARE SUB topbar ()
 DECLARE SUB center (y%, a$)
 DECLARE SUB displayMessageBox (a$, s%)
 DECLARE SUB maptext ()
-DECLARE SUB mountain (xx%, yy%)
 DECLARE SUB maxWidth (wide%)
 DECLARE SUB generateRomanNumeralArmy (target%, a$)
 DECLARE SUB animate (index%, flag%)
@@ -24,10 +23,8 @@ DECLARE SUB moveArmy ()
 DECLARE SUB showArmyStatistics (index%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB displayPlayerTurnScreen ()
-DECLARE SUB bub2 (limit%)
-DECLARE SUB bubble (size%)
 DECLARE SUB cancel (side%)
-DECLARE SUB cannon ()
+DECLARE SUB drawCannon ()
 DECLARE SUB capitol ()
 DECLARE SUB capture (active%, c%, s%, flag%)
 DECLARE SUB chessie ()
@@ -55,11 +52,9 @@ DECLARE SUB placearmy (which%)
 DECLARE SUB railroad (who%)
 DECLARE SUB recruit (who%)
 DECLARE SUB report (who%)
-DECLARE SUB resupply (index%)
-DECLARE SUB rwin ()
+DECLARE SUB rebelWin ()
 DECLARE SUB scribe (a$, flag%)
 DECLARE SUB shen ()
-DECLARE SUB ships ()
 DECLARE SUB shipicon (who%, flag%)
 DECLARE SUB smarts ()
 DECLARE SUB showcity ()
@@ -72,7 +67,6 @@ DECLARE SUB touchup ()
 DECLARE SUB tupdate ()
 DECLARE SUB addUnionAdvantage ()
 DECLARE SUB usa ()
-DECLARE SUB usamap ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 DECLARE SUB maxWidth (wide%)
@@ -1527,12 +1521,9 @@ SUB navy (who, chx)
 	IF navyMenuFlag > 0 AND choose <> 1 THEN EXIT SUB
 	CALL menu(0): CALL clearRight
 	anchor:
-	'---------------------------------------------------------------------------
-	SELECT CASE choose
-	'---------------------------------------------------------------------------
-	'                               Build Ship
-	'---------------------------------------------------------------------------
-		CASE 1
+
+	SELECT CASE choose ' Naval Menu
+		CASE 1 ' Build Ship
 		IF cash(who) < cost OR navyloc(who) = 99 GOTO ahoy
 		IF chx = 1 AND navysize(who) > 9 THEN EXIT SUB
 		IF chx = 0 AND navysize(who) > 9 THEN GOTO ahoy
@@ -1597,10 +1588,7 @@ SUB navy (who, chx)
 		CALL drawShips
 		IF noise > 0 THEN SOUND 3000, 1
 		CALL TICK(turbo!)
-	'---------------------------------------------------------------------------
-	'                               Attack City
-	'---------------------------------------------------------------------------
-		CASE 2
+		CASE 2 ' Attack City
 		IF navyloc(who) = 99 GOTO ahoy
 		IF chx = 2 AND cityp(navyloc(who)) = who THEN EXIT SUB
 		IF chx = 2 AND occupied(navyloc(who)) > 0 AND RND > .5 THEN chx = 3: GOTO anchor
@@ -1650,10 +1638,7 @@ SUB navy (who, chx)
 		CALL showcity
 		victory(who) = victory(who) + cityv(navyloc(who))
 		EXIT SUB
-	'---------------------------------------------------------------------------
-	'                               Sail
-	'---------------------------------------------------------------------------
-		CASE 3
+		CASE 3 ' Sail
 		navysize(who) = LEN(fleet$(who))
 		IF navysize(who) < 1 AND chx > 0 THEN EXIT SUB
 		IF navyloc(who) < 1 OR navysize(who) < 1 THEN CALL clearBottom: PRINT "No ships remain"; : TICK 1: GOTO ahoy
@@ -1704,9 +1689,9 @@ SUB navy (who, chx)
 			a = ASC(LEFT$(fleet$(who), 1))
 			SELECT CASE a
 				CASE 73
-					CALL ironclad
+					CALL drawIronclad
 				CASE 87
-					CALL schooner
+					CALL drawSchooner
 			END SELECT
 			TICK 2 * turbo!
 		ELSE
@@ -1715,10 +1700,7 @@ SUB navy (who, chx)
 		navyloc(who) = array(choose)
 		IF navyloc(1) = navyloc(2) GOTO pirate
 		GOTO sail3
-	'---------------------------------------------------------------------------
-	'                               Raid Commerce
-	'---------------------------------------------------------------------------
-		CASE 4
+		CASE 4 ' Raid Commerce
 		navysize(who) = LEN(fleet$(who))
 		IF navysize(who) < 1 AND chx > 0 THEN EXIT SUB
 		IF navysize(who) < 1 OR commerce = who GOTO ahoy
@@ -1736,9 +1718,9 @@ SUB navy (who, chx)
 			a = ASC(LEFT$(fleet$(who), 1))
 			SELECT CASE a
 				CASE 73
-					CALL ironclad
+					CALL drawIronclad
 				CASE 87
-					CALL schooner
+					CALL drawSchooner
 			END SELECT
 			TICK 2 * turbo!
 		ELSE
@@ -1748,10 +1730,7 @@ SUB navy (who, chx)
 		IF navyloc(1) = navyloc(2) GOTO pirate
 		CLS : CALL usa
 		EXIT SUB
-	'---------------------------------------------------------------------------
-	'                               Invasion
-	'---------------------------------------------------------------------------
-		CASE 5
+		CASE 5 ' Naval Invasion
 		CALL commander((who), empty)
 		IF chx > 0 AND empty = 0 THEN chx = 3: GOTO anchor
 		x = 35
@@ -1762,10 +1741,7 @@ SUB navy (who, chx)
 		armysize(empty) = x
 		IF who = side THEN navyMenuFlag = 1
 		EXIT SUB
-	'---------------------------------------------------------------------------
-	'                               Exit
-	'---------------------------------------------------------------------------
-		CASE ELSE
+		CASE ELSE ' Exit
 		EXIT SUB
 	END SELECT
 	GOTO ahoy
@@ -4851,7 +4827,7 @@ SUB maxWidth (wide)
 	NEXT i
 END SUB
 
-SUB ironclad
+SUB drawIronclad
 	SCREEN 12
 	LINE (1, 240)-(639, 309), 3, BF
 	LINE (639, 309)-(1, 479), 1, BF
@@ -4956,7 +4932,7 @@ SUB ironclad
 	LINE (110, 313)-(114, 315), 0, BF
 END SUB
 
-SUB schooner
+SUB drawSchooner
 	SCREEN 12
 	LINE (1, 240)-(639, 309), 3, BF
 	LINE (639, 309)-(1, 479), 1, BF
