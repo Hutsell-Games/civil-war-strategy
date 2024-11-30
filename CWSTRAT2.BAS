@@ -30,7 +30,7 @@ SELECT CASE z
 END SELECT
 END SUB
 
-SUB bub2 (limit)
+SUB bubbleSort (limit)
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
