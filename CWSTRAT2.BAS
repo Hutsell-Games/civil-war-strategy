@@ -521,7 +521,6 @@ abe:
 		emancipate = 1
 		CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
 		victory(1) = victory(1) + 100: victory(2) = victory(2) - 100
-		SHELL "abelinco.exe"
 		CALL usa
 		GOTO dull2
 	END IF

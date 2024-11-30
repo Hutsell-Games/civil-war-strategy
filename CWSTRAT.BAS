@@ -59,7 +59,6 @@ FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
 choose = 0
 a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 
-band:           SHELL "cwstitle.exe"
 notitle2:
 SCREEN 12
 	DEF SEG = VARSEG(graphic(1))
