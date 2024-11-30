@@ -164,22 +164,22 @@ LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
 CALL flags(1, -440, 0): CALL flags(2, -100, 0)
 IF replay = 0 AND noise = 2 AND choose = 0 THEN
-IF side = 1 THEN
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "MST170o1e8o0b8o1e8"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "e8e4f#8g4f#8"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "g4e8d2o0b8o1d2 "
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
-    ELSE
-	CALL shen
-    END IF
+	IF side = 1 THEN
+		DIM notes(7) AS STRING
+		notes(0) = "MST170o1e8o0b8o1e8"
+		notes(1) = "e8e4f#8g4f#8"
+		notes(2) = "g4e8d2o0b8o1d2 "
+		notes(3) = "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
+		notes(4) = "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
+		notes(5) = "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
+
+		FOR i = 0 TO 5
+			IF INKEY$ <> "" THEN GOTO notitle
+			PLAY notes(i)
+		NEXT i
+	ELSE
+		CALL shen
+	END IF
 END IF
 notitle:
 GOSUB unionplus
@@ -187,20 +187,21 @@ GOSUB unionplus
 city$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 vptotal = usadv + 200
-FOR i = 1 TO 40: INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
-cityo(i) = cityp(i)
-CALL occupy(i)
-FOR j = 1 TO 7
-	INPUT #1, matrix(i, j)
-NEXT j
-INPUT #1, fort(i)
-IF cityp(i) > 0 THEN 
-	x = cityp(i)
-	control(x) = control(x) + 1
-	victory(x) = victory(x) + cityv(i)
-END IF
-IF cityp(i) > 0 THEN cash(cityp(i)) = cash(cityp(i)) + cityv(i)
-vptotal = vptotal + cityv(i)
+FOR i = 1 TO 40
+    INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
+    cityo(i) = cityp(i)
+    CALL occupy(i)
+    FOR j = 1 TO 7
+        INPUT #1, matrix(i, j)
+    NEXT j
+    INPUT #1, fort(i)
+    IF cityp(i) > 0 THEN 
+        x = cityp(i)
+        control(x) = control(x) + 1
+        victory(x) = victory(x) + cityv(i)
+    END IF
+    IF cityp(i) > 0 THEN cash(cityp(i)) = cash(cityp(i)) + cityv(i)
+    vptotal = vptotal + cityv(i)
 NEXT i
 CLOSE #1
 CALL clrbot
@@ -211,7 +212,7 @@ wtype = 2
 hilite = 15
 replay = 1
 IF player = 2 THEN GOSUB blanken
-mtx$(0) = "VGA CIVILWAR STRATEGY"
+mtx$(0) = "VGA CIVIL WAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
 mtx$(3) = "Quit"
@@ -725,19 +726,23 @@ mtx$(1) = "Yes"
 mtx$(2) = "No"
 size = 2: colour = 5
 tlx = 67: tly = 15
-CALL menu(0): CALL clrrite: IF choose = 1 THEN END ELSE GOTO menu0
+CALL menu(0)
+CALL clrrite
+IF choose = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: usadv = 120 * difficult: IF player = 2 THEN usadv = 50 * difficult
-	   IF realism > 0 THEN usadv = usadv * .7
-	   RETURN
+unionplus:
+	usadv = 120 * difficult: IF player = 2 THEN usadv = 50 * difficult
+	IF realism > 0 THEN usadv = usadv * .7
+	RETURN
 '............................................................................
-blanken:        c = 1: IF side = 2 THEN c = 7
-		CLS : LINE (100, 200)-(500, 300), c, BF
-		LINE (100, 200)-(500, 300), 8 - c, B
-		COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
-		COLOR 11: LOCATE 17, 30: PRINT force$(side); " PLAYER TURN"
-		DO WHILE INKEY$ = "": LOOP
-		RETURN
+blanken:
+	c = 1: IF side = 2 THEN c = 7
+	CLS : LINE (100, 200)-(500, 300), c, BF
+	LINE (100, 200)-(500, 300), 8 - c, B
+	COLOR 7: LOCATE 14, 31: PRINT " "; month$(month); year
+	COLOR 11: LOCATE 17, 30: PRINT force$(side); " PLAYER TURN"
+	DO WHILE INKEY$ = "": LOOP
+	RETURN
 '............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
@@ -751,29 +756,29 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' index: index of the army to be moved
 ' flag: a flag to determine if certain actions should be skipped
 SUB animate (index, flag)
-from = armyloc(index): to2 = armymove(index): armyloc(index) = 0
-x = cityx(from) - 12
-y = cityy(from) - 11
-x1 = .5 * (cityx(to2) + cityx(from))
-y1 = .5 * (cityy(to2) + cityy(from))
+	from = armyloc(index): to2 = armymove(index): armyloc(index) = 0
+	x = cityx(from) - 12
+	y = cityy(from) - 11
+	x1 = .5 * (cityx(to2) + cityx(from))
+	y1 = .5 * (cityy(to2) + cityy(from))
 
-CALL occupy(from): IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
-       
-IF flag > 0 GOTO already
-	GET (x - 9, y - 7)-(x + 9, y + 6), anima
-	IF occupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-already:
+	CALL occupy(from): IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
+		
+	IF flag > 0 GOTO already
+		GET (x - 9, y - 7)-(x + 9, y + 6), anima
+		IF occupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	already:
 
-	FOR i = 2 TO 8
-	x1 = .1 * (i * cityx(to2) + (10 - i) * cityx(from))
-	y1 = .1 * (i * cityy(to2) + (10 - i) * cityy(from))
-	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
-	PUT (x1 - 10, y1 - 10), anima, PSET
-	IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
-	IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
-	PUT (x1 - 10, y1 - 10), image, PSET
-	NEXT i
-	armyloc(index) = from
+		FOR i = 2 TO 8
+		x1 = .1 * (i * cityx(to2) + (10 - i) * cityx(from))
+		y1 = .1 * (i * cityy(to2) + (10 - i) * cityy(from))
+		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
+		PUT (x1 - 10, y1 - 10), anima, PSET
+		IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
+		IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
+		PUT (x1 - 10, y1 - 10), image, PSET
+		NEXT i
+		armyloc(index) = from
 END SUB
 
 SUB armies
