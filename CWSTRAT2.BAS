@@ -199,7 +199,6 @@ SUB capture (active, c, s, flag)
 		a$ = force$(3 - s) + " CAPITAL captured !"
 		CALL scribe(a$, 1)
 		CALL image2(city$(capcity(3 - s)) + " has fallen!", 4)
-		IF graf = 3 THEN CALL burn(3 - s)
 		capcity(3 - s) = 0
 		CALL flashcity(c)
 	END IF

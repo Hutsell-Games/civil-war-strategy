@@ -1057,12 +1057,6 @@ victory(s) = victory(s) + 1
 CALL icon(armyloc(defend), 0, 8)
 END SUB
 
-SUB burn (who)
-SHELL "cityburn.exe"
-SCREEN 12
-CALL usa
-END SUB
-
 SUB combine (who)
 	colour = 3: target = 0: hilite = 3
 	tlx = 67: tly = 2
