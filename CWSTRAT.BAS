@@ -21,30 +21,32 @@ DECLARE SUB relieveArmyCommander (who%)
 DECLARE SUB retreat (active%, x%)
 DECLARE SUB showArmyStatistics (index%)
 DECLARE SUB fortifyCity (target%)
+DECLARE SUB captureCity (active%, c%, s%, flag%)
 
 ' Utility
-DECLARE SUB integrity ()
+DECLARE SUB determineTrainCapacity (who%, limit%)
 DECLARE SUB filer (switch%)
 DECLARE SUB generateNormalRandom (xbar%, variance%, result%)
+DECLARE SUB integrity ()
 DECLARE SUB setStartFinishIndexes (startIndex%, endIndex%, who%)
 
 ' Reports
 DECLARE SUB report (who%)
 
-DECLARE SUB traincapacity (who%, limit%)
+' Game Mechanics
+DECLARE SUB advanceToNextTurn ()
+
 DECLARE SUB center (y%, a$)
 DECLARE SUB maptext ()
 DECLARE SUB battle (attack%, defend%, win%, lose%)
-DECLARE SUB capture (active%, c%, s%, flag%)
 DECLARE SUB choices (b1%, wide%)
 DECLARE SUB cutoff (who%, target%, a%)
 DECLARE SUB endit ()
 DECLARE SUB engine ()
 DECLARE SUB evaluate (index%, x%)
 DECLARE SUB events ()
-DECLARE SUB advanceToNextTurn ()
-DECLARE SUB maxx ()
-DECLARE SUB newcity (index%)
+
+DECLARE SUB moveCapitalCity (index%)
 DECLARE SUB rebelWin ()
 DECLARE SUB scribe (a$, flag%)
 DECLARE SUB shen ()
@@ -80,6 +82,7 @@ DECLARE SUB drawShipIcon (who%, flag%)
 DECLARE SUB drawTinyTrain (who%, flag%)
 DECLARE SUB displayMessageBox (a$, s%)
 DECLARE SUB displayPlayerTurnScreen ()
+DECLARE SUB displayHighScoreScreen ()
 DECLARE SUB touchup ()
 DECLARE SUB topbar ()
 
@@ -314,7 +317,7 @@ SELECT CASE choose
             x = POINT(0): y = POINT(1)
             PAINT (x, y), z, 15
             COLOR 15: IF side = 1 THEN COLOR 11
-            CALL traincapacity(side, limit)
+            CALL determineTrainCapacity(side, limit)
             CALL clearBottom
             PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
             CALL railroad(side)
@@ -417,7 +420,7 @@ SELECT CASE choose
                 CALL clearRight
                 menuText$(0) = "Capital"
                 a$ = city$(capcity(side))
-                index = capcity(side): CALL newcity(index)
+                index = capcity(side): CALL moveCapitalCity(index)
                 IF index = 0 GOTO menu0
                 capcity(side) = index
                 CALL clearBottom: PRINT force$(side); " capital moved from "; a$; " to "; city$(capcity(side));
@@ -1620,7 +1623,7 @@ SUB navy (who, chx)
 		CALL sinkShip(who)
 		c = navyloc(who): CALL newarmy((who), empty, c)
 		cash(who) = cash(who) + 100     'compensate for cost of recruiting new army
-		CALL capture(empty, c, who, 0)
+		CALL captureCity(empty, c, who, 0)
 		armysize(empty) = x
 		IF who = side THEN navyMenuFlag = 1
 		EXIT SUB
@@ -1798,7 +1801,7 @@ SUB newarmy (who, empty, target)
 	armymove(empty) = -1
 END SUB
 
-SUB newcity (index)
+SUB moveCapitalCity (index)
 		menuText$(1) = "  "
 		menuText$(3) = "  "
 		size = 3: a$ = city$(index)
@@ -1877,7 +1880,7 @@ SUB railroad (who)
 		IF defend < max THEN target = armyloc(i): GOSUB route: IF x > 1 THEN max = defend: index = i
 	puter:  NEXT i
 		IF index = 0 OR max > .3 * armysize(index) GOTO toot
-		CALL traincapacity(who, limit)
+		CALL determineTrainCapacity(who, limit)
 		IF armysize(index) > limit THEN GOTO toot
 		from = armyloc(index)
 		x1 = 0: FOR i = 1 TO 40: IF cityp(i) <> who GOTO puted
@@ -1900,7 +1903,7 @@ SUB railroad (who)
 	human:
 		CALL moveArmyFrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clearBottom: PRINT "Railroad move not allowed"; : GOTO toot
 		x = 1: IF index > 20 THEN x = 2
-		CALL traincapacity(who, limit)
+		CALL determineTrainCapacity(who, limit)
 		IF armysize(index) > limit THEN CALL clearBottom: PRINT "Too many troops for railroad capacity"; : GOTO toot
 		
 		target = armyloc(index): GOSUB route: IF x > 1 GOTO aboard
@@ -1908,7 +1911,7 @@ SUB railroad (who)
 	aboard:
 		CALL clearBottom: PRINT "Select destination for "; armyname$(index); " from "; city$(target);
 		menuText$(0) = "To": from = target: x1 = from: IF from = 0 GOTO toot
-		CALL newcity(x1): IF x1 = from OR x1 = 0 GOTO toot
+		CALL moveCapitalCity(x1): IF x1 = from OR x1 = 0 GOTO toot
 
 		target = x1: GOSUB route: IF x > 1 GOTO haul
 		CALL clearBottom: PRINT armyname$(index); "'s train cannot go to "; city$(x1); " - select another city"; : CALL TICK(9)
@@ -1941,7 +1944,7 @@ SUB railroad (who)
 		CALL TICK(turbo!)
 		x = cityx(armyloc(index)) - 12: y = cityy(armyloc(index)) - 11
 		LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-		IF cityp(armyloc(index)) <> who THEN CALL capture(index, armyloc(index), who, 0)
+		IF cityp(armyloc(index)) <> who THEN CALL captureCity(index, armyloc(index), who, 0)
 		CALL placearmy(index)
 		IF occupied(armyloc(index)) > 0 THEN CALL increaseArmyExperience(who): GOTO toot
 		CALL occupyCity(armyloc(index)): CALL placearmy(index)
@@ -2461,7 +2464,7 @@ SUB tupdate
 				TICK 3
 			END IF
 		END IF
-		CALL capture(active, c, s, flag)
+		CALL captureCity(active, c, s, flag)
 	horde:
 	IF supply(active) < 10 THEN supply(active) = supply(active) + 1: IF RND > .8 GOTO horde
 	digin:
@@ -2583,7 +2586,7 @@ SUB cancelArmyMove (side)
 	CALL clearRight
 END SUB
 
-SUB capture (active, c, s, flag)
+SUB captureCity (active, c, s, flag)
 	cityp(c) = s: CALL clearBottom
 	a$ = armyname$(active) + " has captured " + city$(c)
 	COLOR 11: PRINT armyname$(active) + " has captured " + city$(c);
@@ -2983,52 +2986,6 @@ SUB maptext
         NEXT j
         nextc:
     NEXT k
-END SUB
-
-SUB maxx
-	COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
-	SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
-
-	LOCATE 2, 7: PRINT STRING$(57, "�")
-	LOCATE 9, 7: PRINT STRING$(57, "�")
-	FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "�"; SPACE$(55); "�": NEXT i
-
-			OPEN "I", 1, "hiscore.cws"
-			FOR s = 1 TO 2
-			COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT force$(s); " HALL of FAME"
-			COLOR 15, 0: FOR i = 1 TO 5
-			INPUT #1, city$(5 * (s - 1) + i), matrix(s, i)
-			LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, city$(5 * (s - 1) + i), matrix(s, i)
-			NEXT i: NEXT s: CLOSE #1
-				
-				FOR s = 1 TO 2: FOR i = 1 TO 5
-				IF victory(s) < matrix(s, i) GOTO oldskor
-					FOR j = 5 TO i + 1 STEP -1
-					matrix(s, j) = matrix(s, j - 1)
-					city$(5 * (s - 1) + j) = city$(5 * (s - 1) + j - 1)
-					NEXT j
-
-				COLOR 15, 1: IF s = 2 THEN COLOR 4, 7
-				FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
-				LOCATE 12, 1: PRINT "Congratulations ! Score of"; victory(s)
-				PRINT "New Entry into "; force$(s); " HALL of FAME in place "; i
-				IF player = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; force$(s); " commander": GOTO automate
-	who4:
-				PRINT "What is name of "; force$(s); " commander"; : INPUT a$: IF a$ = "" GOTO who4
-	automate:
-				city$(5 * (s - 1) + i) = a$
-				matrix(s, i) = victory(s): GOTO foun
-	oldskor:
-				NEXT i
-	foun:
-				NEXT s
-			
-			OPEN "O", 1, "hiscore.cws"
-			FOR s = 1 TO 2
-				FOR i = 1 TO 5
-				WRITE #1, city$(5 * (s - 1) + i), matrix(s, i)
-				NEXT i
-			NEXT s: CLOSE #1: PRINT "Game Over": DO WHILE INKEY$ = "": LOOP: pcode = 1
 END SUB
 
 SUB occupyCity (x)
@@ -3738,7 +3695,7 @@ SUB touchup
     LINE (66, 375)-(52, 375), 10
 END SUB
 
-SUB traincapacity (who, limit)
+SUB determineTrainCapacity (who, limit)
     IF realism = 0 THEN limit = train(who): EXIT SUB
     x = 11: IF side = 2 THEN x = 23
     limit = train(who) + 5 * (control(who) - x)
@@ -4192,7 +4149,7 @@ SUB victor
 		CALL scribe(t$, 0)
 		CALL scribe(a$, 0)
 	END IF
-	PRINT a$: CALL maxx
+	PRINT a$: CALL displayHighScoreScreen
 	EXIT SUB
     stale:
     NEXT i
@@ -5063,4 +5020,50 @@ SUB drawIcons (from, dest, kind)
 
 		CASE ELSE
 	END SELECT
+END SUB
+
+SUB displayHighScoreScreen
+	COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+	SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
+
+	LOCATE 2, 7: PRINT STRING$(57, "�")
+	LOCATE 9, 7: PRINT STRING$(57, "�")
+	FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "�"; SPACE$(55); "�": NEXT i
+
+			OPEN "I", 1, "hiscore.cws"
+			FOR s = 1 TO 2
+			COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT force$(s); " HALL of FAME"
+			COLOR 15, 0: FOR i = 1 TO 5
+			INPUT #1, city$(5 * (s - 1) + i), matrix(s, i)
+			LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, city$(5 * (s - 1) + i), matrix(s, i)
+			NEXT i: NEXT s: CLOSE #1
+				
+				FOR s = 1 TO 2: FOR i = 1 TO 5
+				IF victory(s) < matrix(s, i) GOTO oldskor
+					FOR j = 5 TO i + 1 STEP -1
+					matrix(s, j) = matrix(s, j - 1)
+					city$(5 * (s - 1) + j) = city$(5 * (s - 1) + j - 1)
+					NEXT j
+
+				COLOR 15, 1: IF s = 2 THEN COLOR 4, 7
+				FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
+				LOCATE 12, 1: PRINT "Congratulations ! Score of"; victory(s)
+				PRINT "New Entry into "; force$(s); " HALL of FAME in place "; i
+				IF player = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; force$(s); " commander": GOTO automate
+	who4:
+				PRINT "What is name of "; force$(s); " commander"; : INPUT a$: IF a$ = "" GOTO who4
+	automate:
+				city$(5 * (s - 1) + i) = a$
+				matrix(s, i) = victory(s): GOTO foun
+	oldskor:
+				NEXT i
+	foun:
+				NEXT s
+			
+			OPEN "O", 1, "hiscore.cws"
+			FOR s = 1 TO 2
+				FOR i = 1 TO 5
+				WRITE #1, city$(5 * (s - 1) + i), matrix(s, i)
+				NEXT i
+			NEXT s: CLOSE #1: PRINT "Game Over": DO WHILE INKEY$ = "": LOOP: pcode = 1
 END SUB
