@@ -1,6 +1,6 @@
 DEFINT A-Z
 DECLARE SUB armyxy (x%, y%, z%)
-DECLARE SUB barnacle (who%)
+DECLARE SUB sinkShip (who%)
 DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB integrity ()
 DECLARE SUB ironclad ()
@@ -854,7 +854,7 @@ IF supply(index) < 2 THEN COLOR 12
 LOCATE 9, 68: PRINT "Supply:"; TAB(75); supply(index)
 END SUB
 
-SUB barnacle (who)
+SUB sinkShip (who)
 navysize(who) = navysize(who) - 1
 IF navysize(who) > 0 THEN
 	fleet$(who) = LEFT$(fleet$(who), navysize(who))
@@ -1593,7 +1593,7 @@ add2ship:
 deserted:
 	IF fort(target) = 0 GOTO blast
 	IF RND < .7 + .03 * (navysize(who) - fort(target)) GOTO hurt1
-	CALL barnacle(who)
+	CALL sinkShip(who)
 	CALL clrbot
 	PRINT force$(cityp(target)); " shore battery sunk an attacking ship!"; navysize(who); "ship(s) left! ";
 	IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5
@@ -1726,7 +1726,7 @@ admiral:
 	CALL commander((who), empty)
 	IF chx > 0 AND empty = 0 THEN chx = 3: GOTO anchor
 	x = 35
-	CALL barnacle(who)
+	CALL sinkShip(who)
 	c = navyloc(who): CALL newarmy((who), empty, c)
 	cash(who) = cash(who) + 100     'compensate for cost of recruiting new army
 	CALL capture(empty, c, who, 0)
@@ -1794,7 +1794,7 @@ hitem:
 	 y = 90: IF who = 1 THEN y = 190
 	 GOSUB xout
 	 LOCATE 17, 5: PRINT force$(3 - who); " ship SUNK!": CALL TICK(turbo! + 1): GOSUB clr1
-	 CALL barnacle(3 - who)
+	 CALL sinkShip(3 - who)
 	 IF navysize(3 - who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
 		PRINT force$(3 - who); " fleet DEFEATED"
@@ -1813,7 +1813,7 @@ hitme1:
 	 y = 190: IF who = 1 THEN y = 90
 	 GOSUB xout
 	 LOCATE 17, 5: PRINT "One of the "; force$(who); " ships was SUNK!": CALL TICK(turbo!): GOSUB clr1
-	 CALL barnacle(who)
+	 CALL sinkShip(who)
 	 IF navysize(who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
 		PRINT "Attacking "; force$(who); " fleet has been ELIMINATED !"
@@ -2645,7 +2645,7 @@ IF commerce > 0 THEN
 		TICK 9
 	ELSE
 		raider = 0
-		CALL barnacle(commerce)
+		CALL sinkShip(commerce)
 		COLOR 15: PRINT force$(commerce); " raiders have lost a ship ("; navysize(commerce); " remain)";
 		IF noise > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 		IF navyloc(commerce) > 0 THEN
