@@ -6,7 +6,6 @@ DECLARE SUB relieveArmyCommander (who%)
 DECLARE SUB retreat (active%, x%)
 DECLARE SUB shiptype (who%, i%)
 DECLARE SUB increaseArmyExperience (who%)
-DECLARE SUB tinytrain (who%, flag%)
 DECLARE SUB traincapacity (who%, limit%)
 DECLARE SUB topbar ()
 DECLARE SUB center (y%, a$)
@@ -14,13 +13,11 @@ DECLARE SUB displayMessageBox (a$, s%)
 DECLARE SUB maptext ()
 DECLARE SUB maxWidth (wide%)
 DECLARE SUB generateRomanNumeralArmy (target%, a$)
-DECLARE SUB animate (index%, flag%)
 DECLARE SUB moveArmy ()
 DECLARE SUB showArmyStatistics (index%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB displayPlayerTurnScreen ()
-DECLARE SUB cancel (side%)
-DECLARE SUB capitol ()
+DECLARE SUB cancelArmyMove (side%)
 DECLARE SUB capture (active%, c%, s%, flag%)
 DECLARE SUB chessie ()
 DECLARE SUB combineArmies (who%)
@@ -37,7 +34,7 @@ DECLARE SUB icon (from%, dest%, kind%)
 DECLARE SUB advanceToNextTurn ()
 DECLARE SUB maxx ()
 DECLARE SUB menu (switch%)
-DECLARE SUB movefrom (index%, target%)
+DECLARE SUB moveArmyFrom (index%, target%)
 DECLARE SUB navy (who%, x%)
 DECLARE SUB newarmy (who%, empty%, target%)
 DECLARE SUB newcity (index%)
@@ -66,12 +63,15 @@ DECLARE SUB maxWidth (wide%)
 DEFINT A-Z
 DECLARE SUB choices (b1%, wide%)
 DECLARE SUB topbar ()
+DECLARE SUB animateArmyMove (index%, flag%)
 DECLARE SUB drawArmy (x%, y%, z%)
 DECLARE SUB drawCannon ()
+DECLARE SUB drawCapitol ()
 DECLARE SUB drawFlags (who%, w%, a%)
 DECLARE SUB drawIronclad ()
 DECLARE SUB drawSchooner ()
 DECLARE SUB drawShipIcon (who%, flag%)
+DECLARE SUB drawTinyTrain (who%, flag%)
 DIM SHARED graft(1 TO 1564)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
 
@@ -351,7 +351,7 @@ SELECT CASE choose
         chosit = 28
         SELECT CASE choose
             CASE 1 ' Cancel Move
-                CALL cancel(side)
+                CALL cancelArmyMove(side)
                 moveMenuFlag = 0
                 choose = 22
 		    CASE 2 ' Fortify
@@ -416,7 +416,7 @@ SELECT CASE choose
 		    CASE 6 ' Detach Army
                 IF side = 1 THEN CALL clearBottom: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
                 COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-                CALL movefrom(index, target): IF target < 1 OR index < 1 GOTO menu0
+                CALL moveArmyFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
                 IF armysize(index) < 65 THEN CALL clearBottom: PRINT "Too small to detach"; : CALL TICK(turbo!): GOTO menu0
                 CALL commander(2, empty): IF empty = 0 GOTO menu0
                 supply(empty) = .3 * supply(index): supply(index) = supply(index) - supply(empty): IF supply(index) < 0 THEN supply(index) = 0
@@ -431,7 +431,7 @@ SELECT CASE choose
                 GOTO optionsMenu
             CASE 7 ' Drill Army
                 COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
-                CALL movefrom(index, target)
+                CALL moveArmyFrom(index, target)
                 IF target < 1 OR index < 1 THEN COLOR 11: CALL clearBottom: PRINT "No armies remain eligible for drills in "; month$(month); : GOTO menu0
                 IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN COLOR 12: CALL clearBottom: PRINT armyname$(index); ": Army has reached maximum improvement through drilling"; : GOTO optionsMenu
                 armyexper(index) = armyexper(index) + 1
@@ -740,51 +740,12 @@ SUB addUnionAdvantage ()
 	IF realism > 0 THEN usadv = usadv * .7
 END SUB
 
-SUB animate (index, flag)
-    ' Store the current and target locations of the army
-    from = armyloc(index)
-    to2 = armymove(index)
-    armyloc(index) = 0
-
-    ' Calculate the initial coordinates for animation
-    x = cityx(from) - 12
-    y = cityy(from) - 11
-    x1 = .5 * (cityx(to2) + cityx(from))
-    y1 = .5 * (cityy(to2) + cityy(from))
-
-    ' Place the army in the current location if occupied
-    CALL occupyCity(from)
-    IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
-       
-    ' Skip the animation setup if flag is set
-    IF flag > 0 GOTO already
-
-    ' Capture the current screen area for animation
-	GET (x - 9, y - 7)-(x + 9, y + 6), anima
-	IF occupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-
-    already:
-    ' Animate the movement of the army
-	FOR i = 2 TO 8
-	x1 = .1 * (i * cityx(to2) + (10 - i) * cityx(from))
-	y1 = .1 * (i * cityy(to2) + (10 - i) * cityy(from))
-	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
-	PUT (x1 - 10, y1 - 10), anima, PSET
-	IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
-	IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
-	PUT (x1 - 10, y1 - 10), image, PSET
-	NEXT i
-
-    ' Restore the army's original location
-	armyloc(index) = from
-END SUB
-
 ' This subroutine handles the movement of armies from one city to another.
 ' It first determines the target city and then displays a menu of possible destinations.
 ' If a valid destination is chosen, it updates the army's location and animates the movement.
 SUB moveArmy
     ' Determine the target city for the army movement
-    CALL movefrom(index, target)
+    CALL moveArmyFrom(index, target)
     IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN moveMenuFlag = 1
 	EXIT SUB
@@ -1258,7 +1219,7 @@ SUB filer (switch)
 		SCREEN 12: CLS
 		CLOSE #1: CALL usa: CALL clearBottom
 		FOR k = 1 TO 2
-		IF rr(k) > 0 THEN CALL tinytrain(k, 1)
+		IF rr(k) > 0 THEN CALL drawTinyTrain(k, 1)
 		NEXT k
 		side = a
 
@@ -1438,7 +1399,7 @@ SUB advanceToNextTurn
     IF side = 1 AND y > 0 THEN aggress! = x / y ELSE IF side = 1 THEN aggress! = 1
 END SUB
 
-SUB movefrom (index, target)
+SUB moveArmyFrom (index, target)
 	colour = 3: tlx = 67: tly = 5: index = 0: size = 0: target = 0
 	who = side: CALL setStartFinishIndexes(startIndex, endIndex, who)
 	FOR i = startIndex TO endIndex
@@ -2000,7 +1961,7 @@ SUB railroad (who)
 		END IF
 		IF x1 > 0 GOTO haul ELSE GOTO toot
 	human:
-		CALL movefrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clearBottom: PRINT "Railroad move not allowed"; : GOTO toot
+		CALL moveArmyFrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clearBottom: PRINT "Railroad move not allowed"; : GOTO toot
 		x = 1: IF index > 20 THEN x = 2
 		CALL traincapacity(who, limit)
 		IF armysize(index) > limit THEN CALL clearBottom: PRINT "Too many troops for railroad capacity"; : GOTO toot
@@ -2021,7 +1982,7 @@ SUB railroad (who)
 		from = armyloc(index)
 		rrfrom(who) = from
 		rr(who) = index: armyloc(index) = 0: armymove(index) = x1
-		CALL tinytrain(who, 1)
+		CALL drawTinyTrain(who, 1)
 		IF noise > 0 THEN SOUND 2222, 1
 		CALL engine
 
@@ -2030,13 +1991,13 @@ SUB railroad (who)
 		GOTO toot
 
 		CASE IS > 0
-		CALL tinytrain(who, 0)
+		CALL drawTinyTrain(who, 0)
 		CALL occupyCity(rrfrom(who))
 		IF occupied(rrfrom(who)) > 0 THEN CALL placearmy(occupied(rrfrom(who)))
 
 		index = rr(who)
 		tracks(who) = armymove(index)
-		CALL tinytrain(who, 1)
+		CALL drawTinyTrain(who, 1)
 
 		rr(who) = 0: armyloc(index) = armymove(index): armymove(index) = -1
 		COLOR 11: CALL clearBottom: PRINT "Train with "; armyname$(index); " has arrived in "; city$(armyloc(index)); : IF noise > 0 THEN SOUND 1200, 2
@@ -2369,21 +2330,6 @@ SUB strong (index)
 	PRINT a$;
 END SUB
 
-SUB tinytrain (who, flag)
-	IF tracks(who) = 0 THEN EXIT SUB
-	from = tracks(who)
-	x = cityx(from) - 12: y = cityy(from) - 11
-	SELECT CASE flag
-		CASE IS > 0
-		LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-		PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
-		DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
-		x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
-		CASE ELSE
-		LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-	END SELECT
-END SUB
-
 SUB tupdate
 	flag = 0
 	IF player = 1 THEN
@@ -2439,7 +2385,7 @@ SUB tupdate
 	CALL placearmy(active)
 	CALL icon(armyloc(active), armymove(active), 5)
 
-	CALL animate(active, 0)
+	CALL animateArmyMove(active, 0)
 
 	target = armymove(active)
 	IF occupied(target) = 0 GOTO easy
@@ -2475,7 +2421,7 @@ SUB tupdate
 	COLOR 11: CALL clearBottom: PRINT armyname$(active); " withdrew to "; city$(armymove(active));
 
 	CALL placearmy(armyloc(active))
-	CALL animate(active, 1)
+	CALL animateArmyMove(active, 1)
 
 	armyloc(active) = armymove(active)
 	CALL placearmy(armyloc(active))
@@ -2510,7 +2456,7 @@ SUB tupdate
 		CALL placearmy(defend)                  ' in old city
 
 		armymove(defend) = move2
-		CALL animate(defend, 0)                 ' animate retreat
+		CALL animateArmyMove(defend, 0)                 ' animate retreat
 		
 		armyloc(defend) = move2
 		occupied(move2) = defend
@@ -2667,7 +2613,7 @@ SUB bubbleSortMenuText (limit)
 	LOOP WHILE swaps%
 END SUB
 
-SUB cancel (side)
+SUB cancelArmyMove (side)
 	CALL setStartFinishIndexes(startIndex, endIndex, (side))
 	counter:
 	CALL clearRight
@@ -2698,54 +2644,6 @@ SUB cancel (side)
 	END SELECT
 	finix:
 	CALL clearRight
-END SUB
-
-SUB capitol
-	SCREEN 12
-	CLS
-	LINE (1, 1)-(639, 150), 4, BF
-	LINE (1, 150)-(639, 300), 15, BF
-	LINE (1, 300)-(639, 450), 1, BF
-	x = 0
-	LINE (150, 190)-(500, 254), 7, B
-	LINE (270, 190)-(370, 254), 7, B
-	LINE (270, 185)-(370, 175), 7, B
-	LINE (280, 173)-(360, 168), 7, B
-	LINE (270, 235)-(370, 254), 7, B
-	CIRCLE (320, 150), 74, 7, .2, 2.95, 2.1
-	LINE (285, 138)-(355, 168), 7, B
-	lwing:
-	PSET (180 + 120 * x, 200), 0
-
-	DRAW "C7ER1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1F1R1F1R1F1"
-	DRAW "R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1L47D4R48U3D51L4U17L41D17L3U47"
-	FOR i = 1 TO 7: DRAW "BR6R2D25L2U25": NEXT i
-	DRAW "BD33R2"
-	FOR i = 1 TO 5: DRAW "L40BR40D3": NEXT i
-	x = x + 1: IF x < 3 GOTO lwing
-	PSET (270, 190), 0
-	FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
-	PSET (344, 190), 0
-	FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
-	PSET (283, 140), 0
-	FOR i = 1 TO 11: DRAW "C7BR6R2D25L2U25": NEXT i
-	PSET (283, 120), 0
-	FOR i = 1 TO 11: DRAW "C7BR6R2D15L2U15": NEXT i
-	LINE (315, 55)-(325, 77), 7, B
-	LINE (318, 57)-(322, 75), 7, B
-	PSET (315, 53), 0
-	DRAW "S3C7R13U6L13D5BU5C7U2E1U2E2U3H2U3H1E3U2H1U2E2U2E2F2D2F4D3R2E2F1G4L1D7F1D2F1D1G2"
-	LINE (140, 270)-(510, 430), 14, BF
-	COLOR 15
-	IF noise = 2 THEN PLAY "T130MFMSO2f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4"
-	LOCATE 20, 20: PRINT CHR$(34); "... and that the government of the people,"
-	IF noise = 2 THEN PLAY "o2b-8.a16g8.g16g8.a16b-8.a16b-8.g16f8.g16f8.d16f4"
-	LOCATE 21, 20: PRINT "by the people, for the people,"
-	IF noise = 2 THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
-	LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
-	LOCATE 25, 40: PRINT "- Abraham Lincoln"
-	FOR i = -565 TO 50 STEP 50: CALL drawFlags(1, i, 0): NEXT i
-	IF noise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
 SUB capture (active, c, s, flag)
@@ -4372,7 +4270,7 @@ SUB victor
 	CALL usa: CALL report(100 + side)
 	IF j = 2 THEN FOR k = 1 TO 2: victory(k) = .7 * victory(k): NEXT k: CALL rebelWin: GOTO death
 
-	IF i = 1 THEN CALL capitol: COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(victory(1)): PRINT t$: GOTO death
+	IF i = 1 THEN CALL drawCapitol: COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(victory(1)): PRINT t$: GOTO death
 	IF i = 2 THEN CALL rebelWin: COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(victory(2)): PRINT t$
     death:
 	COLOR 14: LOCATE 4, 40 - .5 * LEN(a$)
@@ -5052,4 +4950,106 @@ SUB animateFlashingCity (which)
     CIRCLE (cityx(which), cityy(which)), 4, 0
     CIRCLE (cityx(which), cityy(which)), 3, c
     PAINT (cityx(which), cityy(which)), c, c
+END SUB
+
+SUB drawCapitol
+	SCREEN 12
+	CLS
+	LINE (1, 1)-(639, 150), 4, BF
+	LINE (1, 150)-(639, 300), 15, BF
+	LINE (1, 300)-(639, 450), 1, BF
+	x = 0
+	LINE (150, 190)-(500, 254), 7, B
+	LINE (270, 190)-(370, 254), 7, B
+	LINE (270, 185)-(370, 175), 7, B
+	LINE (280, 173)-(360, 168), 7, B
+	LINE (270, 235)-(370, 254), 7, B
+	CIRCLE (320, 150), 74, 7, .2, 2.95, 2.1
+	LINE (285, 138)-(355, 168), 7, B
+	lwing:
+	PSET (180 + 120 * x, 200), 0
+
+	DRAW "C7ER1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1F1R1F1R1F1"
+	DRAW "R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1L47D4R48U3D51L4U17L41D17L3U47"
+	FOR i = 1 TO 7: DRAW "BR6R2D25L2U25": NEXT i
+	DRAW "BD33R2"
+	FOR i = 1 TO 5: DRAW "L40BR40D3": NEXT i
+	x = x + 1: IF x < 3 GOTO lwing
+	PSET (270, 190), 0
+	FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
+	PSET (344, 190), 0
+	FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
+	PSET (283, 140), 0
+	FOR i = 1 TO 11: DRAW "C7BR6R2D25L2U25": NEXT i
+	PSET (283, 120), 0
+	FOR i = 1 TO 11: DRAW "C7BR6R2D15L2U15": NEXT i
+	LINE (315, 55)-(325, 77), 7, B
+	LINE (318, 57)-(322, 75), 7, B
+	PSET (315, 53), 0
+	DRAW "S3C7R13U6L13D5BU5C7U2E1U2E2U3H2U3H1E3U2H1U2E2U2E2F2D2F4D3R2E2F1G4L1D7F1D2F1D1G2"
+	LINE (140, 270)-(510, 430), 14, BF
+	COLOR 15
+	IF noise = 2 THEN PLAY "T130MFMSO2f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4"
+	LOCATE 20, 20: PRINT CHR$(34); "... and that the government of the people,"
+	IF noise = 2 THEN PLAY "o2b-8.a16g8.g16g8.a16b-8.a16b-8.g16f8.g16f8.d16f4"
+	LOCATE 21, 20: PRINT "by the people, for the people,"
+	IF noise = 2 THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
+	LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
+	LOCATE 25, 40: PRINT "- Abraham Lincoln"
+	FOR i = -565 TO 50 STEP 50: CALL drawFlags(1, i, 0): NEXT i
+	IF noise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
+END SUB
+
+SUB drawTinyTrain (who, flag)
+	IF tracks(who) = 0 THEN EXIT SUB
+	from = tracks(who)
+	x = cityx(from) - 12: y = cityy(from) - 11
+	SELECT CASE flag
+		CASE IS > 0
+		LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
+		PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
+		DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
+		x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
+		CASE ELSE
+		LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	END SELECT
+END SUB
+
+SUB animateArmyMove (index, flag)
+    ' Store the current and target locations of the army
+    from = armyloc(index)
+    to2 = armymove(index)
+    armyloc(index) = 0
+
+    ' Calculate the initial coordinates for animation
+    x = cityx(from) - 12
+    y = cityy(from) - 11
+    x1 = .5 * (cityx(to2) + cityx(from))
+    y1 = .5 * (cityy(to2) + cityy(from))
+
+    ' Place the army in the current location if occupied
+    CALL occupyCity(from)
+    IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
+       
+    ' Skip the animation setup if flag is set
+    IF flag > 0 GOTO already
+
+    ' Capture the current screen area for animation
+	GET (x - 9, y - 7)-(x + 9, y + 6), anima
+	IF occupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+
+    already:
+    ' Animate the movement of the army
+	FOR i = 2 TO 8
+	x1 = .1 * (i * cityx(to2) + (10 - i) * cityx(from))
+	y1 = .1 * (i * cityy(to2) + (10 - i) * cityy(from))
+	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
+	PUT (x1 - 10, y1 - 10), anima, PSET
+	IF turbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
+	IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
+	PUT (x1 - 10, y1 - 10), image, PSET
+	NEXT i
+
+    ' Restore the army's original location
+	armyloc(index) = from
 END SUB
