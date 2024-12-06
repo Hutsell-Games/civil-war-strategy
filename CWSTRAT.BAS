@@ -5,9 +5,11 @@ DECLARE SUB sinkShip (who%)
 DECLARE SUB shiptype (who%, i%)
 
 ' Army
+DECLARE SUB aiDetermineArmyMoves (index%, x%)
 DECLARE SUB cancelArmyMove (side%)
 DECLARE SUB combineArmies (who%)
 DECLARE SUB commander (who%, empty%)
+DECLARE SUB determineCutoff (who%, target%, a%)
 DECLARE SUB generateRomanNumeralArmy (target%, a$)
 DECLARE SUB increaseArmyExperience (who%)
 DECLARE SUB moveArmy ()
@@ -36,28 +38,14 @@ DECLARE SUB report (who%)
 
 ' Game Mechanics
 DECLARE SUB advanceToNextTurn ()
-
-DECLARE SUB center (y%, a$)
-DECLARE SUB maptext ()
-
-DECLARE SUB choices (b1%, wide%)
-DECLARE SUB determineCutoff (who%, target%, a%)
 DECLARE SUB selectEndingConditions ()
-DECLARE SUB engine ()
-DECLARE SUB evaluate (index%, x%)
-DECLARE SUB events ()
-
+DECLARE SUB specialEvents ()
 DECLARE SUB moveCapitalCity (index%)
 DECLARE SUB rebelWin ()
-DECLARE SUB scribe (a$, flag%)
-DECLARE SUB shen ()
-DECLARE SUB smarts ()
-DECLARE SUB showcity ()
-DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB strong (index%)
-DECLARE SUB surrender (who%)
-DECLARE SUB TICK (sec!)
-DECLARE SUB tupdate ()
+DECLARE SUB playShenandoahMusic ()
+DECLARE SUB aiTakeTurn ()
+DECLARE SUB delaySeconds (sec!)
+DECLARE SUB updateGameTurn ()
 DECLARE SUB addUnionAdvantage ()
 DECLARE SUB usa ()
 DECLARE SUB victor ()
@@ -66,11 +54,13 @@ DECLARE SUB void (a%, y%)
 ' Menu
 DECLARE SUB maxWidth (wide%)
 DECLARE SUB menu (switch%)
+DECLARE SUB drawChoicesMenu (b1%, wide%)
 
 
 ' Draw and Animate
 DECLARE SUB animateArmyMove (index%, flag%)
 DECLARE SUB animateFlashingCity (which%)
+DECLARE SUB drawCityNames ()
 DECLARE SUB drawArmy (x%, y%, z%)
 DECLARE SUB drawCannon ()
 DECLARE SUB drawCapitol ()
@@ -81,11 +71,18 @@ DECLARE SUB drawIronclad ()
 DECLARE SUB drawSchooner ()
 DECLARE SUB drawShipIcon (who%, flag%)
 DECLARE SUB drawTinyTrain (who%, flag%)
+DECLARE SUB drawTrainEngine ()
 DECLARE SUB displayMessageBox (a$, s%)
 DECLARE SUB displayPlayerTurnScreen ()
 DECLARE SUB displayHighScoreScreen ()
 DECLARE SUB touchup ()
 DECLARE SUB topbar ()
+DECLARE SUB displayArmySize (index%)
+DECLARE SUB drawArmySurrender (who%)
+DECLARE SUB centerText (y%, a$)
+DECLARE SUB displayAndLogMessage (a$, flag%)
+DECLARE SUB drawCities ()
+DECLARE SUB captureAndRestoreScreenArea (x%, y%, flag%)
 
 DIM SHARED graft(1 TO 1564)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
@@ -116,46 +113,65 @@ DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
 
 replay = 0
 newgame:
-pcode = 0: recruitMenuFlag = 0
-FOR k = 1 TO 40: armysize(k) = 0: armyloc(k) = 0: armymove(k) = 0: armylead(k) = 0: armyname$(k) = "": NEXT k
-usadv = 0: emancipate = 0
+pcode = 0
+recruitMenuFlag = 0
+FOR k = 1 TO 40
+	armysize(k) = 0
+	armyloc(k) = 0
+	armymove(k) = 0
+	armylead(k) = 0
+	armyname$(k) = ""
+NEXT k
+usadv = 0
+emancipate = 0
 FOR k = 1 TO 2
-navysize(k) = 0: navyloc(k) = 0: navymove(k) = 0
-rr(k) = 0: victory(k) = 0: tracks(k) = 0
+	navysize(k) = 0
+	navyloc(k) = 0
+	navymove(k) = 0
+	rr(k) = 0
+	victory(k) = 0
+	tracks(k) = 0
 NEXT k
 
-filel = 1: vicflag(1) = 1
+filel = 1
+vicflag(1) = 1
 CALL manageGameFiles(1)
 IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
 	BLOAD "mtn.vga", VARPTR(mtn(1))
 	DEF SEG
 ELSE
-	COLOR 15: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": TICK 9
+	COLOR 15: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": delaySeconds(9)
 END IF
 
 RESTORE
-FOR k = 1 TO 26: READ font$(k): NEXT k
+FOR k = 1 TO 26
+	READ font$(k)
+NEXT k
 
 IF realism > 0 AND year < 1862 THEN
-		FOR i = 1 TO 2
-			a$ = STRING$(LEN(fleet$(i)), "W")
-			fleet$(i) = a$
-		NEXT i
+	FOR i = 1 TO 2
+		a$ = STRING$(LEN(fleet$(i)), "W")
+		fleet$(i) = a$
+	NEXT i
 END IF
 iron:
 IF player < 1 OR player > 2 THEN player = 1
 IF player = 2 OR side = 0 THEN side = 1
 IF side = 1 THEN randbal = 7
 IF side = 2 THEN randbal = 3
-	IF turbo! < 1 THEN turbo! = 2
-	IF side = 1 AND difficult < 3 THEN cash(2) = cash(2) + 600 - 100 * difficult
-	IF side = 2 AND difficult > 3 THEN cash(1) = cash(1) + 100 * difficult
+IF turbo! < 1 THEN turbo! = 2
+IF side = 1 AND difficult < 3 THEN cash(2) = cash(2) + 600 - 100 * difficult
+IF side = 2 AND difficult > 3 THEN cash(1) = cash(1) + 100 * difficult
 
 
-FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
+FOR i = 1 TO 2
+	income(i) = cash(i)
+	cash(i) = cash(i) + 50 * RND
+NEXT i
 choose = 0
-a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
+a$ = COMMAND$
+IF a$ <> "" OR replay > 0 GOTO notitle2
 
 notitle2:
 SCREEN 12
@@ -172,23 +188,24 @@ COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
 LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
-CALL drawFlags(1, -440, 0): CALL drawFlags(2, -100, 0)
+CALL drawFlags(1, -440, 0)
+CALL drawFlags(2, -100, 0)
 IF replay = 0 AND noise = 2 AND choose = 0 THEN
 IF side = 1 THEN
 	IF INKEY$ <> "" GOTO notitle
-	PLAY "MST170o1e8o0b8o1e8"
+		PLAY "MST170o1e8o0b8o1e8"
 	IF INKEY$ <> "" GOTO notitle
-	PLAY "e8e4f#8g4f#8"
+		PLAY "e8e4f#8g4f#8"
 	IF INKEY$ <> "" GOTO notitle
-	PLAY "g4e8d2o0b8o1d2 "
+		PLAY "g4e8d2o0b8o1d2 "
 	IF INKEY$ <> "" GOTO notitle
-	PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
+		PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
 	IF INKEY$ <> "" GOTO notitle
-	PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
+		PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
 	IF INKEY$ <> "" GOTO notitle
-	PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
+		PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
     ELSE
-	CALL shen
+		CALL playShenandoahMusic
     END IF
 END IF
 notitle:
@@ -197,18 +214,29 @@ CALL addUnionAdvantage
 city$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 vptotal = usadv + 200
-FOR i = 1 TO 40: INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
-cityo(i) = cityp(i)
-CALL occupyCity(i)
-FOR j = 1 TO 7: INPUT #1, matrix(i, j): NEXT j: INPUT #1, fort(i)
-IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: victory(x) = victory(x) + cityv(i)
-IF cityp(i) > 0 THEN cash(cityp(i)) = cash(cityp(i)) + cityv(i)
-vptotal = vptotal + cityv(i)
+FOR i = 1 TO 40
+	INPUT #1, a, cityx(i), cityy(i), city$(i), cityp(i), cityv(i)
+	cityo(i) = cityp(i)
+	CALL occupyCity(i)
+	FOR j = 1 TO 7
+		INPUT #1, matrix(i, j)
+	NEXT j
+	INPUT #1, fort(i)
+	IF cityp(i) > 0 THEN
+		x = cityp(i)
+		control(x) = control(x) + 1
+		victory(x) = victory(x) + cityv(i)
+	END IF
+	IF cityp(i) > 0 THEN 
+		cash(cityp(i)) = cash(cityp(i)) + cityv(i)
+	END IF
+	vptotal = vptotal + cityv(i)
 NEXT i
-CLOSE #1: CALL clearBottom
+CLOSE #1
+CALL clearBottom
 
 RANDOMIZE TIMER
-TICK .3
+delaySeconds(.3)
 wtype = 2
 hilite = 15
 replay = 1
@@ -216,7 +244,7 @@ IF player = 2 THEN CALL displayPlayerTurnScreen
 mtx$(0) = "VGA CIVILWAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
-mtx$(3) = "Quit to DOS"
+mtx$(3) = "Quit"
 tlx = 33: tly = 20: colour = 5: size = 3
 choose = 23
 CALL menu(0)
@@ -225,7 +253,10 @@ IF choose = 1 THEN
 	GOTO loader
 	GOTO menu0
 END IF
-IF choose = 3 THEN CLS : END
+IF choose = 3 THEN 
+	CLS
+	END
+END IF
 IF history = 1 THEN
 	CLS
 	IF _FILEEXISTS("cws.his") THEN SHELL "copy cws.his oldhist.ory"
@@ -233,7 +264,8 @@ IF history = 1 THEN
 	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; DATE$; " ]"
 	CLOSE #2
 ELSE
-	SCREEN 12: CLS
+	SCREEN 12
+	CLS
 END IF
 CALL usa
 GOTO menu0
@@ -241,34 +273,46 @@ GOTO menu0
 newmonth: ' Begin New Month
 IF side > 2 THEN side = 1
 a$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
-CALL scribe(a$, 0)
-CALL tupdate
-control(1) = 0: control(2) = 0
+CALL displayAndLogMessage(a$, 0)
+CALL updateGameTurn
+control(1) = 0
+control(2) = 0
 
 FOR i = 1 TO 2
-income(i) = 0
-IF cash(i) > 19999 THEN cash(i) = 19999
-IF cash(i) < 0 THEN cash(i) = 0
+	income(i) = 0
+	IF cash(i) > 19999 THEN cash(i) = 19999
+	IF cash(i) < 0 THEN cash(i) = 0
 NEXT i
 IF player = 1 AND side = 2 THEN income(1) = income(1) + usadv
 
 FOR i = 1 TO 40
-IF cityp(i) > 0 THEN x = cityp(i): control(x) = control(x) + 1: income(x) = income(x) + cityv(i)
-armymove(i) = 0
+	IF cityp(i) > 0 THEN
+		x = cityp(i)
+		control(x) = control(x) + 1
+		income(x) = income(x) + cityv(i)
+	END IF
+	armymove(i) = 0
 NEXT i
 
-FOR i = 1 TO 2: navymove(i) = 0: IF capcity(i) > 0 THEN income(i) = income(i) + 100
-cash(i) = cash(i) + income(i)
-IF commerce > 0 AND i <> commerce THEN cash(i) = cash(i) - raider
+FOR i = 1 TO 2
+	navymove(i) = 0
+	IF capcity(i) > 0 THEN income(i) = income(i) + 100
+	cash(i) = cash(i) + income(i)
+	IF commerce > 0 AND i <> commerce THEN cash(i) = cash(i) - raider
 NEXT i
 vptotal = income(1) + income(2)
 
 chosit = 22
-IF player = 2 THEN CALL displayPlayerTurnScreen: CALL usa
+IF player = 2 THEN 
+	CALL displayPlayerTurnScreen
+	CALL usa
+END IF
 CALL victor
 ON ERROR GOTO 0
 IF pcode > 0 THEN
-	FOR k = 1 TO 40: armyloc(k) = 0: NEXT k
+	FOR k = 1 TO 40
+		armyloc(k) = 0
+	NEXT k
 	GOTO newgame
 END IF
 
@@ -298,7 +342,10 @@ CALL clearRight
 
 SELECT CASE choose
 	CASE 1 ' Recruit Menu
-        IF cash(side) < 100 OR recruitMenuFlag < 0 THEN recruitMenuFlag = -1: GOTO menu0
+        IF cash(side) < 100 OR recruitMenuFlag < 0 THEN 
+			recruitMenuFlag = -1
+			GOTO menu0
+		END IF
         CALL recruitArmy((side))
         chosit = 23
         GOTO menu0
@@ -314,10 +361,13 @@ SELECT CASE choose
             COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
             PSET (550, 20), 0
             DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
-            z = 9: IF side = 2 THEN z = 7
-            x = POINT(0): y = POINT(1)
+            z = 9
+			IF side = 2 THEN z = 7
+            x = POINT(0)
+			y = POINT(1)
             PAINT (x, y), z, 15
-            COLOR 15: IF side = 1 THEN COLOR 11
+            COLOR 15
+			IF side = 1 THEN COLOR 11
             CALL determineTrainCapacity(side, limit)
             CALL clearBottom
             PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
@@ -335,16 +385,28 @@ SELECT CASE choose
         size = 2
         CALL menu(0)
         CALL clearRight
-        IF choose <> 1 THEN chosit = 24: GOTO menu0
+        IF choose <> 1 THEN 
+			chosit = 24
+			GOTO menu0
+		END IF
         endrnd:
-        recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
-        IF player = 2 THEN side = side + 1: IF side = 2 THEN CALL displayPlayerTurnScreen: CALL usa: GOTO menu0
+        recruitMenuFlag = 0
+		moveMenuFlag = 0
+		navyMenuFlag = 0
+        IF player = 2 THEN 
+			side = side + 1
+			IF side = 2 THEN 
+				CALL displayPlayerTurnScreen
+				CALL usa
+				GOTO menu0
+			END IF
+		END IF
         GOTO newmonth
 	CASE 6 ' Report Menu
         CALL report((side)): chosit = 27
         CALL setStartFinishIndexes(startIndex, endIndex, side)
         FOR i = startIndex TO endIndex
-        IF armymove(i) > 0 THEN CALL drawIcons(armyloc(i), armymove(i), 1)
+        	IF armymove(i) > 0 THEN CALL drawIcons(armyloc(i), armymove(i), 1)
         NEXT i
 	CASE 7 ' Options Menu
         optionsMenu:
@@ -405,7 +467,7 @@ SELECT CASE choose
                         IF a < 1 THEN 
                             CALL clearBottom
                             COLOR 15: PRINT force$(side); " army in "; city$(armyloc(i)); " is CUT OFF !";
-                            TICK turbo!
+                            delaySeconds(turbo!)
                             GOTO alone
                         END IF
                     END IF
@@ -414,7 +476,7 @@ SELECT CASE choose
                     IF LEN(armyname$(i)) < 11 THEN max = LEN(armyname$(i))
                     menuText$(size) = LEFT$(armyname$(i), max)
                     array(size) = i
-                    alone:
+                alone:
                 NEXT i
                 IF size = 0 THEN 
                     COLOR 11
@@ -427,8 +489,8 @@ SELECT CASE choose
                 IF choose < 0 GOTO menu0
                 index = array(choose)
                 IF supply(index) < 2 THEN
-                CALL resupplyArmy(index)
-                CALL placeArmy(index)
+					CALL resupplyArmy(index)
+					CALL placeArmy(index)
                 END IF
                 choose = 25
                 GOTO optionsMenu
@@ -443,14 +505,15 @@ SELECT CASE choose
                 CALL clearRight
                 menuText$(0) = "Capital"
                 a$ = city$(capcity(side))
-                index = capcity(side): CALL moveCapitalCity(index)
+                index = capcity(side)
+				CALL moveCapitalCity(index)
                 IF index = 0 GOTO menu0
                 capcity(side) = index
                 CALL clearBottom
                 PRINT force$(side); " capital moved from "; a$; " to "; city$(capcity(side));
                 CALL clearRight
-                CALL showcity
-                CALL TICK(9)
+                CALL drawCities
+                CALL delaySeconds(9)
                 CALL clearBottom
 		    CASE 6 ' Detach Army
                 IF side = 1 THEN 
@@ -459,16 +522,18 @@ SELECT CASE choose
                     GOTO menu0
                 END IF
                 COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-                CALL moveArmyFrom(index, target): IF target < 1 OR index < 1 GOTO menu0
+                CALL moveArmyFrom(index, target)
+				IF target < 1 OR index < 1 GOTO menu0
                 IF armysize(index) < 65 THEN 
                     CALL clearBottom
                     PRINT "Too small to detach";
-                    CALL TICK(turbo!)
+                    CALL delaySeconds(turbo!)
                     GOTO menu0
                 END IF
                 CALL commander(2, empty)
                 IF empty = 0 GOTO menu0
-                supply(empty) = .3 * supply(index): supply(index) = supply(index) - supply(empty)
+                supply(empty) = .3 * supply(index)
+				supply(index) = supply(index) - supply(empty)
                 IF supply(index) < 0 THEN supply(index) = 0
                 armysize(empty) = .3 * armysize(index)
                 armysize(index) = armysize(index) - armysize(empty)
@@ -481,8 +546,8 @@ SELECT CASE choose
                 armyexper(empty) = armyexper(index)
                 COLOR 11
                 CALL clearBottom
-                PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; armyname$(empty);
-                CALL TICK(turbo!)
+                PRINT "Unit #"; empty; " with "; : CALL displayArmySize(empty): PRINT " men detached under "; armyname$(empty);
+                CALL delaySeconds(turbo!)
                 IF noise > 0 THEN SOUND 2222, 1
                 CALL increaseArmyExperience(side)
                 choose = 27
@@ -506,7 +571,7 @@ SELECT CASE choose
                 CALL clearBottom
                 PRINT armyname$(index); " has drilled to reach experience level "; armyexper(index);
                 IF noise > 0 THEN SOUND 2222, 1
-                CALL TICK(turbo!)
+                CALL delaySeconds(turbo!)
                 CALL clearBottom
                 armymove(index) = -1
                 choose = 28
@@ -546,7 +611,8 @@ SELECT CASE choose
         size = 13: tlx = 67: tly = 11
         COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
         IF player = 1 THEN 
-            size = 14: menuText$(14) = "Aggress" + STR$(bold)
+            size = 14
+			menuText$(14) = "Aggress" + STR$(bold)
         END IF
         CALL menu(-1)
         CALL clearRight
@@ -669,7 +735,8 @@ SELECT CASE choose
         
                  SELECT CASE choose
                      CASE 1
-                        randbal = 0: t$ = ""
+                        randbal = 0
+						t$ = ""
                      CASE 2
                         randbal = 3
                      CASE 3
@@ -696,14 +763,22 @@ SELECT CASE choose
                 bold = 5 * RND
                 FOR k = 1 TO 6
                     IF RND > .6 THEN
-                    armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-                    armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+                    armyloc(k) = 0
+					armysize(k) = 0
+					armylead(k) = 0
+                    armyexper(k) = 0
+					armymove(k) = 0
+					supply(k) = 0
                     END IF
                 NEXT k
                 FOR k = 21 TO 6
                     IF RND > .6 THEN
-                    armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
-                    armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
+                    armyloc(k) = 0
+					armysize(k) = 0
+					armylead(k) = 0
+                    armyexper(k) = 0
+					armymove(k) = 0
+					supply(k) = 0
                     END IF
                 NEXT k
                 FOR k = 1 TO 40
@@ -716,7 +791,8 @@ SELECT CASE choose
                 FOR i = 1 TO 2
                     fleet$(i) = ""
                     FOR j = 1 TO navysize(i)
-                        a$ = "W": IF RND > .45 * side THEN a$ = "I"
+                        a$ = "W"
+						IF RND > .45 * side THEN a$ = "I"
                         fleet$(i) = fleet$(i) + a$
                     NEXT j
                 NEXT i
@@ -748,14 +824,16 @@ SELECT CASE choose
                     PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
                 ELSE
                     PRINT "REALISM ON: Recruiting based on CITY SIZE";
-                    IF side = 2 AND randbal = 1 AND randbal < 5 THEN randbal = randbal + 2
+                    IF side = 2 AND randbal = 1 AND randbal < 5 THEN 
+						randbal = randbal + 2
+					END IF
                     CALL addUnionAdvantage
                 END IF
                 choose = 32
                 GOTO utilityMenu
 	        CASE 12 ' Check Map Linkages
                 CALL checkCityDataIntegrity
-                CALL TICK(99)
+                CALL delaySeconds(99)
                 CALL usa
 	        CASE 13 ' History Setting
                 history = 1 - history
@@ -763,7 +841,8 @@ SELECT CASE choose
                 IF history = 1 THEN a$ = "ON"
                 CALL clearBottom
                 PRINT "History is now "; a$;
-                choose = 34: GOTO utilityMenu
+                choose = 34
+				GOTO utilityMenu
 	        CASE 14 ' Aggression Setting
                 bold = bold + 1
                 IF bold > 5 THEN bold = 0
@@ -803,7 +882,11 @@ SELECT CASE choose
                 loader:
                 IF choose = 1 AND filel = 0 GOTO filex
                 CALL manageGameFiles(choose + 1)
-                IF choose = 1 THEN recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
+                IF choose = 1 THEN
+					recruitMenuFlag = 0
+					moveMenuFlag = 0
+					navyMenuFlag = 0
+				END IF
                 GOTO menu0
             CASE 3
                 OPEN "O", 1, "cws.cfg"
@@ -898,7 +981,7 @@ SUB moveArmy
         COLOR 11
         CALL clearBottom
         PRINT "No campaigns in January"
-        CALL TICK(9)
+        CALL delaySeconds(9)
         CALL clearBottom
         EXIT SUB
     END IF
@@ -912,7 +995,7 @@ SUB moveArmy
     END IF
     CALL drawIcons(target, array(choose), 1)
     armymove(index) = array(choose)
-    CALL TICK(turbo!)
+    CALL delaySeconds(turbo!)
     CALL clearBottom
     CALL clearRight
 END SUB
@@ -921,8 +1004,9 @@ SUB showArmyStatistics (index)
 	LINE (530, 60)-(639, 150), 0, BF
 	COLOR 15
 	LOCATE 5, 68: PRINT armyname$(index)
-	COLOR 9: IF index > 20 THEN COLOR 7
-	LOCATE 6, 68: PRINT "Size:"; : CALL strong(index)
+	COLOR 9
+	IF index > 20 THEN COLOR 7
+	LOCATE 6, 68: PRINT "Size:"; : CALL displayArmySize(index)
 	LOCATE 7, 68: PRINT "Leader:"; TAB(75); armylead(index)
 	LOCATE 8, 68: PRINT "Exper:"; TAB(75); armyexper(index)
 	IF supply(index) < 2 THEN COLOR 12
@@ -953,7 +1037,7 @@ SUB resolveBattle (attack, defend, win, lose)
     c = 9
     IF attack > 20 THEN c = 7
     COLOR c: LOCATE 2, y: PRINT armyname$(attack)
-    LOCATE 3, y: CALL strong(attack)
+    LOCATE 3, y: CALL displayArmySize(attack)
     x = .01 * armysize(attack)
     IF x > TCR THEN x = TCR
     LOCATE 4, y: PRINT "Base    "; x
@@ -994,8 +1078,12 @@ SUB resolveBattle (attack, defend, win, lose)
     IF x < 1 THEN x = 1
 
     ' Adjust attack advantage based on difficulty and side
-    IF attack < 21 AND side = 2 AND difficult > 3 THEN x = x + 2 * difficult - 6
-    IF attack > 20 AND side = 1 AND difficult < 3 THEN x = x + 6 - 2 * difficult
+    IF attack < 21 AND side = 2 AND difficult > 3 THEN 
+		x = x + 2 * difficult - 6
+	END IF
+    IF attack > 20 AND side = 1 AND difficult < 3 THEN
+		x = x + 6 - 2 * difficult
+	END IF
     LOCATE 9, y: PRINT "Difclt  "; x
     IF x > TCR THEN x = TCR
     COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
@@ -1009,7 +1097,7 @@ SUB resolveBattle (attack, defend, win, lose)
     END IF
     LOCATE 13, y: PRINT "Defender"
     COLOR 16 - c: LOCATE 14, y: PRINT armyname$(defend)
-    LOCATE 15, y: CALL strong(defend)
+    LOCATE 15, y: CALL displayArmySize(defend)
     LOCATE 16, y: PRINT "Base    "; INT(.01 * armysize(defend))
     LOCATE 17, y: PRINT "Defense "; x1
     IF armysize(defend) / armysize(attack) > .2 THEN 
@@ -1048,13 +1136,19 @@ SUB resolveBattle (attack, defend, win, lose)
     IF x1 < 1 THEN x1 = 1
     
     ' Adjust defend advantage based on difficulty and side
-    IF defend < 21 AND side = 2 AND difficult > 3 THEN x1 = x1 + 2 * difficult - 6
-    IF defend > 20 AND side = 1 AND difficult < 3 THEN x1 = x1 + 6 - 2 * difficult
+    IF defend < 21 AND side = 2 AND difficult > 3 THEN 
+		x1 = x1 + 2 * difficult - 6
+	END IF
+    IF defend > 20 AND side = 1 AND difficult < 3 THEN 
+		x1 = x1 + 6 - 2 * difficult
+	END IF
     LOCATE 22, y: PRINT "Difclt  "; x1
 
     ' Fortification adjustments
     a$ = "Fort"
-    IF armymove(defend) = 0 THEN x1 = x1 * (1 + fort(armyloc(defend)))
+    IF armymove(defend) = 0 THEN 
+		x1 = x1 * (1 + fort(armyloc(defend)))
+	END IF
     IF x1 > TCR THEN x1 = TCR
     IF fort(armyloc(defend)) > 0 AND armymove(defend) = 0 THEN
         COLOR 13: a$ = "Fort+"
@@ -1072,7 +1166,8 @@ SUB resolveBattle (attack, defend, win, lose)
     scale = scale + 1
     
     odds! = x / (x + x1)
-    a = INT(100 * odds!): IF a < 1 THEN a = 1
+    a = INT(100 * odds!)
+	IF a < 1 THEN a = 1
     a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
     COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
     LINE (530, 412)-(635, 435), 14, B
@@ -1101,14 +1196,22 @@ SUB resolveBattle (attack, defend, win, lose)
     hit1 = 0
     startIndex = scale * RND
     endIndex = scale * RND
-    IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
+    IF noise > 0 THEN
+		SOUND 77, .5
+		SOUND 59, .5
+		CALL delaySeconds(.1)
+	END IF
     IF startIndex <= x THEN hit = 1
     IF endIndex <= x1 THEN hit1 = 1
     
     IF hit = 0 AND hit1 = 0 GOTO grapple
     IF hit = 1 AND hit1 = 1 GOTO grapple
-    win = defend: lose = attack
-    IF hit = 1 THEN win = attack: lose = defend
+    win = defend
+	lose = attack
+    IF hit = 1 THEN 
+		win = attack
+		lose = defend
+	END IF
 
     ' Display battle result
     a$ = "UNION"
@@ -1121,7 +1224,7 @@ SUB resolveBattle (attack, defend, win, lose)
     CALL drawFlags(a, 0, 0)
     CALL clearBottom
     COLOR 11: PRINT armyname$(win); " defeats "; armyname$(lose); " in "; city$(armyloc(defend));
-    CALL TICK(9)
+    CALL delaySeconds(9)
 
     ' Calculate casualties
     pct! = .01 * DEFAC - .03 * fort(armyloc(defend))
@@ -1167,21 +1270,28 @@ SUB resolveBattle (attack, defend, win, lose)
     COLOR c
     LOCATE 1, 1: PRINT "Attack Loss: ";
     PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
-    CALL strong(attack)
+    CALL displayArmySize(attack)
     PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) �";
     COLOR 16 - c: PRINT "� Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
-    CALL strong(defend)
+    CALL displayArmySize(defend)
     PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / armysize(defend)))))); "%)"
 
     ' Update battle results
     menuText$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(armysize(attack)) + "00") + ") "
     t$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(armysize(defend)) + "00") + ")"
     menuText$(2) = t$
-    IF win = defend THEN menuText$(2) = menuText$(1): menuText$(1) = t$
-    menuText$(3) = "*" + armyname$(win): menuText$(4) = armyname$(lose)
-    IF win = defend THEN menuText$(3) = armyname$(win): menuText$(4) = "*" + armyname$(lose)
+    IF win = defend THEN 
+		menuText$(2) = menuText$(1)
+		menuText$(1) = t$
+	END IF
+    menuText$(3) = "*" + armyname$(win)
+	menuText$(4) = armyname$(lose)
+    IF win = defend THEN 
+		menuText$(3) = armyname$(win)
+		menuText$(4) = "*" + armyname$(lose)
+	END IF
     a$ = city$(armyloc(defend)) + ": " + menuText$(3) + menuText$(1) + " defeats " + menuText$(4) + menuText$(2)
-    CALL scribe(a$, 0)
+    CALL displayAndLogMessage(a$, 0)
 
     ' Wait for player input if necessary
     IF player = 1 AND (side = 1 AND attack > 20) OR (side = 2 AND attack < 21) THEN
@@ -1254,11 +1364,16 @@ SUB combineArmies (who)
 	target = array(choose)
 	CALL clearBottom
 	PRINT "Combining "; force$(who); " armies in "; city$(target);
-	CALL TICK(turbo!)
+	CALL delaySeconds(turbo!)
 
     ' Initialize temporary army variables
-	armysize(0) = 0: armylead(0) = 0: armyexper(0) = 0: armyloc(0) = target
-	armyname$(0) = "": supply(0) = 0: armymove(0) = 0
+	armysize(0) = 0
+	armylead(0) = 0
+	armyexper(0) = 0
+	armyloc(0) = target
+	armyname$(0) = ""
+	supply(0) = 0
+	armymove(0) = 0
 
     ' Combine eligible armies
 	best = 0
@@ -1269,7 +1384,7 @@ SUB combineArmies (who)
         IF armysize(0) + armysize(j) > 1250 THEN
             CALL clearBottom
             PRINT "Cannot combine "; armyname$(j); "... TOO LARGE";
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
             GOTO dork1
         END IF
 
@@ -1287,8 +1402,8 @@ SUB combineArmies (who)
 		spin = spin + 1
 		armyexper(0) = (1 - pct!) * armyexper(0) + pct! * armyexper(j)
 		CALL clearBottom
-		PRINT armyname$(j); " is combining his "; : CALL strong(j): PRINT " forces";
-		CALL TICK(turbo!)
+		PRINT armyname$(j); " is combining his "; : CALL displayArmySize(j): PRINT " forces";
+		CALL delaySeconds(turbo!)
 		supply(0) = supply(0) + supply(j)
 		IF supply(0) > 10 THEN supply(0) = 10
 		armysize(j) = 0
@@ -1307,7 +1422,7 @@ SUB combineArmies (who)
 	IF who <> side AND spin = 0 THEN EXIT SUB
 	IF spin = 0 THEN
 		PRINT "No valid armies to combine at this time in "; city$(target);
-		TICK turbo!
+		delaySeconds(turbo!)
 		EXIT SUB
 	END IF
 	armysize(best) = armysize(0)
@@ -1318,16 +1433,16 @@ SUB combineArmies (who)
 	armyname$(best) = armyname$(0)
 	lname$(best) = ""
 	IF spin > 1 THEN
-		PRINT "New army "; best; " of "; : CALL strong(best): PRINT " is commanded by "; armyname$(best);
+		PRINT "New army "; best; " of "; : CALL displayArmySize(best): PRINT " is commanded by "; armyname$(best);
 		armymove(best) = -1
 	ELSE
 		PRINT "Only 1 eligible army -- cannot combine at this time";
 	END IF
-	IF who = side THEN CALL TICK(turbo!)
+	IF who = side THEN CALL delaySeconds(turbo!)
 	IF noise > 0 THEN SOUND 4000, .7
 	       
     ' Update city and army status
-	CALL showcity
+	CALL drawCities
 	CALL placeArmy(best)
 	CALL drawIcons(target, 0, 6)
 	occupied(target) = best
@@ -1337,8 +1452,8 @@ END SUB
 SUB determineCutoff (who, target, a)
     a = 0
     FOR j = 1 TO 6
-    y = matrix(target, j)
-    IF y > 0 AND cityp(y) = who THEN a = a + 1
+		y = matrix(target, j)
+		IF y > 0 AND cityp(y) = who THEN a = a + 1
     NEXT j
 END SUB
 
@@ -1351,8 +1466,12 @@ SUB manageGameFiles (switch)
             NEXT i
             CLOSE #1
 		    OPEN "I", 1, "cws.ini"
-		    FOR i = 0 TO 2: INPUT #1, force$(i): NEXT i
-		    FOR i = 1 TO 12: INPUT #1, month$(i): NEXT i
+		    FOR i = 0 TO 2
+				INPUT #1, force$(i)
+			NEXT i
+		    FOR i = 1 TO 12
+				INPUT #1, month$(i)
+			NEXT i
 		    INPUT #1, month, year
 		    ' Set end game conditions
 		    FOR i = 1 TO 6
@@ -1375,13 +1494,19 @@ SUB manageGameFiles (switch)
 				armylead(i) = rating(i)
 				lname$(i) = ""
 	        NEXT i
-	        FOR i = 1 TO 2: INPUT #1, cash(i): NEXT i
+	        FOR i = 1 TO 2
+				INPUT #1, cash(i)
+			NEXT i
 		    INPUT #1, ATKFAC, DEFAC, TCR
 		    INPUT #1, fleet$(1), navyloc(1), fleet$(2), navyloc(2)
-		    FOR k = 1 TO 2: navysize(k) = LEN(fleet$(k)): NEXT k
+		    FOR k = 1 TO 2
+				navysize(k) = LEN(fleet$(k))
+			NEXT k
 		    INPUT #1, capcity(1), capcity(2)
 
-	        FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
+	        FOR i = 1 TO 8 ' star locations on flag
+				INPUT #1, starx(i), stary(i)
+			NEXT i
 		    CLOSE #1
 		    OPEN "I", 1, "cws.cfg"
 		    INPUT #1, side, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), jancam, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
@@ -1423,7 +1548,9 @@ SUB manageGameFiles (switch)
                     END IF
                 END IF
 		    NEXT i
-		    FOR i = 1 TO 40: INPUT #1, occupied(i), cityp(i), fort(i): PRINT "."; : NEXT i
+		    FOR i = 1 TO 40
+				INPUT #1, occupied(i), cityp(i), fort(i): PRINT ".";
+			NEXT i
 		    FOR i = 1 TO 2
                 INPUT #1, cash(i), control(i), income(i), victory(i), capcity(i)
                 INPUT #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
@@ -1433,7 +1560,8 @@ SUB manageGameFiles (switch)
     		OPEN "I", 1, "cws.cfg"
 	    	INPUT #1, myside, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), jancam, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
 	    	CLOSE #1
-	    	SCREEN 12: CLS
+	    	SCREEN 12
+			CLS
 		    CLOSE #1
 		    CALL usa
 		    CALL clearBottom
@@ -1445,7 +1573,9 @@ SUB manageGameFiles (switch)
 		    menuText$(0) = "Save Game"
             FOR k = 1 TO 9
                 menuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-                IF _FILEEXISTS(menuText$(k)) THEN menuText$(k) = menuText$(k) + " �"
+                IF _FILEEXISTS(menuText$(k)) THEN 
+					menuText$(k) = menuText$(k) + " �"
+				END IF
             NEXT k
             tlx = 67: size = 9
             CALL menu(0)
@@ -1461,7 +1591,9 @@ SUB manageGameFiles (switch)
 		    FOR i = 1 TO 40
 		        WRITE #1, armyname$(i), armysize(i), armylead(i), armyloc(i), armyexper(i), supply(i), armymove(i)
 		    NEXT i
-		    FOR i = 1 TO 40: WRITE #1, occupied(i), cityp(i), fort(i): PRINT "."; : NEXT i
+		    FOR i = 1 TO 40
+				WRITE #1, occupied(i), cityp(i), fort(i): PRINT ".";
+			NEXT i
 		    FOR i = 1 TO 2
                 WRITE #1, cash(i), control(i), income(i), victory(i), capcity(i)
                 WRITE #1, fleet$(i), navyloc(i), navymove(i), rr(i), tracks(i)
@@ -1473,7 +1605,8 @@ SUB manageGameFiles (switch)
 		    OPEN "O", 1, "cws.cfg"
 		    WRITE #1, myside, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), jancam, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
 		    CLOSE #1
-		    CLS : CALL usa
+		    CLS
+			CALL usa
 	END SELECT
 END SUB
 
@@ -1509,14 +1642,14 @@ SUB fortifyCity (target)
 	IF fort(target) > 1 THEN 
 	    CALL clearBottom
 	    PRINT city$(target); " at MAXIMUM fortification level of 2";
-	    CALL TICK(4)
+	    CALL delaySeconds(4)
 	    EXIT SUB
 	END IF
 	cost = 200
 	IF cash(side) < cost THEN 
 	    CALL clearBottom
 	    PRINT "Fortifications for "; city$(target); " cost "; cost; " and you only have "; cash(side);
-	    CALL TICK(4)
+	    CALL delaySeconds(4)
 	    EXIT SUB
 	END IF
 	COLOR 3
@@ -1525,7 +1658,7 @@ SUB fortifyCity (target)
 	CALL clearBottom
 	PRINT city$(target); " fortifications increased to "; fort(target);
 	CALL drawIcons(target, 0, 6)
-	CALL showcity
+	CALL drawCities
 	IF armymove(x) > 0 THEN CALL drawIcons(armyloc(x), armymove(x), 5)
 	armymove(x) = -1
 	CALL placeArmy(x)
@@ -1562,7 +1695,7 @@ SUB advanceToNextTurn
             supply(i) = supply(i) - 1
             CALL clearBottom
             PRINT armyname$(i); " is blockaded";
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
         END IF
         COLOR 13
         IF supply(i) < 1 THEN
@@ -1570,7 +1703,7 @@ SUB advanceToNextTurn
             CALL clearBottom
             PRINT armyname$(i); " is out of supplies";
             CALL placeArmy(i)
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
             IF RND > .8 AND armysize(i) > 50 THEN armysize(i) = .9 * armysize(i)
         END IF
         rip:
@@ -1586,8 +1719,16 @@ SUB advanceToNextTurn
     FOR i = 21 TO 40
         x = x + .1 * armysize(i)
     NEXT i
-    IF side = 2 AND x > 0 THEN aggress! = y / x ELSE aggress! = 1
-    IF side = 1 AND y > 0 THEN aggress! = x / y ELSE IF side = 1 THEN aggress! = 1
+    IF side = 2 AND x > 0 THEN 
+		aggress! = y / x 
+	ELSE 
+		aggress! = 1
+	END IF
+    IF side = 1 AND y > 0 THEN 
+		aggress! = x / y 
+	ELSE 
+		IF side = 1 THEN aggress! = 1
+	END IF
 END SUB
 
 SUB moveArmyFrom (index, target)
@@ -1600,7 +1741,8 @@ SUB moveArmyFrom (index, target)
 	FOR i = startIndex TO endIndex
 	    IF armyloc(i) > 0 AND armymove(i) = 0 THEN 
 	        size = size + 1
-	        menuText$(size) = city$(armyloc(i)): array(size) = armyloc(i)
+	        menuText$(size) = city$(armyloc(i))
+			array(size) = armyloc(i)
 	    END IF
 	NEXT i
 	IF size = 0 THEN index = -1: EXIT SUB
@@ -1733,7 +1875,10 @@ SUB navy (who, chx)
                     CALL menu(0)
                     CALL clearRight
                     IF choose < 1 GOTO ahoy
-                    IF choose = 2 THEN a$ = "I": cost = 2 * cost
+                    IF choose = 2 THEN 
+						a$ = "I"
+						cost = 2 * cost
+					END IF
                 ELSE
                     a$ = "I"
                 END IF
@@ -1742,9 +1887,11 @@ SUB navy (who, chx)
             noiron:
                 navysize(who) = navysize(who) + 1
                 IF a$ = "W" THEN
-                    fleet$(who) = fleet$(who) + a$: a = 1
+                    fleet$(who) = fleet$(who) + a$
+					a = 1
                 ELSE
-                    fleet$(who) = a$ + fleet$(who): a = 2
+                    fleet$(who) = a$ + fleet$(who)
+					a = 2
                 END IF
                 IF navysize(who) > 1 GOTO add2ship
 	        ships:
@@ -1783,7 +1930,7 @@ SUB navy (who, chx)
             COLOR 11: PRINT force$(who); " is building NEW fleet in "; city$(array(choose));
             PSET (400, 465), 0: CALL drawShipIcon(who, a)
             IF noise > 0 THEN SOUND 3000, 1
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
             GOTO ahoy
 	        add2ship:
             cash(who) = cash(who) - cost
@@ -1792,7 +1939,7 @@ SUB navy (who, chx)
             PSET (400, 465), 0: CALL drawShipIcon(who, a)
             CALL drawShips
             IF noise > 0 THEN SOUND 3000, 1
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
         CASE 2 ' Attack City
             IF navyloc(who) = 99 GOTO ahoy
             IF chx = 2 AND cityp(navyloc(who)) = who THEN EXIT SUB
@@ -1822,7 +1969,7 @@ SUB navy (who, chx)
             x = .5 * navysize(who) + 1
             IF x > supply(index) THEN x = supply(index)
             supply(index) = supply(index) - x
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
             armysize(index) = armysize(index) - killd
             IF armysize(index) < 1 THEN armysize(index) = 1
             EXIT SUB
@@ -1833,11 +1980,11 @@ SUB navy (who, chx)
             CALL clearBottom
             PRINT force$(cityp(target)); " shore battery sunk an attacking ship!"; navysize(who); "ship(s) left! ";
             IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
             IF navysize(who) < 1 THEN
                 navyloc(who) = 0: fleet$(who) = "": GOSUB box2
                 LOCATE 12, 27: PRINT force$(who); " fleet eliminated"
-                CALL TICK(9)
+                CALL delaySeconds(9)
                 victory(3 - who) = victory(3 - who) + 5
                 IF who = side THEN grudge = 0
                 GOTO sail3
@@ -1850,26 +1997,26 @@ SUB navy (who, chx)
             x = cityx(target)
             y = cityy(target)
             LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-            CALL showcity
-            CALL TICK(turbo!)
+            CALL drawCities
+            CALL delaySeconds(turbo!)
             EXIT SUB
 	        blast:
             IF RND > .25 + .07 * navysize(who) THEN 
                 CALL clearBottom
                 PRINT "Citizens of "; city$(target); " stand firm against the attack";
-                CALL TICK(turbo!)
+                CALL delaySeconds(turbo!)
                 EXIT SUB
             END IF
             IF navyloc(who) = capcity(3 - who) THEN
                 CALL clearBottom
                 PRINT "The CAPITAL steadfastly stands loyal";
-                CALL TICK(turbo!)
+                CALL delaySeconds(turbo!)
                 EXIT SUB
             END IF
             cityp(navyloc(who)) = 0
             CALL clearBottom
             PRINT city$(navyloc(who)); " is now  NEUTRAL";
-            CALL showcity
+            CALL drawCities
             victory(who) = victory(who) + cityv(navyloc(who))
             EXIT SUB
         CASE 3 ' Sail
@@ -1878,7 +2025,7 @@ SUB navy (who, chx)
             IF navyloc(who) < 1 OR navysize(who) < 1 THEN 
                 CALL clearBottom
                 PRINT "No ships remain";
-                TICK 1
+                delaySeconds(1)
                 GOTO ahoy
             END IF
 
@@ -1944,9 +2091,9 @@ SUB navy (who, chx)
                     CASE 87
                         CALL drawSchooner
                 END SELECT
-                TICK 2 * turbo!
+                delaySeconds(2 * turbo!)
             ELSE
-                TICK turbo!
+                delaySeconds(turbo!)
             END IF
             navyloc(who) = array(choose)
             IF navyloc(1) = navyloc(2) GOTO pirate
@@ -1973,9 +2120,9 @@ SUB navy (who, chx)
                     CASE 87
                         CALL drawSchooner
                 END SELECT
-                TICK 2 * turbo!
+                delaySeconds(2 * turbo!)
             ELSE
-                TICK turbo!
+                delaySeconds(turbo!)
             END IF
 		    navyloc(who) = 99
 		    commerce = who
@@ -2049,12 +2196,20 @@ SUB navy (who, chx)
 		SELECT CASE choose
 		CASE 1
 	        firemore:
-            IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
+            IF noise > 0 THEN 
+				SOUND 77, .5
+				SOUND 59, .5
+				CALL delaySeconds(.1)
+			END IF
             pct! = 0: a$ = RIGHT$(fleet$(who), 1)
             IF a$ <> RIGHT$(fleet$(3 - who), 1) THEN
                 IF a$ = "I" THEN pct! = .1 ELSE pct! = -.1
             END IF
-            IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
+            IF RND <= .5 + pct! THEN
+				GOTO hitem 
+			ELSE 
+				GOTO hitme1
+			END IF
             GOTO firemore
 	        hitem:
             hit(3 - who) = hit(3 - who) - 1
@@ -2065,13 +2220,13 @@ SUB navy (who, chx)
             IF who = 1 THEN y = 190
             GOSUB xout
             LOCATE 17, 5: PRINT force$(3 - who); " ship SUNK!"
-            CALL TICK(turbo! + 1)
+            CALL delaySeconds(turbo! + 1)
             GOSUB clr1
             CALL sinkShip(3 - who)
             IF navysize(3 - who) < 1 THEN
                 LOCATE 19, 5: COLOR 12
                 PRINT force$(3 - who); " fleet DEFEATED"
-                CALL TICK(turbo!)
+                CALL delaySeconds(turbo!)
                 navyloc(3 - who) = 0: fleet$(3 - who) = ""
                 victory(3 - who) = victory(3 - who) + 10
                 IF who = side THEN grudge = 1 ELSE grudge = 0
@@ -2089,13 +2244,13 @@ SUB navy (who, chx)
 		    IF who = 1 THEN y = 90
 		    GOSUB xout
 		    LOCATE 17, 5: PRINT "One of the "; force$(who); " ships was SUNK!"
-			CALL TICK(turbo!)
+			CALL delaySeconds(turbo!)
 			GOSUB clr1
 		    CALL sinkShip(who)
             IF navysize(who) < 1 THEN
                 LOCATE 19, 5: COLOR 12
                 PRINT "Attacking "; force$(who); " fleet has been ELIMINATED !"
-                CALL TICK(turbo!)
+                CALL delaySeconds(turbo!)
                 navyloc(who) = 0
                 fleet$(who) = ""
                 victory(who) = victory(who) + 10
@@ -2118,7 +2273,7 @@ SUB navy (who, chx)
             found1:
             CALL clearBottom
             COLOR 11: PRINT force$(who); " is retreating to "; city$(target);
-            CALL TICK(turbo!)
+            CALL delaySeconds(turbo!)
             navyloc(who) = target
             GOTO sail3
 		CASE ELSE
@@ -2131,7 +2286,7 @@ SUB navy (who, chx)
     	showhit:
 		LOCATE 9, 6 * navysize(1): PRINT hit(1); " ";
 		LOCATE 15, 6 * navysize(2): PRINT hit(2); " ";
-		IF noise = 0 THEN TICK .1 * turbo!
+		IF noise = 0 THEN delaySeconds(.1 * turbo!)
 		RETURN
     	clr1:
 		LOCATE 17, 1: PRINT SPACE$(60): RETURN
@@ -2202,12 +2357,12 @@ SUB createNewArmy (who, empty, target)
 	IF a < 1 THEN x = x \ 3
 	occupied(target) = empty
 	armysize(empty) = x
-	PRINT " Size = "; : CALL strong(empty)
+	PRINT " Size = "; : CALL displayArmySize(empty)
 	cash(who) = cash(who) - 100
 	IF noise > 0 THEN SOUND 2222, .5
 	armyloc(empty) = target
 	CALL placeArmy(empty)
-	CALL TICK(turbo! - .5)
+	CALL delaySeconds(turbo! - .5)
 	armymove(empty) = -1
 END SUB
 
@@ -2380,7 +2535,7 @@ SUB railroad (who)
             IF x > 1 GOTO haul
             CALL clearBottom
             PRINT armyname$(index); "'s train cannot go to "; city$(x1); " - select another city";
-            CALL TICK(9)
+            CALL delaySeconds(9)
             GOTO aboard
             haul:
             COLOR 11
@@ -2394,7 +2549,7 @@ SUB railroad (who)
             armymove(index) = x1
             CALL drawTinyTrain(who, 1)
             IF noise > 0 THEN SOUND 2222, 1
-            CALL engine
+            CALL drawTrainEngine
             CALL occupyCity(from)
             IF occupied(from) > 0 THEN CALL placeArmy(occupied(from))
             GOTO toot
@@ -2414,7 +2569,7 @@ SUB railroad (who)
 		    CALL clearBottom
 		    PRINT "Train with "; armyname$(index); " has arrived in "; city$(armyloc(index));
 		    IF noise > 0 THEN SOUND 1200, 2
-		    CALL TICK(turbo!)
+		    CALL delaySeconds(turbo!)
 		    x = cityx(armyloc(index)) - 12
 		    y = cityy(armyloc(index)) - 11
 		    LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
@@ -2444,7 +2599,7 @@ SUB railroad (who)
 	    RETURN
 
 	    toot:
-		IF who = side THEN CALL TICK(9)
+		IF who = side THEN CALL delaySeconds(9)
 		CALL clearRight
 		clearBottom
 END SUB
@@ -2549,10 +2704,10 @@ SUB recruitArmy (who)
 	IF noise > 0 THEN SOUND 2222, 1
 	COLOR 11
 	CALL clearBottom
-	PRINT "Army "; i; armyname$(i); " in "; city$(armyloc(i)); " strength increased to "; : CALL strong(i)
+	PRINT "Army "; i; armyname$(i); " in "; city$(armyloc(i)); " strength increased to "; : CALL displayArmySize(i)
 	IF a$ <> "" THEN PRINT a$;
 	PUT (x - 9, y - 7), anima, PSET
-	CALL TICK(turbo! - .5)
+	CALL delaySeconds(turbo! - .5)
 	GOTO levy
 	randsel:
 	choose = 0
@@ -2595,7 +2750,7 @@ SUB shiptype (who, i)
 	CALL drawShipIcon(who, a)
 END SUB
 
-SUB showcity
+SUB drawCities
 	FOR i = 1 TO 40
         c = 9
         IF cityp(i) = 2 THEN c = 7
@@ -2623,8 +2778,8 @@ SUB showcity
 	NEXT i
 END SUB
 
-SUB smarts
-	CALL events
+SUB aiTakeTurn
+	CALL specialEvents
 	slush = 0
 	who = 3 - side
 	c = 9
@@ -2670,7 +2825,7 @@ SUB smarts
 	CALL clearBottom
 	PRINT city$(target); " fortifications increased to "; fort(target);
 	CALL drawIcons(target, 0, 6)
-	CALL showcity
+	CALL drawCities
 	IF who = 1 AND navysize(1) < 1 AND RND > .5 AND cash < 222 GOTO signup
 	IF 3 * RND > 1 + aggress! AND cash(who) >= cost GOTO city2
 
@@ -2757,7 +2912,7 @@ SUB smarts
 		    IF flag > 0 GOTO deadman
 		NEXT j
 	    nocap:
-	    CALL evaluate(i, best)
+	    CALL aiDetermineArmyMoves(i, best)
 	    IF best = 0 GOTO deadman
 	    move9:
 		IF best = 0 THEN choose = 1 + INT((j - 1) * RND)
@@ -2784,7 +2939,7 @@ SUB smarts
 		END IF
 			CALL drawIcons(armyloc(i), armymove(i), 1)
 			CALL drawIcons(armyloc(i), armymove(i), 9)
-		CALL TICK(turbo! - 1)
+		CALL delaySeconds(turbo! - 1)
 		PUT (cityx(armyloc(i)) - 20, cityy(armyloc(i)) - 19), image, PSET
 	deadman:
 	NEXT i
@@ -2797,7 +2952,7 @@ SUB smarts
                     PRINT armyname$(i); " has drilled to reach experience level "; armyexper(i);
                 END IF
                 armymove(i) = -1
-                CALL TICK(turbo! - 1)
+                CALL delaySeconds(turbo! - 1)
             END IF
 		NEXT i
 	EXIT SUB
@@ -2821,20 +2976,20 @@ SUB smarts
 	RETURN
 END SUB
 
-SUB snapshot (x, y, flag)
+SUB captureAndRestoreScreenArea (x, y, flag)
 	IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), image
 	IF flag = 1 THEN PUT (x - 10, y - 10), image, PSET
 END SUB
 
-SUB strong (index)
+SUB displayArmySize (index)
 	a$ = LTRIM$(RTRIM$(STR$(armysize(index)))) + "00"
 	PRINT a$;
 END SUB
 
-SUB tupdate
+SUB updateGameTurn
 	flag = 0
 	IF player = 1 THEN
-		CALL smarts
+		CALL aiTakeTurn
 	ELSE
 		FOR i = 1 TO 40
 		    IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL drawIcons(armyloc(i), armymove(i), 1)
@@ -2851,7 +3006,7 @@ SUB tupdate
 	    IF rr(i) > 0 THEN 
 	        CALL railroad(i)
 	        LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B
-	        CALL engine
+	        CALL drawTrainEngine
 	    END IF
 	NEXT i
 
@@ -2892,7 +3047,7 @@ SUB tupdate
 	supply(active) = supply(active) - 1
 	IF supply(active) < 0 THEN 
 		supply(active) = 0
-		CALL TICK(turbo!)
+		CALL delaySeconds(turbo!)
 		CALL clearBottom: PRINT armyname$(active); " is out of supplies !";
 	END IF
 
@@ -2909,7 +3064,7 @@ SUB tupdate
 	COLOR 11
 	CALL clearBottom
 	PRINT armyname$(active); " and "; armyname$(occupied(target)); " meet in "; city$(target);
-	CALL TICK(turbo!)
+	CALL delaySeconds(turbo!)
 	CALL drawIcons(armymove(active), 0, 6)
 	CALL clearBottom
 	GOTO easy
@@ -2921,7 +3076,7 @@ SUB tupdate
 	COLOR 11
 	CALL clearBottom
 	PRINT armyname$(active); " attacks "; armyname$(defend); " in "; city$(armyloc(defend));
-	CALL TICK(turbo! - 1)
+	CALL delaySeconds(turbo! - 1)
 	IF armysize(defend) > 0 THEN 
 		CALL resolveBattle(active, defend, win, lose)
 		flag = 1
@@ -2932,7 +3087,7 @@ SUB tupdate
 	IF armysize(lose) < 2 THEN
 		CALL clearBottom
 		a$ = armyname$(lose) + "'s army is crushed in " + city$(armyloc(defend))
-		CALL scribe(a$, 2)
+		CALL displayAndLogMessage(a$, 2)
 		index = lose
 		GOTO crushed
 	END IF
@@ -2961,7 +3116,7 @@ SUB tupdate
 		IF armymove(defend) > 0 THEN armymove(defend) = -2
 	END IF
 
-	CALL TICK(turbo!)
+	CALL delaySeconds(turbo!)
 	GOTO digin
 
 	kickbutt: ' Defender Retreats
@@ -3012,10 +3167,10 @@ SUB tupdate
 	deadmeat:
 		index = defend
 		a$ = armyname$(index) + " surrenders to " + armyname$(active) + " in " + city$(armyloc(index))
-		CALL scribe(a$, 2)
+		CALL displayAndLogMessage(a$, 2)
 	crushed:
 		IF graf > 2 THEN 
-			CALL surrender(index)
+			CALL drawArmySurrender(index)
 			COLOR 14: LOCATE 3, 68: PRINT armyname$(index): LOCATE 4, 68: PRINT "surrenders !"
 		END IF
 		x = 1
@@ -3034,7 +3189,7 @@ SUB tupdate
 		supply(active) = supply(active) + supply(index)
 		supply(index) = 0
 		IF supply(active) > 10 THEN supply(active) = 10
-		CALL TICK(9)
+		CALL delaySeconds(9)
 		CALL clearRight
 		IF armyloc(active) = 0 GOTO digin
 
@@ -3044,7 +3199,7 @@ SUB tupdate
 		COLOR 11
 		CALL clearBottom
 		PRINT "There are still defenders in "; city$(target);
-		CALL TICK(99)
+		CALL delaySeconds(99)
 		GOTO enemy
 
 	easy: ' Move into new city
@@ -3073,10 +3228,10 @@ SUB tupdate
 				x = cityx(c)
 				y = cityy(c)
 				LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-				CALL showcity
+				CALL drawCities
 				CALL clearBottom
 				PRINT armyname$(active); " has destroyed the forts at "; city$(c);
-				TICK 3
+				delaySeconds(3)
 			END IF
 		END IF
 		CALL captureCity(active, c, s, flag)
@@ -3111,20 +3266,20 @@ SUB tupdate
 			PSET (500, 465), 0: CALL drawShipIcon(commerce, a)
 			IF noise > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
 			IF commerce = side THEN grudge = 1
-			TICK 9
+			delaySeconds(9)
 		ELSE
 			raider = 0
 			CALL sinkShip(commerce)
 			COLOR 15: PRINT force$(commerce); " raiders have lost a ship ("; navysize(commerce); " remain)";
 			IF noise > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 			IF navyloc(commerce) > 0 THEN
-				TICK 9
+				delaySeconds(9)
 				GOTO allthru
 			ELSE
 				commerce = 0
 				LINE (447, 291)-(525, 335), 1, BF
 				FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
-				TICK 9
+				delaySeconds(9)
 				LINE (447, 291)-(525, 335), 1, BF
 			END IF
 		END IF
@@ -3221,7 +3376,7 @@ SUB cancelArmyMove (side)
 
 		CALL clearBottom
 		COLOR 11: PRINT armyname$(index); " has cancelled move to "; city$(armymove(index));
-		CALL TICK(turbo + 1)
+		CALL delaySeconds(turbo + 1)
 		CALL drawIcons(armyloc(index), armymove(index), 4)
 		armymove(index) = 0
 		IF noise > 0 THEN SOUND 2999, .5
@@ -3246,7 +3401,7 @@ SUB captureCity (active, c, s, flag)
 		victory(s) = victory(s) + 100
 		victory(3 - s) = victory(3 - s) - 100
 		a$ = force$(3 - s) + " CAPITAL captured !"
-		CALL scribe(a$, 1)
+		CALL displayAndLogMessage(a$, 1)
 		CALL displayMessageBox(city$(capcity(3 - s)) + " has fallen!", 4)
 		capcity(3 - s) = 0
 		CALL animateFlashingCity(c)
@@ -3256,11 +3411,11 @@ SUB captureCity (active, c, s, flag)
 		x = cityx(c)
 		y = cityy(c)
 		LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-		CALL showcity
+		CALL drawCities
 	END IF
 END SUB
 
-SUB center (y, a$)
+SUB centerText (y, a$)
 	x = LEN(a$)
 	x = 26 - x \ 2
 	LOCATE y, 7 + x: PRINT a$
@@ -3300,7 +3455,7 @@ SUB commander (who, empty)
 	NEXT i
 	CALL clearBottom
 	PRINT "No more "; force$(who); " commanders available";
-	CALL TICK(turbo!)
+	CALL delaySeconds(turbo!)
 END SUB
 
 SUB selectEndingConditions
@@ -3339,7 +3494,7 @@ SUB selectEndingConditions
 	CALL usa
 END SUB
 
-SUB engine
+SUB drawTrainEngine
 	IF rr(1) + rr(2) = 0 THEN EXIT SUB
 	LINE (5, 17)-(100, 63), 3, BF
 	LINE (5, 17)-(100, 47), 0, B
@@ -3362,7 +3517,7 @@ SUB engine
 	NEXT i
 END SUB
 
-SUB evaluate (index, x)
+SUB aiDetermineArmyMoves (index, x)
 	from = armyloc(index)
 	x = 200
 	IF aggress! > 1.5 THEN 
@@ -3490,17 +3645,17 @@ SUB evaluate (index, x)
 	best = 0
 	FOR j = 1 TO max
 		IF array(j) < 0 GOTO allof
-			IF array(j) > x THEN 
-				x = array(j)
-				best = j
-			END IF
+		IF array(j) > x THEN 
+			x = array(j)
+			best = j
+		END IF
 	allof:
 	NEXT j
 	IF defend > armysize(index) AND array(best) < 50 THEN best = 0
 	x = best
 END SUB
 
-SUB events ' Special Events
+SUB specialEvents ' Special Events
 	IF realism > 0 AND year = 1862 AND month < 3 THEN
 		COLOR 14
 		CALL clearBottom
@@ -3538,7 +3693,7 @@ SUB events ' Special Events
 			NEXT i
 		IF empty = 0 GOTO mercen
 	float1:
-		CALL scribe("England has given ships to the South", 2)
+		CALL displayAndLogMessage("England has given ships to the South", 2)
 		navysize(2) = navysize(2) + 2 * plus
 		IF navysize(2) > 10 THEN navysize(2) = 10
 		x = navysize(2) - LEN(fleet$(2))
@@ -3550,18 +3705,18 @@ SUB events ' Special Events
 		IF RND > .1 OR control(2) < 30 GOTO money
 		a$ = "French"
 		IF RND > .5 THEN a$ = "British"
-		CALL scribe(a$ + " mercenaries join " + armyname$(index) + "'s army", 2)
+		CALL displayAndLogMessage(a$ + " mercenaries join " + armyname$(index) + "'s army", 2)
 		armysize(index) = armysize(index) + 100 * plus
 		armyexper(index) = 10
 		supply(index) = 10
 		GOTO dull1
 	money:
 		IF RND > .3 OR control(2) < 12 GOTO cotton
-			CALL scribe("The South has obtained a loan from Europe", 2)
+			CALL displayAndLogMessage("The South has obtained a loan from Europe", 2)
 			GOTO purse
 	cotton:
 		IF RND > .5 OR control(2) < 12 GOTO uprising
-		CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
+		CALL displayAndLogMessage("Cash from cotton sales fill the Rebel Treasury", 2)
 	purse:
 		cash(2) = cash(2) + 100 * plus
 		GOTO dull1
@@ -3570,7 +3725,7 @@ SUB events ' Special Events
 		a$ = "Union troops diverted to fight Western Indian uprisings"
 		IF RND > .5 THEN a$ = "Union 90-day enlistees return home"
 		IF year = 1864 AND month > 5 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
-		CALL scribe(a$, 2)
+		CALL displayAndLogMessage(a$, 2)
 		FOR k = 1 TO 20
 			armysize(k) = pct! * armysize(k)
 		NEXT k
@@ -3586,11 +3741,11 @@ SUB events ' Special Events
 				COLOR 15
 				PRINT " Riots have broken out in "; city$(x);
 				cityp(x) = 0
-				CALL showcity
-				TICK turbo!
+				CALL drawCities
+				delaySeconds(turbo!)
 				CALL clearBottom
 				CALL displayMessageBox(city$(x) + " is now NEUTRAL !", 4)
-				TICK turbo!
+				delaySeconds(turbo!)
 				RETURN
 			END IF
 		NEXT k
@@ -3599,7 +3754,7 @@ SUB events ' Special Events
 		CASE 2 ' Events Good for Union
 			IF RND > .1 OR navyloc(1) = 0 OR navysize(1) > 9 GOTO event2
 			IF RND > .95 THEN GOSUB riot: EXIT SUB
-			CALL scribe("Union shipworks have produced extra ships", 2)
+			CALL displayAndLogMessage("Union shipworks have produced extra ships", 2)
 			navysize(1) = navysize(1) + plus
 			IF navysize(1) > 10 THEN navysize(1) = 10
 			x = navysize(1) - LEN(fleet$(1))
@@ -3607,7 +3762,7 @@ SUB events ' Special Events
 			GOTO dull2
 			event2:
 			IF RND < .7 GOTO abe
-			CALL scribe("Volunteer troops swell the Union ranks", 2)
+			CALL displayAndLogMessage("Volunteer troops swell the Union ranks", 2)
 			x = 0
 			FOR i = 1 TO 20
 				x = x + 1
@@ -3618,36 +3773,36 @@ SUB events ' Special Events
 			abe:
 			IF emancipate = 0 AND year > 1862 THEN
 				emancipate = 1
-				CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
+				CALL displayAndLogMessage("Abraham Lincoln announces the Emancipation Proclamation", 2)
 				victory(1) = victory(1) + 100
 				victory(2) = victory(2) - 100
 				CALL usa
 				GOTO dull2
 			END IF
 			IF year = 1864 AND month = 11 THEN
-				CALL scribe("Lincoln has been reelected", 2)
+				CALL displayAndLogMessage("Lincoln has been reelected", 2)
 				victory(2) = .5 * victory(2)
 				GOTO dull2
 			END IF
 			IF RND > .5 THEN
-				CALL scribe("Wealthy Unionists give generously to the Federal Cause", 2)
+				CALL displayAndLogMessage("Wealthy Unionists give generously to the Federal Cause", 2)
 				cash(1) = cash(1) + 100 * plus
 				GOTO dull2
 			END IF
 			IF RND > .5 AND year > 1861 THEN
-				CALL scribe("Rebel deserters leave the battlefield to go home", 2)
+				CALL displayAndLogMessage("Rebel deserters leave the battlefield to go home", 2)
 				FOR i = 21 TO 40
 					armysize(i) = .92 * armysize(i)
 				NEXT i
 				GOTO dull2
 			END IF
 			IF RND > .5 AND year > 1861 THEN
-				CALL scribe("Union soldiers now have repeating rifles", 2)
+				CALL displayAndLogMessage("Union soldiers now have repeating rifles", 2)
 				FOR i = 1 TO 20
 					IF armyexper(i) < 9 THEN armyexper(i) = armyexper(i) + 2
 				NEXT i
 			END IF
-			CALL scribe("Secretary of War Stanton predicts the end of the Rebellion", 2)
+			CALL displayAndLogMessage("Secretary of War Stanton predicts the end of the Rebellion", 2)
 			victory(1) = victory(1) + 10
 			GOTO dull2
 		CASE ELSE
@@ -3679,7 +3834,7 @@ SUB displayMessageBox (a$, s)
 	LINE (8 * tlx - 4, 16 * tly - 3)-(8 * (tlx + wide + 1) + 7, 16 * (tly + 3)), 15, B
 	COLOR 14
 	LOCATE tly + 2, tlx + 2: PRINT a$
-	CALL TICK(9)
+	CALL delaySeconds(9)
 	PUT (8 * tlx - 4, 16 * tly - 3), g2, PSET
 END SUB
 
@@ -3699,7 +3854,7 @@ SUB checkCityDataIntegrity
 					GOTO ret
 				END IF
 			NEXT k
-			x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; city$(index); ": no return route to "; city$(i): TICK 1
+			x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; city$(index); ": no return route to "; city$(i): delaySeconds(1)
 		ret:
 		NEXT j
 	done:
@@ -3709,20 +3864,20 @@ SUB checkCityDataIntegrity
 	IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB
 
-SUB maptext
+SUB drawCityNames
     FOR k = 1 TO 40
         FOR j = 1 TO LEN(city$(k))
-        a = cityx(k) + 6 * (j - 4) - 3
-        x = ASC(MID$(UCASE$(city$(k)), j, 1)) - 64
-        IF a > 527 GOTO nextc
-        PSET (a, cityy(k) + 12), 10
-        
-        IF matrix(k, 7) < 90 THEN
-            IF bw = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
-        ELSE
-            DRAW "C10"
-        END IF
-        IF x > 0 AND x < 27 THEN DRAW font$(x)
+			a = cityx(k) + 6 * (j - 4) - 3
+			x = ASC(MID$(UCASE$(city$(k)), j, 1)) - 64
+			IF a > 527 GOTO nextc
+			PSET (a, cityy(k) + 12), 10
+			
+			IF matrix(k, 7) < 90 THEN
+				IF bw = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
+			ELSE
+				DRAW "C10"
+			END IF
+			IF x > 0 AND x < 27 THEN DRAW font$(x)
         NEXT j
         nextc:
     NEXT k
@@ -3788,7 +3943,7 @@ SUB relieveArmyCommander (who)
     COLOR 15
 	CALL clearBottom
 	PRINT lname$(array(choose)); " has replaced "; t$; " in "; city$(armyloc(index));
-	TICK 9
+	delaySeconds(9)
     armyname$(index) = lname$(array(choose))
     lname$(array(choose)) = ""
     CALL drawIcons(armyloc(index), 0, 8)
@@ -3854,7 +4009,7 @@ SUB report (who)
     	IF armyloc(i) < 1 GOTO deadeye
     	x = x + armysize(i)
     	PRINT i; TAB(5); armyname$(i); TAB(25); : y = CSRLIN
-    	CALL strong(i): PRINT TAB(32); city$(armyloc(i));
+    	CALL displayArmySize(i): PRINT TAB(32); city$(armyloc(i));
     	IF who <> side THEN PRINT : GOTO deadeye
     	PRINT TAB(43); armylead(i); TAB(47); armyexper(i); TAB(52); supply(i);
     	PRINT TAB(57); : IF armymove(i) > -1 THEN PRINT city$(armymove(i)) ELSE PRINT "Resting"
@@ -3931,12 +4086,12 @@ SUB report (who)
         	FOR j = 0 TO 3
         		LOCATE y + j, x: PRINT SPACE$(z);
         	NEXT j
-        	LOCATE y, x: PRINT "Siz:"; : CALL strong(k)
+        	LOCATE y, x: PRINT "Siz:"; : CALL displayArmySize(k)
         	LOCATE y + 1, x: PRINT "Ldr:"; armylead(k)
         	LOCATE y + 2, x: PRINT "Xpr:"; armyexper(k)
         	LOCATE y + 3, x: PRINT "Sup:"; supply(k);
         	LINE (8 * (x - 1) - 1, 16 * (y - 1) - 1)-(8 * (x + z - 1) + 1, 16 * (y + 3) + 1), 15, B
-        	TICK 1
+        	delaySeconds(1)
     	END IF
     NEXT k
     GOTO endrep
@@ -4007,7 +4162,7 @@ SUB report (who)
     IF INSTR(a$, "!") THEN COLOR 12
     LOCATE 29, 1: PRINT a$
     x = x + 1
-    IF x > 27 THEN TICK .4
+    IF x > 27 THEN delaySeconds(.4)
     LOOP
     CLOSE #2
     
@@ -4043,7 +4198,7 @@ SUB resupplyArmy (index)
 	PRINT armyname$(index); " has received supplies ";
 	IF noise > 0 THEN SOUND 4500, .5
 	nocash:
-	CALL TICK(turbo!)
+	CALL delaySeconds(turbo!)
 	IF cash(who) < 0 THEN cash(who) = 0
 END SUB
 
@@ -4189,7 +4344,7 @@ SUB rebelWin
 	RETURN
 END SUB
 
-SUB scribe (a$, flag)
+SUB displayAndLogMessage (a$, flag)
 	SELECT CASE flag
 		CASE 1
 			CALL clearBottom
@@ -4205,7 +4360,7 @@ SUB scribe (a$, flag)
 	END IF
 END SUB
 
-SUB shen '                       Shenandoah
+SUB playShenandoahMusic '                       Shenandoah
 	IF noise = 2 THEN
 		IF INKEY$ <> "" THEN choose = 1: EXIT SUB
 		PLAY "T90MFMNo1c4f8f8f4."
@@ -4293,7 +4448,7 @@ SUB increaseArmyExperience (who)
 	NEXT i
 END SUB
 
-SUB surrender (who)
+SUB drawArmySurrender (who)
 	SCREEN 12
 	s = 1
 	c = 1
@@ -4418,10 +4573,10 @@ SUB surrender (who)
 	PAINT (w + 42, 264), c, 0
 
 	CALL drawFlags(3 - s, 26, 0)
-	IF who < 99 THEN CALL TICK(turbo!)
+	IF who < 99 THEN CALL delaySeconds(turbo!)
 END SUB
 
-SUB TICK (sec!)
+SUB delaySeconds (sec!)
     start! = TIMER
     DO WHILE TIMER - start! < sec! AND INKEY$ = "": LOOP
 END SUB
@@ -4824,14 +4979,14 @@ SUB usa
     LINE (430, 66)-(400, 100), 1 ' Shenandoah River
     LINE -(380, 120), 1
     
-    CALL showcity
+    CALL drawCities
     PSET (493, 280), 1
     IF navyloc(1) = 30 OR navyloc(2) = 30 THEN
         DRAW "C11U7R4D3L3BR6BU3D7BU4R3U3D7BR3U7BD4BR4BU4D7R4"
         LINE (485, 241)-(525, 270), 11, B
     END IF
 
-    IF graf > 1 THEN CALL maptext
+    IF graf > 1 THEN CALL drawCityNames
     IF commerce > 0 THEN
 		LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
 		y = 312
@@ -4859,7 +5014,7 @@ SUB usa
     NEXT i
     nosee:
     CALL drawShips
-    CALL engine
+    CALL drawTrainEngine
     COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month$(month), 3)); ","; year
 END SUB
 
@@ -4948,12 +5103,12 @@ SUB victor
 		LINE (50, 120)-(465, 250), 4, B
 		COLOR 14
 		t$ = force$(i) + " SIDE IS WINNING"
-		IF j = 2 THEN CALL center(10, "Confederates will win a technical victory") ELSE CALL center(10, t$)
+		IF j = 2 THEN CALL centerText(10, "Confederates will win a technical victory") ELSE CALL centerText(10, t$)
 
 		COLOR 15
 		t$ = "END GAME VICTORY CONDITION" + STR$(j - 1) + " REACHED"
-		CALL center(12, t$)
-		CALL center(14, a$)
+		CALL centerText(12, t$)
+		CALL centerText(14, a$)
 
 		menuText$(0) = "End Game"
 		menuText$(1) = "Yes"
@@ -5008,8 +5163,8 @@ SUB victor
 			COLOR 14: LOCATE 4, 40 - .5 * LEN(a$)
 		END IF
 		IF history > 0 THEN
-			CALL scribe(t$, 0)
-			CALL scribe(a$, 0)
+			CALL displayAndLogMessage(t$, 0)
+			CALL displayAndLogMessage(a$, 0)
 		END IF
 		PRINT a$
 		CALL displayHighScoreScreen
@@ -5066,7 +5221,7 @@ END SUB
 '                            2=double line
 '               if >10 then 10's digit=box color  1's digit= window type
 
-SUB choices (b1, wide)
+SUB drawChoicesMenu (b1, wide)
     boxColor = colour
     IF windowType > 10 THEN 
         boxColor = INT(windowType / 10)
@@ -5132,7 +5287,7 @@ SUB menu (switch%)
 	COLOR colour
 	b1 = INT(.5 * (wide - LEN(menuText$(0))) + .5) + 1
 
-	CALL choices(b1, wide)
+	CALL drawChoicesMenu(b1, wide)
 	sel1:
 	SELECT CASE switch
 		CASE 1
@@ -5268,7 +5423,7 @@ SUB menu (switch%)
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL usa
-		CALL choices(b1, wide)
+		CALL drawChoicesMenu(b1, wide)
 		CALL topbar
 		RETURN
 	 END IF
@@ -5279,7 +5434,7 @@ SUB menu (switch%)
 	 END IF
 	 IF a$ = ">" AND switch = 0 THEN
 		CALL report(-1)
-		CALL choices(b1, wide)
+		CALL drawChoicesMenu(b1, wide)
 		CALL topbar
 		RETURN
 	 END IF
@@ -5689,7 +5844,7 @@ SUB animateFlashingCity (which)
 		CIRCLE (cityx(which), cityy(which)), 4, 0
 		CIRCLE (cityx(which), cityy(which)), 3, c
 		PAINT (cityx(which), cityy(which)), c, c
-		CALL TICK(.1)
+		CALL delaySeconds(.1)
     NEXT c
     c = 9
 	IF cityp(which) = 2 THEN c = 7
@@ -5801,9 +5956,9 @@ SUB animateArmyMove (index, flag)
 		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
 		PUT (x1 - 10, y1 - 10), anima, PSET
 		IF turbo! > 1 THEN
-			CALL TICK(.1)
+			CALL delaySeconds(.1)
 		ELSE 
-			CALL TICK(.02)
+			CALL delaySeconds(.02)
 		END IF
 		IF noise > 0 THEN SOUND 200, .1: SOUND 50, .1
 		PUT (x1 - 10, y1 - 10), image, PSET
@@ -5851,19 +6006,19 @@ SUB drawIcons (from, dest, kind)
 			FOR i = 6 TO 8
 			LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
 			NEXT i
-			CALL TICK(.1)
+			CALL delaySeconds(.1)
 		CASE 3
 			x = cityx(from)
 			y = cityy(from)
-			CALL snapshot(x, y, 0)
+			CALL captureAndRestoreScreenArea(x, y, 0)
 			FOR j = 1 TO 3
 				FOR i = 4 TO 10 STEP 1
 				CIRCLE (x, y), i, 4
 				PAINT (x, y), 14, 4
 				IF noise > 0 THEN SOUND 37 + 50 * RND, .03
 				NEXT i
-				CALL TICK(.1)
-				CALL snapshot(x, y, 1)
+				CALL delaySeconds(.1)
+				CALL captureAndRestoreScreenArea(x, y, 1)
 			NEXT j
 		CASE 4
 			IF occupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
@@ -5874,12 +6029,12 @@ SUB drawIcons (from, dest, kind)
 		CASE 6
 			x = cityx(from)
 			y = cityy(from)
-			CALL snapshot(x, y, 0)
+			CALL captureAndRestoreScreenArea(x, y, 0)
 			LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
 			LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
 			IF noise > 0 THEN SOUND 3999, .3
-			CALL TICK(turbo! - .5)
-			CALL snapshot(x, y, 1)
+			CALL delaySeconds(turbo! - .5)
+			CALL captureAndRestoreScreenArea(x, y, 1)
 		CASE 7          ' draw white box
 			x = cityx(from) - 12
 			y = cityy(from) - 11
