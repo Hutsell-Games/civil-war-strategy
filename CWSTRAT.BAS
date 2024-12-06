@@ -170,10 +170,7 @@ FOR i = 1 TO 2
 	cash(i) = cash(i) + 50 * RND
 NEXT i
 choose = 0
-a$ = COMMAND$
-IF a$ <> "" OR replay > 0 GOTO notitle2
 
-notitle2:
 SCREEN 12
 	DEF SEG = VARSEG(graphic(1))
 	BLOAD "cwsicon.vga", VARPTR(graphic(1))
@@ -192,23 +189,23 @@ CALL drawFlags(1, -440, 0)
 CALL drawFlags(2, -100, 0)
 IF replay = 0 AND noise = 2 AND choose = 0 THEN
 IF side = 1 THEN
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO noTitle
 		PLAY "MST170o1e8o0b8o1e8"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO noTitle
 		PLAY "e8e4f#8g4f#8"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO noTitle
 		PLAY "g4e8d2o0b8o1d2 "
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO noTitle
 		PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO noTitle
 		PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
-	IF INKEY$ <> "" GOTO notitle
+	IF INKEY$ <> "" GOTO noTitle
 		PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
     ELSE
 		CALL playShenandoahMusic
     END IF
 END IF
-notitle:
+noTitle:
 CALL addUnionAdvantage
 
 city$(0) = "NONE"
@@ -251,7 +248,7 @@ CALL menu(0)
 IF choose = 1 THEN
 	CLS
 	GOTO loader
-	GOTO menu0
+	GOTO mainMenu
 END IF
 IF choose = 3 THEN 
 	CLS
@@ -268,9 +265,9 @@ ELSE
 	CLS
 END IF
 CALL usa
-GOTO menu0
+GOTO mainMenu
 
-newmonth: ' Begin New Month
+newMonth: ' Begin New Month
 IF side > 2 THEN side = 1
 a$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
 CALL displayAndLogMessage(a$, 0)
@@ -316,7 +313,7 @@ IF pcode > 0 THEN
 	GOTO newgame
 END IF
 
-menu0: ' Main Menu
+mainMenu: ' Main Menu
 CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
 IF cash(side) < 100 AND navyloc(side) = 0 THEN navyMenuFlag = 1
@@ -344,15 +341,15 @@ SELECT CASE choose
 	CASE 1 ' Recruit Menu
         IF cash(side) < 100 OR recruitMenuFlag < 0 THEN 
 			recruitMenuFlag = -1
-			GOTO menu0
+			GOTO mainMenu
 		END IF
         CALL recruitArmy((side))
         chosit = 23
-        GOTO menu0
+        GOTO mainMenu
 	CASE 2 ' Armies Menu
         CALL moveArmy
         chosit = 23
-        GOTO menu0
+        GOTO mainMenu
 	CASE 3 ' Navy Menu
         IF navyMenuFlag = 0 THEN CALL navy((side), 0)
         chosit = 25
@@ -374,7 +371,7 @@ SELECT CASE choose
             CALL railroad(side)
         ELSE
             CALL clearBottom
-            COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO menu0
+            COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO mainMenu
         END IF
 	CASE 5 ' End Turn Menu
         tlx = 67: tly = 15
@@ -387,7 +384,7 @@ SELECT CASE choose
         CALL clearRight
         IF choose <> 1 THEN 
 			chosit = 24
-			GOTO menu0
+			GOTO mainMenu
 		END IF
         endrnd:
         recruitMenuFlag = 0
@@ -398,10 +395,10 @@ SELECT CASE choose
 			IF side = 2 THEN 
 				CALL displayPlayerTurnScreen
 				CALL usa
-				GOTO menu0
+				GOTO mainMenu
 			END IF
 		END IF
-        GOTO newmonth
+        GOTO newMonth
 	CASE 6 ' Report Menu
         CALL report((side)): chosit = 27
         CALL setStartFinishIndexes(startIndex, endIndex, side)
@@ -437,10 +434,10 @@ SELECT CASE choose
                     COLOR 11
                     CALL clearBottom
                     PRINT "Not enough money for fort";
-                    GOTO menu0
+                    GOTO mainMenu
                 END IF
                 CALL fortifyCity(target)
-                IF cash(side) < 200 GOTO menu0
+                IF cash(side) < 200 GOTO mainMenu
                 choose = 23
                 GOTO optionsMenu
 		    CASE 3 ' Combine Armies
@@ -451,7 +448,7 @@ SELECT CASE choose
                     COLOR 11
                     PRINT "No eligible armies in same city to combine";
                     CALL increaseArmyExperience(side)
-                    GOTO menu0
+                    GOTO mainMenu
                 END IF
                 choose = 24
                 GOTO optionsMenu
@@ -482,11 +479,11 @@ SELECT CASE choose
                     COLOR 11
                     CALL clearBottom
                     PRINT "All eligible "; force$(side); " armies have supplies";
-                    GOTO menu0
+                    GOTO mainMenu
                 END IF
                 CALL menu(6)
                 CALL clearRight
-                IF choose < 0 GOTO menu0
+                IF choose < 0 GOTO mainMenu
                 index = array(choose)
                 IF supply(index) < 2 THEN
 					CALL resupplyArmy(index)
@@ -498,7 +495,7 @@ SELECT CASE choose
                 IF capcity(side) = 0 OR cash(side) < 500 THEN 
                     CALL clearBottom
                     COLOR 11: PRINT "Cannot move capital";
-                    GOTO menu0
+                    GOTO mainMenu
                 END IF
                 cash(side) = cash(side) - 500
                 victory(3 - side) = victory(3 - side) + 50
@@ -507,7 +504,7 @@ SELECT CASE choose
                 a$ = city$(capcity(side))
                 index = capcity(side)
 				CALL moveCapitalCity(index)
-                IF index = 0 GOTO menu0
+                IF index = 0 GOTO mainMenu
                 capcity(side) = index
                 CALL clearBottom
                 PRINT force$(side); " capital moved from "; a$; " to "; city$(capcity(side));
@@ -519,19 +516,19 @@ SELECT CASE choose
                 IF side = 1 THEN 
                     CALL clearBottom
                     COLOR 11: PRINT "Option not available to Union";
-                    GOTO menu0
+                    GOTO mainMenu
                 END IF
                 COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
                 CALL moveArmyFrom(index, target)
-				IF target < 1 OR index < 1 GOTO menu0
+				IF target < 1 OR index < 1 GOTO mainMenu
                 IF armysize(index) < 65 THEN 
                     CALL clearBottom
                     PRINT "Too small to detach";
                     CALL delaySeconds(turbo!)
-                    GOTO menu0
+                    GOTO mainMenu
                 END IF
                 CALL commander(2, empty)
-                IF empty = 0 GOTO menu0
+                IF empty = 0 GOTO mainMenu
                 supply(empty) = .3 * supply(index)
 				supply(index) = supply(index) - supply(empty)
                 IF supply(index) < 0 THEN supply(index) = 0
@@ -559,7 +556,7 @@ SELECT CASE choose
                     COLOR 11
                     CALL clearBottom
                     PRINT "No armies remain eligible for drills in "; month$(month);
-                    GOTO menu0
+                    GOTO mainMenu
                 END IF
                 IF armyexper(index) > 5 OR armyexper(index) >= armylead(index) THEN 
                     COLOR 12
@@ -582,7 +579,7 @@ SELECT CASE choose
                 GOTO optionsMenu
             CASE ELSE
                 chosit = 28
-                GOTO menu0
+                GOTO mainMenu
         END SELECT
 	    choose = 21 + choose
 	    GOTO optionsMenu
@@ -618,7 +615,7 @@ SELECT CASE choose
         CALL clearRight
         SELECT CASE choose
             CASE 1 ' Swap Sides
-                IF player = 2 GOTO menu0
+                IF player = 2 GOTO mainMenu
                 side = 3 - side
                 COLOR 9
                 IF side = 2 THEN COLOR 7
@@ -628,7 +625,7 @@ SELECT CASE choose
                 IF side = 1 THEN randbal = 7
                 IF side = 2 THEN randbal = 3
                 CALL topbar
-                GOTO menu0
+                GOTO mainMenu
             CASE 2 ' Solo or 2 Player Setting
                 player = 3 - player
                 CALL clearBottom
@@ -663,7 +660,7 @@ SELECT CASE choose
                 size = 3: tlx = 67: tly = 12
                 CALL menu(0)
                 CALL clearRight
-                IF choose < 1 GOTO menu0
+                IF choose < 1 GOTO mainMenu
                 COLOR 11
                 CALL clearBottom
                 PRINT "Sound Option : "; menuText$(choose);
@@ -709,7 +706,7 @@ SELECT CASE choose
                 tlx = 67: tly = 15: size = 5
                 CALL menu(8)
                 CALL clearRight
-                IF choose < 1 GOTO menu0
+                IF choose < 1 GOTO mainMenu
                 CALL clearBottom
                 COLOR 11
                 CALL clearBottom
@@ -877,7 +874,7 @@ SELECT CASE choose
         CALL clearRight
         SELECT CASE choose
             CASE IS < 1
-                GOTO menu0
+                GOTO mainMenu
             CASE 1, 2
                 loader:
                 IF choose = 1 AND filel = 0 GOTO filex
@@ -887,7 +884,7 @@ SELECT CASE choose
 					moveMenuFlag = 0
 					navyMenuFlag = 0
 				END IF
-                GOTO menu0
+                GOTO mainMenu
             CASE 3
                 OPEN "O", 1, "cws.cfg"
                 WRITE #1, side, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), jancam, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
@@ -903,15 +900,15 @@ SELECT CASE choose
                 tlx = 67: tly = 15
                 CALL menu(0)
                 CALL clearRight
-                IF choose = 1 THEN END ELSE GOTO menu0
+                IF choose = 1 THEN END ELSE GOTO mainMenu
 	    END SELECT
 	CASE 99
 	    GOTO endrnd
 CASE ELSE
 	chosit = 22
-	GOTO menu0
+	GOTO mainMenu
 END SELECT
-GOTO menu0
+GOTO mainMenu
 
 '............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
