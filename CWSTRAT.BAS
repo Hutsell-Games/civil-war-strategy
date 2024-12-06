@@ -12,12 +12,13 @@ DECLARE SUB generateRomanNumeralArmy (target%, a$)
 DECLARE SUB increaseArmyExperience (who%)
 DECLARE SUB moveArmy ()
 DECLARE SUB moveArmyFrom (index%, target%)
-DECLARE SUB newarmy (who%, empty%, target%)
+DECLARE SUB createNewArmy (who%, empty%, target%)
 DECLARE SUB occupyCity (x%)
-DECLARE SUB placearmy (which%)
+DECLARE SUB placeArmy (which%)
 DECLARE SUB railroad (who%)
-DECLARE SUB recruit (who%)
+DECLARE SUB recruitArmy (who%)
 DECLARE SUB relieveArmyCommander (who%)
+DECLARE SUB resolveBattle (attack%, defend%, win%, lose%)
 DECLARE SUB retreat (active%, x%)
 DECLARE SUB showArmyStatistics (index%)
 DECLARE SUB fortifyCity (target%)
@@ -25,9 +26,9 @@ DECLARE SUB captureCity (active%, c%, s%, flag%)
 
 ' Utility
 DECLARE SUB determineTrainCapacity (who%, limit%)
-DECLARE SUB filer (switch%)
+DECLARE SUB manageGameFiles (switch%)
 DECLARE SUB generateNormalRandom (xbar%, variance%, result%)
-DECLARE SUB integrity ()
+DECLARE SUB checkCityDataIntegrity ()
 DECLARE SUB setStartFinishIndexes (startIndex%, endIndex%, who%)
 
 ' Reports
@@ -38,10 +39,10 @@ DECLARE SUB advanceToNextTurn ()
 
 DECLARE SUB center (y%, a$)
 DECLARE SUB maptext ()
-DECLARE SUB battle (attack%, defend%, win%, lose%)
+
 DECLARE SUB choices (b1%, wide%)
-DECLARE SUB cutoff (who%, target%, a%)
-DECLARE SUB endit ()
+DECLARE SUB determineCutoff (who%, target%, a%)
+DECLARE SUB selectEndingConditions ()
 DECLARE SUB engine ()
 DECLARE SUB evaluate (index%, x%)
 DECLARE SUB events ()
@@ -124,7 +125,7 @@ rr(k) = 0: victory(k) = 0: tracks(k) = 0
 NEXT k
 
 filel = 1: vicflag(1) = 1
-CALL filer(1)
+CALL manageGameFiles(1)
 IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
 	BLOAD "mtn.vga", VARPTR(mtn(1))
@@ -298,7 +299,7 @@ CALL clearRight
 SELECT CASE choose
 	CASE 1 ' Recruit Menu
         IF cash(side) < 100 OR recruitMenuFlag < 0 THEN recruitMenuFlag = -1: GOTO menu0
-        CALL recruit((side))
+        CALL recruitArmy((side))
         chosit = 23
         GOTO menu0
 	CASE 2 ' Armies Menu
@@ -400,7 +401,7 @@ SELECT CASE choose
                 FOR i = startIndex TO endIndex
                     IF armyloc(i) = 0 OR supply(i) > 1 GOTO alone
                     IF realism > 0 THEN
-                        CALL cutoff(side, armyloc(i), a)
+                        CALL determineCutoff(side, armyloc(i), a)
                         IF a < 1 THEN 
                             CALL clearBottom
                             COLOR 15: PRINT force$(side); " army in "; city$(armyloc(i)); " is CUT OFF !";
@@ -427,7 +428,7 @@ SELECT CASE choose
                 index = array(choose)
                 IF supply(index) < 2 THEN
                 CALL resupplyArmy(index)
-                CALL placearmy(index)
+                CALL placeArmy(index)
                 END IF
                 choose = 25
                 GOTO optionsMenu
@@ -652,7 +653,7 @@ SELECT CASE choose
                 choose = 27
                 GOTO utilityMenu
 	        CASE 7 ' Ending Conditions Settings
-                CALL endit
+                CALL selectEndingConditions
                 choose = 28
                 GOTO utilityMenu
 	        CASE 8 ' Random Events Options
@@ -689,7 +690,7 @@ SELECT CASE choose
                  choose = 29
                  GOTO utilityMenu
 	        CASE 9 ' Vary Start Conditions
-                CALL filer(1)
+                CALL manageGameFiles(1)
                 cash(1) = cash(1) - 100 + 200 * RND
                 cash(2) = cash(2) + 100 + 200 * RND
                 bold = 5 * RND
@@ -753,7 +754,7 @@ SELECT CASE choose
                 choose = 32
                 GOTO utilityMenu
 	        CASE 12 ' Check Map Linkages
-                CALL integrity
+                CALL checkCityDataIntegrity
                 CALL TICK(99)
                 CALL usa
 	        CASE 13 ' History Setting
@@ -801,7 +802,7 @@ SELECT CASE choose
             CASE 1, 2
                 loader:
                 IF choose = 1 AND filel = 0 GOTO filex
-                CALL filer(choose + 1)
+                CALL manageGameFiles(choose + 1)
                 IF choose = 1 THEN recruitMenuFlag = 0: moveMenuFlag = 0: navyMenuFlag = 0
                 GOTO menu0
             CASE 3
@@ -939,7 +940,7 @@ SUB sinkShip (who)
 	END IF
 END SUB
 
-SUB battle (attack, defend, win, lose)
+SUB resolveBattle (attack, defend, win, lose)
     ' Ensure minimum army size
     IF armysize(defend) < 1 THEN armysize(defend) = 1
     IF armysize(attack) < 1 THEN armysize(attack) = 1
@@ -1327,13 +1328,13 @@ SUB combineArmies (who)
 	       
     ' Update city and army status
 	CALL showcity
-	CALL placearmy(best)
+	CALL placeArmy(best)
 	CALL drawIcons(target, 0, 6)
 	occupied(target) = best
 	CALL increaseArmyExperience(who)
 END SUB
 
-SUB cutoff (who, target, a)
+SUB determineCutoff (who, target, a)
     a = 0
     FOR j = 1 TO 6
     y = matrix(target, j)
@@ -1341,9 +1342,9 @@ SUB cutoff (who, target, a)
     NEXT j
 END SUB
 
-SUB filer (switch)
+SUB manageGameFiles (switch)
 	SELECT CASE switch
-		CASE 1
+		CASE 1 ' Load game data
             OPEN "I", 1, "cwslead.dat"
             FOR i = 1 TO 40
                 INPUT #1, lname$(i), rating(i)
@@ -1354,16 +1355,25 @@ SUB filer (switch)
 		    FOR i = 1 TO 12: INPUT #1, month$(i): NEXT i
 		    INPUT #1, month, year
 		    ' Set end game conditions
-		    FOR i = 1 TO 6: INPUT #1, vicflag(i): NEXT i
+		    FOR i = 1 TO 6
+				INPUT #1, vicflag(i)
+			NEXT i
 		    vicflag(3) = .4 * vicflag(3)
 		    INPUT #1, a             ' number of Yankee armies
 	        FOR i = 1 TO a
-		        INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i): occupied(armyloc(i)) = i: armyname$(i) = lname$(i): armylead(i) = rating(i): lname$(i) = ""
+		        INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i)
+				occupied(armyloc(i)) = i
+				armyname$(i) = lname$(i)
+				armylead(i) = rating(i)
+				lname$(i) = ""
 	        NEXT i
 		    INPUT #1, a             ' number of Rebel armies
 	        FOR i = 21 TO 20 + a
 		        INPUT #1, armyloc(i), armysize(i), armyexper(i), supply(i)
-		        occupied(armyloc(i)) = i: armyname$(i) = lname$(i): armylead(i) = rating(i): lname$(i) = ""
+		        occupied(armyloc(i)) = i
+				armyname$(i) = lname$(i)
+				armylead(i) = rating(i)
+				lname$(i) = ""
 	        NEXT i
 	        FOR i = 1 TO 2: INPUT #1, cash(i): NEXT i
 		    INPUT #1, ATKFAC, DEFAC, TCR
@@ -1376,7 +1386,7 @@ SUB filer (switch)
 		    OPEN "I", 1, "cws.cfg"
 		    INPUT #1, side, graf, noise, difficult, player, turbo!, randbal, train(1), train(2), jancam, realism, batwon(1), batwon(2), casualty&(1), casualty&(2), history, bold
 		    CLOSE #1
-		CASE 2
+		CASE 2 ' Load a saved game
 		    IF _FILEEXISTS("*.sav") THEN choose = -1: EXIT SUB
 		    menuText$(0) = "Load"
 		    size = 0
@@ -1431,7 +1441,7 @@ SUB filer (switch)
                 IF rr(k) > 0 THEN CALL drawTinyTrain(k, 1)
             NEXT k
 		    side = a
-		CASE 3
+		CASE 3 ' Save current game
 		    menuText$(0) = "Save Game"
             FOR k = 1 TO 9
                 menuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
@@ -1518,13 +1528,13 @@ SUB fortifyCity (target)
 	CALL showcity
 	IF armymove(x) > 0 THEN CALL drawIcons(armyloc(x), armymove(x), 5)
 	armymove(x) = -1
-	CALL placearmy(x)
+	CALL placeArmy(x)
 	CALL increaseArmyExperience(who)
 END SUB
 
 SUB advanceToNextTurn
     FOR i = 1 TO 40
-        IF armyloc(i) > 0 THEN CALL placearmy(i)
+        IF armyloc(i) > 0 THEN CALL placeArmy(i)
     NEXT i
 
     month = month + 2
@@ -1539,7 +1549,7 @@ SUB advanceToNextTurn
         IF i > 20 THEN s = 2
         IF cash(s) >= .2 * armysize(i) THEN
             a = 1
-            IF realism > 0 THEN CALL cutoff(s, armyloc(i), a)
+            IF realism > 0 THEN CALL determineCutoff(s, armyloc(i), a)
             IF a > 0 THEN
                 supply(i) = supply(i) + 1
                 cash(s) = cash(s) - .2 * armysize(i)
@@ -1559,7 +1569,7 @@ SUB advanceToNextTurn
             supply(i) = 0
             CALL clearBottom
             PRINT armyname$(i); " is out of supplies";
-            CALL placearmy(i)
+            CALL placeArmy(i)
             CALL TICK(turbo!)
             IF RND > .8 AND armysize(i) > 50 THEN armysize(i) = .9 * armysize(i)
         END IF
@@ -1982,7 +1992,7 @@ SUB navy (who, chx)
             x = 35
             CALL sinkShip(who)
             c = navyloc(who)
-            CALL newarmy((who), empty, c)
+            CALL createNewArmy((who), empty, c)
             cash(who) = cash(who) + 100     ' compensate for cost of recruiting new army
             CALL captureCity(empty, c, who, 0)
             armysize(empty) = x
@@ -2175,7 +2185,7 @@ SUB navy (who, chx)
 		CLS : CALL usa
 END SUB
 
-SUB newarmy (who, empty, target)
+SUB createNewArmy (who, empty, target)
 	supply(empty) = 3 + 5 * RND
 	IF who = 1 THEN supply(empty) = supply(empty) + 2
 	armyexper(empty) = 1
@@ -2188,7 +2198,7 @@ SUB newarmy (who, empty, target)
 
 	x = 70
 	IF realism > 0 THEN x = 3 * cityv(target) + 33
-	CALL cutoff(who, target, a)
+	CALL determineCutoff(who, target, a)
 	IF a < 1 THEN x = x \ 3
 	occupied(target) = empty
 	armysize(empty) = x
@@ -2196,7 +2206,7 @@ SUB newarmy (who, empty, target)
 	cash(who) = cash(who) - 100
 	IF noise > 0 THEN SOUND 2222, .5
 	armyloc(empty) = target
-	CALL placearmy(empty)
+	CALL placeArmy(empty)
 	CALL TICK(turbo! - .5)
 	armymove(empty) = -1
 END SUB
@@ -2263,7 +2273,7 @@ SUB generateNormalRandom (xbar, variance, result)
     result = xbar + pct! * SQR(variance)
 END SUB
 
-SUB placearmy (which)
+SUB placeArmy (which)
 	who = 1
 	IF which > 20 THEN who = 2
 	x = cityx(armyloc(which)) - 12
@@ -2386,12 +2396,12 @@ SUB railroad (who)
             IF noise > 0 THEN SOUND 2222, 1
             CALL engine
             CALL occupyCity(from)
-            IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
+            IF occupied(from) > 0 THEN CALL placeArmy(occupied(from))
             GOTO toot
 		CASE IS > 0
 		    CALL drawTinyTrain(who, 0)
 		    CALL occupyCity(rrfrom(who))
-		    IF occupied(rrfrom(who)) > 0 THEN CALL placearmy(occupied(rrfrom(who)))
+		    IF occupied(rrfrom(who)) > 0 THEN CALL placeArmy(occupied(rrfrom(who)))
 
     		index = rr(who)
 	    	tracks(who) = armymove(index)
@@ -2409,13 +2419,13 @@ SUB railroad (who)
 		    y = cityy(armyloc(index)) - 11
 		    LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 		    IF cityp(armyloc(index)) <> who THEN CALL captureCity(index, armyloc(index), who, 0)
-		    CALL placearmy(index)
+		    CALL placeArmy(index)
 		    IF occupied(armyloc(index)) > 0 THEN
 		        CALL increaseArmyExperience(who)
 		        GOTO toot
 		    END IF
 		    CALL occupyCity(armyloc(index))
-		    CALL placearmy(index)
+		    CALL placeArmy(index)
 		    GOTO toot
 		END SELECT
 
@@ -2439,7 +2449,7 @@ SUB railroad (who)
 		clearBottom
 END SUB
 
-SUB recruit (who)
+SUB recruitArmy (who)
 	IF cash(who) < 100 THEN EXIT SUB
 	size = 0
 	COLOR 12
@@ -2512,7 +2522,7 @@ SUB recruit (who)
 	IF empty = 0 GOTO levy
 	armyloc(empty) = index
 	GOSUB playb
-	CALL newarmy(who, empty, index)
+	CALL createNewArmy(who, empty, index)
 	GOTO levy
 
 	add2:
@@ -2521,7 +2531,7 @@ SUB recruit (who)
 	a$ = ""
 	IF realism > 0 THEN
 		x = 2 * cityv(armyloc(i)) + 20
-		CALL cutoff(who, target, a)
+		CALL determineCutoff(who, target, a)
 		IF a < 1 THEN
 		    x = x \ 3
 		    a$ = " ISOLATED !"
@@ -2561,11 +2571,11 @@ SUB recruit (who)
 		target = array(i)
             IF occupied(target) = 0 THEN
                 y = 3 * cityv(target) + 33
-                CALL cutoff(who, target, a)
+                CALL determineCutoff(who, target, a)
                 IF a < 1 THEN y = y \ 3
             ELSE
                 y = 2 * cityv(target) + 20
-                CALL cutoff(who, target, a)
+                CALL determineCutoff(who, target, a)
                 IF a < 1 THEN y = y \ 3
             END IF
             IF y > x AND RND > .5 THEN x = y: choose = i
@@ -2678,7 +2688,7 @@ SUB smarts
 	        IF cash(who) < 100 GOTO isok
 	    END IF
 	END IF
-	CALL recruit(who)
+	CALL recruitArmy(who)
 	
 	isok: ' Naval Commands
 	cash(who) = cash(who) + slush
@@ -2886,7 +2896,7 @@ SUB tupdate
 		CALL clearBottom: PRINT armyname$(active); " is out of supplies !";
 	END IF
 
-	CALL placearmy(active)
+	CALL placeArmy(active)
 	CALL drawIcons(armyloc(active), armymove(active), 5)
 
 	CALL animateArmyMove(active, 0)
@@ -2913,7 +2923,7 @@ SUB tupdate
 	PRINT armyname$(active); " attacks "; armyname$(defend); " in "; city$(armyloc(defend));
 	CALL TICK(turbo! - 1)
 	IF armysize(defend) > 0 THEN 
-		CALL battle(active, defend, win, lose)
+		CALL resolveBattle(active, defend, win, lose)
 		flag = 1
 		IF graf > 0 THEN GOSUB upbox
 	END IF
@@ -2937,12 +2947,12 @@ SUB tupdate
 	CALL clearBottom
 	PRINT armyname$(active); " withdrew to "; city$(armymove(active));
 
-	CALL placearmy(armyloc(active))
+	CALL placeArmy(armyloc(active))
 	CALL animateArmyMove(active, 1)
 
 	armyloc(active) = armymove(active)
-	CALL placearmy(armyloc(active))
-	CALL placearmy(active)
+	CALL placeArmy(armyloc(active))
+	CALL placeArmy(active)
 	occupied(armyloc(active)) = active
 	armymove(active) = -2
 			
@@ -2983,7 +2993,7 @@ SUB tupdate
 		IF flee = 0 GOTO deadmeat
 		move2 = matrix(target, flee)
 	outta:
-		CALL placearmy(defend)                  ' in old city
+		CALL placeArmy(defend)                  ' in old city
 
 		armymove(defend) = move2
 		CALL animateArmyMove(defend, 0)                 ' animate retreat
@@ -2993,7 +3003,7 @@ SUB tupdate
 		CALL clearBottom
 		PRINT armyname$(defend) + " is withdrawing to " + city$(move2);
 
-		CALL placearmy(defend)                  ' in new city
+		CALL placeArmy(defend)                  ' in new city
 		
 		CALL drawIcons(target, 0, 6)
 		armymove(defend) = -2
@@ -3041,7 +3051,7 @@ SUB tupdate
 	CALL drawIcons(armyloc(active), target, 4)
 	armyloc(active) = target: armymove(active) = -2
 	CALL occupyCity(armyloc(active))
-	CALL placearmy(active)
+	CALL placeArmy(active)
 	    ' Capture City
 		IF cityp(armyloc(active)) = s GOTO horde
 		c = armyloc(active)
@@ -3293,7 +3303,7 @@ SUB commander (who, empty)
 	CALL TICK(turbo!)
 END SUB
 
-SUB endit
+SUB selectEndingConditions
 	a$ = STR$(ABS(vicflag(3)) * 2.5) + "% Cities"
 	t$ = STR$(ABS(vicflag(3)) * 2.5) + "% Total Income"
 	menuText$(8) = "Time: " + month$(vicflag(1)) + STR$(ABS(vicflag(2)))
@@ -3673,12 +3683,12 @@ SUB displayMessageBox (a$, s)
 	PUT (8 * tlx - 4, 16 * tly - 3), g2, PSET
 END SUB
 
-SUB integrity
+SUB checkCityDataIntegrity
 	CLS
 	COLOR 15
 	x = 0: y = 0
-	FOR i = 1 TO 40
-		FOR j = 1 TO 6
+	FOR i = 1 TO 40 ' Loop through each city
+		FOR j = 1 TO 6 ' Loop through possible connections for each city
 			IF matrix(i, j) = 0 GOTO done
 			index = matrix(i, j)
 			FOR k = 1 TO 6
@@ -4014,7 +4024,7 @@ SUB resupplyArmy (index)
 	who = 1
 	IF index > 20 THEN who = 2
 	IF realism > 0 THEN
-		CALL cutoff(who, armyloc(index), a)
+		CALL determineCutoff(who, armyloc(index), a)
 		IF a < 1 THEN EXIT SUB
 	END IF
 	IF armysize(index) > 0 THEN 
@@ -4836,7 +4846,7 @@ SUB usa
     END IF
     
     FOR i = 1 TO 40
-   		IF armyloc(i) > 0 THEN CALL placearmy(i)
+   		IF armyloc(i) > 0 THEN CALL placeArmy(i)
     NEXT i
     
     FOR k = 1 TO 2
@@ -5774,7 +5784,7 @@ SUB animateArmyMove (index, flag)
 
     ' Place the army in the current location if occupied
     CALL occupyCity(from)
-    IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
+    IF occupied(from) > 0 THEN CALL placeArmy(occupied(from))
        
     ' Skip the animation setup if flag is set
     IF flag > 0 GOTO already
