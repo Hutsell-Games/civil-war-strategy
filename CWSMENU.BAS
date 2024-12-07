@@ -212,7 +212,7 @@ sel1:
 				LINE (548, 148)-(592, 216), 15, B
 				a = row: IF side = 1 THEN a = 6 - row
 				t$ = "face" + LTRIM$(STR$(a)) + ".vga"
-				IF LEN(DIR$(t$)) > 0 THEN
+				IF _FILEEXISTS(t$) THEN
 					DEF SEG = VARSEG(graft(1))
 					BLOAD t$, VARPTR(graft(1))
 					DEF SEG
@@ -270,14 +270,6 @@ arrows:
 	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
 	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
 	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
-	 IF a$ = ";" AND switch = 0 THEN
-		SCREEN 0: CLS
-		SHELL "cwsdoc.com"
-		SCREEN 12: CALL usa
-		CALL choices(b1, wide)
-		CALL topbar
-		RETURN
-	  END IF
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL usa

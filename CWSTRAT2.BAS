@@ -199,7 +199,6 @@ SUB capture (active, c, s, flag)
 		a$ = force$(3 - s) + " CAPITAL captured !"
 		CALL scribe(a$, 1)
 		CALL image2(city$(capcity(3 - s)) + " has fallen!", 4)
-		IF graf = 3 THEN CALL burn(3 - s)
 		capcity(3 - s) = 0
 		CALL flashcity(c)
 	END IF
@@ -275,7 +274,7 @@ SUB endit
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
 what4:
-	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "û " ELSE mtx$(i - 1) = "  "
+	FOR i = 2 TO 6: IF vicflag(i) > 0 THEN mtx$(i - 1) = "ï¿½ " ELSE mtx$(i - 1) = "  "
 	NEXT i
 	choose = chosit
 	mtx$(0) = "Victory Conditions"
@@ -522,7 +521,6 @@ abe:
 		emancipate = 1
 		CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
 		victory(1) = victory(1) + 100: victory(2) = victory(2) - 100
-		SHELL "abelinco.exe"
 		CALL usa
 		GOTO dull2
 	END IF
@@ -659,9 +657,9 @@ SUB maxx
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
-LOCATE 2, 7: PRINT STRING$(57, "²")
-LOCATE 9, 7: PRINT STRING$(57, "²")
-FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
+LOCATE 2, 7: PRINT STRING$(57, "ï¿½")
+LOCATE 9, 7: PRINT STRING$(57, "ï¿½")
+FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "ï¿½"; SPACE$(55); "ï¿½": NEXT i
 
 		OPEN "I", 1, "hiscore.cws"
 		FOR s = 1 TO 2
@@ -774,7 +772,7 @@ mtx$(3) = "Cities"
 mtx$(4) = "Force Summary"
 mtx$(5) = "Intelligence"
 mtx$(6) = "Battles": size = 6
-IF LEN(DIR$("cws.his")) > 0 THEN mtx$(7) = "Recap": size = 7
+IF _FILEEXISTS("cws.his") THEN mtx$(7) = "Recap": size = 7
 CALL menu(0)
 SELECT CASE choose
 CASE IS < 0
@@ -825,9 +823,9 @@ PRINT TAB(57); : IF armymove(i) > -1 THEN PRINT city$(armymove(i)) ELSE PRINT "R
 IF fort(armyloc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; fort(armyloc(i))
 deadeye:
 NEXT i
-PRINT " "; STRING$(70, "Ä")
+PRINT " "; STRING$(70, "ï¿½")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(aggress! * x))); "00 ]"
-PRINT " "; STRING$(70, "Ä")
+PRINT " "; STRING$(70, "ï¿½")
 PRINT " "; force$(who); " NAVY has "; navysize(who); " ship(s) ";
 x = 0
 FOR k = 1 TO navysize(who)
@@ -1441,7 +1439,7 @@ LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
 COLOR 10
 '==========================  Mountains =================================
-IF LEN(DIR$("mtn.vga")) > 0 THEN
+IF _FILEEXISTS("mtn.vga") THEN
 	PUT (380, 30), mtn, PSET
 	PUT (270, 200), mtn, PSET
 	PUT (310, 160), mtn, PSET
