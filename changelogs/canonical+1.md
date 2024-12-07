@@ -16,3 +16,6 @@ This branch represents the minimal changes needed to make CWS executable by QB64
 8. Remove unused sub declarations: sndfx, sndblst, usamap, blastem, war
 9. Move CWS14.BI, CWSTRAT2.BAS, and CWSMENU.BAS into CWSTRAT.BAS
 10. Fixed `globalCity$(City$` by replacing with `globalCity$(`
+11. Remove unused sub declarations for banner and mountain.
+12. Fixed `globalArmyLocrmyLoc` and similar by replacing with `globalArmyLoc` and similar
+13. Minor code reformatting

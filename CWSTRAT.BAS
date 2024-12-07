@@ -4,7 +4,6 @@ DECLARE SUB armies ()
 DECLARE SUB armyxy (x%, y%, z%)
 DECLARE SUB armystat (index%)
 DECLARE SUB armyxy (x%, y%, z%)
-DECLARE SUB banner (a$)
 DECLARE SUB barnacle (who%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB bub2 (limit%)
@@ -37,7 +36,6 @@ DECLARE SUB iterate ()
 DECLARE SUB maptext ()
 DECLARE SUB maxx ()
 DECLARE SUB menu (switch%)
-DECLARE SUB mountain (xx%, yy%)
 DECLARE SUB movefrom (index%, target%)
 DECLARE SUB mxw (wide%)
 DECLARE SUB navy (who%, x%)
@@ -107,44 +105,62 @@ DIM SHARED graft(1 TO 1564)
 
 replay = 0
 newgame:
-globalPCode = 0: globalRFlag = 0
-FOR k = 1 TO 40: globalArmySize(k) = 0: globalArmyLoc(k) = 0: globalArmyMove(k) = 0: globalArmyLead(k) = 0: globalArmyName$(k) = "": NEXT k
-globalUSAdv = 0: globalEmancipate = 0
+globalPCode = 0
+globalRFlag = 0
+FOR k = 1 TO 40
+	globalArmySize(k) = 0
+	globalArmyLoc(k) = 0
+	globalArmyMove(k) = 0
+	globalArmyLead(k) = 0
+	globalArmyName$(k) = ""
+NEXT k
+globalUSAdv = 0
+globalEmancipate = 0
 FOR k = 1 TO 2
-globalNavySize(k) = 0: globalNavyLoc(k) = 0: globalNavyMove(k) = 0
-globalRR(k) = 0: globalVictory(k) = 0: globalTracks(k) = 0
+	globalNavySize(k) = 0
+	globalNavyLoc(k) = 0
+	globalNavyMove(k) = 0
+	globalRR(k) = 0
+	globalVictory(k) = 0
+	globalTracks(k) = 0
 NEXT k
 
-globalFileL = 1: globalVicFlag(1) = 1
+globalFileL = 1
+globalVicFlag(1) = 1
 CALL filer(1)
 IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(globalMtn(1))
-	BLOAD "globalMtn.vga", VARPTR(globalMtn(1))
+	BLOAD "mtn.vga", VARPTR(globalMtn(1))
 	DEF SEG
 ELSE
 	COLOR 15: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": CALL TICK(9)
 END IF
 
 RESTORE
-FOR k = 1 TO 26: READ globalFont$(k): NEXT k
+FOR k = 1 TO 26
+	READ globalFont$(k)
+NEXT k
 
 IF globalRealism > 0 AND globalYear < 1862 THEN
-		FOR i = 1 TO 2
-			a$ = STRING$(LEN(globalFleet$(i)), "W")
-			globalFleet$(i) = a$
-		NEXT i
+	FOR i = 1 TO 2
+		a$ = STRING$(LEN(globalFleet$(i)), "W")
+		globalFleet$(i) = a$
+	NEXT i
 END IF
 iron:
 IF globalPlayer < 1 OR globalPlayer > 2 THEN globalPlayer = 1
 IF globalPlayer = 2 OR side = 0 THEN side = 1
 IF side = 1 THEN globalRandBal = 7
 IF side = 2 THEN globalRandBal = 3
-	IF globalTurbo! < 1 THEN globalTurbo! = 2
-	IF side = 1 AND globalDifficult < 3 THEN globalCash(2) = globalCash(2) + 600 - 100 * globalDifficult
-	IF side = 2 AND globalDifficult > 3 THEN globalCash(1) = globalCash(1) + 100 * globalDifficult
+IF globalTurbo! < 1 THEN globalTurbo! = 2
+IF side = 1 AND globalDifficult < 3 THEN globalCash(2) = globalCash(2) + 600 - 100 * globalDifficult
+IF side = 2 AND globalDifficult > 3 THEN globalCash(1) = globalCash(1) + 100 * globalDifficult
 
 
-FOR i = 1 TO 2: globalIncome(i) = globalCash(i): globalCash(i) = globalCash(i) + 50 * RND: NEXT i
+FOR i = 1 TO 2
+	globalIncome(i) = globalCash(i)
+	globalCash(i) = globalCash(i) + 50 * RND
+NEXT i
 globalChoose = 0
 
 SCREEN 12
@@ -186,12 +202,22 @@ GOSUB unionplus
 globalCity$(0) = "NONE"
 OPEN "I", 1, "cities.grd"
 globalVPTotal = globalUSAdv + 200
-FOR i = 1 TO 40: INPUT #1, a, globalCityX(i), globalCityY(i), globalCity$(i), globalCityP(i), globalCityV(i)
-globalCityO(i) = globalCityP(i)
-CALL occupy(i)
-FOR j = 1 TO 7: INPUT #1, globalMatrix(i, j): NEXT j: INPUT #1, globalFort(i)
-IF globalCityP(i) > 0 THEN x = globalCityP(i): globalControl(x) = globalControl(x) + 1: globalVictory(x) = globalVictory(x) + globalCityV(i)
-IF globalCityP(i) > 0 THEN globalCash(globalCityP(i)) = globalCash(globalCityP(i)) + globalCityV(i)
+FOR i = 1 TO 40
+	INPUT #1, a, globalCityX(i), globalCityY(i), globalCity$(i), globalCityP(i), globalCityV(i)
+	globalCityO(i) = globalCityP(i)
+	CALL occupy(i)
+	FOR j = 1 TO 7
+		INPUT #1, globalMatrix(i, j)
+	NEXT j
+	INPUT #1, globalFort(i)
+	IF globalCityP(i) > 0 THEN 
+		x = globalCityP(i)
+		globalControl(x) = globalControl(x) + 1
+		globalVictory(x) = globalVictory(x) + globalCityV(i)
+	END IF
+	IF globalCityP(i) > 0 THEN 
+		globalCash(globalCityP(i)) = globalCash(globalCityP(i)) + globalCityV(i)
+	END IF
 globalVPTotal = globalVPTotal + globalCityV(i)
 NEXT i
 CLOSE #1: CALL clrbot
@@ -244,7 +270,11 @@ NEXT i
 IF globalPlayer = 1 AND side = 2 THEN globalIncome(1) = globalIncome(1) + globalUSAdv
 
 FOR i = 1 TO 40
-IF globalCityP(i) > 0 THEN x = globalCityPlCityP(i): globalControl(x) = globalControl(x) + 1: globalIncome(x) = globalIncome(x) + globalCityV(i)
+IF globalCityP(i) > 0 THEN 
+	x = globalCityP(i)
+	globalControl(x) = globalControl(x) + 1
+	globalIncome(x) = globalIncome(x) + globalCityV(i)
+END IF
 globalArmyMove(i) = 0
 NEXT i
 
@@ -287,40 +317,39 @@ globalMTX$(9) = "Files"
 
 size = 9
 globalChoose = chosit
-CALL menu(0): CALL clrrite
+CALL menu(0)
+CALL clrrite
 '==========================================================================
 '                            Main Menu
 '==========================================================================
 SELECT CASE globalChoose
 	CASE 1
-	IF globalCash(side) < 100 OR globalRFlag < 0 THEN globalRFlag = -1: GOTO menu0
-	CALL recruit((side))
-	chosit = 23
-	GOTO menu0
-'==========================================================================
+		IF globalCash(side) < 100 OR globalRFlag < 0 THEN globalRFlag = -1: GOTO menu0
+		CALL recruit((side))
+		chosit = 23
+		GOTO menu0
 	CASE 2
-	CALL armies
-	chosit = 23
-	GOTO menu0
-'==========================================================================
+		CALL armies
+		chosit = 23
+		GOTO menu0
 	CASE 3
-	IF globalNFlag = 0 THEN CALL navy((side), 0)
-	chosit = 25
+		IF globalNFlag = 0 THEN CALL navy((side), 0)
+		chosit = 25
 	CASE 4
-IF globalRR(side) = 0 THEN
-	COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
-	PSET (550, 20), 0
-	DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
-	z = 9: IF side = 2 THEN z = 7
-	x = POINT(0): y = POINT(1)
-	PAINT (x, y), z, 15
-	COLOR 15: IF side = 1 THEN COLOR 11
-	CALL traincapacity(side, limit)
-	CALL clrbot: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
-	CALL railroad(side)
-ELSE
-	CALL clrbot: COLOR 11: PRINT "Railroad is already carrying "; globalArmyName$(globalRR(side)); " to "; globalCity$(globalArmyMove(globalRR(side))); : GOTO menu0
-END IF
+		IF globalRR(side) = 0 THEN
+			COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
+			PSET (550, 20), 0
+			DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
+			z = 9: IF side = 2 THEN z = 7
+			x = POINT(0): y = POINT(1)
+			PAINT (x, y), z, 15
+			COLOR 15: IF side = 1 THEN COLOR 11
+			CALL traincapacity(side, limit)
+			CALL clrbot: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
+			CALL railroad(side)
+		ELSE
+			CALL clrbot: COLOR 11: PRINT "Railroad is already carrying "; globalArmyName$(globalRR(side)); " to "; globalCity$(globalArmyMove(globalRR(side))); : GOTO menu0
+		END IF
 '==========================================================================
 	CASE 5
 	globalTLX = 67: globalTLY = 15
@@ -450,7 +479,7 @@ alone:
 	CALL commander(2, empty): IF empty = 0 GOTO menu0
 	globalSupply(empty) = .3 * globalSupply(index): globalSupply(index) = globalSupply(index) - globalSupply(empty): IF globalSupply(index) < 0 THEN globalSupply(index) = 0
 	globalArmySize(empty) = .3 * globalArmySize(index): globalArmySize(index) = globalArmySize(index) - globalArmySize(empty)
-	globalArmyLocrmyLoc(empty) = target: globalArmyExper(empty) = globalArmyExper(index): globalArmyMove(empty) = 0
+	globalArmyLoc(empty) = target: globalArmyExper(empty) = globalArmyExper(index): globalArmyMove(empty) = 0
 	globalArmyLead(empty) = globalRating(empty)
 	globalArmyName$(empty) = globalLName$(empty): globalLName$(empty) = ""
 	globalArmyExper(empty) = globalArmyExper(index)
@@ -662,8 +691,12 @@ utile:
 		globalBold = 5 * RND
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
-			globalArmyLocrmyLoc(k) = 0: globalArmySize(k) = 0: globalArmyLead(k) = 0
-			globalArmyExper(k) = 0: globalArmyMove(k) = 0: globalSupply(k) = 0
+			globalArmyLoc(k) = 0
+			globalArmySize(k) = 0
+			globalArmyLead(k) = 0
+			globalArmyExper(k) = 0
+			globalArmyMove(k) = 0
+			globalSupply(k) = 0
 			END IF
 		NEXT k
 		FOR k = 21 TO 6
@@ -903,7 +936,7 @@ SUB battle (attack, defend, win, lose)
 IF globalArmySize(defend) < 1 THEN globalArmySize(defend) = 1
 IF globalArmySize(attack) < 1 THEN globalArmySize(attack) = 1
 
-CALL icon(globalArmyLocrmyLoc(defend), 0, 9)
+CALL icon(globalArmyLoc(defend), 0, 9)
 LOCATE 1, 1: PRINT SPACE$(80)
 CALL clrrite: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
 c = 9: IF attack > 20 THEN c = 7
@@ -967,11 +1000,16 @@ IF defend < 21 AND side = 2 AND globalDifficult > 3 THEN x1 = x1 + 2 * globalDif
 IF defend > 20 AND side = 1 AND globalDifficult < 3 THEN x1 = x1 + 6 - 2 * globalDifficult
 LOCATE 22, y: PRINT "Difclt  "; x1
 
-a$ = "Fort": IF globalArmyMove(defend) = 0 THEN x1 = x1 * (1 + globalFort(globalArmyLocrmyLoc(defend)))
+a$ = "Fort"
+IF globalArmyMove(defend) = 0 THEN 
+	x1 = x1 * (1 + globalFort(globalArmyLoc(defend)))
+END IF
 IF x1 > globalTCR THEN x1 = globalTCR
 IF globalFort(globalArmyLoc(defend)) > 0 AND globalArmyMove(defend) = 0 THEN
 	COLOR 13: a$ = "Fort+"
-	IF globalFort(globalArmyLocrmyLocrmyLocrmyLoc(defend)) = 2 THEN a$ = "Fort++"
+	IF globalFort(globalArmyLoc(defend)) = 2 THEN 
+		a$ = "Fort++"
+	END IF
 END IF
 LOCATE 23, y: PRINT a$; TAB(76); x1
 IF x1 > globalTCR THEN x1 = globalTCR
@@ -990,7 +1028,7 @@ LINE (528, 410)-(637, 437), 14, B
 DO WHILE INKEY$ = "": LOOP
 IF globalGraf > 2 THEN
 	CALL cannon
-	k = globalFort(globalArmyLocrmyLoc(defend))
+	k = globalFort(globalArmyLoc(defend))
 	t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
 	IF _FILEEXISTS(t$) THEN
 		DEF SEG = VARSEG(graphic(1))
@@ -1018,10 +1056,10 @@ win = defend: lose = attack: IF hit = 1 THEN win = attack: lose = defend
 a$ = "UNION": IF win > 20 THEN a$ = "REBEL"
 COLOR 14: LOCATE 3, 68: PRINT a$; " VICTORY"
 LOCATE 4, 71: PRINT "in"
-LOCATE 5, 69: PRINT globalCity$(globalArmyLocrmyLoc(defend))
+LOCATE 5, 69: PRINT globalCity$(globalArmyLoc(defend))
 a = 1: IF win > 20 THEN a = 2
 CALL flags(a, 0, 0)
-CALL clrbot: COLOR 11: PRINT globalArmyName$(win); " defeats "; globalArmyName$(lose); " in "; globalCity$(globalArmyLocrmyLoc(defend)); : CALL TICK(9)
+CALL clrbot: COLOR 11: PRINT globalArmyName$(win); " defeats "; globalArmyName$(lose); " in "; globalCity$(globalArmyLoc(defend)); : CALL TICK(9)
 '===========================================================================
 pct! = .01 * globalDEFAC - .03 * globalFort(globalArmyLoc(defend)): IF win = attack THEN pct! = 1.3 * pct!
 SELECT CASE globalArmySize(defend)
