@@ -14,4 +14,5 @@ This branch represents the minimal changes needed to make CWS executable by QB64
 6. Renamed global variables to reflect their nature in the name, e.g. control => globalControl
 7. Removed unused variables: price
 8. Remove unused sub declarations: sndfx, sndblst, usamap, blastem, war
-9. Move CWS14.BI into CWSTRAT.BAS
+9. Move CWS14.BI, CWSTRAT2.BAS, and CWSMENU.BAS into CWSTRAT.BAS
+10. Fixed `globalCity$(City$` by replacing with `globalCity$(`

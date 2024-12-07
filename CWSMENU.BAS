@@ -1,10 +1,3 @@
-DECLARE SUB mxw (wide%)
-DEFINT A-Z
-DECLARE SUB choices (b1%, wide%)
-DECLARE SUB scrnsavr ()
-DECLARE SUB topbar ()
-DIM SHARED graft(1 TO 1564)
-' $INCLUDE: 'cws14.bi'
 '============================================================================
 '                GENmenu 3.05 : Generic Menu Main Module Level  12/91
 '                Updated to Use Graphic Screens 8, 9, 12
