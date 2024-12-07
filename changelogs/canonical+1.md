@@ -11,3 +11,6 @@ This branch represents the minimal changes needed to make CWS executable by QB64
     - CWS14.BI line 11
     - CWSMENU.BAS lines 273-280
 5. Replace instances of DIR$ with _FILEEXISTS.
+6. Renamed global variables to reflect their nature in the name, e.g. control => globalControl
+7. Removed unused variables: price
+8. Remove unused sub declarations: sndfx, sndblst, usamap, blastem, war
