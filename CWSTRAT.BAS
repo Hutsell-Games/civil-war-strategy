@@ -238,10 +238,10 @@ wtype = 2
 hilite = 15
 replay = 1
 IF player = 2 THEN CALL displayPlayerTurnScreen
-mtx$(0) = "VGA CIVILWAR STRATEGY"
-mtx$(1) = "Resume Saved Game"
-mtx$(2) = "Start NEW Game"
-mtx$(3) = "Quit"
+menuText$(0) = "VGA CIVILWAR STRATEGY"
+menuText$(1) = "Resume Saved Game"
+menuText$(2) = "Start NEW Game"
+menuText$(3) = "Quit"
 tlx = 33: tly = 20: colour = 5: size = 3
 choose = 23
 CALL menu(0)
@@ -5235,7 +5235,7 @@ SUB drawChoicesMenu (b1, wide)
     END IF
     COLOR colour
     
-    LOCATE tly + 1, tlx + b1: PRINT mtx$(0)
+    LOCATE tly + 1, tlx + b1: PRINT menuText$(0)
     FOR i = 1 TO size
         LOCATE tly + 2 + i, tlx + 2: PRINT menuText$(i);
     NEXT i
