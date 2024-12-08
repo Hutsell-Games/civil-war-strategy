@@ -1775,471 +1775,629 @@ SUB iterate
 END SUB
 
 SUB movefrom (index, target)
-	globalColour = 3: globalTLX = 67: globalTLY = 5: index = 0: size = 0: target = 0
-	who = side: CALL starfin(star, fin, who)
+	globalColour = 3
+	globalTLX = 67
+	globalTLY = 5
+	index = 0
+	size = 0
+	target = 0
+	who = side
+	CALL starfin(star, fin, who)
 	FOR i = star TO fin
-	IF globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN size = size + 1: globalMTX$(size) = globalCity$(globalArmyLoc(i)): globalArray(size) = globalArmyLoc(i)
+		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN 
+			size = size + 1
+			globalMTX$(size) = globalCity$(globalArmyLoc(i))
+			globalArray(size) = globalArmyLoc(i)
+		END IF
 	NEXT i
-	IF size = 0 THEN index = -1: GOTO notarg
+	IF size = 0 THEN 
+		index = -1
+		GOTO notarg
+	END IF
 	globalMTX$(0) = "From"
 	CALL bubble(size)
-movopt:
-	globalTLX = 67: globalTLY = 5
-		globalHilite = 15: CALL menu(1): CALL clrrite
-		IF globalChoose < 0 THEN target = 0: GOTO notarg
-		target = globalArray(globalChoose)
+	movopt:
+	globalTLX = 67
+	globalTLY = 5
+	globalHilite = 15
+	CALL menu(1)
+	CALL clrrite
+	IF globalChoose < 0 THEN 
+		target = 0
+		GOTO notarg
+	END IF
+	target = globalArray(globalChoose)
 
-		size = 0
-		FOR i = star TO fin
-		IF globalArmyLoc(i) = target AND globalArmyMove(i) = 0 THEN index = i: size = size + 1: globalMTX$(size) = "Army" + STR$(i): globalArray(size) = i
-		NEXT i
-		IF size = 1 GOTO notarg
-		globalMTX$(0) = "Which"
-		CALL bubble(size)
-		globalTLX = 67: globalTLY = 15: CALL menu(4): CALL clrrite
-		IF globalChoose < 0 THEN index = 0: GOTO notarg
-		index = globalArray(globalChoose)
+	size = 0
+	FOR i = star TO fin
+		IF globalArmyLoc(i) = target AND globalArmyMove(i) = 0 THEN 
+			index = i
+			size = size + 1
+			globalMTX$(size) = "Army" + STR$(i)
+			globalArray(size) = i
+		END IF
+	NEXT i
+	IF size = 1 GOTO notarg
+	globalMTX$(0) = "Which"
+	CALL bubble(size)
+	globalTLX = 67
+	globalTLY = 15
+	CALL menu(4)
+	CALL clrrite
+	IF globalChoose < 0 THEN 
+		index = 0
+		GOTO notarg
+	END IF
+	index = globalArray(globalChoose)
 notarg:
 END SUB
 
 SUB navy (who, chx)
-DIM hit(2)
-IF chx > 0 THEN
-	IF globalNavyLoc(who) < 1 THEN
-		chx = 1
-	ELSE
-		IF globalCommerce = 3 - who AND globalRaider > 0 THEN chx = 4
-		IF globalGrudge > 0 THEN chx = 3
-	END IF
-END IF
-COLOR 11
-ahoy:
-cost = 100: globalCityP(0) = who
-IF chx = 0 THEN CALL clrbot: PRINT "Funds available "; globalCash(who);
-IF chx = 1 THEN
-	IF globalCash(who) < cost THEN EXIT SUB
-	IF globalNavySize(who) > 9 THEN EXIT SUB
-END IF
-globalMTX$(0) = "Ships"
-globalMTX$(1) = "Build"
-IF globalNavyLoc(who) <> 99 THEN
-IF globalCash(who) < cost OR globalNavySize(who) > 9 OR globalCityP(globalNavyLoc(who)) <> who THEN globalMTX$(1) = "-": globalChoose = 23
-END IF
-globalMTX$(2) = "Attack"
-IF globalNavyLoc(who) <> 99 THEN
-IF globalCityP(globalNavyLoc(who)) <> 3 - who THEN globalMTX$(2) = "-": globalChoose = 22
-ELSE
-globalMTX$(1) = "-": globalMTX$(2) = "-": globalChoose = 24
-END IF
-globalMTX$(3) = "Sail": IF globalNavyLoc(who) < 1 THEN globalMTX$(3) = "-": IF chx = 3 THEN chx = 1
-globalMTX$(4) = "Raid": IF globalNavySize(who) < 1 OR globalCommerce = who THEN globalMTX$(4) = "-"
-globalTLX = 67: globalTLY = 12: size = 4
-IF globalNavyLoc(who) <> 99 THEN
-IF who = 1 AND globalNavySize(who) > 1 AND globalCityP(globalNavyLoc(who)) = 0 THEN size = 5: globalMTX$(5) = "Invasion": CALL void(globalNavyLoc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
-IF globalRealism = 0 AND who = 2 AND globalNavySize(who) > 1 AND globalCityP(globalNavyLoc(who)) = 0 THEN size = 5: globalMTX$(5) = "Invasion": CALL void(globalNavyLoc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
-END IF
-
-IF chx > 0 THEN globalChoose = chx: GOTO anchor
-IF globalNFlag > 0 AND globalChoose <> 1 THEN EXIT SUB
-CALL menu(0): CALL clrrite
-anchor:
-'---------------------------------------------------------------------------
-SELECT CASE globalChoose
-'---------------------------------------------------------------------------
-'                               Build Ship
-'---------------------------------------------------------------------------
-	CASE 1
-	IF globalCash(who) < cost OR globalNavyLoc(who) = 99 GOTO ahoy
-	IF chx = 1 AND globalNavySize(who) > 9 THEN EXIT SUB
-	IF chx = 0 AND globalNavySize(who) > 9 THEN GOTO ahoy
-
-	IF chx = 0 AND globalNavyLoc(who) > 0 THEN
-		IF globalCityP(globalNavyLoc(who)) <> who GOTO ahoy
-		IF globalMatrix(globalNavyLoc(who), 7) < 99 GOTO ahoy
-	END IF
-	IF chx = 1 AND RND < .07 * globalNavySize(who) THEN EXIT SUB
-	a$ = "W"
-
-	IF globalRealism > 0 AND ((globalYear < 1862) OR (globalYear = 1862 AND month < 3)) GOTO noiron
-	IF globalCash(who) >= 2 * cost THEN
-		globalTLX = 67: globalTLY = 12: globalColour = 9
-		IF who = side THEN
-			globalMTX$(0) = "Type"
-			globalMTX$(1) = "Wooden"
-			globalMTX$(2) = "Ironclad"
-			size = 2
-			CALL menu(0)
-			CALL clrrite
-			IF globalChoose < 1 GOTO ahoy
-			IF globalChoose = 2 THEN a$ = "I": cost = 2 * cost
+	DIM hit(2)
+	IF chx > 0 THEN
+		IF globalNavyLoc(who) < 1 THEN
+			chx = 1
 		ELSE
-			a$ = "I"
+			IF globalCommerce = 3 - who AND globalRaider > 0 THEN chx = 4
+			IF globalGrudge > 0 THEN chx = 3
 		END IF
 	END IF
-
-noiron:
-	globalNavySize(who) = globalNavySize(who) + 1
-	IF a$ = "W" THEN
-		globalFleet$(who) = globalFleet$(who) + a$: a = 1
-	ELSE
-		globalFleet$(who) = a$ + globalFleet$(who): a = 2
-	END IF
-	IF globalNavySize(who) > 1 GOTO add2ship
-ships:
-	globalMTX$(0) = "Port": size = 0: globalTLX = 67: globalTLY = 12
-	FOR i = 1 TO 40
-		IF globalMatrix(i, 7) = 99 AND globalCityP(i) = who AND globalNavyLoc(3 - who) <> i THEN 
-			size = size + 1
-			globalMTX$(size) = globalCity$(i): globalArray(size) = i
-		END IF
-	NEXT i
-	IF chx = 1 THEN globalChoose = 1 + INT(size * RND)
-	IF size < 1 THEN
-		globalNavySize(who) = 0: globalFleet$(who) = ""
-		IF chx = 0 THEN CALL clrbot: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
-		IF chx = 1 THEN EXIT SUB
-	END IF
-	IF chx = 0 THEN CALL menu(9): CALL clrrite
-
-	IF globalChoose < 1 GOTO ships
-	globalNavyLoc(who) = globalArray(globalChoose)
-	globalCash(who) = globalCash(who) - cost: globalNavySize(who) = 1
-	x = globalCityX(globalArray(globalChoose)) + 25: y = globalCityY(globalArray(globalChoose)) + 25: CALL ships
-	CALL clrbot: COLOR 11: PRINT globalForce$(who); " is building NEW fleet in "; globalCity$(globalArray(globalChoose));
-	PSET (400, 465), 0: CALL shipicon(who, a)
-	IF globalNoise > 0 THEN SOUND 3000, 1
-	CALL TICK(globalTurbo!)
-	GOTO ahoy
-add2ship:
-	globalCash(who) = globalCash(who) - cost
-	CALL clrbot: PRINT globalForce$(who); " navy increased to "; globalNavySize(who);
-	PSET (400, 465), 0: CALL shipicon(who, a)
-	CALL ships
-	IF globalNoise > 0 THEN SOUND 3000, 1
-	CALL TICK(globalTurbo!)
-'---------------------------------------------------------------------------
-'                               Attack City
-'---------------------------------------------------------------------------
-	CASE 2
-	IF globalNavyLoc(who) = 99 GOTO ahoy
-	IF chx = 2 AND globalCityP(globalNavyLoc(who)) = who THEN EXIT SUB
-	IF chx = 2 AND globalOccupied(globalNavyLoc(who)) > 0 AND RND > .5 THEN chx = 3: GOTO anchor
-	IF chx = 2 AND globalCityP(globalNavyLoc(who)) = 0 THEN chx = 3: GOTO ahoy
-	IF globalNavyLoc(who) < 1 THEN EXIT SUB
-	IF who = side THEN globalNFlag = 1
-	IF globalCityP(globalNavyLoc(who)) <> 3 - who GOTO ahoy
-	CALL clrbot: COLOR 12: PRINT globalForce$(who); " fleet bombards "; globalCity$(globalNavyLoc(who));
-	CALL icon(globalNavyLoc(who), 0, 3)
-	      
-	target = globalNavyLoc(who): index = globalOccupied(target): IF index = 0 GOTO deserted
-	pct! = .005 * globalNavySize(who) + .02 * RND: killd = globalArmySize(index) * pct!: IF killd < 1 THEN killd = 1
-	CALL clrbot: PRINT globalArmyName$(index); " suffered "; 100 * killd; " casualties";
-	x = .5 * globalNavySize(who) + 1: IF x > globalSupply(index) THEN x = globalSupply(index)
-	globalSupply(index) = globalSupply(index) - x
-	CALL TICK(globalTurbo!)
-	globalArmySize(index) = globalArmySize(index) - killd: IF globalArmySize(index) < 1 THEN globalArmySize(index) = 1
-	EXIT SUB
-deserted:
-	IF globalFort(target) = 0 GOTO blast
-	IF RND < .7 + .03 * (globalNavySize(who) - globalFort(target)) GOTO hurt1
-	CALL barnacle(who)
-	CALL clrbot
-	PRINT globalForce$(globalCityP(target)); " shore battery sunk an attacking ship!"; globalNavySize(who); "ship(s) left! ";
-	IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5
-	CALL TICK(globalTurbo!)
-	IF globalNavySize(who) < 1 THEN
-		globalNavyLoc(who) = 0: globalFleet$(who) = "": GOSUB box2
-		LOCATE 12, 27: PRINT globalForce$(who); " fleet eliminated"
-		CALL TICK(9)
-		globalVictory(3 - who) = globalVictory(3 - who) + 5
-		IF who = side THEN globalGrudge = 0
-		GOTO sail3
-	END IF
-	GOTO deserted
-hurt1:
-	CALL clrbot: PRINT globalCity$(target); " fortifications damaged";
-	globalFort(target) = globalFort(target) - 1: x = globalCityX(target): y = globalCityY(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-	CALL showcity
-	CALL TICK(globalTurbo!)
-	EXIT SUB
-blast:
-	IF RND > .25 + .07 * globalNavySize(who) THEN CALL clrbot: PRINT "Citizens of "; globalCity$(target); " stand firm against the attack"; : CALL TICK(globalTurbo!): EXIT SUB
-	IF globalNavyLoc(who) = globalCapCity(3 - who) THEN CALL clrbot: PRINT "The CAPITAL steadfastly stands loyal"; : CALL TICK(globalTurbo!): EXIT SUB
-	globalCityP(globalNavyLoc(who)) = 0
-	CALL clrbot: PRINT globalCity$(globalNavyLoc(who)); " is now  NEUTRAL";
-	CALL showcity
-	globalVictory(who) = globalVictory(who) + globalCityV(globalNavyLoc(who))
-	EXIT SUB
-'---------------------------------------------------------------------------
-'                               Sail
-'---------------------------------------------------------------------------
-	CASE 3
-	globalNavySize(who) = LEN(globalFleet$(who))
-	IF globalNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
-	IF globalNavyLoc(who) < 1 OR globalNavySize(who) < 1 THEN CALL clrbot: PRINT "No ships remain"; : TICK 1: GOTO ahoy
-
-	size = 0
-	FOR i = 1 TO 40: IF globalMatrix(i, 7) > 90 AND globalNavyLoc(who) <> i THEN size = size + 1: globalMTX$(size) = globalCity$(i): globalArray(size) = i
-	NEXT i
-	IF chx = 3 THEN
-		IF size = 0 THEN EXIT SUB
-		IF globalGrudge > 0 THEN globalChoose = 1: globalArray(1) = globalNavyLoc(3 - who): GOTO admiral
-		GOSUB nest: IF globalChoose > 0 GOTO admiral ELSE EXIT SUB
-	END IF
-	COLOR 11: LOCATE 11, 68
-	IF globalNavyLoc(who) < 41 THEN
-		PRINT globalCity$(globalNavyLoc(who))
-	ELSE
-		PRINT "Raiding"
-	END IF
-	globalMTX$(0) = "To"
-	globalColour = 3: globalTLX = 67: globalTLY = 12
-      
-	CALL menu(9): CALL clrrite: IF globalChoose < 1 THEN EXIT SUB
-admiral:
-	IF globalArray(globalChoose) = globalNavyLoc(who) THEN EXIT SUB
-	IF globalArray(globalChoose) < 1 THEN EXIT SUB
-	IF globalNavySize(who) < 1 GOTO ships
-	IF who = side THEN globalNFlag = 1
-	GOSUB box2
-	LOCATE 10, 25: PRINT globalForce$(who); " fleet of"; globalNavySize(who); "ship(s) is sailing"
-	LOCATE 11, 25: PRINT "From ";
-	IF globalNavyLoc(who) < 41 THEN
-		PRINT globalCity$(globalNavyLoc(who));
-	ELSE
-		PRINT "Raiding";
-	END IF
-	PRINT " to ";
-	IF globalArray(globalChoose) <> 99 THEN
-		PRINT globalCity$(globalArray(globalChoose));
-	ELSE
-		PRINT "Raid Commerce";
-	END IF
-
-	FOR i = 1 TO globalNavySize(who)
-		PSET (120 + 41 * i, 210), 0
-		CALL shiptype(who, i)
-	NEXT i
-	IF globalGraf > 2 THEN
-		a = ASC(LEFT$(globalFleet$(who), 1))
-		SELECT CASE a
-			CASE 73
-				CALL ironclad
-			CASE 87
-				CALL schooner
-		END SELECT
-		TICK 2 * globalTurbo!
-	ELSE
-		TICK globalTurbo!
-	END IF
-	globalNavyLoc(who) = globalArray(globalChoose)
-	IF globalNavyLoc(1) = globalNavyLoc(2) GOTO pirate
-	GOTO sail3
-'---------------------------------------------------------------------------
-'                               Raid Commerce
-'---------------------------------------------------------------------------
-	CASE 4
-	globalNavySize(who) = LEN(globalFleet$(who))
-	IF globalNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
-	IF globalNavySize(who) < 1 OR globalCommerce = who GOTO ahoy
-
-	IF who = side THEN globalNFlag = 1
-	GOSUB box2
-	LOCATE 10, 25: PRINT globalForce$(who); " fleet of"; globalNavySize(who); "ship(s) is sailing"
-	LOCATE 11, 25: PRINT "to RAID "; globalForce$(3 - who); " COMMERCE !"
-
-	FOR i = 1 TO globalNavySize(who)
-		PSET (120 + 41 * i, 210), 0
-		CALL shiptype(who, i)
-	NEXT i
-	IF globalGraf > 2 THEN
-		a = ASC(LEFT$(globalFleet$(who), 1))
-		SELECT CASE a
-			CASE 73
-				CALL ironclad
-			CASE 87
-				CALL schooner
-		END SELECT
-		TICK 2 * globalTurbo!
-	ELSE
-		TICK globalTurbo!
-	END IF
-	globalNavyLoc(who) = 99: globalCommerce = who
-	IF globalNavyLoc(1) = globalNavyLoc(2) GOTO pirate
-	CLS : CALL usa
-	EXIT SUB
-'---------------------------------------------------------------------------
-'                               Invasion
-'---------------------------------------------------------------------------
-	CASE 5
-	CALL commander((who), empty)
-	IF chx > 0 AND empty = 0 THEN chx = 3: GOTO anchor
-	x = 35
-	CALL barnacle(who)
-	c = globalNavyLoc(who): CALL newarmy((who), empty, c)
-	globalCash(who) = globalCash(who) + 100     'compensate for cost of recruiting new army
-	CALL capture(empty, c, who, 0)
-	globalArmySize(empty) = x
-	IF who = side THEN globalNFlag = 1
-	EXIT SUB
-'---------------------------------------------------------------------------
-'                               Exit
-'---------------------------------------------------------------------------
-	CASE ELSE
-	EXIT SUB
-END SELECT
-GOTO ahoy
-'---------------------------------------------------------------------------
-'                               Ship vs. Ship
-'---------------------------------------------------------------------------
-pirate:
-	CLS : LOCATE 1, 30: COLOR 11: PRINT "NAVAL COMBAT"
-	FOR k = 1 TO 2
-	hit(k) = 10
-	IF RIGHT$(globalFleet$(k), 1) = "I" THEN hit(k) = 20
-	NEXT k
-cannon:
-	LOCATE 9, 1: PRINT SPACE$(79)
-	LOCATE 15, 1: PRINT SPACE$(79)
-	x = 10: y = 100
-	COLOR 9: LOCATE 5, 25: PRINT "UNION"; globalNavySize(1); "ship(s)"
-	GOSUB boxes
-	COLOR 1
-	FOR i = 1 TO globalNavySize(1)
-	x = x + 50: PSET (x, y)
-	CALL shiptype(1, i)
-	NEXT i
-	COLOR 11: LOCATE 11, 22: PRINT "CONFEDERATES "; globalNavySize(2); "ship(s)"
-	LINE (10, 180)-(530, 210), 1, BF
-	LINE (10, 180)-(530, 210), 11, B
-	x = 10: y = 200
-	COLOR 1
-	FOR i = 1 TO globalNavySize(2)
-	x = x + 50: PSET (x, y)
-	CALL shiptype(2, i)
-	NEXT i
 	COLOR 11
-wave:
-	globalMTX$(0) = "Options"
-	globalMTX$(1) = "Attack"
-	globalMTX$(2) = "Retreat"
-	IF chx > 0 THEN globalChoose = 1: GOTO powder
-      
-	size = 2: globalColour = 3: globalHilite = 14: globalTLX = 50: globalTLY = 18: CALL menu(0)
-powder:
-	SELECT CASE globalChoose
-	 CASE 1
-firemore:
-	 IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
-	 pct! = 0: a$ = RIGHT$(globalFleet$(who), 1)
-	 IF a$ <> RIGHT$(globalFleet$(3 - who), 1) THEN
-		IF a$ = "I" THEN pct! = .1 ELSE pct! = -.1
-	 END IF
-	 IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
-	 GOTO firemore
-hitem:
-	 hit(3 - who) = hit(3 - who) - 1: GOSUB showhit: IF hit(3 - who) > 0 GOTO firemore
-	 x = 10 + 50 * globalNavySize(3 - who)
-	 y = 90: IF who = 1 THEN y = 190
-	 GOSUB xout
-	 LOCATE 17, 5: PRINT globalForce$(3 - who); " ship SUNK!": CALL TICK(globalTurbo! + 1): GOSUB clr1
-	 CALL barnacle(3 - who)
-	 IF globalNavySize(3 - who) < 1 THEN
-		LOCATE 19, 5: COLOR 12
-		PRINT globalForce$(3 - who); " fleet DEFEATED"
-		CALL TICK(globalTurbo!)
-		globalNavyLoc(3 - who) = 0: globalFleet$(3 - who) = ""
-		globalVictory(3 - who) = globalVictory(3 - who) + 10
-		IF who = side THEN globalGrudge = 1 ELSE globalGrudge = 0
-		GOTO sail3
-	 END IF
-	 hit(3 - who) = 10
-	 IF RIGHT$(globalFleet$(3 - who), 1) = "I" THEN hit(3 - who) = 20
-	 GOTO cannon
-hitme1:
-	 hit(who) = hit(who) - 1: GOSUB showhit: IF hit(who) > 0 GOTO firemore
-	 x = 10 + 50 * globalNavySize(who)
-	 y = 190: IF who = 1 THEN y = 90
-	 GOSUB xout
-	 LOCATE 17, 5: PRINT "One of the "; globalForce$(who); " ships was SUNK!": CALL TICK(globalTurbo!): GOSUB clr1
-	 CALL barnacle(who)
-	 IF globalNavySize(who) < 1 THEN
-		LOCATE 19, 5: COLOR 12
-		PRINT "Attacking "; globalForce$(who); " fleet has been ELIMINATED !"
-		CALL TICK(globalTurbo!)
-		globalNavyLoc(who) = 0: globalFleet$(who) = ""
-		globalVictory(who) = globalVictory(who) + 10
-		IF who <> side THEN globalGrudge = 1 ELSE globalGrudge = 0
-		GOTO sail3
-	 END IF
-	 hit(who) = 10
-	 IF RIGHT$(globalFleet$(who), 1) = "I" THEN hit(who) = 20
-	 GOTO cannon
-
-	 CASE 2
-	 target = 0
-	 FOR i = 1 TO 40
-	 IF globalCityP(i) = who THEN IF i <> globalNavyLoc(who) AND globalMatrix(i, 7) = 99 THEN target = i: IF RND > .3 GOTO found1
-	 NEXT i
-found1:
-	 CALL clrbot: COLOR 11: PRINT globalForce$(who); " is retreating to "; globalCity$(target); : CALL TICK(globalTurbo!)
-	 globalNavyLoc(who) = target
-	 GOTO sail3
-	 CASE ELSE
-	 GOTO wave
-	 END SELECT
-	 GOTO pirate
-'---------------------------------------------------------------------------
-'                               Subs
-'---------------------------------------------------------------------------
-showhit:
-	 LOCATE 9, 6 * globalNavySize(1): PRINT hit(1); " ";
-	 LOCATE 15, 6 * globalNavySize(2): PRINT hit(2); " ";
-	 IF globalNoise = 0 THEN TICK .1 * globalTurbo!
-	 RETURN
-clr1:
-	LOCATE 17, 1: PRINT SPACE$(60): RETURN
-nest:
-	best = 0: x = 0
-	FOR i = 1 TO size
-	target = globalArray(i)
-	IF globalCityP(target) = 0 GOTO neutral
-
-	IF target = globalNavyLoc(3 - who) THEN IF globalNavySize(who) >= globalNavySize(3 - who) AND RND > .1 THEN globalChoose = i: RETURN
-	IF globalCityP(target) <> who THEN
-		best = i: x = x + 1
-		IF RND > .8 THEN globalChoose = best: RETURN
+	ahoy:
+	cost = 100
+	globalCityP(0) = who
+	IF chx = 0 THEN 
+		CALL clrbot
+		PRINT "Funds available "; globalCash(who);
 	END IF
-neutral:
-	NEXT i
-	IF best = 0 THEN
-		globalChoose = 1 + INT(RND * size)
+	IF chx = 1 THEN
+		IF globalCash(who) < cost THEN EXIT SUB
+		IF globalNavySize(who) > 9 THEN EXIT SUB
+	END IF
+	globalMTX$(0) = "Ships"
+	globalMTX$(1) = "Build"
+	IF globalNavyLoc(who) <> 99 THEN
+		IF globalCash(who) < cost OR globalNavySize(who) > 9 OR globalCityP(globalNavyLoc(who)) <> who THEN
+			globalMTX$(1) = "-"
+			globalChoose = 23
+		END IF
+	END IF
+	globalMTX$(2) = "Attack"
+	IF globalNavyLoc(who) <> 99 THEN
+		IF globalCityP(globalNavyLoc(who)) <> 3 - who THEN
+			globalMTX$(2) = "-"
+			globalChoose = 22
+		END IF
 	ELSE
-		globalChoose = best
+		globalMTX$(1) = "-"
+		globalMTX$(2) = "-"
+		globalChoose = 24
+	END IF
+	globalMTX$(3) = "Sail"
+	IF globalNavyLoc(who) < 1 THEN 
+		globalMTX$(3) = "-"
+		IF chx = 3 THEN chx = 1
+	END IF
+	globalMTX$(4) = "Raid"
+	IF globalNavySize(who) < 1 OR globalCommerce = who THEN globalMTX$(4) = "-"
+	globalTLX = 67
+	globalTLY = 12
+	size = 4
+	IF globalNavyLoc(who) <> 99 THEN
+		IF who = 1 AND globalNavySize(who) > 1 AND globalCityP(globalNavyLoc(who)) = 0 THEN 
+			size = 5
+			globalMTX$(5) = "Invasion"
+			CALL void(globalNavyLoc(1), defend)
+			IF chx > 0 AND defend < 100 THEN chx = 5
+		END IF
+		IF globalRealism = 0 AND who = 2 AND globalNavySize(who) > 1 AND globalCityP(globalNavyLoc(who)) = 0 THEN 
+			size = 5
+			globalMTX$(5) = "Invasion"
+			CALL void(globalNavyLoc(1), defend)
+			IF chx > 0 AND defend < 100 THEN chx = 5
+		END IF
 	END IF
 
-	IF who = 2 AND globalNavyLoc(2) = 30 THEN IF RND > .5 THEN globalChoose = 30: RETURN
-	RETURN
-boxes:
-	LINE (10, 80)-(530, 110), 1, BF
-	LINE (10, 80)-(530, 110), 11, B
-	RETURN
-box2:
-	CLS
-	LINE (100, 110)-(550, 240), 1, B
-	LINE (95, 115)-(555, 235), 7, B
-	RETURN
-xout:
+	IF chx > 0 THEN 
+		globalChoose = chx
+		GOTO anchor
+	END IF
+	IF globalNFlag > 0 AND globalChoose <> 1 THEN EXIT SUB
+	CALL menu(0)
+	CALL clrrite
+	anchor:
+	SELECT CASE globalChoose
+		CASE 1 ' Build Ship
+			IF globalCash(who) < cost OR globalNavyLoc(who) = 99 GOTO ahoy
+			IF chx = 1 AND globalNavySize(who) > 9 THEN EXIT SUB
+			IF chx = 0 AND globalNavySize(who) > 9 THEN GOTO ahoy
+
+			IF chx = 0 AND globalNavyLoc(who) > 0 THEN
+				IF globalCityP(globalNavyLoc(who)) <> who GOTO ahoy
+				IF globalMatrix(globalNavyLoc(who), 7) < 99 GOTO ahoy
+			END IF
+			IF chx = 1 AND RND < .07 * globalNavySize(who) THEN EXIT SUB
+			a$ = "W"
+
+			IF globalRealism > 0 AND ((globalYear < 1862) OR (globalYear = 1862 AND month < 3)) GOTO noiron
+			IF globalCash(who) >= 2 * cost THEN
+				globalTLX = 67: globalTLY = 12: globalColour = 9
+				IF who = side THEN
+					globalMTX$(0) = "Type"
+					globalMTX$(1) = "Wooden"
+					globalMTX$(2) = "Ironclad"
+					size = 2
+					CALL menu(0)
+					CALL clrrite
+					IF globalChoose < 1 GOTO ahoy
+					IF globalChoose = 2 THEN 
+						a$ = "I"
+						cost = 2 * cost
+					END IF
+				ELSE
+					a$ = "I"
+				END IF
+			END IF
+
+			noiron:
+			globalNavySize(who) = globalNavySize(who) + 1
+			IF a$ = "W" THEN
+				globalFleet$(who) = globalFleet$(who) + a$: a = 1
+			ELSE
+				globalFleet$(who) = a$ + globalFleet$(who): a = 2
+			END IF
+			IF globalNavySize(who) > 1 GOTO add2ship
+			ships:
+			globalMTX$(0) = "Port": size = 0: globalTLX = 67: globalTLY = 12
+			FOR i = 1 TO 40
+				IF globalMatrix(i, 7) = 99 AND globalCityP(i) = who AND globalNavyLoc(3 - who) <> i THEN 
+					size = size + 1
+					globalMTX$(size) = globalCity$(i): globalArray(size) = i
+				END IF
+			NEXT i
+			IF chx = 1 THEN globalChoose = 1 + INT(size * RND)
+			IF size < 1 THEN
+				globalNavySize(who) = 0
+				globalFleet$(who) = ""
+				IF chx = 0 THEN 
+					CALL clrbot
+					PRINT "NO SHIPYARDS AVAILABLE !";
+					EXIT SUB
+				END IF
+				IF chx = 1 THEN EXIT SUB
+			END IF
+			IF chx = 0 THEN 
+				CALL menu(9)
+				CALL clrrite
+			END IF
+
+			IF globalChoose < 1 GOTO ships
+			globalNavyLoc(who) = globalArray(globalChoose)
+			globalCash(who) = globalCash(who) - cost
+			globalNavySize(who) = 1
+			x = globalCityX(globalArray(globalChoose)) + 25
+			y = globalCityY(globalArray(globalChoose)) + 25
+			CALL ships
+			CALL clrbot
+			COLOR 11: PRINT globalForce$(who); " is building NEW fleet in "; globalCity$(globalArray(globalChoose));
+			PSET (400, 465), 0: CALL shipicon(who, a)
+			IF globalNoise > 0 THEN SOUND 3000, 1
+			CALL TICK(globalTurbo!)
+			GOTO ahoy
+			add2ship:
+			globalCash(who) = globalCash(who) - cost
+			CALL clrbot
+			PRINT globalForce$(who); " navy increased to "; globalNavySize(who);
+			PSET (400, 465), 0: CALL shipicon(who, a)
+			CALL ships
+			IF globalNoise > 0 THEN SOUND 3000, 1
+			CALL TICK(globalTurbo!)
+		CASE 2 ' Attack City
+			IF globalNavyLoc(who) = 99 GOTO ahoy
+			IF chx = 2 AND globalCityP(globalNavyLoc(who)) = who THEN EXIT SUB
+			IF chx = 2 AND globalOccupied(globalNavyLoc(who)) > 0 AND RND > .5 THEN 
+				chx = 3
+				GOTO anchor
+			END IF
+			IF chx = 2 AND globalCityP(globalNavyLoc(who)) = 0 THEN 
+				chx = 3
+				GOTO ahoy
+			END IF
+			IF globalNavyLoc(who) < 1 THEN EXIT SUB
+			IF who = side THEN globalNFlag = 1
+			IF globalCityP(globalNavyLoc(who)) <> 3 - who GOTO ahoy
+			CALL clrbot
+			COLOR 12: PRINT globalForce$(who); " fleet bombards "; globalCity$(globalNavyLoc(who));
+			CALL icon(globalNavyLoc(who), 0, 3)
+			
+			target = globalNavyLoc(who)
+			index = globalOccupied(target)
+			IF index = 0 GOTO deserted
+			pct! = .005 * globalNavySize(who) + .02 * RND
+			killd = globalArmySize(index) * pct!
+			IF killd < 1 THEN killd = 1
+			CALL clrbot
+			PRINT globalArmyName$(index); " suffered "; 100 * killd; " casualties";
+			x = .5 * globalNavySize(who) + 1
+			IF x > globalSupply(index) THEN x = globalSupply(index)
+			globalSupply(index) = globalSupply(index) - x
+			CALL TICK(globalTurbo!)
+			globalArmySize(index) = globalArmySize(index) - killd
+			IF globalArmySize(index) < 1 THEN globalArmySize(index) = 1
+			EXIT SUB
+			deserted:
+			IF globalFort(target) = 0 GOTO blast
+			IF RND < .7 + .03 * (globalNavySize(who) - globalFort(target)) GOTO hurt1
+			CALL barnacle(who)
+			CALL clrbot
+			PRINT globalForce$(globalCityP(target)); " shore battery sunk an attacking ship!"; globalNavySize(who); "ship(s) left! ";
+			IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5
+			CALL TICK(globalTurbo!)
+			IF globalNavySize(who) < 1 THEN
+				globalNavyLoc(who) = 0
+				globalFleet$(who) = ""
+				GOSUB box2
+				LOCATE 12, 27: PRINT globalForce$(who); " fleet eliminated"
+				CALL TICK(9)
+				globalVictory(3 - who) = globalVictory(3 - who) + 5
+				IF who = side THEN globalGrudge = 0
+				GOTO sail3
+			END IF
+			GOTO deserted
+			hurt1:
+			CALL clrbot
+			PRINT globalCity$(target); " fortifications damaged";
+			globalFort(target) = globalFort(target) - 1
+			x = globalCityX(target)
+			y = globalCityY(target)
+			LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+			CALL showcity
+			CALL TICK(globalTurbo!)
+			EXIT SUB
+			blast:
+			IF RND > .25 + .07 * globalNavySize(who) THEN 
+				CALL clrbot
+				PRINT "Citizens of "; globalCity$(target); " stand firm against the attack";
+				CALL TICK(globalTurbo!)
+				EXIT SUB
+			END IF
+			IF globalNavyLoc(who) = globalCapCity(3 - who) THEN 
+				CALL clrbot
+				PRINT "The CAPITAL steadfastly stands loyal";
+				CALL TICK(globalTurbo!)
+				EXIT SUB
+			END IF
+			globalCityP(globalNavyLoc(who)) = 0
+			CALL clrbot
+			PRINT globalCity$(globalNavyLoc(who)); " is now  NEUTRAL";
+			CALL showcity
+			globalVictory(who) = globalVictory(who) + globalCityV(globalNavyLoc(who))
+			EXIT SUB
+		CASE 3 ' Sail
+			globalNavySize(who) = LEN(globalFleet$(who))
+			IF globalNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
+			IF globalNavyLoc(who) < 1 OR globalNavySize(who) < 1 THEN 
+				CALL clrbot
+				PRINT "No ships remain";
+				TICK 1
+				GOTO ahoy
+			END IF
+
+			size = 0
+			FOR i = 1 TO 40
+				IF globalMatrix(i, 7) > 90 AND globalNavyLoc(who) <> i THEN
+					size = size + 1
+					globalMTX$(size) = globalCity$(i)
+					globalArray(size) = i
+				END IF
+			NEXT i
+			IF chx = 3 THEN
+				IF size = 0 THEN EXIT SUB
+				IF globalGrudge > 0 THEN 
+					globalChoose = 1
+					globalArray(1) = globalNavyLoc(3 - who)
+					GOTO admiral
+				END IF
+				GOSUB nest
+				IF globalChoose > 0 GOTO admiral ELSE EXIT SUB
+			END IF
+			COLOR 11: LOCATE 11, 68
+			IF globalNavyLoc(who) < 41 THEN
+				PRINT globalCity$(globalNavyLoc(who))
+			ELSE
+				PRINT "Raiding"
+			END IF
+			globalMTX$(0) = "To"
+			globalColour = 3
+			globalTLX = 67
+			globalTLY = 12
+		
+			CALL menu(9)
+			CALL clrrite
+			IF globalChoose < 1 THEN EXIT SUB
+			admiral:
+			IF globalArray(globalChoose) = globalNavyLoc(who) THEN EXIT SUB
+			IF globalArray(globalChoose) < 1 THEN EXIT SUB
+			IF globalNavySize(who) < 1 GOTO ships
+			IF who = side THEN globalNFlag = 1
+			GOSUB box2
+			LOCATE 10, 25: PRINT globalForce$(who); " fleet of"; globalNavySize(who); "ship(s) is sailing"
+			LOCATE 11, 25: PRINT "From ";
+			IF globalNavyLoc(who) < 41 THEN
+				PRINT globalCity$(globalNavyLoc(who));
+			ELSE
+				PRINT "Raiding";
+			END IF
+			PRINT " to ";
+			IF globalArray(globalChoose) <> 99 THEN
+				PRINT globalCity$(globalArray(globalChoose));
+			ELSE
+				PRINT "Raid Commerce";
+			END IF
+
+			FOR i = 1 TO globalNavySize(who)
+				PSET (120 + 41 * i, 210), 0
+				CALL shiptype(who, i)
+			NEXT i
+			IF globalGraf > 2 THEN
+				a = ASC(LEFT$(globalFleet$(who), 1))
+				SELECT CASE a
+					CASE 73
+						CALL ironclad
+					CASE 87
+						CALL schooner
+				END SELECT
+				TICK 2 * globalTurbo!
+			ELSE
+				TICK globalTurbo!
+			END IF
+			globalNavyLoc(who) = globalArray(globalChoose)
+			IF globalNavyLoc(1) = globalNavyLoc(2) GOTO pirate
+			GOTO sail3
+		CASE 4 ' Raid Commerce
+			globalNavySize(who) = LEN(globalFleet$(who))
+			IF globalNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
+			IF globalNavySize(who) < 1 OR globalCommerce = who GOTO ahoy
+
+			IF who = side THEN globalNFlag = 1
+			GOSUB box2
+			LOCATE 10, 25: PRINT globalForce$(who); " fleet of"; globalNavySize(who); "ship(s) is sailing"
+			LOCATE 11, 25: PRINT "to RAID "; globalForce$(3 - who); " COMMERCE !"
+
+			FOR i = 1 TO globalNavySize(who)
+				PSET (120 + 41 * i, 210), 0
+				CALL shiptype(who, i)
+			NEXT i
+			IF globalGraf > 2 THEN
+				a = ASC(LEFT$(globalFleet$(who), 1))
+				SELECT CASE a
+					CASE 73
+						CALL ironclad
+					CASE 87
+						CALL schooner
+				END SELECT
+				TICK 2 * globalTurbo!
+			ELSE
+				TICK globalTurbo!
+			END IF
+			globalNavyLoc(who) = 99
+			globalCommerce = who
+			IF globalNavyLoc(1) = globalNavyLoc(2) GOTO pirate
+			CLS
+			CALL usa
+			EXIT SUB
+		CASE 5 ' Invasion
+			CALL commander((who), empty)
+			IF chx > 0 AND empty = 0 THEN 
+				chx = 3
+				GOTO anchor
+			END IF
+			x = 35
+			CALL barnacle(who)
+			c = globalNavyLoc(who)
+			CALL newarmy((who), empty, c)
+			globalCash(who) = globalCash(who) + 100     'compensate for cost of recruiting new army
+			CALL capture(empty, c, who, 0)
+			globalArmySize(empty) = x
+			IF who = side THEN globalNFlag = 1
+			EXIT SUB
+		CASE ELSE ' Exit
+			EXIT SUB
+		END SELECT
+		GOTO ahoy
+		pirate: ' Ship vs. Ship 
+		CLS
+		LOCATE 1, 30: COLOR 11: PRINT "NAVAL COMBAT"
+		FOR k = 1 TO 2
+			hit(k) = 10
+			IF RIGHT$(globalFleet$(k), 1) = "I" THEN hit(k) = 20
+		NEXT k
+		cannon:
+		LOCATE 9, 1: PRINT SPACE$(79)
+		LOCATE 15, 1: PRINT SPACE$(79)
+		x = 10
+		y = 100
+		COLOR 9: LOCATE 5, 25: PRINT "UNION"; globalNavySize(1); "ship(s)"
+		GOSUB boxes
+		COLOR 1
+		FOR i = 1 TO globalNavySize(1)
+			x = x + 50: PSET (x, y)
+			CALL shiptype(1, i)
+		NEXT i
+		COLOR 11: LOCATE 11, 22: PRINT "CONFEDERATES "; globalNavySize(2); "ship(s)"
+		LINE (10, 180)-(530, 210), 1, BF
+		LINE (10, 180)-(530, 210), 11, B
+		x = 10
+		y = 200
+		COLOR 1
+		FOR i = 1 TO globalNavySize(2)
+			x = x + 50: PSET (x, y)
+			CALL shiptype(2, i)
+		NEXT i
+		COLOR 11
+		wave:
+		globalMTX$(0) = "Options"
+		globalMTX$(1) = "Attack"
+		globalMTX$(2) = "Retreat"
+		IF chx > 0 THEN 
+			globalChoose = 1
+			GOTO powder
+		END IF
+		
+		size = 2
+		globalColour = 3
+		globalHilite = 14
+		globalTLX = 50
+		globalTLY = 18
+		CALL menu(0)
+		powder:
+		SELECT CASE globalChoose
+			CASE 1
+				firemore:
+				IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
+				pct! = 0
+				a$ = RIGHT$(globalFleet$(who), 1)
+				IF a$ <> RIGHT$(globalFleet$(3 - who), 1) THEN
+					IF a$ = "I" THEN pct! = .1 ELSE pct! = -.1
+				END IF
+				IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
+				GOTO firemore
+				hitem:
+				hit(3 - who) = hit(3 - who) - 1
+				GOSUB showhit
+				IF hit(3 - who) > 0 GOTO firemore
+				x = 10 + 50 * globalNavySize(3 - who)
+				y = 90
+				IF who = 1 THEN y = 190
+				GOSUB xout
+				LOCATE 17, 5: PRINT globalForce$(3 - who); " ship SUNK!"
+				CALL TICK(globalTurbo! + 1)
+				GOSUB clr1
+				CALL barnacle(3 - who)
+				IF globalNavySize(3 - who) < 1 THEN
+					LOCATE 19, 5: COLOR 12
+					PRINT globalForce$(3 - who); " fleet DEFEATED"
+					CALL TICK(globalTurbo!)
+					globalNavyLoc(3 - who) = 0
+					globalFleet$(3 - who) = ""
+					globalVictory(3 - who) = globalVictory(3 - who) + 10
+					IF who = side THEN globalGrudge = 1 ELSE globalGrudge = 0
+					GOTO sail3
+				END IF
+				hit(3 - who) = 10
+				IF RIGHT$(globalFleet$(3 - who), 1) = "I" THEN hit(3 - who) = 20
+				GOTO cannon
+				hitme1:
+				hit(who) = hit(who) - 1
+				GOSUB showhit
+				IF hit(who) > 0 GOTO firemore
+				x = 10 + 50 * globalNavySize(who)
+				y = 190
+				IF who = 1 THEN y = 90
+				GOSUB xout
+				LOCATE 17, 5: PRINT "One of the "; globalForce$(who); " ships was SUNK!"
+				CALL TICK(globalTurbo!)
+				GOSUB clr1
+				CALL barnacle(who)
+				IF globalNavySize(who) < 1 THEN
+					LOCATE 19, 5: COLOR 12
+					PRINT "Attacking "; globalForce$(who); " fleet has been ELIMINATED !"
+					CALL TICK(globalTurbo!)
+					globalNavyLoc(who) = 0: globalFleet$(who) = ""
+					globalVictory(who) = globalVictory(who) + 10
+					IF who <> side THEN globalGrudge = 1 ELSE globalGrudge = 0
+					GOTO sail3
+				END IF
+				hit(who) = 10
+				IF RIGHT$(globalFleet$(who), 1) = "I" THEN hit(who) = 20
+				GOTO cannon
+			CASE 2
+				target = 0
+				FOR i = 1 TO 40
+					IF globalCityP(i) = who THEN 
+						IF i <> globalNavyLoc(who) AND globalMatrix(i, 7) = 99 THEN
+							target = i
+							IF RND > .3 GOTO found1
+						END IF
+					END IF
+				NEXT i
+				found1:
+				CALL clrbot
+				COLOR 11: PRINT globalForce$(who); " is retreating to "; globalCity$(target);
+				CALL TICK(globalTurbo!)
+				globalNavyLoc(who) = target
+				GOTO sail3
+			CASE ELSE
+				GOTO wave
+		END SELECT
+		GOTO pirate
+		'---------------------------------------------------------------------------
+		'                               Subs
+		'---------------------------------------------------------------------------
+		showhit:
+		LOCATE 9, 6 * globalNavySize(1): PRINT hit(1); " ";
+		LOCATE 15, 6 * globalNavySize(2): PRINT hit(2); " ";
+		IF globalNoise = 0 THEN TICK .1 * globalTurbo!
+		RETURN
+		clr1:
+		LOCATE 17, 1: PRINT SPACE$(60): RETURN
+		nest:
+		best = 0
+		x = 0
+		FOR i = 1 TO size
+			target = globalArray(i)
+			IF globalCityP(target) = 0 GOTO neutral
+
+			IF target = globalNavyLoc(3 - who) THEN 
+				IF globalNavySize(who) >= globalNavySize(3 - who) AND RND > .1 THEN 
+					globalChoose = i
+					RETURN
+				END IF
+			END IF
+			IF globalCityP(target) <> who THEN
+				best = i
+				x = x + 1
+				IF RND > .8 THEN 
+					globalChoose = best
+					RETURN
+				END IF
+			END IF
+		neutral:
+		NEXT i
+		IF best = 0 THEN
+			globalChoose = 1 + INT(RND * size)
+		ELSE
+			globalChoose = best
+		END IF
+
+		IF who = 2 AND globalNavyLoc(2) = 30 THEN 
+			IF RND > .5 THEN 
+				globalChoose = 30
+				RETURN
+			END IF
+		END IF
+		RETURN
+		boxes:
+		LINE (10, 80)-(530, 110), 1, BF
+		LINE (10, 80)-(530, 110), 11, B
+		RETURN
+		box2:
+		CLS
+		LINE (100, 110)-(550, 240), 1, B
+		LINE (95, 115)-(555, 235), 7, B
+		RETURN
+		xout:
 		PSET (x, y)
 		DRAW "S5C15G5F5G3H5G5H3E5H5E3F5E5F3"
 		PAINT (x - 3, y + 1), 12, 15
-	RETURN
-sail3:
-	globalCommerce = 0
-	FOR k = 1 TO 2
-	IF globalNavyLoc(k) = 99 THEN globalCommerce = k
-	NEXT k
-	CLS : CALL usa
+		RETURN
+		sail3:
+		globalCommerce = 0
+		FOR k = 1 TO 2
+			IF globalNavyLoc(k) = 99 THEN globalCommerce = k
+		NEXT k
+		CLS 
+		CALL usa
 END SUB
 
 SUB newarmy (who, empty, target)
