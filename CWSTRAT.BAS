@@ -4069,49 +4069,54 @@ SUB events ' Special Events
 END SUB
 
 SUB flags (who, w, a)
-x = 585 + w: y = 200: IF w = 0 THEN y = 180
-IF a <> 0 THEN y = a
-SELECT CASE who
-	CASE 1
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
-	FOR i = -13 TO 9 STEP 5
-	LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
-	NEXT i
-	LINE (x - 17, y - 15)-(x, y), 1, BF
-	IF w = 0 THEN COLOR 9: LOCATE 10, 70: PRINT "U N I O N"
-	FOR i = -16 TO -1 STEP 3
-		FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
-	NEXT i
-	CASE 2
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
-	LINE (x - 17, y - 13)-(x + 15, y + 7), 7
-	LINE (x - 15, y - 15)-(x + 17, y + 5), 7
+	x = 585 + w
+	y = 200
+	IF w = 0 THEN y = 180
+	IF a <> 0 THEN y = a
+	SELECT CASE who
+		CASE 1
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+			FOR i = -13 TO 9 STEP 5
+			LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
+			NEXT i
+			LINE (x - 17, y - 15)-(x, y), 1, BF
+			IF w = 0 THEN COLOR 9: LOCATE 10, 70: PRINT "U N I O N"
+			FOR i = -16 TO -1 STEP 3
+				FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
+			NEXT i
+		CASE 2
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+			LINE (x - 17, y - 13)-(x + 15, y + 7), 7
+			LINE (x - 15, y - 15)-(x + 17, y + 5), 7
 
-	LINE (x - 17, y + 7)-(x + 17, y - 15), 1
-	LINE (x - 17, y + 6)-(x + 16, y - 15), 1
-	LINE (x - 16, y + 7)-(x + 17, y - 14), 1
-	LINE (x - 17, y + 5)-(x + 15, y - 15), 7
-	LINE (x - 15, y + 7)-(x + 17, y - 13), 7
+			LINE (x - 17, y + 7)-(x + 17, y - 15), 1
+			LINE (x - 17, y + 6)-(x + 16, y - 15), 1
+			LINE (x - 16, y + 7)-(x + 17, y - 14), 1
+			LINE (x - 17, y + 5)-(x + 15, y - 15), 7
+			LINE (x - 15, y + 7)-(x + 17, y - 13), 7
 
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 1
-	LINE (x - 17, y - 14)-(x + 16, y + 7), 1
-	LINE (x - 16, y - 15)-(x + 17, y + 6), 1
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 1
+			LINE (x - 17, y - 14)-(x + 16, y + 7), 1
+			LINE (x - 16, y - 15)-(x + 17, y + 6), 1
+			LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
 
-	IF w = 0 THEN COLOR 4: LOCATE 10, 70: PRINT "R E B E L"
-	CASE ELSE
-END SELECT
+			IF w = 0 THEN COLOR 4: LOCATE 10, 70: PRINT "R E B E L"
+		CASE ELSE
+	END SELECT
 END SUB
 
 SUB image2 (a$, s)
-DIM g2(1 TO 8000)
-globalMTX$(1) = a$
-globalTLX = 32 - LEN(a$) \ 2
-globalTLY = 10: size = 1
-CALL mxw(wide)
-IF wide > 59 THEN wide = 59: a$ = LEFT$(a$, 59)
-x = 8 * (globalTLX + wide)
-y = 16 * (globalTLY + 1)
+	DIM g2(1 TO 8000)
+	globalMTX$(1) = a$
+	globalTLX = 32 - LEN(a$) \ 2
+	globalTLY = 10: size = 1
+	CALL mxw(wide)
+	IF wide > 59 THEN 
+		wide = 59
+		a$ = LEFT$(a$, 59)
+	END IF
+	x = 8 * (globalTLX + wide)
+	y = 16 * (globalTLY + 1)
 	GET (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + wide + 1) + 15, 16 * (globalTLY + 3) + 7), g2
 	VIEW (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + 3) + 4)
 	CLS 1
@@ -4126,388 +4131,460 @@ y = 16 * (globalTLY + 1)
 END SUB
 
 SUB integrity
-CLS : COLOR 15
-x = 0: y = 0
-FOR i = 1 TO 40
-FOR j = 1 TO 6: IF globalMatrix(i, j) = 0 GOTO done
-	index = globalMatrix(i, j)
-	FOR k = 1 TO 6
-	IF globalMatrix(index, k) = i GOTO ret
-	IF globalMatrix(index, k) = 0 THEN globalMatrix(index, k) = i: PRINT "+ Adding return route from "; globalCity$(index); " to "; globalCity$(i): y = y + 1: GOTO ret
-	NEXT k
-	x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; globalCity$(index); ": no return route to "; globalCity$(i): TICK 1
-ret:
-NEXT j
-done:
-NEXT i
-IF x + y = 0 THEN PRINT "ALL MAP LINKS ARE OK": EXIT SUB
-IF y > 0 THEN PRINT "* "; y; " fixes made to provide RETURN ROUTES"
-IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
+	CLS
+	COLOR 15
+	x = 0: y = 0
+	FOR i = 1 TO 40
+		FOR j = 1 TO 6
+			IF globalMatrix(i, j) = 0 GOTO done
+			index = globalMatrix(i, j)
+			FOR k = 1 TO 6
+				IF globalMatrix(index, k) = i GOTO ret
+				IF globalMatrix(index, k) = 0 THEN 
+					globalMatrix(index, k) = i
+					PRINT "+ Adding return route from "; globalCity$(index); " to "; globalCity$(i)
+					y = y + 1
+					GOTO ret
+				END IF
+			NEXT k
+			x = x + 1
+			PRINT "Error in CITIES.GRD entry for city #"; i; globalCity$(index); ": no return route to "; globalCity$(i)
+			TICK 1
+		ret:
+		NEXT j
+	done:
+	NEXT i
+	IF x + y = 0 THEN PRINT "ALL MAP LINKS ARE OK": EXIT SUB
+	IF y > 0 THEN PRINT "* "; y; " fixes made to provide RETURN ROUTES"
+	IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB
 
 SUB maptext
-FOR k = 1 TO 40
-	FOR j = 1 TO LEN(globalCity$(k))
-	a = globalCityX(k) + 6 * (j - 4) - 3
-	x = ASC(MID$(UCASE$(globalCity$(k)), j, 1)) - 64
-	IF a > 527 GOTO nextc
-	PSET (a, globalCityY(k) + 12), 10
-	
-	IF globalMatrix(k, 7) < 90 THEN
-		IF globalBW = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
-	ELSE
-		DRAW "C10"
-	END IF
-	IF x > 0 AND x < 27 THEN DRAW globalFont$(x)
-	NEXT j
-nextc:
-NEXT k
+	FOR k = 1 TO 40
+		FOR j = 1 TO LEN(globalCity$(k))
+			a = globalCityX(k) + 6 * (j - 4) - 3
+			x = ASC(MID$(UCASE$(globalCity$(k)), j, 1)) - 64
+			IF a > 527 GOTO nextc
+			PSET (a, globalCityY(k) + 12), 10
+			
+			IF globalMatrix(k, 7) < 90 THEN
+				IF globalBW = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
+			ELSE
+				DRAW "C10"
+			END IF
+			IF x > 0 AND x < 27 THEN DRAW globalFont$(x)
+		NEXT j
+	nextc:
+	NEXT k
 END SUB
 
 SUB maxx
-COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
-SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
+	COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+	SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
-LOCATE 2, 7: PRINT STRING$(57, "�")
-LOCATE 9, 7: PRINT STRING$(57, "�")
-FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "�"; SPACE$(55); "�": NEXT i
+	LOCATE 2, 7: PRINT STRING$(57, "�")
+	LOCATE 9, 7: PRINT STRING$(57, "�")
+	FOR i = 1 TO 6
+		LOCATE 2 + i, 7: PRINT "�"; SPACE$(55); "�"
+	NEXT i
 
-		OPEN "I", 1, "hiscore.cws"
-		FOR s = 1 TO 2
+	OPEN "I", 1, "hiscore.cws"
+	FOR s = 1 TO 2
 		COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT globalForce$(s); " HALL of FAME"
-		COLOR 15, 0: FOR i = 1 TO 5
-		INPUT #1, globalCity$(5 * (s - 1) + i), globalMatrix(s, i)
-		LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, globalCity$(5 * (s - 1) + i), globalMatrix(s, i)
-		NEXT i: NEXT s: CLOSE #1
+		COLOR 15, 0
+		FOR i = 1 TO 5
+			INPUT #1, globalCity$(5 * (s - 1) + i), globalMatrix(s, i)
+			LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, globalCity$(5 * (s - 1) + i), globalMatrix(s, i)
+		NEXT i
+	NEXT s
+	CLOSE #1
 		      
-			FOR s = 1 TO 2: FOR i = 1 TO 5
+	FOR s = 1 TO 2
+		FOR i = 1 TO 5
 			IF globalVictory(s) < globalMatrix(s, i) GOTO oldskor
-				FOR j = 5 TO i + 1 STEP -1
+			FOR j = 5 TO i + 1 STEP -1
 				globalMatrix(s, j) = globalMatrix(s, j - 1)
 				globalCity$(5 * (s - 1) + j) = globalCity$(5 * (s - 1) + j - 1)
-				NEXT j
+			NEXT j
 
-			COLOR 15, 1: IF s = 2 THEN COLOR 4, 7
-			FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
+			COLOR 15, 1
+			IF s = 2 THEN COLOR 4, 7
+			FOR k = 12 TO 14
+				LOCATE k, 1: PRINT SPACE$(80);
+			NEXT k
 			LOCATE 12, 1: PRINT "Congratulations ! Score of"; globalVictory(s)
 			PRINT "New Entry into "; globalForce$(s); " HALL of FAME in place "; i
-			IF globalPlayer = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; globalForce$(s); " commander": GOTO automate
-who4:
-			PRINT "What is name of "; globalForce$(s); " commander"; : INPUT a$: IF a$ = "" GOTO who4
-automate:
+			IF globalPlayer = 1 AND s <> side THEN 
+				a$ = "COMPUTER": PRINT a$; " was "; globalForce$(s); " commander"
+				GOTO automate
+			END IF
+			who4:
+			PRINT "What is name of "; globalForce$(s); " commander"; : INPUT a$
+			IF a$ = "" GOTO who4
+			automate:
 			globalCity$(5 * (s - 1) + i) = a$
-			globalMatrix(s, i) = globalVictory(s): GOTO foun
-oldskor:
-			NEXT i
-foun:
-			NEXT s
+			globalMatrix(s, i) = globalVictory(s)
+			GOTO foun
+		oldskor:
+		NEXT i
+	foun:
+	NEXT s
 	       
-		OPEN "O", 1, "hiscore.cws"
-		FOR s = 1 TO 2
-			FOR i = 1 TO 5
+	OPEN "O", 1, "hiscore.cws"
+	FOR s = 1 TO 2
+		FOR i = 1 TO 5
 			WRITE #1, globalCity$(5 * (s - 1) + i), globalMatrix(s, i)
-			NEXT i
-		NEXT s: CLOSE #1: PRINT "Game Over": DO WHILE INKEY$ = "": LOOP: globalPCode = 1
+		NEXT i
+	NEXT s
+	CLOSE #1
+	PRINT "Game Over": DO WHILE INKEY$ = "": LOOP
+	globalPCode = 1
 END SUB
 
 SUB occupy (x)
-globalOccupied(x) = 0
-FOR i = 1 TO 40
-IF globalArmyLoc(i) = x THEN globalOccupied(x) = i: GOTO holdup
-NEXT i
+	globalOccupied(x) = 0
+	FOR i = 1 TO 40
+		IF globalArmyLoc(i) = x THEN globalOccupied(x) = i: GOTO holdup
+	NEXT i
 holdup:
 END SUB
 
 SUB relieve (who)
-globalColour = 3: target = 0: globalHilite = 3
-globalTLX = 67: globalTLY = 2
-CALL starfin(star, fin, who)
-size = 0
-FOR i = star TO fin
-IF globalArmySize(i) > 0 AND globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN
-	size = size + 1
-	globalMTX$(size) = globalArmyName$(i)
-	IF LEN(globalMTX$(size)) > 11 THEN globalMTX$(size) = LEFT$(globalMTX$(size), 11)
-	globalArray(size) = i
-END IF
-NEXT i
+	globalColour = 3
+	target = 0
+	globalHilite = 3
+	globalTLX = 67
+	globalTLY = 2
+	CALL starfin(star, fin, who)
+	size = 0
+	FOR i = star TO fin
+		IF globalArmySize(i) > 0 AND globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN
+			size = size + 1
+			globalMTX$(size) = globalArmyName$(i)
+			IF LEN(globalMTX$(size)) > 11 THEN globalMTX$(size) = LEFT$(globalMTX$(size), 11)
+			globalArray(size) = i
+		END IF
+	NEXT i
 
-IF size = 0 THEN EXIT SUB
-CALL bubble(size)
-globalMTX$(0) = "Relieve"
-globalChoose = 31: globalHilite = 11
-CALL menu(6): CALL clrrite
+	IF size = 0 THEN EXIT SUB
+	CALL bubble(size)
+	globalMTX$(0) = "Relieve"
+	globalChoose = 31
+	globalHilite = 11
+	CALL menu(6)
+	CALL clrrite
 
-IF globalChoose < 1 THEN EXIT SUB
-index = globalArray(globalChoose)
-CALL icon(globalArmyLoc(index), 0, 9)
+	IF globalChoose < 1 THEN EXIT SUB
+	index = globalArray(globalChoose)
+	CALL icon(globalArmyLoc(index), 0, 9)
 
-t$ = globalArmyName$(index)
-globalLName$(index) = t$
+	t$ = globalArmyName$(index)
+	globalLName$(index) = t$
 
-size = 0
-FOR i = star TO fin
-IF globalLName$(i) <> "" THEN
-	size = size + 1
-	globalMTX$(size) = globalLName$(i)
-	IF LEN(globalMTX$(size)) > 11 THEN globalMTX$(size) = LEFT$(globalMTX$(size), 11)
-	globalArray(size) = i
-END IF
-NEXT i
-CALL bubble(size)
+	size = 0
+	FOR i = star TO fin
+		IF globalLName$(i) <> "" THEN
+			size = size + 1
+			globalMTX$(size) = globalLName$(i)
+			IF LEN(globalMTX$(size)) > 11 THEN globalMTX$(size) = LEFT$(globalMTX$(size), 11)
+			globalArray(size) = i
+		END IF
+	NEXT i
+	CALL bubble(size)
 
-have2:
-globalMTX$(0) = "New Leader"
-globalTLX = 67: globalTLY = 2
-CALL menu(0): CALL clrrite
-IF globalChoose < 1 GOTO have2
-globalArmyMove(index) = -1
-globalArmyLead(index) = globalRating(globalArray(globalChoose))
-IF globalArmyLead(index) > 0 THEN globalArmyLead(index) = globalArmyLead(index) - 1
-IF globalArmyExper(index) > 0 THEN globalArmyExper(index) = globalArmyExper(index) - 1
-COLOR 15: CALL clrbot: PRINT globalLName$(globalArray(globalChoose)); " has replaced "; t$; " in "; globalCity$(globalArmyLoc(index)); : TICK 9
-globalArmyName$(index) = globalLName$(globalArray(globalChoose))
-globalLName$(globalArray(globalChoose)) = ""
-CALL icon(globalArmyLoc(index), 0, 8)
-CALL clrbot
+	have2:
+	globalMTX$(0) = "New Leader"
+	globalTLX = 67
+	globalTLY = 2
+	CALL menu(0)
+	CALL clrrite
+	IF globalChoose < 1 GOTO have2
+	globalArmyMove(index) = -1
+	globalArmyLead(index) = globalRating(globalArray(globalChoose))
+	IF globalArmyLead(index) > 0 THEN globalArmyLead(index) = globalArmyLead(index) - 1
+	IF globalArmyExper(index) > 0 THEN globalArmyExper(index) = globalArmyExper(index) - 1
+	COLOR 15
+	CALL clrbot
+	PRINT globalLName$(globalArray(globalChoose)); " has replaced "; t$; " in "; globalCity$(globalArmyLoc(index));
+	TICK 9
+	globalArmyName$(index) = globalLName$(globalArray(globalChoose))
+	globalLName$(globalArray(globalChoose)) = ""
+	CALL icon(globalArmyLoc(index), 0, 8)
+	CALL clrbot
 END SUB
 
 SUB report (who)
-DIM summ(40)
-IF who = -1 GOTO frep
-IF who > 100 GOTO batrep
-globalMTX$(0) = "Information"
-globalMTX$(1) = globalForce$(side) + " Armies"
-globalMTX$(2) = globalForce$(3 - side) + " Armies"
-globalMTX$(3) = "Cities"
-globalMTX$(4) = "Force Summary"
-globalMTX$(5) = "Intelligence"
-globalMTX$(6) = "Battles": size = 6
-IF _FILEEXISTS("cws.his") THEN globalMTX$(7) = "Recap": size = 7
-CALL menu(0)
-SELECT CASE globalChoose
-CASE IS < 0
+	DIM summ(40)
+	IF who = -1 GOTO frep
+	IF who > 100 GOTO batrep
+	globalMTX$(0) = "Information"
+	globalMTX$(1) = globalForce$(side) + " Armies"
+	globalMTX$(2) = globalForce$(3 - side) + " Armies"
+	globalMTX$(3) = "Cities"
+	globalMTX$(4) = "Force Summary"
+	globalMTX$(5) = "Intelligence"
+	globalMTX$(6) = "Battles": size = 6
+	IF _FILEEXISTS("cws.his") THEN globalMTX$(7) = "Recap": size = 7
+	CALL menu(0)
+	SELECT CASE globalChoose
+		CASE IS < 0
+			CLS
+			CALL usa
+			EXIT SUB
+		CASE 2: who = 3 - side
+		CASE 3: GOTO cityrep
+		CASE 4: GOTO frep
+		CASE 5: GOTO srep
+		CASE 6: GOTO batrep
+		CASE 7: GOTO recap
+		CASE ELSE
+	END SELECT
+	'..........................................................................
+	'                               Army Report
+	'..........................................................................
+	IF globalChoose < 0 GOTO endrep
+	IF globalChoose = 4 GOTO frep
+	CALL starfin(star, fin, who)
 	CLS
-	CALL usa
-	EXIT SUB
-CASE 2: who = 3 - side
-CASE 3: GOTO cityrep
-CASE 4: GOTO frep
-CASE 5: GOTO srep
-CASE 6: GOTO batrep
-CASE 7: GOTO recap
-CASE ELSE
-END SELECT
-'..........................................................................
-'                               Army Report
-'..........................................................................
-IF globalChoose < 0 GOTO endrep
-IF globalChoose = 4 GOTO frep
-CALL starfin(star, fin, who)
-CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
-COLOR c
-PRINT " Report for "; globalForce$(who); " Forces"; TAB(30); globalMonth$(month); ","; globalYear; TAB(49); : COLOR 14: PRINT " Victory Points "; globalVictory(who);
-IF c = 15 THEN c = 7
-x = globalVictory(who) + globalVictory(3 - who)
-IF x = 0 THEN
-	PRINT
-ELSE
-	y = (globalVictory(who) / x) * 100
-	PRINT "("; y; " %)";
-END IF
-CALL armyxy(215, 8, who)
-COLOR c: PRINT globalControl(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(globalControl(who) * 2.5 + .5): PRINT x; "%)";
-PRINT TAB(50); : COLOR 12: PRINT "Capital: "; globalCity$(globalCapCity(who))
-y = globalVPTotal: IF globalCapCity(1) > 0 THEN y = y + 100
-IF globalCapCity(2) > 0 THEN y = y + 100
-PRINT globalIncome(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (globalIncome(who) / globalVPTotal) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; globalCash(who)
-COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
-x = 0: FOR i = star TO fin
-COLOR c
-IF globalArmyLoc(i) < 1 GOTO deadeye
-x = x + globalArmySize(i)
-PRINT i; TAB(5); globalArmyName$(i); TAB(25); : y = CSRLIN
-CALL strong(i): PRINT TAB(32); globalCity$(globalArmyLoc(i));
-IF who <> side THEN PRINT : GOTO deadeye
-PRINT TAB(43); globalArmyLead(i); TAB(47); globalArmyExper(i); TAB(52); globalSupply(i);
-PRINT TAB(57); : IF globalArmyMove(i) > -1 THEN PRINT globalCity$(globalArmyMove(i)) ELSE PRINT "Resting"
-IF globalFort(globalArmyLoc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; globalFort(globalArmyLoc(i))
-deadeye:
-NEXT i
-PRINT " "; STRING$(70, "�")
-PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(globalAggress! * x))); "00 ]"
-PRINT " "; STRING$(70, "�")
-PRINT " "; globalForce$(who); " NAVY has "; globalNavySize(who); " ship(s) ";
-x = 0
-FOR k = 1 TO globalNavySize(who)
-	IF MID$(globalFleet$(who), k, 1) = "I" THEN x = x + 1
-NEXT k
-IF x > 0 THEN PRINT "("; x; "Ironclads) ";
-IF globalNavyLoc(who) > 0 AND globalNavyLoc(who) < 99 THEN PRINT "in "; globalCity$(globalNavyLoc(who)) ELSE PRINT
-IF globalRR(who) > 0 THEN COLOR 14: PRINT " Army #"; globalRR(who); globalArmyName$(globalRR(who)); " on train to "; globalCity$(globalArmyMove(globalRR(who)));
-LINE (0, 0)-(639, 449), 15, B
-LINE (0, 62)-(639, 62), 15
-GOTO endrep
-'..........................................................................
-'                               City Report
-'..........................................................................
-cityrep:
-CLS : LOCATE 1, 1: COLOR 14
-PRINT "City Report"; TAB(20); globalMonth$(month); ","; globalYear: COLOR 15
-PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
-LINE (1, 30)-(630, 30), 15
-FOR i = 1 TO 20: COLOR 4: a$ = "neutral": IF globalCityP(i) = 1 THEN COLOR 9: a$ = "UNION"
-IF globalCityP(i) = 2 THEN COLOR 7: a$ = "REBEL"
-LOCATE 2 + i, 1: PRINT i; TAB(6); globalCity$(i); TAB(18); a$; TAB(29); globalCityV(i)
-NEXT i
-
-FOR i = 21 TO 40: COLOR 4: a$ = "neutral": IF globalCityP(i) = 1 THEN COLOR 9: a$ = "UNION"
-IF globalCityP(i) = 2 THEN COLOR 7: a$ = "REBEL"
-LOCATE i - 18, 41: PRINT i; TAB(46); globalCity$(i); TAB(58); a$; TAB(69); globalCityV(i)
-NEXT i
-LINE (1, 360)-(630, 360), 15
-COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
-COLOR 9: PRINT globalForce$(1); TAB(12); globalControl(1); TAB(23); globalIncome(1); TAB(32); globalCash(1)
-COLOR 7: PRINT globalForce$(2); TAB(12); globalControl(2); TAB(23); globalIncome(2); TAB(32); globalCash(2)
-COLOR 4: PRINT globalForce$(0); TAB(12); 40 - globalControl(1) - globalControl(2)
-LINE (1, 382)-(630, 382), 15
-GOTO endrep
-'..........................................................................
-'                               Intelligence
-'..........................................................................
-srep:
-c = 9: IF side = 2 THEN c = 7
-CALL usa
-CALL starfin(star, fin, side)
-FOR k = star TO fin
-	IF globalArmySize(k) > 0 THEN
+	LOCATE 1, 1
+	c = 9
+	IF who = 2 THEN c = 15
 	COLOR c
-	x = globalCityX(globalArmyLoc(k))
-	y = globalCityY(globalArmyLoc(k))
-	z = 10: IF globalArmySize(k) < 1000 THEN z = 9
-	x = x / 8 - 2: y = y / 16
-	IF y > 26 THEN y = 26
-	FOR j = 0 TO 3
-	LOCATE y + j, x: PRINT SPACE$(z);
-	NEXT j
-	LOCATE y, x: PRINT "Siz:"; : CALL strong(k)
-	LOCATE y + 1, x: PRINT "Ldr:"; globalArmyLead(k)
-	LOCATE y + 2, x: PRINT "Xpr:"; globalArmyExper(k)
-	LOCATE y + 3, x: PRINT "Sup:"; globalSupply(k);
-	LINE (8 * (x - 1) - 1, 16 * (y - 1) - 1)-(8 * (x + z - 1) + 1, 16 * (y + 3) + 1), 15, B
-	TICK 1
-END IF
-NEXT k
-GOTO endrep
-'..........................................................................
-'                               Force Summary
-'..........................................................................
-frep:
-FOR k = 1 TO 40
-	IF globalOccupied(k) > 0 THEN
-		FOR j = 1 TO 40
-		IF globalArmyLoc(j) = k THEN summ(k) = summ(k) + globalArmySize(j)
-		NEXT j
+	PRINT " Report for "; globalForce$(who); " Forces"; TAB(30); globalMonth$(month); ","; globalYear; TAB(49); : COLOR 14: PRINT " Victory Points "; globalVictory(who);
+	IF c = 15 THEN c = 7
+	x = globalVictory(who) + globalVictory(3 - who)
+	IF x = 0 THEN
+		PRINT
+	ELSE
+		y = (globalVictory(who) / x) * 100
+		PRINT "("; y; " %)";
 	END IF
-NEXT k
-
-CLS : CALL usa
-FOR k = 1 TO 40
-IF summ(k) > 0 THEN
-	c = 9: IF globalCityP(k) = 2 THEN c = 7
-	COLOR c
-	LOCATE INT(globalCityY(k) / 16 + 1), globalCityX(k) / 8: PRINT summ(k)
-END IF
-NEXT k
-COLOR 14: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
-GOTO endrep
-'..........................................................................
-'                               Battle Report
-'..........................................................................
-batrep:
-VIEW (200, 123)-(400, 284)
-CLS 1
-VIEW
-LINE (200, 123)-(400, 284), 15, B
-COLOR 14
-LOCATE 9, 32: PRINT "BATTLE SUMMARY"
-CALL armyxy(320, 160, 1)
-CALL armyxy(370, 160, 2)
-LINE (200, 176)-(400, 230), 15, B
-LINE (200, 230)-(400, 284), 15, B
-LINE (290, 176)-(345, 284), 15, B
-LOCATE 13, 27: PRINT "BATTLES"
-LOCATE 14, 27: PRINT "WON"
-LOCATE 16, 27: PRINT "MEN LOST"
-LOCATE 17, 27: PRINT "(1000's)"
-LOCATE 14, 38: PRINT globalBatWon(1)
-LOCATE 14, 45: PRINT globalBatWon(2)
-LOCATE 17, 38: PRINT INT(.1 * globalCasualty&(1))
-LOCATE 17, 45: PRINT INT(.1 * globalCasualty&(2))
-IF globalHistory > 0 AND who > 2 THEN
-	OPEN "O", #1, "battsumm"
-	PRINT #1, " SIDE      BATTLES WON       LOSSES"
-	FOR k = 1 TO 2
-	a$ = " ": IF globalThrill = k THEN a$ = "*"
-	PRINT #1, a$; globalForce$(k), globalBatWon(k), 100 * globalCasualty&(k)
+	CALL armyxy(215, 8, who)
+	COLOR c: PRINT globalControl(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(globalControl(who) * 2.5 + .5): PRINT x; "%)";
+	PRINT TAB(50); : COLOR 12: PRINT "Capital: "; globalCity$(globalCapCity(who))
+	y = globalVPTotal
+	IF globalCapCity(1) > 0 THEN y = y + 100
+	IF globalCapCity(2) > 0 THEN y = y + 100
+	PRINT globalIncome(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (globalIncome(who) / globalVPTotal) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; globalCash(who)
+	COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
+	x = 0
+	FOR i = star TO fin
+		COLOR c
+		IF globalArmyLoc(i) < 1 GOTO deadeye
+		x = x + globalArmySize(i)
+		PRINT i; TAB(5); globalArmyName$(i); TAB(25); : y = CSRLIN
+		CALL strong(i): PRINT TAB(32); globalCity$(globalArmyLoc(i));
+		IF who <> side THEN PRINT : GOTO deadeye
+		PRINT TAB(43); globalArmyLead(i); TAB(47); globalArmyExper(i); TAB(52); globalSupply(i);
+		PRINT TAB(57); : IF globalArmyMove(i) > -1 THEN PRINT globalCity$(globalArmyMove(i)) ELSE PRINT "Resting"
+		IF globalFort(globalArmyLoc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; globalFort(globalArmyLoc(i))
+	deadeye:
+	NEXT i
+	PRINT " "; STRING$(70, "�")
+	PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(globalAggress! * x))); "00 ]"
+	PRINT " "; STRING$(70, "�")
+	PRINT " "; globalForce$(who); " NAVY has "; globalNavySize(who); " ship(s) ";
+	x = 0
+	FOR k = 1 TO globalNavySize(who)
+		IF MID$(globalFleet$(who), k, 1) = "I" THEN x = x + 1
 	NEXT k
-	CLOSE #1
-END IF
-GOTO endrep
-'..........................................................................
-'                               Recap (History)
-'..........................................................................
-recap:
-CLS : x = 0
-OPEN "I", 2, "cws.his"
-DO WHILE NOT EOF(2)
-INPUT #2, a$
-COLOR 7: IF INSTR(a$, "[") THEN COLOR 15
-IF INSTR(a$, ">") THEN COLOR 14
-IF INSTR(a$, "..") THEN COLOR 11
-IF INSTR(a$, "!") THEN COLOR 12
-LOCATE 29, 1: PRINT a$
-x = x + 1
-IF x > 27 THEN TICK .4
-LOOP
-CLOSE #2
+	IF x > 0 THEN PRINT "("; x; "Ironclads) ";
+	IF globalNavyLoc(who) > 0 AND globalNavyLoc(who) < 99 THEN PRINT "in "; globalCity$(globalNavyLoc(who)) ELSE PRINT
+	IF globalRR(who) > 0 THEN COLOR 14: PRINT " Army #"; globalRR(who); globalArmyName$(globalRR(who)); " on train to "; globalCity$(globalArmyMove(globalRR(who)));
+	LINE (0, 0)-(639, 449), 15, B
+	LINE (0, 62)-(639, 62), 15
+	GOTO endrep
+	'..........................................................................
+	'                               City Report
+	'..........................................................................
+	cityrep:
+	CLS
+	LOCATE 1, 1: COLOR 14
+	PRINT "City Report"; TAB(20); globalMonth$(month); ","; globalYear: COLOR 15
+	PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
+	LINE (1, 30)-(630, 30), 15
+	FOR i = 1 TO 20
+		COLOR 4
+		a$ = "neutral"
+		IF globalCityP(i) = 1 THEN COLOR 9: a$ = "UNION"
+		IF globalCityP(i) = 2 THEN COLOR 7: a$ = "REBEL"
+		LOCATE 2 + i, 1: PRINT i; TAB(6); globalCity$(i); TAB(18); a$; TAB(29); globalCityV(i)
+	NEXT i
 
-endrep:
-COLOR 14: LOCATE 29, 29: PRINT "press a key";
-DO WHILE INKEY$ = "": LOOP
-IF who < 3 THEN
+	FOR i = 21 TO 40
+		COLOR 4
+		a$ = "neutral"
+		IF globalCityP(i) = 1 THEN COLOR 9: a$ = "UNION"
+		IF globalCityP(i) = 2 THEN COLOR 7: a$ = "REBEL"
+		LOCATE i - 18, 41: PRINT i; TAB(46); globalCity$(i); TAB(58); a$; TAB(69); globalCityV(i)
+	NEXT i
+	LINE (1, 360)-(630, 360), 15
+	COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
+	COLOR 9: PRINT globalForce$(1); TAB(12); globalControl(1); TAB(23); globalIncome(1); TAB(32); globalCash(1)
+	COLOR 7: PRINT globalForce$(2); TAB(12); globalControl(2); TAB(23); globalIncome(2); TAB(32); globalCash(2)
+	COLOR 4: PRINT globalForce$(0); TAB(12); 40 - globalControl(1) - globalControl(2)
+	LINE (1, 382)-(630, 382), 15
+	GOTO endrep
+	'..........................................................................
+	'                               Intelligence
+	'..........................................................................
+	srep:
+	c = 9
+	IF side = 2 THEN c = 7
+	CALL usa
+	CALL starfin(star, fin, side)
+	FOR k = star TO fin
+		IF globalArmySize(k) > 0 THEN
+			COLOR c
+			x = globalCityX(globalArmyLoc(k))
+			y = globalCityY(globalArmyLoc(k))
+			z = 10
+			IF globalArmySize(k) < 1000 THEN z = 9
+			x = x / 8 - 2: y = y / 16
+			IF y > 26 THEN y = 26
+			FOR j = 0 TO 3
+			LOCATE y + j, x: PRINT SPACE$(z);
+			NEXT j
+			LOCATE y, x: PRINT "Siz:"; : CALL strong(k)
+			LOCATE y + 1, x: PRINT "Ldr:"; globalArmyLead(k)
+			LOCATE y + 2, x: PRINT "Xpr:"; globalArmyExper(k)
+			LOCATE y + 3, x: PRINT "Sup:"; globalSupply(k);
+			LINE (8 * (x - 1) - 1, 16 * (y - 1) - 1)-(8 * (x + z - 1) + 1, 16 * (y + 3) + 1), 15, B
+			TICK 1
+		END IF
+	NEXT k
+	GOTO endrep
+	'..........................................................................
+	'                               Force Summary
+	'..........................................................................
+	frep:
+	FOR k = 1 TO 40
+		IF globalOccupied(k) > 0 THEN
+			FOR j = 1 TO 40
+				IF globalArmyLoc(j) = k THEN summ(k) = summ(k) + globalArmySize(j)
+			NEXT j
+		END IF
+	NEXT k
+
 	CLS
 	CALL usa
-END IF
+	FOR k = 1 TO 40
+		IF summ(k) > 0 THEN
+			c = 9
+			IF globalCityP(k) = 2 THEN c = 7
+			COLOR c
+			LOCATE INT(globalCityY(k) / 16 + 1), globalCityX(k) / 8: PRINT summ(k)
+		END IF
+	NEXT k
+	COLOR 14: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
+	GOTO endrep
+	'..........................................................................
+	'                               Battle Report
+	'..........................................................................
+	batrep:
+	VIEW (200, 123)-(400, 284)
+	CLS 1
+	VIEW
+	LINE (200, 123)-(400, 284), 15, B
+	COLOR 14
+	LOCATE 9, 32: PRINT "BATTLE SUMMARY"
+	CALL armyxy(320, 160, 1)
+	CALL armyxy(370, 160, 2)
+	LINE (200, 176)-(400, 230), 15, B
+	LINE (200, 230)-(400, 284), 15, B
+	LINE (290, 176)-(345, 284), 15, B
+	LOCATE 13, 27: PRINT "BATTLES"
+	LOCATE 14, 27: PRINT "WON"
+	LOCATE 16, 27: PRINT "MEN LOST"
+	LOCATE 17, 27: PRINT "(1000's)"
+	LOCATE 14, 38: PRINT globalBatWon(1)
+	LOCATE 14, 45: PRINT globalBatWon(2)
+	LOCATE 17, 38: PRINT INT(.1 * globalCasualty&(1))
+	LOCATE 17, 45: PRINT INT(.1 * globalCasualty&(2))
+	IF globalHistory > 0 AND who > 2 THEN
+		OPEN "O", #1, "battsumm"
+		PRINT #1, " SIDE      BATTLES WON       LOSSES"
+		FOR k = 1 TO 2
+		a$ = " ": IF globalThrill = k THEN a$ = "*"
+		PRINT #1, a$; globalForce$(k), globalBatWon(k), 100 * globalCasualty&(k)
+		NEXT k
+		CLOSE #1
+	END IF
+	GOTO endrep
+	'..........................................................................
+	'                               Recap (History)
+	'..........................................................................
+	recap:
+	CLS
+	x = 0
+	OPEN "I", 2, "cws.his"
+	DO WHILE NOT EOF(2)
+	INPUT #2, a$
+	COLOR 7: IF INSTR(a$, "[") THEN COLOR 15
+	IF INSTR(a$, ">") THEN COLOR 14
+	IF INSTR(a$, "..") THEN COLOR 11
+	IF INSTR(a$, "!") THEN COLOR 12
+	LOCATE 29, 1: PRINT a$
+	x = x + 1
+	IF x > 27 THEN TICK .4
+	LOOP
+	CLOSE #2
+
+	endrep:
+	COLOR 14: LOCATE 29, 29: PRINT "press a key";
+	DO WHILE INKEY$ = "": LOOP
+	IF who < 3 THEN
+		CLS
+		CALL usa
+	END IF
 END SUB
 
 SUB resupply (index)
-		who = 1: IF index > 20 THEN who = 2
-		IF globalRealism > 0 THEN
-			CALL cutoff(who, globalArmyLoc(index), a)
-			IF a < 1 THEN EXIT SUB
-		END IF
-		IF globalArmySize(index) > 0 THEN x = globalCash(who) / globalArmySize(index) * 10
-		y = x + globalSupply(index): IF y > 5 THEN x = 5 - globalSupply(index)
-		IF x < 1 THEN CALL clrbot: PRINT "Not enough funds in the Treasury to globalSupply "; globalArmyName$(index); : GOTO nocash
-		globalSupply(index) = globalSupply(index) + x: globalCash(who) = globalCash(who) - .1 * x * globalArmySize(index)
-		CALL clrbot: PRINT globalArmyName$(index); " has received supplies "; : IF globalNoise > 0 THEN SOUND 4500, .5
-nocash:
-		CALL TICK(globalTurbo!): IF globalCash(who) < 0 THEN globalCash(who) = 0
+	who = 1
+	IF index > 20 THEN who = 2
+	IF globalRealism > 0 THEN
+		CALL cutoff(who, globalArmyLoc(index), a)
+		IF a < 1 THEN EXIT SUB
+	END IF
+	IF globalArmySize(index) > 0 THEN x = globalCash(who) / globalArmySize(index) * 10
+	y = x + globalSupply(index)
+	IF y > 5 THEN x = 5 - globalSupply(index)
+	IF x < 1 THEN
+		CALL clrbot
+		PRINT "Not enough funds in the Treasury to globalSupply "; globalArmyName$(index);
+		GOTO nocash
+	END IF
+	globalSupply(index) = globalSupply(index) + x
+	globalCash(who) = globalCash(who) - .1 * x * globalArmySize(index)
+	CALL clrbot
+	PRINT globalArmyName$(index); " has received supplies ";
+	IF globalNoise > 0 THEN SOUND 4500, .5
+	nocash:
+	CALL TICK(globalTurbo!)
+	IF globalCash(who) < 0 THEN globalCash(who) = 0
 END SUB
 
 SUB retreat (defend, x)
-x = 0
-IF globalPlayer = 1 THEN
-	IF (side = 1 AND defend > 20) OR (side = 2 AND defend < 21) THEN EXIT SUB
-END IF
+	x = 0
+	IF globalPlayer = 1 THEN
+		IF (side = 1 AND defend > 20) OR (side = 2 AND defend < 21) THEN EXIT SUB
+	END IF
 
-globalHilite = 13: globalColour = 3: globalTLX = 67: globalTLY = 5: size = 0
-y = globalArmyLoc(defend)
-who = 1: IF defend > 20 THEN who = 2
-FOR k = 1 TO 6
-	IF globalMatrix(y, k) > 0 AND globalCityP(globalMatrix(y, k)) = who THEN size = size + 1: globalMTX$(size) = globalCity$(globalMatrix(y, k)): globalArray(size) = globalMatrix(y, k)
-NEXT k
+	globalHilite = 13
+	globalColour = 3
+	globalTLX = 67
+	globalTLY = 5
+	size = 0
+	y = globalArmyLoc(defend)
+	who = 1
+	IF defend > 20 THEN who = 2
+	FOR k = 1 TO 6
+		IF globalMatrix(y, k) > 0 AND globalCityP(globalMatrix(y, k)) = who THEN 
+			size = size + 1
+			globalMTX$(size) = globalCity$(globalMatrix(y, k))
+			globalArray(size) = globalMatrix(y, k)
+		END IF
+	NEXT k
 	IF size = 0 THEN EXIT SUB
 	IF size = 1 THEN x = globalArray(1): EXIT SUB
 	globalMTX$(0) = "Retreat"
@@ -4519,131 +4596,137 @@ NEXT k
 END SUB
 
 SUB roman (target, a$)
-a$ = "Union ": IF target > 20 THEN a$ = "Rebel "
-IF target > 20 THEN target = target - 20
-IF target > 10 THEN a$ = a$ + "X": target = target - 10
-SELECT CASE target
-	CASE IS < 4
-	x = target: GOSUB add1s
-	CASE 4
-	a$ = a$ + "IV"
-	CASE 5 TO 8
-	a$ = a$ + "V"
-	x = target - 5
-	GOSUB add1s
-	CASE 9
-	a$ = a$ + "IX"
-	CASE 10
-	a$ = a$ + "X"
-END SELECT
-EXIT SUB
+	a$ = "Union "
+	IF target > 20 THEN a$ = "Rebel "
+	IF target > 20 THEN target = target - 20
+	IF target > 10 THEN a$ = a$ + "X": target = target - 10
+	SELECT CASE target
+		CASE IS < 4
+			x = target
+			GOSUB add1s
+		CASE 4
+			a$ = a$ + "IV"
+		CASE 5 TO 8
+			a$ = a$ + "V"
+			x = target - 5
+			GOSUB add1s
+		CASE 9
+			a$ = a$ + "IX"
+		CASE 10
+			a$ = a$ + "X"
+	END SELECT
+	EXIT SUB
 
-add1s:
-IF x > 0 THEN FOR k = 1 TO x: a$ = a$ + "I": NEXT k
-RETURN
-
+	add1s:
+	IF x > 0 THEN 
+		FOR k = 1 TO x
+			a$ = a$ + "I"
+		NEXT k
+	END IF
+	RETURN
 END SUB
 
 SUB rwin
-LINE (2, 2)-(637, 239), 4, BF
-COLOR 15: LINE (2, 40)-(597, 239): LINE -(637, 239): LINE -(637, 199): LINE -(40, 2): LINE -(2, 2): LINE -(2, 40)
-COLOR 15: LINE (2, 199)-(2, 239): LINE -(40, 239): LINE -(637, 40): LINE -(637, 2): LINE -(597, 2): LINE -(2, 199)
-LINE (242, 95)-(395, 145), 4, BF
-PAINT (4, 20), 1, 15
+	LINE (2, 2)-(637, 239), 4, BF
+	COLOR 15: LINE (2, 40)-(597, 239): LINE -(637, 239): LINE -(637, 199): LINE -(40, 2): LINE -(2, 2): LINE -(2, 40)
+	COLOR 15: LINE (2, 199)-(2, 239): LINE -(40, 239): LINE -(637, 40): LINE -(637, 2): LINE -(597, 2): LINE -(2, 199)
+	LINE (242, 95)-(395, 145), 4, BF
+	PAINT (4, 20), 1, 15
 
-LINE (2, 239)-(637, 438), 2, BF
-GOSUB stars
+	LINE (2, 239)-(637, 438), 2, BF
+	GOSUB stars
 
-'                               landscape
-PSET (1, 240)
-DRAW "s14BR68C0E6U1E3R2E4R10F2R7F2R5E3R12F7R4F2E3R5E3R9F4"
-DRAW "C0R6F2R5F1R3F3L44F2L42E1H1L29E2R1BH5BL3BR5"
-PAINT (300, 230), 5, 0
-PSET (2, 330)
-DRAW "C0D18U1R32E4R26E2R27E5R20E2R1E2U1E2U2E4H4L5H2L9H1L5H3L4H2L5H1L3H2L12H4"
-DRAW "C0D1F4R5F2R3F2R4F5R5F3L13G1L8G2L24G1L30G1L18D21"
-DRAW "BE5": x = POINT(0): y = POINT(1) + 5: PAINT (x, y), 9, 0
-DRAW "BU12C11R21F1R2BR2BD6C11R9E1R9E1R6BH7C11R9E1R9BF5C11R9E1R1E1R10"
-LINE (1, 1)-(638, 440), 14, B
-LINE (2, 2)-(637, 439), 14, B
+	'                               landscape
+	PSET (1, 240)
+	DRAW "s14BR68C0E6U1E3R2E4R10F2R7F2R5E3R12F7R4F2E3R5E3R9F4"
+	DRAW "C0R6F2R5F1R3F3L44F2L42E1H1L29E2R1BH5BL3BR5"
+	PAINT (300, 230), 5, 0
+	PSET (2, 330)
+	DRAW "C0D18U1R32E4R26E2R27E5R20E2R1E2U1E2U2E4H4L5H2L9H1L5H3L4H2L5H1L3H2L12H4"
+	DRAW "C0D1F4R5F2R3F2R4F5R5F3L13G1L8G2L24G1L30G1L18D21"
+	DRAW "BE5": x = POINT(0): y = POINT(1) + 5: PAINT (x, y), 9, 0
+	DRAW "BU12C11R21F1R2BR2BD6C11R9E1R9E1R6BH7C11R9E1R9BF5C11R9E1R1E1R10"
+	LINE (1, 1)-(638, 440), 14, B
+	LINE (2, 2)-(637, 439), 14, B
 
-'                               mansion
-x = 100: y = 240
-CIRCLE (x + 50, y + 40), 80, 0, , , .2
-PAINT (x + 50, y + 40), 6, 0
-LINE (x + 95, y - 14)-(x + 102, y + 8), 8, BF
-LINE (x + 100, y - 14)-(x + 102, y + 8), 7, BF
-LINE (x, y)-(x + 100, y + 36), 7, BF
-FOR i = 1 TO 6: LINE (x + 17 * i, y + 6)-(x + 17 * i + 4, y + 32), 0, BF: NEXT i
-LINE (x + 12, y + 18)-(x + 98, y + 22), 7, BF
-LINE (x + 50, y + 20)-(x + 57, y + 36), 8, BF
-LINE (x + 100, y + 36)-(x + 105, y + 39), 7
-LINE -(x + 5, y + 39), 7: LINE -(x, y + 38), 7
+	'                               mansion
+	x = 100: y = 240
+	CIRCLE (x + 50, y + 40), 80, 0, , , .2
+	PAINT (x + 50, y + 40), 6, 0
+	LINE (x + 95, y - 14)-(x + 102, y + 8), 8, BF
+	LINE (x + 100, y - 14)-(x + 102, y + 8), 7, BF
+	LINE (x, y)-(x + 100, y + 36), 7, BF
+	FOR i = 1 TO 6: LINE (x + 17 * i, y + 6)-(x + 17 * i + 4, y + 32), 0, BF: NEXT i
+	LINE (x + 12, y + 18)-(x + 98, y + 22), 7, BF
+	LINE (x + 50, y + 20)-(x + 57, y + 36), 8, BF
+	LINE (x + 100, y + 36)-(x + 105, y + 39), 7
+	LINE -(x + 5, y + 39), 7: LINE -(x, y + 38), 7
 
-LINE (x, y)-(x - 7, y - 7), 8: LINE -(x - 14, y + 5), 8
-LINE -(x - 14, y + 33), 8: LINE -(x, y + 36), 8: LINE -(x, y), 8
-COLOR 10: LINE (x - 5, y - 7)-(x + 95, y - 7): LINE -(x + 107, y + 7)
-LINE -(x + 7, y + 7): LINE -(x - 5, y - 7)
-PAINT (x, y - 3), 10
-PAINT (x - 5, y + 15), 8
+	LINE (x, y)-(x - 7, y - 7), 8: LINE -(x - 14, y + 5), 8
+	LINE -(x - 14, y + 33), 8: LINE -(x, y + 36), 8: LINE -(x, y), 8
+	COLOR 10: LINE (x - 5, y - 7)-(x + 95, y - 7): LINE -(x + 107, y + 7)
+	LINE -(x + 7, y + 7): LINE -(x - 5, y - 7)
+	PAINT (x, y - 3), 10
+	PAINT (x - 5, y + 15), 8
 
-FOR i = 1 TO 6: LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF: NEXT i
+	FOR i = 1 TO 6
+		LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF
+	NEXT i
 
-IF globalNoise < 2 GOTO relee
-PLAY "MBMS T120"
-PLAY "O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
-PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8"
-PLAY "L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
-PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4."
-PLAY "L16 T150 g a b T120 O4 L8 c e d. c16 O3 a O4 c4 O3 a O4 d4."
-PLAY "O3 a O4 d4. O3 T150 L16 g a b T120 L8 O4 c e d. c16"
-PLAY "L8 O3 a b O4 c. O3 a16 g e O4 c. O3 e16 e d4 e c4. e d4. a"
-PLAY "L8 g e O4 c. e16 d c4 O3 e c4. e d4. a g e O4 e4. c16 d c4"
+	IF globalNoise < 2 GOTO relee
+	PLAY "MBMS T120"
+	PLAY "O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
+	PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8"
+	PLAY "L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
+	PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4."
+	PLAY "L16 T150 g a b T120 O4 L8 c e d. c16 O3 a O4 c4 O3 a O4 d4."
+	PLAY "O3 a O4 d4. O3 T150 L16 g a b T120 L8 O4 c e d. c16"
+	PLAY "L8 O3 a b O4 c. O3 a16 g e O4 c. O3 e16 e d4 e c4. e d4. a"
+	PLAY "L8 g e O4 c. e16 d c4 O3 e c4. e d4. a g e O4 e4. c16 d c4"
 
-GOTO relee
+	GOTO relee
 
-stars:
-FOR i = 1 TO 8
-x = globalStarX(i): y = globalStarY(i)
-PSET (x, y), 0
-LINE (x + 2, y - 1)-(x + 8, y + 16), 15
-LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
-LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
-LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
-LINE -(x, y - 9): LINE -(x + 16, y - 9)
-LINE -(x + 2, y - 1): PAINT (x, y), 15
-NEXT i
-RETURN
+	stars:
+	FOR i = 1 TO 8
+		x = globalStarX(i): y = globalStarY(i)
+		PSET (x, y), 0
+		LINE (x + 2, y - 1)-(x + 8, y + 16), 15
+		LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
+		LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
+		LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
+		LINE -(x, y - 9): LINE -(x + 16, y - 9)
+		LINE -(x + 2, y - 1): PAINT (x, y), 15
+	NEXT i
+	RETURN
 relee:
 END SUB
 
 SUB scribe (a$, flag)
-SELECT CASE flag
-		CASE 1: CALL clrbot: PRINT a$;
-		CASE 2: CALL image2(a$, 4)
-END SELECT
-IF globalHistory > 0 THEN
-	OPEN "A", 2, "cws.his"
-	a$ = LTRIM$(RTRIM$(a$))
-	PRINT #2, a$
-	CLOSE #2
-END IF
+	SELECT CASE flag
+			CASE 1: CALL clrbot: PRINT a$;
+			CASE 2: CALL image2(a$, 4)
+	END SELECT
+	IF globalHistory > 0 THEN
+		OPEN "A", 2, "cws.his"
+		a$ = LTRIM$(RTRIM$(a$))
+		PRINT #2, a$
+		CLOSE #2
+	END IF
 END SUB
 
-SUB shen
-'                       Shenandoah
-IF globalNoise = 2 THEN
-	IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
-	PLAY "T90MFMNo1c4f8f8f4."
-	IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
-	PLAY "g8a8b-8o2d8c4."
-	IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
-	PLAY "MLf8e8MNd4.c8d8c8o1a8o2c4.c4d8d8d4."
-	IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
-	PLAY "o1a8o2c8o1a8g8f4.g4a4.f8"
-	IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
-	PLAY "a8o2d8c4.o1f8g8a4.f8g4f2."
-END IF
+SUB shen '                       Shenandoah
+	IF globalNoise = 2 THEN
+		IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
+		PLAY "T90MFMNo1c4f8f8f4."
+		IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
+		PLAY "g8a8b-8o2d8c4."
+		IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
+		PLAY "MLf8e8MNd4.c8d8c8o1a8o2c4.c4d8d8d4."
+		IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
+		PLAY "o1a8o2c8o1a8g8f4.g4a4.f8"
+		IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
+		PLAY "a8o2d8c4.o1f8g8a4.f8g4f2."
+	END IF
 END SUB
 
 SUB shipicon (who, flag)
@@ -4651,193 +4734,198 @@ SUB shipicon (who, flag)
 	CIRCLE (x, y), 18, 9, , , .4
 	PAINT (x + 3, y + 4), 9, 9
 	CIRCLE (x, y), 18, 10, , , .4
-SELECT CASE flag
-CASE 1                          'wooden ship
-	DRAW "BF5R5D1C4L20C0H1R22E1L9": DRAW "BL6": DRAW "C0L10H1L1H2": DRAW "BR9D2"
-	DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
-	DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
-	PSET (x + 8, y - 1)
-	GOSUB jack
+	SELECT CASE flag
+		CASE 1                          'wooden ship
+			DRAW "BF5R5D1C4L20C0H1R22E1L9": DRAW "BL6": DRAW "C0L10H1L1H2": DRAW "BR9D2"
+			DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
+			DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
+			PSET (x + 8, y - 1)
+			GOSUB jack
 
-CASE 2                          'ironclad
-	DRAW "BL15BD4E1"
-	DRAW "C0R30H1L2C8L24E1R1"
-	DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1": DRAW "C0R2BR3C0R2BR3C0R2"
-	DRAW "BU3BL10D1": DRAW "C0U4R1D4BR9"
-	PSET (x + 8, y - 1)
-	GOSUB jack
-CASE ELSE
-END SELECT
-EXIT SUB
-jack:
+		CASE 2                          'ironclad
+			DRAW "BL15BD4E1"
+			DRAW "C0R30H1L2C8L24E1R1"
+			DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1": DRAW "C0R2BR3C0R2BR3C0R2"
+			DRAW "BU3BL10D1": DRAW "C0U4R1D4BR9"
+			PSET (x + 8, y - 1)
+			GOSUB jack
+		CASE ELSE
+	END SELECT
+	EXIT SUB
+	jack:
 	SELECT CASE who
-	CASE 1
-	DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
-	CASE 2
-	DRAW "C4R4U1L4U1R4U1L4C3F4BU4C3G4BD2BR2BU1"
+		CASE 1
+			DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
+		CASE 2
+			DRAW "C4R4U1L4U1R4U1L4C3F4BU4C3G4BD2BR2BU1"
 	END SELECT
 	RETURN
 END SUB
 
 SUB ships
-FOR s = 1 TO 2
-IF globalNavySize(s) = 0 OR globalNavyLoc(s) = 0 THEN globalNavyLoc(s) = 0: GOTO sink
-IF globalNavyLoc(s) = 30 THEN x = 515: y = 268: GOTO float
-IF globalNavyLoc(s) = 28 THEN x = 517: y = 172: GOTO float
-IF globalNavyLoc(s) = 17 THEN x = 380: y = 425: GOTO float
-IF globalNavyLoc(s) = 99 THEN x = 495: y = 310: GOTO float
-x = globalCityX(globalNavyLoc(s)) + 25: y = globalCityY(globalNavyLoc(s)) + 25
-IF globalNavyLoc(s) = 24 THEN y = y + 5: x = x - 5
-float:
-	PSET (x, y), 1
-	a = 1: IF LEFT$(globalFleet$(s), 1) = "I" THEN a = 2
-	CALL shipicon(s, a)
-sink:
-NEXT s
+	FOR s = 1 TO 2
+		IF globalNavySize(s) = 0 OR globalNavyLoc(s) = 0 THEN globalNavyLoc(s) = 0: GOTO sink
+		IF globalNavyLoc(s) = 30 THEN x = 515: y = 268: GOTO float
+		IF globalNavyLoc(s) = 28 THEN x = 517: y = 172: GOTO float
+		IF globalNavyLoc(s) = 17 THEN x = 380: y = 425: GOTO float
+		IF globalNavyLoc(s) = 99 THEN x = 495: y = 310: GOTO float
+		x = globalCityX(globalNavyLoc(s)) + 25: y = globalCityY(globalNavyLoc(s)) + 25
+		IF globalNavyLoc(s) = 24 THEN y = y + 5: x = x - 5
+		float:
+			PSET (x, y), 1
+			a = 1: IF LEFT$(globalFleet$(s), 1) = "I" THEN a = 2
+			CALL shipicon(s, a)
+		sink:
+	NEXT s
 END SUB
 
 SUB starfin (star, fin, who)
-star = 1: fin = 20: IF who = 2 THEN star = 21: fin = 40
+	star = 1
+	fin = 20
+	IF who = 2 THEN 
+		star = 21
+		fin = 40
+	END IF
 END SUB
 
 SUB stax (who)
-CALL starfin(star, fin, who)
-FOR i = star TO fin
-IF globalArmySize(i) > 0 AND globalOccupied(globalArmyLoc(i)) <> i THEN
-	target = globalArmyLoc(i)
-	x = globalCityX(target) - 12: y = globalCityY(target) - 12
-	CIRCLE (x, y), 3, 14
-END IF
-NEXT i
+	CALL starfin(star, fin, who)
+	FOR i = star TO fin
+		IF globalArmySize(i) > 0 AND globalOccupied(globalArmyLoc(i)) <> i THEN
+			target = globalArmyLoc(i)
+			x = globalCityX(target) - 12: y = globalCityY(target) - 12
+			CIRCLE (x, y), 3, 14
+		END IF
+	NEXT i
 END SUB
 
 SUB surrender (who)
-SCREEN 12
-s = 1: c = 1: COLOR 0: w = 514
-IF who > 20 THEN c = 7: s = 2
-'               background
-LINE (w + 15, 440)-(w + 125, 16), 2, BF
-LINE (w + 15, 16)-(w + 125, 290), 3, BF
-LINE (w + 14, 16)-(w + 125, 440), c, B
-x = 77: y = 280
-CIRCLE (w + x + 10, y + 30), 30, 4, , , .1
-PAINT (w + x + 10, y + 30), 6, 4
-LINE (w + x, y + 28)-(w + x + 6, y + 28): LINE -(w + x + 6, y + 8)
-LINE -(w + x + 8, y + 8): LINE -(w + x + 8, y + 28)
-LINE -(w + x + 12, y + 28): LINE -(w + x + 12, y + 12)
-LINE -(w + x + 15, y + 12): LINE -(w + x + 15, y + 30)
-LINE -(w + x + 18, y + 30): LINE -(w + x + 18, y + 20)
-LINE -(w + x + 21, y + 21): LINE -(w + x + 21, y + 32)
-LINE -(w + x + 25, y + 32): LINE -(w + x + 25, y + 17)
-LINE -(w + x + 27, y + 17): LINE -(w + x + 25, y - 10)
-LINE -(w + x + 19, y - 14): LINE -(w + x + 15, y - 5)
-LINE -(w + x + 12, y - 12): LINE -(w + x + 8, y - 15)
-LINE -(w + x + 6, y - 15): LINE -(w + x + 6, y - 11)
-LINE -(w + x + 3, y - 14): LINE -(w + x + 2, y - 14)
-LINE -(w + x + 1, y - 10): LINE -(w + x - 3, y - 11)
-LINE -(w + x - 3, y + 15): LINE -(w + x, y + 15)
-LINE -(w + x, y - 3): LINE -(w + x + 2, y - 3)
-LINE -(w + x, y + 28)
-PAINT (w + x + 10, y), 8 - c, 0
+	SCREEN 12
+	s = 1: c = 1: COLOR 0: w = 514
+	IF who > 20 THEN c = 7: s = 2
+	'               background
+	LINE (w + 15, 440)-(w + 125, 16), 2, BF
+	LINE (w + 15, 16)-(w + 125, 290), 3, BF
+	LINE (w + 14, 16)-(w + 125, 440), c, B
+	x = 77: y = 280
+	CIRCLE (w + x + 10, y + 30), 30, 4, , , .1
+	PAINT (w + x + 10, y + 30), 6, 4
+	LINE (w + x, y + 28)-(w + x + 6, y + 28): LINE -(w + x + 6, y + 8)
+	LINE -(w + x + 8, y + 8): LINE -(w + x + 8, y + 28)
+	LINE -(w + x + 12, y + 28): LINE -(w + x + 12, y + 12)
+	LINE -(w + x + 15, y + 12): LINE -(w + x + 15, y + 30)
+	LINE -(w + x + 18, y + 30): LINE -(w + x + 18, y + 20)
+	LINE -(w + x + 21, y + 21): LINE -(w + x + 21, y + 32)
+	LINE -(w + x + 25, y + 32): LINE -(w + x + 25, y + 17)
+	LINE -(w + x + 27, y + 17): LINE -(w + x + 25, y - 10)
+	LINE -(w + x + 19, y - 14): LINE -(w + x + 15, y - 5)
+	LINE -(w + x + 12, y - 12): LINE -(w + x + 8, y - 15)
+	LINE -(w + x + 6, y - 15): LINE -(w + x + 6, y - 11)
+	LINE -(w + x + 3, y - 14): LINE -(w + x + 2, y - 14)
+	LINE -(w + x + 1, y - 10): LINE -(w + x - 3, y - 11)
+	LINE -(w + x - 3, y + 15): LINE -(w + x, y + 15)
+	LINE -(w + x, y - 3): LINE -(w + x + 2, y - 3)
+	LINE -(w + x, y + 28)
+	PAINT (w + x + 10, y), 8 - c, 0
 
-CIRCLE (w + x + 7, y - 10), 3, 0: PAINT (w + x + 7, y - 10), 0, 0
-CIRCLE (w + x + 20, y - 8), 3, 0: PAINT (w + x + 20, y - 8), 0, 0
+	CIRCLE (w + x + 7, y - 10), 3, 0: PAINT (w + x + 7, y - 10), 0, 0
+	CIRCLE (w + x + 20, y - 8), 3, 0: PAINT (w + x + 20, y - 8), 0, 0
 
-LINE (w + x + 5, y - 30)-(w + x + 6, y - 9)
-LINE (w + x + 20, y)-(w + x + 35, y + 30)
-LINE (w + x + 20, y + 1)-(w + x + 35, y + 31)
-LINE (w + x + 22, y - 31)-(w + x + 21, y - 8)
-LINE (w + x - 1, y - 28)-(w + x, y - 8)
-'                       boot
-CIRCLE (w + 37, 425), 22, 8, , , .3
-PAINT (w + 37, 430), 8, 8
-LINE (w + 26, 426)-(w + 46, 426)
-LINE -(w + 46, 423): LINE -(w + 36, 419)
-LINE -(w + 36, 397): LINE -(w + 26, 397)
-LINE -(w + 26, 426)
-PAINT (w + 27, 399), 0, 0
-'                       arm
-LINE (w + 26, 397)-(w + 25, 396): LINE -(w + 24, 374)
-LINE -(w + 25, 346): LINE (w + 25, 346)-(w + 22, 341)
-LINE -(w + 46, 341): LINE -(w + 46, 349)
-LINE -(w + 41, 365): LINE -(w + 41, 380)
-LINE -(w + 36, 398)
-PAINT (w + 30, 350), c, 0
-'                       saber
-LINE (w + 55, 288)-(w + 58, 360), 14, BF
-LINE (w + 55, 288)-(w + 55, 360), 14
-LINE (w + 56, 361)-(w + 55, 360), 14
-LINE (w + 57, 361)-(w + 58, 350), 14
-LINE (w + 58, 350)-(w + 58, 288), 14
-LINE (w + 55, 272)-(w + 62, 288), 6, B
-LINE (w + 56, 273)-(w + 61, 287), 6, B
-LINE (w + 57, 274)-(w + 60, 286), 6, B
-		  
-LINE (w + 54, 295)-(w + 60, 305), 12, BF
-LINE (w + 53, 294)-(w + 61, 306), 0, B
-LINE (w + 57, 303)-(w + 61, 303)
-LINE (w + 57, 298)-(w + 61, 298)
-LINE (w + 34, 310)-(w + 46, 312), c, BF
-LINE (w + 25, 380)-(w + 35, 378)
-LINE (w + 25, 365)-(w + 34, 366)
-'                       shoulder
-COLOR 0
-LINE (w + 53, 297)-(w + 31, 305): LINE -(w + 25, 270)
-LINE -(w + 18, 270): LINE -(w + 16, 275)
-LINE -(w + 21, 309): LINE -(w + 28, 316)
-LINE -(w + 52, 306): LINE -(w + 53, 298)
-PAINT (w + 20, 280), c, 0
-LINE (w + 30, 310)-(w + 32, 305): LINE -(w + 25, 307)
-LINE (w + 46, 298)-(w + 47, 275)
-LINE (w + 47, 275)-(w + 41, 269)
-LINE (w + 41, 269)-(w + 25, 269)
-PAINT (w + 45, 275), c, 0
-CIRCLE (w + 40, 275), 1, 14
-CIRCLE (w + 40, 285), 1, 14
-CIRCLE (w + 40, 295), 1, 14
+	LINE (w + x + 5, y - 30)-(w + x + 6, y - 9)
+	LINE (w + x + 20, y)-(w + x + 35, y + 30)
+	LINE (w + x + 20, y + 1)-(w + x + 35, y + 31)
+	LINE (w + x + 22, y - 31)-(w + x + 21, y - 8)
+	LINE (w + x - 1, y - 28)-(w + x, y - 8)
+	'                       boot
+	CIRCLE (w + 37, 425), 22, 8, , , .3
+	PAINT (w + 37, 430), 8, 8
+	LINE (w + 26, 426)-(w + 46, 426)
+	LINE -(w + 46, 423): LINE -(w + 36, 419)
+	LINE -(w + 36, 397): LINE -(w + 26, 397)
+	LINE -(w + 26, 426)
+	PAINT (w + 27, 399), 0, 0
+	'                       arm
+	LINE (w + 26, 397)-(w + 25, 396): LINE -(w + 24, 374)
+	LINE -(w + 25, 346): LINE (w + 25, 346)-(w + 22, 341)
+	LINE -(w + 46, 341): LINE -(w + 46, 349)
+	LINE -(w + 41, 365): LINE -(w + 41, 380)
+	LINE -(w + 36, 398)
+	PAINT (w + 30, 350), c, 0
+	'                       saber
+	LINE (w + 55, 288)-(w + 58, 360), 14, BF
+	LINE (w + 55, 288)-(w + 55, 360), 14
+	LINE (w + 56, 361)-(w + 55, 360), 14
+	LINE (w + 57, 361)-(w + 58, 350), 14
+	LINE (w + 58, 350)-(w + 58, 288), 14
+	LINE (w + 55, 272)-(w + 62, 288), 6, B
+	LINE (w + 56, 273)-(w + 61, 287), 6, B
+	LINE (w + 57, 274)-(w + 60, 286), 6, B
+			
+	LINE (w + 54, 295)-(w + 60, 305), 12, BF
+	LINE (w + 53, 294)-(w + 61, 306), 0, B
+	LINE (w + 57, 303)-(w + 61, 303)
+	LINE (w + 57, 298)-(w + 61, 298)
+	LINE (w + 34, 310)-(w + 46, 312), c, BF
+	LINE (w + 25, 380)-(w + 35, 378)
+	LINE (w + 25, 365)-(w + 34, 366)
+	'                       shoulder
+	COLOR 0
+	LINE (w + 53, 297)-(w + 31, 305): LINE -(w + 25, 270)
+	LINE -(w + 18, 270): LINE -(w + 16, 275)
+	LINE -(w + 21, 309): LINE -(w + 28, 316)
+	LINE -(w + 52, 306): LINE -(w + 53, 298)
+	PAINT (w + 20, 280), c, 0
+	LINE (w + 30, 310)-(w + 32, 305): LINE -(w + 25, 307)
+	LINE (w + 46, 298)-(w + 47, 275)
+	LINE (w + 47, 275)-(w + 41, 269)
+	LINE (w + 41, 269)-(w + 25, 269)
+	PAINT (w + 45, 275), c, 0
+	CIRCLE (w + 40, 275), 1, 14
+	CIRCLE (w + 40, 285), 1, 14
+	CIRCLE (w + 40, 295), 1, 14
 
-LINE (w + 21, 306)-(w + 18, 340)
-LINE (w + 18, 340)-(w + 47, 340)
-LINE (w + 46, 310)-(w + 48, 339)
-PAINT (w + 30, 330), c, 0
-LINE (w + 46, 312)-(w + 21, 316), 0, BF
-LINE (w + 25, 312)-(w + 35, 313), c, BF
+	LINE (w + 21, 306)-(w + 18, 340)
+	LINE (w + 18, 340)-(w + 47, 340)
+	LINE (w + 46, 310)-(w + 48, 339)
+	PAINT (w + 30, 330), c, 0
+	LINE (w + 46, 312)-(w + 21, 316), 0, BF
+	LINE (w + 25, 312)-(w + 35, 313), c, BF
 
-LINE (w + 30, 268)-(w + 41, 264), 12, BF
-LINE (w + 30, 263)-(w + 41, 263), 0
-LINE (w + 30, 264)-(w + 26, 260): LINE -(w + 25, 248)
-LINE -(w + 28, 243): LINE -(w + 46, 243)
-LINE -(w + 48, 245): LINE -(w + 48, 248)
-LINE -(w + 51, 254): LINE -(w + 51, 255)
-LINE -(w + 48, 256): LINE -(w + 48, 261)
-LINE -(w + 46, 263): LINE -(w + 39, 263)
-PAINT (w + 40, 250), 12, 0
+	LINE (w + 30, 268)-(w + 41, 264), 12, BF
+	LINE (w + 30, 263)-(w + 41, 263), 0
+	LINE (w + 30, 264)-(w + 26, 260): LINE -(w + 25, 248)
+	LINE -(w + 28, 243): LINE -(w + 46, 243)
+	LINE -(w + 48, 245): LINE -(w + 48, 248)
+	LINE -(w + 51, 254): LINE -(w + 51, 255)
+	LINE -(w + 48, 256): LINE -(w + 48, 261)
+	LINE -(w + 46, 263): LINE -(w + 39, 263)
+	PAINT (w + 40, 250), 12, 0
 
-LINE (w + 16, 242)-(w + 57, 241), 0, BF
-LINE (w + 45, 240)-(w + 28, 240)
-LINE -(w + 31, 232): LINE -(w + 45, 232)
-LINE -(w + 48, 240)
-PAINT (w + 40, 235), c, 0
+	LINE (w + 16, 242)-(w + 57, 241), 0, BF
+	LINE (w + 45, 240)-(w + 28, 240)
+	LINE -(w + 31, 232): LINE -(w + 45, 232)
+	LINE -(w + 48, 240)
+	PAINT (w + 40, 235), c, 0
 
-LINE (w + 80, 303)-(w + 81, 200), 6, BF
+	LINE (w + 80, 303)-(w + 81, 200), 6, BF
 
-LINE (w + 48, 251)-(w + 44, 250), 0, B
-LINE (w + 29, 263)-(w + 43, 266)
-LINE -(w + 46, 266): LINE -(w + 48, 263)
-LINE -(w + 48, 260): LINE -(w + 37, 258)
-LINE -(w + 36, 255): LINE -(w + 37, 250)
-LINE -(w + 39, 246): LINE -(w + 40, 243)
-c = 0: IF s = 2 THEN c = 15: LINE (547, 263)-(558, 263), 15
-PAINT (w + 33, 250), c, 0
-PAINT (w + 42, 264), c, 0
+	LINE (w + 48, 251)-(w + 44, 250), 0, B
+	LINE (w + 29, 263)-(w + 43, 266)
+	LINE -(w + 46, 266): LINE -(w + 48, 263)
+	LINE -(w + 48, 260): LINE -(w + 37, 258)
+	LINE -(w + 36, 255): LINE -(w + 37, 250)
+	LINE -(w + 39, 246): LINE -(w + 40, 243)
+	c = 0: IF s = 2 THEN c = 15: LINE (547, 263)-(558, 263), 15
+	PAINT (w + 33, 250), c, 0
+	PAINT (w + 42, 264), c, 0
 
-CALL flags(3 - s, 26, 0)
-IF who < 99 THEN CALL TICK(globalTurbo!)
+	CALL flags(3 - s, 26, 0)
+	IF who < 99 THEN CALL TICK(globalTurbo!)
 END SUB
 
 SUB TICK (sec!)
-start! = TIMER
-DO WHILE TIMER - start! < sec! AND INKEY$ = "": LOOP
+	start! = TIMER
+	DO WHILE TIMER - start! < sec! AND INKEY$ = "": LOOP
 END SUB
 
 SUB topbar
@@ -4846,14 +4934,17 @@ SUB topbar
 	LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(side); " side "; : COLOR 14: PRINT globalMonth$(month); ","; globalYear; "  "
 
 	CALL flags((side), 0, 0)
-	COLOR 4: IF globalBW > 0 THEN COLOR 7
+	COLOR 4
+	IF globalBW > 0 THEN COLOR 7
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(globalDifficult)))
 	LOCATE 7, 68: PRINT "Funds:"; globalCash(side);
 
-	FOR i = 1 TO 2: IF globalVictory(i) < 0 THEN globalVictory(i) = 0
+	FOR i = 1 TO 2
+		IF globalVictory(i) < 0 THEN globalVictory(i) = 0
 	NEXT i
 	x = globalVictory(1) + globalVictory(2): y = 0
-	c = 9: IF side = 2 THEN c = 7
+	c = 9
+	IF side = 2 THEN c = 7
 	LINE (580, 15)-(580, 35), 15
 	LINE (530, 20)-(630, 30), 8 - c, BF
 	IF x > 0 THEN y = 100 * (globalVictory(side) / x)
@@ -4863,548 +4954,600 @@ SUB topbar
 
 	LOCATE 5, 68: PRINT "("; y; "%)"
 
-a$ = "  Snd": IF globalNoise < 2 THEN a$ = "   Snd": IF globalNoise = 0 THEN a$ = "      "
-IF globalGraf > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(globalGraf))
-a$ = a$ + STR$(globalPlayer)
-COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
-COLOR c
-LOCATE 26, 68: PRINT "F3 Redrw Scrn"
-LOCATE 27, 68: PRINT "F7 End Turn"
-LOCATE 28, 68: PRINT a$
+	a$ = "  Snd"
+	IF globalNoise < 2 THEN 
+		a$ = "   Snd"
+		IF globalNoise = 0 THEN a$ = "      "
+	END IF
+	IF globalGraf > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(globalGraf))
+	a$ = a$ + STR$(globalPlayer)
+	COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
+	COLOR c
+	LOCATE 26, 68: PRINT "F3 Redrw Scrn"
+	LOCATE 27, 68: PRINT "F7 End Turn"
+	LOCATE 28, 68: PRINT a$
 END SUB
 
 SUB touchup
+	LINE (500, 170)-(490, 165), 10 'Norfolk Coast
+	LINE -(495, 160), 10
+	LINE -(490, 155), 10
+	LINE -(485, 150), 10
 
-LINE (500, 170)-(490, 165), 10 'Norfolk Coast
-LINE -(495, 160), 10
-LINE -(490, 155), 10
-LINE -(485, 150), 10
+	PAINT (502, 160), 1, 10
 
-PAINT (502, 160), 1, 10
+	LINE (145, 375)-(145, 405), 10   'Mobile border
 
-LINE (145, 375)-(145, 405), 10   'Mobile border
+	LINE (291, 111)-(301, 101), 1
+	LINE -(316, 96), 1
+	LINE -(331, 76), 1
+	LINE -(345, 51), 1
+	LINE -(351, 30), 1
+	LINE -(370, 35), 1
 
-LINE (291, 111)-(301, 101), 1
-LINE -(316, 96), 1
-LINE -(331, 76), 1
-LINE -(345, 51), 1
-LINE -(351, 30), 1
-LINE -(370, 35), 1
+	LINE (381, 81)-(431, 66), 1  'Potomac River
+	LINE -(456, 81), 1
+	LINE -(471, 111), 1
 
-LINE (381, 81)-(431, 66), 1  'Potomac River
-LINE -(456, 81), 1
-LINE -(471, 111), 1
+	LINE (115, 165)-(105, 170), 1  'Paducah
+	LINE -(105, 190), 1
+	LINE (106, 170)-(91, 140), 1   'Missouri R
 
-LINE (115, 165)-(105, 170), 1  'Paducah
-LINE -(105, 190), 1
-LINE (106, 170)-(91, 140), 1   'Missouri R
+	LINE (105, 190)-(150, 190), 10
+	LINE (120, 160)-(130, 200), 1  'Tenn River
 
-LINE (105, 190)-(150, 190), 10
-LINE (120, 160)-(130, 200), 1  'Tenn River
-
-LINE (60, 295)-(65, 325), 1 'Vicksburg
-LINE -(65, 335), 1
+	LINE (60, 295)-(65, 325), 1 'Vicksburg
+	LINE -(65, 335), 1
 
 
-LINE (195, 125)-(170, 130), 1
-LINE -(165, 135), 1
+	LINE (195, 125)-(170, 130), 1
+	LINE -(165, 135), 1
 
-LINE (50, 375)-(60, 395), 1
+	LINE (50, 375)-(60, 395), 1
 
-LINE (60, 395)-(105, 405), 1
-LINE -(110, 420), 1
+	LINE (60, 395)-(105, 405), 1
+	LINE -(110, 420), 1
 
-LINE (291, 265)-(350, 340), 1   'Savannah R.
+	LINE (291, 265)-(350, 340), 1   'Savannah R.
 
-LINE (1, 80)-(15, 77), 1    'Missouri River
-LINE -(25, 95), 1
-LINE -(50, 98), 1
-LINE -(75, 96), 1
+	LINE (1, 80)-(15, 77), 1    'Missouri River
+	LINE -(25, 95), 1
+	LINE -(50, 98), 1
+	LINE -(75, 96), 1
 
-LINE (71, 90)-(61, 95), 1
-LINE -(56, 85), 1
+	LINE (71, 90)-(61, 95), 1
+	LINE -(56, 85), 1
 
-LINE (110, 398)-(105, 398), 10
-LINE -(90, 396), 10
-LINE -(90, 400), 10
-LINE -(105, 402), 10
-LINE -(120, 415), 10
-LINE -(115, 420), 10
-PAINT (108, 400), 1, 10
+	LINE (110, 398)-(105, 398), 10
+	LINE -(90, 396), 10
+	LINE -(90, 400), 10
+	LINE -(105, 402), 10
+	LINE -(120, 415), 10
+	LINE -(115, 420), 10
+	PAINT (108, 400), 1, 10
 
-LINE (66, 375)-(52, 375), 10
+	LINE (66, 375)-(52, 375), 10
 END SUB
 
 SUB traincapacity (who, limit)
-IF globalRealism = 0 THEN limit = globalTrain(who): EXIT SUB
-x = 11: IF side = 2 THEN x = 23
-limit = globalTrain(who) + 5 * (globalControl(who) - x)
-x = 2 * globalTrain(who)
-IF limit > x THEN limit = x
-IF limit < x \ 4 THEN limit = x \ 4
+	IF globalRealism = 0 THEN limit = globalTrain(who): EXIT SUB
+	x = 11
+	IF side = 2 THEN x = 23
+	limit = globalTrain(who) + 5 * (globalControl(who) - x)
+	x = 2 * globalTrain(who)
+	IF limit > x THEN limit = x
+	IF limit < x \ 4 THEN limit = x \ 4
 END SUB
 
 SUB usa
-SCREEN 12
-LINE (1, 16)-(527, 440), 10, B
-PAINT (200, 200), 2, 10
-COLOR 10
-'==========================  Mountains =================================
-IF _FILEEXISTS("mtn.vga") THEN
-	PUT (380, 30), globalMtn, PSET
-	PUT (270, 200), globalMtn, PSET
-	PUT (310, 160), globalMtn, PSET
-	PUT (350, 120), globalMtn, PSET
-	PUT (200, 185), globalMtn, PSET
-	PUT (250, 130), globalMtn, PSET
-	PUT (320, 80), globalMtn, PSET
-	PUT (30, 150), globalMtn, PSET
-	LINE (30, 150)-(70, 190), 2, BF
-END IF
-'===========================  Kentucky =================================
-LINE (105, 190)-(150, 190)
-LINE -(150, 185)
-LINE -(290, 185)
-LINE (276, 185)-(301, 175)
-LINE -(305, 160)
-LINE -(310, 155)
-LINE -(305, 145)
-LINE -(300, 125)
-LINE -(290, 110)
+	SCREEN 12
+	LINE (1, 16)-(527, 440), 10, B
+	PAINT (200, 200), 2, 10
+	COLOR 10
+	'==========================  Mountains =================================
+	IF _FILEEXISTS("mtn.vga") THEN
+		PUT (380, 30), globalMtn, PSET
+		PUT (270, 200), globalMtn, PSET
+		PUT (310, 160), globalMtn, PSET
+		PUT (350, 120), globalMtn, PSET
+		PUT (200, 185), globalMtn, PSET
+		PUT (250, 130), globalMtn, PSET
+		PUT (320, 80), globalMtn, PSET
+		PUT (30, 150), globalMtn, PSET
+		LINE (30, 150)-(70, 190), 2, BF
+	END IF
+	'===========================  Kentucky =================================
+	LINE (105, 190)-(150, 190)
+	LINE -(150, 185)
+	LINE -(290, 185)
+	LINE (276, 185)-(301, 175)
+	LINE -(305, 160)
+	LINE -(310, 155)
+	LINE -(305, 145)
+	LINE -(300, 125)
+	LINE -(290, 110)
 
-LINE -(275, 95), 1
-LINE -(270, 95), 1
-LINE -(260, 100), 1
-LINE -(250, 100), 1
-LINE -(240, 90), 1
-LINE -(235, 85), 1
-LINE -(230, 85), 1
-LINE -(220, 90), 1
-LINE -(220, 100), 1
-LINE -(210, 105), 1
-LINE -(205, 115), 1
-LINE -(195, 125), 1
-LINE -(170, 130), 1
-LINE -(165, 135), 1
-LINE -(130, 140), 1
-LINE -(120, 150), 1
-LINE -(120, 160), 1
-LINE -(115, 165), 1
-LINE -(105, 170), 1
-LINE -(105, 190), 1
-'===========================  Tennessee =================================
-LINE (290, 185)-(320, 185)
-LINE -(320, 185)
-LINE -(315, 195)
-LINE -(302, 210)
-LINE -(290, 215)
-LINE -(275, 230)
-LINE -(260, 241)
-LINE -(260, 241)
-LINE -(70, 241)
+	LINE -(275, 95), 1
+	LINE -(270, 95), 1
+	LINE -(260, 100), 1
+	LINE -(250, 100), 1
+	LINE -(240, 90), 1
+	LINE -(235, 85), 1
+	LINE -(230, 85), 1
+	LINE -(220, 90), 1
+	LINE -(220, 100), 1
+	LINE -(210, 105), 1
+	LINE -(205, 115), 1
+	LINE -(195, 125), 1
+	LINE -(170, 130), 1
+	LINE -(165, 135), 1
+	LINE -(130, 140), 1
+	LINE -(120, 150), 1
+	LINE -(120, 160), 1
+	LINE -(115, 165), 1
+	LINE -(105, 170), 1
+	LINE -(105, 190), 1
+	'===========================  Tennessee =================================
+	LINE (290, 185)-(320, 185)
+	LINE -(320, 185)
+	LINE -(315, 195)
+	LINE -(302, 210)
+	LINE -(290, 215)
+	LINE -(275, 230)
+	LINE -(260, 241)
+	LINE -(260, 241)
+	LINE -(70, 241)
 
-LINE (105, 190)-(95, 200), 1
-LINE -(80, 220), 1
-LINE -(70, 241), 1
-'===========================  Mississippi =================================
-LINE (143, 241)-(145, 405)
-LINE -(135, 400)
-LINE -(125, 400)
-LINE -(115, 405)
-LINE -(110, 400)
-LINE -(110, 390)
-LINE -(115, 380)
-LINE -(115, 375)
-LINE -(50, 375)
-LINE (115, 375)-(60, 375)
+	LINE (105, 190)-(95, 200), 1
+	LINE -(80, 220), 1
+	LINE -(70, 241), 1
+	'===========================  Mississippi =================================
+	LINE (143, 241)-(145, 405)
+	LINE -(135, 400)
+	LINE -(125, 400)
+	LINE -(115, 405)
+	LINE -(110, 400)
+	LINE -(110, 390)
+	LINE -(115, 380)
+	LINE -(115, 375)
+	LINE -(50, 375)
+	LINE (115, 375)-(60, 375)
 
-LINE (70, 241)-(65, 280), 1
-LINE -(60, 295), 1
-LINE -(65, 325), 1
-LINE -(65, 335), 1
-LINE -(50, 375), 1
-'===========================  Alabama =================================
-LINE (215, 241)-(232, 375)
-LINE (176, 395)-(181, 410)
-LINE -(166, 415)
-LINE -(161, 400)
-LINE -(156, 405)
-LINE -(146, 405)
-LINE (176, 395)-(176, 385)
-LINE -(231, 385)
-'===========================  Georgia & Florida ============================
-LINE (261, 241)-(296, 241)
-LINE -(291, 265)
-LINE -(350, 340)
-LINE -(336, 390)
-LINE -(366, 440)
-LINE (336, 385)-(325, 385)   'Fla /Ga Border
-LINE -(320, 388)
-LINE -(245, 388)
-LINE -(230, 385)
-LINE (180, 410)-(195, 410)
-LINE -(215, 415)
-LINE -(225, 425)
-LINE -(255, 420)
-LINE -(265, 420)
-LINE -(270, 425)
-LINE -(275, 440)
-LINE (347, 409)-(343, 409)
-LINE -(343, 431)
-LINE -(346, 431)
-LINE -(346, 412)
-LINE -(349, 412)
-LINE (347, 411)-(350, 411), 1
+	LINE (70, 241)-(65, 280), 1
+	LINE -(60, 295), 1
+	LINE -(65, 325), 1
+	LINE -(65, 335), 1
+	LINE -(50, 375), 1
+	'===========================  Alabama =================================
+	LINE (215, 241)-(232, 375)
+	LINE (176, 395)-(181, 410)
+	LINE -(166, 415)
+	LINE -(161, 400)
+	LINE -(156, 405)
+	LINE -(146, 405)
+	LINE (176, 395)-(176, 385)
+	LINE -(231, 385)
+	'===========================  Georgia & Florida ============================
+	LINE (261, 241)-(296, 241)
+	LINE -(291, 265)
+	LINE -(350, 340)
+	LINE -(336, 390)
+	LINE -(366, 440)
+	LINE (336, 385)-(325, 385)   'Fla /Ga Border
+	LINE -(320, 388)
+	LINE -(245, 388)
+	LINE -(230, 385)
+	LINE (180, 410)-(195, 410)
+	LINE -(215, 415)
+	LINE -(225, 425)
+	LINE -(255, 420)
+	LINE -(265, 420)
+	LINE -(270, 425)
+	LINE -(275, 440)
+	LINE (347, 409)-(343, 409)
+	LINE -(343, 431)
+	LINE -(346, 431)
+	LINE -(346, 412)
+	LINE -(349, 412)
+	LINE (347, 411)-(350, 411), 1
 
-LINE (353, 333)-(358, 336), 10, B
-'===========================  South Carolina ================================
-LINE (290, 241)-(305, 240)
-LINE -(345, 240)
-LINE -(350, 250)
-LINE -(380, 250)
-LINE -(415, 280)
-LINE -(385, 315)
-LINE -(380, 320)
-LINE -(375, 325)
-LINE -(350, 330)
-LINE -(350, 340)
-'===========================  North Carolina ================================
-LINE (320, 185)-(500, 185)
-LINE -(505, 190)
-LINE -(490, 195)
-LINE -(490, 205)
-LINE -(505, 205)
-LINE -(500, 215)
-LINE -(485, 220)
-LINE -(490, 225)
-LINE -(500, 225)
-LINE -(500, 230)
-LINE -(490, 235)
-LINE -(488, 240)
-LINE -(480, 241)
-LINE -(460, 250)
-LINE -(455, 255)
-LINE -(440, 265)
-LINE -(439, 270)
-LINE -(425, 278)
-LINE -(415, 280)
-LINE (510, 190)-(513, 200), , B
-LINE (510, 206)-(510, 226)
-LINE -(500, 236)
-LINE -(502, 241)
-LINE -(512, 228)
-LINE -(512, 208)
-LINE -(510, 206)
+	LINE (353, 333)-(358, 336), 10, B
+	'===========================  South Carolina ================================
+	LINE (290, 241)-(305, 240)
+	LINE -(345, 240)
+	LINE -(350, 250)
+	LINE -(380, 250)
+	LINE -(415, 280)
+	LINE -(385, 315)
+	LINE -(380, 320)
+	LINE -(375, 325)
+	LINE -(350, 330)
+	LINE -(350, 340)
+	'===========================  North Carolina ================================
+	LINE (320, 185)-(500, 185)
+	LINE -(505, 190)
+	LINE -(490, 195)
+	LINE -(490, 205)
+	LINE -(505, 205)
+	LINE -(500, 215)
+	LINE -(485, 220)
+	LINE -(490, 225)
+	LINE -(500, 225)
+	LINE -(500, 230)
+	LINE -(490, 235)
+	LINE -(488, 240)
+	LINE -(480, 241)
+	LINE -(460, 250)
+	LINE -(455, 255)
+	LINE -(440, 265)
+	LINE -(439, 270)
+	LINE -(425, 278)
+	LINE -(415, 280)
+	LINE (510, 190)-(513, 200), , B
+	LINE (510, 206)-(510, 226)
+	LINE -(500, 236)
+	LINE -(502, 241)
+	LINE -(512, 228)
+	LINE -(512, 208)
+	LINE -(510, 206)
 
-'=========================== Chesapeake ====================================
-CALL chessie
-'=============== Ohio, Pennslyvania, Maryland, Virginia =====================
-LINE (291, 111)-(301, 101), 1
-LINE -(316, 96), 1
-LINE -(331, 76), 1
-LINE -(345, 51), 1
-LINE -(351, 30), 1
-LINE -(370, 35), 1
+	'=========================== Chesapeake ====================================
+	CALL chessie
+	'=============== Ohio, Pennslyvania, Maryland, Virginia =====================
+	LINE (291, 111)-(301, 101), 1
+	LINE -(316, 96), 1
+	LINE -(331, 76), 1
+	LINE -(345, 51), 1
+	LINE -(351, 30), 1
+	LINE -(370, 35), 1
 
-LINE (351, 16)-(351, 54)
-LINE -(527, 54)
-LINE (381, 54)-(381, 81)
-LINE -(431, 66)
-LINE -(456, 81)
-LINE -(471, 111)
-LINE (226, 85)-(226, 16)
-'=============== Louisiana, Arkansas, Missouri =============================
-LINE (50, 375)-(60, 395), 1
-LINE -(105, 405), 1
-LINE -(110, 420), 1
-LINE -(125, 438), 1
-LINE (110, 398)-(105, 398)
+	LINE (351, 16)-(351, 54)
+	LINE -(527, 54)
+	LINE (381, 54)-(381, 81)
+	LINE -(431, 66)
+	LINE -(456, 81)
+	LINE -(471, 111)
+	LINE (226, 85)-(226, 16)
+	'=============== Louisiana, Arkansas, Missouri =============================
+	LINE (50, 375)-(60, 395), 1
+	LINE -(105, 405), 1
+	LINE -(110, 420), 1
+	LINE -(125, 438), 1
+	LINE (110, 398)-(105, 398)
 
-LINE -(90, 396)
-LINE -(90, 400)
+	LINE -(90, 396)
+	LINE -(90, 400)
 
 
-LINE -(105, 402)
-LINE -(120, 415)
-LINE -(115, 420)
-LINE -(125, 435)
-LINE -(120, 440)
-LINE -(110, 425)
-LINE -(100, 435)
-LINE -(90, 440)
-LINE -(50, 430)
-LINE -(25, 435)
-LINE -(1, 435)
-'----------------------------------
-PAINT (250, 430), 1, 10
-PAINT (110, 439), 1, 10
-PAINT (50, 439), 1, 10
-'----------------------------------
-LINE (1, 300)-(61, 300)       'Ark
-LINE (91, 205)-(71, 205)
-LINE -(76, 190)
-LINE -(71, 185)
-LINE -(1, 185)
+	LINE -(105, 402)
+	LINE -(120, 415)
+	LINE -(115, 420)
+	LINE -(125, 435)
+	LINE -(120, 440)
+	LINE -(110, 425)
+	LINE -(100, 435)
+	LINE -(90, 440)
+	LINE -(50, 430)
+	LINE -(25, 435)
+	LINE -(1, 435)
+	'----------------------------------
+	PAINT (250, 430), 1, 10
+	PAINT (110, 439), 1, 10
+	PAINT (50, 439), 1, 10
+	'----------------------------------
+	LINE (1, 300)-(61, 300)       'Ark
+	LINE (91, 205)-(71, 205)
+	LINE -(76, 190)
+	LINE -(71, 185)
+	LINE -(1, 185)
 
-LINE (106, 170)-(91, 140), 1    'Missouri
-LINE -(71, 120), 1
-LINE -(76, 110), 1
-LINE -(76, 95), 1
-LINE -(71, 90), 1
-LINE -(61, 95), 1
-LINE -(56, 85), 1
-LINE -(50, 35), 1
-LINE -(46, 20), 1
+	LINE (106, 170)-(91, 140), 1    'Missouri
+	LINE -(71, 120), 1
+	LINE -(76, 110), 1
+	LINE -(76, 95), 1
+	LINE -(71, 90), 1
+	LINE -(61, 95), 1
+	LINE -(56, 85), 1
+	LINE -(50, 35), 1
+	LINE -(46, 20), 1
 
-LINE -(38, 16)
+	LINE -(38, 16)
 
-LINE (46, 20)-(61, 17), 1        'Illinois
+	LINE (46, 20)-(61, 17), 1        'Illinois
 
-LINE (150, 17)-(150, 110)
-LINE -(147, 125), 1
-LINE -(140, 138), 1
-'========================== Rivers =========================================
+	LINE (150, 17)-(150, 110)
+	LINE -(147, 125), 1
+	LINE -(140, 138), 1
+	'========================== Rivers =========================================
 
-LINE (1, 80)-(15, 77), 1    'Missouri River
-LINE -(25, 95), 1
-LINE -(50, 98), 1
-LINE -(75, 96), 1
+	LINE (1, 80)-(15, 77), 1    'Missouri River
+	LINE -(25, 95), 1
+	LINE -(50, 98), 1
+	LINE -(75, 96), 1
 
-LINE (120, 160)-(130, 200), 1  'Tenn River
-LINE -(135, 240), 1
-LINE -(130, 247), 1
-LINE -(160, 250), 1
-LINE -(200, 260), 1
-LINE -(240, 244), 1
-LINE -(245, 240), 1
-LINE -(270, 200), 1
+	LINE (120, 160)-(130, 200), 1  'Tenn River
+	LINE -(135, 240), 1
+	LINE -(130, 247), 1
+	LINE -(160, 250), 1
+	LINE -(200, 260), 1
+	LINE -(240, 244), 1
+	LINE -(245, 240), 1
+	LINE -(270, 200), 1
 
-LINE (120, 160)-(140, 200), 1  'Cumberland River
-LINE -(160, 210), 1
-LINE -(200, 208), 1
-LINE -(240, 170), 1
+	LINE (120, 160)-(140, 200), 1  'Cumberland River
+	LINE -(160, 210), 1
+	LINE -(200, 208), 1
+	LINE -(240, 170), 1
 
-LINE (161, 400)-(155, 320), 1  'Tombigbee River
-LINE -(145, 300), 1
+	LINE (161, 400)-(155, 320), 1  'Tombigbee River
+	LINE -(145, 300), 1
 
-LINE (161, 400)-(170, 370), 1  'Alabama River
-LINE -(200, 350), 1
+	LINE (161, 400)-(170, 370), 1  'Alabama River
+	LINE -(200, 350), 1
 
-LINE (230, 425)-(231, 385), 1  'Chattahoochee River
-LINE -(233, 350), 1
-LINE -(240, 330), 1
-LINE -(270, 290), 1
+	LINE (230, 425)-(231, 385), 1  'Chattahoochee River
+	LINE -(233, 350), 1
+	LINE -(240, 330), 1
+	LINE -(270, 290), 1
 
-LINE (381, 81)-(431, 66), 1   'Potomac River
-LINE -(456, 81), 1
-LINE -(471, 111), 1
+	LINE (381, 81)-(431, 66), 1   'Potomac River
+	LINE -(456, 81), 1
+	LINE -(471, 111), 1
 
-LINE (485, 150)-(455, 145), 1   'James River
-LINE -(400, 150), 1
+	LINE (485, 150)-(455, 145), 1   'James River
+	LINE -(400, 150), 1
 
-LINE (489, 200)-(415, 185), 1   'Roanoke River
-LINE -(400, 160), 1
+	LINE (489, 200)-(415, 185), 1   'Roanoke River
+	LINE -(400, 160), 1
 
-LINE (296, 241)-(291, 265), 1   'Savannah River
-LINE -(350, 340), 1
+	LINE (296, 241)-(291, 265), 1   'Savannah River
+	LINE -(350, 340), 1
 
-LINE (438, 271)-(430, 235), 1  'Cape Fear River
-LINE -(420, 205), 1
+	LINE (438, 271)-(430, 235), 1  'Cape Fear River
+	LINE -(420, 205), 1
 
-LINE (500, 80)-(498, 50), 1 'Susquehanna River
-LINE -(470, 30), 1
+	LINE (500, 80)-(498, 50), 1 'Susquehanna River
+	LINE -(470, 30), 1
 
-LINE (405, 290)-(360, 240), 1 'Pee Dee River
+	LINE (405, 290)-(360, 240), 1 'Pee Dee River
 
-LINE (400, 300)-(350, 280), 1 'Santee River
+	LINE (400, 300)-(350, 280), 1 'Santee River
 
-LINE (270, 423)-(280, 410), 1 'Suwanee River
-LINE -(290, 390), 1
+	LINE (270, 423)-(280, 410), 1 'Suwanee River
+	LINE -(290, 390), 1
 
-LINE (342, 370)-(300, 350), 1 'Altamaha River
+	LINE (342, 370)-(300, 350), 1 'Altamaha River
 
-LINE (50, 370)-(1, 330), 1 'Red River
+	LINE (50, 370)-(1, 330), 1 'Red River
 
-LINE (65, 280)-(1, 240), 1 'Arkansas River
+	LINE (65, 280)-(1, 240), 1 'Arkansas River
 
-LINE (430, 66)-(400, 100), 1 ' Shenandoah River
-LINE -(380, 120), 1
+	LINE (430, 66)-(400, 100), 1 ' Shenandoah River
+	LINE -(380, 120), 1
 
-CALL showcity
-PSET (493, 280), 1
-IF globalNavyLoc(1) = 30 OR globalNavyLoc(2) = 30 THEN
-	DRAW "C11U7R4D3L3BR6BU3D7BU4R3U3D7BR3U7BD4BR4BU4D7R4"
-	LINE (485, 241)-(525, 270), 11, B
-END IF
+	CALL showcity
+	PSET (493, 280), 1
+	IF globalNavyLoc(1) = 30 OR globalNavyLoc(2) = 30 THEN
+		DRAW "C11U7R4D3L3BR6BU3D7BU4R3U3D7BR3U7BD4BR4BU4D7R4"
+		LINE (485, 241)-(525, 270), 11, B
+	END IF
 
-IF globalGraf > 1 THEN CALL maptext
-IF globalCommerce > 0 THEN
-LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
-y = 312
-a$ = "COMMERCE"
-FOR j = 1 TO LEN(a$): x = ASC(MID$(UCASE$(a$), j, 1)) - 64
-PSET (440 + 10 * j, y), 0: DRAW globalFont$(x)
-NEXT j
-ELSE
-LINE (447, 291)-(525, 335), 1, BF
-END IF
+	IF globalGraf > 1 THEN CALL maptext
+	IF globalCommerce > 0 THEN
+		LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
+		y = 312
+		a$ = "COMMERCE"
+		FOR j = 1 TO LEN(a$)
+			x = ASC(MID$(UCASE$(a$), j, 1)) - 64
+			PSET (440 + 10 * j, y), 0: DRAW globalFont$(x)
+		NEXT j
+	ELSE
+		LINE (447, 291)-(525, 335), 1, BF
+	END IF
 
-FOR i = 1 TO 40
-IF globalArmyLoc(i) > 0 THEN CALL placearmy(i)
-NEXT i
+	FOR i = 1 TO 40
+		IF globalArmyLoc(i) > 0 THEN CALL placearmy(i)
+	NEXT i
 
-FOR k = 1 TO 2
-CALL stax(k)
-NEXT k
+	FOR k = 1 TO 2
+		CALL stax(k)
+	NEXT k
 
-IF globalPlayer = 2 GOTO nosee
-FOR i = 1 TO 40: IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
-NEXT i
-nosee:
-CALL ships
-CALL engine
-COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(month), 3)); ","; globalYear
+	IF globalPlayer = 2 GOTO nosee
+	FOR i = 1 TO 40
+		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
+	NEXT i
+	nosee:
+	CALL ships
+	CALL engine
+	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(month), 3)); ","; globalYear
 END SUB
 
 SUB victor
-	x = 0: FOR j = 1 TO 20: IF globalArmyLoc(j) > 0 THEN x = x + globalArmySize(j)
+	x = 0
+	FOR j = 1 TO 20
+		IF globalArmyLoc(j) > 0 THEN x = x + globalArmySize(j)
 	NEXT j
-	y = 0: FOR j = 21 TO 40: IF globalArmyLoc(j) > 0 THEN y = y + globalArmySize(j)
+	y = 0
+	FOR j = 21 TO 40
+		IF globalArmyLoc(j) > 0 THEN y = y + globalArmySize(j)
 	NEXT j
 
-	CALL clrbot: COLOR 14
+	CALL clrbot
+	COLOR 14
 	IF globalVicFlag(2) > 0 AND globalYear >= globalVicFlag(2) AND month < globalVicFlag(1) THEN
 		a$ = "Time almost expired (" + globalMonth$(globalVicFlag(1)) + "," + STR$(globalVicFlag(2)) + ")"
 		CALL image2(a$, 4)
 	END IF
     FOR i = 1 TO 2
-	IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: globalVictory(i) = globalVictory(i) + 300: GOTO finis
-
-	IF globalYear >= globalVicFlag(2) AND month >= globalVicFlag(1) AND globalVicFlag(2) > 0 THEN j = 2: GOTO finis
-	IF globalControl(i) >= globalVicFlag(3) AND globalVicFlag(3) > 0 THEN j = 3: GOTO finis
-	IF globalIncome(i) / (globalIncome(1) + globalIncome(2)) >= .01 * globalVicFlag(4) AND globalVicFlag(4) > 0 THEN j = 4: GOTO finis
-	IF globalVicFlag(5) > 0 AND globalCapCity(3 - i) = 0 AND globalCapCity(i) > 0 THEN j = 5: GOTO finis
-
-	IF globalVicFlag(6) > 0 THEN
-		IF i = 1 THEN
-			IF y = 0 THEN j = 7: GOTO finis
-			IF x / y > globalVicFlag(6) THEN j = 6: GOTO finis
+		IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN 
+			j = 7
+			globalVictory(i) = globalVictory(i) + 300
+			GOTO finis
 		END IF
-		IF i = 2 THEN
-			IF x = 0 THEN j = 7: GOTO finis
-			IF y / x > globalVicFlag(6) THEN j = 6: GOTO finis
+
+		IF globalYear >= globalVicFlag(2) AND month >= globalVicFlag(1) AND globalVicFlag(2) > 0 THEN 
+			j = 2
+			GOTO finis
 		END IF
-	END IF
-
-	CALL clrbot: COLOR 14
-	IF globalVicFlag(3) > 0 AND globalControl(i) >= .9 * globalVicFlag(3) THEN
-		a$ = globalForce$(i) + " side almost controls" + STR$(globalVicFlag(3)) + " cities"
-		CALL image2(a$, 4)
-	END IF
-
-	IF globalVicFlag(4) > 0 AND globalIncome(i) / (globalIncome(1) + globalIncome(2)) >= .009 * globalVicFlag(4) THEN
-		a$ = globalForce$(i) + " side close to" + STR$(globalVicFlag(4)) + " % of total income"
-		CALL image2(a$, 4)
-	END IF
-
-	IF globalVicFlag(6) > 0 AND x > 0 AND y > 0 THEN
-		IF (i = 1 AND x / y > .9 * globalVicFlag(6)) OR (i = 2 AND y / x > .9 * globalVicFlag(6)) THEN
-		a$ = globalForce$(i) + "side close to" + STR$(globalVicFlag(6)) + ":1 strength ratio"
-		CALL image2(a$, 4)
+		IF globalControl(i) >= globalVicFlag(3) AND globalVicFlag(3) > 0 THEN 
+			j = 3
+			GOTO finis
 		END IF
-	END IF
-	GOTO stale
+		IF globalIncome(i) / (globalIncome(1) + globalIncome(2)) >= .01 * globalVicFlag(4) AND globalVicFlag(4) > 0 THEN 
+			j = 4
+			GOTO finis
+		END IF
+		IF globalVicFlag(5) > 0 AND globalCapCity(3 - i) = 0 AND globalCapCity(i) > 0 THEN 
+			j = 5
+			GOTO finis
+		END IF
 
-finis:
-	SELECT CASE j
-		CASE IS < 3
-		a$ = "TIME EXPIRED"
-		CASE 3
-		a$ = STR$(2.5 * globalVicFlag(3)) + "% CITIES CONTROLLED"
-		CASE 4
-		a$ = STR$(globalVicFlag(4)) + " % OF TOTAL INCOME"
-		CASE 5
-		a$ = "CAPITAL CAPTURED"
-		CASE 6
-		a$ = STR$(globalVicFlag(6)) + ":1 ARMY STRENGTH RATIO"
-		CASE 7
-		a$ = "ENEMY ANNIHILATED"
-END SELECT
-	CLS
-	c = 1: IF i = 2 THEN c = 7
-	LINE (0, 0)-(639, 479), 4, BF
-	LINE (0, 40)-(550, 460), 0, BF
-	CALL usa
-	LINE (70, 140)-(485, 265), 0, BF
-	LINE (50, 120)-(465, 250), c, BF
-	LINE (50, 120)-(465, 250), 4, B
-	COLOR 14
-	t$ = globalForce$(i) + " SIDE IS WINNING"
-	IF j = 2 THEN CALL center(10, "Confederates will win a technical victory") ELSE CALL center(10, t$)
+		IF globalVicFlag(6) > 0 THEN
+			IF i = 1 THEN
+				IF y = 0 THEN j = 7: GOTO finis
+				IF x / y > globalVicFlag(6) THEN j = 6: GOTO finis
+			END IF
+			IF i = 2 THEN
+				IF x = 0 THEN j = 7: GOTO finis
+				IF y / x > globalVicFlag(6) THEN j = 6: GOTO finis
+			END IF
+		END IF
 
-	COLOR 15
-	t$ = "END GAME VICTORY CONDITION" + STR$(j - 1) + " REACHED"
-	CALL center(12, t$)
-	CALL center(14, a$)
+		CALL clrbot
+		COLOR 14
+		IF globalVicFlag(3) > 0 AND globalControl(i) >= .9 * globalVicFlag(3) THEN
+			a$ = globalForce$(i) + " side almost controls" + STR$(globalVicFlag(3)) + " cities"
+			CALL image2(a$, 4)
+		END IF
 
-	globalMTX$(0) = "End Game"
-	globalMTX$(1) = "Yes"
-	globalMTX$(2) = "No-Override"
-	size = 2: globalColour = 4
-	globalTLX = 27: globalTLY = 18
-	globalHilite = 15
-	IF j = 7 THEN size = 1
-	CALL menu(0)
+		IF globalVicFlag(4) > 0 AND globalIncome(i) / (globalIncome(1) + globalIncome(2)) >= .009 * globalVicFlag(4) THEN
+			a$ = globalForce$(i) + " side close to" + STR$(globalVicFlag(4)) + " % of total income"
+			CALL image2(a$, 4)
+		END IF
 
-	IF globalChoose <> 1 AND j < 7 THEN
-play4ever:
+		IF globalVicFlag(6) > 0 AND x > 0 AND y > 0 THEN
+			IF (i = 1 AND x / y > .9 * globalVicFlag(6)) OR (i = 2 AND y / x > .9 * globalVicFlag(6)) THEN
+			a$ = globalForce$(i) + "side close to" + STR$(globalVicFlag(6)) + ":1 strength ratio"
+			CALL image2(a$, 4)
+			END IF
+		END IF
+		GOTO stale
+
+		finis:
+		SELECT CASE j
+			CASE IS < 3
+			a$ = "TIME EXPIRED"
+			CASE 3
+			a$ = STR$(2.5 * globalVicFlag(3)) + "% CITIES CONTROLLED"
+			CASE 4
+			a$ = STR$(globalVicFlag(4)) + " % OF TOTAL INCOME"
+			CASE 5
+			a$ = "CAPITAL CAPTURED"
+			CASE 6
+			a$ = STR$(globalVicFlag(6)) + ":1 ARMY STRENGTH RATIO"
+			CASE 7
+			a$ = "ENEMY ANNIHILATED"
+		END SELECT
+		CLS
+		c = 1
+		IF i = 2 THEN c = 7
+		LINE (0, 0)-(639, 479), 4, BF
+		LINE (0, 40)-(550, 460), 0, BF
+		CALL usa
+		LINE (70, 140)-(485, 265), 0, BF
+		LINE (50, 120)-(465, 250), c, BF
+		LINE (50, 120)-(465, 250), 4, B
+		COLOR 14
+		t$ = globalForce$(i) + " SIDE IS WINNING"
+		IF j = 2 THEN 
+			CALL center(10, "Confederates will win a technical victory")
+		ELSE 
+			CALL center(10, t$)
+		END IF
+
+		COLOR 15
+		t$ = "END GAME VICTORY CONDITION" + STR$(j - 1) + " REACHED"
+		CALL center(12, t$)
+		CALL center(14, a$)
+
+		globalMTX$(0) = "End Game"
+		globalMTX$(1) = "Yes"
+		globalMTX$(2) = "No-Override"
+		size = 2: globalColour = 4
+		globalTLX = 27: globalTLY = 18
+		globalHilite = 15
+		IF j = 7 THEN size = 1
+		CALL menu(0)
+
+		IF globalChoose <> 1 AND j < 7 THEN
+			play4ever:
 			globalVicFlag(j) = globalVicFlag(j) + 1
 			IF j = 5 THEN globalVicFlag(j) = 0
 			CLS
 			CALL usa
 			EXIT SUB
-	END IF
-	globalMTX$(0) = "Options"
-	globalMTX$(1) = "Quit this Game"
-	globalMTX$(2) = "Play More"
-	IF globalPlayer = 1 THEN globalMTX$(2) = "No - Press Onward to " + globalCity$(globalCapCity(3 - side))
-	size = 2: globalColour = 8
-	globalTLX = 27: globalTLY = 18
-	IF j <> 7 THEN
-		CALL menu(0)
-		IF globalChoose <> 1 GOTO play4ever
-	ELSE
-		globalVictory(i) = globalVictory(i) + 100
-	END IF
+		END IF
+		globalMTX$(0) = "Options"
+		globalMTX$(1) = "Quit this Game"
+		globalMTX$(2) = "Play More"
+		IF globalPlayer = 1 THEN globalMTX$(2) = "No - Press Onward to " + globalCity$(globalCapCity(3 - side))
+		size = 2
+		globalColour = 8
+		globalTLX = 27
+		globalTLY = 18
+		IF j <> 7 THEN
+			CALL menu(0)
+			IF globalChoose <> 1 GOTO play4ever
+		ELSE
+			globalVictory(i) = globalVictory(i) + 100
+		END IF
 
-	globalThrill = i
-	CALL usa: CALL report(100 + side)
-	IF j = 2 THEN FOR k = 1 TO 2: globalVictory(k) = .7 * globalVictory(k): NEXT k: CALL rwin: GOTO death
+		globalThrill = i
+		CALL usa
+		CALL report(100 + side)
+		IF j = 2 THEN 
+			FOR k = 1 TO 2
+				globalVictory(k) = .7 * globalVictory(k)
+			NEXT k
+			CALL rwin
+			GOTO death
+		END IF
 
-	IF i = 1 THEN CALL capitol: COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(globalVictory(1)): PRINT t$: GOTO death
-	IF i = 2 THEN CALL rwin: COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(globalVictory(2)): PRINT t$
-death:
-	COLOR 14: LOCATE 4, 40 - .5 * LEN(a$)
-	IF globalHistory > 0 THEN
-		CALL scribe(t$, 0)
-		CALL scribe(a$, 0)
-	END IF
-	PRINT a$: CALL maxx
-	EXIT SUB
-stale:
-    NEXT i
+		IF i = 1 THEN 
+			CALL capitol
+			COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(globalVictory(1)): PRINT t$
+			GOTO death
+		END IF
+		IF i = 2 THEN 
+			CALL rwin
+			COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(globalVictory(2)): PRINT t$
+		END IF
+		death:
+		COLOR 14: LOCATE 4, 40 - .5 * LEN(a$)
+		IF globalHistory > 0 THEN
+			CALL scribe(t$, 0)
+			CALL scribe(a$, 0)
+		END IF
+		PRINT a$: CALL maxx
+		EXIT SUB
+	stale:
+	NEXT i
 END SUB
 
 SUB void (a, y)
-  y = 0
-FOR j = 1 TO 6
-  x = globalMatrix(a, j): IF x = 0 GOTO tally5
-  IF globalCityP(x) = side AND globalOccupied(x) > 0 THEN y = y + globalArmySize(globalOccupied(x))
-	FOR k = 1 TO 6: m = globalMatrix(x, k): IF m = 0 OR m = a GOTO tally4
-	IF globalCityP(m) = side AND globalOccupied(m) > 0 THEN y = y + .1 * globalArmySize(globalOccupied(m))
-tally4:
-	NEXT k
-NEXT j
+	y = 0
+	FOR j = 1 TO 6
+		x = globalMatrix(a, j)
+		IF x = 0 GOTO tally5
+		IF globalCityP(x) = side AND globalOccupied(x) > 0 THEN y = y + globalArmySize(globalOccupied(x))
+		FOR k = 1 TO 6
+			m = globalMatrix(x, k)
+			IF m = 0 OR m = a GOTO tally4
+			IF globalCityP(m) = side AND globalOccupied(m) > 0 THEN y = y + .1 * globalArmySize(globalOccupied(m))
+		tally4:
+		NEXT k
+	NEXT j
 tally5:
 END SUB
 
@@ -5427,131 +5570,135 @@ END SUB
 '               if >10 then 10's digit=box color  1's digit= window type
 
 SUB choices (b1, wide)
-boxc = globalColour: IF globalWType > 10 THEN boxc = INT(globalWType / 10): globalWType = globalWType - 10 * boxc
-COLOR boxc
-VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8)
-CLS 1
-VIEW
-LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8), globalColour, B
-LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
-IF ABS(globalWType) = 2 THEN
-LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + size + 2) + 4), globalColour, B
-END IF
-COLOR globalColour
+	boxc = globalColour
+	IF globalWType > 10 THEN 
+		boxc = INT(globalWType / 10)
+		globalWType = globalWType - 10 * boxc
+	END IF
+	COLOR boxc
+	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8)
+	CLS 1
+	VIEW
+	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8), globalColour, B
+	LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
+	IF ABS(globalWType) = 2 THEN
+		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + size + 2) + 4), globalColour, B
+	END IF
+	COLOR globalColour
 
-LOCATE globalTLY + 1, globalTLX + b1: PRINT globalMTX$(0)
-FOR i = 1 TO size
-LOCATE globalTLY + 2 + i, globalTLX + 2: PRINT globalMTX$(i);
-NEXT i
+	LOCATE globalTLY + 1, globalTLX + b1: PRINT globalMTX$(0)
+	FOR i = 1 TO size
+		LOCATE globalTLY + 2 + i, globalTLX + 2: PRINT globalMTX$(i);
+	NEXT i
 END SUB
 
 SUB ironclad
-SCREEN 12
-LINE (1, 240)-(639, 309), 3, BF
-LINE (639, 309)-(1, 479), 1, BF
+	SCREEN 12
+	LINE (1, 240)-(639, 309), 3, BF
+	LINE (639, 309)-(1, 479), 1, BF
 
-COLOR 7
-LINE (478, 368)-(174, 389): LINE -(86, 363): LINE -(78, 353)
-LINE -(161, 337): LINE -(162, 337): LINE -(406, 326): LINE -(478, 368)
-PAINT (300, 350), 7
+	COLOR 7
+	LINE (478, 368)-(174, 389): LINE -(86, 363): LINE -(78, 353)
+	LINE -(161, 337): LINE -(162, 337): LINE -(406, 326): LINE -(478, 368)
+	PAINT (300, 350), 7
 
-COLOR 15
-LINE (427, 358)-(203, 373): LINE -(247, 322): LINE -(205, 312)
-LINE -(167, 342): LINE -(203, 373): LINE -(246, 323): LINE -(401, 318)
-LINE -(427, 358): LINE -(400, 318): LINE -(363, 306): LINE -(204, 312)
-PAINT (300, 315), 7, 15
-PAINT (200, 325), 8, 15
-PAINT (300, 325), 8, 15
+	COLOR 15
+	LINE (427, 358)-(203, 373): LINE -(247, 322): LINE -(205, 312)
+	LINE -(167, 342): LINE -(203, 373): LINE -(246, 323): LINE -(401, 318)
+	LINE -(427, 358): LINE -(400, 318): LINE -(363, 306): LINE -(204, 312)
+	PAINT (300, 315), 7, 15
+	PAINT (200, 325), 8, 15
+	PAINT (300, 325), 8, 15
 
-COLOR 7
-LINE (77, 353)-(76, 363): LINE -(84, 370): LINE -(85, 363)
-LINE -(84, 369): LINE -(169, 396): LINE -(170, 389): LINE -(168, 396)
-LINE -(477, 375): LINE -(478, 369)
-PAINT (80, 363), 7
-PAINT (150, 385), 8, 7
-PAINT (190, 390), 0, 7
+	COLOR 7
+	LINE (77, 353)-(76, 363): LINE -(84, 370): LINE -(85, 363)
+	LINE -(84, 369): LINE -(169, 396): LINE -(170, 389): LINE -(168, 396)
+	LINE -(477, 375): LINE -(478, 369)
+	PAINT (80, 363), 7
+	PAINT (150, 385), 8, 7
+	PAINT (190, 390), 0, 7
 
-COLOR 0
-LINE (299, 261)-(294, 254): LINE -(303, 250): LINE -(299, 243)
-LINE -(316, 243): LINE -(321, 247): LINE -(326, 241): LINE -(335, 240)
-LINE -(345, 240): LINE -(357, 246): LINE -(366, 241): LINE -(381, 245)
-LINE -(384, 253): LINE -(398, 248): LINE -(410, 248): LINE -(413, 259)
-LINE -(424, 264): LINE -(425, 254): LINE -(444, 258): LINE -(445, 270)
-LINE -(436, 277): LINE -(426, 281): LINE -(418, 270): LINE -(411, 272)
-LINE -(400, 263): LINE -(392, 275): LINE -(374, 270): LINE -(370, 262)
-LINE -(357, 257): LINE -(345, 256): LINE -(335, 257): LINE -(335, 262)
-LINE -(324, 257): LINE -(317, 258): LINE -(309, 257): LINE -(305, 262)
-LINE -(300, 261)
-PAINT (320, 250), 0
+	COLOR 0
+	LINE (299, 261)-(294, 254): LINE -(303, 250): LINE -(299, 243)
+	LINE -(316, 243): LINE -(321, 247): LINE -(326, 241): LINE -(335, 240)
+	LINE -(345, 240): LINE -(357, 246): LINE -(366, 241): LINE -(381, 245)
+	LINE -(384, 253): LINE -(398, 248): LINE -(410, 248): LINE -(413, 259)
+	LINE -(424, 264): LINE -(425, 254): LINE -(444, 258): LINE -(445, 270)
+	LINE -(436, 277): LINE -(426, 281): LINE -(418, 270): LINE -(411, 272)
+	LINE -(400, 263): LINE -(392, 275): LINE -(374, 270): LINE -(370, 262)
+	LINE -(357, 257): LINE -(345, 256): LINE -(335, 257): LINE -(335, 262)
+	LINE -(324, 257): LINE -(317, 258): LINE -(309, 257): LINE -(305, 262)
+	LINE -(300, 261)
+	PAINT (320, 250), 0
 
-LINE (211, 341)-(196, 357): LINE -(179, 346)
-LINE -(194, 335): LINE -(211, 341)
-PAINT (190, 350), 0
-LINE (211, 341)-(225, 330), 7: LINE -(209, 324), 7: LINE -(188, 340), 0
+	LINE (211, 341)-(196, 357): LINE -(179, 346)
+	LINE -(194, 335): LINE -(211, 341)
+	PAINT (190, 350), 0
+	LINE (211, 341)-(225, 330), 7: LINE -(209, 324), 7: LINE -(188, 340), 0
 
-FOR k = 0 TO 3
-x = 260 + 40 * k: y = 344 - 2 * k
-LINE (x, y)-(x + 2, y + 20): LINE -(x + 17, y + 19): LINE -(x + 15, y)
-LINE -(x, y)
-PAINT (x + 10, 350), 0
-LINE (x, y)-(x + 15, y), 7: LINE -(x + 13, y - 14), 7: LINE -(x - 2, y - 14), 7: LINE -(x, y)
-NEXT k
+	FOR k = 0 TO 3
+	x = 260 + 40 * k: y = 344 - 2 * k
+	LINE (x, y)-(x + 2, y + 20): LINE -(x + 17, y + 19): LINE -(x + 15, y)
+	LINE -(x, y)
+	PAINT (x + 10, 350), 0
+	LINE (x, y)-(x + 15, y), 7: LINE -(x + 13, y - 14), 7: LINE -(x - 2, y - 14), 7: LINE -(x, y)
+	NEXT k
 
-COLOR 8
-LINE (168, 340)-(85, 355): LINE -(91, 361): LINE -(173, 386): LINE -(466, 366)
-LINE -(414, 334)
+	COLOR 8
+	LINE (168, 340)-(85, 355): LINE -(91, 361): LINE -(173, 386): LINE -(466, 366)
+	LINE -(414, 334)
 
-LINE (358, 307)-(382, 315): LINE -(249, 320): LINE -(220, 314)
-LINE -(358, 307)
+	LINE (358, 307)-(382, 315): LINE -(249, 320): LINE -(220, 314)
+	LINE -(358, 307)
 
-LINE (314, 255)-(330, 314), 8, BF
-LINE (297, 310)-(309, 262), 8, BF
-LINE (323, 257)-(329, 314), 0, BF
-LINE (303, 310)-(308, 262), 0, BF
-LINE (319, 257)-(320, 315), 15, BF
-LINE (300, 262)-(301, 312), 15, BF
+	LINE (314, 255)-(330, 314), 8, BF
+	LINE (297, 310)-(309, 262), 8, BF
+	LINE (323, 257)-(329, 314), 0, BF
+	LINE (303, 310)-(308, 262), 0, BF
+	LINE (319, 257)-(320, 315), 15, BF
+	LINE (300, 262)-(301, 312), 15, BF
 
-LINE (96, 297)-(94, 357), 8, BF
-LINE (98, 299)-(106, 317), 4, BF
-LINE (107, 304)-(110, 319), 9, BF
-LINE (111, 300)-(114, 312), 15, BF
+	LINE (96, 297)-(94, 357), 8, BF
+	LINE (98, 299)-(106, 317), 4, BF
+	LINE (107, 304)-(110, 319), 9, BF
+	LINE (111, 300)-(114, 312), 15, BF
 
-y = 387: FOR x = 180 TO 470 STEP 15: y = y - 1: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
-y = 360: FOR x = 90 TO 170 STEP 15: y = y + 4: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
-y = 373: FOR x = 216 TO 250 STEP 7: y = y - 8: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
-y = 373: FOR x = 205 TO 243 STEP 7: y = y - 8: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
-y = 350: FOR x = 172 TO 200 STEP 9: y = y - 8: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
-y = 310: FOR x = 397 TO 425 STEP 8: y = y + 11: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
-COLOR 11
-LINE (70, 361)-(68, 369): LINE -(106, 384): LINE -(166, 394)
-LINE -(210, 385): LINE -(255, 391): LINE -(219, 394)
-LINE -(242, 402): LINE -(202, 405): LINE -(162, 402)
-LINE -(121, 387)
-PAINT (190, 400), 3, 11
+	y = 387: FOR x = 180 TO 470 STEP 15: y = y - 1: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
+	y = 360: FOR x = 90 TO 170 STEP 15: y = y + 4: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
+	y = 373: FOR x = 216 TO 250 STEP 7: y = y - 8: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
+	y = 373: FOR x = 205 TO 243 STEP 7: y = y - 8: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
+	y = 350: FOR x = 172 TO 200 STEP 9: y = y - 8: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
+	y = 310: FOR x = 397 TO 425 STEP 8: y = y + 11: LINE (x, y)-(x + 1, y + 1), 0, BF: NEXT x
+	COLOR 11
+	LINE (70, 361)-(68, 369): LINE -(106, 384): LINE -(166, 394)
+	LINE -(210, 385): LINE -(255, 391): LINE -(219, 394)
+	LINE -(242, 402): LINE -(202, 405): LINE -(162, 402)
+	LINE -(121, 387)
+	PAINT (190, 400), 3, 11
 
-LINE (331, 391)-(365, 387)
-LINE -(403, 375): LINE -(446, 382): LINE -(471, 384)
-LINE -(446, 391): LINE -(478, 395): LINE -(449, 407)
-LINE -(445, 406): LINE -(414, 395): LINE -(412, 395)
-LINE -(369, 396): LINE -(323, 391)
-PAINT (390, 390), 3, 11
+	LINE (331, 391)-(365, 387)
+	LINE -(403, 375): LINE -(446, 382): LINE -(471, 384)
+	LINE -(446, 391): LINE -(478, 395): LINE -(449, 407)
+	LINE -(445, 406): LINE -(414, 395): LINE -(412, 395)
+	LINE -(369, 396): LINE -(323, 391)
+	PAINT (390, 390), 3, 11
 
-LINE (476, 379)-(531, 372)
-LINE (420, 329)-(497, 327), 3
-LINE -(464, 340): LINE -(535, 343), 3
-LINE (141, 337)-(67, 349): LINE -(58, 372)
+	LINE (476, 379)-(531, 372)
+	LINE (420, 329)-(497, 327), 3
+	LINE -(464, 340): LINE -(535, 343), 3
+	LINE (141, 337)-(67, 349): LINE -(58, 372)
 
-LINE (525, 405)-(587, 392): LINE -(628, 402): LINE -(588, 415)
-LINE -(563, 409): LINE -(562, 409): LINE -(527, 423)
-LINE -(540, 410): LINE -(523, 406)
-PAINT (560, 405), 9, 11
+	LINE (525, 405)-(587, 392): LINE -(628, 402): LINE -(588, 415)
+	LINE -(563, 409): LINE -(562, 409): LINE -(527, 423)
+	LINE -(540, 410): LINE -(523, 406)
+	PAINT (560, 405), 9, 11
 
-LINE (106, 320)-(101, 318), 0, BF
-LINE (110, 313)-(114, 315), 0, BF
+	LINE (106, 320)-(101, 318), 0, BF
+	LINE (110, 313)-(114, 315), 0, BF
 END SUB
 
 SUB menu (switch%)
-remenu:
+	remenu:
 	IF globalColour = 0 THEN globalColour = 7
 	LOCATE 1, 1, 0
 	IF globalMTX$(0) = "" THEN globalMTX$(0) = "M E N U"
@@ -5572,7 +5719,11 @@ remenu:
 	brx = globalTLX + wide + 1
 	bry = globalTLY + size + 3
        
-	boxc = globalColour: IF globalWType > 10 THEN boxc = INT(globalWType / 10): globalWType = globalWType - 10 * boxc
+	boxc = globalColour
+	IF globalWType > 10 THEN 
+		boxc = INT(globalWType / 10)
+		globalWType = globalWType - 10 * boxc
+	END IF
 
 	COLOR boxc
 
@@ -5589,32 +5740,40 @@ remenu:
 	b1 = INT(.5 * (wide - LEN(globalMTX$(0))) + .5) + 1
 
 	CALL choices(b1, wide)
-sel1:
+	sel1:
 	SELECT CASE switch
-		CASE 1: CALL icon(globalArray(row), 0, 7)
-		CASE 2: CALL icon(globalArray(row), 0, 9)
+		CASE 1:
+			CALL icon(globalArray(row), 0, 7)
+		CASE 2: 
+			CALL icon(globalArray(row), 0, 9)
 			target = globalOccupied(globalArray(row))
 			IF target > 0 THEN
-			flag = 1
-			t$ = globalArmyName$(target)
-			IF LEN(t$) > wide THEN t$ = LEFT$(t$, wide)
-			COLOR 12
-			LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT SPACE$(wide);
-			LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT t$;
-			LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT SPACE$(12);
-			LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT "Size"; globalArmySize(target);
-			x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
+				flag = 1
+				t$ = globalArmyName$(target)
+				IF LEN(t$) > wide THEN t$ = LEFT$(t$, wide)
+				COLOR 12
+				LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT SPACE$(wide);
+				LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT t$;
+				LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT SPACE$(12);
+				LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT "Size"; globalArmySize(target);
+				x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
 			ELSE
-			flag = 0
-			LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT SPACE$(12);
+				flag = 0
+				LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT SPACE$(12);
 			END IF
-		CASE 4: CALL armystat(globalArray(row))
-		CASE 5: COLOR 11: CALL clrbot: PRINT globalArmyName$(index); "  Exp="; globalArmyExper(index); " Cash="; globalCash(side);
-		CASE 6: CALL icon(globalArmyLoc(globalArray(row)), 0, 9)
+		CASE 4:
+			CALL armystat(globalArray(row))
+		CASE 5:
+			COLOR 11
+			CALL clrbot
+			PRINT globalArmyName$(index); "  Exp="; globalArmyExper(index); " Cash="; globalCash(side);
+		CASE 6:
+			CALL icon(globalArmyLoc(globalArray(row)), 0, 9)
 		CASE 8
 			IF globalGraf > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
-				a = row: IF side = 1 THEN a = 6 - row
+				a = row
+				IF side = 1 THEN a = 6 - row
 				t$ = "face" + LTRIM$(STR$(a)) + ".vga"
 				IF _FILEEXISTS(t$) THEN
 					DEF SEG = VARSEG(graft(1))
@@ -5627,20 +5786,23 @@ sel1:
 					END IF
 				END IF
 			END IF
-		CASE 9: CALL icon(globalArray(row), 0, 9)
+		CASE 9
+			CALL icon(globalArray(row), 0, 9)
 	END SELECT
 	IF flag = 0 THEN
 		COLOR globalHilite
 		LOCATE globalTLY + 2 + row, globalTLX + 2
 		PRINT globalMTX$(row)
-		IF globalBW > 0 THEN LINE (8 * (globalTLX + 1), 16 * (globalTLY + row + 1))-(8 * (globalTLX + LEN(globalMTX$(row)) + 1) - 1, 16 * (globalTLY + row + 2) - 1), globalHilite, B
+		IF globalBW > 0 THEN 
+			LINE (8 * (globalTLX + 1), 16 * (globalTLY + row + 1))-(8 * (globalTLX + LEN(globalMTX$(row)) + 1) - 1, 16 * (globalTLY + row + 2) - 1), globalHilite, B
+		END IF
 	END IF
 	GOSUB crsr
 	IF switch <> 3 GOTO reglr
 	IF a$ = "H" THEN globalChoose = 1: GOTO called
 	IF ASC(a$) = 13 THEN globalChoose = 2: GOTO called
 	IF a$ = "P" THEN globalChoose = 3: GOTO called
-reglr:
+	reglr:
 	IF ASC(a$) = 13 GOTO called
 	IF switch = 2 THEN LOCATE globalTLY + 2 + row1, globalTLX + 2: PRINT SPACE$(wide);
 	COLOR globalColour
@@ -5655,19 +5817,25 @@ reglr:
 
 	globalChoose = row
 	GOTO sel1
-crsr:   a$ = INKEY$: IF a$ = "" GOTO crsr
+	crsr:
+	a$ = INKEY$
+	IF a$ = "" GOTO crsr
 	IF ASC(a$) = 13 THEN RETURN
 	IF ASC(a$) = 2 THEN GOTO boss
 	IF LEN(a$) = 2 GOTO arrows
 	IF switch = 3 THEN globalChoose = -ASC(UCASE$(a$)): GOTO called
 	IF ASC(a$) = 27 THEN globalChoose = -1: GOTO called
-		row1 = row
-		FOR k = 1 TO size
+	row1 = row
+	FOR k = 1 TO size
 		c1$ = UCASE$(LEFT$(LTRIM$(globalMTX$(k)), 1))
-		IF c1$ = UCASE$(a$) THEN globalChoose = k: GOSUB limits: GOTO called
-		NEXT k
+		IF c1$ = UCASE$(a$) THEN
+			globalChoose = k
+			GOSUB limits
+			GOTO called
+		END IF
+	NEXT k
 	GOTO crsr
-arrows:
+	arrows:
 	a$ = RIGHT$(a$, 1)
 	row1 = row
 	 IF a$ = "H" THEN row = row - 1: GOSUB limits: RETURN
@@ -5694,20 +5862,20 @@ arrows:
 	 END IF
 	 RETURN
 
-limits:
+	limits:
 	IF row > size THEN row = 1
 	IF row < 1 THEN row = size
 	RETURN
-noadjust:
+	noadjust:
 	IF globalTLX = 0 THEN globalTLX = INT(40.5 - .5 * wide)
 	RETURN
-boss:
+	boss:
 	CALL scrnsavr
-boss1:
+	boss1:
 	CLS
 	CALL usa
 	GOTO remenu
-called:
+	called:
 	IF globalNoise > 0 THEN SOUND 700, .5
 	COLOR globalColour
 	globalTLX = 0: globalTLY = 0
@@ -5723,225 +5891,224 @@ END SUB
 SUB mxw (wide)
 	wide = LEN(globalMTX$(0)) + 1
 	FOR i = 1 TO size
-	x = LEN(globalMTX$(i))
-	IF x > wide THEN wide = x
+		x = LEN(globalMTX$(i))
+		IF x > wide THEN wide = x
 	NEXT i
 END SUB
 
 SUB schooner
-SCREEN 12
-LINE (1, 240)-(639, 309), 3, BF
-LINE (639, 309)-(1, 479), 1, BF
-COLOR 6
-LINE (243, 241)-(247, 395), , BF
-LINE (369, 395)-(373, 241), , BF
-LINE (183, 395)-(435, 400), , BF
-LINE (188, 395)-(107, 356): LINE -(106, 360): LINE -(173, 392)
-LINE -(182, 419): LINE -(191, 429): LINE -(230, 426): LINE -(275, 432)
-LINE -(314, 418): LINE -(354, 431): LINE -(390, 421): LINE -(390, 422)
-LINE -(413, 427): LINE -(437, 419): LINE -(447, 401): LINE -(447, 377)
-LINE -(401, 377): LINE -(399, 396)
-PAINT (300, 415), 6
+	SCREEN 12
+	LINE (1, 240)-(639, 309), 3, BF
+	LINE (639, 309)-(1, 479), 1, BF
+	COLOR 6
+	LINE (243, 241)-(247, 395), , BF
+	LINE (369, 395)-(373, 241), , BF
+	LINE (183, 395)-(435, 400), , BF
+	LINE (188, 395)-(107, 356): LINE -(106, 360): LINE -(173, 392)
+	LINE -(182, 419): LINE -(191, 429): LINE -(230, 426): LINE -(275, 432)
+	LINE -(314, 418): LINE -(354, 431): LINE -(390, 421): LINE -(390, 422)
+	LINE -(413, 427): LINE -(437, 419): LINE -(447, 401): LINE -(447, 377)
+	LINE -(401, 377): LINE -(399, 396)
+	PAINT (300, 415), 6
 
-LINE (378, 290)-(434, 262): LINE -(432, 258): LINE -(377, 286)
-LINE -(378, 290)
-PAINT (380, 286), 6
+	LINE (378, 290)-(434, 262): LINE -(432, 258): LINE -(377, 286)
+	LINE -(378, 290)
+	PAINT (380, 286), 6
 
-LINE (378, 346)-(456, 336): LINE -(457, 340): LINE -(376, 350)
-LINE -(378, 346)
-PAINT (382, 347), 6
+	LINE (378, 346)-(456, 336): LINE -(457, 340): LINE -(376, 350)
+	LINE -(378, 346)
+	PAINT (382, 347), 6
 
 
-COLOR 15
-LINE (109, 355)-(131, 361)
-LINE -(239, 259): LINE -(239, 256): LINE -(109, 355)
-PAINT (140, 340)
+	COLOR 15
+	LINE (109, 355)-(131, 361)
+	LINE -(239, 259): LINE -(239, 256): LINE -(109, 355)
+	PAINT (140, 340)
 
-LINE (238, 268)-(256, 273)
-LINE -(241, 295): LINE -(240, 309): LINE -(250, 322)
-LINE -(226, 321): LINE -(220, 299): LINE -(227, 284)
-LINE -(239, 269)
-PAINT (245, 275), 15
+	LINE (238, 268)-(256, 273)
+	LINE -(241, 295): LINE -(240, 309): LINE -(250, 322)
+	LINE -(226, 321): LINE -(220, 299): LINE -(227, 284)
+	LINE -(239, 269)
+	PAINT (245, 275), 15
 
-LINE (232, 327)-(225, 350): LINE -(233, 385): LINE -(251, 387)
-LINE -(242, 352): LINE -(243, 345): LINE -(249, 333)
-LINE -(232, 327)
-PAINT (235, 335), 15
+	LINE (232, 327)-(225, 350): LINE -(233, 385): LINE -(251, 387)
+	LINE -(242, 352): LINE -(243, 345): LINE -(249, 333)
+	LINE -(232, 327)
+	PAINT (235, 335), 15
 
-LINE (381, 268)-(368, 286)
-LINE -(366, 303): LINE -(374, 317): LINE -(350, 315)
-LINE -(347, 297): LINE -(361, 264): LINE -(381, 268)
-PAINT (365, 275), 15
+	LINE (381, 268)-(368, 286)
+	LINE -(366, 303): LINE -(374, 317): LINE -(350, 315)
+	LINE -(347, 297): LINE -(361, 264): LINE -(381, 268)
+	PAINT (365, 275), 15
 
-LINE (379, 335)-(360, 328)
-LINE -(351, 347): LINE -(355, 367)
-LINE -(357, 382): LINE -(378, 386): LINE -(368, 373)
-LINE -(369, 345): LINE -(379, 334)
-PAINT (360, 345), 15
+	LINE (379, 335)-(360, 328)
+	LINE -(351, 347): LINE -(355, 367)
+	LINE -(357, 382): LINE -(378, 386): LINE -(368, 373)
+	LINE -(369, 345): LINE -(379, 334)
+	PAINT (360, 345), 15
 
-LINE (379, 290)-(406, 342): LINE -(456, 336): LINE -(435, 289)
-LINE -(433, 264): LINE -(378, 291)
-PAINT (410, 325), 15
+	LINE (379, 290)-(406, 342): LINE -(456, 336): LINE -(435, 289)
+	LINE -(433, 264): LINE -(378, 291)
+	PAINT (410, 325), 15
 
-FOR k = 260 TO 400 STEP 25
-CIRCLE (k, 405), 3, 0
-PAINT (k, 405), 0
-NEXT k
+	FOR k = 260 TO 400 STEP 25
+	CIRCLE (k, 405), 3, 0
+	PAINT (k, 405), 0
+	NEXT k
 
-COLOR 11
-LINE (247, 437)-(290, 422): LINE -(314, 416): LINE -(334, 423)
-LINE -(305, 432): LINE -(287, 430): LINE -(286, 430)
-LINE -(267, 441): LINE -(225, 439): LINE -(225, 438)
-LINE -(246, 437)
-PAINT (300, 425), 3, 11
+	COLOR 11
+	LINE (247, 437)-(290, 422): LINE -(314, 416): LINE -(334, 423)
+	LINE -(305, 432): LINE -(287, 430): LINE -(286, 430)
+	LINE -(267, 441): LINE -(225, 439): LINE -(225, 438)
+	LINE -(246, 437)
+	PAINT (300, 425), 3, 11
 
-LINE (362, 428)-(385, 419)
-LINE -(394, 421): LINE -(375, 437): LINE -(354, 432)
-LINE -(345, 429): LINE -(362, 428)
-PAINT (370, 430), 3, 11
+	LINE (362, 428)-(385, 419)
+	LINE -(394, 421): LINE -(375, 437): LINE -(354, 432)
+	LINE -(345, 429): LINE -(362, 428)
+	PAINT (370, 430), 3, 11
 
-LINE (16, 383)-(43, 379)
-LINE -(44, 379): LINE -(78, 385): LINE -(16, 384)
-PAINT (40, 383), 9, 11
+	LINE (16, 383)-(43, 379)
+	LINE -(44, 379): LINE -(78, 385): LINE -(16, 384)
+	PAINT (40, 383), 9, 11
 
-LINE (173, 440)-(204, 431): LINE -(227, 431): LINE -(210, 439)
-LINE -(175, 441): LINE -(173, 440)
-PAINT (200, 435), 11
+	LINE (173, 440)-(204, 431): LINE -(227, 431): LINE -(210, 439)
+	LINE -(175, 441): LINE -(173, 440)
+	PAINT (200, 435), 11
 
-LINE (445, 417)-(552, 409)
-LINE -(599, 416): LINE -(539, 415): LINE -(468, 415)
-PAINT (550, 411), 9, 11
+	LINE (445, 417)-(552, 409)
+	LINE -(599, 416): LINE -(539, 415): LINE -(468, 415)
+	PAINT (550, 411), 9, 11
 
-LINE (509, 349)-(540, 351)
-LINE -(541, 351)
-LINE -(517, 343): LINE -(509, 349)
-PAINT (520, 347), 3, 11
+	LINE (509, 349)-(540, 351)
+	LINE -(541, 351)
+	LINE -(517, 343): LINE -(509, 349)
+	PAINT (520, 347), 3, 11
 
-LINE (577, 342)-(598, 343)
-LINE (275, 340)-(287, 342), 9
+	LINE (577, 342)-(598, 343)
+	LINE (275, 340)-(287, 342), 9
 
-LINE (149, 346)-(188, 345), 9
-LINE (24, 337)-(72, 338), 3
+	LINE (149, 346)-(188, 345), 9
+	LINE (24, 337)-(72, 338), 3
 
-COLOR 7
-LINE (227, 354)-(236, 383): LINE -(246, 386): LINE -(239, 356)
-LINE -(233, 357): LINE -(227, 354)
-PAINT (238, 365), 7
+	COLOR 7
+	LINE (227, 354)-(236, 383): LINE -(246, 386): LINE -(239, 356)
+	LINE -(233, 357): LINE -(227, 354)
+	PAINT (238, 365), 7
 
-LINE (223, 301)-(231, 321): LINE -(244, 321): LINE -(237, 308): LINE -(240, 303)
-LINE -(223, 301)
-PAINT (236, 312), 7
+	LINE (223, 301)-(231, 321): LINE -(244, 321): LINE -(237, 308): LINE -(240, 303)
+	LINE -(223, 301)
+	PAINT (236, 312), 7
 
-LINE (349, 299)-(353, 313): LINE -(370, 316)
-LINE -(363, 302): LINE -(364, 303): LINE -(350, 300)
-PAINT (360, 310), 7
+	LINE (349, 299)-(353, 313): LINE -(370, 316)
+	LINE -(363, 302): LINE -(364, 303): LINE -(350, 300)
+	PAINT (360, 310), 7
 
-LINE (356, 359)-(359, 380): LINE -(375, 385): LINE -(366, 372): LINE -(368, 364)
-LINE -(356, 360)
-PAINT (360, 370), 7
+	LINE (356, 359)-(359, 380): LINE -(375, 385): LINE -(366, 372): LINE -(368, 364)
+	LINE -(356, 360)
+	PAINT (360, 370), 7
 
-LINE (393, 302)-(394, 302): LINE -(409, 323)
-LINE -(417, 309): LINE -(434, 325): LINE -(429, 304): LINE -(428, 291)
-LINE -(410, 296): LINE -(400, 290): LINE -(394, 302)
-PAINT (420, 300), 7
+	LINE (393, 302)-(394, 302): LINE -(409, 323)
+	LINE -(417, 309): LINE -(434, 325): LINE -(429, 304): LINE -(428, 291)
+	LINE -(410, 296): LINE -(400, 290): LINE -(394, 302)
+	PAINT (420, 300), 7
 
-COLOR 0
-LINE (247, 256)-(291, 394)
-LINE (247, 256)-(284, 394)
-LINE (244, 256)-(191, 394)
-LINE (244, 256)-(184, 394)
+	COLOR 0
+	LINE (247, 256)-(291, 394)
+	LINE (247, 256)-(284, 394)
+	LINE (244, 256)-(191, 394)
+	LINE (244, 256)-(184, 394)
 
-LINE (371, 257)-(321, 394)
-LINE (371, 257)-(314, 394)
-LINE (375, 257)-(431, 378)
-LINE (375, 257)-(438, 378)
+	LINE (371, 257)-(321, 394)
+	LINE (371, 257)-(314, 394)
+	LINE (375, 257)-(431, 378)
+	LINE (375, 257)-(438, 378)
 
-LINE (375, 258)-(434, 259)
+	LINE (375, 258)-(434, 259)
 
-COLOR 8
-LINE (180, 400)-(183, 415): LINE -(192, 426): LINE -(212, 426)
-LINE -(202, 421): LINE -(210, 414): LINE -(191, 408): LINE -(201, 402)
-LINE -(180, 400)
-PAINT (185, 410), 8
+	COLOR 8
+	LINE (180, 400)-(183, 415): LINE -(192, 426): LINE -(212, 426)
+	LINE -(202, 421): LINE -(210, 414): LINE -(191, 408): LINE -(201, 402)
+	LINE -(180, 400)
+	PAINT (185, 410), 8
 
-LINE (445, 381)-(445, 400): LINE -(435, 417)
-LINE -(413, 424): LINE -(422, 413): LINE -(418, 404): LINE -(434, 401)
-LINE -(427, 393): LINE -(435, 391): LINE -(437, 384): LINE -(445, 382)
-PAINT (440, 388), 8
+	LINE (445, 381)-(445, 400): LINE -(435, 417)
+	LINE -(413, 424): LINE -(422, 413): LINE -(418, 404): LINE -(434, 401)
+	LINE -(427, 393): LINE -(435, 391): LINE -(437, 384): LINE -(445, 382)
+	PAINT (440, 388), 8
 
-LINE (186, 425)-(155, 429), 11: LINE -(146, 433), 11
-LINE (150, 417)-(116, 425), 11
-LINE (123, 452)-(153, 460), 11
-LINE (297, 463)-(319, 468), 11
+	LINE (186, 425)-(155, 429), 11: LINE -(146, 433), 11
+	LINE (150, 417)-(116, 425), 11
+	LINE (123, 452)-(153, 460), 11
+	LINE (297, 463)-(319, 468), 11
 
-FOR k = 1 TO 4
-x = 185 + 200 * RND
-LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
-NEXT k
+	FOR k = 1 TO 4
+	x = 185 + 200 * RND
+	LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
+	NEXT k
 END SUB
 
 SUB scrnsavr
-SCREEN 12
-most = 5
-CLS
-sec! = 0
-DO WHILE TIMER - sec! < .5: LOOP
-DIM x(2), y(2)
-RANDOMIZE TIMER
-boxes = 1: IF RND > .5 THEN boxes = 0: aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
+	SCREEN 12
+	most = 5
+	CLS
+	sec! = 0
+	DO WHILE TIMER - sec! < .5: LOOP
+	DIM x(2), y(2)
+	RANDOMIZE TIMER
+	boxes = 1: IF RND > .5 THEN boxes = 0: aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
 
-dx = 20: dy = 5: c = 1
-GOSUB newbox
+	dx = 20: dy = 5: c = 1
+	GOSUB newbox
 
-animate:
-IF boxes = 0 THEN
-	CIRCLE (x(1), y(1)), .5 * ABS(x(1) - x(2)), c, , , aspect!
-ELSE
-	LINE (x(1), y(1))-(x(2), y(2)), c, B
-END IF
-PAINT (x(1) + 1, y(1) + 1), 16 * RND, c
+	animate:
+	IF boxes = 0 THEN
+		CIRCLE (x(1), y(1)), .5 * ABS(x(1) - x(2)), c, , , aspect!
+	ELSE
+		LINE (x(1), y(1))-(x(2), y(2)), c, B
+	END IF
+	PAINT (x(1) + 1, y(1) + 1), 16 * RND, c
 
-sec! = TIMER
-DO: a$ = INKEY$: LOOP WHILE a$ = "" AND TIMER - sec! < .1
-IF a$ <> "" THEN IF ASC(a$) = 2 THEN EXIT SUB
+	sec! = TIMER
+	DO: a$ = INKEY$: LOOP WHILE a$ = "" AND TIMER - sec! < .1
+	IF a$ <> "" THEN IF ASC(a$) = 2 THEN EXIT SUB
 
-x(1) = x(1) + dx
-x(2) = x(2) + dx
+	x(1) = x(1) + dx
+	x(2) = x(2) + dx
 
-IF x(1) < 1 THEN dx = 20: x(1) = 1: GOSUB newbox1
-IF x(2) > 675 THEN dx = -20: GOSUB newbox1
+	IF x(1) < 1 THEN dx = 20: x(1) = 1: GOSUB newbox1
+	IF x(2) > 675 THEN dx = -20: GOSUB newbox1
 
-y(1) = y(1) + dy
-y(2) = y(2) + dy
-IF y(1) < 1 THEN dy = 5: y(1) = 1: GOSUB newbox1
-IF y(2) > 480 THEN dy = -5: GOSUB newbox1
+	y(1) = y(1) + dy
+	y(2) = y(2) + dy
+	IF y(1) < 1 THEN dy = 5: y(1) = 1: GOSUB newbox1
+	IF y(2) > 480 THEN dy = -5: GOSUB newbox1
 
-GOTO animate
-	    
-newbox:
-x(1) = 1 + 650 * RND
-IF x(1) < 1 THEN x(1) = 1
-x(2) = x(1) + 30 + 50 * RND: IF x(2) > 639 THEN x(2) = 639
-IF x(2) < 1 THEN x(2) = x(1)
+	GOTO animate
+			
+	newbox:
+	x(1) = 1 + 650 * RND
+	IF x(1) < 1 THEN x(1) = 1
+	x(2) = x(1) + 30 + 50 * RND: IF x(2) > 639 THEN x(2) = 639
+	IF x(2) < 1 THEN x(2) = x(1)
 
-y(1) = 10 + 100 * RND
-y(2) = y(1) + 50 + 120 * RND
-RETURN
+	y(1) = 10 + 100 * RND
+	y(2) = y(1) + 50 + 120 * RND
+	RETURN
 
-newbox1:
-reps = reps + 1
-IF reps >= most THEN CLS : reps = 0: most = 3 + 10 * RND: IF RND > .9 THEN boxes = 1 - boxes
-y(2) = y(1) + 20 + 100 * RND
-IF y(2) > 475 THEN y(2) = 475
-x(2) = x(1) + 50 + 50 * RND
-IF x(2) > 675 THEN x(2) = 675
-c = c + 1
-IF c > 15 THEN c = 1
-IF RND > .5 THEN RETURN
-IF dy = 5 THEN dy = 5 + 10 * RND
-IF dy = -5 THEN dy = -5 - 10 * RND
-IF boxes = 0 THEN aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
-RETURN
-
+	newbox1:
+	reps = reps + 1
+	IF reps >= most THEN CLS : reps = 0: most = 3 + 10 * RND: IF RND > .9 THEN boxes = 1 - boxes
+	y(2) = y(1) + 20 + 100 * RND
+	IF y(2) > 475 THEN y(2) = 475
+	x(2) = x(1) + 50 + 50 * RND
+	IF x(2) > 675 THEN x(2) = 675
+	c = c + 1
+	IF c > 15 THEN c = 1
+	IF RND > .5 THEN RETURN
+	IF dy = 5 THEN dy = 5 + 10 * RND
+	IF dy = -5 THEN dy = -5 - 10 * RND
+	IF boxes = 0 THEN aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
+	RETURN
 END SUB
 
