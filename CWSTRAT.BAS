@@ -930,276 +930,365 @@ SELECT CASE globalChoose
 	DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
 SUB animate (index, flag)
-from = globalArmyLoc(index): to2 = globalArmyMove(index): globalArmyLoc(index) = 0
-x = globalCityX(from) - 12
-y = globalCityY(from) - 11
-x1 = .5 * (globalCityX(to2) + globalCityX(from))
-y1 = .5 * (globalCityY(to2) + globalCityY(from))
+	from = globalArmyLoc(index)
+	to2 = globalArmyMove(index)
+	globalArmyLoc(index) = 0
+	x = globalCityX(from) - 12
+	y = globalCityY(from) - 11
+	x1 = .5 * (globalCityX(to2) + globalCityX(from))
+	y1 = .5 * (globalCityY(to2) + globalCityY(from))
 
-CALL occupy(from): IF globalOccupied(from) > 0 THEN CALL placearmy(globalOccupied(from))
+	CALL occupy(from)
+	IF globalOccupied(from) > 0 THEN CALL placearmy(globalOccupied(from))
        
-IF flag > 0 GOTO already
+	IF flag > 0 GOTO already
 	GET (x - 9, y - 7)-(x + 9, y + 6), globalAnima
 	IF globalOccupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-already:
+	already:
 
 	FOR i = 2 TO 8
-	x1 = .1 * (i * globalCityX(to2) + (10 - i) * globalCityX(from))
-	y1 = .1 * (i * globalCityY(to2) + (10 - i) * globalCityY(from))
-	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
-	PUT (x1 - 10, y1 - 10), globalAnima, PSET
-	IF globalTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
-	IF globalNoise > 0 THEN SOUND 200, .1: SOUND 50, .1
-	PUT (x1 - 10, y1 - 10), image, PSET
+		x1 = .1 * (i * globalCityX(to2) + (10 - i) * globalCityX(from))
+		y1 = .1 * (i * globalCityY(to2) + (10 - i) * globalCityY(from))
+		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
+		PUT (x1 - 10, y1 - 10), globalAnima, PSET
+		IF globalTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
+		IF globalNoise > 0 THEN SOUND 200, .1: SOUND 50, .1
+		PUT (x1 - 10, y1 - 10), image, PSET
 	NEXT i
 	globalArmyLoc(index) = from
 END SUB
 
 SUB armies
-CALL movefrom(index, target): IF target > 0 AND index > 0 GOTO tent
+	CALL movefrom(index, target)
+	IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN globalMFlag = 1
 	GOTO dudd
-tent:
-globalTLX = 67: globalTLY = 12
+	tent:
+	globalTLX = 67: globalTLY = 12
 
-CALL armystat(index)
-COLOR 11: LOCATE 11, 68: PRINT globalCity$(target)
-size = 0
-globalMTX$(0) = "To"
-FOR i = 1 TO 6: IF globalMatrix(target, i) > 0 THEN size = size + 1: globalMTX$(size) = globalCity$(globalMatrix(target, i)): globalArray(size) = globalMatrix(target, i)
-NEXT i
-CALL bubble(size)
+	CALL armystat(index)
+	COLOR 11: LOCATE 11, 68: PRINT globalCity$(target)
+	size = 0
+	globalMTX$(0) = "To"
+	FOR i = 1 TO 6
+		IF globalMatrix(target, i) > 0 THEN 
+			size = size + 1
+			globalMTX$(size) = globalCity$(globalMatrix(target, i))
+			globalArray(size) = globalMatrix(target, i)
+		END IF
+	NEXT i
+	CALL bubble(size)
 
-globalHilite = 10: globalColour = 3: CALL menu(2): CALL clrrite
-IF globalChoose < 0 GOTO dudd
-IF month < 3 AND globalJanCam = 0 AND globalCityP(globalArray(globalChoose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: GOTO dudd
+	globalHilite = 10
+	globalColour = 3
+	CALL menu(2)
+	CALL clrrite
+	IF globalChoose < 0 GOTO dudd
+	IF month < 3 AND globalJanCam = 0 AND globalCityP(globalArray(globalChoose)) <> side THEN 
+		COLOR 11
+		CALL clrbot
+		PRINT "No campaigns in January"; 
+		CALL TICK(9)
+		CALL clrbot
+		GOTO dudd
+	END IF
 
-CALL clrbot: PRINT "Army "; index; " "; globalArmyName$(index); " is moving from "; globalCity$(target); " to "; globalCity$(globalArray(globalChoose));
-IF globalNoise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
-CALL icon(target, globalArray(globalChoose), 1)
-globalArmyMove(index) = globalArray(globalChoose): CALL TICK(globalTurbo!): CALL clrbot
-CALL clrrite
+	CALL clrbot
+	PRINT "Army "; index; " "; globalArmyName$(index); " is moving from "; globalCity$(target); " to "; globalCity$(globalArray(globalChoose));
+	IF globalNoise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
+	CALL icon(target, globalArray(globalChoose), 1)
+	globalArmyMove(index) = globalArray(globalChoose)
+	CALL TICK(globalTurbo!)
+	CALL clrbot
+	CALL clrrite
 dudd:
 END SUB
 
 SUB armystat (index)
-LINE (530, 60)-(639, 150), 0, BF
-COLOR 15
-LOCATE 5, 68: PRINT globalArmyName$(index)
-COLOR 9: IF index > 20 THEN COLOR 7
-LOCATE 6, 68: PRINT "Size:"; : CALL strong(index)
-LOCATE 7, 68: PRINT "Leader:"; TAB(75); globalArmyLead(index)
-LOCATE 8, 68: PRINT "Exper:"; TAB(75); globalArmyExper(index)
-IF globalSupply(index) < 2 THEN COLOR 12
-LOCATE 9, 68: PRINT "Supply:"; TAB(75); globalSupply(index)
+	LINE (530, 60)-(639, 150), 0, BF
+	COLOR 15
+	LOCATE 5, 68: PRINT globalArmyName$(index)
+	COLOR 9
+	IF index > 20 THEN COLOR 7
+	LOCATE 6, 68: PRINT "Size:"; : CALL strong(index)
+	LOCATE 7, 68: PRINT "Leader:"; TAB(75); globalArmyLead(index)
+	LOCATE 8, 68: PRINT "Exper:"; TAB(75); globalArmyExper(index)
+	IF globalSupply(index) < 2 THEN COLOR 12
+	LOCATE 9, 68: PRINT "Supply:"; TAB(75); globalSupply(index)
 END SUB
 
 SUB barnacle (who)
-globalNavySize(who) = globalNavySize(who) - 1
-IF globalNavySize(who) > 0 THEN
-	globalFleet$(who) = LEFT$(globalFleet$(who), globalNavySize(who))
-ELSE
-	globalFleet$(who) = "": globalNavyLoc(who) = 0: globalNavySize(who) = 0
-END IF
+	globalNavySize(who) = globalNavySize(who) - 1
+	IF globalNavySize(who) > 0 THEN
+		globalFleet$(who) = LEFT$(globalFleet$(who), globalNavySize(who))
+	ELSE
+		globalFleet$(who) = ""
+		globalNavyLoc(who) = 0
+		globalNavySize(who) = 0
+	END IF
 END SUB
 
 SUB battle (attack, defend, win, lose)
-IF globalArmySize(defend) < 1 THEN globalArmySize(defend) = 1
-IF globalArmySize(attack) < 1 THEN globalArmySize(attack) = 1
+	IF globalArmySize(defend) < 1 THEN globalArmySize(defend) = 1
+	IF globalArmySize(attack) < 1 THEN globalArmySize(attack) = 1
 
-CALL icon(globalArmyLoc(defend), 0, 9)
-LOCATE 1, 1: PRINT SPACE$(80)
-CALL clrrite: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
-c = 9: IF attack > 20 THEN c = 7
-COLOR c: LOCATE 2, y: PRINT globalArmyName$(attack)
-LOCATE 3, y: CALL strong(attack)
-x = .01 * globalArmySize(attack): IF x > globalTCR THEN x = globalTCR
-LOCATE 4, y: PRINT "Base    "; x
-IF globalArmySize(attack) / globalArmySize(defend) > .2 THEN x = x + .3 * globalArmyLead(attack) + .3 * globalArmyExper(attack): IF x > globalTCR THEN x = globalTCR
-IF globalArmyExper(attack) > 8 THEN x = x + 1: IF x > globalTCR THEN x = globalTCR
-LOCATE 5, y: PRINT "Ldr/Exp "; x
-IF globalArmySize(attack) < 15 THEN x = .5 * x: IF x > globalTCR THEN x = globalTCR
-LOCATE 6, y: PRINT "Small   "; x
-IF globalArmySize(attack) / globalArmySize(defend) <= .5 THEN x = x - 2: IF x < 1 THEN x = 1
-IF globalArmySize(attack) / globalArmySize(defend) > 3 THEN x = x + 2: IF x > globalTCR THEN x = globalTCR
-IF globalArmySize(attack) / globalArmySize(defend) > 10 THEN x = globalTCR
-IF globalArmySize(attack) / globalArmySize(defend) <= .2 THEN x = 1
-LOCATE 7, y: PRINT "Outman  "; x
-IF globalSupply(attack) < 1 THEN x = .5 * x: COLOR 13
-LOCATE 8, y: PRINT "Supply  "; x: COLOR c
-IF x < 1 THEN x = 1
-'                       Adjust attack advantage
-IF attack < 21 AND side = 2 AND globalDifficult > 3 THEN x = x + 2 * globalDifficult - 6
-IF attack > 20 AND side = 1 AND globalDifficult < 3 THEN x = x + 6 - 2 * globalDifficult
-LOCATE 9, y: PRINT "Difclt  "; x
-IF x > globalTCR THEN x = globalTCR
-COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
-LINE (530, 155)-(635, 175), 11, B
-
-x1 = .013 * globalArmySize(defend) + 1: IF globalRealism = 1 THEN x1 = .02 * globalArmySize(defend) + 2: IF x1 > 20 THEN x1 = 20
-LOCATE 13, y: PRINT "Defender"
-COLOR 16 - c: LOCATE 14, y: PRINT globalArmyName$(defend)
-LOCATE 15, y: CALL strong(defend)
-LOCATE 16, y: PRINT "Base    "; INT(.01 * globalArmySize(defend))
-LOCATE 17, y: PRINT "Defense "; x1
-IF globalArmySize(defend) / globalArmySize(attack) > .2 THEN x1 = x1 + .3 * globalArmyLead(defend) + .3 * globalArmyExper(defend): IF x1 > globalTCR THEN x1 = globalTCR
-IF globalArmyExper(defend) > 8 THEN x1 = x1 + 1: IF x1 > globalTCR THEN x1 = globalTCR
-LOCATE 18, y: PRINT "Ldr/Exp "; x1
-IF globalArmySize(defend) < 15 THEN x1 = .5 * x1
-LOCATE 19, y: PRINT "Small   "; x1
-
-R! = globalArmySize(defend) / globalArmySize(attack)
-SELECT CASE R!
-	CASE IS > 10
-		x1 = globalTCR
-	CASE IS > 1.5
-		x1 = x1 + 2
-	CASE IS < .5
-		x1 = .8 * x1
-	CASE IS < .2
-		x1 = .5 * x1
-END SELECT
-	IF x1 < 1 THEN x1 = 1
-	IF x1 > globalTCR THEN x1 = globalTCR
-
-LOCATE 20, y: PRINT "Outman  "; x1
-IF globalSupply(defend) < 1 THEN x1 = .5 * x1: COLOR 13
-LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
-IF x1 < 1 THEN x1 = 1
-'                       Adjust defend advantage
-IF defend < 21 AND side = 2 AND globalDifficult > 3 THEN x1 = x1 + 2 * globalDifficult - 6
-IF defend > 20 AND side = 1 AND globalDifficult < 3 THEN x1 = x1 + 6 - 2 * globalDifficult
-LOCATE 22, y: PRINT "Difclt  "; x1
-
-a$ = "Fort"
-IF globalArmyMove(defend) = 0 THEN 
-	x1 = x1 * (1 + globalFort(globalArmyLoc(defend)))
-END IF
-IF x1 > globalTCR THEN x1 = globalTCR
-IF globalFort(globalArmyLoc(defend)) > 0 AND globalArmyMove(defend) = 0 THEN
-	COLOR 13: a$ = "Fort+"
-	IF globalFort(globalArmyLoc(defend)) = 2 THEN 
-		a$ = "Fort++"
-	END IF
-END IF
-LOCATE 23, y: PRINT a$; TAB(76); x1
-IF x1 > globalTCR THEN x1 = globalTCR
-COLOR 11: LOCATE 25, y: PRINT "Defend  "; x1
-LINE (530, 380)-(635, 400), 11, B
-
-spin = 0
-scale = x: IF x1 > scale THEN scale = x1
-scale = scale + 1
-
-odds! = x / (x + x1): a = INT(100 * odds!): IF a < 1 THEN a = 1
-a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
-COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
-LINE (530, 412)-(635, 435), 14, B
-LINE (528, 410)-(637, 437), 14, B
-DO WHILE INKEY$ = "": LOOP
-IF globalGraf > 2 THEN
-	CALL cannon
-	k = globalFort(globalArmyLoc(defend))
-	t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
-	IF _FILEEXISTS(t$) THEN
-		DEF SEG = VARSEG(graphic(1))
-		BLOAD t$, VARPTR(graphic(1))
-		DEF SEG
-		PUT (550, 270), graphic, PSET
-	END IF
-ELSE
+	CALL icon(globalArmyLoc(defend), 0, 9)
+	LOCATE 1, 1: PRINT SPACE$(80)
 	CALL clrrite
-END IF
-FOR i = 1 TO 2: IF globalSupply(i) > 0 THEN globalSupply(i) = globalSupply(i) - 1
-NEXT i
-'---------------------------------------------------------------------------
-grapple:
-hit = 0: hit1 = 0
-star = scale * RND: fin = scale * RND
-IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
-IF star <= x THEN hit = 1
-IF fin <= x1 THEN hit1 = 1
+	y = 68
+	COLOR 11: LOCATE 1, y: PRINT "Attacker"
+	c = 9
+	IF attack > 20 THEN c = 7
+	COLOR c: LOCATE 2, y: PRINT globalArmyName$(attack)
+	LOCATE 3, y: CALL strong(attack)
+	x = .01 * globalArmySize(attack)
+	IF x > globalTCR THEN x = globalTCR
+	LOCATE 4, y: PRINT "Base    "; x
+	IF globalArmySize(attack) / globalArmySize(defend) > .2 THEN 
+		x = x + .3 * globalArmyLead(attack) + .3 * globalArmyExper(attack)
+		IF x > globalTCR THEN x = globalTCR
+	END IF
+	IF globalArmyExper(attack) > 8 THEN 
+		x = x + 1
+		IF x > globalTCR THEN x = globalTCR
+	END IF
+	LOCATE 5, y: PRINT "Ldr/Exp "; x
+	IF globalArmySize(attack) < 15 THEN 
+		x = .5 * x
+		IF x > globalTCR THEN x = globalTCR
+	END IF
+	LOCATE 6, y: PRINT "Small   "; x
+	IF globalArmySize(attack) / globalArmySize(defend) <= .5 THEN 
+		x = x - 2
+		IF x < 1 THEN x = 1
+	END IF
+	IF globalArmySize(attack) / globalArmySize(defend) > 3 THEN 
+		x = x + 2
+		IF x > globalTCR THEN x = globalTCR
+	END IF
+	IF globalArmySize(attack) / globalArmySize(defend) > 10 THEN x = globalTCR
+	IF globalArmySize(attack) / globalArmySize(defend) <= .2 THEN x = 1
+	LOCATE 7, y: PRINT "Outman  "; x
+	IF globalSupply(attack) < 1 THEN 
+		x = .5 * x
+		COLOR 13
+	END IF
+	LOCATE 8, y: PRINT "Supply  "; x: COLOR c
+	IF x < 1 THEN x = 1
+	'                       Adjust attack advantage
+	IF attack < 21 AND side = 2 AND globalDifficult > 3 THEN x = x + 2 * globalDifficult - 6
+	IF attack > 20 AND side = 1 AND globalDifficult < 3 THEN x = x + 6 - 2 * globalDifficult
+	LOCATE 9, y: PRINT "Difclt  "; x
+	IF x > globalTCR THEN x = globalTCR
+	COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
+	LINE (530, 155)-(635, 175), 11, B
 
-IF hit = 0 AND hit1 = 0 GOTO grapple
-IF hit = 1 AND hit1 = 1 GOTO grapple
-win = defend: lose = attack: IF hit = 1 THEN win = attack: lose = defend
-'---------------------------------------------------------------------------
-a$ = "UNION": IF win > 20 THEN a$ = "REBEL"
-COLOR 14: LOCATE 3, 68: PRINT a$; " VICTORY"
-LOCATE 4, 71: PRINT "in"
-LOCATE 5, 69: PRINT globalCity$(globalArmyLoc(defend))
-a = 1: IF win > 20 THEN a = 2
-CALL flags(a, 0, 0)
-CALL clrbot: COLOR 11: PRINT globalArmyName$(win); " defeats "; globalArmyName$(lose); " in "; globalCity$(globalArmyLoc(defend)); : CALL TICK(9)
-'===========================================================================
-pct! = .01 * globalDEFAC - .03 * globalFort(globalArmyLoc(defend)): IF win = attack THEN pct! = 1.3 * pct!
-SELECT CASE globalArmySize(defend)
-	CASE IS > 300
-		pct! = .9 * pct!
-	CASE IS > 800
-		pct! = .8 * pct!
-END SELECT
-xbar = globalArmySize(attack) * pct!
-vary = xbar * (1 - pct!)
-CALL normal(xbar, vary, killd)
-'...........................................................................
-pct! = .01 * globalATKFAC + .02 * globalFort(globalArmyLoc(defend)): IF win = defend THEN pct! = 1.5 * pct!
-SELECT CASE globalArmySize(attack)
-	CASE IS > 300
-		pct! = .9 * pct!
-	CASE IS > 800
-		pct! = .8 * pct!
-END SELECT
-xbar = globalArmySize(defend) * pct!
-vary = xbar * (1 - pct!)
-CALL normal(xbar, vary, killa)
-'===========================================================================
+	x1 = .013 * globalArmySize(defend) + 1
+	IF globalRealism = 1 THEN 
+		x1 = .02 * globalArmySize(defend) + 2
+		IF x1 > 20 THEN x1 = 20
+	END IF
+	LOCATE 13, y: PRINT "Defender"
+	COLOR 16 - c: LOCATE 14, y: PRINT globalArmyName$(defend)
+	LOCATE 15, y: CALL strong(defend)
+	LOCATE 16, y: PRINT "Base    "; INT(.01 * globalArmySize(defend))
+	LOCATE 17, y: PRINT "Defense "; x1
+	IF globalArmySize(defend) / globalArmySize(attack) > .2 THEN 
+		x1 = x1 + .3 * globalArmyLead(defend) + .3 * globalArmyExper(defend)
+		IF x1 > globalTCR THEN x1 = globalTCR
+	END IF
+	IF globalArmyExper(defend) > 8 THEN 
+		x1 = x1 + 1
+		IF x1 > globalTCR THEN x1 = globalTCR
+	END IF
+	LOCATE 18, y: PRINT "Ldr/Exp "; x1
+	IF globalArmySize(defend) < 15 THEN x1 = .5 * x1
+	LOCATE 19, y: PRINT "Small   "; x1
 
-killa = .8 * killa + .2 * killd: IF killa < 1 THEN killa = 1
-killd = .8 * killd + .2 * killa: IF killd < 1 THEN killd = 1
-IF killa > 9 * killd THEN killa = 9 * killd
-IF killd > 5 * killa THEN killd = 5 * killa
+	R! = globalArmySize(defend) / globalArmySize(attack)
+	SELECT CASE R!
+		CASE IS > 10
+			x1 = globalTCR
+		CASE IS > 1.5
+			x1 = x1 + 2
+		CASE IS < .5
+			x1 = .8 * x1
+		CASE IS < .2
+			x1 = .5 * x1
+	END SELECT
+		IF x1 < 1 THEN x1 = 1
+		IF x1 > globalTCR THEN x1 = globalTCR
 
-IF killa >= globalArmySize(attack) THEN killa = globalArmySize(attack) - 1
-IF killd >= globalArmySize(defend) THEN killd = globalArmySize(defend) - 1
-'---------------------------------------------------------------------------
-x = INT(100 * odds!): IF x < 1 THEN x = 1
-a$ = LTRIM$(RTRIM$(STR$(x))) + "%"
+	LOCATE 20, y: PRINT "Outman  "; x1
+	IF globalSupply(defend) < 1 THEN 
+		x1 = .5 * x1
+		COLOR 13
+	END IF
+	LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
+	IF x1 < 1 THEN x1 = 1
+	'                       Adjust defend advantage
+	IF defend < 21 AND side = 2 AND globalDifficult > 3 THEN x1 = x1 + 2 * globalDifficult - 6
+	IF defend > 20 AND side = 1 AND globalDifficult < 3 THEN x1 = x1 + 6 - 2 * globalDifficult
+	LOCATE 22, y: PRINT "Difclt  "; x1
 
-COLOR c
-LOCATE 1, 1: PRINT "Attack Loss: ";
-PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
-CALL strong(attack)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / globalArmySize(attack)))))); "%) �";
-COLOR 16 - c: PRINT "� Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
-CALL strong(defend)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / globalArmySize(defend)))))); "%)"
-'---------------------------------------------------------------------------
-globalMTX$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(globalArmySize(attack)) + "00") + ") "
-t$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(globalArmySize(defend)) + "00") + ")"
-globalMTX$(2) = t$
-IF win = defend THEN globalMTX$(2) = globalMTX$(1): globalMTX$(1) = t$
-globalMTX$(3) = "*" + globalArmyName$(win): globalMTX$(4) = globalArmyName$(lose)
-IF win = defend THEN globalMTX$(3) = globalArmyName$(win): globalMTX$(4) = "*" + globalArmyName$(lose)
-a$ = globalCity$(globalArmyLoc(defend)) + ": " + globalMTX$(3) + globalMTX$(1) + " defeats " + globalMTX$(4) + globalMTX$(2)
-CALL scribe(a$, 0)
+	a$ = "Fort"
+	IF globalArmyMove(defend) = 0 THEN 
+		x1 = x1 * (1 + globalFort(globalArmyLoc(defend)))
+	END IF
+	IF x1 > globalTCR THEN x1 = globalTCR
+	IF globalFort(globalArmyLoc(defend)) > 0 AND globalArmyMove(defend) = 0 THEN
+		COLOR 13: a$ = "Fort+"
+		IF globalFort(globalArmyLoc(defend)) = 2 THEN 
+			a$ = "Fort++"
+		END IF
+	END IF
+	LOCATE 23, y: PRINT a$; TAB(76); x1
+	IF x1 > globalTCR THEN x1 = globalTCR
+	COLOR 11: LOCATE 25, y: PRINT "Defend  "; x1
+	LINE (530, 380)-(635, 400), 11, B
 
-IF globalPlayer = 1 AND (side = 1 AND attack > 20) OR (side = 2 AND attack < 21) THEN
-COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
-END IF
+	spin = 0
+	scale = x
+	IF x1 > scale THEN scale = x1
+	scale = scale + 1
 
-globalArmySize(attack) = globalArmySize(attack) - killa
-globalArmySize(defend) = globalArmySize(defend) - killd
-IF globalArmySize(defend) < 1 THEN globalArmySize(defend) = 1
-'---------------------------------------------------------------------------
-s = 1: IF attack > 2 THEN s = 2
-globalCasualty&(s) = globalCasualty&(s) + killa
-globalCasualty&(3 - s) = globalCasualty&(3 - s) + killd
-'---------------------------------------------------------------------------
-s = 1: IF win > 20 THEN s = 2
-globalBatWon(s) = globalBatWon(s) + 1
-globalVictory(s) = globalVictory(s) + 1
-CALL icon(globalArmyLoc(defend), 0, 8)
+	odds! = x / (x + x1)
+	a = INT(100 * odds!)
+	IF a < 1 THEN a = 1
+	a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
+	COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
+	LINE (530, 412)-(635, 435), 14, B
+	LINE (528, 410)-(637, 437), 14, B
+	DO WHILE INKEY$ = "": LOOP
+	IF globalGraf > 2 THEN
+		CALL cannon
+		k = globalFort(globalArmyLoc(defend))
+		t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
+		IF _FILEEXISTS(t$) THEN
+			DEF SEG = VARSEG(graphic(1))
+			BLOAD t$, VARPTR(graphic(1))
+			DEF SEG
+			PUT (550, 270), graphic, PSET
+		END IF
+	ELSE
+		CALL clrrite
+	END IF
+	FOR i = 1 TO 2
+		IF globalSupply(i) > 0 THEN globalSupply(i) = globalSupply(i) - 1
+	NEXT i
+	'---------------------------------------------------------------------------
+	grapple:
+	hit = 0
+	hit1 = 0
+	star = scale * RND
+	fin = scale * RND
+	IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
+	IF star <= x THEN hit = 1
+	IF fin <= x1 THEN hit1 = 1
+
+	IF hit = 0 AND hit1 = 0 GOTO grapple
+	IF hit = 1 AND hit1 = 1 GOTO grapple
+	win = defend
+	lose = attack
+	IF hit = 1 THEN 
+		win = attack
+		lose = defend
+	END IF
+	'---------------------------------------------------------------------------
+	a$ = "UNION"
+	IF win > 20 THEN a$ = "REBEL"
+	COLOR 14: LOCATE 3, 68: PRINT a$; " VICTORY"
+	LOCATE 4, 71: PRINT "in"
+	LOCATE 5, 69: PRINT globalCity$(globalArmyLoc(defend))
+	a = 1
+	IF win > 20 THEN a = 2
+	CALL flags(a, 0, 0)
+	CALL clrbot
+	COLOR 11: PRINT globalArmyName$(win); " defeats "; globalArmyName$(lose); " in "; globalCity$(globalArmyLoc(defend));
+	CALL TICK(9)
+	'===========================================================================
+	pct! = .01 * globalDEFAC - .03 * globalFort(globalArmyLoc(defend))
+	IF win = attack THEN pct! = 1.3 * pct!
+	SELECT CASE globalArmySize(defend)
+		CASE IS > 300
+			pct! = .9 * pct!
+		CASE IS > 800
+			pct! = .8 * pct!
+	END SELECT
+	xbar = globalArmySize(attack) * pct!
+	vary = xbar * (1 - pct!)
+	CALL normal(xbar, vary, killd)
+	'...........................................................................
+	pct! = .01 * globalATKFAC + .02 * globalFort(globalArmyLoc(defend))
+	IF win = defend THEN pct! = 1.5 * pct!
+	SELECT CASE globalArmySize(attack)
+		CASE IS > 300
+			pct! = .9 * pct!
+		CASE IS > 800
+			pct! = .8 * pct!
+	END SELECT
+	xbar = globalArmySize(defend) * pct!
+	vary = xbar * (1 - pct!)
+	CALL normal(xbar, vary, killa)
+	'===========================================================================
+	killa = .8 * killa + .2 * killd
+	IF killa < 1 THEN killa = 1
+	killd = .8 * killd + .2 * killa
+	IF killd < 1 THEN killd = 1
+	IF killa > 9 * killd THEN killa = 9 * killd
+	IF killd > 5 * killa THEN killd = 5 * killa
+
+	IF killa >= globalArmySize(attack) THEN killa = globalArmySize(attack) - 1
+	IF killd >= globalArmySize(defend) THEN killd = globalArmySize(defend) - 1
+	'---------------------------------------------------------------------------
+	x = INT(100 * odds!): IF x < 1 THEN x = 1
+	a$ = LTRIM$(RTRIM$(STR$(x))) + "%"
+
+	COLOR c
+	LOCATE 1, 1: PRINT "Attack Loss: ";
+	PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
+	CALL strong(attack)
+	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / globalArmySize(attack)))))); "%) �";
+	COLOR 16 - c: PRINT "� Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+	CALL strong(defend)
+	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / globalArmySize(defend)))))); "%)"
+	'---------------------------------------------------------------------------
+	globalMTX$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(globalArmySize(attack)) + "00") + ") "
+	t$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(globalArmySize(defend)) + "00") + ")"
+	globalMTX$(2) = t$
+	IF win = defend THEN 
+		globalMTX$(2) = globalMTX$(1)
+		globalMTX$(1) = t$
+	END IF
+	globalMTX$(3) = "*" + globalArmyName$(win)
+	globalMTX$(4) = globalArmyName$(lose)
+	IF win = defend THEN 
+		globalMTX$(3) = globalArmyName$(win)
+		globalMTX$(4) = "*" + globalArmyName$(lose)
+	END IF
+	a$ = globalCity$(globalArmyLoc(defend)) + ": " + globalMTX$(3) + globalMTX$(1) + " defeats " + globalMTX$(4) + globalMTX$(2)
+	CALL scribe(a$, 0)
+
+	IF globalPlayer = 1 AND (side = 1 AND attack > 20) OR (side = 2 AND attack < 21) THEN
+		COLOR 14
+		CALL clrbot
+		PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
+	END IF
+
+	globalArmySize(attack) = globalArmySize(attack) - killa
+	globalArmySize(defend) = globalArmySize(defend) - killd
+	IF globalArmySize(defend) < 1 THEN globalArmySize(defend) = 1
+	'---------------------------------------------------------------------------
+	s = 1
+	IF attack > 2 THEN s = 2
+	globalCasualty&(s) = globalCasualty&(s) + killa
+	globalCasualty&(3 - s) = globalCasualty&(3 - s) + killd
+	'---------------------------------------------------------------------------
+	s = 1
+	IF win > 20 THEN s = 2
+	globalBatWon(s) = globalBatWon(s) + 1
+	globalVictory(s) = globalVictory(s) + 1
+	CALL icon(globalArmyLoc(defend), 0, 8)
 END SUB
 
 SUB combine (who)
