@@ -2666,44 +2666,74 @@ SUB recruit (who)
 	IF globalCash(who) < 100 GOTO menu1
 	size = 0: COLOR 12
 	globalMTX$(0) = "Recruit"
-	IF who = side AND globalRFlag > 0 THEN FOR i = 1 TO globalRFlag: x = globalRCity(i): globalMTX$(i) = globalCity$(x): globalArray(i) = x: NEXT i: size = globalRFlag: GOTO alldone
-	max = 4: IF RND > .8 THEN max = max - 1
+	IF who = side AND globalRFlag > 0 THEN 
+		FOR i = 1 TO globalRFlag
+			x = globalRCity(i)
+			globalMTX$(i) = globalCity$(x)
+			globalArray(i) = x
+		NEXT i
+		size = globalRFlag
+		GOTO alldone
+	END IF
+	max = 4
+	IF RND > .8 THEN max = max - 1
 	IF globalDifficult < 3 THEN max = max + 1
 
 	FOR i = 1 TO 40
-	IF globalControl(who) > 0 THEN pct! = .6 * max / globalControl(who) ELSE pct! = .3
-	IF size = 0 AND i > 20 THEN pct! = .3
-	IF size < 2 AND i > 30 THEN pct! = .3
-	globalArray(i) = 0
-	IF globalOccupied(i) > 0 AND globalCityP(i) = who THEN pct! = .4
-	IF RND < pct! AND globalCityP(i) = who THEN
-		IF globalRealism > 0 AND globalCityO(i) = 3 - who GOTO foe
-		size = size + 1
-		globalMTX$(size) = globalCity$(i)
-		globalArray(size) = i
-		IF size > max - 1 GOTO alldone
-	END IF
-foe:
+		IF globalControl(who) > 0 THEN 
+			pct! = .6 * max / globalControl(who) 
+		ELSE 
+			pct! = .3
+		END IF
+		IF size = 0 AND i > 20 THEN pct! = .3
+		IF size < 2 AND i > 30 THEN pct! = .3
+		globalArray(i) = 0
+		IF globalOccupied(i) > 0 AND globalCityP(i) = who THEN pct! = .4
+		IF RND < pct! AND globalCityP(i) = who THEN
+			IF globalRealism > 0 AND globalCityO(i) = 3 - who GOTO foe
+			size = size + 1
+			globalMTX$(size) = globalCity$(i)
+			globalArray(size) = i
+			IF size > max - 1 GOTO alldone
+		END IF
+	foe:
 	NEXT i
-alldone:
+	alldone:
 	IF size = 0 GOTO menu1
-	IF who = side AND globalRFlag = 0 THEN FOR i = 1 TO size: globalRCity(i) = globalArray(i): NEXT i: globalRFlag = size
+	IF who = side AND globalRFlag = 0 THEN 
+		FOR i = 1 TO size
+			globalRCity(i) = globalArray(i)
+		NEXT i
+		globalRFlag = size
+	END IF
 	CALL bubble(size)
-'............................................................................
-levy:
+	'............................................................................
+	levy:
 	IF globalCash(who) < 100 GOTO menu1
-	IF (who = side) OR (globalPlayer = 2) THEN CALL clrbot: PRINT globalForce$(who); " funds available "; globalCash(who);
-	globalTLX = 67: globalTLY = 12: globalColour = 3
-	IF who <> side THEN GOSUB randsel: GOTO auto1
+	IF (who = side) OR (globalPlayer = 2) THEN 
+		CALL clrbot
+		PRINT globalForce$(who); " funds available "; globalCash(who);
+	END IF
+	globalTLX = 67
+	globalTLY = 12
+	globalColour = 3
+	IF who <> side THEN
+		GOSUB randsel
+		GOTO auto1
+	END IF
       
 	IF globalChoose > 0 THEN globalChoose = 21 + globalChoose
-	CALL menu(2): CALL clrrite
+	CALL menu(2)
+	CALL clrrite
 	IF globalChoose < 1 GOTO menu1
-auto1:
+	auto1:
 	empty = 0
 	index = globalArray(globalChoose)
 	CALL occupy(index)
-	IF globalOccupied(index) > 0 THEN i = globalOccupied(index): GOTO add2
+	IF globalOccupied(index) > 0 THEN
+		i = globalOccupied(index)
+		GOTO add2
+	END IF
 	CALL commander((who), empty)
        
 	IF who <> side AND empty = 0 GOTO menu1
@@ -2712,57 +2742,63 @@ auto1:
 	GOSUB playb
 	CALL newarmy(who, empty, index)
 	GOTO levy
-'............................................................................
-add2:
+	'............................................................................
+	add2:
 	target = globalArray(globalChoose)
-	x = 45: a$ = ""
+	x = 45
+	a$ = ""
 	IF globalRealism > 0 THEN
 		x = 2 * globalCityV(globalArmyLoc(i)) + 20
 		CALL cutoff(who, target, a)
-		IF a < 1 THEN x = x \ 3: a$ = " ISOLATED !"
+		IF a < 1 THEN x = x \ 3
+		a$ = " ISOLATED !"
 	END IF
 	globalArmySize(i) = globalArmySize(i) + x
 
 	GOSUB playb
 	globalCash(who) = globalCash(who) - 100
-	from = globalArmyLoc(i): x = globalCityX(from) - 12: y = globalCityY(from) - 11
+	from = globalArmyLoc(i)
+	x = globalCityX(from) - 12
+	y = globalCityY(from) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), globalAnima
 	CALL icon(globalArmyLoc(i), 0, 2)
 	IF globalNoise > 0 THEN SOUND 2222, 1
-	COLOR 11: CALL clrbot: PRINT "Army "; i; globalArmyName$(i); " in "; globalCity$(globalArmyLoc(i)); " strength increased to "; : CALL strong(i)
+	COLOR 11
+	CALL clrbot
+	PRINT "Army "; i; globalArmyName$(i); " in "; globalCity$(globalArmyLoc(i)); " strength increased to "; : CALL strong(i)
 	IF a$ <> "" THEN PRINT a$;
 	PUT (x - 9, y - 7), globalAnima, PSET
 	CALL TICK(globalTurbo! - .5)
 	GOTO levy
-randsel:
-		globalChoose = 0: x = 0
-		FOR i = 1 TO size
+	randsel:
+	globalChoose = 0: x = 0
+	FOR i = 1 TO size
 		target = globalArray(i)
 		LOCATE 14 + i, 69
 		x = globalOccupied(target)
 		IF x = 0 XOR globalArmySize(x) < 155 THEN globalChoose = i
-		NEXT i
+	NEXT i
 
 	IF globalChoose = 0 THEN globalChoose = 1 + INT(RND * size)
 	IF globalRealism > 0 THEN
 		x = 0
 		FOR i = 1 TO size
-		target = globalArray(i)
-		IF globalOccupied(target) = 0 THEN
-			y = 3 * globalCityV(target) + 33
-			CALL cutoff(who, target, a)
-			IF a < 1 THEN y = y \ 3
-		ELSE
-			y = 2 * globalCityV(target) + 20
-			CALL cutoff(who, target, a)
-			IF a < 1 THEN y = y \ 3
-		END IF
-		IF y > x AND RND > .5 THEN x = y: globalChoose = i
+			target = globalArray(i)
+			IF globalOccupied(target) = 0 THEN
+				y = 3 * globalCityV(target) + 33
+				CALL cutoff(who, target, a)
+				IF a < 1 THEN y = y \ 3
+			ELSE
+				y = 2 * globalCityV(target) + 20
+				CALL cutoff(who, target, a)
+				IF a < 1 THEN y = y \ 3
+			END IF
+			IF y > x AND RND > .5 THEN x = y: globalChoose = i
 		NEXT i
 	END IF
 	IF globalCash(who) < 100 THEN globalChoose = size
 	RETURN
-playb:
+	playb:
 	IF side = 1 AND globalDifficult < 3 THEN globalArmySize(empty) = globalArmySize(empty) + 15 - 5 * globalDifficult
 	IF side = 2 AND globalDifficult > 3 THEN globalArmySize(empty) = globalArmySize(empty) + 5 * globalDifficult - 15
 	RETURN
@@ -2770,34 +2806,38 @@ menu1:
 END SUB
 
 SUB shiptype (who, i)
-a = 1: IF MID$(globalFleet$(who), i, 1) = "I" THEN a = 2
-CALL shipicon(who, a)
+	a = 1
+	IF MID$(globalFleet$(who), i, 1) = "I" THEN a = 2
+	CALL shipicon(who, a)
 END SUB
 
 SUB showcity
-FOR i = 1 TO 40
-c = 9: IF globalCityP(i) = 2 THEN c = 7
-IF globalCityP(i) = 0 THEN c = 12
-x = globalCityX(i): y = globalCityY(i)
-IF i = globalCapCity(1) OR i = globalCapCity(2) THEN
-	PUT (x - 6, y - 6), Ncap, PSET
-	LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
-	LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
-	PSET (x + 8, y - 4)
-	IF globalFort(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
-	IF globalFort(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
-ELSE
-	IF globalFort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
-	IF globalFort(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-	CIRCLE (globalCityX(i), globalCityY(i)), 4, 0
-	CIRCLE (globalCityX(i), globalCityY(i)), 3, c
-	PAINT (globalCityX(i), globalCityY(i)), c, c
-END IF
-IF globalGraf = 0 GOTO nocon
-	FOR j = 1 TO 6: IF globalMatrix(i, j) > 0 THEN CALL icon(i, globalMatrix(i, j), 11)
-	NEXT j
-nocon:
-NEXT i
+	FOR i = 1 TO 40
+		c = 9
+		IF globalCityP(i) = 2 THEN c = 7
+		IF globalCityP(i) = 0 THEN c = 12
+		x = globalCityX(i)
+		y = globalCityY(i)
+		IF i = globalCapCity(1) OR i = globalCapCity(2) THEN
+			PUT (x - 6, y - 6), Ncap, PSET
+			LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
+			LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
+			PSET (x + 8, y - 4)
+			IF globalFort(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
+			IF globalFort(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
+		ELSE
+			IF globalFort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
+			IF globalFort(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+			CIRCLE (globalCityX(i), globalCityY(i)), 4, 0
+			CIRCLE (globalCityX(i), globalCityY(i)), 3, c
+			PAINT (globalCityX(i), globalCityY(i)), c, c
+		END IF
+		IF globalGraf = 0 GOTO nocon
+			FOR j = 1 TO 6
+				IF globalMatrix(i, j) > 0 THEN CALL icon(i, globalMatrix(i, j), 11)
+			NEXT j
+	nocon:
+	NEXT i
 END SUB
 
 SUB smarts
