@@ -13,7 +13,6 @@ DECLARE SUB cannon ()
 DECLARE SUB capitol ()
 DECLARE SUB capture (active%, c%, s%, flag%)
 DECLARE SUB center (y%, a$)
-DECLARE SUB chessie ()
 DECLARE SUB choices (b1%, wide%)
 DECLARE SUB clrbot ()
 DECLARE SUB combine (who%)
@@ -143,7 +142,7 @@ IF globalRealism > 0 AND globalYear < 1862 THEN
 		globalFleet$(i) = a$
 	NEXT i
 END IF
-iron:
+
 IF globalPlayer < 1 OR globalPlayer > 2 THEN globalPlayer = 1
 IF globalPlayer = 2 OR globalSide = 0 THEN globalSide = 1
 IF globalSide = 1 THEN globalRandBal = 7
@@ -881,7 +880,15 @@ SELECT CASE globalChoose
 				CLS
 				GOTO newgame
 			CASE 4
-				GOTO rusure
+				globalChoose = 23
+				globalMTX$(0) = "Quit"
+				globalMTX$(1) = "Yes"
+				globalMTX$(2) = "No"
+				globalSize = 2: globalColour = 5
+				globalTLX = 67: globalTLY = 15
+				CALL menu(0)
+				CALL clrrite
+				IF globalChoose = 1 THEN END ELSE GOTO menu0
 		END SELECT
 	CASE 99
 		GOTO endrnd
@@ -891,23 +898,6 @@ SELECT CASE globalChoose
 	END SELECT
 	GOTO menu0
 	'                               Subs
-	topbar:
-	LOCATE 1, 1: PRINT SPACE$(80);
-	COLOR 11
-	LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(globalSide); " side "; : COLOR 14: PRINT globalMonth$(month); ","; globalYear; "  "
-	RETURN
-
-	rusure:
-	globalChoose = 23
-	globalMTX$(0) = "Quit"
-	globalMTX$(1) = "Yes"
-	globalMTX$(2) = "No"
-	globalSize = 2: globalColour = 5
-	globalTLX = 67: globalTLY = 15
-	CALL menu(0)
-	CALL clrrite
-	IF globalChoose = 1 THEN END ELSE GOTO menu0
-
 	unionplus:
 	globalUSAdv = 120 * globalDifficult
 	IF globalPlayer = 2 THEN globalUSAdv = 50 * globalDifficult
@@ -3665,28 +3655,6 @@ SUB center (y, a$)
 	LOCATE y, 7 + x: PRINT a$
 END SUB
 
-SUB chessie
-	COLOR 10
-	LINE (500, 185)-(505, 180): LINE -(505, 175)
-	LINE -(500, 170): LINE -(490, 165)
-	LINE -(495, 160): LINE -(490, 155)
-	LINE -(485, 150): LINE -(495, 155)
-	LINE -(495, 145): LINE -(490, 140)
-	LINE -(485, 130): LINE -(470, 120)
-	LINE -(470, 110): LINE -(475, 120)
-	LINE -(485, 120): LINE -(485, 115)
-	LINE -(480, 100): LINE -(485, 90)
-	LINE -(495, 80): LINE -(500, 80)
-	LINE -(500, 85): LINE -(495, 90)
-	LINE -(495, 100): LINE -(495, 115)
-	LINE -(500, 120): LINE -(500, 130)
-	LINE -(515, 135): LINE -(515, 140)
-	LINE -(510, 160): LINE -(520, 145)
-	LINE -(525, 120): LINE -(525, 115)
-	LINE -(515, 85): LINE -(527, 95)
-	PAINT (500, 400), 1, 10
-	PAINT (510, 110), 2
-END SUB
 
 SUB clrbot
 	LOCATE 29, 1: PRINT SPACE$(79);
@@ -5205,7 +5173,26 @@ SUB usa
 	LINE -(510, 206)
 
 	'=========================== Chesapeake ====================================
-	CALL chessie
+	COLOR 10
+	LINE (500, 185)-(505, 180): LINE -(505, 175)
+	LINE -(500, 170): LINE -(490, 165)
+	LINE -(495, 160): LINE -(490, 155)
+	LINE -(485, 150): LINE -(495, 155)
+	LINE -(495, 145): LINE -(490, 140)
+	LINE -(485, 130): LINE -(470, 120)
+	LINE -(470, 110): LINE -(475, 120)
+	LINE -(485, 120): LINE -(485, 115)
+	LINE -(480, 100): LINE -(485, 90)
+	LINE -(495, 80): LINE -(500, 80)
+	LINE -(500, 85): LINE -(495, 90)
+	LINE -(495, 100): LINE -(495, 115)
+	LINE -(500, 120): LINE -(500, 130)
+	LINE -(515, 135): LINE -(515, 140)
+	LINE -(510, 160): LINE -(520, 145)
+	LINE -(525, 120): LINE -(525, 115)
+	LINE -(515, 85): LINE -(527, 95)
+	PAINT (500, 400), 1, 10
+	PAINT (510, 110), 2
 	'=============== Ohio, Pennslyvania, Maryland, Virginia =====================
 	LINE (291, 111)-(301, 101), 1
 	LINE -(316, 96), 1
