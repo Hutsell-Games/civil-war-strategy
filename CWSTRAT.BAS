@@ -1292,14 +1292,21 @@ SUB battle (attack, defend, win, lose)
 END SUB
 
 SUB combine (who)
-	globalColour = 3: target = 0: globalHilite = 3
+	globalColour = 3
+	target = 0
+	globalHilite = 3
 	globalTLX = 67: globalTLY = 2
 	CALL starfin(star, fin, who)
 	size = 0
 	FOR i = 1 TO 40
 		IF globalCityP(i) = who AND globalOccupied(i) > 0 THEN
 			FOR j = star TO fin
-			IF globalArmyLoc(j) = i AND globalOccupied(i) <> j AND globalArmyMove(j) = 0 THEN size = size + 1: globalMTX$(size) = globalCity$(i): globalArray(size) = i: EXIT FOR
+				IF globalArmyLoc(j) = i AND globalOccupied(i) <> j AND globalArmyMove(j) = 0 THEN 
+					size = size + 1
+					globalMTX$(size) = globalCity$(i)
+					globalArray(size) = i
+					EXIT FOR
+				END IF
 			NEXT j
 		END IF
 	NEXT i
@@ -1307,22 +1314,41 @@ SUB combine (who)
 	IF size = 0 THEN who = -1: EXIT SUB
 	CALL bubble(size)
 
-	IF who <> side THEN globalChoose = 1 + INT(size * RND): GOTO join
+	IF who <> side THEN 
+		globalChoose = 1 + INT(size * RND)
+		GOTO join
+	END IF
 	globalMTX$(0) = "Join"
-		globalChoose = 31: globalHilite = 11
-		CALL menu(9): CALL clrrite
-join:
-		IF globalChoose < 1 GOTO nocity2
-		target = globalArray(globalChoose)
-		CALL clrbot: PRINT "Combining "; globalForce$(who); " armies in "; globalCity$(target); :  CALL TICK(globalTurbo!)
+	globalChoose = 31
+	globalHilite = 11
+	CALL menu(9)
+	CALL clrrite
+	join:
+	IF globalChoose < 1 GOTO nocity2
+	target = globalArray(globalChoose)
+	CALL clrbot
+	PRINT "Combining "; globalForce$(who); " armies in "; globalCity$(target);
+	CALL TICK(globalTurbo!)
 
-		globalArmySize(0) = 0: globalArmyLead(0) = 0: globalArmyExper(0) = 0: globalArmyLoc(0) = target
-		globalArmyName$(0) = "": globalSupply(0) = 0: globalArmyMove(0) = 0
-'...........................................................................
-		best = 0: x = 0: spin = 0
-		FOR j = star TO fin
+	globalArmySize(0) = 0
+	globalArmyLead(0) = 0
+	globalArmyExper(0) = 0
+	globalArmyLoc(0) = target
+	globalArmyName$(0) = ""
+	globalSupply(0) = 0
+	globalArmyMove(0) = 0
+	'...........................................................................
+	best = 0
+	x = 0
+	spin = 0
+	FOR j = star TO fin
 		IF globalArmyMove(j) <> 0 OR globalArmyLoc(j) <> target OR globalArmySize(j) = 0 GOTO dork1
-		IF globalArmySize(0) + globalArmySize(j) > 1250 THEN CALL clrbot: PRINT "Cannot combine "; globalArmyName$(j); "... TOO LARGE"; : CALL TICK(globalTurbo!): GOTO dork1
+		IF globalArmySize(0) + globalArmySize(j) > 1250 THEN 
+			CALL clrbot
+			PRINT "Cannot combine "; globalArmyName$(j); "... TOO LARGE";
+			CALL TICK(globalTurbo!)
+			GOTO dork1
+		END IF
 
 		IF globalArmyLead(j) > x THEN
 			x = globalArmyLead(j)
@@ -1336,41 +1362,50 @@ join:
 		pct! = (globalArmySize(j) / globalArmySize(0))
 		spin = spin + 1
 		globalArmyExper(0) = (1 - pct!) * globalArmyExper(0) + pct! * globalArmyExper(j)
-		CALL clrbot: PRINT globalArmyName$(j); " is combining his "; : CALL strong(j): PRINT " forces"; : CALL TICK(globalTurbo!)
+		CALL clrbot
+		PRINT globalArmyName$(j); " is combining his "; : CALL strong(j): PRINT " forces";
+		CALL TICK(globalTurbo!)
 		globalSupply(0) = globalSupply(0) + globalSupply(j)
 		IF globalSupply(0) > 10 THEN globalSupply(0) = 10
-		globalArmySize(j) = 0: globalArmyLoc(j) = 0: globalArmyExper(j) = 0: globalArmyMove(j) = 0
+		globalArmySize(j) = 0
+		globalArmyLoc(j) = 0
+		globalArmyExper(j) = 0
+		globalArmyMove(j) = 0
 		globalLName$(j) = globalArmyName$(j)
-		globalArmyLead(j) = 0: globalSupply(j) = 0: globalArmyName$(j) = ""
-dork1:
-		NEXT j
+		globalArmyLead(j) = 0
+		globalSupply(j) = 0
+		globalArmyName$(j) = ""
+	dork1:
+	NEXT j
 
-		CALL clrbot
-		IF who <> side AND spin = 0 THEN EXIT SUB
-		IF spin = 0 THEN
-				PRINT "No valid armies to combine at this time in "; globalCity$(target);
-				TICK globalTurbo!
-				EXIT SUB
-		END IF
-		globalArmySize(best) = globalArmySize(0): globalArmyLead(best) = globalArmyLead(0)
-		globalArmyExper(best) = globalArmyExper(0): globalSupply(best) = globalSupply(0)
-		globalArmyLoc(best) = target
-		globalArmyName$(best) = globalArmyName$(0)
-		globalLName$(best) = ""
-		IF spin > 1 THEN
+	CALL clrbot
+	IF who <> side AND spin = 0 THEN EXIT SUB
+	IF spin = 0 THEN
+		PRINT "No valid armies to combine at this time in "; globalCity$(target);
+		TICK globalTurbo!
+		EXIT SUB
+	END IF
+	globalArmySize(best) = globalArmySize(0)
+	globalArmyLead(best) = globalArmyLead(0)
+	globalArmyExper(best) = globalArmyExper(0)
+	globalSupply(best) = globalSupply(0)
+	globalArmyLoc(best) = target
+	globalArmyName$(best) = globalArmyName$(0)
+	globalLName$(best) = ""
+	IF spin > 1 THEN
 		PRINT "New army "; best; " of "; : CALL strong(best): PRINT " is commanded by "; globalArmyName$(best);
 		globalArmyMove(best) = -1
-		ELSE
+	ELSE
 		PRINT "Only 1 eligible army -- cannot combine at this time";
-		END IF
-		IF who = side THEN CALL TICK(globalTurbo!)
-		IF globalNoise > 0 THEN SOUND 4000, .7
+	END IF
+	IF who = side THEN CALL TICK(globalTurbo!)
+	IF globalNoise > 0 THEN SOUND 4000, .7
 	       
-		CALL showcity
-		CALL placearmy(best)
-		CALL icon(target, 0, 6)
-		globalOccupied(target) = best
-		CALL stax(who)
+	CALL showcity
+	CALL placearmy(best)
+	CALL icon(target, 0, 6)
+	globalOccupied(target) = best
+	CALL stax(who)
 nocity2:
 END SUB
 
