@@ -19,3 +19,4 @@ This branch represents the minimal changes needed to make CWS executable by QB64
 11. Remove unused sub declarations for banner and mountain.
 12. Fixed `globalArmyLocrmyLoc` and similar by replacing with `globalArmyLoc` and similar
 13. Minor code reformatting
+14. Remove screensaver related code

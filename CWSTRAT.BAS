@@ -54,7 +54,6 @@ DECLARE SUB roman (target%, a$)
 DECLARE SUB rwin ()
 DECLARE SUB schooner ()
 DECLARE SUB scribe (a$, flag%)
-DECLARE SUB scrnsavr ()
 DECLARE SUB shen ()
 DECLARE SUB ships ()
 DECLARE SUB shipicon (who%, flag%)
@@ -5821,7 +5820,6 @@ SUB menu (switch%)
 	a$ = INKEY$
 	IF a$ = "" GOTO crsr
 	IF ASC(a$) = 13 THEN RETURN
-	IF ASC(a$) = 2 THEN GOTO boss
 	IF LEN(a$) = 2 GOTO arrows
 	IF switch = 3 THEN globalChoose = -ASC(UCASE$(a$)): GOTO called
 	IF ASC(a$) = 27 THEN globalChoose = -1: GOTO called
@@ -5869,8 +5867,6 @@ SUB menu (switch%)
 	noadjust:
 	IF globalTLX = 0 THEN globalTLX = INT(40.5 - .5 * wide)
 	RETURN
-	boss:
-	CALL scrnsavr
 	boss1:
 	CLS
 	CALL usa
@@ -6046,69 +6042,5 @@ SUB schooner
 	x = 185 + 200 * RND
 	LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
 	NEXT k
-END SUB
-
-SUB scrnsavr
-	SCREEN 12
-	most = 5
-	CLS
-	sec! = 0
-	DO WHILE TIMER - sec! < .5: LOOP
-	DIM x(2), y(2)
-	RANDOMIZE TIMER
-	boxes = 1: IF RND > .5 THEN boxes = 0: aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
-
-	dx = 20: dy = 5: c = 1
-	GOSUB newbox
-
-	animate:
-	IF boxes = 0 THEN
-		CIRCLE (x(1), y(1)), .5 * ABS(x(1) - x(2)), c, , , aspect!
-	ELSE
-		LINE (x(1), y(1))-(x(2), y(2)), c, B
-	END IF
-	PAINT (x(1) + 1, y(1) + 1), 16 * RND, c
-
-	sec! = TIMER
-	DO: a$ = INKEY$: LOOP WHILE a$ = "" AND TIMER - sec! < .1
-	IF a$ <> "" THEN IF ASC(a$) = 2 THEN EXIT SUB
-
-	x(1) = x(1) + dx
-	x(2) = x(2) + dx
-
-	IF x(1) < 1 THEN dx = 20: x(1) = 1: GOSUB newbox1
-	IF x(2) > 675 THEN dx = -20: GOSUB newbox1
-
-	y(1) = y(1) + dy
-	y(2) = y(2) + dy
-	IF y(1) < 1 THEN dy = 5: y(1) = 1: GOSUB newbox1
-	IF y(2) > 480 THEN dy = -5: GOSUB newbox1
-
-	GOTO animate
-			
-	newbox:
-	x(1) = 1 + 650 * RND
-	IF x(1) < 1 THEN x(1) = 1
-	x(2) = x(1) + 30 + 50 * RND: IF x(2) > 639 THEN x(2) = 639
-	IF x(2) < 1 THEN x(2) = x(1)
-
-	y(1) = 10 + 100 * RND
-	y(2) = y(1) + 50 + 120 * RND
-	RETURN
-
-	newbox1:
-	reps = reps + 1
-	IF reps >= most THEN CLS : reps = 0: most = 3 + 10 * RND: IF RND > .9 THEN boxes = 1 - boxes
-	y(2) = y(1) + 20 + 100 * RND
-	IF y(2) > 475 THEN y(2) = 475
-	x(2) = x(1) + 50 + 50 * RND
-	IF x(2) > 675 THEN x(2) = 675
-	c = c + 1
-	IF c > 15 THEN c = 1
-	IF RND > .5 THEN RETURN
-	IF dy = 5 THEN dy = 5 + 10 * RND
-	IF dy = -5 THEN dy = -5 - 10 * RND
-	IF boxes = 0 THEN aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
-	RETURN
 END SUB
 
