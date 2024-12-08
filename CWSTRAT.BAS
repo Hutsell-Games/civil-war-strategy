@@ -566,349 +566,368 @@ SELECT CASE globalChoose
       	END SELECT
 		globalChoose = 21 + globalChoose
 		GOTO optmen
-'==========================================================================
-'                               Utility Menu
-'==========================================================================
-	CASE 8
-utile:
-	chosit = 29
-	globalMTX$(0) = "Utility"
-	globalMTX$(1) = "Side": IF globalPlayer = 2 THEN globalMTX$(2) = ""
-	globalMTX$(2) = "1 Player": IF globalPlayer = 2 THEN globalMTX$(2) = "2 Player"
-	globalMTX$(3) = "Graphics" + STR$(globalGraf)
-	globalMTX$(4) = "Noise": IF globalNoise > 0 THEN globalMTX$(4) = globalMTX$(4) + STRING$(globalNoise, "*")
-	globalMTX$(5) = "Display" + STR$(globalTurbo!)
-	a$ = STR$(globalDifficult): IF side = 1 THEN a$ = STR$(6 - globalDifficult)
-	globalMTX$(6) = "Balance" + a$
-	globalMTX$(7) = "End Cond"
-	a$ = "�": IF globalRandBal = 0 THEN a$ = ""
-	globalMTX$(8) = "Rndom Evt " + a$
-	globalMTX$(9) = "Vary Start"
-	a$ = "": IF globalJanCam = 1 THEN a$ = "�"
-	globalMTX$(10) = "Jan Campgn" + a$
-	a$ = "": IF globalRealism = 1 THEN a$ = "�"
-	globalMTX$(11) = "Realism " + a$
-	globalMTX$(12) = "Chk Links"
-	a$ = "": IF globalHistory = 1 THEN a$ = "�"
-	globalMTX$(13) = "History" + a$
-	size = 13: globalTLX = 67: globalTLY = 11
-	COLOR 11: LOCATE globalTLY - 2, globalTLX: PRINT "esc=Main Menu"
-	IF globalPlayer = 1 THEN size = 14: globalMTX$(14) = "Aggress" + STR$(globalBold)
-	CALL menu(-1): CALL clrrite
+	CASE 8 ' Utility Menu
+		utile:
+		chosit = 29
+		globalMTX$(0) = "Utility"
+		globalMTX$(1) = "Side": IF globalPlayer = 2 THEN globalMTX$(2) = ""
+		globalMTX$(2) = "1 Player": IF globalPlayer = 2 THEN globalMTX$(2) = "2 Player"
+		globalMTX$(3) = "Graphics" + STR$(globalGraf)
+		globalMTX$(4) = "Noise": IF globalNoise > 0 THEN globalMTX$(4) = globalMTX$(4) + STRING$(globalNoise, "*")
+		globalMTX$(5) = "Display" + STR$(globalTurbo!)
+		a$ = STR$(globalDifficult): IF side = 1 THEN a$ = STR$(6 - globalDifficult)
+		globalMTX$(6) = "Balance" + a$
+		globalMTX$(7) = "End Cond"
+		a$ = "�": IF globalRandBal = 0 THEN a$ = ""
+		globalMTX$(8) = "Rndom Evt " + a$
+		globalMTX$(9) = "Vary Start"
+		a$ = "": IF globalJanCam = 1 THEN a$ = "�"
+		globalMTX$(10) = "Jan Campgn" + a$
+		a$ = "": IF globalRealism = 1 THEN a$ = "�"
+		globalMTX$(11) = "Realism " + a$
+		globalMTX$(12) = "Chk Links"
+		a$ = "": IF globalHistory = 1 THEN a$ = "�"
+		globalMTX$(13) = "History" + a$
+		size = 13: globalTLX = 67: globalTLY = 11
+		COLOR 11: LOCATE globalTLY - 2, globalTLX: PRINT "esc=Main Menu"
+		IF globalPlayer = 1 THEN 
+			size = 14
+			globalMTX$(14) = "Aggress" + STR$(globalBold)
+		END IF
+		CALL menu(-1)
+		CALL clrrite
 	    SELECT CASE globalChoose
-'-------------------------------------------------------------------------
-'                               Swap Sides
-'-------------------------------------------------------------------------
-	    CASE 1
-		IF globalPlayer = 2 GOTO menu0
-		side = 3 - side: COLOR 9: IF side = 2 THEN COLOR 7
-		CALL clrbot: PRINT "Now playing "; globalForce$(side); " side"; : IF globalNoise > 0 THEN SOUND 999, 1
-		IF side = 1 THEN globalRandBal = 7
-		IF side = 2 THEN globalRandBal = 3
-		CALL topbar
-		GOTO menu0
-'-------------------------------------------------------------------------
-'                               Solo or 2 Player
-'-------------------------------------------------------------------------
-	    CASE 2
-		globalPlayer = 3 - globalPlayer: CALL clrbot: COLOR 12
-		IF globalNoise > 0 THEN SOUND 999, 1
-		a$ = "Solo": IF globalPlayer = 2 THEN a$ = "2 Player"
-		PRINT a$; " Game";
-		globalChoose = 23: GOTO utile
-'-------------------------------------------------------------------------
-'                               Graphics
-'-------------------------------------------------------------------------
-	    CASE 3
-		globalGraf = globalGraf + 1
-		IF globalGraf > 3 THEN globalGraf = 0
-		a$ = "ROADS"
-		IF globalGraf = 0 THEN a$ = "DISABLED"
-		IF globalGraf = 2 THEN a$ = "CITY NAMES"
-		IF globalGraf = 3 THEN a$ = "FULL"
-		CLS
-		CALL usa
-		CALL clrbot: COLOR 11: PRINT "Graphics : "; a$; : IF globalNoise > 0 THEN SOUND 2700, 1
-		globalChoose = 24: GOTO utile
-'-------------------------------------------------------------------------
-'                               Sounds
-'-------------------------------------------------------------------------
-	    CASE 4
-		CALL clrrite: globalChoose = globalNoise + 22
-		globalMTX$(0) = "SOUNDS"
-		globalMTX$(1) = "Quiet"
-		globalMTX$(2) = "Sound"
-		globalMTX$(3) = " & Sound"
-		size = 3: globalTLX = 67: globalTLY = 12
-		CALL menu(0): CALL clrrite
-		IF globalChoose < 1 GOTO menu0
-		COLOR 11: CALL clrbot: PRINT "Sound Option : "; globalMTX$(globalChoose);
-		globalNoise = globalChoose - 1
-		IF globalNoise > 0 THEN SOUND 999, 1
-		globalChoose = 25: GOTO utile
-'-------------------------------------------------------------------------
-'                               Display Speed
-'-------------------------------------------------------------------------
-	    CASE 5
-		globalChoose = globalTurbo! + 21
-		globalMTX$(0) = "Display"
-		globalMTX$(1) = "Fast"
-		globalMTX$(2) = "Normal"
-		globalMTX$(3) = "Slow"
-		globalMTX$(4) = "Very Slow"
-		globalMTX$(5) = "Reg Color": IF globalBW > 0 THEN globalMTX$(5) = "Alt Color"
-		globalTLX = 67: globalTLY = 15: size = 5
-		CALL menu(0): CALL clrrite
+	    CASE 1 ' Swap Sides
+			IF globalPlayer = 2 GOTO menu0
+			side = 3 - side
+			COLOR 9
+			IF side = 2 THEN COLOR 7
+			CALL clrbot
+			PRINT "Now playing "; globalForce$(side); " side";
+			IF globalNoise > 0 THEN SOUND 999, 1
+			IF side = 1 THEN globalRandBal = 7
+			IF side = 2 THEN globalRandBal = 3
+			CALL topbar
+			GOTO menu0
+	    CASE 2 ' Solo or 2 Player
+			globalPlayer = 3 - globalPlayer
+			CALL clrbot
+			COLOR 12
+			IF globalNoise > 0 THEN SOUND 999, 1
+			a$ = "Solo"
+			IF globalPlayer = 2 THEN a$ = "2 Player"
+			PRINT a$; " Game";
+			globalChoose = 23
+			GOTO utile
+	    CASE 3 ' Graphics
+			globalGraf = globalGraf + 1
+			IF globalGraf > 3 THEN globalGraf = 0
+			a$ = "ROADS"
+			IF globalGraf = 0 THEN a$ = "DISABLED"
+			IF globalGraf = 2 THEN a$ = "CITY NAMES"
+			IF globalGraf = 3 THEN a$ = "FULL"
+			CLS
+			CALL usa
+			CALL clrbot
+			COLOR 11: PRINT "Graphics : "; a$; 
+			IF globalNoise > 0 THEN SOUND 2700, 1
+			globalChoose = 24
+	    CASE 4 ' Sounds
+			CALL clrrite
+			globalChoose = globalNoise + 22
+			globalMTX$(0) = "SOUNDS"
+			globalMTX$(1) = "Quiet"
+			globalMTX$(2) = "Sound"
+			globalMTX$(3) = " & Sound"
+			size = 3
+			globalTLX = 67
+			globalTLY = 12
+			CALL menu(0)
+			CALL clrrite
+			IF globalChoose < 1 GOTO menu0
+			COLOR 11
+			CALL clrbot
+			PRINT "Sound Option : "; globalMTX$(globalChoose);
+			globalNoise = globalChoose - 1
+			IF globalNoise > 0 THEN SOUND 999, 1
+			globalChoose = 25
+			GOTO utile
+	    CASE 5 ' Display Speed
+			globalChoose = globalTurbo! + 21
+			globalMTX$(0) = "Display"
+			globalMTX$(1) = "Fast"
+			globalMTX$(2) = "Normal"
+			globalMTX$(3) = "Slow"
+			globalMTX$(4) = "Very Slow"
+			globalMTX$(5) = "Reg Color": IF globalBW > 0 THEN globalMTX$(5) = "Alt Color"
+			globalTLX = 67: globalTLY = 15: size = 5
+			CALL menu(0)
+			CALL clrrite
+			SELECT CASE globalChoose
+				CASE IS < 1
+				CASE IS < 5
+					globalTurbo! = globalChoose
+					IF globalTurbo! = 4 THEN globalTurbo! = 8
+					CALL clrbot: COLOR 11
+					PRINT "Display Speed : "; globalMTX$(globalChoose);
+				CASE 5
+					globalBW = 1 - globalBW
+					CLS
+					CALL usa
+					CALL topbar
+			END SELECT
+			globalChoose = 26
+			GOTO utile
+	   	CASE 6 ' Play Balance
+			globalChoose = globalDifficult + 21
+			globalMTX$(0) = "Balance"
+			globalMTX$(1) = "Rebel ++"
+			globalMTX$(2) = "Rebel +"
+			globalMTX$(3) = "Balanced"
+			globalMTX$(4) = "Union +"
+			globalMTX$(5) = "Union ++"
+			globalTLX = 67: globalTLY = 15: size = 5
+			CALL menu(8)
+			CALL clrrite
+			IF globalChoose < 1 GOTO menu0
+			CALL clrbot
+			COLOR 11
+			CALL clrbot
+			PRINT "Play Balance : "; globalMTX$(globalChoose);
+			globalDifficult = globalChoose
+			GOSUB unionplus
+			globalChoose = 27
+			GOTO utile
+	   	CASE 7 ' Ending Conditions
+			CALL endit
+			globalChoose = 28
+			GOTO utile
+	   	CASE 8 ' Random Events
+			globalMTX$(0) = "Random Events"
+			size = 4: globalTLX = 30: globalTLY = 8
+			globalMTX$(1) = "OFF"
+			globalMTX$(2) = "Favor Union ": IF globalRandBal = 3 THEN globalMTX$(2) = globalMTX$(2) + " "
+			globalMTX$(3) = "Neutral     ": IF globalRandBal = 5 THEN globalMTX$(3) = globalMTX$(3) + " "
+			globalMTX$(4) = "Favor Rebels": IF globalRandBal = 7 THEN globalMTX$(4) = globalMTX$(4) + " "
+			globalColour = 5
+			CALL menu(0)
+			globalColour = 4
+
+			SELECT CASE globalChoose
+			CASE 1
+				globalRandBal = 0
+				t$ = ""
+			CASE 2
+				globalRandBal = 3
+			CASE 3
+				globalRandBal = 5
+			CASE 4
+				globalRandBal = 7
+			CASE ELSE
+			END SELECT
+			IF globalChoose > 1 AND globalChoose < 5 THEN t$ = globalMTX$(globalChoose)
+			CALL clrbot
+			a$ = ""
+			IF globalRandBal = 0 THEN a$ = "OFF"
+			COLOR 11: PRINT "Random Events : "; a$; " "; t$;
+			COLOR 14: PRINT "			press a key";
+			DO WHILE INKEY$ = "": LOOP
+			CLS
+			CALL usa
+			globalChoose = 29
+			GOTO utile
+	   	CASE 9 ' Vary Start Conditions
+			CALL filer(1)
+			globalCash(1) = globalCash(1) - 100 + 200 * RND
+			globalCash(2) = globalCash(2) + 100 + 200 * RND
+			globalBold = 5 * RND
+			FOR k = 1 TO 6
+				IF RND > .6 THEN
+				globalArmyLoc(k) = 0
+				globalArmySize(k) = 0
+				globalArmyLead(k) = 0
+				globalArmyExper(k) = 0
+				globalArmyMove(k) = 0
+				globalSupply(k) = 0
+				END IF
+			NEXT k
+			FOR k = 21 TO 6
+				IF RND > .6 THEN
+				globalArmyLoc(k) = 0
+				globalArmySize(k) = 0
+				globalArmyLead(k) = 0
+				globalArmyExper(k) = 0
+				globalArmyMove(k) = 0
+				globalSupply(k) = 0
+				END IF
+			NEXT k
+			FOR k = 1 TO 40
+				CALL occupy(k)
+			NEXT k
+			globalNavySize(1) = 10 * RND
+			IF globalNavySize(1) = 0 THEN globalNavyLoc(1) = 0
+			globalNavySize(2) = 10 * RND
+			IF globalNavySize(2) > 0 THEN globalNavyLoc(2) = 27
+			FOR i = 1 TO 2
+				globalFleet$(i) = ""
+				FOR j = 1 TO globalNavySize(i)
+					a$ = "W"
+					IF RND > .45 * side THEN a$ = "I"
+					globalFleet$(i) = globalFleet$(i) + a$
+				NEXT j
+			NEXT i
+			IF RND > .7 THEN globalCapCity(2) = 25
+
+			FOR k = 1 TO 40
+				IF RND > .8 THEN 
+					globalRating(k) = globalRating(k) - 3 + 6 * RND
+					IF globalRating(k) > 9 THEN globalRating(k) = 9
+				END IF
+				IF globalRating(k) < 1 THEN globalRating(k) = 1
+			NEXT k
+			CLS
+			CALL usa
+			globalChoose = 30
+			GOTO utile
+	   	CASE 10 ' January Campaigns
+			globalJanCam = 1 - globalJanCam
+			a$ = "PROHIBITED"
+			IF globalJanCam = 1 THEN a$ = "ALLOWED"
+			COLOR 11
+			CALL clrbot
+			PRINT "January Campaigns : "; a$;
+			globalChoose = 31
+			GOTO utile
+	   	CASE 11 ' Realism Switch
+			globalRealism = 1 - globalRealism
+			CALL clrbot
+			COLOR 11
+			IF globalRealism = 0 THEN
+				PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
+			ELSE
+				PRINT "REALISM ON: Recruiting based on CITY SIZE";
+				IF side = 2 AND globalRandBal = 1 AND globalRandBal < 5 THEN globalRandBal = globalRandBal + 2
+				GOSUB unionplus
+			END IF
+				globalChoose = 32
+				GOTO utile
+	   	CASE 12 ' Check Map Links
+			CALL integrity
+			CALL TICK(99)
+			CALL usa
+	  	CASE 13 ' History
+			globalHistory = 1 - globalHistory
+			a$ = "OFF"
+			IF globalHistory = 1 THEN a$ = "ON"
+			CALL clrbot
+			PRINT "History is now "; a$;
+			globalChoose = 34
+			GOTO utile
+	  	CASE 14 ' Aggression
+			globalBold = globalBold + 1
+			IF globalBold > 5 THEN globalBold = 0
+			SELECT CASE globalBold
+				CASE 0: a$ = "PASSIVE"
+				CASE 1: a$ = "TIMID"
+				CASE 2: a$ = "CAUTIOUS"
+				CASE 3: a$ = "NORMAL"
+				CASE 4: a$ = "BOLD"
+				CASE 5: a$ = "RECKLESS"
+			END SELECT
+			CALL clrbot
+			COLOR 11
+			PRINT "Enemy Aggression : "; a$; " ("; globalBold; ")";
+			globalChoose = 35
+			GOTO utile
+		CASE ELSE
+		END SELECT
+	CASE 9 ' Files
+		IF NOT _FILEEXISTS("*.sav") THEN globalFileL = 0
+		filex:
+		globalChoose = 23
+		chosit = 30
+		IF globalYear = 1861 THEN globalChoose = 22
+		globalMTX$(0) = "Options"
+		globalMTX$(1) = "Load": IF globalFileL = 0 THEN globalMTX$(1) = "-": globalChoose = 23
+		globalMTX$(2) = "Save"
+		globalMTX$(3) = "New Game"
+		globalMTX$(4) = "Quit to DOS"
+		size = 4: globalTLX = 67: globalTLY = 15
+		CALL menu(0)
+		CALL clrrite
 		SELECT CASE globalChoose
 			CASE IS < 1
-			CASE IS < 5
-				globalTurbo! = globalChoose
-				IF globalTurbo! = 4 THEN globalTurbo! = 8
-				CALL clrbot: COLOR 11
-				PRINT "Display Speed : "; globalMTX$(globalChoose);
-			CASE 5
-				globalBW = 1 - globalBW
+				GOTO menu0
+			CASE 1, 2
+				loader:
+				IF globalChoose = 1 AND globalFileL = 0 GOTO filex
+				CALL filer(globalChoose + 1)
+				IF globalChoose = 1 THEN 
+					globalRFlag = 0
+					globalMFlag = 0
+					globalNFlag = 0
+				END IF
+				GOTO menu0
+			CASE 3
+				OPEN "O", 1, "cws.cfg"
+				WRITE #1, side, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
+				CLOSE #1
 				CLS
-				CALL usa
-				CALL topbar
+				GOTO newgame
+			CASE 4
+				GOTO rusure
 		END SELECT
-		globalChoose = 26: GOTO utile
-'-------------------------------------------------------------------------
-'                               Play Balance
-'-------------------------------------------------------------------------
-	   CASE 6
-		globalChoose = globalDifficult + 21
-		globalMTX$(0) = "Balance"
-		globalMTX$(1) = "Rebel ++"
-		globalMTX$(2) = "Rebel +"
-		globalMTX$(3) = "Balanced"
-		globalMTX$(4) = "Union +"
-		globalMTX$(5) = "Union ++"
-		globalTLX = 67: globalTLY = 15: size = 5
-		CALL menu(8): CALL clrrite
-		IF globalChoose < 1 GOTO menu0
-		CALL clrbot
-		COLOR 11: CALL clrbot: PRINT "Play Balance : "; globalMTX$(globalChoose);
-		globalDifficult = globalChoose
-		GOSUB unionplus
-		globalChoose = 27: GOTO utile
-'-------------------------------------------------------------------------
-'                               Ending Conditions
-'-------------------------------------------------------------------------
-	   CASE 7
-		CALL endit
-		globalChoose = 28: GOTO utile
-'-------------------------------------------------------------------------
-'                           Random Events Options
-'-------------------------------------------------------------------------
-	   CASE 8
-		 globalMTX$(0) = "Random Events"
-		 size = 4: globalTLX = 30: globalTLY = 8
-		 globalMTX$(1) = "OFF"
-		 globalMTX$(2) = "Favor Union ": IF globalRandBal = 3 THEN globalMTX$(2) = globalMTX$(2) + " "
-		 globalMTX$(3) = "Neutral     ": IF globalRandBal = 5 THEN globalMTX$(3) = globalMTX$(3) + " "
-		 globalMTX$(4) = "Favor Rebels": IF globalRandBal = 7 THEN globalMTX$(4) = globalMTX$(4) + " "
-		 globalColour = 5
-		 CALL menu(0)
-		 globalColour = 4
-
-		 SELECT CASE globalChoose
-		 CASE 1
-		 globalRandBal = 0: t$ = ""
-		 CASE 2
-		 globalRandBal = 3
-		 CASE 3
-		 globalRandBal = 5
-		 CASE 4
-		 globalRandBal = 7
-		 CASE ELSE
-		 END SELECT
-		 IF globalChoose > 1 AND globalChoose < 5 THEN t$ = globalMTX$(globalChoose)
-		 CALL clrbot
-		 a$ = "": IF globalRandBal = 0 THEN a$ = "OFF"
-		 COLOR 11: PRINT "Random Events : "; a$; " "; t$;
-		 COLOR 14: PRINT "			press a key";
-		 DO WHILE INKEY$ = "": LOOP
-		 CLS
-		 CALL usa
-		 globalChoose = 29
-		 GOTO utile
-'-------------------------------------------------------------------------
-'                              Vary Start Conditions
-'-------------------------------------------------------------------------
-	   CASE 9
-		CALL filer(1)
-		globalCash(1) = globalCash(1) - 100 + 200 * RND
-		globalCash(2) = globalCash(2) + 100 + 200 * RND
-		globalBold = 5 * RND
-		FOR k = 1 TO 6
-			IF RND > .6 THEN
-			globalArmyLoc(k) = 0
-			globalArmySize(k) = 0
-			globalArmyLead(k) = 0
-			globalArmyExper(k) = 0
-			globalArmyMove(k) = 0
-			globalSupply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 21 TO 6
-			IF RND > .6 THEN
-			globalArmyLoc(k) = 0: globalArmySize(k) = 0: globalArmyLead(k) = 0
-			globalArmyExper(k) = 0: globalArmyMove(k) = 0: globalSupply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 1 TO 40: CALL occupy(k): NEXT k
-		globalNavySize(1) = 10 * RND: IF globalNavySize(1) = 0 THEN globalNavyLoc(1) = 0
-		globalNavySize(2) = 10 * RND: IF globalNavySize(2) > 0 THEN globalNavyLoc(2) = 27
-		FOR i = 1 TO 2
-			globalFleet$(i) = ""
-			FOR j = 1 TO globalNavySize(i)
-			a$ = "W": IF RND > .45 * side THEN a$ = "I"
-			globalFleet$(i) = globalFleet$(i) + a$
-		NEXT j
-		NEXT i
-		IF RND > .7 THEN globalCapCity(2) = 25
-
-		FOR k = 1 TO 40
-		IF RND > .8 THEN globalRating(k) = globalRating(k) - 3 + 6 * RND: IF globalRating(k) > 9 THEN globalRating(k) = 9
-		IF globalRating(k) < 1 THEN globalRating(k) = 1
-		NEXT k
-		CLS
-		CALL usa
-		globalChoose = 30: GOTO utile
-'-------------------------------------------------------------------------
-'                               January Campaigns
-'-------------------------------------------------------------------------
-	   CASE 10
-		globalJanCam = 1 - globalJanCam
-		a$ = "PROHIBITED": IF globalJanCam = 1 THEN a$ = "ALLOWED"
-		COLOR 11
-		CALL clrbot
-		PRINT "January Campaigns : "; a$;
-		globalChoose = 31: GOTO utile
-'-------------------------------------------------------------------------
-'                               Realism Switch
-'-------------------------------------------------------------------------
-	   CASE 11
-		globalRealism = 1 - globalRealism
-		CALL clrbot: COLOR 11
-	IF globalRealism = 0 THEN
-		PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
-	ELSE
-		PRINT "REALISM ON: Recruiting based on CITY SIZE";
-		IF side = 2 AND globalRandBal = 1 AND globalRandBal < 5 THEN globalRandBal = globalRandBal + 2
-		GOSUB unionplus
-	END IF
-		globalChoose = 32: GOTO utile
-'-------------------------------------------------------------------------
-'                               Check Map Linakges
-'-------------------------------------------------------------------------
-	   CASE 12
-		CALL integrity
-		CALL TICK(99)
-		CALL usa
-'-------------------------------------------------------------------------
-'                               History
-'-------------------------------------------------------------------------
-	   CASE 13
-		globalHistory = 1 - globalHistory
-		a$ = "OFF": IF globalHistory = 1 THEN a$ = "ON"
-		CALL clrbot: PRINT "History is now "; a$;
-		globalChoose = 34: GOTO utile
-'-------------------------------------------------------------------------
-'                               Aggression
-'-------------------------------------------------------------------------
-	   CASE 14
-		globalBold = globalBold + 1: IF globalBold > 5 THEN globalBold = 0
-		SELECT CASE globalBold
-		CASE 0: a$ = "PASSIVE"
-		CASE 1: a$ = "TIMID"
-		CASE 2: a$ = "CAUTIOUS"
-		CASE 3: a$ = "NORMAL"
-		CASE 4: a$ = "BOLD"
-		CASE 5: a$ = "RECKLESS"
-		END SELECT
-		CALL clrbot
-		COLOR 11
-		PRINT "Enemy Aggression : "; a$; " ("; globalBold; ")";
-		globalChoose = 35: GOTO utile
-		CASE ELSE
-	   END SELECT
-'==========================================================================
-'                               Files
-'==========================================================================
-	CASE 9
-	IF NOT _FILEEXISTS("*.sav") THEN globalFileL = 0
-filex:
-	globalChoose = 23: chosit = 30: IF globalYear = 1861 THEN globalChoose = 22
-	globalMTX$(0) = "Options"
-	globalMTX$(1) = "Load": IF globalFileL = 0 THEN globalMTX$(1) = "-": globalChoose = 23
-	globalMTX$(2) = "Save"
-	globalMTX$(3) = "New Game"
-	globalMTX$(4) = "Quit to DOS"
-	size = 4: globalTLX = 67: globalTLY = 15
-	CALL menu(0): CALL clrrite
-	SELECT CASE globalChoose
-		CASE IS < 1: GOTO menu0
-		CASE 1, 2
-loader:
-			IF globalChoose = 1 AND globalFileL = 0 GOTO filex
-			CALL filer(globalChoose + 1)
-			IF globalChoose = 1 THEN globalRFlag = 0: globalMFlag = 0: globalNFlag = 0
-			GOTO menu0
-		CASE 3
-			OPEN "O", 1, "cws.cfg"
-			WRITE #1, side, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
-			CLOSE #1
-			CLS
-			GOTO newgame
-		CASE 4: GOTO rusure
-	END SELECT
-'==========================================================================
 	CASE 99
-	GOTO endrnd
-CASE ELSE
-	chosit = 22
+		GOTO endrnd
+	CASE ELSE
+		chosit = 22
+		GOTO menu0
+	END SELECT
 	GOTO menu0
-END SELECT
-GOTO menu0
-'............................................................................
-'                               Subs
-'............................................................................
-topbar:
-LOCATE 1, 1: PRINT SPACE$(80);
-COLOR 11
-LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(side); " side "; : COLOR 14: PRINT globalMonth$(month); ","; globalYear; "  "
-RETURN
-'............................................................................
-rusure:
-globalChoose = 23
-globalMTX$(0) = "Quit"
-globalMTX$(1) = "Yes"
-globalMTX$(2) = "No"
-size = 2: globalColour = 5
-globalTLX = 67: globalTLY = 15
-CALL menu(0): CALL clrrite: IF globalChoose = 1 THEN END ELSE GOTO menu0
-'............................................................................
-unionplus: globalUSAdv = 120 * globalDifficult: IF globalPlayer = 2 THEN globalUSAdv = 50 * globalDifficult
-	   IF globalRealism > 0 THEN globalUSAdv = globalUSAdv * .7
-	   RETURN
-'............................................................................
-blanken:        c = 1: IF side = 2 THEN c = 7
-		CLS : LINE (100, 200)-(500, 300), c, BF
-		LINE (100, 200)-(500, 300), 8 - c, B
-		COLOR 7: LOCATE 14, 31: PRINT " "; globalMonth$(month); globalYear
-		COLOR 11: LOCATE 17, 30: PRINT globalForce$(side); " PLAYER TURN"
-		DO WHILE INKEY$ = "": LOOP
-		RETURN
-'............................................................................
-DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
-DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
-DATA "U4BD2BR1R3U2BD3D1","R1U4L1R2BL1BD4R1","R1E1U3BG3F1","U4BR3G2F2"
-DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
-DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
-DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
-DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+	'............................................................................
+	'                               Subs
+	'............................................................................
+	topbar:
+	LOCATE 1, 1: PRINT SPACE$(80);
+	COLOR 11
+	LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(side); " side "; : COLOR 14: PRINT globalMonth$(month); ","; globalYear; "  "
+	RETURN
+	'............................................................................
+	rusure:
+	globalChoose = 23
+	globalMTX$(0) = "Quit"
+	globalMTX$(1) = "Yes"
+	globalMTX$(2) = "No"
+	size = 2: globalColour = 5
+	globalTLX = 67: globalTLY = 15
+	CALL menu(0)
+	CALL clrrite
+	IF globalChoose = 1 THEN END ELSE GOTO menu0
+	'............................................................................
+	unionplus:
+	globalUSAdv = 120 * globalDifficult
+	IF globalPlayer = 2 THEN globalUSAdv = 50 * globalDifficult
+	IF globalRealism > 0 THEN globalUSAdv = globalUSAdv * .7
+	RETURN
+	'............................................................................
+	blanken:        
+	c = 1
+	IF side = 2 THEN c = 7
+	CLS
+	LINE (100, 200)-(500, 300), c, BF
+	LINE (100, 200)-(500, 300), 8 - c, B
+	COLOR 7: LOCATE 14, 31: PRINT " "; globalMonth$(month); globalYear
+	COLOR 11: LOCATE 17, 30: PRINT globalForce$(side); " PLAYER TURN"
+	DO WHILE INKEY$ = "": LOOP
+	RETURN
+	'............................................................................
+	DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
+	DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
+	DATA "U4BD2BR1R3U2BD3D1","R1U4L1R2BL1BD4R1","R1E1U3BG3F1","U4BR3G2F2"
+	DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
+	DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
+	DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
+	DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 
 SUB animate (index, flag)
 from = globalArmyLoc(index): to2 = globalArmyMove(index): globalArmyLoc(index) = 0
