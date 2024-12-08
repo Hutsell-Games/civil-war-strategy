@@ -3425,182 +3425,203 @@ END SUB
 
 ' CWSTRAT2.BAS
 SUB armyxy (x, y, z)
-LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
-SELECT CASE z
-	CASE 1
-	LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
-	LINE (x - 7, y - 5)-(x - 1, y), 1, BF
-	LINE (x, y - 2)-(x + 7, y - 1), 7, B
-	LINE (x - 7, y + 2)-(x + 7, y + 3), 7, B
-	LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
-	CASE 2
-	LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
-	LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
-	LINE (x - 7, y - 4)-(x + 6, y + 5), 9
-	LINE (x - 7, y + 4)-(x + 6, y - 5), 9
-	LINE (x - 7, y - 5)-(x + 7, y + 5), 9
-	LINE (x - 7, y + 5)-(x + 7, y - 5), 9
-	CASE ELSE
-END SELECT
+	LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
+	SELECT CASE z
+		CASE 1
+			LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
+			LINE (x - 7, y - 5)-(x - 1, y), 1, BF
+			LINE (x, y - 2)-(x + 7, y - 1), 7, B
+			LINE (x - 7, y + 2)-(x + 7, y + 3), 7, B
+			LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
+		CASE 2
+			LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
+			LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
+			LINE (x - 7, y - 4)-(x + 6, y + 5), 9
+			LINE (x - 7, y + 4)-(x + 6, y - 5), 9
+			LINE (x - 7, y - 5)-(x + 7, y + 5), 9
+			LINE (x - 7, y + 5)-(x + 7, y - 5), 9
+		CASE ELSE
+	END SELECT
 END SUB
 
 SUB bub2 (limit)
-DO
-	swaps% = FALSE
-	FOR i = 1 TO limit - 1
-	IF globalBrray(i) > globalBrray(i + 1) THEN
-		SWAP globalBrray(i), globalBrray(i + 1)
-		swaps% = i
-	END IF
-	NEXT i
-LOOP WHILE swaps%
+	DO
+		swaps% = FALSE
+		FOR i = 1 TO limit - 1
+			IF globalBrray(i) > globalBrray(i + 1) THEN
+				SWAP globalBrray(i), globalBrray(i + 1)
+				swaps% = i
+			END IF
+		NEXT i
+	LOOP WHILE swaps%
 END SUB
 
 SUB bubble (limit)
-DO
-	swaps% = FALSE
-	FOR i = 1 TO limit - 1
-	IF globalMTX$(i) > globalMTX$(i + 1) THEN
-		SWAP globalMTX$(i), globalMTX$(i + 1)
-		SWAP globalArray(i), globalArray(i + 1)
-		swaps% = i
-	END IF
-	NEXT i
-LOOP WHILE swaps%
+	DO
+		swaps% = FALSE
+		FOR i = 1 TO limit - 1
+			IF globalMTX$(i) > globalMTX$(i + 1) THEN
+				SWAP globalMTX$(i), globalMTX$(i + 1)
+				SWAP globalArray(i), globalArray(i + 1)
+				swaps% = i
+			END IF
+		NEXT i
+	LOOP WHILE swaps%
 END SUB
 
 SUB cancel (side)
-CALL starfin(star, fin, (side))
-counter:
-CALL clrrite
+	CALL starfin(star, fin, (side))
+	counter:
+	CALL clrrite
 	size = 0
 	FOR j = star TO fin
-	a$ = globalArmyName$(j): IF LEN(a$) > 10 THEN x = INSTR(a$, " "): a$ = RIGHT$(a$, LEN(a$) - x)
-	IF globalArmyLoc(j) > 0 AND globalArmyMove(j) > 0 THEN size = size + 1: globalMTX$(size) = a$: globalArray(size) = globalArmyLoc(j)
+		a$ = globalArmyName$(j)
+		IF LEN(a$) > 10 THEN 
+			x = INSTR(a$, " ")
+			a$ = RIGHT$(a$, LEN(a$) - x)
+		END IF
+		IF globalArmyLoc(j) > 0 AND globalArmyMove(j) > 0 THEN 
+			size = size + 1
+			globalMTX$(size) = a$
+			globalArray(size) = globalArmyLoc(j)
+		END IF
 	NEXT j
 	CALL bubble(size)
-	globalTLX = 67: globalTLY = 2: globalWType = 2
+	globalTLX = 67
+	globalTLY = 2
+	globalWType = 2
 	globalMTX$(0) = "Cancel"
-	IF size < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
+	IF size < 1 THEN 
+		CALL clrbot
+		COLOR 11: PRINT "No units have orders to cancel";
+		EXIT SUB
+	END IF
 	CALL menu(1)
 	SELECT CASE globalChoose
-	 CASE 1 TO size
-		target = globalArray(globalChoose)
-	       
-		FOR i = star TO fin
-		IF globalArmyLoc(i) = target THEN x = INSTR(globalArmyName$(i), globalMTX$(globalChoose)): IF x > 0 AND globalArmyMove(i) > 0 THEN index = i
-		NEXT i
+		CASE 1 TO size
+			target = globalArray(globalChoose)
+			
+			FOR i = star TO fin
+				IF globalArmyLoc(i) = target THEN 
+					x = INSTR(globalArmyName$(i), globalMTX$(globalChoose))
+					IF x > 0 AND globalArmyMove(i) > 0 THEN index = i
+				END IF
+			NEXT i
 
-		CALL clrbot: COLOR 11: PRINT globalArmyName$(index); " has cancelled move to "; globalCity$(globalArmyMove(index)); : CALL TICK(globalTurbo + 1)
-		CALL icon(globalArmyLoc(index), globalArmyMove(index), 4)
-		globalArmyMove(index) = 0: IF globalNoise > 0 THEN SOUND 2999, .5
-		CALL stax(side)
-	 CASE ELSE
+			CALL clrbot
+			COLOR 11: PRINT globalArmyName$(index); " has cancelled move to "; globalCity$(globalArmyMove(index));
+			CALL TICK(globalTurbo + 1)
+			CALL icon(globalArmyLoc(index), globalArmyMove(index), 4)
+			globalArmyMove(index) = 0
+			IF globalNoise > 0 THEN SOUND 2999, .5
+			CALL stax(side)
+		CASE ELSE
 		GOTO finix
 	END SELECT
-finix:
+	finix:
 	CALL clrrite
 END SUB
 
 SUB cannon
-CALL clrrite
-LINE (528, 80)-(639, 310), 3, BF
-LINE (528, 310)-(639, 435), 2, BF
-LINE (528, 405)-(639, 420), 0, BF
-PSET (580, 380), 0
+	CALL clrrite
+	LINE (528, 80)-(639, 310), 3, BF
+	LINE (528, 310)-(639, 435), 2, BF
+	LINE (528, 405)-(639, 420), 0, BF
+	PSET (580, 380), 0
 
-DRAW "BR15"
-x = POINT(0): y = POINT(1): CIRCLE (x, y), 25, 1, , , 1.4
-CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4
-CIRCLE (x, y), 29, 1, , , 1.4
-DRAW "BR20"
-x = POINT(0): y = POINT(1): PAINT (x, y), 3, 1
-DRAW "BR3BU7"
-x = POINT(0): y = POINT(1): PAINT (x, y), 5, 1
-DRAW "BL15C7G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BL2"
-DRAW "BH2C6"
-x = POINT(0): y = POINT(1): PAINT (x, y), 7
-DRAW "BD2R4C0G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BR5U3"
-DRAW "C8G2H2G6L15G1L32H1L1H1L19H3E2R2F1R6"
-DRAW "E2R4F1R6E1R58F1G2BL9BH2BU5BR3C15H1L48G1L13G1L4"
-DRAW "BD3BF3BR9"
-x = POINT(0): y = POINT(1): PAINT (x, y), 8
-DRAW "BR34BE1BR7BL5BD8C6R16F5D1F4D6F7R17D7L30H18L8H4L18H3U5R33BR17BD5"
-x = POINT(0): y = POINT(1): PAINT (x, y), 6
-DRAW "BU5C8F8D7F6R1F1R16D7E3U7G3E2BE2C8L16H6U8C8G3BE3C8H8G6BR5"
-x = POINT(0): y = POINT(1): PAINT (x, y), 8
-DRAW "BL38"
-x = POINT(0): y = POINT(1): CIRCLE (x, y), 30, 4, , , 1.4
-CIRCLE (x + 5, y), 35, 4, 4, 1.5, 1.4
-CIRCLE (x, y), 35, 4, , , 1.4
-CIRCLE (x, y), 8, 4, , , 1.4: PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
-DRAW "BR23"
-x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 4, 4
-DRAW "BR5BU7"
-x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
-DRAW "BU22BL28"
-DRAW "C4D20R1U19BD37C4D20L1U21BH2BL1BH1C4G12F1E11BU3BH2"
-DRAW "BU3BL1C4L13U1R15BR1BU3C4H12E1F11BF5BE4C4E11F1G11BD3C4R13D1L10D3BL3BD1C4"
-DRAW "F12G1H12BL33BH13BU3BH2BU1BE1BR2BU1BE1BR1"
-DRAW "BL5BU5C8E4U1"
-DRAW "H4E3H3U3E3H6L3G7F1H7E2U2E2H7L7G9D6F8G3L1H3L5G7D4F4R2D3F3R2G5D4L4G4D5F8D2"
-DRAW "R5F9E3F5R6E6H4E2F6R3E8F1E4H5U2H3U1H1U7E4H7BL5"
-x = POINT(0): y = POINT(1): PAINT (x, y), 8, 8
-DRAW "BR9BD6C15H8L1H2L12G1F5L8G4F4R3G3D1G2D3F2E5G1D8R4E3D6F3E12H1U1H1U6E5BH6BU4"
-DRAW "BD15"
-x = POINT(0): y = POINT(1): PAINT (x, y), 14, 15
+	DRAW "BR15"
+	x = POINT(0): y = POINT(1): CIRCLE (x, y), 25, 1, , , 1.4
+	CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4
+	CIRCLE (x, y), 29, 1, , , 1.4
+	DRAW "BR20"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 3, 1
+	DRAW "BR3BU7"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 5, 1
+	DRAW "BL15C7G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BL2"
+	DRAW "BH2C6"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 7
+	DRAW "BD2R4C0G4L50H1L12H1L7H3U1H1U4E5R6E1R13E1R52F3D2R1E1R1F2D5G3H2G2BR5U3"
+	DRAW "C8G2H2G6L15G1L32H1L1H1L19H3E2R2F1R6"
+	DRAW "E2R4F1R6E1R58F1G2BL9BH2BU5BR3C15H1L48G1L13G1L4"
+	DRAW "BD3BF3BR9"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 8
+	DRAW "BR34BE1BR7BL5BD8C6R16F5D1F4D6F7R17D7L30H18L8H4L18H3U5R33BR17BD5"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 6
+	DRAW "BU5C8F8D7F6R1F1R16D7E3U7G3E2BE2C8L16H6U8C8G3BE3C8H8G6BR5"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 8
+	DRAW "BL38"
+	x = POINT(0): y = POINT(1): CIRCLE (x, y), 30, 4, , , 1.4
+	CIRCLE (x + 5, y), 35, 4, 4, 1.5, 1.4
+	CIRCLE (x, y), 35, 4, , , 1.4
+	CIRCLE (x, y), 8, 4, , , 1.4: PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
+	DRAW "BR23"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 4, 4
+	DRAW "BR5BU7"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 1, 4: PAINT (x, y), 0, 4
+	DRAW "BU22BL28"
+	DRAW "C4D20R1U19BD37C4D20L1U21BH2BL1BH1C4G12F1E11BU3BH2"
+	DRAW "BU3BL1C4L13U1R15BR1BU3C4H12E1F11BF5BE4C4E11F1G11BD3C4R13D1L10D3BL3BD1C4"
+	DRAW "F12G1H12BL33BH13BU3BH2BU1BE1BR2BU1BE1BR1"
+	DRAW "BL5BU5C8E4U1"
+	DRAW "H4E3H3U3E3H6L3G7F1H7E2U2E2H7L7G9D6F8G3L1H3L5G7D4F4R2D3F3R2G5D4L4G4D5F8D2"
+	DRAW "R5F9E3F5R6E6H4E2F6R3E8F1E4H5U2H3U1H1U7E4H7BL5"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 8, 8
+	DRAW "BR9BD6C15H8L1H2L12G1F5L8G4F4R3G3D1G2D3F2E5G1D8R4E3D6F3E12H1U1H1U6E5BH6BU4"
+	DRAW "BD15"
+	x = POINT(0): y = POINT(1): PAINT (x, y), 14, 15
 END SUB
 
 SUB capitol
-SCREEN 12
-CLS
-LINE (1, 1)-(639, 150), 4, BF
-LINE (1, 150)-(639, 300), 15, BF
-LINE (1, 300)-(639, 450), 1, BF
-x = 0
-LINE (150, 190)-(500, 254), 7, B
-LINE (270, 190)-(370, 254), 7, B
-LINE (270, 185)-(370, 175), 7, B
-LINE (280, 173)-(360, 168), 7, B
-LINE (270, 235)-(370, 254), 7, B
-CIRCLE (320, 150), 74, 7, .2, 2.95, 2.1
-LINE (285, 138)-(355, 168), 7, B
-lwing:
-PSET (180 + 120 * x, 200), 0
+	SCREEN 12
+	CLS
+	LINE (1, 1)-(639, 150), 4, BF
+	LINE (1, 150)-(639, 300), 15, BF
+	LINE (1, 300)-(639, 450), 1, BF
+	x = 0
+	LINE (150, 190)-(500, 254), 7, B
+	LINE (270, 190)-(370, 254), 7, B
+	LINE (270, 185)-(370, 175), 7, B
+	LINE (280, 173)-(360, 168), 7, B
+	LINE (270, 235)-(370, 254), 7, B
+	CIRCLE (320, 150), 74, 7, .2, 2.95, 2.1
+	LINE (285, 138)-(355, 168), 7, B
+	lwing:
+	PSET (180 + 120 * x, 200), 0
 
-DRAW "C7ER1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1F1R1F1R1F1"
-DRAW "R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1L47D4R48U3D51L4U17L41D17L3U47"
-FOR i = 1 TO 7: DRAW "BR6R2D25L2U25": NEXT i
-DRAW "BD33R2"
-FOR i = 1 TO 5: DRAW "L40BR40D3": NEXT i
-x = x + 1: IF x < 3 GOTO lwing
-PSET (270, 190), 0
-FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
-PSET (344, 190), 0
-FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
-PSET (283, 140), 0
-FOR i = 1 TO 11: DRAW "C7BR6R2D25L2U25": NEXT i
-PSET (283, 120), 0
-FOR i = 1 TO 11: DRAW "C7BR6R2D15L2U15": NEXT i
-LINE (315, 55)-(325, 77), 7, B
-LINE (318, 57)-(322, 75), 7, B
-PSET (315, 53), 0
-DRAW "S3C7R13U6L13D5BU5C7U2E1U2E2U3H2U3H1E3U2H1U2E2U2E2F2D2F4D3R2E2F1G4L1D7F1D2F1D1G2"
-LINE (140, 270)-(510, 430), 14, BF
-COLOR 15
-IF globalNoise = 2 THEN PLAY "T130MFMSO2f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4"
-LOCATE 20, 20: PRINT CHR$(34); "... and that the government of the people,"
-IF globalNoise = 2 THEN PLAY "o2b-8.a16g8.g16g8.a16b-8.a16b-8.g16f8.g16f8.d16f4"
-LOCATE 21, 20: PRINT "by the people, for the people,"
-IF globalNoise = 2 THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
-LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
-LOCATE 25, 40: PRINT "- Abraham Lincoln"
-FOR i = -565 TO 50 STEP 50: CALL flags(1, i, 0): NEXT i
-IF globalNoise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
+	DRAW "C7ER1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1F1R1F1R1F1"
+	DRAW "R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1L47D4R48U3D51L4U17L41D17L3U47"
+	FOR i = 1 TO 7: DRAW "BR6R2D25L2U25": NEXT i
+	DRAW "BD33R2"
+	FOR i = 1 TO 5: DRAW "L40BR40D3": NEXT i
+	x = x + 1: IF x < 3 GOTO lwing
+	PSET (270, 190), 0
+	FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
+	PSET (344, 190), 0
+	FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
+	PSET (283, 140), 0
+	FOR i = 1 TO 11: DRAW "C7BR6R2D25L2U25": NEXT i
+	PSET (283, 120), 0
+	FOR i = 1 TO 11: DRAW "C7BR6R2D15L2U15": NEXT i
+	LINE (315, 55)-(325, 77), 7, B
+	LINE (318, 57)-(322, 75), 7, B
+	PSET (315, 53), 0
+	DRAW "S3C7R13U6L13D5BU5C7U2E1U2E2U3H2U3H1E3U2H1U2E2U2E2F2D2F4D3R2E2F1G4L1D7F1D2F1D1G2"
+	LINE (140, 270)-(510, 430), 14, BF
+	COLOR 15
+	IF globalNoise = 2 THEN PLAY "T130MFMSO2f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4"
+	LOCATE 20, 20: PRINT CHR$(34); "... and that the government of the people,"
+	IF globalNoise = 2 THEN PLAY "o2b-8.a16g8.g16g8.a16b-8.a16b-8.g16f8.g16f8.d16f4"
+	LOCATE 21, 20: PRINT "by the people, for the people,"
+	IF globalNoise = 2 THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
+	LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
+	LOCATE 25, 40: PRINT "- Abraham Lincoln"
+	FOR i = -565 TO 50 STEP 50: CALL flags(1, i, 0): NEXT i
+	IF globalNoise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
 SUB capture (active, c, s, flag)
-	globalCityP(c) = s: CALL clrbot
+	globalCityP(c) = s
+	CALL clrbot
 	a$ = globalArmyName$(active) + " has captured " + globalCity$(c)
 	COLOR 11: PRINT globalArmyName$(active) + " has captured " + globalCity$(c);
 	IF active < 21 AND globalNoise > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
@@ -3616,41 +3637,47 @@ SUB capture (active, c, s, flag)
 		globalCapCity(3 - s) = 0
 		CALL flashcity(c)
 	END IF
-	IF globalFort(c) > 0 AND flag > 0 THEN globalFort(c) = globalFort(c) - 1: x = globalCityX(c): y = globalCityY(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL showcity
+	IF globalFort(c) > 0 AND flag > 0 THEN 
+		globalFort(c) = globalFort(c) - 1
+		x = globalCityX(c)
+		y = globalCityY(c)
+		LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+		CALL showcity
+	END IF
 END SUB
 
 SUB center (y, a$)
-x = LEN(a$)
-x = 26 - x \ 2
-LOCATE y, 7 + x: PRINT a$
+	x = LEN(a$)
+	x = 26 - x \ 2
+	LOCATE y, 7 + x: PRINT a$
 END SUB
 
 SUB chessie
-COLOR 10
-LINE (500, 185)-(505, 180): LINE -(505, 175)
-LINE -(500, 170): LINE -(490, 165)
-LINE -(495, 160): LINE -(490, 155)
-LINE -(485, 150): LINE -(495, 155)
-LINE -(495, 145): LINE -(490, 140)
-LINE -(485, 130): LINE -(470, 120)
-LINE -(470, 110): LINE -(475, 120)
-LINE -(485, 120): LINE -(485, 115)
-LINE -(480, 100): LINE -(485, 90)
-LINE -(495, 80): LINE -(500, 80)
-LINE -(500, 85): LINE -(495, 90)
-LINE -(495, 100): LINE -(495, 115)
-LINE -(500, 120): LINE -(500, 130)
-LINE -(515, 135): LINE -(515, 140)
-LINE -(510, 160): LINE -(520, 145)
-LINE -(525, 120): LINE -(525, 115)
-LINE -(515, 85): LINE -(527, 95)
-PAINT (500, 400), 1, 10
-PAINT (510, 110), 2
+	COLOR 10
+	LINE (500, 185)-(505, 180): LINE -(505, 175)
+	LINE -(500, 170): LINE -(490, 165)
+	LINE -(495, 160): LINE -(490, 155)
+	LINE -(485, 150): LINE -(495, 155)
+	LINE -(495, 145): LINE -(490, 140)
+	LINE -(485, 130): LINE -(470, 120)
+	LINE -(470, 110): LINE -(475, 120)
+	LINE -(485, 120): LINE -(485, 115)
+	LINE -(480, 100): LINE -(485, 90)
+	LINE -(495, 80): LINE -(500, 80)
+	LINE -(500, 85): LINE -(495, 90)
+	LINE -(495, 100): LINE -(495, 115)
+	LINE -(500, 120): LINE -(500, 130)
+	LINE -(515, 135): LINE -(515, 140)
+	LINE -(510, 160): LINE -(520, 145)
+	LINE -(525, 120): LINE -(525, 115)
+	LINE -(515, 85): LINE -(527, 95)
+	PAINT (500, 400), 1, 10
+	PAINT (510, 110), 2
 END SUB
 
 SUB clrbot
-LOCATE 29, 1: PRINT SPACE$(79);
-LOCATE 29, 1
+	LOCATE 29, 1: PRINT SPACE$(79);
+	LOCATE 29, 1
 END SUB
 
 SUB clrrite
