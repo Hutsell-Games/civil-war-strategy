@@ -80,8 +80,7 @@ COMMON SHARED globalChoose%, globalTLX%, globalTLY%, size%, globalMTX$(), global
 COMMON SHARED globalCityX(), globalCityY(), globalCityV(), globalCityP(), globalCity$(), globalLName$(), globalFileL
 COMMON SHARED globalCash(), globalControl(), globalMatrix(), globalIncome(), globalAnima(), globalRating(), globalRFlag
 COMMON SHARED globalNFlag, globalBold, globalTurbo!, globalRR(), globalStarX(), globalStarY(), globalMtn(), globalRRFrom()
-' image
-COMMON SHARED image(), globalForce$(), globalArmyLoc(), globalArmyName$(), globalPlayer, globalAggress!
+COMMON SHARED globalImage(), globalForce$(), globalArmyLoc(), globalArmyName$(), globalPlayer, globalAggress!
 COMMON SHARED globalArmySize(), globalArmyLead(), globalArmyExper(), globalSupply(), globalMonth$()
 COMMON SHARED globalRCity(), globalVicFlag(), globalTracks(), globalBatWon(), globalCityO()
 ' side
@@ -93,7 +92,7 @@ COMMON SHARED globalPCode, globalHistory, globalThrill, globalFleet$(), globalCo
 '==========================================================================
 DIM SHARED globalCityX(40), globalCityY(40), globalCityV(40), globalCityP(40), globalCity$(40), globalLName$(40), globalRCity(5)
 DIM SHARED globalCash(2), globalControl(2), globalMatrix(40, 7), globalIncome(2), globalAnima(300), globalRating(40)
-DIM SHARED globalMTX$(21), image(300), globalForce$(2), globalArmyLoc(40), globalArmyName$(40), globalVicFlag(6)
+DIM SHARED globalMTX$(21), globalImage(300), globalForce$(2), globalArmyLoc(40), globalArmyName$(40), globalVicFlag(6)
 DIM SHARED globalArmySize(40), globalArmyLead(40), globalArmyExper(40), globalSupply(40), globalMonth$(12)
 DIM SHARED globalArmyMove(40), globalArray(40), globalStarX(8), globalStarY(8), globalMtn(1 TO 1564), globalRRFrom(2)
 DIM SHARED globalNavyLoc(2), globalNavySize(2), globalNavyMove(2), globalOccupied(40), globalFort(40), globalRR(2)
@@ -948,11 +947,11 @@ SUB animate (index, flag)
 	FOR i = 2 TO 8
 		x1 = .1 * (i * globalCityX(to2) + (10 - i) * globalCityX(from))
 		y1 = .1 * (i * globalCityY(to2) + (10 - i) * globalCityY(from))
-		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), image
+		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), globalImage
 		PUT (x1 - 10, y1 - 10), globalAnima, PSET
 		IF globalTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
 		IF globalNoise > 0 THEN SOUND 200, .1: SOUND 50, .1
-		PUT (x1 - 10, y1 - 10), image, PSET
+		PUT (x1 - 10, y1 - 10), globalImage, PSET
 	NEXT i
 	globalArmyLoc(index) = from
 END SUB
@@ -1682,16 +1681,16 @@ SUB icon (from, dest, kind)
 		CASE 7          ' draw white box
 			x = globalCityX(from) - 12
 			y = globalCityY(from) - 11
-			GET (x - 8, y - 8)-(x + 8, y + 8), image
+			GET (x - 8, y - 8)-(x + 8, y + 8), globalImage
 			LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
 			LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
 		CASE 8     ' replace old image
 			x = globalCityX(from) - 12: y = globalCityY(from) - 11
-			IF x > 0 THEN PUT (x - 8, y - 8), image, PSET
+			IF x > 0 THEN PUT (x - 8, y - 8), globalImage, PSET
 		CASE 9          ' draw arrow pointer
 			x = globalCityX(from) - 12
 			y = globalCityY(from) - 11
-			GET (x - 8, y - 8)-(x + 10, y + 7), image
+			GET (x - 8, y - 8)-(x + 10, y + 7), globalImage
 			x = x + 7
 			y = y + 5
 			LINE (x + 2, y)-(x + 2, y - 8), 12
@@ -3013,7 +3012,7 @@ SUB smarts
 		CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
 		CALL icon(globalArmyLoc(i), globalArmyMove(i), 9)
 		CALL TICK(globalTurbo! - 1)
-		PUT (globalCityX(globalArmyLoc(i)) - 20, globalCityY(globalArmyLoc(i)) - 19), image, PSET
+		PUT (globalCityX(globalArmyLoc(i)) - 20, globalCityY(globalArmyLoc(i)) - 19), globalImage, PSET
 	deadman:
 	NEXT i
 	FOR i = star TO fin
@@ -3050,8 +3049,8 @@ SUB smarts
 END SUB
 
 SUB snapshot (x, y, flag)
-	IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), image
-	IF flag = 1 THEN PUT (x - 10, y - 10), image, PSET
+	IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), globalImage
+	IF flag = 1 THEN PUT (x - 10, y - 10), globalImage, PSET
 END SUB
 
 SUB strong (index)
