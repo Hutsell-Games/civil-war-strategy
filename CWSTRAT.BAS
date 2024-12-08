@@ -1410,123 +1410,160 @@ nocity2:
 END SUB
 
 SUB cutoff (who, target, a)
-a = 0
-FOR j = 1 TO 6
-y = globalMatrix(target, j)
-IF y > 0 AND globalCityP(y) = who THEN a = a + 1
-NEXT j
+	a = 0
+	FOR j = 1 TO 6
+		y = globalMatrix(target, j)
+		IF y > 0 AND globalCityP(y) = who THEN a = a + 1
+	NEXT j
 END SUB
 
 SUB filer (switch)
-SELECT CASE switch
-	CASE 1
-	OPEN "I", 1, "cwslead.dat"
-	FOR i = 1 TO 40: INPUT #1, globalLName$(i), globalRating(i): NEXT i
-	CLOSE #1
-	OPEN "I", 1, "cws.ini"
-	FOR i = 0 TO 2: INPUT #1, globalForce$(i): NEXT i
-	FOR i = 1 TO 12: INPUT #1, globalMonth$(i): NEXT i
-	INPUT #1, month, globalYear
-'               set end game conditions
-	FOR i = 1 TO 6: INPUT #1, globalVicFlag(i): NEXT i
-	globalVicFlag(3) = .4 * globalVicFlag(3)
-	INPUT #1, a             ' number of Yankee armies
-FOR i = 1 TO a
-	INPUT #1, globalArmyLoc(i), globalArmySize(i), globalArmyExper(i), globalSupply(i): globalOccupied(globalArmyLoc(i)) = i: globalArmyName$(i) = globalLName$(i): globalArmyLead(i) = globalRating(i): globalLName$(i) = ""
-NEXT i
-	INPUT #1, a             ' number of Rebel armies
-FOR i = 21 TO 20 + a
-	INPUT #1, globalArmyLoc(i), globalArmySize(i), globalArmyExper(i), globalSupply(i)
-	globalOccupied(globalArmyLoc(i)) = i: globalArmyName$(i) = globalLName$(i): globalArmyLead(i) = globalRating(i): globalLName$(i) = ""
-NEXT i
-FOR i = 1 TO 2: INPUT #1, globalCash(i): NEXT i
-	INPUT #1, globalATKFAC, globalDEFAC, globalTCR
-	INPUT #1, globalFleet$(1), globalNavyLoc(1), globalFleet$(2), globalNavyLoc(2)
-	FOR k = 1 TO 2: globalNavySize(k) = LEN(globalFleet$(k)): NEXT k
-	INPUT #1, globalCapCity(1), globalCapCity(2)
-
-FOR i = 1 TO 8: INPUT #1, globalStarX(i), globalStarY(i): NEXT i  ' star locations on flag
-	CLOSE #1
-	OPEN "I", 1, "cws.cfg"
-	INPUT #1, side, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
-	CLOSE #1
-
-	CASE 2
-	IF NOT _FILEEXISTS("*.sav") THEN globalChoose = -1: EXIT SUB
-	globalMTX$(0) = "Load"
-	size = 0
-	FOR k = 1 TO 9
-		t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
-		IF _FILEEXISTS(t$) THEN
-			size = size + 1: globalMTX$(size) = t$: globalArray(size) = k
-		END IF
-	NEXT k
-	CALL bubble((size))
-	globalTLX = 67: globalTLY = 14 - .5 * size
-	CALL menu(0)
-	CALL clrrite
-	IF globalChoose < 1 THEN EXIT SUB
-	OPEN "I", 1, "cws" + LTRIM$(STR$(globalArray(globalChoose))) + ".sav"
-	COLOR 11: CALL clrbot: PRINT "Loading";
-	INPUT #1, month, globalYear, globalUSAdv, a
-	FOR i = 1 TO 40: INPUT #1, globalArmyName$(i), globalArmySize(i), globalArmyLead(i), globalArmyLoc(i), globalArmyExper(i), globalSupply(i), globalArmyMove(i)
-	IF globalArmyLoc(i) > 0 THEN
-		IF globalArmyName$(i) = globalLName$(i) THEN
-			globalLName$(i) = ""
-		ELSE
-			who = 1: IF i > 20 THEN who = 2
-			CALL starfin(star, fin, who)
-			FOR k = star TO fin
-			IF globalArmyName$(i) = globalLName$(k) THEN globalLName$(k) = "": EXIT FOR
+	SELECT CASE switch
+		CASE 1
+			OPEN "I", 1, "cwslead.dat"
+			FOR i = 1 TO 40
+				INPUT #1, globalLName$(i), globalRating(i)
+			NEXT i
+			CLOSE #1
+			OPEN "I", 1, "cws.ini"
+			FOR i = 0 TO 2
+				INPUT #1, globalForce$(i)
+			NEXT i
+			FOR i = 1 TO 12
+				INPUT #1, globalMonth$(i)
+			NEXT i
+			INPUT #1, month, globalYear
+			'               set end game conditions
+			FOR i = 1 TO 6
+				INPUT #1, globalVicFlag(i)
+			NEXT i
+			globalVicFlag(3) = .4 * globalVicFlag(3)
+			INPUT #1, a             ' number of Yankee armies
+			FOR i = 1 TO a
+				INPUT #1, globalArmyLoc(i), globalArmySize(i), globalArmyExper(i), globalSupply(i)
+				globalOccupied(globalArmyLoc(i)) = i
+				globalArmyName$(i) = globalLName$(i)
+				globalArmyLead(i) = globalRating(i)
+				globalLName$(i) = ""
+			NEXT i
+			INPUT #1, a             ' number of Rebel armies
+			FOR i = 21 TO 20 + a
+				INPUT #1, globalArmyLoc(i), globalArmySize(i), globalArmyExper(i), globalSupply(i)
+				globalOccupied(globalArmyLoc(i)) = i
+				globalArmyName$(i) = globalLName$(i)
+				globalArmyLead(i) = globalRating(i)
+				globalLName$(i) = ""
+			NEXT i
+			FOR i = 1 TO 2
+				INPUT #1, globalCash(i)
+			NEXT i
+			INPUT #1, globalATKFAC, globalDEFAC, globalTCR
+			INPUT #1, globalFleet$(1), globalNavyLoc(1), globalFleet$(2), globalNavyLoc(2)
+			FOR k = 1 TO 2
+				globalNavySize(k) = LEN(globalFleet$(k))
 			NEXT k
-		END IF
-	END IF
-	NEXT i
-	FOR i = 1 TO 40: INPUT #1, globalOccupied(i), globalCityP(i), globalFort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: INPUT #1, globalCash(i), globalControl(i), globalIncome(i), globalVictory(i), globalCapCity(i)
-	INPUT #1, globalFleet$(i), globalNavyLoc(i), globalNavyMove(i), globalRR(i), globalTracks(i)
-	globalNavySize(i) = LEN(globalFleet$(i))
-	NEXT i
-       
-	CLOSE #1
-	OPEN "I", 1, "cws.cfg"
-	INPUT #1, myside, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
-	CLOSE #1
-	SCREEN 12: CLS
-	CLOSE #1: CALL usa: CALL clrbot
-	FOR k = 1 TO 2
-	IF globalRR(k) > 0 THEN CALL tinytrain(k, 1)
-	NEXT k
-	side = a
+			INPUT #1, globalCapCity(1), globalCapCity(2)
+			FOR i = 1 TO 8 ' star locations on flag
+				INPUT #1, globalStarX(i), globalStarY(i)
+			NEXT i
+			CLOSE #1
+			OPEN "I", 1, "cws.cfg"
+			INPUT #1, side, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
+			CLOSE #1
+		CASE 2
+			IF NOT _FILEEXISTS("*.sav") THEN globalChoose = -1: EXIT SUB
+			globalMTX$(0) = "Load"
+			size = 0
+			FOR k = 1 TO 9
+				t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
+				IF _FILEEXISTS(t$) THEN
+					size = size + 1
+					globalMTX$(size) = t$
+					globalArray(size) = k
+				END IF
+			NEXT k
+			CALL bubble((size))
+			globalTLX = 67: globalTLY = 14 - .5 * size
+			CALL menu(0)
+			CALL clrrite
+			IF globalChoose < 1 THEN EXIT SUB
+			OPEN "I", 1, "cws" + LTRIM$(STR$(globalArray(globalChoose))) + ".sav"
+			COLOR 11
+			CALL clrbot
+			PRINT "Loading";
+			INPUT #1, month, globalYear, globalUSAdv, a
+			FOR i = 1 TO 40
+				INPUT #1, globalArmyName$(i), globalArmySize(i), globalArmyLead(i), globalArmyLoc(i), globalArmyExper(i), globalSupply(i), globalArmyMove(i)
+				IF globalArmyLoc(i) > 0 THEN
+					IF globalArmyName$(i) = globalLName$(i) THEN
+						globalLName$(i) = ""
+					ELSE
+						who = 1
+						IF i > 20 THEN who = 2
+						CALL starfin(star, fin, who)
+						FOR k = star TO fin
+							IF globalArmyName$(i) = globalLName$(k) THEN globalLName$(k) = "": EXIT FOR
+						NEXT k
+					END IF
+				END IF
+			NEXT i
+			FOR i = 1 TO 40
+				INPUT #1, globalOccupied(i), globalCityP(i), globalFort(i)
+				PRINT ".";
+			NEXT i
+			FOR i = 1 TO 2
+				INPUT #1, globalCash(i), globalControl(i), globalIncome(i), globalVictory(i), globalCapCity(i)
+				INPUT #1, globalFleet$(i), globalNavyLoc(i), globalNavyMove(i), globalRR(i), globalTracks(i)
+				globalNavySize(i) = LEN(globalFleet$(i))
+			NEXT i
+			CLOSE #1
+			OPEN "I", 1, "cws.cfg"
+			INPUT #1, myside, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
+			CLOSE #1
+			SCREEN 12
+			CLS
+			CLOSE #1
+			CALL usa
+			CALL clrbot
+			FOR k = 1 TO 2
+				IF globalRR(k) > 0 THEN CALL tinytrain(k, 1)
+			NEXT k
+			side = a
+		CASE 3
+			globalMTX$(0) = "Save Game"
+			FOR k = 1 TO 9
+				globalMTX$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
+				IF _FILEEXISTS(globalMTX$(k)) THEN globalMTX$(k) = globalMTX$(k) + " �"
+			NEXT k
+				globalTLX = 67: size = 9
+				CALL menu(0)
+				IF globalChoose < 1 THEN clrrite: EXIT SUB
+				COLOR 11
+				CALL clrbot
+				PRINT "Saving";
 
-	CASE 3
-	globalMTX$(0) = "Save Game"
-	FOR k = 1 TO 9
-	globalMTX$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF _FILEEXISTS(globalMTX$(k)) THEN globalMTX$(k) = globalMTX$(k) + " �"
-	NEXT k
-	globalTLX = 67: size = 9
-	CALL menu(0)
-	IF globalChoose < 1 THEN clrrite: EXIT SUB
-	COLOR 11: CALL clrbot: PRINT "Saving";
-
-	OPEN "O", 1, "cws" + LTRIM$(STR$(globalChoose)) + ".sav"
-	WRITE #1, month, globalYear, globalUSAdv, side
-	FOR i = 1 TO 40: WRITE #1, globalArmyName$(i), globalArmySize(i), globalArmyLead(i), globalArmyLoc(i), globalArmyExper(i), globalSupply(i), globalArmyMove(i)
-	NEXT i
-	FOR i = 1 TO 40: WRITE #1, globalOccupied(i), globalCityP(i), globalFort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: WRITE #1, globalCash(i), globalControl(i), globalIncome(i), globalVictory(i), globalCapCity(i)
-	WRITE #1, globalFleet$(i), globalNavyLoc(i), globalNavyMove(i), globalRR(i), globalTracks(i)
-	NEXT i
-	CLOSE #1
-       
-	myside = side
-	IF myside < 1 OR myside > 2 THEN myside = 1
-	OPEN "O", 1, "cws.cfg"
-	WRITE #1, myside, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
-	CLOSE #1
-	CLS : CALL usa
-END SELECT
+			OPEN "O", 1, "cws" + LTRIM$(STR$(globalChoose)) + ".sav"
+			WRITE #1, month, globalYear, globalUSAdv, side
+			FOR i = 1 TO 40
+				WRITE #1, globalArmyName$(i), globalArmySize(i), globalArmyLead(i), globalArmyLoc(i), globalArmyExper(i), globalSupply(i), globalArmyMove(i)
+			NEXT i
+			FOR i = 1 TO 40
+				WRITE #1, globalOccupied(i), globalCityP(i), globalFort(i): PRINT ".";
+			NEXT i
+			FOR i = 1 TO 2
+				WRITE #1, globalCash(i), globalControl(i), globalIncome(i), globalVictory(i), globalCapCity(i)
+				WRITE #1, globalFleet$(i), globalNavyLoc(i), globalNavyMove(i), globalRR(i), globalTracks(i)
+			NEXT i
+			CLOSE #1
+		
+			myside = side
+			IF myside < 1 OR myside > 2 THEN myside = 1
+			OPEN "O", 1, "cws.cfg"
+			WRITE #1, myside, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
+			CLOSE #1
+			CLS
+			CALL usa
+	END SELECT
 END SUB
 
 SUB flashcity (which)
