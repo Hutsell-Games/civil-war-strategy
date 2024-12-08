@@ -3681,30 +3681,32 @@ SUB clrbot
 END SUB
 
 SUB clrrite
-VIEW (528, 1)-(639, 450)
-CLS 1
-VIEW
+	VIEW (528, 1)-(639, 450)
+	CLS 1
+	VIEW
 END SUB
 
 SUB commander (who, empty)
 	empty = 0
 	CALL starfin(star, fin, who)
 	FOR i = star TO fin
-	IF globalArmyLoc(i) = 0 AND globalLName$(i) <> "" THEN empty = i: EXIT SUB
+		IF globalArmyLoc(i) = 0 AND globalLName$(i) <> "" THEN empty = i: EXIT SUB
 	NEXT i
 
 '                 generic leaders if set list is exhausted
 	FOR i = star TO fin
-	IF globalArmyLoc(i) = 0 THEN
-		x = i
-		CALL roman(x, a$)
-		empty = i
-		globalLName$(i) = a$
-		globalRating(i) = 1 + 8 * RND
-		EXIT SUB
-	END IF
+		IF globalArmyLoc(i) = 0 THEN
+			x = i
+			CALL roman(x, a$)
+			empty = i
+			globalLName$(i) = a$
+			globalRating(i) = 1 + 8 * RND
+			EXIT SUB
+		END IF
 	NEXT i
-	CALL clrbot: PRINT "No more "; globalForce$(who); " commanders available"; : CALL TICK(globalTurbo!)
+	CALL clrbot
+	PRINT "No more "; globalForce$(who); " commanders available";
+	CALL TICK(globalTurbo!)
 END SUB
 
 SUB endit
@@ -3714,8 +3716,9 @@ SUB endit
 	globalMTX$(9) = RTRIM$(STR$(ABS(globalVicFlag(6)))) + ":1 Force Ratio"
 	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
 	COLOR 14: PRINT "				ESC when done"
-what4:
-	FOR i = 2 TO 6: IF globalVicFlag(i) > 0 THEN globalMTX$(i - 1) = "� " ELSE globalMTX$(i - 1) = "  "
+	what4:
+	FOR i = 2 TO 6
+		IF globalVicFlag(i) > 0 THEN globalMTX$(i - 1) = "� " ELSE globalMTX$(i - 1) = "  "
 	NEXT i
 	globalChoose = chosit
 	globalMTX$(0) = "Victory Conditions"
@@ -3725,275 +3728,342 @@ what4:
 	globalMTX$(4) = globalMTX$(4) + "Capital Captured"
 	globalMTX$(5) = globalMTX$(5) + globalMTX$(9)
 	globalMTX$(6) = "DONE"
-	globalWType = 2: globalColour = 3: size = 6: globalHilite = 14
+	globalWType = 2
+	globalColour = 3
+	size = 6
+	globalHilite = 14
 	CALL menu(0)
 	chosit = 21 + globalChoose
-SELECT CASE globalChoose
-	CASE 1
-	globalVicFlag(2) = -globalVicFlag(2)
-	CASE 2 TO 5
-	globalVicFlag(globalChoose + 1) = -globalVicFlag(globalChoose + 1)
-	CASE ELSE
-	GOTO cheer
-END SELECT
+	SELECT CASE globalChoose
+		CASE 1
+			globalVicFlag(2) = -globalVicFlag(2)
+		CASE 2 TO 5
+			globalVicFlag(globalChoose + 1) = -globalVicFlag(globalChoose + 1)
+		CASE ELSE
+			GOTO cheer
+	END SELECT
 	GOTO what4
-cheer:
+	cheer:
 	CLS
 	CALL usa
 END SUB
 
 SUB engine
-IF globalRR(1) + globalRR(2) = 0 GOTO notrain
-LINE (5, 17)-(100, 63), 3, BF
-LINE (5, 17)-(100, 47), 0, B
-LINE (5, 47)-(100, 63), 0, B
+	IF globalRR(1) + globalRR(2) = 0 GOTO notrain
+	LINE (5, 17)-(100, 63), 3, BF
+	LINE (5, 17)-(100, 47), 0, B
+	LINE (5, 47)-(100, 63), 0, B
 
-FOR i = 1 TO 2
-IF globalRR(i) = 0 GOTO notrane
-PSET (15, 25), 3: c = 9: IF i = 2 THEN c = 15: PSET (60, 25), 3
-DRAW "C0S4R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4"
-x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
-LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(globalCity$(globalArmyMove(globalRR(i))), 5)
-notrane:
-NEXT i
+	FOR i = 1 TO 2
+		IF globalRR(i) = 0 GOTO notrane
+		PSET (15, 25), 3
+		c = 9
+		IF i = 2 THEN c = 15
+		PSET (60, 25), 3
+		DRAW "C0S4R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4"
+		x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
+		LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(globalCity$(globalArmyMove(globalRR(i))), 5)
+	notrane:
+	NEXT i
 
 notrain:
 END SUB
 
 SUB evaluate (index, x)
-from = globalArmyLoc(index)
-x = 200: IF globalAggress! > 1.5 THEN x = 80: IF globalAggress! > 2 THEN x = 20: IF globalAggress! > 3 THEN x = 5
-CALL void(from, defend): IF defend = 0 THEN x = 0
-IF globalBold > 1 THEN x = .5 * x
-
-best = globalArmySize(index)
-
-FOR j = 1 TO 6: globalArray(j) = -1
-a = globalMatrix(from, j): IF a > 0 THEN IF globalOccupied(a) > 0 THEN best = best - globalArmySize(globalOccupied(a)): y = 1
-NEXT j: best = .01 * best
-IF globalBold > 0 THEN best = best + 20 * globalBold
-
-CALL starfin(star, fin, 3 - side)
-
-FOR j = 1 TO 6
-	y = -1: a = globalMatrix(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
-      
-	c = globalOccupied(a)
-	FOR k = star TO fin: IF globalArmyLoc(k) > 0 THEN IF globalArmyMove(k) = a AND c = 0 GOTO alle
-	NEXT k
-	
-	y = best - x * globalFort(from) - globalCityV(from) + 30 * RND
-	IF globalFort(from) > 0 THEN IF index = globalOccupied(from) THEN y = y - 25: IF globalRealism > 0 THEN y = y - 50
-	IF a = globalCapCity(side) THEN IF globalVicFlag(5) > 0 THEN y = y + 200
-	IF globalCityP(a) <> 3 - side THEN y = y + 5 * globalCityV(a) + 10 * globalFort(a)
-	IF globalCityP(a) <> side GOTO ourn
-	   IF c = 0 THEN y = y + 10 * globalCityV(a): GOTO ourn
-	   x1 = 1: IF globalFort(a) = 1 THEN x1 = 2: IF globalFort(a) = 3 THEN x1 = 3
-
-	   IF globalArmySize(c) > 0 THEN
-		odds! = globalArmySize(index) / (x1 * globalArmySize(c))
-		IF globalRealism > 1 THEN odds! = .8 * odds!
-	   ELSE
-		odds! = 5
-	   END IF
-
-	   IF globalArmySize(index) < 15 THEN y = y - 300: odds! = .1
-	   IF globalBold < 3 AND globalArmySize(index) < 40 AND odds! < .8 THEN y = 0
-	   IF globalRealism > 0 THEN y = y - 15
-	   IF odds! < .5 THEN y = y - 200
-	   IF globalBold = 0 AND RND > .9 THEN y = y + 10 * (globalArmyLead(index) - globalArmyLead(c) + globalArmyExper(index) - globalArmyLead(index))
-	   IF globalSupply(index) < 1 THEN y = y - 100
-	   SELECT CASE odds! + .5 * globalBold
-		CASE IS < .3
-		y = -9999
-		CASE IS < .5
-		y = y - 300
-		CASE IS <= .8
-		y = y - 20
-		CASE .8 TO 1.2
-		y = y - 5
-		CASE 1.2 TO 1.5
-		y = y + 10
-		CASE ELSE
-		y = y + .5 * (globalArmySize(index) - globalArmySize(c)) + 50 * RND
-	   END SELECT
-ourn:
-	IF globalCityP(a) = 3 - side AND c > 0 AND globalArmyMove(c) = 0 THEN y = y - globalArmySize(c)
-	IF side = 1 AND globalCityY(a) < globalCityY(from) THEN y = y + 2
-	IF side = 2 AND globalCityY(a) > globalCityY(from) THEN y = y + 2
-'---------------------------------------------------------------------------
-	FOR k = 1 TO 6: m = globalMatrix(a, k): IF m = 0 GOTO tally3
-	IF globalCityP(m) = 0 THEN y = y + 3 * globalCityV(m) + 4 * globalFort(m)
-	IF globalCityP(m) = side THEN y = y + 3 * globalCityV(m) + 4 * globalFort(m)
-	IF globalCityP(m) = side AND c > 0 THEN
-		odds! = 5 - 4 * RND
-		IF globalArmySize(c) > 0 THEN odds! = globalArmySize(index) / globalArmySize(c) ELSE odds! = 5
-		IF odds! < 1 THEN y = y - 2
+	from = globalArmyLoc(index)
+	x = 200
+	IF globalAggress! > 1.5 THEN 
+		x = 80
+		IF globalAggress! > 2 THEN 
+			x = 20
+			IF globalAggress! > 3 THEN x = 5
+		END IF
 	END IF
-	IF globalCityP(m) = globalCapCity(side) THEN y = y + 50
-tally3:
-	NEXT k
-'---------------------------------------------------------------------------
-	globalArray(j) = y
-alle:
-NEXT j: max = 6
-alleval:
-x = 0: best = 0
-FOR j = 1 TO max
-IF globalArray(j) < 0 GOTO allof
-	IF globalArray(j) > x THEN x = globalArray(j): best = j
-allof:
-NEXT j
+	CALL void(from, defend)
+	IF defend = 0 THEN x = 0
+	IF globalBold > 1 THEN x = .5 * x
+
+	best = globalArmySize(index)
+
+	FOR j = 1 TO 6
+		globalArray(j) = -1
+		a = globalMatrix(from, j)
+		IF a > 0 THEN 
+			IF globalOccupied(a) > 0 THEN 
+				best = best - globalArmySize(globalOccupied(a))
+				y = 1
+			END IF
+		END IF
+	NEXT j
+	best = .01 * best
+	IF globalBold > 0 THEN best = best + 20 * globalBold
+
+	CALL starfin(star, fin, 3 - side)
+
+	FOR j = 1 TO 6
+		y = -1
+		a = globalMatrix(from, j)
+		IF a = 0 THEN 
+			max = j - 1
+			GOTO alleval
+		END IF
+      
+		c = globalOccupied(a)
+		FOR k = star TO fin
+			IF globalArmyLoc(k) > 0 THEN 
+				IF globalArmyMove(k) = a AND c = 0 GOTO alle
+			END IF
+		NEXT k
+		
+		y = best - x * globalFort(from) - globalCityV(from) + 30 * RND
+		IF globalFort(from) > 0 THEN 
+			IF index = globalOccupied(from) THEN 
+				y = y - 25
+				IF globalRealism > 0 THEN y = y - 50
+			END IF
+		END IF
+		IF a = globalCapCity(side) THEN 
+			IF globalVicFlag(5) > 0 THEN y = y + 200
+		END IF
+		IF globalCityP(a) <> 3 - side THEN 
+			y = y + 5 * globalCityV(a) + 10 * globalFort(a)
+		END IF
+		IF globalCityP(a) <> side GOTO ourn
+		IF c = 0 THEN y = y + 10 * globalCityV(a): GOTO ourn
+		x1 = 1
+		IF globalFort(a) = 1 THEN 
+			x1 = 2
+			IF globalFort(a) = 3 THEN x1 = 3
+		END IF
+
+		IF globalArmySize(c) > 0 THEN
+			odds! = globalArmySize(index) / (x1 * globalArmySize(c))
+			IF globalRealism > 1 THEN odds! = .8 * odds!
+		ELSE
+			odds! = 5
+		END IF
+
+		IF globalArmySize(index) < 15 THEN y = y - 300: odds! = .1
+		IF globalBold < 3 AND globalArmySize(index) < 40 AND odds! < .8 THEN y = 0
+		IF globalRealism > 0 THEN y = y - 15
+		IF odds! < .5 THEN y = y - 200
+		IF globalBold = 0 AND RND > .9 THEN 
+			y = y + 10 * (globalArmyLead(index) - globalArmyLead(c) + globalArmyExper(index) - globalArmyLead(index))
+		END IF
+		IF globalSupply(index) < 1 THEN y = y - 100
+		SELECT CASE odds! + .5 * globalBold
+			CASE IS < .3
+				y = -9999
+			CASE IS < .5
+				y = y - 300
+			CASE IS <= .8
+				y = y - 20
+			CASE .8 TO 1.2
+				y = y - 5
+			CASE 1.2 TO 1.5
+				y = y + 10
+			CASE ELSE
+				y = y + .5 * (globalArmySize(index) - globalArmySize(c)) + 50 * RND
+		END SELECT
+		ourn:
+		IF globalCityP(a) = 3 - side AND c > 0 AND globalArmyMove(c) = 0 THEN y = y - globalArmySize(c)
+		IF side = 1 AND globalCityY(a) < globalCityY(from) THEN y = y + 2
+		IF side = 2 AND globalCityY(a) > globalCityY(from) THEN y = y + 2
+
+		FOR k = 1 TO 6
+			m = globalMatrix(a, k)
+			IF m = 0 GOTO tally3
+			IF globalCityP(m) = 0 THEN y = y + 3 * globalCityV(m) + 4 * globalFort(m)
+			IF globalCityP(m) = side THEN y = y + 3 * globalCityV(m) + 4 * globalFort(m)
+			IF globalCityP(m) = side AND c > 0 THEN
+				odds! = 5 - 4 * RND
+				IF globalArmySize(c) > 0 THEN odds! = globalArmySize(index) / globalArmySize(c) ELSE odds! = 5
+				IF odds! < 1 THEN y = y - 2
+			END IF
+			IF globalCityP(m) = globalCapCity(side) THEN y = y + 50
+		tally3:
+		NEXT k
+
+		globalArray(j) = y
+		alle:
+	NEXT j
+	max = 6
+	alleval:
+	x = 0
+	best = 0
+	FOR j = 1 TO max
+		IF globalArray(j) < 0 GOTO allof
+		IF globalArray(j) > x THEN x = globalArray(j): best = j
+	allof:
+	NEXT j
 	IF defend > globalArmySize(index) AND globalArray(best) < 50 THEN best = 0
 	x = best
 END SUB
 
-SUB events
-'==========================================================================
-'                              Special Events
-'==========================================================================
-IF globalRealism > 0 AND globalYear = 1862 AND month < 3 THEN
-	COLOR 14: CALL clrbot
-	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
-	IF globalNoise > 0 THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
-	DO WHILE INKEY$ = "": LOOP
-	EXIT SUB
-END IF
-IF globalRandBal = 0 THEN EXIT SUB
-plus = globalDifficult: IF side = 1 THEN plus = 6 - globalDifficult
-pct! = .005 * (globalYear - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
-IF RND > pct! THEN EXIT SUB
-
-CALL clrbot: COLOR 14: PRINT "SPECIAL EVENT...";
-who = 1: IF RND > .1 * globalRandBal THEN who = 2
-
-SELECT CASE who
-'----------------------------------------------------------------------------
-'                               good for South
-'----------------------------------------------------------------------------
-	CASE 1
-	IF globalYear = 1864 AND month = 1 THEN globalVictory(2) = globalVictory(2) + 50
-	IF globalYear = 1865 AND month = 1 THEN globalVictory(2) = globalVictory(2) + 100
-	IF RND > .9 THEN GOSUB riot: EXIT SUB
+SUB events ' Special Events
+	IF globalRealism > 0 AND globalYear = 1862 AND month < 3 THEN
+		COLOR 14
+		CALL clrbot
+		PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
+		IF globalNoise > 0 THEN 
+			FOR k = 1 TO 5
+				SOUND 140, 1: SOUND 37, 1
+			NEXT k
+		END IF
+		DO WHILE INKEY$ = "": LOOP
+		EXIT SUB
+	END IF
+	IF globalRandBal = 0 THEN EXIT SUB
+	plus = globalDifficult
+	IF side = 1 THEN plus = 6 - globalDifficult
+	pct! = .005 * (globalYear - 1860) * plus * plus
+	IF pct! > .9 THEN pct! = .9
+	IF RND > pct! THEN EXIT SUB
 
 	CALL clrbot
-	IF RND > .2 OR globalNavySize(2) > 9 GOTO mercen
-	IF globalNavySize(2) > 0 AND globalNavyLoc(2) <> 99 THEN empty = globalNavyLoc(2): GOTO float1
-		empty = 0
-		FOR i = 1 TO 40
-		IF globalCityP(i) = 2 AND globalMatrix(i, 7) = 99 AND globalNavyLoc(1) <> i THEN empty = i: EXIT FOR
-		NEXT i
-	IF empty = 0 GOTO mercen
-float1:
-	CALL scribe("England has given ships to the South", 2)
-	globalNavySize(2) = globalNavySize(2) + 2 * plus
-	IF globalNavySize(2) > 10 THEN globalNavySize(2) = 10
-	x = globalNavySize(2) - LEN(globalFleet$(2))
-	globalFleet$(2) = globalFleet$(2) + STRING$(x, "W")
-	globalNavyLoc(2) = empty: CALL ships
-	GOTO dull1
-mercen:
-	IF RND > .1 OR globalControl(2) < 30 GOTO money
-	a$ = "French": IF RND > .5 THEN a$ = "British"
-	CALL scribe(a$ + " mercenaries join " + globalArmyName$(index) + "'s army", 2)
-	globalArmySize(index) = globalArmySize(index) + 100 * plus
-	globalArmyExper(index) = 10: globalSupply(index) = 10
-	GOTO dull1
-money:
-	IF RND > .3 OR globalControl(2) < 12 GOTO cotton
-		CALL scribe("The South has obtained a loan from Europe", 2)
-		GOTO purse
-cotton:
-	IF RND > .5 OR globalControl(2) < 12 GOTO uprising
-	CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
-purse:
-	globalCash(2) = globalCash(2) + 100 * plus
-	GOTO dull1
-uprising:
-	pct! = .9
-	a$ = "Union troops diverted to fight Western Indian uprisings"
-	IF RND > .5 THEN a$ = "Union 90-day enlistees return home"
-	IF globalYear = 1864 AND month > 5 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
-	CALL scribe(a$, 2)
-	FOR k = 1 TO 20
-	globalArmySize(k) = pct! * globalArmySize(k)
-	NEXT k
-	GOTO dull1
-'----------------------------------------------------------------------------
-riot:
-	IF globalRealism = 0 THEN RETURN
-	IF globalControl(who) = 1 THEN EXIT SUB
-	FOR k = 1 TO 99
-	x = 1 + INT(40 * RND)
-		IF globalCityO(x) <> who AND globalCityP(x) = who AND globalOccupied(x) = 0 THEN
-			CALL clrbot: COLOR 15
-			PRINT " Riots have broken out in "; globalCity$(x);
-			globalCityP(x) = 0
-			CALL showcity
-			TICK globalTurbo!
+	COLOR 14: PRINT "SPECIAL EVENT...";
+	who = 1
+	IF RND > .1 * globalRandBal THEN who = 2
+
+	SELECT CASE who
+		CASE 1 ' good for South
+			IF globalYear = 1864 AND month = 1 THEN globalVictory(2) = globalVictory(2) + 50
+			IF globalYear = 1865 AND month = 1 THEN globalVictory(2) = globalVictory(2) + 100
+			IF RND > .9 THEN GOSUB riot: EXIT SUB
+
 			CALL clrbot
-			CALL image2(globalCity$(x) + " is now NEUTRAL !", 4)
-			TICK globalTurbo!
+			IF RND > .2 OR globalNavySize(2) > 9 GOTO mercen
+			IF globalNavySize(2) > 0 AND globalNavyLoc(2) <> 99 THEN 
+				empty = globalNavyLoc(2)
+				GOTO float1
+			END IF
+			empty = 0
+			FOR i = 1 TO 40
+				IF globalCityP(i) = 2 AND globalMatrix(i, 7) = 99 AND globalNavyLoc(1) <> i THEN empty = i: EXIT FOR
+			NEXT i
+			IF empty = 0 GOTO mercen
+			float1:
+			CALL scribe("England has given ships to the South", 2)
+			globalNavySize(2) = globalNavySize(2) + 2 * plus
+			IF globalNavySize(2) > 10 THEN globalNavySize(2) = 10
+			x = globalNavySize(2) - LEN(globalFleet$(2))
+			globalFleet$(2) = globalFleet$(2) + STRING$(x, "W")
+			globalNavyLoc(2) = empty: CALL ships
+			GOTO dull1
+			mercen:
+			IF RND > .1 OR globalControl(2) < 30 GOTO money
+			a$ = "French"
+			IF RND > .5 THEN a$ = "British"
+			CALL scribe(a$ + " mercenaries join " + globalArmyName$(index) + "'s army", 2)
+			globalArmySize(index) = globalArmySize(index) + 100 * plus
+			globalArmyExper(index) = 10
+			globalSupply(index) = 10
+			GOTO dull1
+			money:
+			IF RND > .3 OR globalControl(2) < 12 GOTO cotton
+			CALL scribe("The South has obtained a loan from Europe", 2)
+			GOTO purse
+			cotton:
+			IF RND > .5 OR globalControl(2) < 12 GOTO uprising
+			CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
+			purse:
+			globalCash(2) = globalCash(2) + 100 * plus
+			GOTO dull1
+			uprising:
+			pct! = .9
+			a$ = "Union troops diverted to fight Western Indian uprisings"
+			IF RND > .5 THEN a$ = "Union 90-day enlistees return home"
+			IF globalYear = 1864 AND month > 5 THEN 
+				a$ = "20% of Union forces take furloughs to vote in 1864 elections"
+				pct! = .8
+			END IF
+			CALL scribe(a$, 2)
+			FOR k = 1 TO 20
+				globalArmySize(k) = pct! * globalArmySize(k)
+			NEXT k
+			GOTO dull1
+			'----------------------------------------------------------------------------
+			riot:
+			IF globalRealism = 0 THEN RETURN
+			IF globalControl(who) = 1 THEN EXIT SUB
+			FOR k = 1 TO 99
+				x = 1 + INT(40 * RND)
+				IF globalCityO(x) <> who AND globalCityP(x) = who AND globalOccupied(x) = 0 THEN
+					CALL clrbot
+					COLOR 15
+					PRINT " Riots have broken out in "; globalCity$(x);
+					globalCityP(x) = 0
+					CALL showcity
+					TICK globalTurbo!
+					CALL clrbot
+					CALL image2(globalCity$(x) + " is now NEUTRAL !", 4)
+					TICK globalTurbo!
+					RETURN
+				END IF
+			NEXT k
 			RETURN
-		END IF
-	NEXT k
-	RETURN
-'----------------------------------------------------------------------------
-'                               good for Union
-'----------------------------------------------------------------------------
-	CASE 2
-	IF RND > .1 OR globalNavyLoc(1) = 0 OR globalNavySize(1) > 9 GOTO event2
-	IF RND > .95 THEN GOSUB riot: EXIT SUB
-	CALL scribe("Union shipworks have produced extra ships", 2)
-	globalNavySize(1) = globalNavySize(1) + plus
-	IF globalNavySize(1) > 10 THEN globalNavySize(1) = 10
-	x = globalNavySize(1) - LEN(globalFleet$(1))
-	globalFleet$(1) = globalFleet$(1) + STRING$(x, "W")
-	GOTO dull2
-event2:
-	IF RND < .7 GOTO abe
-	CALL scribe("Volunteer troops swell the Union ranks", 2)
-	x = 0: FOR i = 1 TO 20: x = x + 1: IF x > 5 GOTO dull2
-	IF globalArmySize(i) > 0 AND RND > .5 THEN globalArmySize(i) = globalArmySize(i) * 1.1 + plus
-	NEXT i: GOTO dull2
-abe:
-	IF globalEmancipate = 0 AND globalYear > 1862 THEN
+		CASE 2 ' good for Union
+			IF RND > .1 OR globalNavyLoc(1) = 0 OR globalNavySize(1) > 9 GOTO event2
+			IF RND > .95 THEN 
+				GOSUB riot
+				EXIT SUB
+			END IF
+			CALL scribe("Union shipworks have produced extra ships", 2)
+			globalNavySize(1) = globalNavySize(1) + plus
+			IF globalNavySize(1) > 10 THEN globalNavySize(1) = 10
+			x = globalNavySize(1) - LEN(globalFleet$(1))
+			globalFleet$(1) = globalFleet$(1) + STRING$(x, "W")
+			GOTO dull2
+			event2:
+			IF RND < .7 GOTO abe
+			CALL scribe("Volunteer troops swell the Union ranks", 2)
+			x = 0
+			FOR i = 1 TO 20
+				x = x + 1
+				IF x > 5 GOTO dull2
+				IF globalArmySize(i) > 0 AND RND > .5 THEN globalArmySize(i) = globalArmySize(i) * 1.1 + plus
+			NEXT i
+			GOTO dull2
+			abe:
+			IF globalEmancipate = 0 AND globalYear > 1862 THEN
+				globalEmancipate = 1
+				CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
+				globalVictory(1) = globalVictory(1) + 100: globalVictory(2) = globalVictory(2) - 100
+				CALL usa
+				GOTO dull2
+			END IF
+			IF globalYear = 1864 AND month = 11 THEN
+				CALL scribe("Lincoln has been reelected", 2)
+				globalVictory(2) = .5 * globalVictory(2)
+				GOTO dull2
+			END IF
+			IF RND > .5 THEN
+				CALL scribe("Wealthy Unionists give generously to the Federal Cause", 2)
+				globalCash(1) = globalCash(1) + 100 * plus
+				GOTO dull2
+			END IF
+			IF RND > .5 AND globalYear > 1861 THEN
+				CALL scribe("Rebel deserters leave the battlefield to go home", 2)
+				FOR i = 21 TO 40
+					globalArmySize(i) = .92 * globalArmySize(i)
+				NEXT i
+				GOTO dull2
+			END IF
+			IF RND > .5 AND globalYear > 1861 THEN
+				CALL scribe("Union soldiers now have repeating rifles", 2)
+				FOR i = 1 TO 20
+					IF globalArmyExper(i) < 9 THEN globalArmyExper(i) = globalArmyExper(i) + 2
+				NEXT i
+			END IF
+			CALL scribe("Secretary of War Stanton predicts the end of the Rebellion", 2)
+			globalVictory(1) = globalVictory(1) + 10: GOTO dull2
+		CASE ELSE
+	END SELECT
 
-		globalEmancipate = 1
-		CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
-		globalVictory(1) = globalVictory(1) + 100: globalVictory(2) = globalVictory(2) - 100
-		CALL usa
-		GOTO dull2
-	END IF
-	IF globalYear = 1864 AND month = 11 THEN
-		CALL scribe("Lincoln has been reelected", 2)
-		globalVictory(2) = .5 * globalVictory(2)
-		GOTO dull2
-	END IF
-	IF RND > .5 THEN
-		CALL scribe("Wealthy Unionists give generously to the Federal Cause", 2)
-		globalCash(1) = globalCash(1) + 100 * plus
-		GOTO dull2
-	END IF
-	IF RND > .5 AND globalYear > 1861 THEN
-		CALL scribe("Rebel deserters leave the battlefield to go home", 2)
-		FOR i = 21 TO 40: globalArmySize(i) = .92 * globalArmySize(i): NEXT i: GOTO dull2
-	END IF
-	IF RND > .5 AND globalYear > 1861 THEN
-		CALL scribe("Union soldiers now have repeating rifles", 2)
-		FOR i = 1 TO 20
-			IF globalArmyExper(i) < 9 THEN globalArmyExper(i) = globalArmyExper(i) + 2
-		NEXT i
-	END IF
-		CALL scribe("Secretary of War Stanton predicts the end of the Rebellion", 2)
-		globalVictory(1) = globalVictory(1) + 10: GOTO dull2
-	CASE ELSE
-END SELECT
-
-dull2:
+	dull2:
 	IF globalNoise = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	DO WHILE INKEY$ = "": LOOP: EXIT SUB
-dull1:
+	dull1:
 	IF globalNoise = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	DO WHILE INKEY$ = "": LOOP
 END SUB
