@@ -2841,77 +2841,101 @@ SUB showcity
 END SUB
 
 SUB smarts
-CALL events
-slush = 0: who = 3 - side
-c = 9: IF side = 1 THEN c = 15
-LOCATE 1, 1: PRINT SPACE$(80);
-COLOR c: LOCATE 1, 10: PRINT globalForce$(who); " Side is making decisions";
-CALL starfin(star, fin, who)
-'==========================================================================
-'                       Check Supply
-'==========================================================================
-FOR i = star TO fin: IF globalArmyLoc(i) > 0 AND globalSupply(i) < 1 THEN CALL resupply(i)
-NEXT i
-'==========================================================================
-'                       Fortify Capital or Other City
-'==========================================================================
-cost = 200
-IF cost > globalCash(who) GOTO signup
+	CALL events
+	slush = 0
+	who = 3 - side
+	c = 9
+	IF side = 1 THEN c = 15
+	LOCATE 1, 1: PRINT SPACE$(80);
+	COLOR c: LOCATE 1, 10: PRINT globalForce$(who); " Side is making decisions";
+	CALL starfin(star, fin, who)
+	'==========================================================================
+	'                       Check Supply
+	'==========================================================================
+	FOR i = star TO fin
+		IF globalArmyLoc(i) > 0 AND globalSupply(i) < 1 THEN CALL resupply(i)
+	NEXT i
+	'==========================================================================
+	'                       Fortify Capital or Other City
+	'==========================================================================
+	cost = 200
+	IF cost > globalCash(who) GOTO signup
 
-target = 0: IF globalOccupied(globalCapCity(who)) = 0 OR globalFort(globalCapCity(who)) > 1 GOTO city2
-target = globalCapCity(who)
-IF globalCityP(target) = who GOTO capital ELSE GOTO city2
-IF target > 0 GOTO capital
+	target = 0
+	IF globalOccupied(globalCapCity(who)) = 0 OR globalFort(globalCapCity(who)) > 1 GOTO city2
+	target = globalCapCity(who)
+	IF globalCityP(target) = who GOTO capital ELSE GOTO city2
+	IF target > 0 GOTO capital
 
-city2:
-IF 1 + RND < globalBold + globalAggress! GOTO signup
-target = 0: FOR i = star TO fin
-x = globalArmyLoc(i): IF x = 0 OR globalArmyMove(globalOccupied(x)) < 0 OR globalArmyMove(i) < 0 GOTO endlook
-IF globalFort(x) > 1 GOTO endlook
-	CALL void(x, defend): IF defend > globalArmySize(i) THEN target = globalArmyLoc(i): GOTO capital
-endlook:
-NEXT i
+	city2:
+	IF 1 + RND < globalBold + globalAggress! GOTO signup
+	target = 0
+	FOR i = star TO fin
+		x = globalArmyLoc(i): IF x = 0 OR globalArmyMove(globalOccupied(x)) < 0 OR globalArmyMove(i) < 0 GOTO endlook
+		IF globalFort(x) > 1 GOTO endlook
+		CALL void(x, defend)
+		IF defend > globalArmySize(i) THEN 
+			target = globalArmyLoc(i)
+			GOTO capital
+		END IF
+	endlook:
+	NEXT i
 
-capital:
+	capital:
 	IF target = 0 GOTO signup
 	IF globalFort(target) > 1 GOTO signup
 	globalFort(target) = globalFort(target) + 1
-	x = globalOccupied(target): globalArmyMove(x) = -1
+	x = globalOccupied(target)
+	globalArmyMove(x) = -1
 	globalCash(who) = globalCash(who) - cost
-	CALL clrbot: PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
+	CALL clrbot
+	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
 	CALL icon(target, 0, 6)
 	CALL showcity
 	IF who = 1 AND globalNavySize(1) < 1 AND RND > .5 AND globalCash < 222 GOTO signup
 	IF 3 * RND > 1 + globalAggress! AND globalCash(who) >= cost GOTO city2
-'==========================================================================
-'                       Recruit New Armies
-'==========================================================================
-signup:
-IF who = 1 AND globalNavySize(1) < 1 AND globalCash(1) > 100 THEN CALL navy(1, 1): IF globalCash(who) < 100 GOTO isok
-GOSUB enufarmies
-IF x > 2 + 3 * side + 3 * RND GOTO isok
-IF globalNavySize(who) < 5 AND globalCash(who) > 100 AND globalNavyLoc(who) <> 99 THEN IF globalCityP(globalNavyLoc(who)) = who THEN slush = slush + 100: globalCash(who) = globalCash(who) - 100: IF globalCash(who) < 100 GOTO isok
-CALL recruit(who)
-'==========================================================================
-'                         Naval Commands
-'==========================================================================
-isok:
+	'==========================================================================
+	'                       Recruit New Armies
+	'==========================================================================
+	signup:
+	IF who = 1 AND globalNavySize(1) < 1 AND globalCash(1) > 100 THEN 
+		CALL navy(1, 1)
+		IF globalCash(who) < 100 GOTO isok
+	END IF
+	GOSUB enufarmies
+	IF x > 2 + 3 * side + 3 * RND GOTO isok
+	IF globalNavySize(who) < 5 AND globalCash(who) > 100 AND globalNavyLoc(who) <> 99 THEN 
+		IF globalCityP(globalNavyLoc(who)) = who THEN 
+			slush = slush + 100
+			globalCash(who) = globalCash(who) - 100
+			IF globalCash(who) < 100 GOTO isok
+		END IF
+	END IF
+	CALL recruit(who)
+	'==========================================================================
+	'                         Naval Commands
+	'==========================================================================
+	isok:
 	globalCash(who) = globalCash(who) + slush
-dock:
-	IF side = 2 AND globalNavyLoc(1) = 0 AND globalNavySize(1) < 1 AND globalCityP(30) = 1 AND globalCash(1) > 100 THEN globalNavyLoc(1) = 30: CALL navy(1, 1): GOTO movenavy
+	dock:
+	IF side = 2 AND globalNavyLoc(1) = 0 AND globalNavySize(1) < 1 AND globalCityP(30) = 1 AND globalCash(1) > 100 THEN 
+		globalNavyLoc(1) = 30
+		CALL navy(1, 1)
+		GOTO movenavy
+	END IF
 	IF globalNavyLoc(who) = 99 THEN
 		IF RND < .9 THEN CALL navy(who, 3)
 		GOTO movearmy
 	END IF
 	IF globalCash(who) < 100 OR globalNavySize(who) > 9 OR globalCityP(globalNavyLoc(who)) <> who GOTO movenavy
 	CALL navy(who, 1)
-'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-movenavy:
+
+	movenavy:
 	IF globalNavySize(who) = 0 THEN globalNavyLoc(who) = 0
 	IF globalNavyLoc(who) = 0 GOTO movearmy
-'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-'                     move ships & prohibit further action this turn
-'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	'                     move ships & prohibit further action this turn
+	'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	IF globalNavyLoc(who) <> 99 THEN
 		IF globalCityP(globalNavyLoc(who)) = who THEN CALL navy(who, 3): GOTO movearmy   'move ships & prohibit further action this turn
 		IF globalCityP(globalNavyLoc(who)) = 0 THEN CALL navy(who, 3): GOTO movearmy
@@ -2927,378 +2951,476 @@ movenavy:
 			CALL navy(who, 3) 'move
 		END IF
 	END IF
-'==========================================================================
-'                       Give Move Orders to Each Army
-'==========================================================================
-movearmy:
+	'==========================================================================
+	'                       Give Move Orders to Each Army
+	'==========================================================================
+	movearmy:
 	CALL ships
-'---------------------------------------------------------------------------
-'                               Check to Combine
-'---------------------------------------------------------------------------
-a = who: CALL combine(a)
-CALL railroad(who)
-'---------------------------------------------------------------------------
-'                               Top Priority
-'---------------------------------------------------------------------------
-FOR i = star TO fin
-target = globalArmyLoc(i)
-IF globalArmyLoc(i) < 1 OR globalArmyMove(i) < 0 GOTO deadman
-x = globalArmySize(i): IF globalSupply(i) < 1 AND RND > .1 GOTO deadman
-
-globalChoose = 0
-
-CALL void(target, defend)
-
-IF defend > 0 AND target = globalCapCity(who) AND globalOccupied(target) = i GOTO deadman   'hold capital
-IF target <> globalCapCity(who) GOTO nocap
-IF globalVicFlag(5) = 0 GOTO nocap
-	FOR j = 1 TO 6
-	k = globalMatrix(target, j): IF j = 0 GOTO nocap
-	CALL void(k, flag): IF flag > 0 GOTO deadman
-	NEXT j
-nocap:
-CALL evaluate(i, best): IF best = 0 GOTO deadman
-move9:
-	IF best = 0 THEN globalChoose = 1 + INT((j - 1) * RND)
-	IF globalChoose = 0 THEN globalChoose = best
-	globalArmyMove(i) = globalMatrix(target, globalChoose)
-
-	IF globalCityP(globalArmyMove(i)) = who THEN y = globalOccupied(globalArmyMove(i)): IF y > 0 THEN IF globalArmyMove(y) = x THEN globalArmyMove(i) = 0: GOTO deadman  ' eliminate crossing moves
-	IF month = 1 AND globalJanCam = 0 AND globalCityP(globalArmyMove(i)) <> who THEN globalArmyMove(i) = 0: GOTO deadman
-
-	IF globalTurbo! > 1 THEN
-		COLOR c: CALL clrbot
-		PRINT globalArmyName$(i); " plans to move from "; globalCity$(globalArmyLoc(i)); " to "; globalCity$(globalArmyMove(i));
-	END IF
-		CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
-		CALL icon(globalArmyLoc(i), globalArmyMove(i), 9)
-	CALL TICK(globalTurbo! - 1)
-	PUT (globalCityX(globalArmyLoc(i)) - 20, globalCityY(globalArmyLoc(i)) - 19), image, PSET
-deadman:
-NEXT i
+	'---------------------------------------------------------------------------
+	'                               Check to Combine
+	'---------------------------------------------------------------------------
+	a = who
+	CALL combine(a)
+	CALL railroad(who)
+	'---------------------------------------------------------------------------
+	'                               Top Priority
+	'---------------------------------------------------------------------------
 	FOR i = star TO fin
-	IF globalArmyMove(i) = 0 AND globalArmyExper(i) < 6 AND globalArmyExper(i) < globalArmyLead(i) THEN
-		globalArmyExper(i) = globalArmyExper(i) + 1
+		target = globalArmyLoc(i)
+		IF globalArmyLoc(i) < 1 OR globalArmyMove(i) < 0 GOTO deadman
+		x = globalArmySize(i)
+		IF globalSupply(i) < 1 AND RND > .1 GOTO deadman
+
+		globalChoose = 0
+
+		CALL void(target, defend)
+
+		IF defend > 0 AND target = globalCapCity(who) AND globalOccupied(target) = i GOTO deadman   'hold capital
+		IF target <> globalCapCity(who) GOTO nocap
+		IF globalVicFlag(5) = 0 GOTO nocap
+		FOR j = 1 TO 6
+			k = globalMatrix(target, j)
+			IF j = 0 GOTO nocap
+			CALL void(k, flag)
+			IF flag > 0 GOTO deadman
+		NEXT j
+		nocap:
+		CALL evaluate(i, best)
+		IF best = 0 GOTO deadman
+		move9:
+		IF best = 0 THEN globalChoose = 1 + INT((j - 1) * RND)
+		IF globalChoose = 0 THEN globalChoose = best
+		globalArmyMove(i) = globalMatrix(target, globalChoose)
+
+		IF globalCityP(globalArmyMove(i)) = who THEN 
+			y = globalOccupied(globalArmyMove(i))
+			IF y > 0 THEN 
+				IF globalArmyMove(y) = x THEN 
+					globalArmyMove(i) = 0
+					GOTO deadman  ' eliminate crossing moves
+				END IF
+			END IF
+		END IF
+		IF month = 1 AND globalJanCam = 0 AND globalCityP(globalArmyMove(i)) <> who THEN 
+			globalArmyMove(i) = 0
+			GOTO deadman
+		END IF
 
 		IF globalTurbo! > 1 THEN
-		CALL clrbot
-			PRINT globalArmyName$(i); " has drilled to reach experience level "; globalArmyExper(i);
+			COLOR c
+			CALL clrbot
+			PRINT globalArmyName$(i); " plans to move from "; globalCity$(globalArmyLoc(i)); " to "; globalCity$(globalArmyMove(i));
 		END IF
-		globalArmyMove(i) = -1
+		CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
+		CALL icon(globalArmyLoc(i), globalArmyMove(i), 9)
 		CALL TICK(globalTurbo! - 1)
-	END IF
+		PUT (globalCityX(globalArmyLoc(i)) - 20, globalCityY(globalArmyLoc(i)) - 19), image, PSET
+	deadman:
 	NEXT i
-EXIT SUB
-'---------------------------------------------------------------------------
-enufarmies:
-CALL starfin(star, fin, 3 - who)
-FOR i = star TO fin
-	IF globalArmyLoc(i) > 0 THEN y = y + .1 * globalArmySize(i)
-NEXT i
-CALL starfin(star, fin, who)
-x = 0: z = 0: FOR i = star TO fin: IF globalArmyLoc(i) > 0 THEN x = x + 1: z = z + .1 * globalArmySize(i)
-NEXT i
-IF y > z THEN x = x - 2
-IF y > 2 * z THEN x = 0
-RETURN
-'---------------------------------------------------------------------------
+	FOR i = star TO fin
+		IF globalArmyMove(i) = 0 AND globalArmyExper(i) < 6 AND globalArmyExper(i) < globalArmyLead(i) THEN
+			globalArmyExper(i) = globalArmyExper(i) + 1
+
+			IF globalTurbo! > 1 THEN
+				CALL clrbot
+				PRINT globalArmyName$(i); " has drilled to reach experience level "; globalArmyExper(i);
+			END IF
+			globalArmyMove(i) = -1
+			CALL TICK(globalTurbo! - 1)
+		END IF
+	NEXT i
+	EXIT SUB
+	'---------------------------------------------------------------------------
+	enufarmies:
+	CALL starfin(star, fin, 3 - who)
+	FOR i = star TO fin
+		IF globalArmyLoc(i) > 0 THEN y = y + .1 * globalArmySize(i)
+	NEXT i
+	CALL starfin(star, fin, who)
+	x = 0
+	z = 0
+	FOR i = star TO fin
+		IF globalArmyLoc(i) > 0 THEN 
+			x = x + 1
+			z = z + .1 * globalArmySize(i)
+		END IF
+	NEXT i
+	IF y > z THEN x = x - 2
+	IF y > 2 * z THEN x = 0
+	RETURN
 END SUB
 
 SUB snapshot (x, y, flag)
-IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), image
-IF flag = 1 THEN PUT (x - 10, y - 10), image, PSET
+	IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), image
+	IF flag = 1 THEN PUT (x - 10, y - 10), image, PSET
 END SUB
 
 SUB strong (index)
-a$ = LTRIM$(RTRIM$(STR$(globalArmySize(index)))) + "00"
-PRINT a$;
+	a$ = LTRIM$(RTRIM$(STR$(globalArmySize(index)))) + "00"
+	PRINT a$;
 END SUB
 
 SUB tinytrain (who, flag)
 	IF globalTracks(who) = 0 THEN EXIT SUB
 	from = globalTracks(who)
-	x = globalCityX(from) - 12: y = globalCityY(from) - 11
-SELECT CASE flag
-	CASE IS > 0
-	LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-	PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
-	DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
-	x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
-	CASE ELSE
-	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	x = globalCityX(from) - 12
+	y = globalCityY(from) - 11
+	SELECT CASE flag
+		CASE IS > 0
+			LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
+			PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
+			DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
+			x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
+		CASE ELSE
+			LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 END SELECT
 END SUB
 
 SUB tupdate
-flag = 0
-IF globalPlayer = 1 THEN
-	CALL smarts
-ELSE
-	FOR i = 1 TO 40
-	IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
-	NEXT i
-END IF
-COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
-LOCATE 1, 20: PRINT "Update for "; globalMonth$(month); ","; globalYear
-CALL clrbot: PRINT "press any key for "; globalMonth$(month); ","; globalYear; " events";
-DO WHILE INKEY$ = "": LOOP
-GOSUB upbox
-'==========================================================================
-'                       Assign Time of Action
-'==========================================================================
-FOR i = 1 TO 2: IF globalRR(i) > 0 THEN CALL railroad(i): LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B: CALL engine
-NEXT i
-
-FOR i = 1 TO 40
-globalBrray(i) = 999
-IF globalArmyMove(i) < 0 THEN globalArmyMove(i) = 0
-IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN globalBrray(i) = INT(4 + 4 * RND) * 100 + i
-IF globalSupply(i) < 1 AND globalArmyMove(i) > 0 THEN globalBrray(i) = 900 + i
-SELECT CASE globalArmySize(i)         'bigger armies move slower
-	CASE IS > 400
-		IF globalBrray(i) < 900 THEN globalBrray(i) = globalBrray(i) + 100: x = 2
-	CASE IS > 800
-		IF globalBrray(i) < 800 THEN globalBrray(i) = globalBrray(i) + 200: x = 3
-	CASE IS > 1000
-		IF globalBrray(i) < 700 THEN globalBrray(i) = globalBrray(i) + 300: x = 4
-	CASE ELSE
-		x = 1
-END SELECT
-IF globalBrray(i) <> 999 AND globalArmyLead(i) > 10 * RND THEN
-		globalBrray(i) = globalBrray(i) - 100 * (globalArmyLead(i) \ 2)
-		IF globalBrray(i) < 100 THEN globalBrray(i) = 100 + i
-END IF
-NEXT i
-
-CALL bub2(40)
-'==========================================================================
-'                       Begin Main Loop
-'==========================================================================
-FOR j = 1 TO 40
-flag = 0
-IF globalBrray(j) = 999 GOTO allthru
-active = INT(globalBrray(j) / 100): active = globalBrray(j) - 100 * active: s = 1: IF active > 20 THEN s = 2
-IF globalArmyMove(active) < 1 GOTO digin
-COLOR 11: CALL clrbot: PRINT globalArmyName$(active); " is moving to "; globalCity$(globalArmyMove(active));
-
-globalSupply(active) = globalSupply(active) - 1: IF globalSupply(active) < 0 THEN globalSupply(active) = 0: CALL TICK(globalTurbo!): CALL clrbot: PRINT globalArmyName$(active); " is out of supplies !";
-
-CALL placearmy(active)
-CALL icon(globalArmyLoc(active), globalArmyMove(active), 5)
-
-CALL animate(active, 0)
-'==========================================================================
-target = globalArmyMove(active)
-IF globalOccupied(target) = 0 GOTO easy
-IF (s = 1 AND globalOccupied(target) < 21) OR (s = 2 AND globalOccupied(target) > 20) GOTO friend ELSE GOTO enemy
-'==========================================================================
-'                         Join Forces
-'==========================================================================
-friend:
-COLOR 11: CALL clrbot: PRINT globalArmyName$(active); " and "; globalArmyName$(globalOccupied(target)); " meet in "; globalCity$(target); : CALL TICK(globalTurbo!)
-CALL icon(globalArmyMove(active), 0, 6)
-CALL clrbot
-GOTO easy
-'==========================================================================
-'                       Attack
-'==========================================================================
-enemy:
-CALL icon(target, 0, 3)
-defend = globalOccupied(target)
-
-COLOR 11: CALL clrbot: PRINT globalArmyName$(active); " attacks "; globalArmyName$(defend); " in "; globalCity$(globalArmyLoc(defend)); : CALL TICK(globalTurbo! - 1)
-IF globalArmySize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF globalGraf > 0 THEN GOSUB upbox
-IF globalArmyExper(win) < 10 THEN globalArmyExper(win) = globalArmyExper(win) + 1
-
-IF globalArmySize(lose) < 2 THEN
-	CALL clrbot
-	a$ = globalArmyName$(lose) + "'s army is crushed in " + globalCity$(globalArmyLoc(defend))
-	CALL scribe(a$, 2)
-	index = lose: GOTO crushed
-END IF
-
-CALL clrrite
-'==========================================================================
-'                       Attacker Loses
-'==========================================================================
-IF win = active GOTO kickbutt
-globalArmyMove(active) = globalArmyLoc(active)
-globalArmyLoc(active) = target
-COLOR 11: CALL clrbot: PRINT globalArmyName$(active); " withdrew to "; globalCity$(globalArmyMove(active));
-
-CALL placearmy(globalArmyLoc(active))
-CALL animate(active, 1)
-
-globalArmyLoc(active) = globalArmyMove(active)
-CALL placearmy(globalArmyLoc(active))
-CALL placearmy(active)
-globalOccupied(globalArmyLoc(active)) = active
-globalArmyMove(active) = -2
-	      
-IF 11 * RND > globalArmyLead(defend) THEN CALL icon(globalArmyLoc(defend), globalArmyMove(defend), 4): IF globalArmyMove(defend) > 0 THEN globalArmyMove(defend) = -2
-
-CALL TICK(globalTurbo!): GOTO digin
-'==========================================================================
-'                       Defender Retreats
-'==========================================================================
-kickbutt:
-	CALL icon(globalArmyLoc(active), target, 4)
-	IF globalArmyMove(defend) > 0 THEN CALL icon(target, globalArmyMove(defend), 4)
-
-	CALL retreat(defend, flee): IF flee > 0 THEN move2 = flee: GOTO outta
-
-	best = 0: flee = 0
-	FOR i = 1 TO 6
-	x = globalMatrix(target, i)
-	IF x > 0 AND (globalCityP(x) = 3 - s) AND globalCityV(x) > best THEN
-		IF best = 0 THEN
-			flee = i: best = globalCityV(x)
-		ELSE
-			IF globalOccupied(x) = 0 THEN flee = i: best = globalCityV(x)
-		END IF
-	END IF
-	NEXT i
-	IF flee = 0 GOTO deadmeat
-	move2 = globalMatrix(target, flee)
-outta:
-	CALL placearmy(defend)                  ' in old city
-
-	globalArmyMove(defend) = move2
-	CALL animate(defend, 0)                 ' animate retreat
-       
-	globalArmyLoc(defend) = move2
-	globalOccupied(move2) = defend
-	CALL clrbot
-	PRINT globalArmyName$(defend) + " is withdrawing to " + globalCity$(move2);
-
-	CALL placearmy(defend)                  ' in new city
-       
-	CALL icon(target, 0, 6)
-	globalArmyMove(defend) = -2
-	GOTO holdon
-
-deadmeat:
-	index = defend
-	a$ = globalArmyName$(index) + " surrenders to " + globalArmyName$(active) + " in " + globalCity$(globalArmyLoc(index))
-	CALL scribe(a$, 2)
-crushed:
-	IF globalGraf > 2 THEN CALL surrender(index): COLOR 14: LOCATE 3, 68: PRINT globalArmyName$(index): LOCATE 4, 68: PRINT "surrenders !"
-	x = 1: IF index > 20 THEN x = 2
-	IF globalNoise > 1 AND x <> side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
-	IF globalArmyMove(index) > 0 THEN CALL icon(globalArmyLoc(index), globalArmyMove(index), 4)
-	globalVictory(3 - s) = globalVictory(3 - s) + 25
-	globalArmyLoc(index) = 0: globalLName$(index) = "": globalArmyName$(index) = ""
-	globalArmySize(index) = 0: globalArmyLead(index) = 0
-	globalArmyExper(index) = 0: globalArmyMove(index) = 0: globalSupply(index) = 0
-	globalSupply(active) = globalSupply(active) + globalSupply(index): globalSupply(index) = 0
-	IF globalSupply(active) > 10 THEN globalSupply(active) = 10
-	CALL TICK(9): CALL clrrite
-	IF globalArmyLoc(active) = 0 GOTO digin
-'---------------------------------------------------------------------------
-'                       check for more defenders !
-'---------------------------------------------------------------------------
-holdon:
-	CALL occupy(target): IF globalOccupied(target) = 0 GOTO easy
-	COLOR 11: CALL clrbot: PRINT "There are still defenders in "; globalCity$(target); : CALL TICK(99)
-	GOTO enemy
-'==========================================================================
-'                       Move Into New City
-'==========================================================================
-easy:
-CALL icon(globalArmyLoc(active), target, 4)
-globalArmyLoc(active) = target: globalArmyMove(active) = -2
-CALL occupy(globalArmyLoc(active))
-CALL placearmy(active)
-'---------------------------------------------------------------------------
-'                            City Capture
-'---------------------------------------------------------------------------
-	IF globalCityP(globalArmyLoc(active)) = s GOTO horde
-	c = globalArmyLoc(active)
-	IF globalPlayer = 1 AND s = side AND globalFort(c) > 0 AND flag = 0 THEN
-		globalTLX = 67: globalTLY = 15
-		globalHilite = 15: globalColour = 3
-		globalMTX$(0) = "Raze ?"
-		globalMTX$(1) = "No"
-		globalMTX$(2) = "Yes"
-		size = 2
-		CALL menu(0)
-		CALL clrrite
-		IF globalChoose = 2 GOTO smoke
-	END IF
-	IF globalPlayer = 1 AND s <> side AND globalFort(c) > 0 AND flag = 0 THEN
-		IF globalRealism > 0 AND globalCityY(c) > 150 THEN
-smoke:
-			globalFort(c) = 0
-			x = globalCityX(c)
-			y = globalCityY(c)
-			LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-			CALL showcity
-			CALL clrbot
-			PRINT globalArmyName$(active); " has destroyed the forts at "; globalCity$(c);
-			TICK 3
-		END IF
-	END IF
-	CALL capture(active, c, s, flag)
-horde:
-IF globalSupply(active) < 10 THEN globalSupply(active) = globalSupply(active) + 1: IF RND > .8 GOTO horde
-digin:
-NEXT j
-GOTO allthru
-
-upbox:
-LINE (450, 318)-(526, 420), 1, BF
-LINE (527, 315)-(527, 439), 10
-COLOR 14: LOCATE 23, 50: PRINT "�������������ͻ"
-LOCATE 24, 50: PRINT "� U P D A T E �"
-LOCATE 25, 50: PRINT "�������������ͼ"
-RETURN
-
-allthru:
-IF globalNavySize(globalCommerce) < 1 THEN globalCommerce = 0
-IF globalCommerce > 0 THEN
-	CALL clrbot
-	IF RND < .8 + .02 * globalNavySize(globalCommerce) THEN
-		globalRaider = .05 * globalNavySize(globalCommerce) * (1 + RND) * (globalIncome(3 - globalCommerce))
-		IF globalRaider < 1 THEN globalRaider = 1
-		IF globalRaider / globalIncome(3 - globalCommerce) > .3 THEN globalRaider = .3 * globalIncome(3 - globalCommerce)
-		COLOR 15: PRINT globalForce$(globalCommerce); " raiders have sunk $"; globalRaider; " of "; globalForce$(3 - globalCommerce); " commerce";
-		a = 1: IF LEFT$(globalFleet$(globalCommerce), 1) = "I" THEN a = 2
-		PSET (500, 465), 0: CALL shipicon(globalCommerce, a)
-		IF globalNoise > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
-		IF globalCommerce = side THEN globalGrudge = 1
-		TICK 9
+	flag = 0
+	IF globalPlayer = 1 THEN
+		CALL smarts
 	ELSE
-		globalRaider = 0
-		CALL barnacle(globalCommerce)
-		COLOR 15: PRINT globalForce$(globalCommerce); " raiders have lost a ship ("; globalNavySize(globalCommerce); " remain)";
-		IF globalNoise > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
-		IF globalNavyLoc(globalCommerce) > 0 THEN
-			TICK 9
-			GOTO allthru
+		FOR i = 1 TO 40
+			IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
+		NEXT i
+	END IF
+	COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
+	LOCATE 1, 20: PRINT "Update for "; globalMonth$(month); ","; globalYear
+	CALL clrbot: PRINT "press any key for "; globalMonth$(month); ","; globalYear; " events";
+	DO WHILE INKEY$ = "": LOOP
+	GOSUB upbox
+	'==========================================================================
+	'                       Assign Time of Action
+	'==========================================================================
+	FOR i = 1 TO 2
+		IF globalRR(i) > 0 THEN 
+			CALL railroad(i)
+			LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B
+			CALL engine
+		END IF
+	NEXT i
+
+	FOR i = 1 TO 40
+		globalBrray(i) = 999
+		IF globalArmyMove(i) < 0 THEN globalArmyMove(i) = 0
+		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN globalBrray(i) = INT(4 + 4 * RND) * 100 + i
+		IF globalSupply(i) < 1 AND globalArmyMove(i) > 0 THEN globalBrray(i) = 900 + i
+		SELECT CASE globalArmySize(i)         'bigger armies move slower
+			CASE IS > 400
+				IF globalBrray(i) < 900 THEN globalBrray(i) = globalBrray(i) + 100: x = 2
+			CASE IS > 800
+				IF globalBrray(i) < 800 THEN globalBrray(i) = globalBrray(i) + 200: x = 3
+			CASE IS > 1000
+				IF globalBrray(i) < 700 THEN globalBrray(i) = globalBrray(i) + 300: x = 4
+			CASE ELSE
+				x = 1
+		END SELECT
+		IF globalBrray(i) <> 999 AND globalArmyLead(i) > 10 * RND THEN
+				globalBrray(i) = globalBrray(i) - 100 * (globalArmyLead(i) \ 2)
+				IF globalBrray(i) < 100 THEN globalBrray(i) = 100 + i
+		END IF
+	NEXT i
+
+	CALL bub2(40)
+	'==========================================================================
+	'                       Begin Main Loop
+	'==========================================================================
+	FOR j = 1 TO 40
+		flag = 0
+		IF globalBrray(j) = 999 GOTO allthru
+		active = INT(globalBrray(j) / 100)
+		active = globalBrray(j) - 100 * active
+		s = 1
+		IF active > 20 THEN s = 2
+		IF globalArmyMove(active) < 1 GOTO digin
+		COLOR 11
+		CALL clrbot
+		PRINT globalArmyName$(active); " is moving to "; globalCity$(globalArmyMove(active));
+
+		globalSupply(active) = globalSupply(active) - 1
+		IF globalSupply(active) < 0 THEN 
+			globalSupply(active) = 0
+			CALL TICK(globalTurbo!)
+			CALL clrbot
+			PRINT globalArmyName$(active); " is out of supplies !";
+		END IF
+		CALL placearmy(active)
+		CALL icon(globalArmyLoc(active), globalArmyMove(active), 5)
+
+		CALL animate(active, 0)
+
+		target = globalArmyMove(active)
+		IF globalOccupied(target) = 0 GOTO easy
+		IF (s = 1 AND globalOccupied(target) < 21) OR (s = 2 AND globalOccupied(target) > 20) THEN
+			GOTO friend
 		ELSE
-			globalCommerce = 0
-			LINE (447, 291)-(525, 335), 1, BF
-			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
+			GOTO enemy
+		END IF
+		friend: ' Join Forces
+		COLOR 11
+		CALL clrbot
+		PRINT globalArmyName$(active); " and "; globalArmyName$(globalOccupied(target)); " meet in "; globalCity$(target);
+		CALL TICK(globalTurbo!)
+		CALL icon(globalArmyMove(active), 0, 6)
+		CALL clrbot
+		GOTO easy
+
+		enemy: ' Attack
+		CALL icon(target, 0, 3)
+		defend = globalOccupied(target)
+
+		COLOR 11
+		CALL clrbot
+		PRINT globalArmyName$(active); " attacks "; globalArmyName$(defend); " in "; globalCity$(globalArmyLoc(defend));
+		CALL TICK(globalTurbo! - 1)
+		IF globalArmySize(defend) > 0 THEN 
+			CALL battle(active, defend, win, lose)
+			flag = 1
+			IF globalGraf > 0 THEN GOSUB upbox
+		END IF
+		IF globalArmyExper(win) < 10 THEN globalArmyExper(win) = globalArmyExper(win) + 1
+
+		IF globalArmySize(lose) < 2 THEN
+			CALL clrbot
+			a$ = globalArmyName$(lose) + "'s army is crushed in " + globalCity$(globalArmyLoc(defend))
+			CALL scribe(a$, 2)
+			index = lose
+			GOTO crushed
+		END IF
+
+		CALL clrrite
+		'==========================================================================
+		'                       Attacker Loses
+		'==========================================================================
+		IF win = active GOTO kickbutt
+		globalArmyMove(active) = globalArmyLoc(active)
+		globalArmyLoc(active) = target
+		COLOR 11
+		CALL clrbot
+		PRINT globalArmyName$(active); " withdrew to "; globalCity$(globalArmyMove(active));
+
+		CALL placearmy(globalArmyLoc(active))
+		CALL animate(active, 1)
+
+		globalArmyLoc(active) = globalArmyMove(active)
+		CALL placearmy(globalArmyLoc(active))
+		CALL placearmy(active)
+		globalOccupied(globalArmyLoc(active)) = active
+		globalArmyMove(active) = -2
+			
+		IF 11 * RND > globalArmyLead(defend) THEN 
+			CALL icon(globalArmyLoc(defend), globalArmyMove(defend), 4)
+			IF globalArmyMove(defend) > 0 THEN globalArmyMove(defend) = -2
+		END IF
+
+		CALL TICK(globalTurbo!)
+		GOTO digin
+		'==========================================================================
+		'                       Defender Retreats
+		'==========================================================================
+		kickbutt:
+		CALL icon(globalArmyLoc(active), target, 4)
+		IF globalArmyMove(defend) > 0 THEN CALL icon(target, globalArmyMove(defend), 4)
+
+		CALL retreat(defend, flee)
+		IF flee > 0 THEN
+			move2 = flee
+			GOTO outta
+		END IF
+
+		best = 0
+		flee = 0
+		FOR i = 1 TO 6
+			x = globalMatrix(target, i)
+			IF x > 0 AND (globalCityP(x) = 3 - s) AND globalCityV(x) > best THEN
+				IF best = 0 THEN
+					flee = i
+					best = globalCityV(x)
+				ELSE
+					IF globalOccupied(x) = 0 THEN 
+						flee = i
+						best = globalCityV(x)
+					END IF
+				END IF
+			END IF
+		NEXT i
+		IF flee = 0 GOTO deadmeat
+		move2 = globalMatrix(target, flee)
+		outta:
+		CALL placearmy(defend)                  ' in old city
+
+		globalArmyMove(defend) = move2
+		CALL animate(defend, 0)                 ' animate retreat
+		
+		globalArmyLoc(defend) = move2
+		globalOccupied(move2) = defend
+		CALL clrbot
+		PRINT globalArmyName$(defend) + " is withdrawing to " + globalCity$(move2);
+
+		CALL placearmy(defend)                  ' in new city
+		
+		CALL icon(target, 0, 6)
+		globalArmyMove(defend) = -2
+		GOTO holdon
+
+		deadmeat:
+		index = defend
+		a$ = globalArmyName$(index) + " surrenders to " + globalArmyName$(active) + " in " + globalCity$(globalArmyLoc(index))
+		CALL scribe(a$, 2)
+		crushed:
+		IF globalGraf > 2 THEN 
+			CALL surrender(index)
+			COLOR 14: LOCATE 3, 68: PRINT globalArmyName$(index): LOCATE 4, 68: PRINT "surrenders !"
+		END IF
+		x = 1
+		IF index > 20 THEN x = 2
+		IF globalNoise > 1 AND x <> side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
+		IF globalArmyMove(index) > 0 THEN CALL icon(globalArmyLoc(index), globalArmyMove(index), 4)
+		globalVictory(3 - s) = globalVictory(3 - s) + 25
+		globalArmyLoc(index) = 0
+		globalLName$(index) = ""
+		globalArmyName$(index) = ""
+		globalArmySize(index) = 0
+		globalArmyLead(index) = 0
+		globalArmyExper(index) = 0
+		globalArmyMove(index) = 0
+		globalSupply(index) = 0
+		globalSupply(active) = globalSupply(active) + globalSupply(index)
+		globalSupply(index) = 0
+		IF globalSupply(active) > 10 THEN globalSupply(active) = 10
+		CALL TICK(9)
+		CALL clrrite
+		IF globalArmyLoc(active) = 0 GOTO digin
+		'---------------------------------------------------------------------------
+		'                       check for more defenders !
+		'---------------------------------------------------------------------------
+		holdon:
+		CALL occupy(target)
+		IF globalOccupied(target) = 0 GOTO easy
+		COLOR 11
+		CALL clrbot
+		PRINT "There are still defenders in "; globalCity$(target);
+		CALL TICK(99)
+		GOTO enemy
+		'==========================================================================
+		'                       Move Into New City
+		'==========================================================================
+		easy:
+		CALL icon(globalArmyLoc(active), target, 4)
+		globalArmyLoc(active) = target
+		globalArmyMove(active) = -2
+		CALL occupy(globalArmyLoc(active))
+		CALL placearmy(active)
+		'---------------------------------------------------------------------------
+		'                            City Capture
+		'---------------------------------------------------------------------------
+		IF globalCityP(globalArmyLoc(active)) = s GOTO horde
+		c = globalArmyLoc(active)
+		IF globalPlayer = 1 AND s = side AND globalFort(c) > 0 AND flag = 0 THEN
+			globalTLX = 67
+			globalTLY = 15
+			globalHilite = 15
+			globalColour = 3
+			globalMTX$(0) = "Raze ?"
+			globalMTX$(1) = "No"
+			globalMTX$(2) = "Yes"
+			size = 2
+			CALL menu(0)
+			CALL clrrite
+			IF globalChoose = 2 GOTO smoke
+		END IF
+		IF globalPlayer = 1 AND s <> side AND globalFort(c) > 0 AND flag = 0 THEN
+			IF globalRealism > 0 AND globalCityY(c) > 150 THEN
+				smoke:
+				globalFort(c) = 0
+				x = globalCityX(c)
+				y = globalCityY(c)
+				LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+				CALL showcity
+				CALL clrbot
+				PRINT globalArmyName$(active); " has destroyed the forts at "; globalCity$(c);
+				TICK 3
+			END IF
+		END IF
+		CALL capture(active, c, s, flag)
+		horde:
+		IF globalSupply(active) < 10 THEN 
+			globalSupply(active) = globalSupply(active) + 1
+			IF RND > .8 GOTO horde
+		END IF
+	digin:
+	NEXT j
+	GOTO allthru
+
+	upbox:
+	LINE (450, 318)-(526, 420), 1, BF
+	LINE (527, 315)-(527, 439), 10
+	COLOR 14: LOCATE 23, 50: PRINT "�������������ͻ"
+	LOCATE 24, 50: PRINT "� U P D A T E �"
+	LOCATE 25, 50: PRINT "�������������ͼ"
+	RETURN
+
+	allthru:
+	IF globalNavySize(globalCommerce) < 1 THEN globalCommerce = 0
+	IF globalCommerce > 0 THEN
+		CALL clrbot
+		IF RND < .8 + .02 * globalNavySize(globalCommerce) THEN
+			globalRaider = .05 * globalNavySize(globalCommerce) * (1 + RND) * (globalIncome(3 - globalCommerce))
+			IF globalRaider < 1 THEN globalRaider = 1
+			IF globalRaider / globalIncome(3 - globalCommerce) > .3 THEN globalRaider = .3 * globalIncome(3 - globalCommerce)
+			COLOR 15: PRINT globalForce$(globalCommerce); " raiders have sunk $"; globalRaider; " of "; globalForce$(3 - globalCommerce); " commerce";
+			a = 1
+			IF LEFT$(globalFleet$(globalCommerce), 1) = "I" THEN a = 2
+			PSET (500, 465), 0: CALL shipicon(globalCommerce, a)
+			IF globalNoise > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
+			IF globalCommerce = side THEN globalGrudge = 1
 			TICK 9
-			LINE (447, 291)-(525, 335), 1, BF
+		ELSE
+			globalRaider = 0
+			CALL barnacle(globalCommerce)
+			COLOR 15: PRINT globalForce$(globalCommerce); " raiders have lost a ship ("; globalNavySize(globalCommerce); " remain)";
+			IF globalNoise > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
+			IF globalNavyLoc(globalCommerce) > 0 THEN
+				TICK 9
+				GOTO allthru
+			ELSE
+				globalCommerce = 0
+				LINE (447, 291)-(525, 335), 1, BF
+				FOR k = 1 TO 5
+					CIRCLE (480, 315), 4 * k, 11
+				NEXT k
+				TICK 9
+				LINE (447, 291)-(525, 335), 1, BF
+			END IF
 		END IF
 	END IF
-END IF
 
-CALL touchup: CALL ships: CALL iterate
+	CALL touchup
+	CALL ships
+	CALL iterate
 
-CALL clrbot
-LINE (390, 350)-(520, 400), 1, BF
-COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(month), 3)); ","; globalYear
-globalVictory(1) = .8 * globalVictory(1) + .3 * (globalIncome(1) + globalControl(1))
-IF globalControl(1) > 29 THEN globalVictory(1) = globalVictory(1) + 50: IF globalControl(1) > 34 THEN globalVictory(1) = globalVictory(1) + 100
-IF side = 2 AND globalControl(1) < 11 THEN globalAggress! = globalAggress! + .7
+	CALL clrbot
+	LINE (390, 350)-(520, 400), 1, BF
+	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(month), 3)); ","; globalYear
+	globalVictory(1) = .8 * globalVictory(1) + .3 * (globalIncome(1) + globalControl(1))
+	IF globalControl(1) > 29 THEN 
+		globalVictory(1) = globalVictory(1) + 50
+		IF globalControl(1) > 34 THEN globalVictory(1) = globalVictory(1) + 100
+	END IF
+	IF side = 2 AND globalControl(1) < 11 THEN globalAggress! = globalAggress! + .7
 
-IF globalVictory(1) < 1 THEN globalVictory(1) = 0
-globalVictory(2) = .8 * globalVictory(2) + .3 * (globalIncome(2) + globalControl(2))
-IF globalControl(2) > 29 THEN globalVictory(2) = globalVictory(2) + 50: IF globalControl(2) > 34 THEN globalVictory(2) = globalVictory(1) + 100
-IF side = 1 AND globalControl(2) < 11 THEN globalAggress! = globalAggress! + .7
-IF globalPlayer = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+	IF globalVictory(1) < 1 THEN globalVictory(1) = 0
+	globalVictory(2) = .8 * globalVictory(2) + .3 * (globalIncome(2) + globalControl(2))
+	IF globalControl(2) > 29 THEN 
+		globalVictory(2) = globalVictory(2) + 50
+		IF globalControl(2) > 34 THEN globalVictory(2) = globalVictory(1) + 100
+	END IF
+	IF side = 1 AND globalControl(2) < 11 THEN globalAggress! = globalAggress! + .7
+	IF globalPlayer = 2 THEN 
+		CALL clrbot
+		COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
+	END IF
 END SUB
 
 ' CWSTRAT2.BAS
