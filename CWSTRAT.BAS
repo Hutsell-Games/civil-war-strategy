@@ -2401,185 +2401,262 @@ SUB navy (who, chx)
 END SUB
 
 SUB newarmy (who, empty, target)
-	globalSupply(empty) = 3 + 5 * RND: IF who = 1 THEN globalSupply(empty) = globalSupply(empty) + 2
-	globalArmyExper(empty) = 1: IF who = 2 THEN globalArmyExper(empty) = 2
+	globalSupply(empty) = 3 + 5 * RND
+	IF who = 1 THEN globalSupply(empty) = globalSupply(empty) + 2
+	globalArmyExper(empty) = 1
+	IF who = 2 THEN globalArmyExper(empty) = 2
 	globalArmyLead(empty) = globalRating(empty)
-	globalArmyName$(empty) = globalLName$(empty): globalLName$(empty) = ""
-	COLOR 12: CALL clrbot: PRINT "Placing NEW army "; empty; globalArmyName$(empty); " in "; globalCity$(target);
+	globalArmyName$(empty) = globalLName$(empty)
+	globalLName$(empty) = ""
+	COLOR 12
+	CALL clrbot
+	PRINT "Placing NEW army "; empty; globalArmyName$(empty); " in "; globalCity$(target);
 
-	x = 70: IF globalRealism > 0 THEN x = 3 * globalCityV(target) + 33
-	CALL cutoff(who, target, a): IF a < 1 THEN x = x \ 3
-	globalOccupied(target) = empty: globalArmySize(empty) = x
+	x = 70
+	IF globalRealism > 0 THEN x = 3 * globalCityV(target) + 33
+	CALL cutoff(who, target, a)
+	IF a < 1 THEN x = x \ 3
+	globalOccupied(target) = empty
+	globalArmySize(empty) = x
 	PRINT " Size = "; : CALL strong(empty)
-	globalCash(who) = globalCash(who) - 100: IF globalNoise > 0 THEN SOUND 2222, .5
-	globalArmyLoc(empty) = target: CALL placearmy(empty)
+	globalCash(who) = globalCash(who) - 100
+	IF globalNoise > 0 THEN SOUND 2222, .5
+	globalArmyLoc(empty) = target
+	CALL placearmy(empty)
 	CALL TICK(globalTurbo! - .5)
 	globalArmyMove(empty) = -1
 END SUB
 
 SUB newcity (index)
-		globalMTX$(1) = "  "
-		globalMTX$(3) = "  "
-		size = 3: a$ = globalCity$(index)
-morecap:
-		globalTLX = 68: globalTLY = 15: globalColour = 3: globalChoose = 23
-		globalMTX$(2) = globalCity$(index)
-		CALL menu(3): CALL clrrite
-	       SELECT CASE globalChoose
+	globalMTX$(1) = "  "
+	globalMTX$(3) = "  "
+	size = 3
+	a$ = globalCity$(index)
+	morecap:
+	globalTLX = 68
+	globalTLY = 15
+	globalColour = 3
+	globalChoose = 23
+	globalMTX$(2) = globalCity$(index)
+	CALL menu(3)
+	CALL clrrite
+	SELECT CASE globalChoose
 		CASE IS = -27
-		index = 0: EXIT SUB
+			index = 0
+			EXIT SUB
 		CASE IS < 1
-		a$ = CHR$(ABS(globalChoose))
-		x = 0
-		FOR k = 1 TO 40
-		IF LEFT$(globalCity$(k), 1) = a$ THEN
-			y = index: index = k
-spin2:
-			IF globalCityP(index) = side GOTO morecap
-				index = index + 1
-				IF index > 40 THEN index = 1
-				x = x + 1: IF x < 39 GOTO spin2
-				index = y: GOTO morecap
-		END IF
-		NEXT k
-		GOTO morecap
+			a$ = CHR$(ABS(globalChoose))
+			x = 0
+			FOR k = 1 TO 40
+				IF LEFT$(globalCity$(k), 1) = a$ THEN
+					y = index
+					index = k
+					spin2:
+					IF globalCityP(index) = side GOTO morecap
+					index = index + 1
+					IF index > 40 THEN index = 1
+					x = x + 1
+					IF x < 39 GOTO spin2
+					index = y
+					GOTO morecap
+				END IF
+			NEXT k
+			GOTO morecap
 		CASE 1
-minus1:
-		index = index - 1: IF index < 1 THEN index = 40
-		IF globalCityP(index) <> side GOTO minus1 ELSE GOTO morecap
+			minus1:
+			index = index - 1
+			IF index < 1 THEN index = 40
+			IF globalCityP(index) <> side GOTO minus1 ELSE GOTO morecap
 		CASE 2
-		GOTO fnew
+			GOTO fnew
 		CASE 3
-plus1:
-		index = index + 1: IF index > 40 THEN index = 1
-		IF globalCityP(index) <> side GOTO plus1 ELSE GOTO morecap
+			plus1:
+			index = index + 1
+			IF index > 40 THEN index = 1
+			IF globalCityP(index) <> side GOTO plus1 ELSE GOTO morecap
 		CASE ELSE
-		index = 0
+			index = 0
 		END SELECT
 fnew:
 END SUB
 
 SUB normal (xbar, vary, result)
-' NOTE : vary is VARIANCE
-pct! = 0
-FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
-pct! = pct! - 5.5
-result = xbar + pct! * SQR(vary)
+	' NOTE : vary is VARIANCE
+	pct! = 0
+	FOR k = 1 TO 12
+		pct! = pct! + RND
+	NEXT k
+	pct! = pct! - 5.5
+	result = xbar + pct! * SQR(vary)
 END SUB
 
 SUB placearmy (which)
-who = 1: IF which > 20 THEN who = 2
-x = globalCityX(globalArmyLoc(which)) - 12
-y = globalCityY(globalArmyLoc(which)) - 11
-CALL armyxy(x, y, who)
-IF globalSupply(which) < 1 THEN
-	x = x - 3: y = y + 4
-	PSET (x, y), 13: DRAW "C11S8"
-	DRAW globalFont$(19)
-	DRAW "S4"
-END IF
+	who = 1
+	IF which > 20 THEN who = 2
+	x = globalCityX(globalArmyLoc(which)) - 12
+	y = globalCityY(globalArmyLoc(which)) - 11
+	CALL armyxy(x, y, who)
+	IF globalSupply(which) < 1 THEN
+		x = x - 3
+		y = y + 4
+		PSET (x, y), 13: DRAW "C11S8"
+		DRAW globalFont$(19)
+		DRAW "S4"
+	END IF
 END SUB
 
 SUB railroad (who)
-SELECT CASE globalRR(who)
-	CASE 0
-	IF who = side GOTO human
-	CALL starfin(star, fin, who): max = 32767
-	index = 0
-	FOR i = star TO fin: IF globalArmyLoc(i) = 0 OR globalArmyMove(i) <> 0 GOTO puter
-	x = 0: FOR j = 1 TO 6: from = globalMatrix(globalArmyLoc(i), j): IF from > 0 AND globalCityP(from) <> who THEN x = x + 1
-	NEXT j
-	IF globalOccupied(globalCapCity(who)) > 0 AND x > 1 GOTO puter
-	CALL void(globalArmyLoc(i), defend)
-	IF globalVicFlag(5) > 0 AND globalOccupied(globalCapCity(who)) = 0 THEN IF defend > max THEN defend = max - 1
-	IF defend < max THEN target = globalArmyLoc(i): GOSUB route: IF x > 1 THEN max = defend: index = i
-puter:  NEXT i
-	IF index = 0 OR max > .3 * globalArmySize(index) GOTO toot
-	CALL traincapacity(who, limit)
-	IF globalArmySize(index) > limit THEN GOTO toot
-	from = globalArmyLoc(index)
-	x1 = 0: FOR i = 1 TO 40: IF globalCityP(i) <> who GOTO puted
-	CALL void(i, defend): IF defend = 0 OR defend > 3 * globalArmySize(index) GOTO puted
-	IF globalOccupied(i) > 0 GOTO puted
-	target = i
-	GOSUB route: IF x = 0 GOTO puted
-	IF side = 1 AND globalCityY(i) < globalCityY(from) THEN x1 = i
-	IF side = 2 AND globalCityY(i) > globalCityY(from) THEN x1 = i
-	IF globalFort(i) > 0 AND globalOccupied(i) = 0 THEN x1 = i: EXIT FOR
-puted:  NEXT i
-	IF globalVicFlag(5) > 0 AND globalOccupied(globalCapCity(who)) = 0 THEN
-		GOSUB route
-		IF x > 0 THEN
-			CALL void(globalCapCity(who), defend)
-			IF defend > 0 THEN x1 = globalCapCity(who)
+	SELECT CASE globalRR(who)
+		CASE 0
+			IF who = side GOTO human
+			CALL starfin(star, fin, who)
+			max = 32767
+			index = 0
+			FOR i = star TO fin
+				IF globalArmyLoc(i) = 0 OR globalArmyMove(i) <> 0 GOTO puter
+				x = 0
+				FOR j = 1 TO 6
+					from = globalMatrix(globalArmyLoc(i), j)
+					IF from > 0 AND globalCityP(from) <> who THEN x = x + 1
+				NEXT j
+				IF globalOccupied(globalCapCity(who)) > 0 AND x > 1 GOTO puter
+				CALL void(globalArmyLoc(i), defend)
+				IF globalVicFlag(5) > 0 AND globalOccupied(globalCapCity(who)) = 0 THEN
+					IF defend > max THEN defend = max - 1
+				END IF
+				IF defend < max THEN 
+					target = globalArmyLoc(i)
+					GOSUB route
+					IF x > 1 THEN max = defend: index = i
+				END IF
+			puter:  
+			NEXT i
+		IF index = 0 OR max > .3 * globalArmySize(index) GOTO toot
+		CALL traincapacity(who, limit)
+		IF globalArmySize(index) > limit THEN GOTO toot
+		from = globalArmyLoc(index)
+		x1 = 0
+		FOR i = 1 TO 40
+			IF globalCityP(i) <> who GOTO puted
+			CALL void(i, defend)
+			IF defend = 0 OR defend > 3 * globalArmySize(index) GOTO puted
+			IF globalOccupied(i) > 0 GOTO puted
+			target = i
+			GOSUB route
+			IF x = 0 GOTO puted
+			IF side = 1 AND globalCityY(i) < globalCityY(from) THEN x1 = i
+			IF side = 2 AND globalCityY(i) > globalCityY(from) THEN x1 = i
+			IF globalFort(i) > 0 AND globalOccupied(i) = 0 THEN x1 = i: EXIT FOR
+		puted:
+		NEXT i
+		IF globalVicFlag(5) > 0 AND globalOccupied(globalCapCity(who)) = 0 THEN
+			GOSUB route
+			IF x > 0 THEN
+				CALL void(globalCapCity(who), defend)
+				IF defend > 0 THEN x1 = globalCapCity(who)
+			END IF
 		END IF
-	END IF
-	IF x1 > 0 GOTO haul ELSE GOTO toot
-human:
-	CALL movefrom(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "Railroad move not allowed"; : GOTO toot
-	x = 1: IF index > 20 THEN x = 2
-	CALL traincapacity(who, limit)
-	IF globalArmySize(index) > limit THEN CALL clrbot: PRINT "Too many troops for railroad capacity"; : GOTO toot
-	
-	target = globalArmyLoc(index): GOSUB route: IF x > 1 GOTO aboard
-	CALL clrbot: PRINT "Track from "; globalCity$(target); " is blocked"; : GOTO toot
-aboard:
-	CALL clrbot: PRINT "Select destination for "; globalArmyName$(index); " from "; globalCity$(target);
-	globalMTX$(0) = "To": from = target: x1 = from: IF from = 0 GOTO toot
-	CALL newcity(x1): IF x1 = from OR x1 = 0 GOTO toot
+		IF x1 > 0 GOTO haul ELSE GOTO toot
+		human:
+		CALL movefrom(index, a)
+		IF a < 1 OR index < 1 THEN 
+			COLOR 11
+			CALL clrbot
+			PRINT "Railroad move not allowed";
+			GOTO toot
+		END IF
+		x = 1
+		IF index > 20 THEN x = 2
+		CALL traincapacity(who, limit)
+		IF globalArmySize(index) > limit THEN 
+			CALL clrbot
+			PRINT "Too many troops for railroad capacity";
+			GOTO toot
+		END IF
+		
+		target = globalArmyLoc(index)
+		GOSUB route
+		IF x > 1 GOTO aboard
+		CALL clrbot
+		PRINT "Track from "; globalCity$(target); " is blocked";
+		GOTO toot
+		aboard:
+		CALL clrbot
+		PRINT "Select destination for "; globalArmyName$(index); " from "; globalCity$(target);
+		globalMTX$(0) = "To"
+		from = target
+		x1 = from
+		IF from = 0 GOTO toot
+		CALL newcity(x1)
+		IF x1 = from OR x1 = 0 GOTO toot
 
-	target = x1: GOSUB route: IF x > 1 GOTO haul
-	CALL clrbot: PRINT globalArmyName$(index); "'s train cannot go to "; globalCity$(x1); " - select another city"; : CALL TICK(9)
-	GOTO aboard
-haul:
-	COLOR 11: CALL clrbot: PRINT globalArmyName$(index); " is taking the train from "; globalCity$(from); " to "; globalCity$(x1);
-	globalTracks(who) = globalArmyLoc(index)
-	from = globalArmyLoc(index)
-	globalRRFrom(who) = from
-	globalRR(who) = index: globalArmyLoc(index) = 0: globalArmyMove(index) = x1
-	CALL tinytrain(who, 1)
-	IF globalNoise > 0 THEN SOUND 2222, 1
-	CALL engine
+		target = x1
+		GOSUB route
+		IF x > 1 GOTO haul
+		CALL clrbot
+		PRINT globalArmyName$(index); "'s train cannot go to "; globalCity$(x1); " - select another city";
+		CALL TICK(9)
+		GOTO aboard
+		haul:
+		COLOR 11
+		CALL clrbot
+		PRINT globalArmyName$(index); " is taking the train from "; globalCity$(from); " to "; globalCity$(x1);
+		globalTracks(who) = globalArmyLoc(index)
+		from = globalArmyLoc(index)
+		globalRRFrom(who) = from
+		globalRR(who) = index
+		globalArmyLoc(index) = 0
+		globalArmyMove(index) = x1
+		CALL tinytrain(who, 1)
+		IF globalNoise > 0 THEN SOUND 2222, 1
+		CALL engine
 
-	CALL occupy(from)
-       IF globalOccupied(from) > 0 THEN CALL placearmy(globalOccupied(from))
-	GOTO toot
+		CALL occupy(from)
+		IF globalOccupied(from) > 0 THEN CALL placearmy(globalOccupied(from))
+		GOTO toot
 
-	CASE IS > 0
-	CALL tinytrain(who, 0)
-	CALL occupy(globalRRFrom(who))
-	IF globalOccupied(globalRRFrom(who)) > 0 THEN CALL placearmy(globalOccupied(globalRRFrom(who)))
+		CASE IS > 0
+			CALL tinytrain(who, 0)
+			CALL occupy(globalRRFrom(who))
+			IF globalOccupied(globalRRFrom(who)) > 0 THEN CALL placearmy(globalOccupied(globalRRFrom(who)))
 
-	index = globalRR(who)
-	globalTracks(who) = globalArmyMove(index)
-	CALL tinytrain(who, 1)
+			index = globalRR(who)
+			globalTracks(who) = globalArmyMove(index)
+			CALL tinytrain(who, 1)
 
-	globalRR(who) = 0: globalArmyLoc(index) = globalArmyMove(index): globalArmyMove(index) = -1
-	COLOR 11: CALL clrbot: PRINT "Train with "; globalArmyName$(index); " has arrived in "; globalCity$(globalArmyLoc(index)); : IF globalNoise > 0 THEN SOUND 1200, 2
-	CALL TICK(globalTurbo!)
-	x = globalCityX(globalArmyLoc(index)) - 12: y = globalCityY(globalArmyLoc(index)) - 11
-	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-	IF globalCityP(globalArmyLoc(index)) <> who THEN CALL capture(index, globalArmyLoc(index), who, 0)
-	CALL placearmy(index)
-	IF globalOccupied(globalArmyLoc(index)) > 0 THEN CALL stax(who): GOTO toot
-	CALL occupy(globalArmyLoc(index)): CALL placearmy(index)
-	GOTO toot
-END SELECT
+			globalRR(who) = 0
+			globalArmyLoc(index) = globalArmyMove(index)
+			globalArmyMove(index) = -1
+			COLOR 11
+			CALL clrbot
+			PRINT "Train with "; globalArmyName$(index); " has arrived in "; globalCity$(globalArmyLoc(index));
+			IF globalNoise > 0 THEN SOUND 1200, 2
+			CALL TICK(globalTurbo!)
+			x = globalCityX(globalArmyLoc(index)) - 12
+			y = globalCityY(globalArmyLoc(index)) - 11
+			LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+			IF globalCityP(globalArmyLoc(index)) <> who THEN CALL capture(index, globalArmyLoc(index), who, 0)
+			CALL placearmy(index)
+			IF globalOccupied(globalArmyLoc(index)) > 0 THEN CALL stax(who): GOTO toot
+			CALL occupy(globalArmyLoc(index)): CALL placearmy(index)
+			GOTO toot
+	END SELECT
 
-route:
-	x = 0: FOR j = 1 TO 6
-	y = globalMatrix(target, j)
-	IF y > 0 AND globalCityP(y) = who THEN
-	x = x + 1
-		FOR m = 1 TO 6
-		z = globalMatrix(y, m)
-		IF z > 0 AND z <> target AND globalCityP(z) = who THEN x = x + 1
-		NEXT m
-	END IF
-NEXT j
-RETURN
+	route:
+	x = 0
+	FOR j = 1 TO 6
+		y = globalMatrix(target, j)
+		IF y > 0 AND globalCityP(y) = who THEN
+			x = x + 1
+			FOR m = 1 TO 6
+				z = globalMatrix(y, m)
+				IF z > 0 AND z <> target AND globalCityP(z) = who THEN x = x + 1
+			NEXT m
+		END IF
+	NEXT j
+	RETURN
 
-toot:
+	toot:
 	IF who = side THEN CALL TICK(9)
 	CALL clrrite
 	clrbot
