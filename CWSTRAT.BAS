@@ -82,7 +82,6 @@ COMMON SHARED globalNFlag, globalBold, globalTurbo!, globalRR(), globalStarX(), 
 COMMON SHARED globalImage(), globalForce$(), globalArmyLoc(), globalArmyName$(), globalPlayer, globalAggress!
 COMMON SHARED globalArmySize(), globalArmyLead(), globalArmyExper(), globalSupply(), globalMonth$()
 COMMON SHARED globalRCity(), globalVicFlag(), globalTracks(), globalBatWon(), globalCityO()
-' globalSide
 COMMON SHARED globalArmyMove(), globalMonth, globalYear, globalArray(), globalMFlag, globalSide, globalATKFAC, globalDEFAC, globalTCR
 COMMON SHARED globalNavyLoc(), globalNavySize(), globalNavyMove(), globalOccupied(), globalVPTotal, globalFort()
 COMMON SHARED globalVictory(), globalGraf, globalNoise, globalCapCity(), globalDifficult, globalUSAdv, globalBW
@@ -100,7 +99,7 @@ DIM SHARED globalTrain(2), globalFont$(26), globalBrray(40), globalCasualty&(2),
 DIM SHARED graphic(1 TO 1564), Ncap(60)
 DIM SHARED graft(1 TO 1564)
 
-replay = 0
+globalReplay = 0
 newgame:
 globalPCode = 0
 globalRFlag = 0
@@ -175,7 +174,7 @@ LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
 CALL flags(1, -440, 0): CALL flags(2, -100, 0)
-IF replay = 0 AND globalNoise = 2 AND globalChoose = 0 THEN
+IF globalReplay = 0 AND globalNoise = 2 AND globalChoose = 0 THEN
 IF globalSide = 1 THEN
 	IF INKEY$ <> "" GOTO notitle
 	PLAY "MST170o1e8o0b8o1e8"
@@ -224,13 +223,16 @@ RANDOMIZE TIMER
 TICK .3
 globalWType = 2
 globalHilite = 15
-replay = 1
+globalReplay = 1
 IF globalPlayer = 2 THEN GOSUB blanken
 globalMTX$(0) = "VGA CIVILWAR STRATEGY"
 globalMTX$(1) = "Resume Saved Game"
 globalMTX$(2) = "Start NEW Game"
-globalMTX$(3) = "Quit to DOS"
-globalTLX = 33: globalTLY = 20: globalColour = 5: globalSize = 3
+globalMTX$(3) = "Quit"
+globalTLX = 33
+globalTLY = 20
+globalColour = 5
+globalSize = 3
 globalChoose = 23
 CALL menu(0)
 IF globalChoose = 1 THEN
@@ -246,7 +248,8 @@ IF globalHistory = 1 THEN
 	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; DATE$; " ]"
 	CLOSE #2
 ELSE
-	SCREEN 12: CLS
+	SCREEN 12
+	CLS
 END IF
 CALL usa
 GOTO menu0
@@ -364,7 +367,10 @@ SELECT CASE globalChoose
 		globalSize = 2
 		CALL menu(0)
 		CALL clrrite
-		IF globalChoose <> 1 THEN chosit = 24: GOTO menu0
+		IF globalChoose <> 1 THEN 
+			chosit = 24
+			GOTO menu0
+		END IF
 		endrnd:
 		globalRFlag = 0
 		globalMFlag = 0
@@ -387,7 +393,8 @@ SELECT CASE globalChoose
 		NEXT i
 	CASE 7 ' Commands
 		optmen:
-		globalTLX = 67: globalTLY = 13
+		globalTLX = 67
+		globalTLY = 13
 		COLOR 11: LOCATE globalTLY - 2, globalTLX: PRINT "esc=Main Menu"
 		globalHilite = 15
 		globalColour = 3
@@ -440,7 +447,7 @@ SELECT CASE globalChoose
 			globalTLX = 67: globalTLY = 5: globalColour = 5
 			globalSize = 0
 			FOR i = star TO fin
-				IF globalArmyLoc(i) = 0 OR globalSupply(i) > 1 GOTO alone
+				IF globalArmyLoc(i) = 0 OR globalSupply(i) > 1 THEN GOTO alone
 				IF globalRealism > 0 THEN
 					CALL cutoff(globalSide, globalArmyLoc(i), a)
 					IF a < 1 THEN 
@@ -683,7 +690,9 @@ SELECT CASE globalChoose
 			globalMTX$(3) = "Balanced"
 			globalMTX$(4) = "Union +"
 			globalMTX$(5) = "Union ++"
-			globalTLX = 67: globalTLY = 15: globalSize = 5
+			globalTLX = 67
+			globalTLY = 15
+			globalSize = 5
 			CALL menu(8)
 			CALL clrrite
 			IF globalChoose < 1 GOTO menu0
@@ -848,7 +857,7 @@ SELECT CASE globalChoose
 		globalMTX$(1) = "Load": IF globalFileL = 0 THEN globalMTX$(1) = "-": globalChoose = 23
 		globalMTX$(2) = "Save"
 		globalMTX$(3) = "New Game"
-		globalMTX$(4) = "Quit to DOS"
+		globalMTX$(4) = "Quit"
 		globalSize = 4: globalTLX = 67: globalTLY = 15
 		CALL menu(0)
 		CALL clrrite
@@ -881,15 +890,13 @@ SELECT CASE globalChoose
 		GOTO menu0
 	END SELECT
 	GOTO menu0
-	'............................................................................
 	'                               Subs
-	'............................................................................
 	topbar:
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR 11
 	LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(globalSide); " side "; : COLOR 14: PRINT globalMonth$(month); ","; globalYear; "  "
 	RETURN
-	'............................................................................
+
 	rusure:
 	globalChoose = 23
 	globalMTX$(0) = "Quit"
@@ -900,13 +907,13 @@ SELECT CASE globalChoose
 	CALL menu(0)
 	CALL clrrite
 	IF globalChoose = 1 THEN END ELSE GOTO menu0
-	'............................................................................
+
 	unionplus:
 	globalUSAdv = 120 * globalDifficult
 	IF globalPlayer = 2 THEN globalUSAdv = 50 * globalDifficult
 	IF globalRealism > 0 THEN globalUSAdv = globalUSAdv * .7
 	RETURN
-	'............................................................................
+
 	blanken:        
 	c = 1
 	IF globalSide = 2 THEN c = 7
@@ -917,7 +924,7 @@ SELECT CASE globalChoose
 	COLOR 11: LOCATE 17, 30: PRINT globalForce$(globalSide); " PLAYER TURN"
 	DO WHILE INKEY$ = "": LOOP
 	RETURN
-	'............................................................................
+
 	DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 	DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
 	DATA "U4BD2BR1R3U2BD3D1","R1U4L1R2BL1BD4R1","R1E1U3BG3F1","U4BR3G2F2"
@@ -948,7 +955,11 @@ SUB animate (index, flag)
 		y1 = .1 * (i * globalCityY(to2) + (10 - i) * globalCityY(from))
 		GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), globalImage
 		PUT (x1 - 10, y1 - 10), globalAnima, PSET
-		IF globalTurbo! > 1 THEN CALL TICK(.1) ELSE CALL TICK(.02)
+		IF globalTurbo! > 1 THEN 
+			CALL TICK(.1) 
+		ELSE 
+			CALL TICK(.02)
+		END IF
 		IF globalNoise > 0 THEN SOUND 200, .1: SOUND 50, .1
 		PUT (x1 - 10, y1 - 10), globalImage, PSET
 	NEXT i
@@ -1134,7 +1145,8 @@ SUB battle (attack, defend, win, lose)
 	END IF
 	IF x1 > globalTCR THEN x1 = globalTCR
 	IF globalFort(globalArmyLoc(defend)) > 0 AND globalArmyMove(defend) = 0 THEN
-		COLOR 13: a$ = "Fort+"
+		COLOR 13
+		a$ = "Fort+"
 		IF globalFort(globalArmyLoc(defend)) = 2 THEN 
 			a$ = "Fort++"
 		END IF
@@ -1203,7 +1215,7 @@ SUB battle (attack, defend, win, lose)
 	CALL clrbot
 	COLOR 11: PRINT globalArmyName$(win); " defeats "; globalArmyName$(lose); " in "; globalCity$(globalArmyLoc(defend));
 	CALL TICK(9)
-	'===========================================================================
+
 	pct! = .01 * globalDEFAC - .03 * globalFort(globalArmyLoc(defend))
 	IF win = attack THEN pct! = 1.3 * pct!
 	SELECT CASE globalArmySize(defend)
@@ -1215,7 +1227,7 @@ SUB battle (attack, defend, win, lose)
 	xbar = globalArmySize(attack) * pct!
 	vary = xbar * (1 - pct!)
 	CALL normal(xbar, vary, killd)
-	'...........................................................................
+
 	pct! = .01 * globalATKFAC + .02 * globalFort(globalArmyLoc(defend))
 	IF win = defend THEN pct! = 1.5 * pct!
 	SELECT CASE globalArmySize(attack)
@@ -1227,7 +1239,7 @@ SUB battle (attack, defend, win, lose)
 	xbar = globalArmySize(defend) * pct!
 	vary = xbar * (1 - pct!)
 	CALL normal(xbar, vary, killa)
-	'===========================================================================
+
 	killa = .8 * killa + .2 * killd
 	IF killa < 1 THEN killa = 1
 	killd = .8 * killd + .2 * killa
@@ -1237,7 +1249,7 @@ SUB battle (attack, defend, win, lose)
 
 	IF killa >= globalArmySize(attack) THEN killa = globalArmySize(attack) - 1
 	IF killd >= globalArmySize(defend) THEN killd = globalArmySize(defend) - 1
-	'---------------------------------------------------------------------------
+
 	x = INT(100 * odds!): IF x < 1 THEN x = 1
 	a$ = LTRIM$(RTRIM$(STR$(x))) + "%"
 
@@ -1249,7 +1261,7 @@ SUB battle (attack, defend, win, lose)
 	COLOR 16 - c: PRINT "� Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
 	CALL strong(defend)
 	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / globalArmySize(defend)))))); "%)"
-	'---------------------------------------------------------------------------
+
 	globalMTX$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(globalArmySize(attack)) + "00") + ") "
 	t$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(globalArmySize(defend)) + "00") + ")"
 	globalMTX$(2) = t$
@@ -1275,12 +1287,12 @@ SUB battle (attack, defend, win, lose)
 	globalArmySize(attack) = globalArmySize(attack) - killa
 	globalArmySize(defend) = globalArmySize(defend) - killd
 	IF globalArmySize(defend) < 1 THEN globalArmySize(defend) = 1
-	'---------------------------------------------------------------------------
+
 	s = 1
 	IF attack > 2 THEN s = 2
 	globalCasualty&(s) = globalCasualty&(s) + killa
 	globalCasualty&(3 - s) = globalCasualty&(3 - s) + killd
-	'---------------------------------------------------------------------------
+
 	s = 1
 	IF win > 20 THEN s = 2
 	globalBatWon(s) = globalBatWon(s) + 1
@@ -1321,7 +1333,7 @@ SUB combine (who)
 	CALL menu(9)
 	CALL clrrite
 	join:
-	IF globalChoose < 1 GOTO nocity2
+	IF globalChoose < 1 THEN GOTO nocity2
 	target = globalArray(globalChoose)
 	CALL clrbot
 	PRINT "Combining "; globalForce$(who); " armies in "; globalCity$(target);
@@ -1334,12 +1346,12 @@ SUB combine (who)
 	globalArmyName$(0) = ""
 	globalSupply(0) = 0
 	globalArmyMove(0) = 0
-	'...........................................................................
+
 	best = 0
 	x = 0
 	spin = 0
 	FOR j = star TO fin
-		IF globalArmyMove(j) <> 0 OR globalArmyLoc(j) <> target OR globalArmySize(j) = 0 GOTO dork1
+		IF globalArmyMove(j) <> 0 OR globalArmyLoc(j) <> target OR globalArmySize(j) = 0 THEN GOTO dork1
 		IF globalArmySize(0) + globalArmySize(j) > 1250 THEN 
 			CALL clrbot
 			PRINT "Cannot combine "; globalArmyName$(j); "... TOO LARGE";
@@ -1534,7 +1546,10 @@ SUB filer (switch)
 			NEXT k
 				globalTLX = 67: globalSize = 9
 				CALL menu(0)
-				IF globalChoose < 1 THEN clrrite: EXIT SUB
+				IF globalChoose < 1 THEN 
+					clrrite
+					EXIT SUB
+				END IF
 				COLOR 11
 				CALL clrbot
 				PRINT "Saving";
@@ -1545,7 +1560,8 @@ SUB filer (switch)
 				WRITE #1, globalArmyName$(i), globalArmySize(i), globalArmyLead(i), globalArmyLoc(i), globalArmyExper(i), globalSupply(i), globalArmyMove(i)
 			NEXT i
 			FOR i = 1 TO 40
-				WRITE #1, globalOccupied(i), globalCityP(i), globalFort(i): PRINT ".";
+				WRITE #1, globalOccupied(i), globalCityP(i), globalFort(i)
+				PRINT ".";
 			NEXT i
 			FOR i = 1 TO 2
 				WRITE #1, globalCash(i), globalControl(i), globalIncome(i), globalVictory(i), globalCapCity(i)
