@@ -9,3 +9,5 @@
 8. Remove unused line label code: topbar
 9. Move single use rusure inline
 10. Move chessie inline
+===
+11. clrbot => clearBottom; clrrite => clearRight

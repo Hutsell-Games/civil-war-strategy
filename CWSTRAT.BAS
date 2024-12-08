@@ -14,9 +14,9 @@ DECLARE SUB capitol ()
 DECLARE SUB capture (active%, c%, s%, flag%)
 DECLARE SUB center (y%, a$)
 DECLARE SUB choices (b1%, wide%)
-DECLARE SUB clrbot ()
+DECLARE SUB clearBottom ()
 DECLARE SUB combine (who%)
-DECLARE SUB clrrite ()
+DECLARE SUB clearRight ()
 DECLARE SUB commander (who%, empty%)
 DECLARE SUB cutoff (who%, target%, a%)
 DECLARE SUB endit ()
@@ -216,7 +216,7 @@ FOR i = 1 TO 40
 globalVPTotal = globalVPTotal + globalCityV(i)
 NEXT i
 CLOSE #1
-CALL clrbot
+CALL clearBottom
 
 RANDOMIZE TIMER
 TICK .3
@@ -320,7 +320,7 @@ globalMTX$(9) = "Files"
 globalSize = 9
 globalChoose = chosit
 CALL menu(0)
-CALL clrrite
+CALL clearRight
 '==========================================================================
 '                            Main Menu
 '==========================================================================
@@ -347,11 +347,11 @@ SELECT CASE globalChoose
 			PAINT (x, y), z, 15
 			COLOR 15: IF globalSide = 1 THEN COLOR 11
 			CALL traincapacity(globalSide, limit)
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 			CALL railroad(globalSide)
 		ELSE
-			CALL clrbot
+			CALL clearBottom
 			COLOR 11: PRINT "Railroad is already carrying "; globalArmyName$(globalRR(globalSide)); " to "; globalCity$(globalArmyMove(globalRR(globalSide)));
 			GOTO menu0
 		END IF
@@ -365,7 +365,7 @@ SELECT CASE globalChoose
 		globalMTX$(2) = "NOT YET"
 		globalSize = 2
 		CALL menu(0)
-		CALL clrrite
+		CALL clearRight
 		IF globalChoose <> 1 THEN 
 			chosit = 24
 			GOTO menu0
@@ -410,7 +410,7 @@ SELECT CASE globalChoose
 		globalMTX$(9) = "MAIN MENU"
 		globalSize = 9
 		CALL menu(0)
-		CALL clrrite
+		CALL clearRight
 		chosit = 28
 		SELECT CASE globalChoose
 			CASE 1 ' Cancel
@@ -420,7 +420,7 @@ SELECT CASE globalChoose
 			CASE 2 ' Fortify
 				IF globalCash(globalSide) < 200 THEN 
 					COLOR 11
-					CALL clrbot
+					CALL clearBottom
 					PRINT "Not enough money for fort";
 					GOTO menu0
 				END IF
@@ -432,7 +432,7 @@ SELECT CASE globalChoose
 				x = globalSide
 				CALL combine(x)
 				IF x < 0 THEN
-					CALL clrbot
+					CALL clearBottom
 					COLOR 11
 					PRINT "No eligible armies in same city to combine";
 					CALL stax(globalSide)
@@ -450,7 +450,7 @@ SELECT CASE globalChoose
 				IF globalRealism > 0 THEN
 					CALL cutoff(globalSide, globalArmyLoc(i), a)
 					IF a < 1 THEN 
-						CALL clrbot
+						CALL clearBottom
 						COLOR 15: PRINT globalForce$(globalSide); " army in "; globalCity$(globalArmyLoc(i)); " is CUT OFF !";
 						TICK globalTurbo!
 						GOTO alone
@@ -465,12 +465,12 @@ SELECT CASE globalChoose
 			NEXT i
 			IF globalSize = 0 THEN 
 				COLOR 11
-				CALL clrbot
+				CALL clearBottom
 				PRINT "All eligible "; globalForce$(globalSide); " armies have supplies";
 				GOTO menu0
 			END IF
 			CALL menu(6)
-			CALL clrrite
+			CALL clearRight
 			IF globalChoose < 0 GOTO menu0
 			index = globalArray(globalChoose)
 			IF globalSupply(index) < 2 THEN
@@ -481,27 +481,27 @@ SELECT CASE globalChoose
 			GOTO optmen
 		CASE 5 ' Move Capital
 			IF globalCapCity(globalSide) = 0 OR globalCash(globalSide) < 500 THEN 
-				CALL clrbot
+				CALL clearBottom
 				COLOR 11: PRINT "Cannot move capital";
 				GOTO menu0
 			END IF
 			globalCash(globalSide) = globalCash(globalSide) - 500
 			globalVictory(3 - globalSide) = globalVictory(3 - globalSide) + 50
-			CALL clrrite
+			CALL clearRight
 			globalMTX$(0) = "Capital"
 			a$ = globalCity$(globalCapCity(globalSide))
 			index = globalCapCity(globalSide)
 			CALL newcity(index)
 			IF index = 0 GOTO menu0
 			globalCapCity(globalSide) = index
-			CALL clrbot: PRINT globalForce$(globalSide); " capital moved from "; a$; " to "; globalCity$(globalCapCity(globalSide));
-			CALL clrrite
+			CALL clearBottom: PRINT globalForce$(globalSide); " capital moved from "; a$; " to "; globalCity$(globalCapCity(globalSide));
+			CALL clearRight
 			CALL showcity
 			CALL TICK(9)
-			CALL clrbot
+			CALL clearBottom
 		CASE 6 ' Detach Army
 			IF globalSide = 1 THEN 
-				CALL clrbot
+				CALL clearBottom
 				COLOR 11: PRINT "Option not available to Union";
 				GOTO menu0
 			END IF
@@ -509,7 +509,7 @@ SELECT CASE globalChoose
 			CALL movefrom(index, target)
 			IF target < 1 OR index < 1 GOTO menu0
 			IF globalArmySize(index) < 65 THEN 
-				CALL clrbot
+				CALL clearBottom
 				PRINT "Too small to detach";
 				CALL TICK(globalTurbo!)
 				GOTO menu0
@@ -529,7 +529,7 @@ SELECT CASE globalChoose
 			globalLName$(empty) = ""
 			globalArmyExper(empty) = globalArmyExper(index)
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; globalArmyName$(empty);
 			CALL TICK(globalTurbo!)
 			IF globalNoise > 0 THEN SOUND 2222, 1
@@ -541,21 +541,21 @@ SELECT CASE globalChoose
 			CALL movefrom(index, target)
 			IF target < 1 OR index < 1 THEN 
 				COLOR 11
-				CALL clrbot
+				CALL clearBottom
 				PRINT "No armies remain eligible for drills in "; globalMonth$(month);
 				GOTO menu0
 			END IF
 			IF globalArmyExper(index) > 5 OR globalArmyExper(index) >= globalArmyLead(index) THEN
 				COLOR 12
-				CALL clrbot
+				CALL clearBottom
 				PRINT globalArmyName$(index); ": Army has reached maximum improvement through drilling";
 				GOTO optmen
 			END IF
 			globalArmyExper(index) = globalArmyExper(index) + 1
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalArmyName$(index); " has drilled to reach experience level "; globalArmyExper(index);
 			IF globalNoise > 0 THEN SOUND 2222, 1
-			CALL TICK(globalTurbo!): clrbot
+			CALL TICK(globalTurbo!): clearBottom
 			globalArmyMove(index) = -1
 			globalChoose = 28
 			GOTO optmen
@@ -598,14 +598,14 @@ SELECT CASE globalChoose
 			globalMTX$(14) = "Aggress" + STR$(globalBold)
 		END IF
 		CALL menu(-1)
-		CALL clrrite
+		CALL clearRight
 	    SELECT CASE globalChoose
 	    CASE 1 ' Swap Sides
 			IF globalPlayer = 2 GOTO menu0
 			globalSide = 3 - globalSide
 			COLOR 9
 			IF globalSide = 2 THEN COLOR 7
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Now playing "; globalForce$(globalSide); " side";
 			IF globalNoise > 0 THEN SOUND 999, 1
 			IF globalSide = 1 THEN globalRandBal = 7
@@ -614,7 +614,7 @@ SELECT CASE globalChoose
 			GOTO menu0
 	    CASE 2 ' Solo or 2 Player
 			globalPlayer = 3 - globalPlayer
-			CALL clrbot
+			CALL clearBottom
 			COLOR 12
 			IF globalNoise > 0 THEN SOUND 999, 1
 			a$ = "Solo"
@@ -631,12 +631,12 @@ SELECT CASE globalChoose
 			IF globalGraf = 3 THEN a$ = "FULL"
 			CLS
 			CALL usa
-			CALL clrbot
+			CALL clearBottom
 			COLOR 11: PRINT "Graphics : "; a$; 
 			IF globalNoise > 0 THEN SOUND 2700, 1
 			globalChoose = 24
 	    CASE 4 ' Sounds
-			CALL clrrite
+			CALL clearRight
 			globalChoose = globalNoise + 22
 			globalMTX$(0) = "SOUNDS"
 			globalMTX$(1) = "Quiet"
@@ -646,10 +646,10 @@ SELECT CASE globalChoose
 			globalTLX = 67
 			globalTLY = 12
 			CALL menu(0)
-			CALL clrrite
+			CALL clearRight
 			IF globalChoose < 1 GOTO menu0
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Sound Option : "; globalMTX$(globalChoose);
 			globalNoise = globalChoose - 1
 			IF globalNoise > 0 THEN SOUND 999, 1
@@ -665,13 +665,13 @@ SELECT CASE globalChoose
 			globalMTX$(5) = "Reg Color": IF globalBW > 0 THEN globalMTX$(5) = "Alt Color"
 			globalTLX = 67: globalTLY = 15: globalSize = 5
 			CALL menu(0)
-			CALL clrrite
+			CALL clearRight
 			SELECT CASE globalChoose
 				CASE IS < 1
 				CASE IS < 5
 					globalTurbo! = globalChoose
 					IF globalTurbo! = 4 THEN globalTurbo! = 8
-					CALL clrbot: COLOR 11
+					CALL clearBottom: COLOR 11
 					PRINT "Display Speed : "; globalMTX$(globalChoose);
 				CASE 5
 					globalBW = 1 - globalBW
@@ -693,11 +693,11 @@ SELECT CASE globalChoose
 			globalTLY = 15
 			globalSize = 5
 			CALL menu(8)
-			CALL clrrite
+			CALL clearRight
 			IF globalChoose < 1 GOTO menu0
-			CALL clrbot
+			CALL clearBottom
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Play Balance : "; globalMTX$(globalChoose);
 			globalDifficult = globalChoose
 			GOSUB unionplus
@@ -731,7 +731,7 @@ SELECT CASE globalChoose
 			CASE ELSE
 			END SELECT
 			IF globalChoose > 1 AND globalChoose < 5 THEN t$ = globalMTX$(globalChoose)
-			CALL clrbot
+			CALL clearBottom
 			a$ = ""
 			IF globalRandBal = 0 THEN a$ = "OFF"
 			COLOR 11: PRINT "Random Events : "; a$; " "; t$;
@@ -799,13 +799,13 @@ SELECT CASE globalChoose
 			a$ = "PROHIBITED"
 			IF globalJanCam = 1 THEN a$ = "ALLOWED"
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT "January Campaigns : "; a$;
 			globalChoose = 31
 			GOTO utile
 	   	CASE 11 ' Realism Switch
 			globalRealism = 1 - globalRealism
-			CALL clrbot
+			CALL clearBottom
 			COLOR 11
 			IF globalRealism = 0 THEN
 				PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
@@ -824,7 +824,7 @@ SELECT CASE globalChoose
 			globalHistory = 1 - globalHistory
 			a$ = "OFF"
 			IF globalHistory = 1 THEN a$ = "ON"
-			CALL clrbot
+			CALL clearBottom
 			PRINT "History is now "; a$;
 			globalChoose = 34
 			GOTO utile
@@ -839,7 +839,7 @@ SELECT CASE globalChoose
 				CASE 4: a$ = "BOLD"
 				CASE 5: a$ = "RECKLESS"
 			END SELECT
-			CALL clrbot
+			CALL clearBottom
 			COLOR 11
 			PRINT "Enemy Aggression : "; a$; " ("; globalBold; ")";
 			globalChoose = 35
@@ -859,7 +859,7 @@ SELECT CASE globalChoose
 		globalMTX$(4) = "Quit"
 		globalSize = 4: globalTLX = 67: globalTLY = 15
 		CALL menu(0)
-		CALL clrrite
+		CALL clearRight
 		SELECT CASE globalChoose
 			CASE IS < 1
 				GOTO menu0
@@ -887,7 +887,7 @@ SELECT CASE globalChoose
 				globalSize = 2: globalColour = 5
 				globalTLX = 67: globalTLY = 15
 				CALL menu(0)
-				CALL clrrite
+				CALL clearRight
 				IF globalChoose = 1 THEN END ELSE GOTO menu0
 		END SELECT
 	CASE 99
@@ -980,25 +980,25 @@ SUB armies
 	globalHilite = 10
 	globalColour = 3
 	CALL menu(2)
-	CALL clrrite
+	CALL clearRight
 	IF globalChoose < 0 GOTO dudd
 	IF month < 3 AND globalJanCam = 0 AND globalCityP(globalArray(globalChoose)) <> globalSide THEN 
 		COLOR 11
-		CALL clrbot
+		CALL clearBottom
 		PRINT "No campaigns in January"; 
 		CALL TICK(9)
-		CALL clrbot
+		CALL clearBottom
 		GOTO dudd
 	END IF
 
-	CALL clrbot
+	CALL clearBottom
 	PRINT "Army "; index; " "; globalArmyName$(index); " is moving from "; globalCity$(target); " to "; globalCity$(globalArray(globalChoose));
 	IF globalNoise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
 	CALL icon(target, globalArray(globalChoose), 1)
 	globalArmyMove(index) = globalArray(globalChoose)
 	CALL TICK(globalTurbo!)
-	CALL clrbot
-	CALL clrrite
+	CALL clearBottom
+	CALL clearRight
 dudd:
 END SUB
 
@@ -1032,7 +1032,7 @@ SUB battle (attack, defend, win, lose)
 
 	CALL icon(globalArmyLoc(defend), 0, 9)
 	LOCATE 1, 1: PRINT SPACE$(80)
-	CALL clrrite
+	CALL clearRight
 	y = 68
 	COLOR 11: LOCATE 1, y: PRINT "Attacker"
 	c = 9
@@ -1170,7 +1170,7 @@ SUB battle (attack, defend, win, lose)
 			PUT (550, 270), graphic, PSET
 		END IF
 	ELSE
-		CALL clrrite
+		CALL clearRight
 	END IF
 	FOR i = 1 TO 2
 		IF globalSupply(i) > 0 THEN globalSupply(i) = globalSupply(i) - 1
@@ -1202,7 +1202,7 @@ SUB battle (attack, defend, win, lose)
 	a = 1
 	IF win > 20 THEN a = 2
 	CALL flags(a, 0, 0)
-	CALL clrbot
+	CALL clearBottom
 	COLOR 11: PRINT globalArmyName$(win); " defeats "; globalArmyName$(lose); " in "; globalCity$(globalArmyLoc(defend));
 	CALL TICK(9)
 
@@ -1270,7 +1270,7 @@ SUB battle (attack, defend, win, lose)
 
 	IF globalPlayer = 1 AND (globalSide = 1 AND attack > 20) OR (globalSide = 2 AND attack < 21) THEN
 		COLOR 14
-		CALL clrbot
+		CALL clearBottom
 		PRINT "hit any key to continue"; : DO WHILE INKEY$ = "": LOOP
 	END IF
 
@@ -1321,11 +1321,11 @@ SUB combine (who)
 	globalChoose = 31
 	globalHilite = 11
 	CALL menu(9)
-	CALL clrrite
+	CALL clearRight
 	join:
 	IF globalChoose < 1 THEN GOTO nocity2
 	target = globalArray(globalChoose)
-	CALL clrbot
+	CALL clearBottom
 	PRINT "Combining "; globalForce$(who); " armies in "; globalCity$(target);
 	CALL TICK(globalTurbo!)
 
@@ -1343,7 +1343,7 @@ SUB combine (who)
 	FOR j = star TO fin
 		IF globalArmyMove(j) <> 0 OR globalArmyLoc(j) <> target OR globalArmySize(j) = 0 THEN GOTO dork1
 		IF globalArmySize(0) + globalArmySize(j) > 1250 THEN 
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Cannot combine "; globalArmyName$(j); "... TOO LARGE";
 			CALL TICK(globalTurbo!)
 			GOTO dork1
@@ -1361,7 +1361,7 @@ SUB combine (who)
 		pct! = (globalArmySize(j) / globalArmySize(0))
 		spin = spin + 1
 		globalArmyExper(0) = (1 - pct!) * globalArmyExper(0) + pct! * globalArmyExper(j)
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(j); " is combining his "; : CALL strong(j): PRINT " forces";
 		CALL TICK(globalTurbo!)
 		globalSupply(0) = globalSupply(0) + globalSupply(j)
@@ -1377,7 +1377,7 @@ SUB combine (who)
 	dork1:
 	NEXT j
 
-	CALL clrbot
+	CALL clearBottom
 	IF who <> globalSide AND spin = 0 THEN EXIT SUB
 	IF spin = 0 THEN
 		PRINT "No valid armies to combine at this time in "; globalCity$(target);
@@ -1484,11 +1484,11 @@ SUB filer (switch)
 			CALL bubble((globalSize))
 			globalTLX = 67: globalTLY = 14 - .5 * globalSize
 			CALL menu(0)
-			CALL clrrite
+			CALL clearRight
 			IF globalChoose < 1 THEN EXIT SUB
 			OPEN "I", 1, "cws" + LTRIM$(STR$(globalArray(globalChoose))) + ".sav"
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Loading";
 			INPUT #1, month, globalYear, globalUSAdv, a
 			FOR i = 1 TO 40
@@ -1523,7 +1523,7 @@ SUB filer (switch)
 			CLS
 			CLOSE #1
 			CALL usa
-			CALL clrbot
+			CALL clearBottom
 			FOR k = 1 TO 2
 				IF globalRR(k) > 0 THEN CALL tinytrain(k, 1)
 			NEXT k
@@ -1537,11 +1537,11 @@ SUB filer (switch)
 				globalTLX = 67: globalSize = 9
 				CALL menu(0)
 				IF globalChoose < 1 THEN 
-					clrrite
+					clearRight
 					EXIT SUB
 				END IF
 				COLOR 11
-				CALL clrbot
+				CALL clearBottom
 				PRINT "Saving";
 
 			OPEN "O", 1, "cws" + LTRIM$(STR$(globalChoose)) + ".sav"
@@ -1600,7 +1600,7 @@ SUB fortify (target)
 		END IF
 	NEXT i
 	IF globalSize = 0 THEN 
-		CALL clrbot
+		CALL clearBottom
 		COLOR 11: PRINT "No cities eligible to fortify";
 		EXIT SUB
 	END IF
@@ -1608,21 +1608,21 @@ SUB fortify (target)
 	globalMTX$(0) = "Fortify"
 	globalChoose = 31
 	CALL menu(9)
-	CALL clrrite
+	CALL clearRight
 	IF globalChoose < 0 GOTO nocity
 	target = globalArray(globalChoose)
 	CALL occupy(target)
 	x = globalOccupied(target)
 	IF x < 0 GOTO nocity
 	IF globalFort(target) > 1 THEN 
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalCity$(target); " at MAXIMUM fortification level of 2";
 		CALL TICK(4)
 		GOTO nocity
 	END IF
 	cost = 200
 	IF globalCash(globalSide) < cost THEN 
-		CALL clrbot
+		CALL clearBottom
 		PRINT "Fortifications for "; globalCity$(target); " cost "; cost; " and you only have "; globalCash(globalSide);
 		CALL TICK(4)
 		GOTO nocity
@@ -1630,7 +1630,7 @@ SUB fortify (target)
 	COLOR 3
 	globalFort(target) = globalFort(target) + 1
 	globalCash(globalSide) = globalCash(globalSide) - cost
-	CALL clrbot
+	CALL clearBottom
 	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
 	CALL icon(target, 0, 6)
 	CALL showcity
@@ -1737,14 +1737,14 @@ SUB iterate
 		IF (month < 7 OR month > 10) AND globalMatrix(globalArmyLoc(i), 7) < 99 THEN globalSupply(i) = globalSupply(i) - 1
 		IF globalMatrix(globalArmyLoc(i), 7) = 99 AND globalNavyLoc(3 - s) = globalArmyLoc(i) THEN 
 			globalSupply(i) = globalSupply(i) - 1
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalArmyName$(i); " is blockaded"; 
 			CALL TICK(globalTurbo!)
 		END IF
 		COLOR 13
 		IF globalSupply(i) < 1 THEN
 			globalSupply(i) = 0
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalArmyName$(i); " is out of supplies";
 			CALL placearmy(i)
 			CALL TICK(globalTurbo!)
@@ -1804,7 +1804,7 @@ SUB movefrom (index, target)
 	globalTLY = 5
 	globalHilite = 15
 	CALL menu(1)
-	CALL clrrite
+	CALL clearRight
 	IF globalChoose < 0 THEN 
 		target = 0
 		GOTO notarg
@@ -1826,7 +1826,7 @@ SUB movefrom (index, target)
 	globalTLX = 67
 	globalTLY = 15
 	CALL menu(4)
-	CALL clrrite
+	CALL clearRight
 	IF globalChoose < 0 THEN 
 		index = 0
 		GOTO notarg
@@ -1850,7 +1850,7 @@ SUB navy (who, chx)
 	cost = 100
 	globalCityP(0) = who
 	IF chx = 0 THEN 
-		CALL clrbot
+		CALL clearBottom
 		PRINT "Funds available "; globalCash(who);
 	END IF
 	IF chx = 1 THEN
@@ -1907,7 +1907,7 @@ SUB navy (who, chx)
 	END IF
 	IF globalNFlag > 0 AND globalChoose <> 1 THEN EXIT SUB
 	CALL menu(0)
-	CALL clrrite
+	CALL clearRight
 	anchor:
 	SELECT CASE globalChoose
 		CASE 1 ' Build Ship
@@ -1931,7 +1931,7 @@ SUB navy (who, chx)
 					globalMTX$(2) = "Ironclad"
 					globalSize = 2
 					CALL menu(0)
-					CALL clrrite
+					CALL clearRight
 					IF globalChoose < 1 GOTO ahoy
 					IF globalChoose = 2 THEN 
 						a$ = "I"
@@ -1963,7 +1963,7 @@ SUB navy (who, chx)
 				globalNavySize(who) = 0
 				globalFleet$(who) = ""
 				IF chx = 0 THEN 
-					CALL clrbot
+					CALL clearBottom
 					PRINT "NO SHIPYARDS AVAILABLE !";
 					EXIT SUB
 				END IF
@@ -1971,7 +1971,7 @@ SUB navy (who, chx)
 			END IF
 			IF chx = 0 THEN 
 				CALL menu(9)
-				CALL clrrite
+				CALL clearRight
 			END IF
 
 			IF globalChoose < 1 GOTO ships
@@ -1981,7 +1981,7 @@ SUB navy (who, chx)
 			x = globalCityX(globalArray(globalChoose)) + 25
 			y = globalCityY(globalArray(globalChoose)) + 25
 			CALL ships
-			CALL clrbot
+			CALL clearBottom
 			COLOR 11: PRINT globalForce$(who); " is building NEW fleet in "; globalCity$(globalArray(globalChoose));
 			PSET (400, 465), 0: CALL shipicon(who, a)
 			IF globalNoise > 0 THEN SOUND 3000, 1
@@ -1989,7 +1989,7 @@ SUB navy (who, chx)
 			GOTO ahoy
 			add2ship:
 			globalCash(who) = globalCash(who) - cost
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalForce$(who); " navy increased to "; globalNavySize(who);
 			PSET (400, 465), 0: CALL shipicon(who, a)
 			CALL ships
@@ -2009,7 +2009,7 @@ SUB navy (who, chx)
 			IF globalNavyLoc(who) < 1 THEN EXIT SUB
 			IF who = globalSide THEN globalNFlag = 1
 			IF globalCityP(globalNavyLoc(who)) <> 3 - who GOTO ahoy
-			CALL clrbot
+			CALL clearBottom
 			COLOR 12: PRINT globalForce$(who); " fleet bombards "; globalCity$(globalNavyLoc(who));
 			CALL icon(globalNavyLoc(who), 0, 3)
 			
@@ -2019,7 +2019,7 @@ SUB navy (who, chx)
 			pct! = .005 * globalNavySize(who) + .02 * RND
 			killd = globalArmySize(index) * pct!
 			IF killd < 1 THEN killd = 1
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalArmyName$(index); " suffered "; 100 * killd; " casualties";
 			x = .5 * globalNavySize(who) + 1
 			IF x > globalSupply(index) THEN x = globalSupply(index)
@@ -2032,7 +2032,7 @@ SUB navy (who, chx)
 			IF globalFort(target) = 0 GOTO blast
 			IF RND < .7 + .03 * (globalNavySize(who) - globalFort(target)) GOTO hurt1
 			CALL barnacle(who)
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalForce$(globalCityP(target)); " shore battery sunk an attacking ship!"; globalNavySize(who); "ship(s) left! ";
 			IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5
 			CALL TICK(globalTurbo!)
@@ -2048,7 +2048,7 @@ SUB navy (who, chx)
 			END IF
 			GOTO deserted
 			hurt1:
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalCity$(target); " fortifications damaged";
 			globalFort(target) = globalFort(target) - 1
 			x = globalCityX(target)
@@ -2059,19 +2059,19 @@ SUB navy (who, chx)
 			EXIT SUB
 			blast:
 			IF RND > .25 + .07 * globalNavySize(who) THEN 
-				CALL clrbot
+				CALL clearBottom
 				PRINT "Citizens of "; globalCity$(target); " stand firm against the attack";
 				CALL TICK(globalTurbo!)
 				EXIT SUB
 			END IF
 			IF globalNavyLoc(who) = globalCapCity(3 - who) THEN 
-				CALL clrbot
+				CALL clearBottom
 				PRINT "The CAPITAL steadfastly stands loyal";
 				CALL TICK(globalTurbo!)
 				EXIT SUB
 			END IF
 			globalCityP(globalNavyLoc(who)) = 0
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalCity$(globalNavyLoc(who)); " is now  NEUTRAL";
 			CALL showcity
 			globalVictory(who) = globalVictory(who) + globalCityV(globalNavyLoc(who))
@@ -2080,7 +2080,7 @@ SUB navy (who, chx)
 			globalNavySize(who) = LEN(globalFleet$(who))
 			IF globalNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
 			IF globalNavyLoc(who) < 1 OR globalNavySize(who) < 1 THEN 
-				CALL clrbot
+				CALL clearBottom
 				PRINT "No ships remain";
 				TICK 1
 				GOTO ahoy
@@ -2116,7 +2116,7 @@ SUB navy (who, chx)
 			globalTLY = 12
 		
 			CALL menu(9)
-			CALL clrrite
+			CALL clearRight
 			IF globalChoose < 1 THEN EXIT SUB
 			admiral:
 			IF globalArray(globalChoose) = globalNavyLoc(who) THEN EXIT SUB
@@ -2325,7 +2325,7 @@ SUB navy (who, chx)
 					END IF
 				NEXT i
 				found1:
-				CALL clrbot
+				CALL clearBottom
 				COLOR 11: PRINT globalForce$(who); " is retreating to "; globalCity$(target);
 				CALL TICK(globalTurbo!)
 				globalNavyLoc(who) = target
@@ -2412,7 +2412,7 @@ SUB newarmy (who, empty, target)
 	globalArmyName$(empty) = globalLName$(empty)
 	globalLName$(empty) = ""
 	COLOR 12
-	CALL clrbot
+	CALL clearBottom
 	PRINT "Placing NEW army "; empty; globalArmyName$(empty); " in "; globalCity$(target);
 
 	x = 70
@@ -2442,7 +2442,7 @@ SUB newcity (index)
 	globalChoose = 23
 	globalMTX$(2) = globalCity$(index)
 	CALL menu(3)
-	CALL clrrite
+	CALL clearRight
 	SELECT CASE globalChoose
 		CASE IS = -27
 			index = 0
@@ -2564,7 +2564,7 @@ SUB railroad (who)
 		CALL movefrom(index, a)
 		IF a < 1 OR index < 1 THEN 
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Railroad move not allowed";
 			GOTO toot
 		END IF
@@ -2572,7 +2572,7 @@ SUB railroad (who)
 		IF index > 20 THEN x = 2
 		CALL traincapacity(who, limit)
 		IF globalArmySize(index) > limit THEN 
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Too many troops for railroad capacity";
 			GOTO toot
 		END IF
@@ -2580,11 +2580,11 @@ SUB railroad (who)
 		target = globalArmyLoc(index)
 		GOSUB route
 		IF x > 1 GOTO aboard
-		CALL clrbot
+		CALL clearBottom
 		PRINT "Track from "; globalCity$(target); " is blocked";
 		GOTO toot
 		aboard:
-		CALL clrbot
+		CALL clearBottom
 		PRINT "Select destination for "; globalArmyName$(index); " from "; globalCity$(target);
 		globalMTX$(0) = "To"
 		from = target
@@ -2596,13 +2596,13 @@ SUB railroad (who)
 		target = x1
 		GOSUB route
 		IF x > 1 GOTO haul
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(index); "'s train cannot go to "; globalCity$(x1); " - select another city";
 		CALL TICK(9)
 		GOTO aboard
 		haul:
 		COLOR 11
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(index); " is taking the train from "; globalCity$(from); " to "; globalCity$(x1);
 		globalTracks(who) = globalArmyLoc(index)
 		from = globalArmyLoc(index)
@@ -2631,7 +2631,7 @@ SUB railroad (who)
 			globalArmyLoc(index) = globalArmyMove(index)
 			globalArmyMove(index) = -1
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT "Train with "; globalArmyName$(index); " has arrived in "; globalCity$(globalArmyLoc(index));
 			IF globalNoise > 0 THEN SOUND 1200, 2
 			CALL TICK(globalTurbo!)
@@ -2661,8 +2661,8 @@ SUB railroad (who)
 
 	toot:
 	IF who = globalSide THEN CALL TICK(9)
-	CALL clrrite
-	clrbot
+	CALL clearRight
+	clearBottom
 END SUB
 
 SUB recruit (who)
@@ -2714,7 +2714,7 @@ SUB recruit (who)
 	levy:
 	IF globalCash(who) < 100 GOTO menu1
 	IF (who = globalSide) OR (globalPlayer = 2) THEN 
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalForce$(who); " funds available "; globalCash(who);
 	END IF
 	globalTLX = 67
@@ -2727,7 +2727,7 @@ SUB recruit (who)
       
 	IF globalChoose > 0 THEN globalChoose = 21 + globalChoose
 	CALL menu(2)
-	CALL clrrite
+	CALL clearRight
 	IF globalChoose < 1 GOTO menu1
 	auto1:
 	empty = 0
@@ -2767,7 +2767,7 @@ SUB recruit (who)
 	CALL icon(globalArmyLoc(i), 0, 2)
 	IF globalNoise > 0 THEN SOUND 2222, 1
 	COLOR 11
-	CALL clrbot
+	CALL clearBottom
 	PRINT "Army "; i; globalArmyName$(i); " in "; globalCity$(globalArmyLoc(i)); " strength increased to "; : CALL strong(i)
 	IF a$ <> "" THEN PRINT a$;
 	PUT (x - 9, y - 7), globalAnima, PSET
@@ -2891,7 +2891,7 @@ SUB smarts
 	x = globalOccupied(target)
 	globalArmyMove(x) = -1
 	globalCash(who) = globalCash(who) - cost
-	CALL clrbot
+	CALL clearBottom
 	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
 	CALL icon(target, 0, 6)
 	CALL showcity
@@ -3011,7 +3011,7 @@ SUB smarts
 
 		IF globalTurbo! > 1 THEN
 			COLOR c
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalArmyName$(i); " plans to move from "; globalCity$(globalArmyLoc(i)); " to "; globalCity$(globalArmyMove(i));
 		END IF
 		CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
@@ -3025,7 +3025,7 @@ SUB smarts
 			globalArmyExper(i) = globalArmyExper(i) + 1
 
 			IF globalTurbo! > 1 THEN
-				CALL clrbot
+				CALL clearBottom
 				PRINT globalArmyName$(i); " has drilled to reach experience level "; globalArmyExper(i);
 			END IF
 			globalArmyMove(i) = -1
@@ -3090,7 +3090,7 @@ SUB tupdate
 	END IF
 	COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
 	LOCATE 1, 20: PRINT "Update for "; globalMonth$(month); ","; globalYear
-	CALL clrbot: PRINT "press any key for "; globalMonth$(month); ","; globalYear; " events";
+	CALL clearBottom: PRINT "press any key for "; globalMonth$(month); ","; globalYear; " events";
 	DO WHILE INKEY$ = "": LOOP
 	GOSUB upbox
 	'==========================================================================
@@ -3138,14 +3138,14 @@ SUB tupdate
 		IF active > 20 THEN s = 2
 		IF globalArmyMove(active) < 1 GOTO digin
 		COLOR 11
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(active); " is moving to "; globalCity$(globalArmyMove(active));
 
 		globalSupply(active) = globalSupply(active) - 1
 		IF globalSupply(active) < 0 THEN 
 			globalSupply(active) = 0
 			CALL TICK(globalTurbo!)
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalArmyName$(active); " is out of supplies !";
 		END IF
 		CALL placearmy(active)
@@ -3162,11 +3162,11 @@ SUB tupdate
 		END IF
 		friend: ' Join Forces
 		COLOR 11
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(active); " and "; globalArmyName$(globalOccupied(target)); " meet in "; globalCity$(target);
 		CALL TICK(globalTurbo!)
 		CALL icon(globalArmyMove(active), 0, 6)
-		CALL clrbot
+		CALL clearBottom
 		GOTO easy
 
 		enemy: ' Attack
@@ -3174,7 +3174,7 @@ SUB tupdate
 		defend = globalOccupied(target)
 
 		COLOR 11
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(active); " attacks "; globalArmyName$(defend); " in "; globalCity$(globalArmyLoc(defend));
 		CALL TICK(globalTurbo! - 1)
 		IF globalArmySize(defend) > 0 THEN 
@@ -3185,14 +3185,14 @@ SUB tupdate
 		IF globalArmyExper(win) < 10 THEN globalArmyExper(win) = globalArmyExper(win) + 1
 
 		IF globalArmySize(lose) < 2 THEN
-			CALL clrbot
+			CALL clearBottom
 			a$ = globalArmyName$(lose) + "'s army is crushed in " + globalCity$(globalArmyLoc(defend))
 			CALL scribe(a$, 2)
 			index = lose
 			GOTO crushed
 		END IF
 
-		CALL clrrite
+		CALL clearRight
 		'==========================================================================
 		'                       Attacker Loses
 		'==========================================================================
@@ -3200,7 +3200,7 @@ SUB tupdate
 		globalArmyMove(active) = globalArmyLoc(active)
 		globalArmyLoc(active) = target
 		COLOR 11
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(active); " withdrew to "; globalCity$(globalArmyMove(active));
 
 		CALL placearmy(globalArmyLoc(active))
@@ -3258,7 +3258,7 @@ SUB tupdate
 		
 		globalArmyLoc(defend) = move2
 		globalOccupied(move2) = defend
-		CALL clrbot
+		CALL clearBottom
 		PRINT globalArmyName$(defend) + " is withdrawing to " + globalCity$(move2);
 
 		CALL placearmy(defend)                  ' in new city
@@ -3293,7 +3293,7 @@ SUB tupdate
 		globalSupply(index) = 0
 		IF globalSupply(active) > 10 THEN globalSupply(active) = 10
 		CALL TICK(9)
-		CALL clrrite
+		CALL clearRight
 		IF globalArmyLoc(active) = 0 GOTO digin
 		'---------------------------------------------------------------------------
 		'                       check for more defenders !
@@ -3302,7 +3302,7 @@ SUB tupdate
 		CALL occupy(target)
 		IF globalOccupied(target) = 0 GOTO easy
 		COLOR 11
-		CALL clrbot
+		CALL clearBottom
 		PRINT "There are still defenders in "; globalCity$(target);
 		CALL TICK(99)
 		GOTO enemy
@@ -3330,7 +3330,7 @@ SUB tupdate
 			globalMTX$(2) = "Yes"
 			globalSize = 2
 			CALL menu(0)
-			CALL clrrite
+			CALL clearRight
 			IF globalChoose = 2 GOTO smoke
 		END IF
 		IF globalPlayer = 1 AND s <> globalSide AND globalFort(c) > 0 AND flag = 0 THEN
@@ -3341,7 +3341,7 @@ SUB tupdate
 				y = globalCityY(c)
 				LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
 				CALL showcity
-				CALL clrbot
+				CALL clearBottom
 				PRINT globalArmyName$(active); " has destroyed the forts at "; globalCity$(c);
 				TICK 3
 			END IF
@@ -3367,7 +3367,7 @@ SUB tupdate
 	allthru:
 	IF globalNavySize(globalCommerce) < 1 THEN globalCommerce = 0
 	IF globalCommerce > 0 THEN
-		CALL clrbot
+		CALL clearBottom
 		IF RND < .8 + .02 * globalNavySize(globalCommerce) THEN
 			globalRaider = .05 * globalNavySize(globalCommerce) * (1 + RND) * (globalIncome(3 - globalCommerce))
 			IF globalRaider < 1 THEN globalRaider = 1
@@ -3403,7 +3403,7 @@ SUB tupdate
 	CALL ships
 	CALL iterate
 
-	CALL clrbot
+	CALL clearBottom
 	LINE (390, 350)-(520, 400), 1, BF
 	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(month), 3)); ","; globalYear
 	globalVictory(1) = .8 * globalVictory(1) + .3 * (globalIncome(1) + globalControl(1))
@@ -3421,7 +3421,7 @@ SUB tupdate
 	END IF
 	IF globalSide = 1 AND globalControl(2) < 11 THEN globalAggress! = globalAggress! + .7
 	IF globalPlayer = 2 THEN 
-		CALL clrbot
+		CALL clearBottom
 		COLOR 14: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 	END IF
 END SUB
@@ -3475,7 +3475,7 @@ END SUB
 SUB cancel (globalSide)
 	CALL starfin(star, fin, (globalSide))
 	counter:
-	CALL clrrite
+	CALL clearRight
 	globalSize = 0
 	FOR j = star TO fin
 		a$ = globalArmyName$(j)
@@ -3495,7 +3495,7 @@ SUB cancel (globalSide)
 	globalWType = 2
 	globalMTX$(0) = "Cancel"
 	IF globalSize < 1 THEN 
-		CALL clrbot
+		CALL clearBottom
 		COLOR 11: PRINT "No units have orders to cancel";
 		EXIT SUB
 	END IF
@@ -3511,7 +3511,7 @@ SUB cancel (globalSide)
 				END IF
 			NEXT i
 
-			CALL clrbot
+			CALL clearBottom
 			COLOR 11: PRINT globalArmyName$(index); " has cancelled move to "; globalCity$(globalArmyMove(index));
 			CALL TICK(globalTurbo + 1)
 			CALL icon(globalArmyLoc(index), globalArmyMove(index), 4)
@@ -3522,11 +3522,11 @@ SUB cancel (globalSide)
 		GOTO finix
 	END SELECT
 	finix:
-	CALL clrrite
+	CALL clearRight
 END SUB
 
 SUB cannon
-	CALL clrrite
+	CALL clearRight
 	LINE (528, 80)-(639, 310), 3, BF
 	LINE (528, 310)-(639, 435), 2, BF
 	LINE (528, 405)-(639, 420), 0, BF
@@ -3624,7 +3624,7 @@ END SUB
 
 SUB capture (active, c, s, flag)
 	globalCityP(c) = s
-	CALL clrbot
+	CALL clearBottom
 	a$ = globalArmyName$(active) + " has captured " + globalCity$(c)
 	COLOR 11: PRINT globalArmyName$(active) + " has captured " + globalCity$(c);
 	IF active < 21 AND globalNoise > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
@@ -3656,12 +3656,12 @@ SUB center (y, a$)
 END SUB
 
 
-SUB clrbot
+SUB clearBottom
 	LOCATE 29, 1: PRINT SPACE$(79);
 	LOCATE 29, 1
 END SUB
 
-SUB clrrite
+SUB clearRight
 	VIEW (528, 1)-(639, 450)
 	CLS 1
 	VIEW
@@ -3685,7 +3685,7 @@ SUB commander (who, empty)
 			EXIT SUB
 		END IF
 	NEXT i
-	CALL clrbot
+	CALL clearBottom
 	PRINT "No more "; globalForce$(who); " commanders available";
 	CALL TICK(globalTurbo!)
 END SUB
@@ -3884,7 +3884,7 @@ END SUB
 SUB events ' Special Events
 	IF globalRealism > 0 AND globalYear = 1862 AND month < 3 THEN
 		COLOR 14
-		CALL clrbot
+		CALL clearBottom
 		PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
 		IF globalNoise > 0 THEN 
 			FOR k = 1 TO 5
@@ -3901,7 +3901,7 @@ SUB events ' Special Events
 	IF pct! > .9 THEN pct! = .9
 	IF RND > pct! THEN EXIT SUB
 
-	CALL clrbot
+	CALL clearBottom
 	COLOR 14: PRINT "SPECIAL EVENT...";
 	who = 1
 	IF RND > .1 * globalRandBal THEN who = 2
@@ -3912,7 +3912,7 @@ SUB events ' Special Events
 			IF globalYear = 1865 AND month = 1 THEN globalVictory(2) = globalVictory(2) + 100
 			IF RND > .9 THEN GOSUB riot: EXIT SUB
 
-			CALL clrbot
+			CALL clearBottom
 			IF RND > .2 OR globalNavySize(2) > 9 GOTO mercen
 			IF globalNavySize(2) > 0 AND globalNavyLoc(2) <> 99 THEN 
 				empty = globalNavyLoc(2)
@@ -3970,13 +3970,13 @@ SUB events ' Special Events
 			FOR k = 1 TO 99
 				x = 1 + INT(40 * RND)
 				IF globalCityO(x) <> who AND globalCityP(x) = who AND globalOccupied(x) = 0 THEN
-					CALL clrbot
+					CALL clearBottom
 					COLOR 15
 					PRINT " Riots have broken out in "; globalCity$(x);
 					globalCityP(x) = 0
 					CALL showcity
 					TICK globalTurbo!
-					CALL clrbot
+					CALL clearBottom
 					CALL image2(globalCity$(x) + " is now NEUTRAL !", 4)
 					TICK globalTurbo!
 					RETURN
@@ -4253,7 +4253,7 @@ SUB relieve (who)
 	globalChoose = 31
 	globalHilite = 11
 	CALL menu(6)
-	CALL clrrite
+	CALL clearRight
 
 	IF globalChoose < 1 THEN EXIT SUB
 	index = globalArray(globalChoose)
@@ -4278,20 +4278,20 @@ SUB relieve (who)
 	globalTLX = 67
 	globalTLY = 2
 	CALL menu(0)
-	CALL clrrite
+	CALL clearRight
 	IF globalChoose < 1 GOTO have2
 	globalArmyMove(index) = -1
 	globalArmyLead(index) = globalRating(globalArray(globalChoose))
 	IF globalArmyLead(index) > 0 THEN globalArmyLead(index) = globalArmyLead(index) - 1
 	IF globalArmyExper(index) > 0 THEN globalArmyExper(index) = globalArmyExper(index) - 1
 	COLOR 15
-	CALL clrbot
+	CALL clearBottom
 	PRINT globalLName$(globalArray(globalChoose)); " has replaced "; t$; " in "; globalCity$(globalArmyLoc(index));
 	TICK 9
 	globalArmyName$(index) = globalLName$(globalArray(globalChoose))
 	globalLName$(globalArray(globalChoose)) = ""
 	CALL icon(globalArmyLoc(index), 0, 8)
-	CALL clrbot
+	CALL clearBottom
 END SUB
 
 SUB report (who)
@@ -4531,13 +4531,13 @@ SUB resupply (index)
 	y = x + globalSupply(index)
 	IF y > 5 THEN x = 5 - globalSupply(index)
 	IF x < 1 THEN
-		CALL clrbot
+		CALL clearBottom
 		PRINT "Not enough funds in the Treasury to globalSupply "; globalArmyName$(index);
 		GOTO nocash
 	END IF
 	globalSupply(index) = globalSupply(index) + x
 	globalCash(who) = globalCash(who) - .1 * x * globalArmySize(index)
-	CALL clrbot
+	CALL clearBottom
 	PRINT globalArmyName$(index); " has received supplies ";
 	IF globalNoise > 0 THEN SOUND 4500, .5
 	nocash:
@@ -4571,7 +4571,7 @@ SUB retreat (defend, x)
 	globalMTX$(0) = "Retreat"
 	CALL bubble(globalSize)
 	CALL menu(9)
-	CALL clrrite
+	CALL clearRight
 	IF globalChoose < 0 OR globalChoose > globalSize THEN x = 0: EXIT SUB
 	x = globalArray(globalChoose)
 END SUB
@@ -4684,7 +4684,7 @@ END SUB
 
 SUB scribe (a$, flag)
 	SELECT CASE flag
-			CASE 1: CALL clrbot: PRINT a$;
+			CASE 1: CALL clearBottom: PRINT a$;
 			CASE 2: CALL image2(a$, 4)
 	END SELECT
 	IF globalHistory > 0 THEN
@@ -5373,7 +5373,7 @@ SUB victor
 		IF globalArmyLoc(j) > 0 THEN y = y + globalArmySize(j)
 	NEXT j
 
-	CALL clrbot
+	CALL clearBottom
 	COLOR 14
 	IF globalVicFlag(2) > 0 AND globalYear >= globalVicFlag(2) AND month < globalVicFlag(1) THEN
 		a$ = "Time almost expired (" + globalMonth$(globalVicFlag(1)) + "," + STR$(globalVicFlag(2)) + ")"
@@ -5414,7 +5414,7 @@ SUB victor
 			END IF
 		END IF
 
-		CALL clrbot
+		CALL clearBottom
 		COLOR 14
 		IF globalVicFlag(3) > 0 AND globalControl(i) >= .9 * globalVicFlag(3) THEN
 			a$ = globalForce$(i) + " side almost controls" + STR$(globalVicFlag(3)) + " cities"
@@ -5765,7 +5765,7 @@ SUB menu (switch%)
 			CALL armystat(globalArray(row))
 		CASE 5:
 			COLOR 11
-			CALL clrbot
+			CALL clearBottom
 			PRINT globalArmyName$(index); "  Exp="; globalArmyExper(index); " Cash="; globalCash(globalSide);
 		CASE 6:
 			CALL icon(globalArmyLoc(globalArray(row)), 0, 9)
