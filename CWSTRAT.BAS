@@ -1567,166 +1567,211 @@ SUB filer (switch)
 END SUB
 
 SUB flashcity (which)
-FOR c = 1 TO 15 STEP 2
-CIRCLE (globalCityX(which), globalCityY(which)), 4, 0
-CIRCLE (globalCityX(which), globalCityY(which)), 3, c
-PAINT (globalCityX(which), globalCityY(which)), c, c
-CALL TICK(.1)
-NEXT c
-c = 9: IF globalCityP(which) = 2 THEN c = 7
-IF globalCityP(which) = 0 THEN c = 12
-CIRCLE (globalCityX(which), globalCityY(which)), 4, 0
-CIRCLE (globalCityX(which), globalCityY(which)), 3, c
-PAINT (globalCityX(which), globalCityY(which)), c, c
+	FOR c = 1 TO 15 STEP 2
+		CIRCLE (globalCityX(which), globalCityY(which)), 4, 0
+		CIRCLE (globalCityX(which), globalCityY(which)), 3, c
+		PAINT (globalCityX(which), globalCityY(which)), c, c
+		CALL TICK(.1)
+	NEXT c
+	c = 9
+	IF globalCityP(which) = 2 THEN c = 7
+	IF globalCityP(which) = 0 THEN c = 12
+	CIRCLE (globalCityX(which), globalCityY(which)), 4, 0
+	CIRCLE (globalCityX(which), globalCityY(which)), 3, c
+	PAINT (globalCityX(which), globalCityY(which)), c, c
 END SUB
 
 SUB fortify (target)
-	target = 0: globalHilite = 11
-	globalTLX = 67: globalTLY = 2
+	target = 0
+	globalHilite = 11
+	globalTLX = 67
+	globalTLY = 2
 	who = side
 	CALL starfin(star, fin, who)
 	size = 0
 	FOR i = star TO fin
-	IF globalArmyLoc(i) > 0 AND globalFort(globalArmyLoc(i)) < 2 THEN
-		size = size + 1
-		globalMTX$(size) = globalCity$(globalArmyLoc(i))
-		globalArray(size) = globalArmyLoc(i)
-	END IF
+		IF globalArmyLoc(i) > 0 AND globalFort(globalArmyLoc(i)) < 2 THEN
+			size = size + 1
+			globalMTX$(size) = globalCity$(globalArmyLoc(i))
+			globalArray(size) = globalArmyLoc(i)
+		END IF
 	NEXT i
-	IF size = 0 THEN CALL clrbot: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
+	IF size = 0 THEN 
+		CALL clrbot
+		COLOR 11: PRINT "No cities eligible to fortify";
+		EXIT SUB
+	END IF
 	CALL bubble(size)
 	globalMTX$(0) = "Fortify"
-		globalChoose = 31
-		CALL menu(9): CALL clrrite
-		IF globalChoose < 0 GOTO nocity
-		target = globalArray(globalChoose): CALL occupy(target): x = globalOccupied(target): IF x < 0 GOTO nocity
-		IF globalFort(target) > 1 THEN CALL clrbot: PRINT globalCity$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): GOTO nocity
-		cost = 200
-		IF globalCash(side) < cost THEN CALL clrbot: PRINT "Fortifications for "; globalCity$(target); " cost "; cost; " and you only have "; globalCash(side); : CALL TICK(4): GOTO nocity
-		COLOR 3
-		globalFort(target) = globalFort(target) + 1
-		globalCash(side) = globalCash(side) - cost
-		CALL clrbot: PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
-		CALL icon(target, 0, 6)
-		CALL showcity
-		IF globalArmyMove(x) > 0 THEN CALL icon(globalArmyLoc(x), globalArmyMove(x), 5)
-		globalArmyMove(x) = -1
-		CALL placearmy(x)
-		CALL stax(who)
+	globalChoose = 31
+	CALL menu(9)
+	CALL clrrite
+	IF globalChoose < 0 GOTO nocity
+	target = globalArray(globalChoose)
+	CALL occupy(target)
+	x = globalOccupied(target)
+	IF x < 0 GOTO nocity
+	IF globalFort(target) > 1 THEN 
+		CALL clrbot
+		PRINT globalCity$(target); " at MAXIMUM fortification level of 2";
+		CALL TICK(4)
+		GOTO nocity
+	END IF
+	cost = 200
+	IF globalCash(side) < cost THEN 
+		CALL clrbot
+		PRINT "Fortifications for "; globalCity$(target); " cost "; cost; " and you only have "; globalCash(side);
+		CALL TICK(4)
+		GOTO nocity
+	END IF
+	COLOR 3
+	globalFort(target) = globalFort(target) + 1
+	globalCash(side) = globalCash(side) - cost
+	CALL clrbot
+	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
+	CALL icon(target, 0, 6)
+	CALL showcity
+	IF globalArmyMove(x) > 0 THEN CALL icon(globalArmyLoc(x), globalArmyMove(x), 5)
+	globalArmyMove(x) = -1
+	CALL placearmy(x)
+	CALL stax(who)
 nocity:
 END SUB
 
 SUB icon (from, dest, kind)
-IF from < 1 OR from > 40 GOTO noshow
-IF dest < 0 GOTO noshow
-IF from = 999 GOTO noshow
-x = globalCityX(from) - 12: y = globalCityY(from) - 11
-x1 = globalCityX(dest): y1 = globalCityY(dest)
-SELECT CASE kind
-	CASE 1
-	LINE (x, y)-(x1, y1), 15, , &HF0F0
-       
-	CASE 2
-	FOR i = 6 TO 8
-	LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
-	NEXT i
-	CALL TICK(.1)
-       
-	CASE 3
-	x = globalCityX(from): y = globalCityY(from)
-	CALL snapshot(x, y, 0)
-	FOR j = 1 TO 3
-	FOR i = 4 TO 10 STEP 1
-	CIRCLE (x, y), i, 4
-	PAINT (x, y), 14, 4
-	IF globalNoise > 0 THEN SOUND 37 + 50 * RND, .03
-	NEXT i
-	CALL TICK(.1)
-	CALL snapshot(x, y, 1)
-	NEXT j
-       
-	CASE 4
-	IF globalOccupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
-	IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-	IF from = 27 OR from = 28 THEN CALL touchup
-
-	CASE 5
-	IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-
-	CASE 6
-	x = globalCityX(from): y = globalCityY(from)
-	CALL snapshot(x, y, 0)
-	LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
-	LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
-	IF globalNoise > 0 THEN SOUND 3999, .3
-	CALL TICK(globalTurbo! - .5)
-	CALL snapshot(x, y, 1)
-	CASE 7          ' draw white box
+	IF from < 1 OR from > 40 GOTO noshow
+	IF dest < 0 GOTO noshow
+	IF from = 999 GOTO noshow
 	x = globalCityX(from) - 12: y = globalCityY(from) - 11
-	GET (x - 8, y - 8)-(x + 8, y + 8), image
-	LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
-	LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
-	     CASE 8     ' replace old image
-	x = globalCityX(from) - 12: y = globalCityY(from) - 11
-	IF x > 0 THEN PUT (x - 8, y - 8), image, PSET
-       
-	CASE 9          ' draw arrow pointer
-	x = globalCityX(from) - 12: y = globalCityY(from) - 11
-	GET (x - 8, y - 8)-(x + 10, y + 7), image
-	x = x + 7: y = y + 5
-	LINE (x + 2, y)-(x + 2, y - 8), 12
-	LINE -(x, y - 6), 12
-	LINE -(x - 5, y - 11), 12
-	LINE -(x - 10, y - 6), 12
-	LINE -(x - 6, y - 2), 12
-	LINE -(x - 10, y), 12
-	LINE -(x + 1, y), 12
-	PAINT (x - 2, y - 1), 15, 12
-
-	CASE 11
-	LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
-
-	CASE ELSE
-END SELECT
+	x1 = globalCityX(dest): y1 = globalCityY(dest)
+	SELECT CASE kind
+		CASE 1
+			LINE (x, y)-(x1, y1), 15, , &HF0F0
+		CASE 2
+			FOR i = 6 TO 8
+				LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
+			NEXT i
+			CALL TICK(.1)
+		CASE 3
+			x = globalCityX(from)
+			y = globalCityY(from)
+			CALL snapshot(x, y, 0)
+			FOR j = 1 TO 3
+				FOR i = 4 TO 10 STEP 1
+					CIRCLE (x, y), i, 4
+					PAINT (x, y), 14, 4
+					IF globalNoise > 0 THEN SOUND 37 + 50 * RND, .03
+				NEXT i
+				CALL TICK(.1)
+				CALL snapshot(x, y, 1)
+			NEXT j
+		CASE 4
+			IF globalOccupied(from) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
+			IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
+			IF from = 27 OR from = 28 THEN CALL touchup
+		CASE 5
+			IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
+		CASE 6
+			x = globalCityX(from)
+			y = globalCityY(from)
+			CALL snapshot(x, y, 0)
+			LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
+			LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
+			IF globalNoise > 0 THEN SOUND 3999, .3
+			CALL TICK(globalTurbo! - .5)
+			CALL snapshot(x, y, 1)
+		CASE 7          ' draw white box
+			x = globalCityX(from) - 12
+			y = globalCityY(from) - 11
+			GET (x - 8, y - 8)-(x + 8, y + 8), image
+			LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
+			LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
+		CASE 8     ' replace old image
+			x = globalCityX(from) - 12: y = globalCityY(from) - 11
+			IF x > 0 THEN PUT (x - 8, y - 8), image, PSET
+		CASE 9          ' draw arrow pointer
+			x = globalCityX(from) - 12
+			y = globalCityY(from) - 11
+			GET (x - 8, y - 8)-(x + 10, y + 7), image
+			x = x + 7
+			y = y + 5
+			LINE (x + 2, y)-(x + 2, y - 8), 12
+			LINE -(x, y - 6), 12
+			LINE -(x - 5, y - 11), 12
+			LINE -(x - 10, y - 6), 12
+			LINE -(x - 6, y - 2), 12
+			LINE -(x - 10, y), 12
+			LINE -(x + 1, y), 12
+			PAINT (x - 2, y - 1), 15, 12
+		CASE 11
+			LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
+		CASE ELSE
+	END SELECT
 noshow:
 END SUB
 
 SUB iterate
-'---------------------------------------------------------------------------
-FOR i = 1 TO 40: IF globalArmyLoc(i) > 0 THEN CALL placearmy(i)
-NEXT i
-'---------------------------------------------------------------------------
-month = month + 2
-IF month > 12 THEN month = 1: globalYear = globalYear + 1
-'---------------------------------------------------------------------------
-s = 1
-FOR i = 1 TO 40: IF globalArmyLoc(i) < 1 GOTO rip
-IF i > 20 THEN s = 2
-IF globalCash(s) >= .2 * globalArmySize(i) THEN
-	a = 1: IF globalRealism > 0 THEN CALL cutoff(s, globalArmyLoc(i), a)
-	IF a > 0 THEN
-		globalSupply(i) = globalSupply(i) + 1
-		globalCash(s) = globalCash(s) - .2 * globalArmySize(i)
+	FOR i = 1 TO 40
+		IF globalArmyLoc(i) > 0 THEN CALL placearmy(i)
+	NEXT i
+	month = month + 2
+	IF month > 12 THEN
+		month = 1
+		globalYear = globalYear + 1
 	END IF
-END IF
-IF (month < 7 OR month > 10) AND globalMatrix(globalArmyLoc(i), 7) < 99 THEN globalSupply(i) = globalSupply(i) - 1
-IF globalMatrix(globalArmyLoc(i), 7) = 99 AND globalNavyLoc(3 - s) = globalArmyLoc(i) THEN globalSupply(i) = globalSupply(i) - 1: CALL clrbot: PRINT globalArmyName$(i); " is blockaded"; : CALL TICK(globalTurbo!)
-COLOR 13
-IF globalSupply(i) < 1 THEN
-	globalSupply(i) = 0
-	CALL clrbot
-	PRINT globalArmyName$(i); " is out of supplies";
-	CALL placearmy(i)
-	CALL TICK(globalTurbo!)
-	IF RND > .8 AND globalArmySize(i) > 50 THEN globalArmySize(i) = .9 * globalArmySize(i)
-END IF
-rip:
-NEXT i
-FOR k = 1 TO 2: CALL stax(k): NEXT k
-y = 0: FOR i = 1 TO 20: y = y + .1 * globalArmySize(i): NEXT i
-x = 0: FOR i = 21 TO 40: x = x + .1 * globalArmySize(i): NEXT i
-IF side = 2 AND x > 0 THEN globalAggress! = y / x ELSE globalAggress! = 1
-IF side = 1 AND y > 0 THEN globalAggress! = x / y ELSE IF side = 1 THEN globalAggress! = 1
+	s = 1
+	FOR i = 1 TO 40
+		IF globalArmyLoc(i) < 1 GOTO rip
+		IF i > 20 THEN s = 2
+		IF globalCash(s) >= .2 * globalArmySize(i) THEN
+			a = 1
+			IF globalRealism > 0 THEN CALL cutoff(s, globalArmyLoc(i), a)
+			IF a > 0 THEN
+				globalSupply(i) = globalSupply(i) + 1
+				globalCash(s) = globalCash(s) - .2 * globalArmySize(i)
+			END IF
+		END IF
+		IF (month < 7 OR month > 10) AND globalMatrix(globalArmyLoc(i), 7) < 99 THEN globalSupply(i) = globalSupply(i) - 1
+		IF globalMatrix(globalArmyLoc(i), 7) = 99 AND globalNavyLoc(3 - s) = globalArmyLoc(i) THEN 
+			globalSupply(i) = globalSupply(i) - 1
+			CALL clrbot
+			PRINT globalArmyName$(i); " is blockaded"; 
+			CALL TICK(globalTurbo!)
+		END IF
+		COLOR 13
+		IF globalSupply(i) < 1 THEN
+			globalSupply(i) = 0
+			CALL clrbot
+			PRINT globalArmyName$(i); " is out of supplies";
+			CALL placearmy(i)
+			CALL TICK(globalTurbo!)
+			IF RND > .8 AND globalArmySize(i) > 50 THEN globalArmySize(i) = .9 * globalArmySize(i)
+		END IF
+	rip:
+	NEXT i
+	FOR k = 1 TO 2
+		CALL stax(k)
+	NEXT k
+	y = 0
+	FOR i = 1 TO 20
+		y = y + .1 * globalArmySize(i)
+	NEXT i
+	x = 0
+	FOR i = 21 TO 40
+		x = x + .1 * globalArmySize(i)
+	NEXT i
+	IF side = 2 AND x > 0 THEN 
+		globalAggress! = y / x 
+	ELSE 
+		globalAggress! = 1
+	END IF
+	IF side = 1 AND y > 0 THEN 
+		globalAggress! = x / y 
+	ELSE 
+		IF side = 1 THEN 
+			globalAggress! = 1
+		END IF
+	END IF
 END SUB
 
 SUB movefrom (index, target)
