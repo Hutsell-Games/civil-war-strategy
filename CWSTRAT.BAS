@@ -348,7 +348,8 @@ SELECT CASE globalChoose
 			PAINT (x, y), z, 15
 			COLOR 15: IF side = 1 THEN COLOR 11
 			CALL traincapacity(side, limit)
-			CALL clrbot: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
+			CALL clrbot
+			PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 			CALL railroad(side)
 		ELSE
 			CALL clrbot
@@ -371,10 +372,18 @@ SELECT CASE globalChoose
 		globalRFlag = 0
 		globalMFlag = 0
 		globalNFlag = 0
-		IF globalPlayer = 2 THEN side = side + 1: IF side = 2 THEN GOSUB blanken: CALL usa: GOTO menu0
+		IF globalPlayer = 2 THEN
+			side = side + 1
+			IF side = 2 THEN 
+				GOSUB blanken
+				CALL usa
+				GOTO menu0
+			END IF
+		END IF
 		GOTO newmonth
 	CASE 6
-		CALL report((side)): chosit = 27
+		CALL report((side))
+		chosit = 27
 		CALL starfin(star, fin, side)
 		FOR i = star TO fin
 			IF globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
@@ -406,7 +415,12 @@ SELECT CASE globalChoose
 				globalMFlag = 0
 				globalChoose = 22
 			CASE 2 ' Fortify
-				IF globalCash(side) < 200 THEN COLOR 11: CALL clrbot: PRINT "Not enough money for fort"; : GOTO menu0
+				IF globalCash(side) < 200 THEN 
+					COLOR 11
+					CALL clrbot
+					PRINT "Not enough money for fort";
+					GOTO menu0
+				END IF
 				CALL fortify(target)
 				IF globalCash(side) < 200 GOTO menu0
 				globalChoose = 23
@@ -429,19 +443,31 @@ SELECT CASE globalChoose
 			globalTLX = 67: globalTLY = 5: globalColour = 5
 			size = 0
 			FOR i = star TO fin
-			IF globalArmyLoc(i) = 0 OR globalSupply(i) > 1 GOTO alone
-			IF globalRealism > 0 THEN
-				CALL cutoff(side, globalArmyLoc(i), a)
-				IF a < 1 THEN CALL clrbot: COLOR 15: PRINT globalForce$(side); " army in "; globalCity$(globalArmyLoc(i)); " is CUT OFF !"; : TICK globalTurbo!: GOTO alone
-			END IF
-			size = size + 1
-			max = 11: IF LEN(globalArmyName$(i)) < 11 THEN max = LEN(globalArmyName$(i))
-			globalMTX$(size) = LEFT$(globalArmyName$(i), max)
-			globalArray(size) = i
+				IF globalArmyLoc(i) = 0 OR globalSupply(i) > 1 GOTO alone
+				IF globalRealism > 0 THEN
+					CALL cutoff(side, globalArmyLoc(i), a)
+					IF a < 1 THEN 
+						CALL clrbot
+						COLOR 15: PRINT globalForce$(side); " army in "; globalCity$(globalArmyLoc(i)); " is CUT OFF !";
+						TICK globalTurbo!
+						GOTO alone
+					END IF
+				END IF
+				size = size + 1
+				max = 11
+				IF LEN(globalArmyName$(i)) < 11 THEN max = LEN(globalArmyName$(i))
+				globalMTX$(size) = LEFT$(globalArmyName$(i), max)
+				globalArray(size) = i
 			alone:
 			NEXT i
-			IF size = 0 THEN COLOR 11: CALL clrbot: PRINT "All eligible "; globalForce$(side); " armies have supplies"; : GOTO menu0
-			CALL menu(6): CALL clrrite
+			IF size = 0 THEN 
+				COLOR 11
+				CALL clrbot
+				PRINT "All eligible "; globalForce$(side); " armies have supplies";
+				GOTO menu0
+			END IF
+			CALL menu(6)
+			CALL clrrite
 			IF globalChoose < 0 GOTO menu0
 			index = globalArray(globalChoose)
 			IF globalSupply(index) < 2 THEN
@@ -450,69 +476,96 @@ SELECT CASE globalChoose
 			END IF
 			globalChoose = 25
 			GOTO optmen
-'-------------------------------------------------------------------------
-'                               Move Capital
-'-------------------------------------------------------------------------
-		CASE 5
-	IF globalCapCity(side) = 0 OR globalCash(side) < 500 THEN CALL clrbot: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
-	globalCash(side) = globalCash(side) - 500
-	globalVictory(3 - side) = globalVictory(3 - side) + 50
-	CALL clrrite
-	globalMTX$(0) = "Capital"
-	a$ = globalCity$(globalCapCity(side))
-	index = globalCapCity(side): CALL newcity(index)
-	IF index = 0 GOTO menu0
-	globalCapCity(side) = index
-	CALL clrbot: PRINT globalForce$(side); " capital moved from "; a$; " to "; globalCity$(globalCapCity(side));
-	CALL clrrite
-	CALL showcity
-	CALL TICK(9): CALL clrbot
-'-------------------------------------------------------------------------
-'                               Detach
-'-------------------------------------------------------------------------
-		CASE 6
-	IF side = 1 THEN CALL clrbot: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
-	COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
-	CALL movefrom(index, target): IF target < 1 OR index < 1 GOTO menu0
-	IF globalArmySize(index) < 65 THEN CALL clrbot: PRINT "Too small to detach"; : CALL TICK(globalTurbo!): GOTO menu0
-	CALL commander(2, empty): IF empty = 0 GOTO menu0
-	globalSupply(empty) = .3 * globalSupply(index): globalSupply(index) = globalSupply(index) - globalSupply(empty): IF globalSupply(index) < 0 THEN globalSupply(index) = 0
-	globalArmySize(empty) = .3 * globalArmySize(index): globalArmySize(index) = globalArmySize(index) - globalArmySize(empty)
-	globalArmyLoc(empty) = target: globalArmyExper(empty) = globalArmyExper(index): globalArmyMove(empty) = 0
-	globalArmyLead(empty) = globalRating(empty)
-	globalArmyName$(empty) = globalLName$(empty): globalLName$(empty) = ""
-	globalArmyExper(empty) = globalArmyExper(index)
-	COLOR 11: CALL clrbot: PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; globalArmyName$(empty); : CALL TICK(globalTurbo!): IF globalNoise > 0 THEN SOUND 2222, 1
-	CALL stax(side)
-	globalChoose = 27
-	GOTO optmen
-'-------------------------------------------------------------------------
-'                               Drill
-'-------------------------------------------------------------------------
-		CASE 7
-	COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
-	CALL movefrom(index, target)
-	IF target < 1 OR index < 1 THEN COLOR 11: CALL clrbot: PRINT "No armies remain eligible for drills in "; globalMonth$(month); : GOTO menu0
-	IF globalArmyExper(index) > 5 OR globalArmyExper(index) >= globalArmyLead(index) THEN COLOR 12: CALL clrbot: PRINT globalArmyName$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
-	globalArmyExper(index) = globalArmyExper(index) + 1
-	CALL clrbot: PRINT globalArmyName$(index); " has drilled to reach experience level "; globalArmyExper(index); : IF globalNoise > 0 THEN SOUND 2222, 1
-	CALL TICK(globalTurbo!): clrbot
-	globalArmyMove(index) = -1
-	globalChoose = 28
-	GOTO optmen
-'-------------------------------------------------------------------------
-'                               Relieve
-'-------------------------------------------------------------------------
-		CASE 8
-		CALL relieve(side)
-		globalChoose = 29
-		GOTO optmen
-'-------------------------------------------------------------------------
+		CASE 5 ' Move Capital
+			IF globalCapCity(side) = 0 OR globalCash(side) < 500 THEN 
+				CALL clrbot
+				COLOR 11: PRINT "Cannot move capital";
+				GOTO menu0
+			END IF
+			globalCash(side) = globalCash(side) - 500
+			globalVictory(3 - side) = globalVictory(3 - side) + 50
+			CALL clrrite
+			globalMTX$(0) = "Capital"
+			a$ = globalCity$(globalCapCity(side))
+			index = globalCapCity(side)
+			CALL newcity(index)
+			IF index = 0 GOTO menu0
+			globalCapCity(side) = index
+			CALL clrbot: PRINT globalForce$(side); " capital moved from "; a$; " to "; globalCity$(globalCapCity(side));
+			CALL clrrite
+			CALL showcity
+			CALL TICK(9)
+			CALL clrbot
+		CASE 6 ' Detach Army
+			IF side = 1 THEN 
+				CALL clrbot
+				COLOR 11: PRINT "Option not available to Union";
+				GOTO menu0
+			END IF
+			COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
+			CALL movefrom(index, target)
+			IF target < 1 OR index < 1 GOTO menu0
+			IF globalArmySize(index) < 65 THEN 
+				CALL clrbot
+				PRINT "Too small to detach";
+				CALL TICK(globalTurbo!)
+				GOTO menu0
+			END IF
+			CALL commander(2, empty)
+			IF empty = 0 GOTO menu0
+			globalSupply(empty) = .3 * globalSupply(index)
+			globalSupply(index) = globalSupply(index) - globalSupply(empty)
+			IF globalSupply(index) < 0 THEN globalSupply(index) = 0
+			globalArmySize(empty) = .3 * globalArmySize(index)
+			globalArmySize(index) = globalArmySize(index) - globalArmySize(empty)
+			globalArmyLoc(empty) = target
+			globalArmyExper(empty) = globalArmyExper(index)
+			globalArmyMove(empty) = 0
+			globalArmyLead(empty) = globalRating(empty)
+			globalArmyName$(empty) = globalLName$(empty)
+			globalLName$(empty) = ""
+			globalArmyExper(empty) = globalArmyExper(index)
+			COLOR 11
+			CALL clrbot
+			PRINT "Unit #"; empty; " with "; : CALL strong(empty): PRINT " men detached under "; globalArmyName$(empty);
+			CALL TICK(globalTurbo!)
+			IF globalNoise > 0 THEN SOUND 2222, 1
+			CALL stax(side)
+			globalChoose = 27
+			GOTO optmen
+		CASE 7 ' Army Drill
+			COLOR 14: LOCATE 4, 68: PRINT "DRILL ARMY"
+			CALL movefrom(index, target)
+			IF target < 1 OR index < 1 THEN 
+				COLOR 11
+				CALL clrbot
+				PRINT "No armies remain eligible for drills in "; globalMonth$(month);
+				GOTO menu0
+			END IF
+			IF globalArmyExper(index) > 5 OR globalArmyExper(index) >= globalArmyLead(index) THEN
+				COLOR 12
+				CALL clrbot
+				PRINT globalArmyName$(index); ": Army has reached maximum improvement through drilling";
+				GOTO optmen
+			END IF
+			globalArmyExper(index) = globalArmyExper(index) + 1
+			CALL clrbot
+			PRINT globalArmyName$(index); " has drilled to reach experience level "; globalArmyExper(index);
+			IF globalNoise > 0 THEN SOUND 2222, 1
+			CALL TICK(globalTurbo!): clrbot
+			globalArmyMove(index) = -1
+			globalChoose = 28
+			GOTO optmen
+		CASE 8 ' Relieve Commander
+			CALL relieve(side)
+			globalChoose = 29
+			GOTO optmen
 		CASE ELSE
-		chosit = 28
-		GOTO menu0
-      END SELECT
-	globalChoose = 21 + globalChoose: GOTO optmen
+			chosit = 28
+			GOTO menu0
+      	END SELECT
+		globalChoose = 21 + globalChoose
+		GOTO optmen
 '==========================================================================
 '                               Utility Menu
 '==========================================================================
