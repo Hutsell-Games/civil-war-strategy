@@ -7,7 +7,7 @@ DECLARE SUB armyxy (x%, y%, z%)
 DECLARE SUB barnacle (who%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB bub2 (limit%)
-DECLARE SUB bubble (size%)
+DECLARE SUB bubble (globalSize%)
 DECLARE SUB cancel (side%)
 DECLARE SUB cannon ()
 DECLARE SUB capitol ()
@@ -74,9 +74,8 @@ DECLARE SUB tupdate ()
 DECLARE SUB usa ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
-'==========================================================================
-' size
-COMMON SHARED globalChoose%, globalTLX%, globalTLY%, size%, globalMTX$(), globalWType%, globalColour%, globalHilite%
+
+COMMON SHARED globalChoose%, globalTLX%, globalTLY%, globalSize%, globalMTX$(), globalWType%, globalColour%, globalHilite%
 COMMON SHARED globalCityX(), globalCityY(), globalCityV(), globalCityP(), globalCity$(), globalLName$(), globalFileL
 COMMON SHARED globalCash(), globalControl(), globalMatrix(), globalIncome(), globalAnima(), globalRating(), globalRFlag
 COMMON SHARED globalNFlag, globalBold, globalTurbo!, globalRR(), globalStarX(), globalStarY(), globalMtn(), globalRRFrom()
@@ -89,7 +88,7 @@ COMMON SHARED globalNavyLoc(), globalNavySize(), globalNavyMove(), globalOccupie
 COMMON SHARED globalVictory(), globalGraf, globalNoise, globalCapCity(), globalDifficult, globalUSAdv, globalBW
 COMMON SHARED globalTrain(), globalFont$(), globalBrray(), globalJanCam, globalRandBal, globalRealism, globalCasualty&()
 COMMON SHARED globalPCode, globalHistory, globalThrill, globalFleet$(), globalCommerce, globalRaider, globalGrudge
-'==========================================================================
+
 DIM SHARED globalCityX(40), globalCityY(40), globalCityV(40), globalCityP(40), globalCity$(40), globalLName$(40), globalRCity(5)
 DIM SHARED globalCash(2), globalControl(2), globalMatrix(40, 7), globalIncome(2), globalAnima(300), globalRating(40)
 DIM SHARED globalMTX$(21), globalImage(300), globalForce$(2), globalArmyLoc(40), globalArmyName$(40), globalVicFlag(6)
@@ -231,7 +230,7 @@ globalMTX$(0) = "VGA CIVILWAR STRATEGY"
 globalMTX$(1) = "Resume Saved Game"
 globalMTX$(2) = "Start NEW Game"
 globalMTX$(3) = "Quit to DOS"
-globalTLX = 33: globalTLY = 20: globalColour = 5: size = 3
+globalTLX = 33: globalTLY = 20: globalColour = 5: globalSize = 3
 globalChoose = 23
 CALL menu(0)
 IF globalChoose = 1 THEN
@@ -316,7 +315,7 @@ globalMTX$(7) = "COMMANDS"
 globalMTX$(8) = "UTILITY"
 globalMTX$(9) = "Files"
 
-size = 9
+globalSize = 9
 globalChoose = chosit
 CALL menu(0)
 CALL clrrite
@@ -362,7 +361,7 @@ SELECT CASE globalChoose
 		globalMTX$(0) = "End Turn"
 		globalMTX$(1) = "Yes"
 		globalMTX$(2) = "NOT YET"
-		size = 2
+		globalSize = 2
 		CALL menu(0)
 		CALL clrrite
 		IF globalChoose <> 1 THEN chosit = 24: GOTO menu0
@@ -403,7 +402,7 @@ SELECT CASE globalChoose
 		globalMTX$(7) = "Army Drill"
 		globalMTX$(8) = "Relieve"
 		globalMTX$(9) = "MAIN MENU"
-		size = 9
+		globalSize = 9
 		CALL menu(0)
 		CALL clrrite
 		chosit = 28
@@ -439,7 +438,7 @@ SELECT CASE globalChoose
 			CALL starfin(star, fin, (side))
 			globalMTX$(0) = "Supply"
 			globalTLX = 67: globalTLY = 5: globalColour = 5
-			size = 0
+			globalSize = 0
 			FOR i = star TO fin
 				IF globalArmyLoc(i) = 0 OR globalSupply(i) > 1 GOTO alone
 				IF globalRealism > 0 THEN
@@ -451,14 +450,14 @@ SELECT CASE globalChoose
 						GOTO alone
 					END IF
 				END IF
-				size = size + 1
+				globalSize = globalSize + 1
 				max = 11
 				IF LEN(globalArmyName$(i)) < 11 THEN max = LEN(globalArmyName$(i))
-				globalMTX$(size) = LEFT$(globalArmyName$(i), max)
-				globalArray(size) = i
+				globalMTX$(globalSize) = LEFT$(globalArmyName$(i), max)
+				globalArray(globalSize) = i
 			alone:
 			NEXT i
-			IF size = 0 THEN 
+			IF globalSize = 0 THEN 
 				COLOR 11
 				CALL clrbot
 				PRINT "All eligible "; globalForce$(side); " armies have supplies";
@@ -586,10 +585,10 @@ SELECT CASE globalChoose
 		globalMTX$(12) = "Chk Links"
 		a$ = "": IF globalHistory = 1 THEN a$ = "�"
 		globalMTX$(13) = "History" + a$
-		size = 13: globalTLX = 67: globalTLY = 11
+		globalSize = 13: globalTLX = 67: globalTLY = 11
 		COLOR 11: LOCATE globalTLY - 2, globalTLX: PRINT "esc=Main Menu"
 		IF globalPlayer = 1 THEN 
-			size = 14
+			globalSize = 14
 			globalMTX$(14) = "Aggress" + STR$(globalBold)
 		END IF
 		CALL menu(-1)
@@ -637,7 +636,7 @@ SELECT CASE globalChoose
 			globalMTX$(1) = "Quiet"
 			globalMTX$(2) = "Sound"
 			globalMTX$(3) = " & Sound"
-			size = 3
+			globalSize = 3
 			globalTLX = 67
 			globalTLY = 12
 			CALL menu(0)
@@ -658,7 +657,7 @@ SELECT CASE globalChoose
 			globalMTX$(3) = "Slow"
 			globalMTX$(4) = "Very Slow"
 			globalMTX$(5) = "Reg Color": IF globalBW > 0 THEN globalMTX$(5) = "Alt Color"
-			globalTLX = 67: globalTLY = 15: size = 5
+			globalTLX = 67: globalTLY = 15: globalSize = 5
 			CALL menu(0)
 			CALL clrrite
 			SELECT CASE globalChoose
@@ -684,7 +683,7 @@ SELECT CASE globalChoose
 			globalMTX$(3) = "Balanced"
 			globalMTX$(4) = "Union +"
 			globalMTX$(5) = "Union ++"
-			globalTLX = 67: globalTLY = 15: size = 5
+			globalTLX = 67: globalTLY = 15: globalSize = 5
 			CALL menu(8)
 			CALL clrrite
 			IF globalChoose < 1 GOTO menu0
@@ -702,7 +701,7 @@ SELECT CASE globalChoose
 			GOTO utile
 	   	CASE 8 ' Random Events
 			globalMTX$(0) = "Random Events"
-			size = 4: globalTLX = 30: globalTLY = 8
+			globalSize = 4: globalTLX = 30: globalTLY = 8
 			globalMTX$(1) = "OFF"
 			globalMTX$(2) = "Favor Union ": IF globalRandBal = 3 THEN globalMTX$(2) = globalMTX$(2) + " "
 			globalMTX$(3) = "Neutral     ": IF globalRandBal = 5 THEN globalMTX$(3) = globalMTX$(3) + " "
@@ -850,7 +849,7 @@ SELECT CASE globalChoose
 		globalMTX$(2) = "Save"
 		globalMTX$(3) = "New Game"
 		globalMTX$(4) = "Quit to DOS"
-		size = 4: globalTLX = 67: globalTLY = 15
+		globalSize = 4: globalTLX = 67: globalTLY = 15
 		CALL menu(0)
 		CALL clrrite
 		SELECT CASE globalChoose
@@ -896,7 +895,7 @@ SELECT CASE globalChoose
 	globalMTX$(0) = "Quit"
 	globalMTX$(1) = "Yes"
 	globalMTX$(2) = "No"
-	size = 2: globalColour = 5
+	globalSize = 2: globalColour = 5
 	globalTLX = 67: globalTLY = 15
 	CALL menu(0)
 	CALL clrrite
@@ -966,16 +965,16 @@ SUB armies
 
 	CALL armystat(index)
 	COLOR 11: LOCATE 11, 68: PRINT globalCity$(target)
-	size = 0
+	globalSize = 0
 	globalMTX$(0) = "To"
 	FOR i = 1 TO 6
 		IF globalMatrix(target, i) > 0 THEN 
-			size = size + 1
-			globalMTX$(size) = globalCity$(globalMatrix(target, i))
-			globalArray(size) = globalMatrix(target, i)
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = globalCity$(globalMatrix(target, i))
+			globalArray(globalSize) = globalMatrix(target, i)
 		END IF
 	NEXT i
-	CALL bubble(size)
+	CALL bubble(globalSize)
 
 	globalHilite = 10
 	globalColour = 3
@@ -1295,25 +1294,25 @@ SUB combine (who)
 	globalHilite = 3
 	globalTLX = 67: globalTLY = 2
 	CALL starfin(star, fin, who)
-	size = 0
+	globalSize = 0
 	FOR i = 1 TO 40
 		IF globalCityP(i) = who AND globalOccupied(i) > 0 THEN
 			FOR j = star TO fin
 				IF globalArmyLoc(j) = i AND globalOccupied(i) <> j AND globalArmyMove(j) = 0 THEN 
-					size = size + 1
-					globalMTX$(size) = globalCity$(i)
-					globalArray(size) = i
+					globalSize = globalSize + 1
+					globalMTX$(globalSize) = globalCity$(i)
+					globalArray(globalSize) = i
 					EXIT FOR
 				END IF
 			NEXT j
 		END IF
 	NEXT i
 	
-	IF size = 0 THEN who = -1: EXIT SUB
-	CALL bubble(size)
+	IF globalSize = 0 THEN who = -1: EXIT SUB
+	CALL bubble(globalSize)
 
 	IF who <> side THEN 
-		globalChoose = 1 + INT(size * RND)
+		globalChoose = 1 + INT(globalSize * RND)
 		GOTO join
 	END IF
 	globalMTX$(0) = "Join"
@@ -1471,17 +1470,17 @@ SUB filer (switch)
 		CASE 2
 			IF NOT _FILEEXISTS("*.sav") THEN globalChoose = -1: EXIT SUB
 			globalMTX$(0) = "Load"
-			size = 0
+			globalSize = 0
 			FOR k = 1 TO 9
 				t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
 				IF _FILEEXISTS(t$) THEN
-					size = size + 1
-					globalMTX$(size) = t$
-					globalArray(size) = k
+					globalSize = globalSize + 1
+					globalMTX$(globalSize) = t$
+					globalArray(globalSize) = k
 				END IF
 			NEXT k
-			CALL bubble((size))
-			globalTLX = 67: globalTLY = 14 - .5 * size
+			CALL bubble((globalSize))
+			globalTLX = 67: globalTLY = 14 - .5 * globalSize
 			CALL menu(0)
 			CALL clrrite
 			IF globalChoose < 1 THEN EXIT SUB
@@ -1533,7 +1532,7 @@ SUB filer (switch)
 				globalMTX$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
 				IF _FILEEXISTS(globalMTX$(k)) THEN globalMTX$(k) = globalMTX$(k) + " �"
 			NEXT k
-				globalTLX = 67: size = 9
+				globalTLX = 67: globalSize = 9
 				CALL menu(0)
 				IF globalChoose < 1 THEN clrrite: EXIT SUB
 				COLOR 11
@@ -1586,20 +1585,20 @@ SUB fortify (target)
 	globalTLY = 2
 	who = side
 	CALL starfin(star, fin, who)
-	size = 0
+	globalSize = 0
 	FOR i = star TO fin
 		IF globalArmyLoc(i) > 0 AND globalFort(globalArmyLoc(i)) < 2 THEN
-			size = size + 1
-			globalMTX$(size) = globalCity$(globalArmyLoc(i))
-			globalArray(size) = globalArmyLoc(i)
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = globalCity$(globalArmyLoc(i))
+			globalArray(globalSize) = globalArmyLoc(i)
 		END IF
 	NEXT i
-	IF size = 0 THEN 
+	IF globalSize = 0 THEN 
 		CALL clrbot
 		COLOR 11: PRINT "No cities eligible to fortify";
 		EXIT SUB
 	END IF
-	CALL bubble(size)
+	CALL bubble(globalSize)
 	globalMTX$(0) = "Fortify"
 	globalChoose = 31
 	CALL menu(9)
@@ -1777,23 +1776,23 @@ SUB movefrom (index, target)
 	globalTLX = 67
 	globalTLY = 5
 	index = 0
-	size = 0
+	globalSize = 0
 	target = 0
 	who = side
 	CALL starfin(star, fin, who)
 	FOR i = star TO fin
 		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN 
-			size = size + 1
-			globalMTX$(size) = globalCity$(globalArmyLoc(i))
-			globalArray(size) = globalArmyLoc(i)
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = globalCity$(globalArmyLoc(i))
+			globalArray(globalSize) = globalArmyLoc(i)
 		END IF
 	NEXT i
-	IF size = 0 THEN 
+	IF globalSize = 0 THEN 
 		index = -1
 		GOTO notarg
 	END IF
 	globalMTX$(0) = "From"
-	CALL bubble(size)
+	CALL bubble(globalSize)
 	movopt:
 	globalTLX = 67
 	globalTLY = 5
@@ -1806,18 +1805,18 @@ SUB movefrom (index, target)
 	END IF
 	target = globalArray(globalChoose)
 
-	size = 0
+	globalSize = 0
 	FOR i = star TO fin
 		IF globalArmyLoc(i) = target AND globalArmyMove(i) = 0 THEN 
 			index = i
-			size = size + 1
-			globalMTX$(size) = "Army" + STR$(i)
-			globalArray(size) = i
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = "Army" + STR$(i)
+			globalArray(globalSize) = i
 		END IF
 	NEXT i
-	IF size = 1 GOTO notarg
+	IF globalSize = 1 GOTO notarg
 	globalMTX$(0) = "Which"
-	CALL bubble(size)
+	CALL bubble(globalSize)
 	globalTLX = 67
 	globalTLY = 15
 	CALL menu(4)
@@ -1880,16 +1879,16 @@ SUB navy (who, chx)
 	IF globalNavySize(who) < 1 OR globalCommerce = who THEN globalMTX$(4) = "-"
 	globalTLX = 67
 	globalTLY = 12
-	size = 4
+	globalSize = 4
 	IF globalNavyLoc(who) <> 99 THEN
 		IF who = 1 AND globalNavySize(who) > 1 AND globalCityP(globalNavyLoc(who)) = 0 THEN 
-			size = 5
+			globalSize = 5
 			globalMTX$(5) = "Invasion"
 			CALL void(globalNavyLoc(1), defend)
 			IF chx > 0 AND defend < 100 THEN chx = 5
 		END IF
 		IF globalRealism = 0 AND who = 2 AND globalNavySize(who) > 1 AND globalCityP(globalNavyLoc(who)) = 0 THEN 
-			size = 5
+			globalSize = 5
 			globalMTX$(5) = "Invasion"
 			CALL void(globalNavyLoc(1), defend)
 			IF chx > 0 AND defend < 100 THEN chx = 5
@@ -1924,7 +1923,7 @@ SUB navy (who, chx)
 					globalMTX$(0) = "Type"
 					globalMTX$(1) = "Wooden"
 					globalMTX$(2) = "Ironclad"
-					size = 2
+					globalSize = 2
 					CALL menu(0)
 					CALL clrrite
 					IF globalChoose < 1 GOTO ahoy
@@ -1946,15 +1945,15 @@ SUB navy (who, chx)
 			END IF
 			IF globalNavySize(who) > 1 GOTO add2ship
 			ships:
-			globalMTX$(0) = "Port": size = 0: globalTLX = 67: globalTLY = 12
+			globalMTX$(0) = "Port": globalSize = 0: globalTLX = 67: globalTLY = 12
 			FOR i = 1 TO 40
 				IF globalMatrix(i, 7) = 99 AND globalCityP(i) = who AND globalNavyLoc(3 - who) <> i THEN 
-					size = size + 1
-					globalMTX$(size) = globalCity$(i): globalArray(size) = i
+					globalSize = globalSize + 1
+					globalMTX$(globalSize) = globalCity$(i): globalArray(globalSize) = i
 				END IF
 			NEXT i
-			IF chx = 1 THEN globalChoose = 1 + INT(size * RND)
-			IF size < 1 THEN
+			IF chx = 1 THEN globalChoose = 1 + INT(globalSize * RND)
+			IF globalSize < 1 THEN
 				globalNavySize(who) = 0
 				globalFleet$(who) = ""
 				IF chx = 0 THEN 
@@ -2081,16 +2080,16 @@ SUB navy (who, chx)
 				GOTO ahoy
 			END IF
 
-			size = 0
+			globalSize = 0
 			FOR i = 1 TO 40
 				IF globalMatrix(i, 7) > 90 AND globalNavyLoc(who) <> i THEN
-					size = size + 1
-					globalMTX$(size) = globalCity$(i)
-					globalArray(size) = i
+					globalSize = globalSize + 1
+					globalMTX$(globalSize) = globalCity$(i)
+					globalArray(globalSize) = i
 				END IF
 			NEXT i
 			IF chx = 3 THEN
-				IF size = 0 THEN EXIT SUB
+				IF globalSize = 0 THEN EXIT SUB
 				IF globalGrudge > 0 THEN 
 					globalChoose = 1
 					globalArray(1) = globalNavyLoc(3 - who)
@@ -2242,7 +2241,7 @@ SUB navy (who, chx)
 			GOTO powder
 		END IF
 		
-		size = 2
+		globalSize = 2
 		globalColour = 3
 		globalHilite = 14
 		globalTLX = 50
@@ -2342,7 +2341,7 @@ SUB navy (who, chx)
 		nest:
 		best = 0
 		x = 0
-		FOR i = 1 TO size
+		FOR i = 1 TO globalSize
 			target = globalArray(i)
 			IF globalCityP(target) = 0 GOTO neutral
 
@@ -2363,7 +2362,7 @@ SUB navy (who, chx)
 		neutral:
 		NEXT i
 		IF best = 0 THEN
-			globalChoose = 1 + INT(RND * size)
+			globalChoose = 1 + INT(RND * globalSize)
 		ELSE
 			globalChoose = best
 		END IF
@@ -2428,7 +2427,7 @@ END SUB
 SUB newcity (index)
 	globalMTX$(1) = "  "
 	globalMTX$(3) = "  "
-	size = 3
+	globalSize = 3
 	a$ = globalCity$(index)
 	morecap:
 	globalTLX = 68
@@ -2662,7 +2661,7 @@ END SUB
 
 SUB recruit (who)
 	IF globalCash(who) < 100 GOTO menu1
-	size = 0: COLOR 12
+	globalSize = 0: COLOR 12
 	globalMTX$(0) = "Recruit"
 	IF who = side AND globalRFlag > 0 THEN 
 		FOR i = 1 TO globalRFlag
@@ -2670,7 +2669,7 @@ SUB recruit (who)
 			globalMTX$(i) = globalCity$(x)
 			globalArray(i) = x
 		NEXT i
-		size = globalRFlag
+		globalSize = globalRFlag
 		GOTO alldone
 	END IF
 	max = 4
@@ -2683,28 +2682,28 @@ SUB recruit (who)
 		ELSE 
 			pct! = .3
 		END IF
-		IF size = 0 AND i > 20 THEN pct! = .3
-		IF size < 2 AND i > 30 THEN pct! = .3
+		IF globalSize = 0 AND i > 20 THEN pct! = .3
+		IF globalSize < 2 AND i > 30 THEN pct! = .3
 		globalArray(i) = 0
 		IF globalOccupied(i) > 0 AND globalCityP(i) = who THEN pct! = .4
 		IF RND < pct! AND globalCityP(i) = who THEN
 			IF globalRealism > 0 AND globalCityO(i) = 3 - who GOTO foe
-			size = size + 1
-			globalMTX$(size) = globalCity$(i)
-			globalArray(size) = i
-			IF size > max - 1 GOTO alldone
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = globalCity$(i)
+			globalArray(globalSize) = i
+			IF globalSize > max - 1 GOTO alldone
 		END IF
 	foe:
 	NEXT i
 	alldone:
-	IF size = 0 GOTO menu1
+	IF globalSize = 0 GOTO menu1
 	IF who = side AND globalRFlag = 0 THEN 
-		FOR i = 1 TO size
+		FOR i = 1 TO globalSize
 			globalRCity(i) = globalArray(i)
 		NEXT i
-		globalRFlag = size
+		globalRFlag = globalSize
 	END IF
-	CALL bubble(size)
+	CALL bubble(globalSize)
 	'............................................................................
 	levy:
 	IF globalCash(who) < 100 GOTO menu1
@@ -2770,17 +2769,17 @@ SUB recruit (who)
 	GOTO levy
 	randsel:
 	globalChoose = 0: x = 0
-	FOR i = 1 TO size
+	FOR i = 1 TO globalSize
 		target = globalArray(i)
 		LOCATE 14 + i, 69
 		x = globalOccupied(target)
 		IF x = 0 XOR globalArmySize(x) < 155 THEN globalChoose = i
 	NEXT i
 
-	IF globalChoose = 0 THEN globalChoose = 1 + INT(RND * size)
+	IF globalChoose = 0 THEN globalChoose = 1 + INT(RND * globalSize)
 	IF globalRealism > 0 THEN
 		x = 0
-		FOR i = 1 TO size
+		FOR i = 1 TO globalSize
 			target = globalArray(i)
 			IF globalOccupied(target) = 0 THEN
 				y = 3 * globalCityV(target) + 33
@@ -2794,7 +2793,7 @@ SUB recruit (who)
 			IF y > x AND RND > .5 THEN x = y: globalChoose = i
 		NEXT i
 	END IF
-	IF globalCash(who) < 100 THEN globalChoose = size
+	IF globalCash(who) < 100 THEN globalChoose = globalSize
 	RETURN
 	playb:
 	IF side = 1 AND globalDifficult < 3 THEN globalArmySize(empty) = globalArmySize(empty) + 15 - 5 * globalDifficult
@@ -3323,7 +3322,7 @@ SUB tupdate
 			globalMTX$(0) = "Raze ?"
 			globalMTX$(1) = "No"
 			globalMTX$(2) = "Yes"
-			size = 2
+			globalSize = 2
 			CALL menu(0)
 			CALL clrrite
 			IF globalChoose = 2 GOTO smoke
@@ -3471,7 +3470,7 @@ SUB cancel (side)
 	CALL starfin(star, fin, (side))
 	counter:
 	CALL clrrite
-	size = 0
+	globalSize = 0
 	FOR j = star TO fin
 		a$ = globalArmyName$(j)
 		IF LEN(a$) > 10 THEN 
@@ -3479,24 +3478,24 @@ SUB cancel (side)
 			a$ = RIGHT$(a$, LEN(a$) - x)
 		END IF
 		IF globalArmyLoc(j) > 0 AND globalArmyMove(j) > 0 THEN 
-			size = size + 1
-			globalMTX$(size) = a$
-			globalArray(size) = globalArmyLoc(j)
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = a$
+			globalArray(globalSize) = globalArmyLoc(j)
 		END IF
 	NEXT j
-	CALL bubble(size)
+	CALL bubble(globalSize)
 	globalTLX = 67
 	globalTLY = 2
 	globalWType = 2
 	globalMTX$(0) = "Cancel"
-	IF size < 1 THEN 
+	IF globalSize < 1 THEN 
 		CALL clrbot
 		COLOR 11: PRINT "No units have orders to cancel";
 		EXIT SUB
 	END IF
 	CALL menu(1)
 	SELECT CASE globalChoose
-		CASE 1 TO size
+		CASE 1 TO globalSize
 			target = globalArray(globalChoose)
 			
 			FOR i = star TO fin
@@ -3728,7 +3727,7 @@ SUB endit
 	globalMTX$(6) = "DONE"
 	globalWType = 2
 	globalColour = 3
-	size = 6
+	globalSize = 6
 	globalHilite = 14
 	CALL menu(0)
 	chosit = 21 + globalChoose
@@ -4107,7 +4106,7 @@ SUB image2 (a$, s)
 	DIM g2(1 TO 8000)
 	globalMTX$(1) = a$
 	globalTLX = 32 - LEN(a$) \ 2
-	globalTLY = 10: size = 1
+	globalTLY = 10: globalSize = 1
 	CALL mxw(wide)
 	IF wide > 59 THEN 
 		wide = 59
@@ -4254,18 +4253,18 @@ SUB relieve (who)
 	globalTLX = 67
 	globalTLY = 2
 	CALL starfin(star, fin, who)
-	size = 0
+	globalSize = 0
 	FOR i = star TO fin
 		IF globalArmySize(i) > 0 AND globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN
-			size = size + 1
-			globalMTX$(size) = globalArmyName$(i)
-			IF LEN(globalMTX$(size)) > 11 THEN globalMTX$(size) = LEFT$(globalMTX$(size), 11)
-			globalArray(size) = i
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = globalArmyName$(i)
+			IF LEN(globalMTX$(globalSize)) > 11 THEN globalMTX$(globalSize) = LEFT$(globalMTX$(globalSize), 11)
+			globalArray(globalSize) = i
 		END IF
 	NEXT i
 
-	IF size = 0 THEN EXIT SUB
-	CALL bubble(size)
+	IF globalSize = 0 THEN EXIT SUB
+	CALL bubble(globalSize)
 	globalMTX$(0) = "Relieve"
 	globalChoose = 31
 	globalHilite = 11
@@ -4279,16 +4278,16 @@ SUB relieve (who)
 	t$ = globalArmyName$(index)
 	globalLName$(index) = t$
 
-	size = 0
+	globalSize = 0
 	FOR i = star TO fin
 		IF globalLName$(i) <> "" THEN
-			size = size + 1
-			globalMTX$(size) = globalLName$(i)
-			IF LEN(globalMTX$(size)) > 11 THEN globalMTX$(size) = LEFT$(globalMTX$(size), 11)
-			globalArray(size) = i
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = globalLName$(i)
+			IF LEN(globalMTX$(globalSize)) > 11 THEN globalMTX$(globalSize) = LEFT$(globalMTX$(globalSize), 11)
+			globalArray(globalSize) = i
 		END IF
 	NEXT i
-	CALL bubble(size)
+	CALL bubble(globalSize)
 
 	have2:
 	globalMTX$(0) = "New Leader"
@@ -4321,8 +4320,8 @@ SUB report (who)
 	globalMTX$(3) = "Cities"
 	globalMTX$(4) = "Force Summary"
 	globalMTX$(5) = "Intelligence"
-	globalMTX$(6) = "Battles": size = 6
-	IF _FILEEXISTS("cws.his") THEN globalMTX$(7) = "Recap": size = 7
+	globalMTX$(6) = "Battles": globalSize = 6
+	IF _FILEEXISTS("cws.his") THEN globalMTX$(7) = "Recap": globalSize = 7
 	CALL menu(0)
 	SELECT CASE globalChoose
 		CASE IS < 0
@@ -4572,24 +4571,24 @@ SUB retreat (defend, x)
 	globalColour = 3
 	globalTLX = 67
 	globalTLY = 5
-	size = 0
+	globalSize = 0
 	y = globalArmyLoc(defend)
 	who = 1
 	IF defend > 20 THEN who = 2
 	FOR k = 1 TO 6
 		IF globalMatrix(y, k) > 0 AND globalCityP(globalMatrix(y, k)) = who THEN 
-			size = size + 1
-			globalMTX$(size) = globalCity$(globalMatrix(y, k))
-			globalArray(size) = globalMatrix(y, k)
+			globalSize = globalSize + 1
+			globalMTX$(globalSize) = globalCity$(globalMatrix(y, k))
+			globalArray(globalSize) = globalMatrix(y, k)
 		END IF
 	NEXT k
-	IF size = 0 THEN EXIT SUB
-	IF size = 1 THEN x = globalArray(1): EXIT SUB
+	IF globalSize = 0 THEN EXIT SUB
+	IF globalSize = 1 THEN x = globalArray(1): EXIT SUB
 	globalMTX$(0) = "Retreat"
-	CALL bubble(size)
+	CALL bubble(globalSize)
 	CALL menu(9)
 	CALL clrrite
-	IF globalChoose < 0 OR globalChoose > size THEN x = 0: EXIT SUB
+	IF globalChoose < 0 OR globalChoose > globalSize THEN x = 0: EXIT SUB
 	x = globalArray(globalChoose)
 END SUB
 
@@ -5472,10 +5471,10 @@ SUB victor
 		globalMTX$(0) = "End Game"
 		globalMTX$(1) = "Yes"
 		globalMTX$(2) = "No-Override"
-		size = 2: globalColour = 4
+		globalSize = 2: globalColour = 4
 		globalTLX = 27: globalTLY = 18
 		globalHilite = 15
-		IF j = 7 THEN size = 1
+		IF j = 7 THEN globalSize = 1
 		CALL menu(0)
 
 		IF globalChoose <> 1 AND j < 7 THEN
@@ -5490,7 +5489,7 @@ SUB victor
 		globalMTX$(1) = "Quit this Game"
 		globalMTX$(2) = "Play More"
 		IF globalPlayer = 1 THEN globalMTX$(2) = "No - Press Onward to " + globalCity$(globalCapCity(3 - side))
-		size = 2
+		globalSize = 2
 		globalColour = 8
 		globalTLX = 27
 		globalTLY = 18
@@ -5556,10 +5555,10 @@ END SUB
 '============================================================================
 '       globalTLX  = top left x  (if zero, automatically centered)
 '       globalTLY = top left y   (if zero, automatically centered)
-'       size = # rows (current maximum=20)
+'       globalSize = # rows (current maximum=20)
 '       globalMTX$() = text for menu
 '                globalMTX$(0) = heading (blank defaults to M E N U)
-'                globalMTX$(1-size) are options
+'                globalMTX$(1-globalSize) are options
 '       globalChoose = option selected (row #)
 '            -1 indicates ESC key pressed
 '            entering with globalChoose+21 causes globalChoose to be default entry
@@ -5574,18 +5573,18 @@ SUB choices (b1, wide)
 		globalWType = globalWType - 10 * boxc
 	END IF
 	COLOR boxc
-	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8)
+	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8)
 	CLS 1
 	VIEW
-	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8), globalColour, B
+	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8), globalColour, B
 	LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
 	IF ABS(globalWType) = 2 THEN
-		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + size + 2) + 4), globalColour, B
+		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + globalSize + 2) + 4), globalColour, B
 	END IF
 	COLOR globalColour
 
 	LOCATE globalTLY + 1, globalTLX + b1: PRINT globalMTX$(0)
-	FOR i = 1 TO size
+	FOR i = 1 TO globalSize
 		LOCATE globalTLY + 2 + i, globalTLX + 2: PRINT globalMTX$(i);
 	NEXT i
 END SUB
@@ -5707,15 +5706,15 @@ SUB menu (switch%)
 	IF globalChoose > 21 THEN globalChoose = globalChoose - 21
 	IF globalChoose > 21 THEN globalChoose = 1
 	row = globalChoose: IF row < 1 THEN row = 1
-	IF row > size THEN row = 1
+	IF row > globalSize THEN row = 1
 	globalChoose = row
 	row1 = row
        
-	IF globalTLY = 0 THEN globalTLY = INT(11.5 - .5 * size)
-	IF globalTLY + size > 26 THEN globalTLY = 26 - size
+	IF globalTLY = 0 THEN globalTLY = INT(11.5 - .5 * globalSize)
+	IF globalTLY + globalSize > 26 THEN globalTLY = 26 - globalSize
        
 	brx = globalTLX + wide + 1
-	bry = globalTLY + size + 3
+	bry = globalTLY + globalSize + 3
        
 	boxc = globalColour
 	IF globalWType > 10 THEN 
@@ -5725,13 +5724,13 @@ SUB menu (switch%)
 
 	COLOR boxc
 
-	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8)
+	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8)
 	CLS 1
 	VIEW
-	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + size + 2) + 8), globalColour, B
+	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + wide + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8), globalColour, B
 	LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
 	IF ABS(globalWType) = 2 THEN
-		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + size + 2) + 4), globalColour, B
+		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + wide + 1) + 3, 16 * (globalTLY + globalSize + 2) + 4), globalColour, B
 	END IF
 
 	COLOR globalColour
@@ -5752,12 +5751,12 @@ SUB menu (switch%)
 				COLOR 12
 				LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT SPACE$(wide);
 				LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT t$;
-				LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT SPACE$(12);
-				LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT "Size"; globalArmySize(target);
+				LOCATE globalTLY + 4 + globalSize, globalTLX + 1: PRINT SPACE$(12);
+				LOCATE globalTLY + 4 + globalSize, globalTLX + 1: PRINT "Size"; globalArmySize(target);
 				x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
 			ELSE
 				flag = 0
-				LOCATE globalTLY + 4 + size, globalTLX + 1: PRINT SPACE$(12);
+				LOCATE globalTLY + 4 + globalSize, globalTLX + 1: PRINT SPACE$(12);
 			END IF
 		CASE 4:
 			CALL armystat(globalArray(row))
@@ -5823,7 +5822,7 @@ SUB menu (switch%)
 	IF switch = 3 THEN globalChoose = -ASC(UCASE$(a$)): GOTO called
 	IF ASC(a$) = 27 THEN globalChoose = -1: GOTO called
 	row1 = row
-	FOR k = 1 TO size
+	FOR k = 1 TO globalSize
 		c1$ = UCASE$(LEFT$(LTRIM$(globalMTX$(k)), 1))
 		IF c1$ = UCASE$(a$) THEN
 			globalChoose = k
@@ -5838,7 +5837,7 @@ SUB menu (switch%)
 	 IF a$ = "H" THEN row = row - 1: GOSUB limits: RETURN
 	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
 	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
-	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
+	 IF a$ = "Q" THEN row = globalSize: GOSUB limits: RETURN
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL usa
@@ -5860,8 +5859,8 @@ SUB menu (switch%)
 	 RETURN
 
 	limits:
-	IF row > size THEN row = 1
-	IF row < 1 THEN row = size
+	IF row > globalSize THEN row = 1
+	IF row < 1 THEN row = globalSize
 	RETURN
 	noadjust:
 	IF globalTLX = 0 THEN globalTLX = INT(40.5 - .5 * wide)
@@ -5885,7 +5884,7 @@ END SUB
 
 SUB mxw (wide)
 	wide = LEN(globalMTX$(0)) + 1
-	FOR i = 1 TO size
+	FOR i = 1 TO globalSize
 		x = LEN(globalMTX$(i))
 		IF x > wide THEN wide = x
 	NEXT i
