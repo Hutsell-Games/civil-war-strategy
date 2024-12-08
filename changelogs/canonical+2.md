@@ -10,4 +10,5 @@
 9. Move single use rusure inline
 10. Move chessie inline
 ===
-11. clrbot => clearBottom; clrrite => clearRight
+11. clrbot => clearBottom; clrrite => clearRight; cannon => drawCannon; capitol => drawCapitol; flags => drawFlags; image2 => drawOverlayBox; integrity => checkMapIntegrity; rwin => drawRebelWin; shen => playShenandoah; shipicon => drawShipIcon; surrender => drawSurrender; usa => drawUSAMap; ironclad => drawIronclad; icon => drawArmyIcon
+12. Rearrange some DECLARE SUBs

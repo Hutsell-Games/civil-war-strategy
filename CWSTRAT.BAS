@@ -1,4 +1,31 @@
 DEFINT A-Z
+' Draw
+DECLARE SUB drawArmyIcon (from%, dest%, kind%)
+DECLARE SUB drawCannon ()
+DECLARE SUB drawCapitol ()
+DECLARE SUB drawFlags (who%, w%, a%)
+DECLARE SUB drawOverlayBox (a$, s%)
+DECLARE SUB drawIronclad ()
+DECLARE SUB drawRebelWin ()
+DECLARE SUB drawSchooner ()
+DECLARE SUB drawShipIcon (who%, flag%)
+DECLARE SUB drawSurrender (who%)
+DECLARE SUB drawTinyTrain (who%, flag%)
+DECLARE SUB drawUSAMap ()
+DECLARE SUB touchup ()
+
+' Utility
+DECLARE SUB clearBottom ()
+DECLARE SUB clearRight ()
+DECLARE SUB strong (index%)
+DECLARE SUB TICK (sec!)
+DECLARE SUB topbar ()
+
+' Commands
+DECLARE SUB cancel (globalSide%)
+DECLARE SUB fortify (target%)
+DECLARE SUB resupply (index%)
+
 DECLARE SUB animate (index%, flag%)
 DECLARE SUB armies ()
 DECLARE SUB armyxy (x%, y%, z%)
@@ -8,15 +35,10 @@ DECLARE SUB barnacle (who%)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
 DECLARE SUB bub2 (limit%)
 DECLARE SUB bubble (globalSize%)
-DECLARE SUB cancel (globalSide%)
-DECLARE SUB cannon ()
-DECLARE SUB capitol ()
 DECLARE SUB capture (active%, c%, s%, flag%)
 DECLARE SUB center (y%, a$)
 DECLARE SUB choices (b1%, wide%)
-DECLARE SUB clearBottom ()
 DECLARE SUB combine (who%)
-DECLARE SUB clearRight ()
 DECLARE SUB commander (who%, empty%)
 DECLARE SUB cutoff (who%, target%, a%)
 DECLARE SUB endit ()
@@ -24,13 +46,8 @@ DECLARE SUB engine ()
 DECLARE SUB evaluate (index%, x%)
 DECLARE SUB events ()
 DECLARE SUB filer (switch%)
-DECLARE SUB flags (who%, w%, a%)
 DECLARE SUB flashcity (which%)
-DECLARE SUB fortify (target%)
-DECLARE SUB icon (from%, dest%, kind%)
-DECLARE SUB image2 (a$, s%)
-DECLARE SUB integrity ()
-DECLARE SUB ironclad ()
+DECLARE SUB checkMapIntegrity ()
 DECLARE SUB iterate ()
 DECLARE SUB maptext ()
 DECLARE SUB maxx ()
@@ -47,30 +64,19 @@ DECLARE SUB railroad (who%)
 DECLARE SUB recruit (who%)
 DECLARE SUB relieve (who%)
 DECLARE SUB report (who%)
-DECLARE SUB resupply (index%)
 DECLARE SUB retreat (active%, x%)
 DECLARE SUB roman (target%, a$)
-DECLARE SUB rwin ()
-DECLARE SUB schooner ()
 DECLARE SUB scribe (a$, flag%)
-DECLARE SUB shen ()
+DECLARE SUB playShenandoah ()
 DECLARE SUB ships ()
-DECLARE SUB shipicon (who%, flag%)
 DECLARE SUB shiptype (who%, i%)
 DECLARE SUB smarts ()
 DECLARE SUB showcity ()
 DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB starfin (star%, fin%, who%)
+DECLARE SUB setArmyRange (star%, fin%, who%)
 DECLARE SUB stax (who%)
-DECLARE SUB strong (index%)
-DECLARE SUB surrender (who%)
-DECLARE SUB TICK (sec!)
-DECLARE SUB tinytrain (who%, flag%)
-DECLARE SUB topbar ()
-DECLARE SUB touchup ()
 DECLARE SUB traincapacity (who%, limit%)
 DECLARE SUB tupdate ()
-DECLARE SUB usa ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 
@@ -172,7 +178,7 @@ COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
 LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
-CALL flags(1, -440, 0): CALL flags(2, -100, 0)
+CALL drawFlags(1, -440, 0): CALL drawFlags(2, -100, 0)
 IF globalReplay = 0 AND globalNoise = 2 AND globalChoose = 0 THEN
 IF globalSide = 1 THEN
 	IF INKEY$ <> "" GOTO notitle
@@ -188,7 +194,7 @@ IF globalSide = 1 THEN
 	IF INKEY$ <> "" GOTO notitle
 	PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
     ELSE
-	CALL shen
+	CALL playShenandoah
     END IF
 END IF
 notitle:
@@ -250,7 +256,7 @@ ELSE
 	SCREEN 12
 	CLS
 END IF
-CALL usa
+CALL drawUSAMap
 GOTO menu0
 '==========================================================================
 '                              New Month
@@ -288,7 +294,7 @@ NEXT i
 globalVPTotal = globalIncome(1) + globalIncome(2)
 
 chosit = 22
-IF globalPlayer = 2 THEN GOSUB blanken: CALL usa
+IF globalPlayer = 2 THEN GOSUB blanken: CALL drawUSAMap
 CALL victor
 ON ERROR GOTO 0
 IF globalPCode > 0 THEN
@@ -378,7 +384,7 @@ SELECT CASE globalChoose
 			globalSide = globalSide + 1
 			IF globalSide = 2 THEN 
 				GOSUB blanken
-				CALL usa
+				CALL drawUSAMap
 				GOTO menu0
 			END IF
 		END IF
@@ -386,9 +392,9 @@ SELECT CASE globalChoose
 	CASE 6
 		CALL report((globalSide))
 		chosit = 27
-		CALL starfin(star, fin, globalSide)
+		CALL setArmyRange(star, fin, globalSide)
 		FOR i = star TO fin
-			IF globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
+			IF globalArmyMove(i) > 0 THEN CALL drawArmyIcon(globalArmyLoc(i), globalArmyMove(i), 1)
 		NEXT i
 	CASE 7 ' Commands
 		optmen:
@@ -441,7 +447,7 @@ SELECT CASE globalChoose
 				globalChoose = 24
 				GOTO optmen
 		CASE 4 ' Supply
-			CALL starfin(star, fin, (globalSide))
+			CALL setArmyRange(star, fin, (globalSide))
 			globalMTX$(0) = "Supply"
 			globalTLX = 67: globalTLY = 5: globalColour = 5
 			globalSize = 0
@@ -630,7 +636,7 @@ SELECT CASE globalChoose
 			IF globalGraf = 2 THEN a$ = "CITY NAMES"
 			IF globalGraf = 3 THEN a$ = "FULL"
 			CLS
-			CALL usa
+			CALL drawUSAMap
 			CALL clearBottom
 			COLOR 11: PRINT "Graphics : "; a$; 
 			IF globalNoise > 0 THEN SOUND 2700, 1
@@ -676,7 +682,7 @@ SELECT CASE globalChoose
 				CASE 5
 					globalBW = 1 - globalBW
 					CLS
-					CALL usa
+					CALL drawUSAMap
 					CALL topbar
 			END SELECT
 			globalChoose = 26
@@ -738,7 +744,7 @@ SELECT CASE globalChoose
 			COLOR 14: PRINT "			press a key";
 			DO WHILE INKEY$ = "": LOOP
 			CLS
-			CALL usa
+			CALL drawUSAMap
 			globalChoose = 29
 			GOTO utile
 	   	CASE 9 ' Vary Start Conditions
@@ -791,7 +797,7 @@ SELECT CASE globalChoose
 				IF globalRating(k) < 1 THEN globalRating(k) = 1
 			NEXT k
 			CLS
-			CALL usa
+			CALL drawUSAMap
 			globalChoose = 30
 			GOTO utile
 	   	CASE 10 ' January Campaigns
@@ -817,9 +823,9 @@ SELECT CASE globalChoose
 				globalChoose = 32
 				GOTO utile
 	   	CASE 12 ' Check Map Links
-			CALL integrity
+			CALL checkMapIntegrity
 			CALL TICK(99)
-			CALL usa
+			CALL drawUSAMap
 	  	CASE 13 ' History
 			globalHistory = 1 - globalHistory
 			a$ = "OFF"
@@ -994,7 +1000,7 @@ SUB armies
 	CALL clearBottom
 	PRINT "Army "; index; " "; globalArmyName$(index); " is moving from "; globalCity$(target); " to "; globalCity$(globalArray(globalChoose));
 	IF globalNoise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
-	CALL icon(target, globalArray(globalChoose), 1)
+	CALL drawArmyIcon(target, globalArray(globalChoose), 1)
 	globalArmyMove(index) = globalArray(globalChoose)
 	CALL TICK(globalTurbo!)
 	CALL clearBottom
@@ -1030,7 +1036,7 @@ SUB battle (attack, defend, win, lose)
 	IF globalArmySize(defend) < 1 THEN globalArmySize(defend) = 1
 	IF globalArmySize(attack) < 1 THEN globalArmySize(attack) = 1
 
-	CALL icon(globalArmyLoc(defend), 0, 9)
+	CALL drawArmyIcon(globalArmyLoc(defend), 0, 9)
 	LOCATE 1, 1: PRINT SPACE$(80)
 	CALL clearRight
 	y = 68
@@ -1160,7 +1166,7 @@ SUB battle (attack, defend, win, lose)
 	LINE (528, 410)-(637, 437), 14, B
 	DO WHILE INKEY$ = "": LOOP
 	IF globalGraf > 2 THEN
-		CALL cannon
+		CALL drawCannon
 		k = globalFort(globalArmyLoc(defend))
 		t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
 		IF _FILEEXISTS(t$) THEN
@@ -1201,7 +1207,7 @@ SUB battle (attack, defend, win, lose)
 	LOCATE 5, 69: PRINT globalCity$(globalArmyLoc(defend))
 	a = 1
 	IF win > 20 THEN a = 2
-	CALL flags(a, 0, 0)
+	CALL drawFlags(a, 0, 0)
 	CALL clearBottom
 	COLOR 11: PRINT globalArmyName$(win); " defeats "; globalArmyName$(lose); " in "; globalCity$(globalArmyLoc(defend));
 	CALL TICK(9)
@@ -1287,7 +1293,7 @@ SUB battle (attack, defend, win, lose)
 	IF win > 20 THEN s = 2
 	globalBatWon(s) = globalBatWon(s) + 1
 	globalVictory(s) = globalVictory(s) + 1
-	CALL icon(globalArmyLoc(defend), 0, 8)
+	CALL drawArmyIcon(globalArmyLoc(defend), 0, 8)
 END SUB
 
 SUB combine (who)
@@ -1295,7 +1301,7 @@ SUB combine (who)
 	target = 0
 	globalHilite = 3
 	globalTLX = 67: globalTLY = 2
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	globalSize = 0
 	FOR i = 1 TO 40
 		IF globalCityP(i) = who AND globalOccupied(i) > 0 THEN
@@ -1402,7 +1408,7 @@ SUB combine (who)
 	       
 	CALL showcity
 	CALL placearmy(best)
-	CALL icon(target, 0, 6)
+	CALL drawArmyIcon(target, 0, 6)
 	globalOccupied(target) = best
 	CALL stax(who)
 nocity2:
@@ -1499,7 +1505,7 @@ SUB filer (switch)
 					ELSE
 						who = 1
 						IF i > 20 THEN who = 2
-						CALL starfin(star, fin, who)
+						CALL setArmyRange(star, fin, who)
 						FOR k = star TO fin
 							IF globalArmyName$(i) = globalLName$(k) THEN globalLName$(k) = "": EXIT FOR
 						NEXT k
@@ -1522,10 +1528,10 @@ SUB filer (switch)
 			SCREEN 12
 			CLS
 			CLOSE #1
-			CALL usa
+			CALL drawUSAMap
 			CALL clearBottom
 			FOR k = 1 TO 2
-				IF globalRR(k) > 0 THEN CALL tinytrain(k, 1)
+				IF globalRR(k) > 0 THEN CALL drawTinyTrain(k, 1)
 			NEXT k
 			globalSide = a
 		CASE 3
@@ -1565,7 +1571,7 @@ SUB filer (switch)
 			WRITE #1, myside, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
 			CLOSE #1
 			CLS
-			CALL usa
+			CALL drawUSAMap
 	END SELECT
 END SUB
 
@@ -1590,7 +1596,7 @@ SUB fortify (target)
 	globalTLX = 67
 	globalTLY = 2
 	who = globalSide
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	globalSize = 0
 	FOR i = star TO fin
 		IF globalArmyLoc(i) > 0 AND globalFort(globalArmyLoc(i)) < 2 THEN
@@ -1632,16 +1638,16 @@ SUB fortify (target)
 	globalCash(globalSide) = globalCash(globalSide) - cost
 	CALL clearBottom
 	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
-	CALL icon(target, 0, 6)
+	CALL drawArmyIcon(target, 0, 6)
 	CALL showcity
-	IF globalArmyMove(x) > 0 THEN CALL icon(globalArmyLoc(x), globalArmyMove(x), 5)
+	IF globalArmyMove(x) > 0 THEN CALL drawArmyIcon(globalArmyLoc(x), globalArmyMove(x), 5)
 	globalArmyMove(x) = -1
 	CALL placearmy(x)
 	CALL stax(who)
 nocity:
 END SUB
 
-SUB icon (from, dest, kind)
+SUB drawArmyIcon (from, dest, kind)
 	IF from < 1 OR from > 40 GOTO noshow
 	IF dest < 0 GOTO noshow
 	IF from = 999 GOTO noshow
@@ -1785,7 +1791,7 @@ SUB movefrom (index, target)
 	globalSize = 0
 	target = 0
 	who = globalSide
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	FOR i = star TO fin
 		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN 
 			globalSize = globalSize + 1
@@ -1983,7 +1989,7 @@ SUB navy (who, chx)
 			CALL ships
 			CALL clearBottom
 			COLOR 11: PRINT globalForce$(who); " is building NEW fleet in "; globalCity$(globalArray(globalChoose));
-			PSET (400, 465), 0: CALL shipicon(who, a)
+			PSET (400, 465), 0: CALL drawShipIcon(who, a)
 			IF globalNoise > 0 THEN SOUND 3000, 1
 			CALL TICK(globalTurbo!)
 			GOTO ahoy
@@ -1991,7 +1997,7 @@ SUB navy (who, chx)
 			globalCash(who) = globalCash(who) - cost
 			CALL clearBottom
 			PRINT globalForce$(who); " navy increased to "; globalNavySize(who);
-			PSET (400, 465), 0: CALL shipicon(who, a)
+			PSET (400, 465), 0: CALL drawShipIcon(who, a)
 			CALL ships
 			IF globalNoise > 0 THEN SOUND 3000, 1
 			CALL TICK(globalTurbo!)
@@ -2011,7 +2017,7 @@ SUB navy (who, chx)
 			IF globalCityP(globalNavyLoc(who)) <> 3 - who GOTO ahoy
 			CALL clearBottom
 			COLOR 12: PRINT globalForce$(who); " fleet bombards "; globalCity$(globalNavyLoc(who));
-			CALL icon(globalNavyLoc(who), 0, 3)
+			CALL drawArmyIcon(globalNavyLoc(who), 0, 3)
 			
 			target = globalNavyLoc(who)
 			index = globalOccupied(target)
@@ -2146,9 +2152,9 @@ SUB navy (who, chx)
 				a = ASC(LEFT$(globalFleet$(who), 1))
 				SELECT CASE a
 					CASE 73
-						CALL ironclad
+						CALL drawIronclad
 					CASE 87
-						CALL schooner
+						CALL drawSchooner
 				END SELECT
 				TICK 2 * globalTurbo!
 			ELSE
@@ -2175,9 +2181,9 @@ SUB navy (who, chx)
 				a = ASC(LEFT$(globalFleet$(who), 1))
 				SELECT CASE a
 					CASE 73
-						CALL ironclad
+						CALL drawIronclad
 					CASE 87
-						CALL schooner
+						CALL drawSchooner
 				END SELECT
 				TICK 2 * globalTurbo!
 			ELSE
@@ -2187,7 +2193,7 @@ SUB navy (who, chx)
 			globalCommerce = who
 			IF globalNavyLoc(1) = globalNavyLoc(2) GOTO pirate
 			CLS
-			CALL usa
+			CALL drawUSAMap
 			EXIT SUB
 		CASE 5 ' Invasion
 			CALL commander((who), empty)
@@ -2400,7 +2406,7 @@ SUB navy (who, chx)
 			IF globalNavyLoc(k) = 99 THEN globalCommerce = k
 		NEXT k
 		CLS 
-		CALL usa
+		CALL drawUSAMap
 END SUB
 
 SUB newarmy (who, empty, target)
@@ -2512,7 +2518,7 @@ SUB railroad (who)
 	SELECT CASE globalRR(who)
 		CASE 0
 			IF who = globalSide GOTO human
-			CALL starfin(star, fin, who)
+			CALL setArmyRange(star, fin, who)
 			max = 32767
 			index = 0
 			FOR i = star TO fin
@@ -2610,7 +2616,7 @@ SUB railroad (who)
 		globalRR(who) = index
 		globalArmyLoc(index) = 0
 		globalArmyMove(index) = x1
-		CALL tinytrain(who, 1)
+		CALL drawTinyTrain(who, 1)
 		IF globalNoise > 0 THEN SOUND 2222, 1
 		CALL engine
 
@@ -2619,13 +2625,13 @@ SUB railroad (who)
 		GOTO toot
 
 		CASE IS > 0
-			CALL tinytrain(who, 0)
+			CALL drawTinyTrain(who, 0)
 			CALL occupy(globalRRFrom(who))
 			IF globalOccupied(globalRRFrom(who)) > 0 THEN CALL placearmy(globalOccupied(globalRRFrom(who)))
 
 			index = globalRR(who)
 			globalTracks(who) = globalArmyMove(index)
-			CALL tinytrain(who, 1)
+			CALL drawTinyTrain(who, 1)
 
 			globalRR(who) = 0
 			globalArmyLoc(index) = globalArmyMove(index)
@@ -2710,7 +2716,7 @@ SUB recruit (who)
 		globalRFlag = globalSize
 	END IF
 	CALL bubble(globalSize)
-	'............................................................................
+
 	levy:
 	IF globalCash(who) < 100 GOTO menu1
 	IF (who = globalSide) OR (globalPlayer = 2) THEN 
@@ -2745,7 +2751,7 @@ SUB recruit (who)
 	GOSUB playb
 	CALL newarmy(who, empty, index)
 	GOTO levy
-	'............................................................................
+
 	add2:
 	target = globalArray(globalChoose)
 	x = 45
@@ -2764,7 +2770,7 @@ SUB recruit (who)
 	x = globalCityX(from) - 12
 	y = globalCityY(from) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), globalAnima
-	CALL icon(globalArmyLoc(i), 0, 2)
+	CALL drawArmyIcon(globalArmyLoc(i), 0, 2)
 	IF globalNoise > 0 THEN SOUND 2222, 1
 	COLOR 11
 	CALL clearBottom
@@ -2811,7 +2817,7 @@ END SUB
 SUB shiptype (who, i)
 	a = 1
 	IF MID$(globalFleet$(who), i, 1) = "I" THEN a = 2
-	CALL shipicon(who, a)
+	CALL drawShipIcon(who, a)
 END SUB
 
 SUB showcity
@@ -2836,9 +2842,9 @@ SUB showcity
 			PAINT (globalCityX(i), globalCityY(i)), c, c
 		END IF
 		IF globalGraf = 0 GOTO nocon
-			FOR j = 1 TO 6
-				IF globalMatrix(i, j) > 0 THEN CALL icon(i, globalMatrix(i, j), 11)
-			NEXT j
+		FOR j = 1 TO 6
+			IF globalMatrix(i, j) > 0 THEN CALL drawArmyIcon(i, globalMatrix(i, j), 11)
+		NEXT j
 	nocon:
 	NEXT i
 END SUB
@@ -2851,7 +2857,7 @@ SUB smarts
 	IF globalSide = 1 THEN c = 15
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR c: LOCATE 1, 10: PRINT globalForce$(who); " Side is making decisions";
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	'==========================================================================
 	'                       Check Supply
 	'==========================================================================
@@ -2893,7 +2899,7 @@ SUB smarts
 	globalCash(who) = globalCash(who) - cost
 	CALL clearBottom
 	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
-	CALL icon(target, 0, 6)
+	CALL drawArmyIcon(target, 0, 6)
 	CALL showcity
 	IF who = 1 AND globalNavySize(1) < 1 AND RND > .5 AND globalCash < 222 GOTO signup
 	IF 3 * RND > 1 + globalAggress! AND globalCash(who) >= cost GOTO city2
@@ -3014,8 +3020,8 @@ SUB smarts
 			CALL clearBottom
 			PRINT globalArmyName$(i); " plans to move from "; globalCity$(globalArmyLoc(i)); " to "; globalCity$(globalArmyMove(i));
 		END IF
-		CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
-		CALL icon(globalArmyLoc(i), globalArmyMove(i), 9)
+		CALL drawArmyIcon(globalArmyLoc(i), globalArmyMove(i), 1)
+		CALL drawArmyIcon(globalArmyLoc(i), globalArmyMove(i), 9)
 		CALL TICK(globalTurbo! - 1)
 		PUT (globalCityX(globalArmyLoc(i)) - 20, globalCityY(globalArmyLoc(i)) - 19), globalImage, PSET
 	deadman:
@@ -3033,13 +3039,13 @@ SUB smarts
 		END IF
 	NEXT i
 	EXIT SUB
-	'---------------------------------------------------------------------------
+
 	enufarmies:
-	CALL starfin(star, fin, 3 - who)
+	CALL setArmyRange(star, fin, 3 - who)
 	FOR i = star TO fin
 		IF globalArmyLoc(i) > 0 THEN y = y + .1 * globalArmySize(i)
 	NEXT i
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	x = 0
 	z = 0
 	FOR i = star TO fin
@@ -3063,7 +3069,7 @@ SUB strong (index)
 	PRINT a$;
 END SUB
 
-SUB tinytrain (who, flag)
+SUB drawTinyTrain (who, flag)
 	IF globalTracks(who) = 0 THEN EXIT SUB
 	from = globalTracks(who)
 	x = globalCityX(from) - 12
@@ -3071,7 +3077,9 @@ SUB tinytrain (who, flag)
 	SELECT CASE flag
 		CASE IS > 0
 			LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-			PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
+			PSET (x - 6, y - 2), 3
+			c = 9
+			IF who = 2 THEN c = 15
 			DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
 			x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
 		CASE ELSE
@@ -3085,7 +3093,7 @@ SUB tupdate
 		CALL smarts
 	ELSE
 		FOR i = 1 TO 40
-			IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
+			IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL drawArmyIcon(globalArmyLoc(i), globalArmyMove(i), 1)
 		NEXT i
 	END IF
 	COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
@@ -3149,7 +3157,7 @@ SUB tupdate
 			PRINT globalArmyName$(active); " is out of supplies !";
 		END IF
 		CALL placearmy(active)
-		CALL icon(globalArmyLoc(active), globalArmyMove(active), 5)
+		CALL drawArmyIcon(globalArmyLoc(active), globalArmyMove(active), 5)
 
 		CALL animate(active, 0)
 
@@ -3165,12 +3173,12 @@ SUB tupdate
 		CALL clearBottom
 		PRINT globalArmyName$(active); " and "; globalArmyName$(globalOccupied(target)); " meet in "; globalCity$(target);
 		CALL TICK(globalTurbo!)
-		CALL icon(globalArmyMove(active), 0, 6)
+		CALL drawArmyIcon(globalArmyMove(active), 0, 6)
 		CALL clearBottom
 		GOTO easy
 
 		enemy: ' Attack
-		CALL icon(target, 0, 3)
+		CALL drawArmyIcon(target, 0, 3)
 		defend = globalOccupied(target)
 
 		COLOR 11
@@ -3213,7 +3221,7 @@ SUB tupdate
 		globalArmyMove(active) = -2
 			
 		IF 11 * RND > globalArmyLead(defend) THEN 
-			CALL icon(globalArmyLoc(defend), globalArmyMove(defend), 4)
+			CALL drawArmyIcon(globalArmyLoc(defend), globalArmyMove(defend), 4)
 			IF globalArmyMove(defend) > 0 THEN globalArmyMove(defend) = -2
 		END IF
 
@@ -3223,8 +3231,8 @@ SUB tupdate
 		'                       Defender Retreats
 		'==========================================================================
 		kickbutt:
-		CALL icon(globalArmyLoc(active), target, 4)
-		IF globalArmyMove(defend) > 0 THEN CALL icon(target, globalArmyMove(defend), 4)
+		CALL drawArmyIcon(globalArmyLoc(active), target, 4)
+		IF globalArmyMove(defend) > 0 THEN CALL drawArmyIcon(target, globalArmyMove(defend), 4)
 
 		CALL retreat(defend, flee)
 		IF flee > 0 THEN
@@ -3263,7 +3271,7 @@ SUB tupdate
 
 		CALL placearmy(defend)                  ' in new city
 		
-		CALL icon(target, 0, 6)
+		CALL drawArmyIcon(target, 0, 6)
 		globalArmyMove(defend) = -2
 		GOTO holdon
 
@@ -3273,13 +3281,13 @@ SUB tupdate
 		CALL scribe(a$, 2)
 		crushed:
 		IF globalGraf > 2 THEN 
-			CALL surrender(index)
+			CALL drawSurrender(index)
 			COLOR 14: LOCATE 3, 68: PRINT globalArmyName$(index): LOCATE 4, 68: PRINT "surrenders !"
 		END IF
 		x = 1
 		IF index > 20 THEN x = 2
 		IF globalNoise > 1 AND x <> globalSide THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
-		IF globalArmyMove(index) > 0 THEN CALL icon(globalArmyLoc(index), globalArmyMove(index), 4)
+		IF globalArmyMove(index) > 0 THEN CALL drawArmyIcon(globalArmyLoc(index), globalArmyMove(index), 4)
 		globalVictory(3 - s) = globalVictory(3 - s) + 25
 		globalArmyLoc(index) = 0
 		globalLName$(index) = ""
@@ -3310,7 +3318,7 @@ SUB tupdate
 		'                       Move Into New City
 		'==========================================================================
 		easy:
-		CALL icon(globalArmyLoc(active), target, 4)
+		CALL drawArmyIcon(globalArmyLoc(active), target, 4)
 		globalArmyLoc(active) = target
 		globalArmyMove(active) = -2
 		CALL occupy(globalArmyLoc(active))
@@ -3375,7 +3383,7 @@ SUB tupdate
 			COLOR 15: PRINT globalForce$(globalCommerce); " raiders have sunk $"; globalRaider; " of "; globalForce$(3 - globalCommerce); " commerce";
 			a = 1
 			IF LEFT$(globalFleet$(globalCommerce), 1) = "I" THEN a = 2
-			PSET (500, 465), 0: CALL shipicon(globalCommerce, a)
+			PSET (500, 465), 0: CALL drawShipIcon(globalCommerce, a)
 			IF globalNoise > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
 			IF globalCommerce = globalSide THEN globalGrudge = 1
 			TICK 9
@@ -3473,7 +3481,7 @@ SUB bubble (limit)
 END SUB
 
 SUB cancel (globalSide)
-	CALL starfin(star, fin, (globalSide))
+	CALL setArmyRange(star, fin, (globalSide))
 	counter:
 	CALL clearRight
 	globalSize = 0
@@ -3514,7 +3522,7 @@ SUB cancel (globalSide)
 			CALL clearBottom
 			COLOR 11: PRINT globalArmyName$(index); " has cancelled move to "; globalCity$(globalArmyMove(index));
 			CALL TICK(globalTurbo + 1)
-			CALL icon(globalArmyLoc(index), globalArmyMove(index), 4)
+			CALL drawArmyIcon(globalArmyLoc(index), globalArmyMove(index), 4)
 			globalArmyMove(index) = 0
 			IF globalNoise > 0 THEN SOUND 2999, .5
 			CALL stax(globalSide)
@@ -3525,7 +3533,7 @@ SUB cancel (globalSide)
 	CALL clearRight
 END SUB
 
-SUB cannon
+SUB drawCannon
 	CALL clearRight
 	LINE (528, 80)-(639, 310), 3, BF
 	LINE (528, 310)-(639, 435), 2, BF
@@ -3574,7 +3582,7 @@ SUB cannon
 	x = POINT(0): y = POINT(1): PAINT (x, y), 14, 15
 END SUB
 
-SUB capitol
+SUB drawCapitol
 	SCREEN 12
 	CLS
 	LINE (1, 1)-(639, 150), 4, BF
@@ -3618,7 +3626,7 @@ SUB capitol
 	IF globalNoise = 2 THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
 	LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
 	LOCATE 25, 40: PRINT "- Abraham Lincoln"
-	FOR i = -565 TO 50 STEP 50: CALL flags(1, i, 0): NEXT i
+	FOR i = -565 TO 50 STEP 50: CALL drawFlags(1, i, 0): NEXT i
 	IF globalNoise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
@@ -3636,7 +3644,7 @@ SUB capture (active, c, s, flag)
 		globalVictory(3 - s) = globalVictory(3 - s) - 100
 		a$ = globalForce$(3 - s) + " CAPITAL captured !"
 		CALL scribe(a$, 1)
-		CALL image2(globalCity$(globalCapCity(3 - s)) + " has fallen!", 4)
+		CALL drawOverlayBox(globalCity$(globalCapCity(3 - s)) + " has fallen!", 4)
 		globalCapCity(3 - s) = 0
 		CALL flashcity(c)
 	END IF
@@ -3669,7 +3677,7 @@ END SUB
 
 SUB commander (who, empty)
 	empty = 0
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	FOR i = star TO fin
 		IF globalArmyLoc(i) = 0 AND globalLName$(i) <> "" THEN empty = i: EXIT SUB
 	NEXT i
@@ -3726,7 +3734,7 @@ SUB endit
 	GOTO what4
 	cheer:
 	CLS
-	CALL usa
+	CALL drawUSAMap
 END SUB
 
 SUB engine
@@ -3779,7 +3787,7 @@ SUB evaluate (index, x)
 	best = .01 * best
 	IF globalBold > 0 THEN best = best + 20 * globalBold
 
-	CALL starfin(star, fin, 3 - globalSide)
+	CALL setArmyRange(star, fin, 3 - globalSide)
 
 	FOR j = 1 TO 6
 		y = -1
@@ -3963,7 +3971,7 @@ SUB events ' Special Events
 				globalArmySize(k) = pct! * globalArmySize(k)
 			NEXT k
 			GOTO dull1
-			'----------------------------------------------------------------------------
+
 			riot:
 			IF globalRealism = 0 THEN RETURN
 			IF globalControl(who) = 1 THEN EXIT SUB
@@ -3977,7 +3985,7 @@ SUB events ' Special Events
 					CALL showcity
 					TICK globalTurbo!
 					CALL clearBottom
-					CALL image2(globalCity$(x) + " is now NEUTRAL !", 4)
+					CALL drawOverlayBox(globalCity$(x) + " is now NEUTRAL !", 4)
 					TICK globalTurbo!
 					RETURN
 				END IF
@@ -4010,7 +4018,7 @@ SUB events ' Special Events
 				globalEmancipate = 1
 				CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
 				globalVictory(1) = globalVictory(1) + 100: globalVictory(2) = globalVictory(2) - 100
-				CALL usa
+				CALL drawUSAMap
 				GOTO dull2
 			END IF
 			IF globalYear = 1864 AND month = 11 THEN
@@ -4049,7 +4057,7 @@ SUB events ' Special Events
 	DO WHILE INKEY$ = "": LOOP
 END SUB
 
-SUB flags (who, w, a)
+SUB drawFlags (who, w, a)
 	x = 585 + w
 	y = 200
 	IF w = 0 THEN y = 180
@@ -4086,7 +4094,7 @@ SUB flags (who, w, a)
 	END SELECT
 END SUB
 
-SUB image2 (a$, s)
+SUB drawOverlayBox (a$, s)
 	DIM g2(1 TO 8000)
 	globalMTX$(1) = a$
 	globalTLX = 32 - LEN(a$) \ 2
@@ -4111,7 +4119,7 @@ SUB image2 (a$, s)
 	PUT (8 * globalTLX - 4, 16 * globalTLY - 3), g2, PSET
 END SUB
 
-SUB integrity
+SUB checkMapIntegrity
 	CLS
 	COLOR 15
 	x = 0: y = 0
@@ -4236,7 +4244,7 @@ SUB relieve (who)
 	globalHilite = 3
 	globalTLX = 67
 	globalTLY = 2
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	globalSize = 0
 	FOR i = star TO fin
 		IF globalArmySize(i) > 0 AND globalArmyLoc(i) > 0 AND globalArmyMove(i) = 0 THEN
@@ -4257,7 +4265,7 @@ SUB relieve (who)
 
 	IF globalChoose < 1 THEN EXIT SUB
 	index = globalArray(globalChoose)
-	CALL icon(globalArmyLoc(index), 0, 9)
+	CALL drawArmyIcon(globalArmyLoc(index), 0, 9)
 
 	t$ = globalArmyName$(index)
 	globalLName$(index) = t$
@@ -4290,7 +4298,7 @@ SUB relieve (who)
 	TICK 9
 	globalArmyName$(index) = globalLName$(globalArray(globalChoose))
 	globalLName$(globalArray(globalChoose)) = ""
-	CALL icon(globalArmyLoc(index), 0, 8)
+	CALL drawArmyIcon(globalArmyLoc(index), 0, 8)
 	CALL clearBottom
 END SUB
 
@@ -4310,7 +4318,7 @@ SUB report (who)
 	SELECT CASE globalChoose
 		CASE IS < 0
 			CLS
-			CALL usa
+			CALL drawUSAMap
 			EXIT SUB
 		CASE 2: who = 3 - globalSide
 		CASE 3: GOTO cityrep
@@ -4320,12 +4328,11 @@ SUB report (who)
 		CASE 7: GOTO recap
 		CASE ELSE
 	END SELECT
-	'..........................................................................
-	'                               Army Report
-	'..........................................................................
+
+	' Army Report
 	IF globalChoose < 0 GOTO endrep
 	IF globalChoose = 4 GOTO frep
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	CLS
 	LOCATE 1, 1
 	c = 9
@@ -4375,10 +4382,8 @@ SUB report (who)
 	LINE (0, 0)-(639, 449), 15, B
 	LINE (0, 62)-(639, 62), 15
 	GOTO endrep
-	'..........................................................................
-	'                               City Report
-	'..........................................................................
-	cityrep:
+
+	cityrep: ' City Report
 	CLS
 	LOCATE 1, 1: COLOR 14
 	PRINT "City Report"; TAB(20); globalMonth$(month); ","; globalYear: COLOR 15
@@ -4406,14 +4411,12 @@ SUB report (who)
 	COLOR 4: PRINT globalForce$(0); TAB(12); 40 - globalControl(1) - globalControl(2)
 	LINE (1, 382)-(630, 382), 15
 	GOTO endrep
-	'..........................................................................
-	'                               Intelligence
-	'..........................................................................
-	srep:
+
+	srep: ' Intelligence
 	c = 9
 	IF globalSide = 2 THEN c = 7
-	CALL usa
-	CALL starfin(star, fin, globalSide)
+	CALL drawUSAMap
+	CALL setArmyRange(star, fin, globalSide)
 	FOR k = star TO fin
 		IF globalArmySize(k) > 0 THEN
 			COLOR c
@@ -4435,10 +4438,8 @@ SUB report (who)
 		END IF
 	NEXT k
 	GOTO endrep
-	'..........................................................................
-	'                               Force Summary
-	'..........................................................................
-	frep:
+
+	frep: ' Force Summary
 	FOR k = 1 TO 40
 		IF globalOccupied(k) > 0 THEN
 			FOR j = 1 TO 40
@@ -4448,7 +4449,7 @@ SUB report (who)
 	NEXT k
 
 	CLS
-	CALL usa
+	CALL drawUSAMap
 	FOR k = 1 TO 40
 		IF summ(k) > 0 THEN
 			c = 9
@@ -4459,10 +4460,8 @@ SUB report (who)
 	NEXT k
 	COLOR 14: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
 	GOTO endrep
-	'..........................................................................
-	'                               Battle Report
-	'..........................................................................
-	batrep:
+
+	batrep: ' Battle Report
 	VIEW (200, 123)-(400, 284)
 	CLS 1
 	VIEW
@@ -4492,10 +4491,8 @@ SUB report (who)
 		CLOSE #1
 	END IF
 	GOTO endrep
-	'..........................................................................
-	'                               Recap (History)
-	'..........................................................................
-	recap:
+	
+	recap: ' Recap (History)
 	CLS
 	x = 0
 	OPEN "I", 2, "cws.his"
@@ -4516,7 +4513,7 @@ SUB report (who)
 	DO WHILE INKEY$ = "": LOOP
 	IF who < 3 THEN
 		CLS
-		CALL usa
+		CALL drawUSAMap
 	END IF
 END SUB
 
@@ -4607,7 +4604,7 @@ SUB roman (target, a$)
 	RETURN
 END SUB
 
-SUB rwin
+SUB drawRebelWin
 	LINE (2, 2)-(637, 239), 4, BF
 	COLOR 15: LINE (2, 40)-(597, 239): LINE -(637, 239): LINE -(637, 199): LINE -(40, 2): LINE -(2, 2): LINE -(2, 40)
 	COLOR 15: LINE (2, 199)-(2, 239): LINE -(40, 239): LINE -(637, 40): LINE -(637, 2): LINE -(597, 2): LINE -(2, 199)
@@ -4685,7 +4682,7 @@ END SUB
 SUB scribe (a$, flag)
 	SELECT CASE flag
 			CASE 1: CALL clearBottom: PRINT a$;
-			CASE 2: CALL image2(a$, 4)
+			CASE 2: CALL drawOverlayBox(a$, 4)
 	END SELECT
 	IF globalHistory > 0 THEN
 		OPEN "A", 2, "cws.his"
@@ -4695,7 +4692,7 @@ SUB scribe (a$, flag)
 	END IF
 END SUB
 
-SUB shen '                       Shenandoah
+SUB playShenandoah '                       Shenandoah
 	IF globalNoise = 2 THEN
 		IF INKEY$ <> "" THEN globalChoose = 1: EXIT SUB
 		PLAY "T90MFMNo1c4f8f8f4."
@@ -4710,7 +4707,7 @@ SUB shen '                       Shenandoah
 	END IF
 END SUB
 
-SUB shipicon (who, flag)
+SUB drawShipIcon (who, flag)
 	x = POINT(0) - 10: y = POINT(1) - 10
 	CIRCLE (x, y), 18, 9, , , .4
 	PAINT (x + 3, y + 4), 9, 9
@@ -4753,14 +4750,15 @@ SUB ships
 		x = globalCityX(globalNavyLoc(s)) + 25: y = globalCityY(globalNavyLoc(s)) + 25
 		IF globalNavyLoc(s) = 24 THEN y = y + 5: x = x - 5
 		float:
-			PSET (x, y), 1
-			a = 1: IF LEFT$(globalFleet$(s), 1) = "I" THEN a = 2
-			CALL shipicon(s, a)
+		PSET (x, y), 1
+		a = 1
+		IF LEFT$(globalFleet$(s), 1) = "I" THEN a = 2
+		CALL drawShipIcon(s, a)
 		sink:
 	NEXT s
 END SUB
 
-SUB starfin (star, fin, who)
+SUB setArmyRange (star, fin, who)
 	star = 1
 	fin = 20
 	IF who = 2 THEN 
@@ -4770,7 +4768,7 @@ SUB starfin (star, fin, who)
 END SUB
 
 SUB stax (who)
-	CALL starfin(star, fin, who)
+	CALL setArmyRange(star, fin, who)
 	FOR i = star TO fin
 		IF globalArmySize(i) > 0 AND globalOccupied(globalArmyLoc(i)) <> i THEN
 			target = globalArmyLoc(i)
@@ -4780,7 +4778,7 @@ SUB stax (who)
 	NEXT i
 END SUB
 
-SUB surrender (who)
+SUB drawSurrender (who)
 	SCREEN 12
 	s = 1: c = 1: COLOR 0: w = 514
 	IF who > 20 THEN c = 7: s = 2
@@ -4900,7 +4898,7 @@ SUB surrender (who)
 	PAINT (w + 33, 250), c, 0
 	PAINT (w + 42, 264), c, 0
 
-	CALL flags(3 - s, 26, 0)
+	CALL drawFlags(3 - s, 26, 0)
 	IF who < 99 THEN CALL TICK(globalTurbo!)
 END SUB
 
@@ -4914,7 +4912,7 @@ SUB topbar
 	COLOR 11
 	LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(globalSide); " globalSide "; : COLOR 14: PRINT globalMonth$(month); ","; globalYear; "  "
 
-	CALL flags((globalSide), 0, 0)
+	CALL drawFlags((globalSide), 0, 0)
 	COLOR 4
 	IF globalBW > 0 THEN COLOR 7
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(globalDifficult)))
@@ -5020,7 +5018,7 @@ SUB traincapacity (who, limit)
 	IF limit < x \ 4 THEN limit = x \ 4
 END SUB
 
-SUB usa
+SUB drawUSAMap
 	SCREEN 12
 	LINE (1, 16)-(527, 440), 10, B
 	PAINT (200, 200), 2, 10
@@ -5355,7 +5353,7 @@ SUB usa
 
 	IF globalPlayer = 2 GOTO nosee
 	FOR i = 1 TO 40
-		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL icon(globalArmyLoc(i), globalArmyMove(i), 1)
+		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL drawArmyIcon(globalArmyLoc(i), globalArmyMove(i), 1)
 	NEXT i
 	nosee:
 	CALL ships
@@ -5377,7 +5375,7 @@ SUB victor
 	COLOR 14
 	IF globalVicFlag(2) > 0 AND globalYear >= globalVicFlag(2) AND month < globalVicFlag(1) THEN
 		a$ = "Time almost expired (" + globalMonth$(globalVicFlag(1)) + "," + STR$(globalVicFlag(2)) + ")"
-		CALL image2(a$, 4)
+		CALL drawOverlayBox(a$, 4)
 	END IF
     FOR i = 1 TO 2
 		IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN 
@@ -5418,18 +5416,18 @@ SUB victor
 		COLOR 14
 		IF globalVicFlag(3) > 0 AND globalControl(i) >= .9 * globalVicFlag(3) THEN
 			a$ = globalForce$(i) + " side almost controls" + STR$(globalVicFlag(3)) + " cities"
-			CALL image2(a$, 4)
+			CALL drawOverlayBox(a$, 4)
 		END IF
 
 		IF globalVicFlag(4) > 0 AND globalIncome(i) / (globalIncome(1) + globalIncome(2)) >= .009 * globalVicFlag(4) THEN
 			a$ = globalForce$(i) + " side close to" + STR$(globalVicFlag(4)) + " % of total income"
-			CALL image2(a$, 4)
+			CALL drawOverlayBox(a$, 4)
 		END IF
 
 		IF globalVicFlag(6) > 0 AND x > 0 AND y > 0 THEN
 			IF (i = 1 AND x / y > .9 * globalVicFlag(6)) OR (i = 2 AND y / x > .9 * globalVicFlag(6)) THEN
 			a$ = globalForce$(i) + "side close to" + STR$(globalVicFlag(6)) + ":1 strength ratio"
-			CALL image2(a$, 4)
+			CALL drawOverlayBox(a$, 4)
 			END IF
 		END IF
 		GOTO stale
@@ -5454,7 +5452,7 @@ SUB victor
 		IF i = 2 THEN c = 7
 		LINE (0, 0)-(639, 479), 4, BF
 		LINE (0, 40)-(550, 460), 0, BF
-		CALL usa
+		CALL drawUSAMap
 		LINE (70, 140)-(485, 265), 0, BF
 		LINE (50, 120)-(465, 250), c, BF
 		LINE (50, 120)-(465, 250), 4, B
@@ -5485,7 +5483,7 @@ SUB victor
 			globalVicFlag(j) = globalVicFlag(j) + 1
 			IF j = 5 THEN globalVicFlag(j) = 0
 			CLS
-			CALL usa
+			CALL drawUSAMap
 			EXIT SUB
 		END IF
 		globalMTX$(0) = "Options"
@@ -5504,23 +5502,23 @@ SUB victor
 		END IF
 
 		globalThrill = i
-		CALL usa
+		CALL drawUSAMap
 		CALL report(100 + globalSide)
 		IF j = 2 THEN 
 			FOR k = 1 TO 2
 				globalVictory(k) = .7 * globalVictory(k)
 			NEXT k
-			CALL rwin
+			CALL drawRebelWin
 			GOTO death
 		END IF
 
 		IF i = 1 THEN 
-			CALL capitol
+			CALL drawCapitol
 			COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(globalVictory(1)): PRINT t$
 			GOTO death
 		END IF
 		IF i = 2 THEN 
-			CALL rwin
+			CALL drawRebelWin
 			COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(globalVictory(2)): PRINT t$
 		END IF
 		death:
@@ -5592,7 +5590,7 @@ SUB choices (b1, wide)
 	NEXT i
 END SUB
 
-SUB ironclad
+SUB drawIronclad
 	SCREEN 12
 	LINE (1, 240)-(639, 309), 3, BF
 	LINE (639, 309)-(1, 479), 1, BF
@@ -5743,9 +5741,9 @@ SUB menu (switch%)
 	sel1:
 	SELECT CASE switch
 		CASE 1:
-			CALL icon(globalArray(row), 0, 7)
+			CALL drawArmyIcon(globalArray(row), 0, 7)
 		CASE 2: 
-			CALL icon(globalArray(row), 0, 9)
+			CALL drawArmyIcon(globalArray(row), 0, 9)
 			target = globalOccupied(globalArray(row))
 			IF target > 0 THEN
 				flag = 1
@@ -5768,7 +5766,7 @@ SUB menu (switch%)
 			CALL clearBottom
 			PRINT globalArmyName$(index); "  Exp="; globalArmyExper(index); " Cash="; globalCash(globalSide);
 		CASE 6:
-			CALL icon(globalArmyLoc(globalArray(row)), 0, 9)
+			CALL drawArmyIcon(globalArmyLoc(globalArray(row)), 0, 9)
 		CASE 8
 			IF globalGraf > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
@@ -5787,7 +5785,7 @@ SUB menu (switch%)
 				END IF
 			END IF
 		CASE 9
-			CALL icon(globalArray(row), 0, 9)
+			CALL drawArmyIcon(globalArray(row), 0, 9)
 	END SELECT
 	IF flag = 0 THEN
 		COLOR globalHilite
@@ -5810,9 +5808,9 @@ SUB menu (switch%)
 
 	SELECT CASE switch
 		CASE 1, 2, 9
-			IF globalMTX$(row1) <> "EXIT" THEN CALL icon(globalArray(row1), 0, 8)
+			IF globalMTX$(row1) <> "EXIT" THEN CALL drawArmyIcon(globalArray(row1), 0, 8)
 		CASE 6
-			IF globalMTX$(row1) <> "EXIT" THEN CALL icon(globalArmyLoc(globalArray(row1)), 0, 8)
+			IF globalMTX$(row1) <> "EXIT" THEN CALL drawArmyIcon(globalArmyLoc(globalArray(row1)), 0, 8)
 	END SELECT
 
 	globalChoose = row
@@ -5843,7 +5841,7 @@ SUB menu (switch%)
 	 IF a$ = "Q" THEN row = globalSize: GOSUB limits: RETURN
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
-		CALL usa
+		CALL drawUSAMap
 		CALL choices(b1, wide)
 		CALL topbar
 		RETURN
@@ -5870,7 +5868,7 @@ SUB menu (switch%)
 	RETURN
 	boss1:
 	CLS
-	CALL usa
+	CALL drawUSAMap
 	GOTO remenu
 	called:
 	IF globalNoise > 0 THEN SOUND 700, .5
@@ -5878,9 +5876,9 @@ SUB menu (switch%)
 	globalTLX = 0: globalTLY = 0
 	SELECT CASE switch
 	CASE 1, 2, 9
-		CALL icon(globalArray(row), 0, 8)
+		CALL drawArmyIcon(globalArray(row), 0, 8)
 	CASE 6
-		CALL icon(globalArmyLoc(globalArray(row)), 0, 8)
+		CALL drawArmyIcon(globalArmyLoc(globalArray(row)), 0, 8)
 	END SELECT
 	VIEW
 END SUB
@@ -5893,7 +5891,7 @@ SUB mxw (wide)
 	NEXT i
 END SUB
 
-SUB schooner
+SUB drawSchooner
 	SCREEN 12
 	LINE (1, 240)-(639, 309), 3, BF
 	LINE (639, 309)-(1, 479), 1, BF
