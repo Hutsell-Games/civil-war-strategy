@@ -15,3 +15,7 @@
 ===
 13. recruit => recruitArmy; battle => resolveBattle; events => specialEvents; relieve => relieveCommander; traincapacity => checkTrainCapacity; void => calculateMilitaryPresence; mxw => maxStringWidth; menu => genericMenu; sel1 => menuSelection; crsr => handleUserInput; limits => resetCurrentRow; noadjust => centerMenu; called => onRowChosen
 14. Remove unused boss1 line label code
+===
+15. Removed unused line label: remenu
+16. Minor code reformatting
+17. choices => drawMenuBox; globalChoose => globalSelectedMenuOption; globalWType => globalWindowType; boxc => menuColor; wide => width; b1 => horizontalOffset; globalMTX => globalMenuText
