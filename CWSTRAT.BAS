@@ -13,7 +13,7 @@ DECLARE SUB drawFlags (who%, w%, a%)
 DECLARE SUB drawHallOfFame ()
 DECLARE SUB drawIronclad ()
 DECLARE SUB drawMapText ()
-DECLARE SUB drawMenuBox (horizontalOffset%, width%)
+DECLARE SUB drawMenuBox (horizontalOffset%, menuWidth%)
 DECLARE SUB drawOverlayBox (a$, s%)
 DECLARE SUB drawRebelWin ()
 DECLARE SUB drawSchooner ()
@@ -39,7 +39,7 @@ DECLARE SUB clearRight ()
 DECLARE SUB fileManagement (switch%)
 DECLARE SUB strong (index%)
 DECLARE SUB TICK (sec!)
-DECLARE SUB maxStringWidth (width%)
+DECLARE SUB maxStringWidth (menuWidth%)
 DECLARE SUB snapshot (x%, y%, flag%)
 DECLARE SUB setArmyRange (star%, fin%, who%)
 DECLARE SUB showAndSaveHistory (a$, flag%)
@@ -109,7 +109,7 @@ DIM SHARED globalArmyMove(40), globalMenuOptions(40), globalStarX(8), globalStar
 DIM SHARED globalNavyLoc(2), globalNavySize(2), globalNavyMove(2), globalOccupied(40), globalFort(40), globalRR(2)
 DIM SHARED globalVictory(2), globalCapCity(2), globalEmancipate, globalTracks(2), globalFleet$(2)
 DIM SHARED globalTrain(2), globalFont$(26), globalArmyMoves(40), globalCasualty&(2), globalBatWon(2), globalCityO(40)
-DIM SHARED graphic(1 TO 1564), Ncap(60)
+DIM SHARED graphic(1 TO 1564)
 DIM SHARED graft(1 TO 1564)
 
 globalReplay = 0
@@ -173,12 +173,6 @@ NEXT i
 globalSelectedMenuOption = 0
 
 SCREEN 12
-	DEF SEG = VARSEG(graphic(1))
-	BLOAD "cwsicon.vga", VARPTR(graphic(1))
-	DEF SEG
-
-	PUT (100, 100), graphic, PSET
-	GET (101, 101)-(113, 113), Ncap
 CLS
 COLOR 11: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
 COLOR 4: LOCATE 15, 32: PRINT "Registered Edition"
@@ -271,7 +265,7 @@ GOTO menu0
 '==========================================================================
 newmonth:
 IF globalSide > 2 THEN globalSide = 1
-a$ = "--------> EVENTS FOR " + globalMonth$(month) + " " + STR$(globalYear) + " --------"
+a$ = "--------> EVENTS FOR " + globalMonth$(globalMonth) + " " + STR$(globalYear) + " --------"
 CALL showAndSaveHistory(a$, 0)
 CALL turnUpdate
 globalControl(1) = 0
@@ -556,7 +550,7 @@ SELECT CASE globalSelectedMenuOption
 			IF target < 1 OR index < 1 THEN 
 				COLOR 11
 				CALL clearBottom
-				PRINT "No armies remain eligible for drills in "; globalMonth$(month);
+				PRINT "No armies remain eligible for drills in "; globalMonth$(globalMonth);
 				GOTO menu0
 			END IF
 			IF globalArmyExper(index) > 5 OR globalArmyExper(index) >= globalArmyLead(index) THEN
@@ -925,7 +919,7 @@ SELECT CASE globalSelectedMenuOption
 	CLS
 	LINE (100, 200)-(500, 300), c, BF
 	LINE (100, 200)-(500, 300), 8 - c, B
-	COLOR 7: LOCATE 14, 31: PRINT " "; globalMonth$(month); globalYear
+	COLOR 7: LOCATE 14, 31: PRINT " "; globalMonth$(globalMonth); globalYear
 	COLOR 11: LOCATE 17, 30: PRINT globalForce$(globalSide); " PLAYER TURN"
 	DO WHILE INKEY$ = "": LOOP
 	RETURN
@@ -999,7 +993,7 @@ SUB moveArmy
 	CALL genericMenu(2)
 	CALL clearRight
 	IF globalSelectedMenuOption < 0 GOTO dudd
-	IF month < 3 AND globalJanCam = 0 AND globalCityP(globalMenuOptions(globalSelectedMenuOption)) <> globalSide THEN 
+	IF globalMonth < 3 AND globalJanCam = 0 AND globalCityP(globalMenuOptions(globalSelectedMenuOption)) <> globalSide THEN 
 		COLOR 11
 		CALL clearBottom
 		PRINT "No campaigns in January"; 
@@ -1448,7 +1442,7 @@ SUB fileManagement (switch)
 			FOR i = 1 TO 12
 				INPUT #1, globalMonth$(i)
 			NEXT i
-			INPUT #1, month, globalYear
+			INPUT #1, globalMonth, globalYear
 			'               set end game conditions
 			FOR i = 1 TO 6
 				INPUT #1, globalVicFlag(i)
@@ -1507,7 +1501,7 @@ SUB fileManagement (switch)
 			COLOR 11
 			CALL clearBottom
 			PRINT "Loading";
-			INPUT #1, month, globalYear, globalUSAdv, a
+			INPUT #1, globalMonth, globalYear, globalUSAdv, a
 			FOR i = 1 TO 40
 				INPUT #1, globalArmyName$(i), globalArmySize(i), globalArmyLead(i), globalArmyLoc(i), globalArmyExper(i), globalSupply(i), globalArmyMove(i)
 				IF globalArmyLoc(i) > 0 THEN
@@ -1562,7 +1556,7 @@ SUB fileManagement (switch)
 				PRINT "Saving";
 
 			OPEN "O", 1, "cws" + LTRIM$(STR$(globalSelectedMenuOption)) + ".sav"
-			WRITE #1, month, globalYear, globalUSAdv, globalSide
+			WRITE #1, globalMonth, globalYear, globalUSAdv, globalSide
 			FOR i = 1 TO 40
 				WRITE #1, globalArmyName$(i), globalArmySize(i), globalArmyLead(i), globalArmyLoc(i), globalArmyExper(i), globalSupply(i), globalArmyMove(i)
 			NEXT i
@@ -1736,9 +1730,9 @@ SUB turnIterate
 	FOR i = 1 TO 40
 		IF globalArmyLoc(i) > 0 THEN CALL placeArmy(i)
 	NEXT i
-	month = month + 2
-	IF month > 12 THEN
-		month = 1
+	globalMonth = globalMonth + 2
+	IF globalMonth > 12 THEN
+		globalMonth = 1
 		globalYear = globalYear + 1
 	END IF
 	s = 1
@@ -1753,7 +1747,7 @@ SUB turnIterate
 				globalCash(s) = globalCash(s) - .2 * globalArmySize(i)
 			END IF
 		END IF
-		IF (month < 7 OR month > 10) AND globalMatrix(globalArmyLoc(i), 7) < 99 THEN globalSupply(i) = globalSupply(i) - 1
+		IF (globalMonth < 7 OR globalMonth > 10) AND globalMatrix(globalArmyLoc(i), 7) < 99 THEN globalSupply(i) = globalSupply(i) - 1
 		IF globalMatrix(globalArmyLoc(i), 7) = 99 AND globalNavyLoc(3 - s) = globalArmyLoc(i) THEN 
 			globalSupply(i) = globalSupply(i) - 1
 			CALL clearBottom
@@ -1941,7 +1935,7 @@ SUB navy (who, chx)
 			IF chx = 1 AND RND < .07 * globalNavySize(who) THEN EXIT SUB
 			a$ = "W"
 
-			IF globalRealism > 0 AND ((globalYear < 1862) OR (globalYear = 1862 AND month < 3)) GOTO noiron
+			IF globalRealism > 0 AND ((globalYear < 1862) OR (globalYear = 1862 AND globalMonth < 3)) GOTO noiron
 			IF globalCash(who) >= 2 * cost THEN
 				globalTLX = 67: globalTLY = 12: globalColour = 9
 				IF who = globalSide THEN
@@ -2840,20 +2834,11 @@ SUB drawCity
 		IF globalCityP(i) = 0 THEN c = 12
 		x = globalCityX(i)
 		y = globalCityY(i)
-		IF i = globalCapCity(1) OR i = globalCapCity(2) THEN
-			PUT (x - 6, y - 6), Ncap, PSET
-			LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
-			LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
-			PSET (x + 8, y - 4)
-			IF globalFort(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
-			IF globalFort(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
-		ELSE
-			IF globalFort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
-			IF globalFort(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-			CIRCLE (globalCityX(i), globalCityY(i)), 4, 0
-			CIRCLE (globalCityX(i), globalCityY(i)), 3, c
-			PAINT (globalCityX(i), globalCityY(i)), c, c
-		END IF
+		IF globalFort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
+		IF globalFort(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+		CIRCLE (globalCityX(i), globalCityY(i)), 4, 0
+		CIRCLE (globalCityX(i), globalCityY(i)), 3, c
+		PAINT (globalCityX(i), globalCityY(i)), c, c
 		IF globalGraf = 0 GOTO nocon
 		FOR j = 1 TO 6
 			IF globalMatrix(i, j) > 0 THEN CALL drawArmyMove(i, globalMatrix(i, j), 11)
@@ -3023,7 +3008,7 @@ SUB aiSmarts
 				END IF
 			END IF
 		END IF
-		IF month = 1 AND globalJanCam = 0 AND globalCityP(globalArmyMove(i)) <> who THEN 
+		IF globalMonth = 1 AND globalJanCam = 0 AND globalCityP(globalArmyMove(i)) <> who THEN 
 			globalArmyMove(i) = 0
 			GOTO deadman
 		END IF
@@ -3110,9 +3095,9 @@ SUB turnUpdate
 		NEXT i
 	END IF
 	COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
-	LOCATE 1, 20: PRINT "Update for "; globalMonth$(month); ","; globalYear
+	LOCATE 1, 20: PRINT "Update for "; globalMonth$(globalMonth); ","; globalYear
 	CALL clearBottom
-	PRINT "press any key for "; globalMonth$(month); ","; globalYear; " events";
+	PRINT "press any key for "; globalMonth$(globalMonth); ","; globalYear; " events";
 	DO WHILE INKEY$ = "": LOOP
 	GOSUB upbox
 	'==========================================================================
@@ -3427,7 +3412,7 @@ SUB turnUpdate
 
 	CALL clearBottom
 	LINE (390, 350)-(520, 400), 1, BF
-	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(month), 3)); ","; globalYear
+	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(globalMonth), 3)); ","; globalYear
 	globalVictory(1) = .8 * globalVictory(1) + .3 * (globalIncome(1) + globalControl(1))
 	IF globalControl(1) > 29 THEN 
 		globalVictory(1) = globalVictory(1) + 50
@@ -3908,7 +3893,7 @@ SUB aiEvaluateArmyMoves (index, x)
 END SUB
 
 SUB specialEvents ' Special Events
-	IF globalRealism > 0 AND globalYear = 1862 AND month < 3 THEN
+	IF globalRealism > 0 AND globalYear = 1862 AND globalMonth < 3 THEN
 		COLOR 14
 		CALL clearBottom
 		PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
@@ -3934,8 +3919,8 @@ SUB specialEvents ' Special Events
 
 	SELECT CASE who
 		CASE 1 ' good for South
-			IF globalYear = 1864 AND month = 1 THEN globalVictory(2) = globalVictory(2) + 50
-			IF globalYear = 1865 AND month = 1 THEN globalVictory(2) = globalVictory(2) + 100
+			IF globalYear = 1864 AND globalMonth = 1 THEN globalVictory(2) = globalVictory(2) + 50
+			IF globalYear = 1865 AND globalMonth = 1 THEN globalVictory(2) = globalVictory(2) + 100
 			IF RND > .9 THEN GOSUB riot: EXIT SUB
 
 			CALL clearBottom
@@ -3980,7 +3965,7 @@ SUB specialEvents ' Special Events
 			pct! = .9
 			a$ = "Union troops diverted to fight Western Indian uprisings"
 			IF RND > .5 THEN a$ = "Union 90-day enlistees return home"
-			IF globalYear = 1864 AND month > 5 THEN 
+			IF globalYear = 1864 AND globalMonth > 5 THEN 
 				a$ = "20% of Union forces take furloughs to vote in 1864 elections"
 				pct! = .8
 			END IF
@@ -4039,7 +4024,7 @@ SUB specialEvents ' Special Events
 				CALL drawUSAMap
 				GOTO dull2
 			END IF
-			IF globalYear = 1864 AND month = 11 THEN
+			IF globalYear = 1864 AND globalMonth = 11 THEN
 				CALL showAndSaveHistory("Lincoln has been reelected", 2)
 				globalVictory(2) = .5 * globalVictory(2)
 				GOTO dull2
@@ -4117,20 +4102,20 @@ SUB drawOverlayBox (a$, s)
 	globalMenuText$(1) = a$
 	globalTLX = 32 - LEN(a$) \ 2
 	globalTLY = 10: globalSize = 1
-	CALL maxStringWidth(width)
-	IF width > 59 THEN 
-		width = 59
+	CALL maxStringWidth(menuWidth)
+	IF menuWidth > 59 THEN 
+		menuWidth = 59
 		a$ = LEFT$(a$, 59)
 	END IF
-	x = 8 * (globalTLX + width)
+	x = 8 * (globalTLX + menuWidth)
 	y = 16 * (globalTLY + 1)
-	GET (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + width + 1) + 15, 16 * (globalTLY + 3) + 7), g2
-	VIEW (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + width + 1) + 7, 16 * (globalTLY + 3) + 4)
+	GET (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + menuWidth + 1) + 15, 16 * (globalTLY + 3) + 7), g2
+	VIEW (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + menuWidth + 1) + 7, 16 * (globalTLY + 3) + 4)
 	CLS 1
 	VIEW
-	LINE (8 * globalTLX, 16 * globalTLY - 1)-(8 * (globalTLX + width + 1) + 15, 16 * (globalTLY + 3) + 7), 0, BF
-	LINE (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + width + 1) + 7, 16 * (globalTLY + 3)), s, BF
-	LINE (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + width + 1) + 7, 16 * (globalTLY + 3)), 15, B
+	LINE (8 * globalTLX, 16 * globalTLY - 1)-(8 * (globalTLX + menuWidth + 1) + 15, 16 * (globalTLY + 3) + 7), 0, BF
+	LINE (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + menuWidth + 1) + 7, 16 * (globalTLY + 3)), s, BF
+	LINE (8 * globalTLX - 4, 16 * globalTLY - 3)-(8 * (globalTLX + menuWidth + 1) + 7, 16 * (globalTLY + 3)), 15, B
 	COLOR 14
 	LOCATE globalTLY + 2, globalTLX + 2: PRINT a$
 	CALL TICK(9)
@@ -4359,7 +4344,7 @@ SUB reportsMenu (who)
 	c = 9
 	IF who = 2 THEN c = 15
 	COLOR c
-	PRINT " Report for "; globalForce$(who); " Forces"; TAB(30); globalMonth$(month); ","; globalYear; TAB(49); : COLOR 14: PRINT " Victory Points "; globalVictory(who);
+	PRINT " Report for "; globalForce$(who); " Forces"; TAB(30); globalMonth$(globalMonth); ","; globalYear; TAB(49); : COLOR 14: PRINT " Victory Points "; globalVictory(who);
 	IF c = 15 THEN c = 7
 	x = globalVictory(who) + globalVictory(3 - who)
 	IF x = 0 THEN
@@ -4407,7 +4392,7 @@ SUB reportsMenu (who)
 	cityrep: ' City Report
 	CLS
 	LOCATE 1, 1: COLOR 14
-	PRINT "City Report"; TAB(20); globalMonth$(month); ","; globalYear: COLOR 15
+	PRINT "City Report"; TAB(20); globalMonth$(globalMonth); ","; globalYear: COLOR 15
 	PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
 	LINE (1, 30)-(630, 30), 15
 	FOR i = 1 TO 20
@@ -4957,7 +4942,7 @@ END SUB
 SUB drawTopBar
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR 11
-	LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(globalSide); " side "; : COLOR 14: PRINT globalMonth$(month); ","; globalYear; "  "
+	LOCATE 1, 10: PRINT "Input your decisions now for "; globalForce$(globalSide); " side "; : COLOR 14: PRINT globalMonth$(globalMonth); ","; globalYear; "  "
 
 	CALL drawFlags((globalSide), 0, 0)
 	COLOR 4
@@ -4988,7 +4973,6 @@ SUB drawTopBar
 	END IF
 	IF globalGraf > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(globalGraf))
 	a$ = a$ + STR$(globalPlayer)
-	COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
 	COLOR c
 	LOCATE 26, 68: PRINT "F3 Redrw Scrn"
 	LOCATE 27, 68: PRINT "F7 End Turn"
@@ -5409,7 +5393,7 @@ SUB drawUSAMap
 	nosee:
 	CALL drawShips
 	CALL drawTrainEngine
-	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(month), 3)); ","; globalYear
+	COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(globalMonth$(globalMonth), 3)); ","; globalYear
 END SUB
 
 SUB victor
@@ -5424,7 +5408,7 @@ SUB victor
 
 	CALL clearBottom
 	COLOR 14
-	IF globalVicFlag(2) > 0 AND globalYear >= globalVicFlag(2) AND month < globalVicFlag(1) THEN
+	IF globalVicFlag(2) > 0 AND globalYear >= globalVicFlag(2) AND globalMonth < globalVicFlag(1) THEN
 		a$ = "Time almost expired (" + globalMonth$(globalVicFlag(1)) + "," + STR$(globalVicFlag(2)) + ")"
 		CALL drawOverlayBox(a$, 4)
 	END IF
@@ -5435,7 +5419,7 @@ SUB victor
 			GOTO finis
 		END IF
 
-		IF globalYear >= globalVicFlag(2) AND month >= globalVicFlag(1) AND globalVicFlag(2) > 0 THEN 
+		IF globalYear >= globalVicFlag(2) AND globalMonth >= globalVicFlag(1) AND globalVicFlag(2) > 0 THEN 
 			j = 2
 			GOTO finis
 		END IF
@@ -5616,20 +5600,20 @@ END SUB
 '       globalWindowType = window type 
 '			(0 = no line; 1=single line; 2=double line
 '               if >10 then 10's digit=box color  1's digit= window type
-SUB drawMenuBox (horizontalOffset, width)
+SUB drawMenuBox (horizontalOffset, menuWidth)
 	menuColor = globalColour
 	IF globalWindowType > 10 THEN 
 		menuColor = INT(globalWindowType / 10)
 		globalWindowType = globalWindowType - 10 * menuColor
 	END IF
 	COLOR menuColor
-	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + width + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8)
+	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + menuWidth + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8)
 	CLS 1
 	VIEW
-	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + width + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8), globalColour, B
-	LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + width + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
+	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + menuWidth + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8), globalColour, B
+	LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + menuWidth + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
 	IF ABS(globalWindowType) = 2 THEN
-		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + width + 1) + 3, 16 * (globalTLY + globalSize + 2) + 4), globalColour, B
+		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + menuWidth + 1) + 3, 16 * (globalTLY + globalSize + 2) + 4), globalColour, B
 	END IF
 	COLOR globalColour
 
@@ -5749,7 +5733,7 @@ SUB genericMenu (switch%)
 	LOCATE 1, 1, 0
 	IF globalMenuText$(0) = "" THEN globalMenuText$(0) = "M E N U"
 
-	IF width = 0 THEN CALL maxStringWidth(width)
+	IF menuWidth = 0 THEN CALL maxStringWidth(menuWidth)
 	IF globalTLX = 0 THEN GOSUB centerMenu
 	IF globalSelectedMenuOption < 21 THEN globalSelectedMenuOption = 1
 	IF globalSelectedMenuOption > 21 THEN globalSelectedMenuOption = globalSelectedMenuOption - 21
@@ -5763,7 +5747,7 @@ SUB genericMenu (switch%)
 	IF globalTLY = 0 THEN globalTLY = INT(11.5 - .5 * globalSize)
 	IF globalTLY + globalSize > 26 THEN globalTLY = 26 - globalSize
        
-	brx = globalTLX + width + 1
+	brx = globalTLX + menuWidth + 1
 	bry = globalTLY + globalSize + 3
        
 	menuColor = globalColour
@@ -5774,19 +5758,19 @@ SUB genericMenu (switch%)
 
 	COLOR menuColor
 
-	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + width + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8)
+	VIEW (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + menuWidth + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8)
 	CLS 1
 	VIEW
-	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + width + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8), globalColour, B
-	LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + width + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
+	LINE (8 * globalTLX - 6, 16 * globalTLY - 11)-(8 * (globalTLX + menuWidth + 1) + 7, 16 * (globalTLY + globalSize + 2) + 8), globalColour, B
+	LINE (8 * globalTLX - 2, 16 * (globalTLY + 1) + 3)-(8 * (globalTLX + menuWidth + 1) + 3, 16 * (globalTLY + 1) + 6), globalColour, B
 	IF ABS(globalWindowType) = 2 THEN
-		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + width + 1) + 3, 16 * (globalTLY + globalSize + 2) + 4), globalColour, B
+		LINE (8 * globalTLX - 2, 16 * globalTLY - 8)-(8 * (globalTLX + menuWidth + 1) + 3, 16 * (globalTLY + globalSize + 2) + 4), globalColour, B
 	END IF
 
 	COLOR globalColour
-	horizontalOffset = INT(.5 * (width - LEN(globalMenuText$(0))) + .5) + 1
+	horizontalOffset = INT(.5 * (menuWidth - LEN(globalMenuText$(0))) + .5) + 1
 
-	CALL drawMenuBox(horizontalOffset, width)
+	CALL drawMenuBox(horizontalOffset, menuWidth)
 	menuSelection:
 	SELECT CASE switch
 		CASE 1:
@@ -5797,9 +5781,9 @@ SUB genericMenu (switch%)
 			IF target > 0 THEN
 				flag = 1
 				t$ = globalArmyName$(target)
-				IF LEN(t$) > width THEN t$ = LEFT$(t$, width)
+				IF LEN(t$) > menuWidth THEN t$ = LEFT$(t$, menuWidth)
 				COLOR 12
-				LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT SPACE$(width);
+				LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT SPACE$(menuWidth);
 				LOCATE globalTLY + 2 + row, globalTLX + 2: PRINT t$;
 				LOCATE globalTLY + 4 + globalSize, globalTLX + 1: PRINT SPACE$(12);
 				LOCATE globalTLY + 4 + globalSize, globalTLX + 1: PRINT "Size"; globalArmySize(target);
@@ -5851,7 +5835,7 @@ SUB genericMenu (switch%)
 	IF a$ = "P" THEN globalSelectedMenuOption = 3: GOTO onRowChosen
 	reglr:
 	IF ASC(a$) = 13 GOTO onRowChosen
-	IF switch = 2 THEN LOCATE globalTLY + 2 + row1, globalTLX + 2: PRINT SPACE$(width);
+	IF switch = 2 THEN LOCATE globalTLY + 2 + row1, globalTLX + 2: PRINT SPACE$(menuWidth);
 	COLOR globalColour
 	LOCATE globalTLY + 2 + row1, globalTLX + 2: PRINT globalMenuText$(row1)
 
@@ -5917,7 +5901,7 @@ SUB genericMenu (switch%)
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL drawUSAMap
-		CALL drawMenuBox(horizontalOffset, width)
+		CALL drawMenuBox(horizontalOffset, menuWidth)
 		CALL drawTopBar
 		RETURN
 	 END IF
@@ -5928,7 +5912,7 @@ SUB genericMenu (switch%)
 	 END IF
 	 IF a$ = ">" AND switch = 0 THEN
 		CALL reportsMenu(-1)
-		CALL drawMenuBox(horizontalOffset, width)
+		CALL drawMenuBox(horizontalOffset, menuWidth)
 		CALL drawTopBar
 		RETURN
 	 END IF
@@ -5940,7 +5924,7 @@ SUB genericMenu (switch%)
 	RETURN
 
 	centerMenu:
-	IF globalTLX = 0 THEN globalTLX = INT(40.5 - .5 * width)
+	IF globalTLX = 0 THEN globalTLX = INT(40.5 - .5 * menuWidth)
 	RETURN
 
 	onRowChosen:
@@ -5957,11 +5941,11 @@ SUB genericMenu (switch%)
 	VIEW
 END SUB
 
-SUB maxStringWidth (width)
-	width = LEN(globalMenuText$(0)) + 1
+SUB maxStringWidth (menuWidth)
+	menuWidth = LEN(globalMenuText$(0)) + 1
 	FOR i = 1 TO globalSize
 		x = LEN(globalMenuText$(i))
-		IF x > width THEN width = x
+		IF x > menuWidth THEN menuWidth = x
 	NEXT i
 END SUB
 
