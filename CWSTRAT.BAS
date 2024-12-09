@@ -4745,13 +4745,32 @@ END SUB
 
 SUB ships
 	FOR s = 1 TO 2
-		IF globalNavySize(s) = 0 OR globalNavyLoc(s) = 0 THEN globalNavyLoc(s) = 0: GOTO sink
-		IF globalNavyLoc(s) = 30 THEN x = 515: y = 268: GOTO float
-		IF globalNavyLoc(s) = 28 THEN x = 517: y = 172: GOTO float
-		IF globalNavyLoc(s) = 17 THEN x = 380: y = 425: GOTO float
-		IF globalNavyLoc(s) = 99 THEN x = 495: y = 310: GOTO float
-		x = globalCityX(globalNavyLoc(s)) + 25: y = globalCityY(globalNavyLoc(s)) + 25
-		IF globalNavyLoc(s) = 24 THEN y = y + 5: x = x - 5
+		IF globalNavySize(s) = 0 OR globalNavyLoc(s) = 0 THEN 
+			globalNavyLoc(s) = 0
+			GOTO sink
+		END IF
+		IF globalNavyLoc(s) = 30 THEN 
+			x = 515: y = 268
+			GOTO float
+		END IF
+		IF globalNavyLoc(s) = 28 THEN 
+			x = 517: y = 172
+			GOTO float
+		END IF
+		IF globalNavyLoc(s) = 17 THEN 
+			x = 380: y = 425
+			GOTO float
+		END IF
+		IF globalNavyLoc(s) = 99 THEN
+			x = 495: y = 310
+			GOTO float
+		END IF
+		x = globalCityX(globalNavyLoc(s)) + 25
+		y = globalCityY(globalNavyLoc(s)) + 25
+		IF globalNavyLoc(s) = 24 THEN 
+			y = y + 5
+			x = x - 5
+		END IF
 		float:
 		PSET (x, y), 1
 		a = 1
@@ -4775,7 +4794,8 @@ SUB stax (who)
 	FOR i = star TO fin
 		IF globalArmySize(i) > 0 AND globalOccupied(globalArmyLoc(i)) <> i THEN
 			target = globalArmyLoc(i)
-			x = globalCityX(target) - 12: y = globalCityY(target) - 12
+			x = globalCityX(target) - 12
+			y = globalCityY(target) - 12
 			CIRCLE (x, y), 3, 14
 		END IF
 	NEXT i
@@ -4783,8 +4803,14 @@ END SUB
 
 SUB drawSurrender (who)
 	SCREEN 12
-	s = 1: c = 1: COLOR 0: w = 514
-	IF who > 20 THEN c = 7: s = 2
+	s = 1
+	c = 1
+	COLOR 0
+	w = 514
+	IF who > 20 THEN 
+		c = 7
+		s = 2
+	END IF
 	'               background
 	LINE (w + 15, 440)-(w + 125, 16), 2, BF
 	LINE (w + 15, 16)-(w + 125, 290), 3, BF
@@ -4924,7 +4950,8 @@ SUB topbar
 	FOR i = 1 TO 2
 		IF globalVictory(i) < 0 THEN globalVictory(i) = 0
 	NEXT i
-	x = globalVictory(1) + globalVictory(2): y = 0
+	x = globalVictory(1) + globalVictory(2)
+	y = 0
 	c = 9
 	IF globalSide = 2 THEN c = 7
 	LINE (580, 15)-(580, 35), 15
@@ -5012,7 +5039,10 @@ SUB touchup
 END SUB
 
 SUB checkTrainCapacity (who, limit)
-	IF globalRealism = 0 THEN limit = globalTrain(who): EXIT SUB
+	IF globalRealism = 0 THEN 
+		limit = globalTrain(who)
+		EXIT SUB
+	END IF
 	x = 11
 	IF globalSide = 2 THEN x = 23
 	limit = globalTrain(who) + 5 * (globalControl(who) - x)
@@ -5552,7 +5582,6 @@ SUB calculateMilitaryPresence (a, y)
 tally5:
 END SUB
 
-' CWSMENU.BAS
 '============================================================================
 '                GENmenu 3.05 : Generic Menu Main Module Level  12/91
 '                Updated to Use Graphic Screens 8, 9, 12

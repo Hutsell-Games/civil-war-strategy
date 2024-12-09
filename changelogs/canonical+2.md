@@ -19,3 +19,5 @@
 15. Removed unused line label: remenu
 16. Minor code reformatting
 17. choices => drawMenuBox; globalChoose => globalSelectedMenuOption; globalWType => globalWindowType; boxc => menuColor; wide => width; b1 => horizontalOffset; globalMTX => globalMenuText
+===
+18. Minor code reformatting
