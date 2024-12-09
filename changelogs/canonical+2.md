@@ -12,3 +12,6 @@
 ===
 11. clrbot => clearBottom; clrrite => clearRight; cannon => drawCannon; capitol => drawCapitol; flags => drawFlags; image2 => drawOverlayBox; integrity => checkMapIntegrity; rwin => drawRebelWin; shen => playShenandoah; shipicon => drawShipIcon; surrender => drawSurrender; usa => drawUSAMap; ironclad => drawIronclad; icon => drawArmyIcon
 12. Rearrange some DECLARE SUBs
+===
+13. recruit => recruitArmy; battle => resolveBattle; events => specialEvents; relieve => relieveCommander; traincapacity => checkTrainCapacity; void => calculateMilitaryPresence; mxw => maxStringWidth; menu => genericMenu; sel1 => menuSelection; crsr => handleUserInput; limits => resetCurrentRow; noadjust => centerMenu; called => onRowChosen
+14. Remove unused boss1 line label code
