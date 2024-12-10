@@ -27,3 +27,12 @@
 20. Remove cwsicon.vga, not needed; F1 Help
 21. width => menuWidth (width is a QB64 keyword)
 22. month => globalMonth (there are two months, globalMonth$ and globalMonth)
+===
+23. Reformat various comments
+24. Fix issue with cannon image bleeding into rest of screen
+25. Fix issue with various non-standard characters causing issues
+    - TODO: Make nicer
+26. Fixed issue with menu erroring out due to character width
+    - Left in some debugging code in case further issues arise
+27. row => selectedMenuItem; row1 => selectedMenuItem1
+28. Remove unused bry, brx code.
