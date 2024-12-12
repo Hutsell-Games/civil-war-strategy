@@ -142,7 +142,8 @@ IF _FILEEXISTS("mtn.vga") THEN
 	BLOAD "mtn.vga", VARPTR(globalMtn(1))
 	DEF SEG
 ELSE
-	COLOR 15: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": CALL TICK(9)
+	COLOR 15: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'":
+	CALL TICK(9)
 END IF
 
 RESTORE
@@ -176,7 +177,7 @@ SCREEN 12
 CLS
 COLOR 11: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
 COLOR 4: LOCATE 15, 32: PRINT "Registered Edition"
-COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
+COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998, 2017-2024 W. R. Hutsell, David Mackey"
 LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
@@ -218,7 +219,7 @@ FOR i = 1 TO 40
 		globalControl(x) = globalControl(x) + 1
 		globalVictory(x) = globalVictory(x) + globalCityV(i)
 	END IF
-	IF globalCityP(i) > 0 THEN 
+	IF globalCityP(i) > 0 THEN
 		globalCash(globalCityP(i)) = globalCash(globalCityP(i)) + globalCityV(i)
 	END IF
 globalVPTotal = globalVPTotal + globalCityV(i)
@@ -232,7 +233,7 @@ globalWindowType = 2
 globalHilite = 15
 globalReplay = 1
 IF globalPlayer = 2 THEN GOSUB blanken
-globalMenuText$(0) = "VGA CIVILWAR STRATEGY"
+globalMenuText$(0) = "VGA CIVIL WAR STRATEGY"
 globalMenuText$(1) = "Resume Saved Game"
 globalMenuText$(2) = "Start NEW Game"
 globalMenuText$(3) = "Quit"
@@ -345,7 +346,7 @@ SELECT CASE globalSelectedMenuOption
 		IF globalRR(globalSide) = 0 THEN
 			COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 			PSET (550, 20), 0
-			DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
+			DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U9L2U5R1BF4"
 			z = 9
 			IF globalSide = 2 THEN z = 7
 			x = POINT(0): y = POINT(1)
@@ -373,7 +374,7 @@ SELECT CASE globalSelectedMenuOption
 		globalSize = 2
 		CALL genericMenu(0)
 		CALL clearRight
-		IF globalSelectedMenuOption <> 1 THEN 
+		IF globalSelectedMenuOption <> 1 THEN
 			chosit = 24
 			GOTO menu0
 		END IF
@@ -424,6 +425,7 @@ SELECT CASE globalSelectedMenuOption
 				CALL cancel(globalSide)
 				globalMFlag = 0
 				globalSelectedMenuOption = 22
+
 			CASE 2 ' Fortify
 				IF globalCash(globalSide) < 200 THEN 
 					COLOR 11
@@ -450,7 +452,9 @@ SELECT CASE globalSelectedMenuOption
 		CASE 4 ' Supply
 			CALL setArmyRange(star, fin, (globalSide))
 			globalMenuText$(0) = "Supply"
-			globalTLX = 67: globalTLY = 5: globalColour = 5
+			globalTLX = 67
+			globalTLY = 5
+			globalColour = 5
 			globalSize = 0
 			FOR i = star TO fin
 				IF globalArmyLoc(i) = 0 OR globalSupply(i) > 1 THEN GOTO alone
@@ -470,7 +474,7 @@ SELECT CASE globalSelectedMenuOption
 				globalMenuOptions(globalSize) = i
 			alone:
 			NEXT i
-			IF globalSize = 0 THEN 
+			IF globalSize = 0 THEN
 				COLOR 11
 				CALL clearBottom
 				PRINT "All eligible "; globalForce$(globalSide); " armies have supplies";
@@ -486,7 +490,7 @@ SELECT CASE globalSelectedMenuOption
 			END IF
 			globalSelectedMenuOption = 25
 			GOTO optmen
-		CASE 5 ' Move Capital
+		CASE 5' Move Capital
 			IF globalCapCity(globalSide) = 0 OR globalCash(globalSide) < 500 THEN 
 				CALL clearBottom
 				COLOR 11: PRINT "Cannot move capital";
@@ -501,7 +505,8 @@ SELECT CASE globalSelectedMenuOption
 			CALL chooseCityMenu(index)
 			IF index = 0 GOTO menu0
 			globalCapCity(globalSide) = index
-			CALL clearBottom: PRINT globalForce$(globalSide); " capital moved from "; a$; " to "; globalCity$(globalCapCity(globalSide));
+			CALL clearBottom
+			PRINT globalForce$(globalSide); " capital moved from "; a$; " to "; globalCity$(globalCapCity(globalSide));
 			CALL clearRight
 			CALL drawCity
 			CALL TICK(9)
@@ -589,19 +594,19 @@ SELECT CASE globalSelectedMenuOption
 		IF globalSide = 1 THEN a$ = STR$(6 - globalDifficult)
 		globalMenuText$(6) = "Balance" + a$
 		globalMenuText$(7) = "End Cond"
-		a$ = "F"
+		a$ = "+"
 		IF globalRandBal = 0 THEN a$ = ""
 		globalMenuText$(8) = "Rndom Evt " + a$
 		globalMenuText$(9) = "Vary Start"
 		a$ = ""
-		IF globalJanCam = 1 THEN a$ = "F"
+		IF globalJanCam = 1 THEN a$ = "+"
 		globalMenuText$(10) = "Jan Campgn" + a$
 		a$ = ""
-		IF globalRealism = 1 THEN a$ = "F"
+		IF globalRealism = 1 THEN a$ = "+"
 		globalMenuText$(11) = "Realism " + a$
 		globalMenuText$(12) = "Chk Links"
 		a$ = ""
-		IF globalHistory = 1 THEN a$ = "F"
+		IF globalHistory = 1 THEN a$ = "+"
 		globalMenuText$(13) = "History" + a$
 		globalSize = 13
 		globalTLX = 67
@@ -646,7 +651,7 @@ SELECT CASE globalSelectedMenuOption
 			CLS
 			CALL drawUSAMap
 			CALL clearBottom
-			COLOR 11: PRINT "Graphics : "; a$; 
+			COLOR 11: PRINT "Graphics : "; a$;
 			IF globalNoise > 0 THEN SOUND 2700, 1
 			globalSelectedMenuOption = 24
 			GOTO utile
@@ -656,7 +661,7 @@ SELECT CASE globalSelectedMenuOption
 			globalMenuText$(0) = "SOUNDS"
 			globalMenuText$(1) = "Quiet"
 			globalMenuText$(2) = "Sound"
-			globalMenuText$(3) = "FI & Sound"
+			globalMenuText$(3) = "Music"
 			globalSize = 3
 			globalTLX = 67
 			globalTLY = 12
@@ -677,8 +682,13 @@ SELECT CASE globalSelectedMenuOption
 			globalMenuText$(2) = "Normal"
 			globalMenuText$(3) = "Slow"
 			globalMenuText$(4) = "Very Slow"
-			globalMenuText$(5) = "Reg Color": IF globalBW > 0 THEN globalMenuText$(5) = "Alt Color"
-			globalTLX = 67: globalTLY = 15: globalSize = 5
+			globalMenuText$(5) = "Reg Color"
+			IF globalBW > 0 THEN 
+			    globalMenuText$(5) = "Alt Color"
+			END IF
+			globalTLX = 67
+			globalTLY = 15
+			globalSize = 5
 			CALL genericMenu(0)
 			CALL clearRight
 			SELECT CASE globalSelectedMenuOption
@@ -722,15 +732,15 @@ SELECT CASE globalSelectedMenuOption
 			CALL setEndGameConditions
 			globalSelectedMenuOption = 28
 			GOTO utile
-	   	CASE 8 ' Random Events
+	   	CASE 8 ' Random Event Options
 			globalMenuText$(0) = "Random Events"
 			globalSize = 4
 			globalTLX = 30
 			globalTLY = 8
 			globalMenuText$(1) = "OFF"
-			globalMenuText$(2) = "Favor Union ": IF globalRandBal = 3 THEN globalMenuText$(2) = globalMenuText$(2) + " "
-			globalMenuText$(3) = "Neutral     ": IF globalRandBal = 5 THEN globalMenuText$(3) = globalMenuText$(3) + " "
-			globalMenuText$(4) = "Favor Rebels": IF globalRandBal = 7 THEN globalMenuText$(4) = globalMenuText$(4) + " "
+			globalMenuText$(2) = "Favor Union ": IF globalRandBal = 3 THEN globalMenuText$(2) = globalMenuText$(2) + " +"
+			globalMenuText$(3) = "Neutral     ": IF globalRandBal = 5 THEN globalMenuText$(3) = globalMenuText$(3) + " +"
+			globalMenuText$(4) = "Favor Rebels": IF globalRandBal = 7 THEN globalMenuText$(4) = globalMenuText$(4) + " +"
 			globalColour = 5
 			CALL genericMenu(0)
 			globalColour = 4
@@ -865,6 +875,7 @@ SELECT CASE globalSelectedMenuOption
 		END SELECT
 	CASE 9 ' Files
 		IF NOT _FILEEXISTS("*.sav") THEN globalFileL = 0
+
 		filex:
 		globalSelectedMenuOption = 23
 		chosit = 30
@@ -898,6 +909,7 @@ SELECT CASE globalSelectedMenuOption
 				CLOSE #1
 				CLS
 				GOTO newgame
+
 			CASE 4
 				globalSelectedMenuOption = 23
 				globalMenuText$(0) = "Quit"
@@ -918,7 +930,7 @@ SELECT CASE globalSelectedMenuOption
 		GOTO menu0
 	END SELECT
 	GOTO menu0
-	'                               Subs
+	' Subs
 	unionplus:
 	globalUSAdv = 120 * globalDifficult
 	IF globalPlayer = 2 THEN globalUSAdv = 50 * globalDifficult
@@ -985,7 +997,8 @@ SUB moveArmy
 	IF index = -1 THEN globalMFlag = 1
 	GOTO dudd
 	tent:
-	globalTLX = 67: globalTLY = 12
+	globalTLX = 67
+	globalTLY = 12
 
 	CALL drawArmyStat(index)
 	COLOR 11: LOCATE 11, 68: PRINT globalCity$(target)
@@ -1204,7 +1217,8 @@ SUB resolveBattle (attack, defend, win, lose)
 	hit1 = 0
 	star = scale * RND
 	fin = scale * RND
-	IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL TICK(.1)
+	IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5
+	CALL TICK(.1)
 	IF star <= x THEN hit = 1
 	IF fin <= x1 THEN hit1 = 1
 
@@ -1271,8 +1285,8 @@ SUB resolveBattle (attack, defend, win, lose)
 	LOCATE 1, 1: PRINT "Attack Loss: ";
 	PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
 	CALL strong(attack)
-	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / globalArmySize(attack)))))); "%) FI";
-	COLOR 16 - c: PRINT "FI Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / globalArmySize(attack)))))); "%) |";
+	COLOR 16 - c: PRINT "| Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
 	CALL strong(defend)
 	PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / globalArmySize(defend)))))); "%)"
 
@@ -1458,12 +1472,15 @@ SUB fileManagement (switch)
 				INPUT #1, globalMonth$(i)
 			NEXT i
 			INPUT #1, globalMonth, globalYear
+
 			' Set the End Game Conditions.
 			FOR i = 1 TO 6
 				INPUT #1, globalVicFlag(i)
 			NEXT i
 			globalVicFlag(3) = .4 * globalVicFlag(3)
-			INPUT #1, a             ' number of Yankee armies
+			
+			' Load Union Armies.
+			INPUT #1, a
 			FOR i = 1 TO a
 				INPUT #1, globalArmyLoc(i), globalArmySize(i), globalArmyExper(i), globalSupply(i)
 				globalOccupied(globalArmyLoc(i)) = i
@@ -1471,7 +1488,8 @@ SUB fileManagement (switch)
 				globalArmyLead(i) = globalRating(i)
 				globalLName$(i) = ""
 			NEXT i
-			INPUT #1, a             ' number of Rebel armies
+			' Load Rebel Armies
+			INPUT #1, a
 			FOR i = 21 TO 20 + a
 				INPUT #1, globalArmyLoc(i), globalArmySize(i), globalArmyExper(i), globalSupply(i)
 				globalOccupied(globalArmyLoc(i)) = i
@@ -1483,6 +1501,7 @@ SUB fileManagement (switch)
 				INPUT #1, globalCash(i)
 			NEXT i
 			INPUT #1, globalATKFAC, globalDEFAC, globalTCR
+			' Load Navies
 			INPUT #1, globalFleet$(1), globalNavyLoc(1), globalFleet$(2), globalNavyLoc(2)
 			FOR k = 1 TO 2
 				globalNavySize(k) = LEN(globalFleet$(k))
@@ -1560,7 +1579,7 @@ SUB fileManagement (switch)
 			globalMenuText$(0) = "Save Game"
 			FOR k = 1 TO 9
 				globalMenuText$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-				IF _FILEEXISTS(globalMenuText$(k)) THEN globalMenuText$(k) = globalMenuText$(k) + " FI"
+				IF _FILEEXISTS(globalMenuText$(k)) THEN globalMenuText$(k) = globalMenuText$(k) + " +"
 			NEXT k
 				globalTLX = 67
 				globalSize = 9
@@ -1714,16 +1733,17 @@ SUB drawArmyMove (from, dest, kind)
 			IF globalNoise > 0 THEN SOUND 3999, .3
 			CALL TICK(globalTurbo! - .5)
 			CALL snapshot(x, y, 1)
-		CASE 7          ' draw white box
+		CASE 7  ' draw white box
 			x = globalCityX(from) - 12
 			y = globalCityY(from) - 11
 			GET (x - 8, y - 8)-(x + 8, y + 8), globalImage
 			LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
 			LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
-		CASE 8     ' replace old image
-			x = globalCityX(from) - 12: y = globalCityY(from) - 11
+		CASE 8 ' replace old image
+			x = globalCityX(from) - 12
+			y = globalCityY(from) - 11
 			IF x > 0 THEN PUT (x - 8, y - 8), globalImage, PSET
-		CASE 9          ' draw arrow pointer
+		CASE 9 ' draw arrow pointer
 			x = globalCityX(from) - 12
 			y = globalCityY(from) - 11
 			GET (x - 8, y - 8)-(x + 10, y + 7), globalImage
@@ -1748,11 +1768,13 @@ SUB turnIterate
 	FOR i = 1 TO 40
 		IF globalArmyLoc(i) > 0 THEN CALL placeArmy(i)
 	NEXT i
+
 	globalMonth = globalMonth + 2
 	IF globalMonth > 12 THEN
 		globalMonth = 1
 		globalYear = globalYear + 1
 	END IF
+
 	s = 1
 	FOR i = 1 TO 40
 		IF globalArmyLoc(i) < 1 GOTO rip
@@ -1955,7 +1977,9 @@ SUB navy (who, chx)
 
 			IF globalRealism > 0 AND ((globalYear < 1862) OR (globalYear = 1862 AND globalMonth < 3)) GOTO noiron
 			IF globalCash(who) >= 2 * cost THEN
-				globalTLX = 67: globalTLY = 12: globalColour = 9
+				globalTLX = 67
+				globalTLY = 12
+				globalColour = 9
 				IF who = globalSide THEN
 					globalMenuText$(0) = "Type"
 					globalMenuText$(1) = "Wooden"
@@ -1976,9 +2000,11 @@ SUB navy (who, chx)
 			noiron:
 			globalNavySize(who) = globalNavySize(who) + 1
 			IF a$ = "W" THEN
-				globalFleet$(who) = globalFleet$(who) + a$: a = 1
+				globalFleet$(who) = globalFleet$(who) + a$
+				a = 1
 			ELSE
-				globalFleet$(who) = a$ + globalFleet$(who): a = 2
+				globalFleet$(who) = a$ + globalFleet$(who)
+				a = 2
 			END IF
 			IF globalNavySize(who) > 1 GOTO add2ship
 			ships:
@@ -1986,6 +2012,7 @@ SUB navy (who, chx)
 			globalSize = 0
 			globalTLX = 67
 			globalTLY = 12
+
 			FOR i = 1 TO 40
 				IF globalMatrix(i, 7) = 99 AND globalCityP(i) = who AND globalNavyLoc(3 - who) <> i THEN 
 					globalSize = globalSize + 1
@@ -1993,6 +2020,7 @@ SUB navy (who, chx)
 					globalMenuOptions(globalSize) = i
 				END IF
 			NEXT i
+
 			IF chx = 1 THEN globalSelectedMenuOption = 1 + INT(globalSize * RND)
 			IF globalSize < 1 THEN
 				globalNavySize(who) = 0
@@ -2063,6 +2091,7 @@ SUB navy (who, chx)
 			globalArmySize(index) = globalArmySize(index) - killd
 			IF globalArmySize(index) < 1 THEN globalArmySize(index) = 1
 			EXIT SUB
+
 			deserted:
 			IF globalFort(target) = 0 GOTO blast
 			IF RND < .7 + .03 * (globalNavySize(who) - globalFort(target)) GOTO hurt1
@@ -2082,6 +2111,7 @@ SUB navy (who, chx)
 				GOTO sail3
 			END IF
 			GOTO deserted
+
 			hurt1:
 			CALL clearBottom
 			PRINT globalCity$(target); " fortifications damaged";
@@ -2092,6 +2122,7 @@ SUB navy (who, chx)
 			CALL drawCity
 			CALL TICK(globalTurbo!)
 			EXIT SUB
+
 			blast:
 			IF RND > .25 + .07 * globalNavySize(who) THEN 
 				CALL clearBottom
@@ -2099,18 +2130,21 @@ SUB navy (who, chx)
 				CALL TICK(globalTurbo!)
 				EXIT SUB
 			END IF
+
 			IF globalNavyLoc(who) = globalCapCity(3 - who) THEN 
 				CALL clearBottom
 				PRINT "The CAPITAL steadfastly stands loyal";
 				CALL TICK(globalTurbo!)
 				EXIT SUB
 			END IF
+
 			globalCityP(globalNavyLoc(who)) = 0
 			CALL clearBottom
 			PRINT globalCity$(globalNavyLoc(who)); " is now  NEUTRAL";
 			CALL drawCity
 			globalVictory(who) = globalVictory(who) + globalCityV(globalNavyLoc(who))
 			EXIT SUB
+
 		CASE 3 ' Sail
 			globalNavySize(who) = LEN(globalFleet$(who))
 			IF globalNavySize(who) < 1 AND chx > 0 THEN EXIT SUB
@@ -2129,6 +2163,7 @@ SUB navy (who, chx)
 					globalMenuOptions(globalSize) = i
 				END IF
 			NEXT i
+
 			IF chx = 3 THEN
 				IF globalSize = 0 THEN EXIT SUB
 				IF globalGrudge > 0 THEN 
@@ -2136,6 +2171,7 @@ SUB navy (who, chx)
 					globalMenuOptions(1) = globalNavyLoc(3 - who)
 					GOTO admiral
 				END IF
+
 				GOSUB nest
 				IF globalSelectedMenuOption > 0 GOTO admiral ELSE EXIT SUB
 			END IF
@@ -2369,9 +2405,8 @@ SUB navy (who, chx)
 				GOTO wave
 		END SELECT
 		GOTO pirate
-		'---------------------------------------------------------------------------
+
 		'                               Subs
-		'---------------------------------------------------------------------------
 		showhit:
 		LOCATE 9, 6 * globalNavySize(1): PRINT hit(1); " ";
 		LOCATE 15, 6 * globalNavySize(2): PRINT hit(2); " ";
@@ -2434,7 +2469,7 @@ SUB navy (who, chx)
 		FOR k = 1 TO 2
 			IF globalNavyLoc(k) = 99 THEN globalCommerce = k
 		NEXT k
-		CLS 
+		CLS
 		CALL drawUSAMap
 END SUB
 
@@ -2676,7 +2711,8 @@ SUB resolveRailroadMoves (who)
 			IF globalCityP(globalArmyLoc(index)) <> who THEN CALL captureCity(index, globalArmyLoc(index), who, 0)
 			CALL placeArmy(index)
 			IF globalOccupied(globalArmyLoc(index)) > 0 THEN CALL stax(who): GOTO toot
-			CALL checkCityOccupied(globalArmyLoc(index)): CALL placeArmy(index)
+			CALL checkCityOccupied(globalArmyLoc(index))
+			CALL placeArmy(index)
 			GOTO toot
 	END SELECT
 
@@ -2697,7 +2733,7 @@ SUB resolveRailroadMoves (who)
 	toot:
 	IF who = globalSide THEN CALL TICK(9)
 	CALL clearRight
-	clearBottom
+	CALL clearBottom
 END SUB
 
 SUB recruitArmy (who)
@@ -2749,7 +2785,7 @@ SUB recruitArmy (who)
 
 	levy:
 	IF globalCash(who) < 100 GOTO menu1
-	IF (who = globalSide) OR (globalPlayer = 2) THEN 
+	IF (who = globalSide) OR (globalPlayer = 2) THEN
 		CALL clearBottom
 		PRINT globalForce$(who); " funds available "; globalCash(who);
 	END IF
@@ -2760,7 +2796,7 @@ SUB recruitArmy (who)
 		GOSUB randsel
 		GOTO auto1
 	END IF
-      
+
 	IF globalSelectedMenuOption > 0 THEN globalSelectedMenuOption = 21 + globalSelectedMenuOption
 	CALL genericMenu(2)
 	CALL clearRight
@@ -2774,7 +2810,7 @@ SUB recruitArmy (who)
 		GOTO add2
 	END IF
 	CALL assignArmyCommander((who), empty)
-       
+
 	IF who <> globalSide AND empty = 0 GOTO menu1
 	IF empty = 0 GOTO levy
 	globalArmyLoc(empty) = index
@@ -2810,7 +2846,8 @@ SUB recruitArmy (who)
 	CALL TICK(globalTurbo! - .5)
 	GOTO levy
 	randsel:
-	globalSelectedMenuOption = 0: x = 0
+	globalSelectedMenuOption = 0
+	x = 0
 	FOR i = 1 TO globalSize
 		target = globalMenuOptions(i)
 		LOCATE 14 + i, 69
@@ -2958,7 +2995,7 @@ SUB aiSmarts
 	IF globalNavyLoc(who) = 0 GOTO movearmy
 	'                     move ships & prohibit further action this turn
 	IF globalNavyLoc(who) <> 99 THEN
-		IF globalCityP(globalNavyLoc(who)) = who THEN CALL navy(who, 3): GOTO movearmy   'move drawShips & prohibit further action this turn
+		IF globalCityP(globalNavyLoc(who)) = who THEN CALL navy(who, 3): GOTO movearmy   'move ships & prohibit further action this turn
 		IF globalCityP(globalNavyLoc(who)) = 0 THEN CALL navy(who, 3): GOTO movearmy
 	ELSE
 		IF RND < .5 THEN CALL navy(who, 3)
@@ -2995,6 +3032,7 @@ SUB aiSmarts
 		IF globalVicFlag(5) = 0 GOTO nocap
 		FOR j = 1 TO 6
 			k = globalMatrix(target, j)
+			' TODO: It isn't ever possible?
 			IF j = 0 GOTO nocap
 			CALL calculateMilitaryPresence(k, flag)
 			IF flag > 0 GOTO deadman
@@ -3204,6 +3242,7 @@ SUB turnUpdate
 		END IF
 
 		CALL clearRight
+
 		'                       Attacker Loses
 		IF win = active GOTO kickbutt
 		globalArmyMove(active) = globalArmyLoc(active)
@@ -3227,7 +3266,7 @@ SUB turnUpdate
 		END IF
 
 		CALL TICK(globalTurbo!)
-		GOTO digin                    
+		GOTO digin
 
 		kickbutt: ' Defender Retreats
 		CALL drawArmyMove(globalArmyLoc(active), target, 4)
@@ -3258,17 +3297,17 @@ SUB turnUpdate
 		IF flee = 0 GOTO deadmeat
 		move2 = globalMatrix(target, flee)
 		outta:
-		CALL placeArmy(defend)                  ' in old city
+		CALL placeArmy(defend) ' in old city
 
 		globalArmyMove(defend) = move2
-		CALL animateArmy(defend, 0)                 ' animate retreat
+		CALL animateArmy(defend, 0) ' animate retreat
 		
 		globalArmyLoc(defend) = move2
 		globalOccupied(move2) = defend
 		CALL clearBottom
 		PRINT globalArmyName$(defend) + " is withdrawing to " + globalCity$(move2);
 
-		CALL placeArmy(defend)                  ' in new city
+		CALL placeArmy(defend) ' in new city
 		
 		CALL drawArmyMove(target, 0, 6)
 		globalArmyMove(defend) = -2
@@ -3302,10 +3341,7 @@ SUB turnUpdate
 		CALL TICK(9)
 		CALL clearRight
 		IF globalArmyLoc(active) = 0 GOTO digin
-		'---------------------------------------------------------------------------
-		'                       check for more defenders !
-		'---------------------------------------------------------------------------
-		holdon:
+		holdon: ' check for more defenders
 		CALL checkCityOccupied(target)
 		IF globalOccupied(target) = 0 GOTO easy
 		COLOR 11
@@ -3313,18 +3349,15 @@ SUB turnUpdate
 		PRINT "There are still defenders in "; globalCity$(target);
 		CALL TICK(99)
 		GOTO enemy
-		'==========================================================================
-		'                       Move Into New City
-		'==========================================================================
-		easy:
+
+		easy: ' Move into new city
 		CALL drawArmyMove(globalArmyLoc(active), target, 4)
 		globalArmyLoc(active) = target
 		globalArmyMove(active) = -2
 		CALL checkCityOccupied(globalArmyLoc(active))
 		CALL placeArmy(active)
-		'---------------------------------------------------------------------------
-		'                            City Capture
-		'---------------------------------------------------------------------------
+
+        ' City Capture
 		IF globalCityP(globalArmyLoc(active)) = s GOTO horde
 		c = globalArmyLoc(active)
 		IF globalPlayer = 1 AND s = globalSide AND globalFort(c) > 0 AND flag = 0 THEN
@@ -3366,9 +3399,9 @@ SUB turnUpdate
 	upbox:
 	LINE (450, 318)-(526, 420), 1, BF
 	LINE (527, 315)-(527, 439), 10
-	COLOR 14: LOCATE 23, 50: PRINT "|============|"
+	COLOR 14: LOCATE 23, 50: PRINT "|=============|"
 	LOCATE 24, 50: PRINT "| U P D A T E |"
-	LOCATE 25, 50: PRINT "|============|"
+	LOCATE 25, 50: PRINT "|=============|"
 	RETURN
 
 	allthru:
@@ -3433,7 +3466,6 @@ SUB turnUpdate
 	END IF
 END SUB
 
-' CWSTRAT2.BAS
 SUB drawArmyIcon (x, y, z)
 	LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
 	SELECT CASE z
@@ -3625,7 +3657,9 @@ SUB drawCapitol
 	IF globalNoise = 2 THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
 	LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
 	LOCATE 25, 40: PRINT "- Abraham Lincoln"
-	FOR i = -565 TO 50 STEP 50: CALL drawFlags(1, i, 0): NEXT i
+	FOR i = -565 TO 50 STEP 50
+	    CALL drawFlags(1, i, 0)
+	NEXT i
 	IF globalNoise = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
@@ -3707,7 +3741,7 @@ SUB setEndGameConditions
 	what4:
 	FOR i = 2 TO 6
 		IF globalVicFlag(i) > 0 THEN 
-			globalMenuText$(i - 1) = "FI " 
+			globalMenuText$(i - 1) = "+ " 
 		ELSE 
 			globalMenuText$(i - 1) = "  "
 		END IF
@@ -3764,7 +3798,7 @@ END SUB
 SUB aiEvaluateArmyMoves (index, x)
 	from = globalArmyLoc(index)
 	x = 200
-	IF globalAggress! > 1.5 THEN 
+	IF globalAggress! > 1.5 THEN
 		x = 80
 		IF globalAggress! > 2 THEN 
 			x = 20
@@ -3799,7 +3833,7 @@ SUB aiEvaluateArmyMoves (index, x)
 			max = j - 1
 			GOTO alleval
 		END IF
-      
+
 		c = globalOccupied(a)
 		FOR k = star TO fin
 			IF globalArmyLoc(k) > 0 THEN 
@@ -3918,7 +3952,7 @@ SUB specialEvents ' Special Events
 	IF RND > .1 * globalRandBal THEN who = 2
 
 	SELECT CASE who
-		CASE 1 ' good for South
+		CASE 1 ' Good for South
 			IF globalYear = 1864 AND globalMonth = 1 THEN globalVictory(2) = globalVictory(2) + 50
 			IF globalYear = 1865 AND globalMonth = 1 THEN globalVictory(2) = globalVictory(2) + 100
 			IF RND > .9 THEN GOSUB riot: EXIT SUB
@@ -3935,12 +3969,13 @@ SUB specialEvents ' Special Events
 			NEXT i
 			IF empty = 0 GOTO mercen
 			float1:
-			CALL showAndSaveHistory("England has given drawShips to the South", 2)
+			CALL showAndSaveHistory("England has given ships to the South", 2)
 			globalNavySize(2) = globalNavySize(2) + 2 * plus
 			IF globalNavySize(2) > 10 THEN globalNavySize(2) = 10
 			x = globalNavySize(2) - LEN(globalFleet$(2))
 			globalFleet$(2) = globalFleet$(2) + STRING$(x, "W")
-			globalNavyLoc(2) = empty: CALL drawShips
+			globalNavyLoc(2) = empty
+			CALL drawShips
 			GOTO dull1
 			mercen:
 			IF RND > .1 OR globalControl(2) < 30 GOTO money
@@ -3994,7 +4029,7 @@ SUB specialEvents ' Special Events
 				END IF
 			NEXT k
 			RETURN
-		CASE 2 ' good for Union
+		CASE 2 ' Good for Union
 			IF RND > .1 OR globalNavyLoc(1) = 0 OR globalNavySize(1) > 9 GOTO event2
 			IF RND > .95 THEN 
 				GOSUB riot
@@ -4020,7 +4055,8 @@ SUB specialEvents ' Special Events
 			IF globalEmancipate = 0 AND globalYear > 1862 THEN
 				globalEmancipate = 1
 				CALL showAndSaveHistory("Abraham Lincoln announces the Emancipation Proclamation", 2)
-				globalVictory(1) = globalVictory(1) + 100: globalVictory(2) = globalVictory(2) - 100
+				globalVictory(1) = globalVictory(1) + 100
+				globalVictory(2) = globalVictory(2) - 100
 				CALL drawUSAMap
 				GOTO dull2
 			END IF
@@ -4126,7 +4162,8 @@ END SUB
 SUB checkMapIntegrity
 	CLS
 	COLOR 15
-	x = 0: y = 0
+	x = 0
+	y = 0
 	FOR i = 1 TO 40
 		FOR j = 1 TO 6
 			IF globalMatrix(i, j) = 0 GOTO done
@@ -4175,10 +4212,10 @@ SUB drawHallOfFame
 	COLOR 14: LOCATE 28, 1: PRINT "press a key"; : DO WHILE INKEY$ = "": LOOP
 	SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
-	LOCATE 2, 7: PRINT STRING$(57, "FI")
-	LOCATE 9, 7: PRINT STRING$(57, "FI")
+	LOCATE 2, 7: PRINT STRING$(57, "|")
+	LOCATE 9, 7: PRINT STRING$(57, "|")
 	FOR i = 1 TO 6
-		LOCATE 2 + i, 7: PRINT "FI"; SPACE$(55); "FI"
+		LOCATE 2 + i, 7: PRINT "|"; SPACE$(55); "|"
 	NEXT i
 
 	OPEN "I", 1, "hiscore.cws"
@@ -4306,7 +4343,7 @@ SUB relieveCommander (who)
 	COLOR 15
 	CALL clearBottom
 	PRINT globalLName$(globalMenuOptions(globalSelectedMenuOption)); " has replaced "; t$; " in "; globalCity$(globalArmyLoc(index));
-	TICK 9
+	CALL TICK(9)
 	globalArmyName$(index) = globalLName$(globalMenuOptions(globalSelectedMenuOption))
 	globalLName$(globalMenuOptions(globalSelectedMenuOption)) = ""
 	CALL drawArmyMove(globalArmyLoc(index), 0, 8)
@@ -4383,9 +4420,9 @@ SUB reportsMenu (who)
 		IF globalFort(globalArmyLoc(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; globalFort(globalArmyLoc(i))
 	deadeye:
 	NEXT i
-	PRINT " "; STRING$(70, "FI")
+	PRINT " "; STRING$(70, "-")
 	PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(globalAggress! * x))); "00 ]"
-	PRINT " "; STRING$(70, "FI")
+	PRINT " "; STRING$(70, "-")
 	PRINT " "; globalForce$(who); " NAVY has "; globalNavySize(who); " ship(s) ";
 	x = 0
 	FOR k = 1 TO globalNavySize(who)
@@ -4500,13 +4537,14 @@ SUB reportsMenu (who)
 		OPEN "O", #1, "battsumm"
 		PRINT #1, " SIDE      BATTLES WON       LOSSES"
 		FOR k = 1 TO 2
-		a$ = " ": IF globalThrill = k THEN a$ = "*"
+		a$ = " "
+		IF globalThrill = k THEN a$ = "*"
 		PRINT #1, a$; globalForce$(k), globalBatWon(k), 100 * globalCasualty&(k)
 		NEXT k
 		CLOSE #1
 	END IF
 	GOTO endrep
-	
+
 	recap: ' Recap (History)
 	CLS
 	x = 0
@@ -4544,7 +4582,7 @@ SUB resupplyArmy (index)
 	IF y > 5 THEN x = 5 - globalSupply(index)
 	IF x < 1 THEN
 		CALL clearBottom
-		PRINT "Not enough funds in the Treasury to globalSupply "; globalArmyName$(index);
+		PRINT "Not enough funds in the Treasury to supply "; globalArmyName$(index);
 		GOTO nocash
 	END IF
 	globalSupply(index) = globalSupply(index) + x
@@ -4681,7 +4719,8 @@ SUB drawRebelWin
 
 	stars:
 	FOR i = 1 TO 8
-		x = globalStarX(i): y = globalStarY(i)
+		x = globalStarX(i)
+		y = globalStarY(i)
 		PSET (x, y), 0
 		LINE (x + 2, y - 1)-(x + 8, y + 16), 15
 		LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
@@ -4723,19 +4762,20 @@ SUB playShenandoah '                       Shenandoah
 END SUB
 
 SUB drawShipIcon (who, flag)
-	x = POINT(0) - 10: y = POINT(1) - 10
+	x = POINT(0) - 10
+	y = POINT(1) - 10
 	CIRCLE (x, y), 18, 9, , , .4
 	PAINT (x + 3, y + 4), 9, 9
 	CIRCLE (x, y), 18, 10, , , .4
 	SELECT CASE flag
-		CASE 1                          'wooden ship
+		CASE 1 ' wooden ship
 			DRAW "BF5R5D1C4L20C0H1R22E1L9": DRAW "BL6": DRAW "C0L10H1L1H2": DRAW "BR9D2"
 			DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
 			DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
 			PSET (x + 8, y - 1)
 			GOSUB jack
 
-		CASE 2                          'ironclad
+		CASE 2 ' ironclad
 			DRAW "BL15BD4E1"
 			DRAW "C0R30H1L2C8L24E1R1"
 			DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1": DRAW "C0R2BR3C0R2BR3C0R2"
@@ -4994,7 +5034,7 @@ SUB touchup
 	LINE -(490, 155), 10
 	LINE -(485, 150), 10
 
-	PAINT (502, 160), 1, 10
+	' PAINT (502, 160), 1, 10
 
 	LINE (145, 375)-(145, 405), 10   'Mobile border
 
@@ -5044,13 +5084,13 @@ SUB touchup
 	LINE -(105, 402), 10
 	LINE -(120, 415), 10
 	LINE -(115, 420), 10
-	PAINT (108, 400), 1, 10
+	' PAINT (108, 400), 1, 10
 
 	LINE (66, 375)-(52, 375), 10
 END SUB
 
 SUB checkTrainCapacity (who, limit)
-	IF globalRealism = 0 THEN 
+	IF globalRealism = 0 THEN
 		limit = globalTrain(who)
 		EXIT SUB
 	END IF
@@ -5558,12 +5598,12 @@ SUB victor
 			GOTO death
 		END IF
 
-		IF i = 1 THEN 
+		IF i = 1 THEN
 			CALL drawCapitol
 			COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(globalVictory(1)): PRINT t$
 			GOTO death
 		END IF
-		IF i = 2 THEN 
+		IF i = 2 THEN
 			CALL drawRebelWin
 			COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(globalVictory(2)): PRINT t$
 		END IF
@@ -5602,10 +5642,10 @@ END SUB
 '       globalTLX  = top left x  (if zero, automatically centered)
 '       globalTLY = top left y   (if zero, automatically centered)
 '       globalSize = # rows (current maximum=20)
-'       globalMenuText$() = text for genericMenu
+'       globalMenuText$() = text for menu
 '                globalMenuText$(0) = heading (blank defaults to M E N U)
 '                globalMenuText$(1-globalSize) are options
-'       globalSelectedMenuOption = option selected (row #)
+'       globalSelectedMenuOption = option selected (selectedMenuItem #)
 '            -1 indicates ESC key pressed
 '            entering with globalSelectedMenuOption+21 causes globalSelectedMenuOption to be default entry
 '       globalWindowType = window type 
@@ -5744,7 +5784,7 @@ SUB genericMenu (switch%)
 	LOCATE 1, 1, 0
 	IF globalMenuText$(0) = "" THEN globalMenuText$(0) = "M E N U"
 
-	IF globalTLX + menuWidth > 78 THEN globalTLX = 78 - menuWidth
+	' IF globalTLX + menuWidth > 78 THEN globalTLX = 78 - menuWidth
 
 	IF menuWidth = 0 THEN CALL maxStringWidth(menuWidth)
 	IF globalTLX = 0 THEN GOSUB centerMenu
@@ -5910,7 +5950,7 @@ SUB genericMenu (switch%)
 		GOSUB resetCurrentRow
 		RETURN
 	END IF
-	IF a$ = "Q" THEN 
+	IF a$ = "Q" THEN
 		selectedMenuItem = globalSize
 		GOSUB resetCurrentRow
 		RETURN

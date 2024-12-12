@@ -36,3 +36,11 @@
     - Left in some debugging code in case further issues arise
 27. row => selectedMenuItem; row1 => selectedMenuItem1
 28. Remove unused bry, brx code.
+===
+29. Code reformatting
+30. Updated copyright, title of game
+31. Fixed railroad move drawing
+32. Updated some special symbols with regular characters, replaced FI with appropriate characters
+33. Symbol & Sound is now Music
+34. Fixed bleeding in touchup
+35. Commented out some new code I added to fix the menu bug that shouldn't be needed
