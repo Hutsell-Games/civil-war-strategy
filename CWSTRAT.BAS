@@ -874,7 +874,7 @@ SELECT CASE globalSelectedMenuOption
 		CASE ELSE
 		END SELECT
 	CASE 9 ' Files
-		IF NOT _FILEEXISTS("*.sav") THEN globalFileL = 0
+		IF _FILEEXISTS("*.sav") THEN globalFileL = 0
 
 		filex:
 		globalSelectedMenuOption = 23
@@ -1517,7 +1517,7 @@ SUB fileManagement (switch)
 			INPUT #1, globalSide, globalGraf, globalNoise, globalDifficult, globalPlayer, globalTurbo!, globalRandBal, globalTrain(1), globalTrain(2), globalJanCam, globalRealism, globalBatWon(1), globalBatWon(2), globalCasualty&(1), globalCasualty&(2), globalHistory, globalBold
 			CLOSE #1
 		CASE 2 ' Load Specific Game File
-			IF NOT _FILEEXISTS("*.sav") THEN globalSelectedMenuOption = -1: EXIT SUB
+			IF _FILEEXISTS("*.sav") THEN globalSelectedMenuOption = -1: EXIT SUB
 			globalMenuText$(0) = "Load"
 			globalSize = 0
 			FOR k = 1 TO 9
