@@ -44,3 +44,6 @@
 33. Symbol & Sound is now Music
 34. Fixed bleeding in touchup
 35. Commented out some new code I added to fix the menu bug that shouldn't be needed
+===
+36. Generate license file for dependencies.
+37. Fix issue with loading saved game files.
