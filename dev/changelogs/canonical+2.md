@@ -54,3 +54,6 @@
 ===
 42. chosit => highlightMenuOption.
 43. Minor code reformatting.
+===
+44. a$ => someText$
+45. Minor code reformatting.
