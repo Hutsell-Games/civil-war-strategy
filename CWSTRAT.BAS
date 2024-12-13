@@ -294,7 +294,7 @@ FOR i = 1 TO 2
 NEXT i
 globalVPTotal = globalIncome(1) + globalIncome(2)
 
-chosit = 22
+highlightMenuOption = 22
 IF globalPlayer = 2 THEN GOSUB blanken: CALL drawUSAMap
 CALL victor
 ON ERROR GOTO 0
@@ -314,10 +314,32 @@ globalHilite = 11
 globalColour = 4
 globalTLX = 67: globalTLY = 13
 globalMenuText$(0) = "Main"
-globalMenuText$(1) = "Troops": IF globalRFlag < 0 OR globalCash(globalSide) < 100 THEN globalMenuText$(1) = "-": chosit = 23
-globalMenuText$(2) = "Moves": IF globalMFlag > 0 THEN globalMenuText$(2) = "-": IF chosit = 23 THEN chosit = 24
-globalMenuText$(3) = "Ships": IF globalNFlag > 0 THEN globalMenuText$(3) = "-": IF chosit = 24 THEN chosit = 25
-globalMenuText$(4) = "Railroad": IF globalRR(globalSide) > 0 THEN globalMenuText$(4) = "-": IF chosit = 25 THEN chosit = 26
+globalMenuText$(1) = "Troops"
+IF globalRFlag < 0 OR globalCash(globalSide) < 100 THEN 
+	globalMenuText$(1) = "-"
+	highlightMenuOption = 23 ' Troops
+END IF
+globalMenuText$(2) = "Moves"
+IF globalMFlag > 0 THEN 
+	globalMenuText$(2) = "-"
+	IF highlightMenuOption = 23 THEN 
+		highlightMenuOption = 24 ' Moves
+	END IF
+END IF
+globalMenuText$(3) = "Ships"
+IF globalNFlag > 0 THEN 
+	globalMenuText$(3) = "-"
+	IF highlightMenuOption = 24 THEN 
+		highlightMenuOption = 25 ' Ships
+	END IF
+END IF
+globalMenuText$(4) = "Railroad"
+IF globalRR(globalSide) > 0 THEN 
+	globalMenuText$(4) = "-"
+	IF highlightMenuOption = 25 THEN 
+		highlightMenuOption = 26 ' Railroad
+	END IF
+END IF
 globalMenuText$(5) = "END TURN"
 globalMenuText$(6) = "Inform"
 globalMenuText$(7) = "COMMANDS"
@@ -325,7 +347,7 @@ globalMenuText$(8) = "UTILITY"
 globalMenuText$(9) = "Files"
 
 globalSize = 9
-globalSelectedMenuOption = chosit
+globalSelectedMenuOption = highlightMenuOption
 CALL genericMenu(0)
 CALL clearRight
 '                            Main Menu
@@ -333,15 +355,15 @@ SELECT CASE globalSelectedMenuOption
 	CASE 1 ' Recruit
 		IF globalCash(globalSide) < 100 OR globalRFlag < 0 THEN globalRFlag = -1: GOTO menu0
 		CALL recruitArmy((globalSide))
-		chosit = 23
+		highlightMenuOption = 23
 		GOTO menu0
 	CASE 2 ' Armies
 		CALL moveArmy
-		chosit = 23
+		highlightMenuOption = 23
 		GOTO menu0
 	CASE 3 ' Navies
 		IF globalNFlag = 0 THEN CALL navy((globalSide), 0)
-		chosit = 25
+		highlightMenuOption = 25
 	CASE 4 ' Railroad
 		IF globalRR(globalSide) = 0 THEN
 			COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
@@ -375,7 +397,7 @@ SELECT CASE globalSelectedMenuOption
 		CALL genericMenu(0)
 		CALL clearRight
 		IF globalSelectedMenuOption <> 1 THEN
-			chosit = 24
+			highlightMenuOption = 24
 			GOTO menu0
 		END IF
 		endrnd:
@@ -393,7 +415,7 @@ SELECT CASE globalSelectedMenuOption
 		GOTO newmonth
 	CASE 6
 		CALL reportsMenu((globalSide))
-		chosit = 27
+		highlightMenuOption = 27
 		CALL setArmyRange(star, fin, globalSide)
 		FOR i = star TO fin
 			IF globalArmyMove(i) > 0 THEN CALL drawArmyMove(globalArmyLoc(i), globalArmyMove(i), 1)
@@ -405,7 +427,7 @@ SELECT CASE globalSelectedMenuOption
 		COLOR 11: LOCATE globalTLY - 2, globalTLX: PRINT "esc=Main Menu"
 		globalHilite = 15
 		globalColour = 3
-		chosit = 24
+		highlightMenuOption = 24
 		globalMenuText$(0) = "Commands"
 		globalMenuText$(1) = "Cancel"
 		globalMenuText$(2) = "Fortify": IF globalCash(globalSide) < 200 THEN globalMenuText$(2) = "-"
@@ -419,7 +441,7 @@ SELECT CASE globalSelectedMenuOption
 		globalSize = 9
 		CALL genericMenu(0)
 		CALL clearRight
-		chosit = 28
+		highlightMenuOption = 28
 		SELECT CASE globalSelectedMenuOption
 			CASE 1 ' Cancel
 				CALL cancel(globalSide)
@@ -576,14 +598,14 @@ SELECT CASE globalSelectedMenuOption
 			globalSelectedMenuOption = 29
 			GOTO optmen
 		CASE ELSE
-			chosit = 28
+			highlightMenuOption = 28
 			GOTO menu0
       	END SELECT
 		globalSelectedMenuOption = 21 + globalSelectedMenuOption
 		GOTO optmen
 	CASE 8 ' Utility Menu
 		utile:
-		chosit = 29
+		highlightMenuOption = 29
 		globalMenuText$(0) = "Utility"
 		globalMenuText$(1) = "Side": IF globalPlayer = 2 THEN globalMenuText$(2) = ""
 		globalMenuText$(2) = "1 Player": IF globalPlayer = 2 THEN globalMenuText$(2) = "2 Player"
@@ -878,7 +900,7 @@ SELECT CASE globalSelectedMenuOption
 
 		filex:
 		globalSelectedMenuOption = 23
-		chosit = 30
+		highlightMenuOption = 30
 		IF globalYear = 1861 THEN globalSelectedMenuOption = 22
 		globalMenuText$(0) = "Options"
 		globalMenuText$(1) = "Load": IF globalFileL = 0 THEN globalMenuText$(1) = "-": globalSelectedMenuOption = 23
@@ -926,7 +948,7 @@ SELECT CASE globalSelectedMenuOption
 	CASE 99
 		GOTO endrnd
 	CASE ELSE
-		chosit = 22
+		highlightMenuOption = 22
 		GOTO menu0
 	END SELECT
 	GOTO menu0
@@ -3746,7 +3768,7 @@ SUB setEndGameConditions
 			globalMenuText$(i - 1) = "  "
 		END IF
 	NEXT i
-	globalSelectedMenuOption = chosit
+	globalSelectedMenuOption = highlightMenuOption
 	globalMenuText$(0) = "Victory Conditions"
 	globalMenuText$(1) = globalMenuText$(1) + globalMenuText$(8)
 	globalMenuText$(2) = globalMenuText$(2) + a$
@@ -3759,7 +3781,7 @@ SUB setEndGameConditions
 	globalSize = 6
 	globalHilite = 14
 	CALL genericMenu(0)
-	chosit = 21 + globalSelectedMenuOption
+	highlightMenuOption = 21 + globalSelectedMenuOption
 	SELECT CASE globalSelectedMenuOption
 		CASE 1
 			globalVicFlag(2) = -globalVicFlag(2)
