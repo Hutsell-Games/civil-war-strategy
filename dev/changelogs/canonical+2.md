@@ -47,3 +47,7 @@
 ===
 36. Generate license file for dependencies.
 37. Fix issue with loading saved game files.
+==
+38. Created a new dev folder to contain other developer focused documents.
+39. Moved the changelogs into the dev folder.
+40. Added a todo list 
