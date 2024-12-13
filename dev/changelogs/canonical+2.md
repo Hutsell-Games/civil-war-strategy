@@ -50,4 +50,4 @@
 ==
 38. Created a new dev folder to contain other developer focused documents.
 39. Moved the changelogs into the dev folder.
-40. Added a todo list 
+41. Update README.md; add CONTRIBUTING.md; add screenshot of game.
