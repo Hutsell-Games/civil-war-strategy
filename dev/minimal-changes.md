@@ -29,6 +29,8 @@ Finally, we add two files:
 
 ## Code Cleanup
 
+### File References
+
 The next thing we need to do is some minimal code cleanup.
 
 Particularly, we want to remove references in the code to the files that we deleted above.
@@ -51,3 +53,41 @@ We will use find/replace to remove references to the files we deleted above.
 - Remove the reference to abelinco.exe found in CWSTRAT2.BAS
 - Remove a reference to cwsdoc.com found in CWSMENU.BAS, on lines 237-280.
 - Remove the instruction to press F1 for HELP as this called the old CWSDOC.COM file, it's found in CWSTRAT2.BAS
+
+### Old DOS Characters
+Next we remove or replace old unsupported DOS characters. They make look like this: "�". Unless otherwise noted we will replace these with the "+" character.
+
+We'll replace "�" with "|" on these two lines:
+```vb
+PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) �";
+COLOR 16 - c: PRINT "� Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+```
+
+We'll replace this:
+```vb
+COLOR 14: LOCATE 23, 50: PRINT "�������������ͻ"
+LOCATE 24, 50: PRINT "� U P D A T E �"
+LOCATE 25, 50: PRINT "�������������ͼ"
+```
+With this:
+```vb
+COLOR 14: LOCATE 23, 50: PRINT "+-----------+"
+LOCATE 24, 50: PRINT "| U P D A T E |"
+LOCATE 25, 50: PRINT "+-----------+"
+```
+
+We'll again replace the "" with a "|" on the following lines:
+```vb
+LOCATE 2, 7: PRINT STRING$(57, "�")
+LOCATE 9, 7: PRINT STRING$(57, "�")
+FOR i = 1 TO 6
+	LOCATE 2 + i, 7: PRINT "�"; SPACE$(55); "�"
+NEXT i
+```
+
+And for the two occurrences right near one another we'll use "-":
+```vb
+PRINT " "; STRING$(70, "-")
+PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(aggress! * x))); "00 ]"
+PRINT " "; STRING$(70, "-")
+```
