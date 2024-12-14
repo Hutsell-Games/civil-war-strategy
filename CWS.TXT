@@ -79,7 +79,7 @@
 10.1  Combat Model Adjustment                         25
 10.2  Game Concept                                    25
 10.3  Victory                                         25
-
+
 ===========================================================
  1              I N T R O D U C T I O N  v1.50
 ===========================================================
@@ -135,7 +135,7 @@ display will appear while the game initializes. You can skip
 opening music and graphics by typing 'CWS Q' at the command
 line prompt.
 
-
+
 				- 2  -
  
 The option to load a game or begin a new game is given at
@@ -193,7 +193,7 @@ When the game is over, you are returned to the opening
 screen, with the option to quit, load a game or begin a new
 game.
 
-
+
 				- 3  -
  1.5   Map Display
 ==================
@@ -252,7 +252,7 @@ keys. Example: You have the option to recruit at either Fort
 Donelson or Front Royal, both of which begin with "F". If
 you press "F", Fort Donelson will be selected because it
 comes first alphabetically in the menu list. If you want to
-
+
 				- 4  -
  
 select Front Royal in this case, you must use the arrow
@@ -311,7 +311,7 @@ current set of options you have chosen.
  1.10  Sequence of Play
 =======================
 Play proceeds in the following sequence for each game turn
-
+
 				- 5  -
  
 (representing 2 months):
@@ -370,7 +370,7 @@ city will change colors to indicate you have gained control.
 Fighting to capture an occupied fortified city reduces the
 fortification by one level. (Thus, a FORTIFIED+ city would
 be reduced to an unfortified city.)
-
+
 				- 6  -
  
 
@@ -429,7 +429,7 @@ SUPPLY     - the current state of food and equipment (0-10).
                      | Files       |
                      +=============+
 
-
+
 				- 7  -
  
 This menu shows the primary decisions you can make. At the
@@ -488,7 +488,7 @@ with slightly better levels for Rebel armies).
 NOTE: Once you have begin to recruit, you should NOT change
       sides or number of players, since the cities to
       recruit in are already selected for that part of the
-
+
 				- 8  -
  
       turn.
@@ -547,7 +547,7 @@ Note that both human and computer players are now prohibited
 from moving to a port and attacking the port on the same
 turn.
 
-
+
 				- 9  -
  
  3.4   Invasions
@@ -606,7 +606,7 @@ but even if it wins it may have its orders cancelled.
 
 During the month of January, you may not carry out any land
 campaigns (i.e., attack enemy or neutral cities). You may
-
+
 				- 10  -
  
 move armies to friendly cities, fortify, or conduct other
@@ -665,7 +665,7 @@ no cost for any of the reports.
        Shows the status of all your armies, and other useful
        statistics on the progress of the game. After the
        first turn, it will also show the total strength of
-
+
 				- 11  -
  
        the enemy forces.
@@ -722,9 +722,9 @@ various features of overall game play to be modified.
 Allows you to load or save games and to quit then program.
 There can be up to 9 saved games,"CWSx.SAV", where "x" is
 a number from 1 to 9. Those file names for which a saved
-game exists are marked with a "û" as a reminder.
+game exists are marked with a "+" as a reminder.
 
-
+
 				- 12  -
  
 When the game is started, the base game is automatically
@@ -783,7 +783,7 @@ city:
 2. City is not already at DOUBLE FORTIFIED ++ level
 3. You have at least 200 money units
 
-
+
 				- 13  -
  
 All cities meeting these conditions, will appear in a menu
@@ -842,7 +842,7 @@ of supply, none will be provided.
 
  5.6   Move Capital - ADVANCED FEATURE
 ======================================
-
+
 				- 14  -
  
 You may move your capital (if it has not yet been captured)
@@ -901,7 +901,7 @@ commanders, awaiting possible future service.
                      | Display    |
                      | Balance    |
                      | End Cond   |
-
+
 				- 15  -
  
                      | Events     |
@@ -960,7 +960,7 @@ be changed by changing that file. Up to 5 different preset
 conditions may trigger the end of the game:
 
                 Time (Month & Year)
-
+
 				- 16  -
  
                 % Cities Controlled by Either Side
@@ -970,7 +970,7 @@ conditions may trigger the end of the game:
 
 In addition, the total elimination of either side's armies
 will trigger a victory condition. Active conditions are
-marked with an "û". These may be toggled either off or on
+marked with an "ï¿½". These may be toggled either off or on
 (active) using this option by pressing ENTER when the
 desired condition is highlighted, but the VALUES themselves
 can only be changed in CWS.INI (see "Files" section below).
@@ -1019,7 +1019,7 @@ Toggle to allow/disallow January campaigns.
 
  6.13 Realism Toggle
 ====================
-
+
 				- 17  -
  
 A toggle is provided in the Utility menu ("REALISM") to
@@ -1078,7 +1078,7 @@ are listed below.
       When the REALISM toggle is ON, only the Union side may
       conduct invasions.
 
-
+
 				- 18  -
  
    f) When REALISM is ON, the defender combat advantage is
@@ -1137,7 +1137,7 @@ any key to move on.
  7.2   Army Movement
 ====================
 When you see the message "press any key for (current month
-
+
 				- 19  -
  
 and year) events", the move and update phase has begun.
@@ -1196,7 +1196,7 @@ for this battle.
 
  Supply     Additional adjustment if unit is out of supply
             (will be in contrasting color). Out-of-supply
-
+
 				- 20  -
  
             units fight at half strength.
@@ -1255,7 +1255,7 @@ the enemy.
 The loser must retreat to an adjacent friendly city. The
 human player is given the option as to which city to retreat
 to if a player-controlled DEFENDING army must retreat (if
-
+
 				- 21  -
  
 there is more than one choice for retreat). If there are no
@@ -1314,7 +1314,7 @@ boxed areas; comment lines before each of the data lines
 describe the information in that line.
 
 Text for sides (Side 0, Side 1, Side 2)
-
+
 				- 22  -
  
 +-----------------------------+
@@ -1373,7 +1373,7 @@ Data lines for each Rebel army at beginning of play
         city # (33 = Richmond)
         strength in 100's (300 = 30,000 men)
         experience (1)
-
+
 				- 23  -
  
         supply     (7)
@@ -1432,7 +1432,7 @@ Format :
 |McDowell,4          |
 +--------------------+
 
-
+
 				- 24  -
  
  9.2   Configuration File (CWS.CFG)
@@ -1491,7 +1491,7 @@ Format:
 Explanation of example line above:
 Atlanta is city 1
         at (265,290)
-
+
 				- 25  -
  
         possessed by side 2
@@ -1550,7 +1550,6 @@ limited, and results may be quite a historical. The 2-player
 option offers more possibilities, but even here, historical
 accuracy is not claimed.
 
-
 				- 26  -
  
  10.3  Victory
@@ -1568,4 +1567,3 @@ Enjoy !
 
 Will Hutsell
 3/95
-
