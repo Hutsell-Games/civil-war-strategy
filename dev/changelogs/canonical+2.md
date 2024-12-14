@@ -57,8 +57,12 @@
 ===
 44. a$ => someText$
 45. Minor code reformatting.
-==
+===
 46. Replace line labels dudd, nocity, noshow, notarg, fnew, and menu1 with EXIT SUB
     - In noshow's case I also took multiple IF conditions that had the same result and condensed them into a single IF
 47. x in resolveBattle now attackStrength; x1 => defendStrength
 48. Code reformatting
+===
+49. Rename dull2 and dull1 line labels to playTune2 and playTune1 to be more descriptive.
+50. float1 => seShips (se for special event), mercen => seMercenaries; money => seLoan; cotton => seCotton; purse => addMoney; uprising => seUprising; riot = seRiot
+51. Replace line label holdup with EXIT SUB

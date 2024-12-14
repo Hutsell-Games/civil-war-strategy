@@ -450,7 +450,6 @@ SELECT CASE globalSelectedMenuOption
 				CALL cancel(globalSide)
 				globalMFlag = 0
 				globalSelectedMenuOption = 22
-
 			CASE 2 ' Fortify
 				IF globalCash(globalSide) < 200 THEN 
 					COLOR 11
@@ -3981,20 +3980,26 @@ SUB specialEvents ' Special Events
 		CASE 1 ' Good for South
 			IF globalYear = 1864 AND globalMonth = 1 THEN globalVictory(2) = globalVictory(2) + 50
 			IF globalYear = 1865 AND globalMonth = 1 THEN globalVictory(2) = globalVictory(2) + 100
-			IF RND > .9 THEN GOSUB riot: EXIT SUB
+			IF RND > .9 THEN 
+				GOSUB seRiot
+				EXIT SUB
+			END IF
 
 			CALL clearBottom
-			IF RND > .2 OR globalNavySize(2) > 9 GOTO mercen
+			IF RND > .2 OR globalNavySize(2) > 9 GOTO seMercenaries
 			IF globalNavySize(2) > 0 AND globalNavyLoc(2) <> 99 THEN 
 				empty = globalNavyLoc(2)
-				GOTO float1
+				GOTO seShips
 			END IF
 			empty = 0
 			FOR i = 1 TO 40
-				IF globalCityP(i) = 2 AND globalMatrix(i, 7) = 99 AND globalNavyLoc(1) <> i THEN empty = i: EXIT FOR
+				IF globalCityP(i) = 2 AND globalMatrix(i, 7) = 99 AND globalNavyLoc(1) <> i THEN 
+					empty = i
+					EXIT FOR
+				END IF
 			NEXT i
-			IF empty = 0 GOTO mercen
-			float1:
+			IF empty = 0 GOTO seMercenaries
+			seShips:
 			CALL showAndSaveHistory("England has given ships to the South", 2)
 			globalNavySize(2) = globalNavySize(2) + 2 * plus
 			IF globalNavySize(2) > 10 THEN globalNavySize(2) = 10
@@ -4002,29 +4007,29 @@ SUB specialEvents ' Special Events
 			globalFleet$(2) = globalFleet$(2) + STRING$(x, "W")
 			globalNavyLoc(2) = empty
 			CALL drawShips
-			GOTO dull1
-			mercen:
-			IF RND > .1 OR globalControl(2) < 30 GOTO money
+			GOTO playTune1
+			seMercenaries:
+			IF RND > .1 OR globalControl(2) < 30 GOTO seLoan
 			someText$ = "French"
 			IF RND > .5 THEN someText$ = "British"
 			CALL showAndSaveHistory(someText$ + " mercenaries join " + globalArmyName$(index) + "'s army", 2)
 			globalArmySize(index) = globalArmySize(index) + 100 * plus
 			globalArmyExper(index) = 10
 			globalSupply(index) = 10
-			GOTO dull1
-			money:
-			IF RND > .3 OR globalControl(2) < 12 GOTO cotton
+			GOTO playTune1
+			seLoan:
+			IF RND > .3 OR globalControl(2) < 12 GOTO seCotton
 			CALL showAndSaveHistory("The South has obtained a loan from Europe", 2)
-			GOTO purse
-			cotton:
-			IF RND > .5 OR globalControl(2) < 12 GOTO uprising
+			GOTO addMoney
+			seCotton:
+			IF RND > .5 OR globalControl(2) < 12 GOTO seUprising
 			CALL showAndSaveHistory("Cash from cotton sales fill the Rebel Treasury", 2)
-			purse:
+			addMoney:
 			globalCash(2) = globalCash(2) + 100 * plus
-			GOTO dull1
-			uprising:
+			GOTO playTune1
+			seUprising:
 			pct! = .9
-			someText$ = "Union troops diverted to fight Western Indian uprisings"
+			someText$ = "Union troops diverted to fight Western native uprisings"
 			IF RND > .5 THEN someText$ = "Union 90-day enlistees return home"
 			IF globalYear = 1864 AND globalMonth > 5 THEN 
 				someText$ = "20% of Union forces take furloughs to vote in 1864 elections"
@@ -4034,9 +4039,9 @@ SUB specialEvents ' Special Events
 			FOR k = 1 TO 20
 				globalArmySize(k) = pct! * globalArmySize(k)
 			NEXT k
-			GOTO dull1
+			GOTO playTune1
 
-			riot:
+			seRiot:
 			IF globalRealism = 0 THEN RETURN
 			IF globalControl(who) = 1 THEN EXIT SUB
 			FOR k = 1 TO 99
@@ -4058,7 +4063,7 @@ SUB specialEvents ' Special Events
 		CASE 2 ' Good for Union
 			IF RND > .1 OR globalNavyLoc(1) = 0 OR globalNavySize(1) > 9 GOTO event2
 			IF RND > .95 THEN 
-				GOSUB riot
+				GOSUB seRiot
 				EXIT SUB
 			END IF
 			CALL showAndSaveHistory("Union shipworks have produced extra ships", 2)
@@ -4066,17 +4071,17 @@ SUB specialEvents ' Special Events
 			IF globalNavySize(1) > 10 THEN globalNavySize(1) = 10
 			x = globalNavySize(1) - LEN(globalFleet$(1))
 			globalFleet$(1) = globalFleet$(1) + STRING$(x, "W")
-			GOTO dull2
+			GOTO playTune2
 			event2:
 			IF RND < .7 GOTO abe
 			CALL showAndSaveHistory("Volunteer troops swell the Union ranks", 2)
 			x = 0
 			FOR i = 1 TO 20
 				x = x + 1
-				IF x > 5 GOTO dull2
+				IF x > 5 GOTO playTune2
 				IF globalArmySize(i) > 0 AND RND > .5 THEN globalArmySize(i) = globalArmySize(i) * 1.1 + plus
 			NEXT i
-			GOTO dull2
+			GOTO playTune2
 			abe:
 			IF globalEmancipate = 0 AND globalYear > 1862 THEN
 				globalEmancipate = 1
@@ -4084,24 +4089,24 @@ SUB specialEvents ' Special Events
 				globalVictory(1) = globalVictory(1) + 100
 				globalVictory(2) = globalVictory(2) - 100
 				CALL drawUSAMap
-				GOTO dull2
+				GOTO playTune2
 			END IF
 			IF globalYear = 1864 AND globalMonth = 11 THEN
 				CALL showAndSaveHistory("Lincoln has been reelected", 2)
 				globalVictory(2) = .5 * globalVictory(2)
-				GOTO dull2
+				GOTO playTune2
 			END IF
 			IF RND > .5 THEN
 				CALL showAndSaveHistory("Wealthy Unionists give generously to the Federal Cause", 2)
 				globalCash(1) = globalCash(1) + 100 * plus
-				GOTO dull2
+				GOTO playTune2
 			END IF
 			IF RND > .5 AND globalYear > 1861 THEN
 				CALL showAndSaveHistory("Rebel deserters leave the battlefield to go home", 2)
 				FOR i = 21 TO 40
 					globalArmySize(i) = .92 * globalArmySize(i)
 				NEXT i
-				GOTO dull2
+				GOTO playTune2
 			END IF
 			IF RND > .5 AND globalYear > 1861 THEN
 				CALL showAndSaveHistory("Union soldiers now have repeating rifles", 2)
@@ -4110,14 +4115,14 @@ SUB specialEvents ' Special Events
 				NEXT i
 			END IF
 			CALL showAndSaveHistory("Secretary of War Stanton predicts the end of the Rebellion", 2)
-			globalVictory(1) = globalVictory(1) + 10: GOTO dull2
+			globalVictory(1) = globalVictory(1) + 10: GOTO playTune2
 		CASE ELSE
 	END SELECT
 
-	dull2:
+	playTune2:
 	IF globalNoise = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	DO WHILE INKEY$ = "": LOOP: EXIT SUB
-	dull1:
+	playTune1:
 	IF globalNoise = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	DO WHILE INKEY$ = "": LOOP
 END SUB
@@ -4302,10 +4307,9 @@ SUB checkCityOccupied (x)
 	FOR i = 1 TO 40
 		IF globalArmyLoc(i) = x THEN 
 			globalOccupied(x) = i
-			GOTO holdup
+			EXIT SUB
 		END IF
 	NEXT i
-holdup:
 END SUB
 
 SUB relieveCommander (who)
