@@ -91,3 +91,20 @@ PRINT " "; STRING$(70, "-")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(aggress! * x))); "00 ]"
 PRINT " "; STRING$(70, "-")
 ```
+
+### Merging the Code Files
+The way QB64 handles includes is different from QB and will throw an error if you try running the code in QB off the bat. So we will update our code to reflect this.
+
+We could use the QB64 INCLUDE statement but that requires some reorganization of the code, instead we'll condense the four code files into one.
+
+Paste the contents of CWS14.BI at the top of CWSTRAT.BAS. Remove the duplicate DEFINT A-Z. Once this is done we can delete CWS14.BI.
+
+Take the declarations at the top of CWSTRAT2.BAS and paste them in at the beginning of CWSTRAT.BAS. Again remove the duplicate DEFINT A-Z.
+
+Paste the rest of the contents of CWSTRAT2.BAS into CWSTRAT.BAS.
+
+We follow the same process for the contents of CWSMENU.BAS - declarations at the top, remove duplicate DEFINT, rest of file at the end.
+
+We can then delete these other code files - CWSTRAT2.BAS, CWSMENU.BAS, CWS14.BI.
+
+This makes for quite the lengthy code file, something that I'm not a huge fan of, but we can break it up later.
