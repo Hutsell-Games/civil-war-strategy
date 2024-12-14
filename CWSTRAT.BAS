@@ -113,7 +113,9 @@ DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
 DIM SHARED graft(1 TO 1564)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
 
-
+$EXEICON: './cws.ico'
+_ICON
+_TITLE "Civil War Strategy Game"
 
 replay = 0
 newgame:
@@ -163,7 +165,7 @@ IF side = 2 THEN randbal = 3
 FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
 choose = 0
 
-
+_FULLSCREEN _SQUAREPIXELS, _SMOOTH
 SCREEN 12
 	DEF SEG = VARSEG(graphic(1))
 	BLOAD "cwsicon.vga", VARPTR(graphic(1))
@@ -174,8 +176,8 @@ SCREEN 12
 CLS
 COLOR 11: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
 COLOR 4: LOCATE 15, 32: PRINT "Registered Edition"
-COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
-LOCATE 28, 60: PRINT "v1.57"
+COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998, 2017, 2018, 2024 by W. R. Hutsell and Dave Mackey"
+LOCATE 28, 60: PRINT "v1.61"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
 CALL flags(1, -440, 0): CALL flags(2, -100, 0)
@@ -219,10 +221,10 @@ wtype = 2
 hilite = 15
 replay = 1
 IF player = 2 THEN GOSUB blanken
-mtx$(0) = "VGA CIVILWAR STRATEGY"
+mtx$(0) = "CIVIL WAR STRATEGY"
 mtx$(1) = "Resume Saved Game"
 mtx$(2) = "Start NEW Game"
-mtx$(3) = "Quit to DOS"
+mtx$(3) = "Quit"
 tlx = 33: tly = 20: colour = 5: size = 3
 choose = 23
 CALL menu(0)
@@ -243,9 +245,7 @@ ELSE
 END IF
 CALL usa
 GOTO menu0
-'==========================================================================
 '                              New Month
-'==========================================================================
 newmonth:
 IF side > 2 THEN side = 1
 a$ = "--------> EVENTS FOR " + month$(month) + " " + STR$(year) + " --------"
@@ -307,21 +307,21 @@ CALL menu(0): CALL clrrite
 '                            Main Menu
 '==========================================================================
 SELECT CASE choose
-	CASE 1
+	CASE 1 ' Recruit
 	IF cash(side) < 100 OR rflag < 0 THEN rflag = -1: GOTO menu0
 	CALL recruit((side))
 	chosit = 23
 	GOTO menu0
 '==========================================================================
-	CASE 2
+	CASE 2 ' Armies
 	CALL armies
 	chosit = 23
 	GOTO menu0
 '==========================================================================
-	CASE 3
+	CASE 3 ' Navies
 	IF nflag = 0 THEN CALL navy((side), 0)
 	chosit = 25
-	CASE 4
+	CASE 4 ' Railroad
 IF rr(side) = 0 THEN
 	COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 	PSET (550, 20), 0
@@ -337,7 +337,7 @@ ELSE
 	CALL clrbot: COLOR 11: PRINT "Railroad is already carrying "; armyname$(rr(side)); " to "; city$(armymove(rr(side))); : GOTO menu0
 END IF
 '==========================================================================
-	CASE 5
+	CASE 5 ' End Turn
 	tlx = 67: tly = 15
 	hilite = 15: colour = 3: choose = 23
 	mtx$(0) = "End Turn"
@@ -355,10 +355,7 @@ endrnd:
 	FOR i = star TO fin
 	IF armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
 	NEXT i
-'==========================================================================
-'                            Commands
-'==========================================================================
-	CASE 7
+	CASE 7 ' Commands
 optmen:
 	tlx = 67: tly = 13
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
@@ -775,7 +772,7 @@ filex:
 	mtx$(1) = "Load": IF filel = 0 THEN mtx$(1) = "-": choose = 23
 	mtx$(2) = "Save"
 	mtx$(3) = "New Game"
-	mtx$(4) = "Quit to DOS"
+	mtx$(4) = "Quit"
 	size = 4: tlx = 67: tly = 15
 	CALL menu(0): CALL clrrite
 	SELECT CASE choose
@@ -4857,7 +4854,6 @@ reglr:
 	GOTO sel1
 crsr:   a$ = INKEY$: IF a$ = "" GOTO crsr
 	IF ASC(a$) = 13 THEN RETURN
-	IF ASC(a$) = 2 THEN GOTO boss
 	IF LEN(a$) = 2 GOTO arrows
 	IF switch = 3 THEN choose = -ASC(UCASE$(a$)): GOTO called
 	IF ASC(a$) = 27 THEN choose = -1: GOTO called
@@ -4901,8 +4897,6 @@ limits:
 noadjust:
 	IF tlx = 0 THEN tlx = INT(40.5 - .5 * wide)
 	RETURN
-boss:
-	CALL scrnsavr
 boss1:
 	CLS
 	CALL usa
@@ -5078,69 +5072,4 @@ FOR k = 1 TO 4
 x = 185 + 200 * RND
 LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
 NEXT k
-END SUB
-
-SUB scrnsavr
-SCREEN 12
-most = 5
-CLS
-sec! = 0
-DO WHILE TIMER - sec! < .5: LOOP
-DIM x(2), y(2)
-RANDOMIZE TIMER
-boxes = 1: IF RND > .5 THEN boxes = 0: aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
-
-dx = 20: dy = 5: c = 1
-GOSUB newbox
-
-animate:
-IF boxes = 0 THEN
-	CIRCLE (x(1), y(1)), .5 * ABS(x(1) - x(2)), c, , , aspect!
-ELSE
-	LINE (x(1), y(1))-(x(2), y(2)), c, B
-END IF
-PAINT (x(1) + 1, y(1) + 1), 16 * RND, c
-
-sec! = TIMER
-DO: a$ = INKEY$: LOOP WHILE a$ = "" AND TIMER - sec! < .1
-IF a$ <> "" THEN IF ASC(a$) = 2 THEN EXIT SUB
-
-x(1) = x(1) + dx
-x(2) = x(2) + dx
-
-IF x(1) < 1 THEN dx = 20: x(1) = 1: GOSUB newbox1
-IF x(2) > 675 THEN dx = -20: GOSUB newbox1
-
-y(1) = y(1) + dy
-y(2) = y(2) + dy
-IF y(1) < 1 THEN dy = 5: y(1) = 1: GOSUB newbox1
-IF y(2) > 480 THEN dy = -5: GOSUB newbox1
-
-GOTO animate
-	    
-newbox:
-x(1) = 1 + 650 * RND
-IF x(1) < 1 THEN x(1) = 1
-x(2) = x(1) + 30 + 50 * RND: IF x(2) > 639 THEN x(2) = 639
-IF x(2) < 1 THEN x(2) = x(1)
-
-y(1) = 10 + 100 * RND
-y(2) = y(1) + 50 + 120 * RND
-RETURN
-
-newbox1:
-reps = reps + 1
-IF reps >= most THEN CLS : reps = 0: most = 3 + 10 * RND: IF RND > .9 THEN boxes = 1 - boxes
-y(2) = y(1) + 20 + 100 * RND
-IF y(2) > 475 THEN y(2) = 475
-x(2) = x(1) + 50 + 50 * RND
-IF x(2) > 675 THEN x(2) = 675
-c = c + 1
-IF c > 15 THEN c = 1
-IF RND > .5 THEN RETURN
-IF dy = 5 THEN dy = 5 + 10 * RND
-IF dy = -5 THEN dy = -5 - 10 * RND
-IF boxes = 0 THEN aspect! = 1: IF RND > .5 THEN aspect! = .5: IF RND > .5 THEN aspect! = 2
-RETURN
-
 END SUB

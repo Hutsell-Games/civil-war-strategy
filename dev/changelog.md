@@ -1,0 +1,4 @@
+- 1.61
+    - Fresh rebase from canonical source
+    - See [minimal-changes.md](minimal-changes.md) for details on changes
+    - Minor textual changes, remove screensaver, add icon, full screen default
