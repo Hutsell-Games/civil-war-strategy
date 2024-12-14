@@ -1,8 +1,21 @@
+DECLARE SUB armyxy (x%, y%, z%)
+DECLARE SUB barnacle (who%)
+DECLARE SUB flags (who%, w%, a%)
+DECLARE SUB integrity ()
+DECLARE SUB ironclad ()
+DECLARE SUB normal (xbar%, vary%, result%)
+DECLARE SUB relieve (who%)
+DECLARE SUB retreat (active%, x%)
+DECLARE SUB schooner ()
+DECLARE SUB shiptype (who%, i%)
+DECLARE SUB stax (who%)
+DECLARE SUB tinytrain (who%, flag%)
+DECLARE SUB traincapacity (who%, limit%)
+DECLARE SUB topbar ()
 DECLARE SUB mxw (wide%)
 DECLARE SUB choices (b1%, wide%)
 DECLARE SUB scrnsavr ()
 DECLARE SUB topbar ()
-DIM SHARED graft(1 TO 1564)
 DECLARE SUB armyxy (x%, y%, z%)
 DECLARE SUB center (y%, a$)
 DECLARE SUB flags (who%, w%, a%)
@@ -74,6 +87,7 @@ DECLARE SUB usamap ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
 DECLARE SUB war ()
+DEFINT A-Z
 '==========================================================================
 COMMON SHARED choose%, tlx%, tly%, size%, mtx$(), wtype%, colour%, hilite%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
@@ -96,29 +110,21 @@ DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2
 DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fort(40), rr(2)
 DIM SHARED victory(2), capcity(2), emancipate, price(3), tracks(2), fleet$(2)
 DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
-
-
-DEFINT A-Z
-DECLARE SUB armyxy (x%, y%, z%)
-DECLARE SUB barnacle (who%)
-DECLARE SUB flags (who%, w%, a%)
-DECLARE SUB integrity ()
-DECLARE SUB ironclad ()
-DECLARE SUB normal (xbar%, vary%, result%)
-DECLARE SUB relieve (who%)
-DECLARE SUB retreat (active%, x%)
-DECLARE SUB schooner ()
-DECLARE SUB shiptype (who%, i%)
-DECLARE SUB stax (who%)
-DECLARE SUB tinytrain (who%, flag%)
-DECLARE SUB traincapacity (who%, limit%)
-DECLARE SUB topbar ()
+DIM SHARED graft(1 TO 1564)
 DIM SHARED graphic(1 TO 1564), Ncap(60)
+
+
 
 replay = 0
 newgame:
 pcode = 0: rflag = 0
-FOR k = 1 TO 40: armysize(k) = 0: armyloc(k) = 0: armymove(k) = 0: armylead(k) = 0: armyname$(k) = "": NEXT k
+FOR k = 1 TO 40
+	armysize(k) = 0
+	armyloc(k) = 0
+	armymove(k) = 0
+	armylead(k) = 0
+	armyname$(k) = ""
+NEXT k
 usadv = 0: emancipate = 0
 FOR k = 1 TO 2
 navysize(k) = 0: navyloc(k) = 0: navymove(k) = 0
@@ -319,7 +325,7 @@ SELECT CASE choose
 IF rr(side) = 0 THEN
 	COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 	PSET (550, 20), 0
-	DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
+	DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U9L2U5R1BF4"
 	z = 9: IF side = 2 THEN z = 7
 	x = POINT(0): y = POINT(1)
 	PAINT (x, y), z, 15
@@ -2803,7 +2809,7 @@ PSET (580, 380), 0
 
 DRAW "BR15"
 x = POINT(0): y = POINT(1): CIRCLE (x, y), 25, 1, , , 1.4
-CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4
+CIRCLE (x + 5, y), 27, 1, 4, 1.5, 1.4
 CIRCLE (x, y), 29, 1, , , 1.4
 DRAW "BR20"
 x = POINT(0): y = POINT(1): PAINT (x, y), 3, 1
@@ -4074,7 +4080,7 @@ LINE -(495, 160), 10
 LINE -(490, 155), 10
 LINE -(485, 150), 10
 
-PAINT (502, 160), 1, 10
+' PAINT (502, 160), 1, 10
 
 LINE (145, 375)-(145, 405), 10   'Mobile border
 
@@ -4124,7 +4130,7 @@ LINE -(90, 400), 10
 LINE -(105, 402), 10
 LINE -(120, 415), 10
 LINE -(115, 420), 10
-PAINT (108, 400), 1, 10
+' PAINT (108, 400), 1, 10
 
 LINE (66, 375)-(52, 375), 10
 END SUB

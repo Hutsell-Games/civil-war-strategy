@@ -131,3 +131,51 @@ Becomes:
 IF NOT _FILEEXISTS("*.sav") = 0 THEN filel = 0
 ```
 We need to keep this in mind for the rest of the code and add `NOT` where appropriate.
+
+## Fixing Image Bleeds
+There are some minor areas in which the way QB64 processes graphical commands seems to differ from QB. This results in graphics bleeding into other areas of the screen in the game. We will make slight modifications to the graphics as necessary to fix these issues.
+
+
+### Small Train Outline
+We'll replace this:
+```vb
+DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5R1BF4"
+```
+With this:
+```vb
+DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U9L2U5R1BF4"
+```
+
+Do you see the difference? Towards the end we replace `U8` with `U9`.
+
+### Cannon
+
+In the `cannon` SUB we'll replace:
+```vb
+CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4
+```
+With this:
+```vb
+CIRCLE (x + 5, y), 27, 1, 4, 1.5, 1.4
+```
+
+Note we are again making a small change - `29` to `27`.
+
+### Touchup
+The touchup routine redraws parts of the map. We need to comment out the following line:
+```vb
+PAINT (502, 160), 1, 10
+```
+
+As well as:
+```vb
+PAINT (108, 400), 1, 10
+```
+
+## An Unexpected Error
+I've worked through this code so many times I know most of the bugs but I'm getting one I don't recall experiencing before - a subscript out of range for `armyloc`.
+
+One thing I didn't spend as much time doing this time around was separating the SUB declarations from the variable declarations. I don't think this should be a problem, but just in case I'm going to move all the variables together and keep all the sub declarations before them...and that fixes it!
+
+## The End
+This might just be the end of our minimal changes. Give the game a try and file an issue if you run into any problems!
