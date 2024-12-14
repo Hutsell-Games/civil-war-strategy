@@ -908,7 +908,11 @@ SELECT CASE globalSelectedMenuOption
 		highlightMenuOption = 30
 		IF globalYear = 1861 THEN globalSelectedMenuOption = 22
 		globalMenuText$(0) = "Options"
-		globalMenuText$(1) = "Load": IF globalFileL = 0 THEN globalMenuText$(1) = "-": globalSelectedMenuOption = 23
+		globalMenuText$(1) = "Load":
+		IF globalFileL = 0 THEN 
+			globalMenuText$(1) = "-"
+			globalSelectedMenuOption = 23
+		END IF
 		globalMenuText$(2) = "Save"
 		globalMenuText$(3) = "New Game"
 		globalMenuText$(4) = "Quit"
@@ -999,7 +1003,9 @@ SUB animateArmy (index, flag)
        
 	IF flag > 0 THEN GOTO already
 	GET (x - 9, y - 7)-(x + 9, y + 6), globalAnima
-	IF globalOccupied(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	IF globalOccupied(from) = 0 THEN 
+		LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	END IF
 
 	already:
 	FOR i = 2 TO 8
@@ -1022,7 +1028,7 @@ SUB moveArmy
 	CALL chooseMoveArmyFrom(index, target)
 	IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN globalMFlag = 1
-	GOTO dudd
+	EXIT SUB
 	tent:
 	globalTLX = 67
 	globalTLY = 12
@@ -1044,14 +1050,14 @@ SUB moveArmy
 	globalColour = 3
 	CALL genericMenu(2)
 	CALL clearRight
-	IF globalSelectedMenuOption < 0 GOTO dudd
+	IF globalSelectedMenuOption < 0 THEN EXIT SUB
 	IF globalMonth < 3 AND globalJanCam = 0 AND globalCityP(globalMenuOptions(globalSelectedMenuOption)) <> globalSide THEN 
 		COLOR 11
 		CALL clearBottom
 		PRINT "No campaigns in January"; 
 		CALL TICK(9)
 		CALL clearBottom
-		GOTO dudd
+		EXIT SUB
 	END IF
 
 	CALL clearBottom
@@ -1062,7 +1068,6 @@ SUB moveArmy
 	CALL TICK(globalTurbo!)
 	CALL clearBottom
 	CALL clearRight
-dudd:
 END SUB
 
 SUB drawArmyStat (index)
@@ -1102,101 +1107,101 @@ SUB resolveBattle (attack, defend, win, lose)
 	IF attack > 20 THEN c = 7
 	COLOR c: LOCATE 2, y: PRINT globalArmyName$(attack)
 	LOCATE 3, y: CALL strong(attack)
-	x = .01 * globalArmySize(attack)
-	IF x > globalTCR THEN x = globalTCR
-	LOCATE 4, y: PRINT "Base    "; x
+	attackStrength = .01 * globalArmySize(attack)
+	IF attackStrength > globalTCR THEN attackStrength = globalTCR
+	LOCATE 4, y: PRINT "Base    "; attackStrength
 	IF globalArmySize(attack) / globalArmySize(defend) > .2 THEN 
-		x = x + .3 * globalArmyLead(attack) + .3 * globalArmyExper(attack)
-		IF x > globalTCR THEN x = globalTCR
+		attackStrength = attackStrength + .3 * globalArmyLead(attack) + .3 * globalArmyExper(attack)
+		IF attackStrength > globalTCR THEN attackStrength = globalTCR
 	END IF
 	IF globalArmyExper(attack) > 8 THEN 
-		x = x + 1
-		IF x > globalTCR THEN x = globalTCR
+		attackStrength = attackStrength + 1
+		IF attackStrength > globalTCR THEN attackStrength = globalTCR
 	END IF
-	LOCATE 5, y: PRINT "Ldr/Exp "; x
+	LOCATE 5, y: PRINT "Ldr/Exp "; attackStrength
 	IF globalArmySize(attack) < 15 THEN 
-		x = .5 * x
-		IF x > globalTCR THEN x = globalTCR
+		attackStrength = .5 * attackStrength
+		IF attackStrength > globalTCR THEN attackStrength = globalTCR
 	END IF
-	LOCATE 6, y: PRINT "Small   "; x
+	LOCATE 6, y: PRINT "Small   "; attackStrength
 	IF globalArmySize(attack) / globalArmySize(defend) <= .5 THEN 
-		x = x - 2
-		IF x < 1 THEN x = 1
+		attackStrength = attackStrength - 2
+		IF attackStrength < 1 THEN attackStrength = 1
 	END IF
 	IF globalArmySize(attack) / globalArmySize(defend) > 3 THEN 
-		x = x + 2
-		IF x > globalTCR THEN x = globalTCR
+		attackStrength = attackStrength + 2
+		IF attackStrength > globalTCR THEN attackStrength = globalTCR
 	END IF
-	IF globalArmySize(attack) / globalArmySize(defend) > 10 THEN x = globalTCR
-	IF globalArmySize(attack) / globalArmySize(defend) <= .2 THEN x = 1
-	LOCATE 7, y: PRINT "Outman  "; x
+	IF globalArmySize(attack) / globalArmySize(defend) > 10 THEN attackStrength = globalTCR
+	IF globalArmySize(attack) / globalArmySize(defend) <= .2 THEN attackStrength = 1
+	LOCATE 7, y: PRINT "Outman  "; attackStrength
 	IF globalSupply(attack) < 1 THEN 
-		x = .5 * x
+		attackStrength = .5 * attackStrength
 		COLOR 13
 	END IF
-	LOCATE 8, y: PRINT "Supply  "; x: COLOR c
-	IF x < 1 THEN x = 1
+	LOCATE 8, y: PRINT "Supply  "; attackStrength: COLOR c
+	IF attackStrength < 1 THEN attackStrength = 1
 	'                       Adjust attack advantage
-	IF attack < 21 AND globalSide = 2 AND globalDifficult > 3 THEN x = x + 2 * globalDifficult - 6
-	IF attack > 20 AND globalSide = 1 AND globalDifficult < 3 THEN x = x + 6 - 2 * globalDifficult
-	LOCATE 9, y: PRINT "Difclt  "; x
-	IF x > globalTCR THEN x = globalTCR
-	COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
+	IF attack < 21 AND globalSide = 2 AND globalDifficult > 3 THEN attackStrength = attackStrength + 2 * globalDifficult - 6
+	IF attack > 20 AND globalSide = 1 AND globalDifficult < 3 THEN attackStrength = attackStrength + 6 - 2 * globalDifficult
+	LOCATE 9, y: PRINT "Difclt  "; attackStrength
+	IF attackStrength > globalTCR THEN attackStrength = globalTCR
+	COLOR 11: LOCATE 11, y: PRINT "Attack  "; attackStrength
 	LINE (530, 155)-(635, 175), 11, B
 
-	x1 = .013 * globalArmySize(defend) + 1
+	defendStrength = .013 * globalArmySize(defend) + 1
 	IF globalRealism = 1 THEN 
-		x1 = .02 * globalArmySize(defend) + 2
-		IF x1 > 20 THEN x1 = 20
+		defendStrength = .02 * globalArmySize(defend) + 2
+		IF defendStrength > 20 THEN defendStrength = 20
 	END IF
 	LOCATE 13, y: PRINT "Defender"
 	COLOR 16 - c: LOCATE 14, y: PRINT globalArmyName$(defend)
 	LOCATE 15, y: CALL strong(defend)
 	LOCATE 16, y: PRINT "Base    "; INT(.01 * globalArmySize(defend))
-	LOCATE 17, y: PRINT "Defense "; x1
+	LOCATE 17, y: PRINT "Defense "; defendStrength
 	IF globalArmySize(defend) / globalArmySize(attack) > .2 THEN 
-		x1 = x1 + .3 * globalArmyLead(defend) + .3 * globalArmyExper(defend)
-		IF x1 > globalTCR THEN x1 = globalTCR
+		defendStrength = defendStrength + .3 * globalArmyLead(defend) + .3 * globalArmyExper(defend)
+		IF defendStrength > globalTCR THEN defendStrength = globalTCR
 	END IF
 	IF globalArmyExper(defend) > 8 THEN 
-		x1 = x1 + 1
-		IF x1 > globalTCR THEN x1 = globalTCR
+		defendStrength = defendStrength + 1
+		IF defendStrength > globalTCR THEN defendStrength = globalTCR
 	END IF
-	LOCATE 18, y: PRINT "Ldr/Exp "; x1
-	IF globalArmySize(defend) < 15 THEN x1 = .5 * x1
-	LOCATE 19, y: PRINT "Small   "; x1
+	LOCATE 18, y: PRINT "Ldr/Exp "; defendStrength
+	IF globalArmySize(defend) < 15 THEN defendStrength = .5 * defendStrength
+	LOCATE 19, y: PRINT "Small   "; defendStrength
 
 	R! = globalArmySize(defend) / globalArmySize(attack)
 	SELECT CASE R!
 		CASE IS > 10
-			x1 = globalTCR
+			defendStrength = globalTCR
 		CASE IS > 1.5
-			x1 = x1 + 2
+			defendStrength = defendStrength + 2
 		CASE IS < .5
-			x1 = .8 * x1
+			defendStrength = .8 * defendStrength
 		CASE IS < .2
-			x1 = .5 * x1
+			defendStrength = .5 * defendStrength
 	END SELECT
-		IF x1 < 1 THEN x1 = 1
-		IF x1 > globalTCR THEN x1 = globalTCR
+		IF defendStrength < 1 THEN defendStrength = 1
+		IF defendStrength > globalTCR THEN defendStrength = globalTCR
 
-	LOCATE 20, y: PRINT "Outman  "; x1
+	LOCATE 20, y: PRINT "Outman  "; defendStrength
 	IF globalSupply(defend) < 1 THEN 
-		x1 = .5 * x1
+		defendStrength = .5 * defendStrength
 		COLOR 13
 	END IF
-	LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
-	IF x1 < 1 THEN x1 = 1
+	LOCATE 21, y: PRINT "Supply  "; defendStrength: COLOR 16 - c
+	IF defendStrength < 1 THEN defendStrength = 1
 	'                       Adjust defend advantage
-	IF defend < 21 AND globalSide = 2 AND globalDifficult > 3 THEN x1 = x1 + 2 * globalDifficult - 6
-	IF defend > 20 AND globalSide = 1 AND globalDifficult < 3 THEN x1 = x1 + 6 - 2 * globalDifficult
-	LOCATE 22, y: PRINT "Difclt  "; x1
+	IF defend < 21 AND globalSide = 2 AND globalDifficult > 3 THEN defendStrength = defendStrength + 2 * globalDifficult - 6
+	IF defend > 20 AND globalSide = 1 AND globalDifficult < 3 THEN defendStrength = defendStrength + 6 - 2 * globalDifficult
+	LOCATE 22, y: PRINT "Difclt  "; defendStrength
 
 	someText$ = "Fort"
 	IF globalArmyMove(defend) = 0 THEN 
-		x1 = x1 * (1 + globalFort(globalArmyLoc(defend)))
+		defendStrength = defendStrength * (1 + globalFort(globalArmyLoc(defend)))
 	END IF
-	IF x1 > globalTCR THEN x1 = globalTCR
+	IF defendStrength > globalTCR THEN defendStrength = globalTCR
 	IF globalFort(globalArmyLoc(defend)) > 0 AND globalArmyMove(defend) = 0 THEN
 		COLOR 13
 		someText$ = "Fort+"
@@ -1204,17 +1209,17 @@ SUB resolveBattle (attack, defend, win, lose)
 			someText$ = "Fort++"
 		END IF
 	END IF
-	LOCATE 23, y: PRINT someText$; TAB(76); x1
-	IF x1 > globalTCR THEN x1 = globalTCR
-	COLOR 11: LOCATE 25, y: PRINT "Defend  "; x1
+	LOCATE 23, y: PRINT someText$; TAB(76); defendStrength
+	IF defendStrength > globalTCR THEN defendStrength = globalTCR
+	COLOR 11: LOCATE 25, y: PRINT "Defend  "; defendStrength
 	LINE (530, 380)-(635, 400), 11, B
 
 	spin = 0
-	scale = x
-	IF x1 > scale THEN scale = x1
+	scale = attackStrength
+	IF defendStrength > scale THEN scale = defendStrength
 	scale = scale + 1
 
-	odds! = x / (x + x1)
+	odds! = attackStrength / (attackStrength + defendStrength)
 	a = INT(100 * odds!)
 	IF a < 1 THEN a = 1
 	someText$ = LTRIM$(RTRIM$(STR$(a))) + "%"
@@ -1246,8 +1251,8 @@ SUB resolveBattle (attack, defend, win, lose)
 	fin = scale * RND
 	IF globalNoise > 0 THEN SOUND 77, .5: SOUND 59, .5
 	CALL TICK(.1)
-	IF star <= x THEN hit = 1
-	IF fin <= x1 THEN hit1 = 1
+	IF star <= attackStrength THEN hit = 1
+	IF fin <= defendStrength THEN hit1 = 1
 
 	IF hit = 0 AND hit1 = 0 GOTO grapple
 	IF hit = 1 AND hit1 = 1 GOTO grapple
@@ -1304,9 +1309,9 @@ SUB resolveBattle (attack, defend, win, lose)
 	IF killa >= globalArmySize(attack) THEN killa = globalArmySize(attack) - 1
 	IF killd >= globalArmySize(defend) THEN killd = globalArmySize(defend) - 1
 
-	x = INT(100 * odds!)
-	IF x < 1 THEN x = 1
-	someText$ = LTRIM$(RTRIM$(STR$(x))) + "%"
+	attackStrength = INT(100 * odds!)
+	IF attackStrength < 1 THEN attackStrength = 1
+	someText$ = LTRIM$(RTRIM$(STR$(attackStrength))) + "%"
 
 	COLOR c
 	LOCATE 1, 1: PRINT "Attack Loss: ";
@@ -1556,7 +1561,8 @@ SUB fileManagement (switch)
 				END IF
 			NEXT k
 			CALL sortMenuOptions((globalSize))
-			globalTLX = 67: globalTLY = 14 - .5 * globalSize
+			globalTLX = 67
+			globalTLY = 14 - .5 * globalSize
 			CALL genericMenu(0)
 			CALL clearRight
 			IF globalSelectedMenuOption < 1 THEN EXIT SUB
@@ -1684,23 +1690,23 @@ SUB fortifyCity (target)
 	globalSelectedMenuOption = 31
 	CALL genericMenu(9)
 	CALL clearRight
-	IF globalSelectedMenuOption < 0 GOTO nocity
+	IF globalSelectedMenuOption < 0 THEN EXIT SUB
 	target = globalMenuOptions(globalSelectedMenuOption)
 	CALL checkCityOccupied(target)
 	x = globalOccupied(target)
-	IF x < 0 GOTO nocity
+	IF x < 0 THEN EXIT SUB
 	IF globalFort(target) > 1 THEN 
 		CALL clearBottom
 		PRINT globalCity$(target); " at MAXIMUM fortification level of 2";
 		CALL TICK(4)
-		GOTO nocity
+		EXIT SUB
 	END IF
 	cost = 200
 	IF globalCash(globalSide) < cost THEN 
 		CALL clearBottom
 		PRINT "Fortifications for "; globalCity$(target); " cost "; cost; " and you only have "; globalCash(globalSide);
 		CALL TICK(4)
-		GOTO nocity
+		EXIT SUB
 	END IF
 	COLOR 3
 	globalFort(target) = globalFort(target) + 1
@@ -1713,13 +1719,10 @@ SUB fortifyCity (target)
 	globalArmyMove(x) = -1
 	CALL placeArmy(x)
 	CALL stax(who)
-nocity:
 END SUB
 
 SUB drawArmyMove (from, dest, kind)
-	IF from < 1 OR from > 40 GOTO noshow
-	IF dest < 0 GOTO noshow
-	IF from = 999 GOTO noshow
+	IF from < 1 OR from > 40 OR dest < 0 OR from = 999 THEN EXIT SUB
 	x = globalCityX(from) - 12
 	y = globalCityY(from) - 11
 	x1 = globalCityX(dest)
@@ -1788,7 +1791,6 @@ SUB drawArmyMove (from, dest, kind)
 			LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
 		CASE ELSE
 	END SELECT
-noshow:
 END SUB
 
 SUB turnIterate
@@ -1875,7 +1877,7 @@ SUB chooseMoveArmyFrom (index, target)
 	NEXT i
 	IF globalSize = 0 THEN 
 		index = -1
-		GOTO notarg
+		EXIT SUB
 	END IF
 	globalMenuText$(0) = "From"
 	CALL sortMenuOptions(globalSize)
@@ -1887,7 +1889,7 @@ SUB chooseMoveArmyFrom (index, target)
 	CALL clearRight
 	IF globalSelectedMenuOption < 0 THEN 
 		target = 0
-		GOTO notarg
+		EXIT SUB
 	END IF
 	target = globalMenuOptions(globalSelectedMenuOption)
 
@@ -1900,7 +1902,7 @@ SUB chooseMoveArmyFrom (index, target)
 			globalMenuOptions(globalSize) = i
 		END IF
 	NEXT i
-	IF globalSize = 1 GOTO notarg
+	IF globalSize = 1 THEN EXIT SUB
 	globalMenuText$(0) = "Which"
 	CALL sortMenuOptions(globalSize)
 	globalTLX = 67
@@ -1909,10 +1911,9 @@ SUB chooseMoveArmyFrom (index, target)
 	CALL clearRight
 	IF globalSelectedMenuOption < 0 THEN 
 		index = 0
-		GOTO notarg
+		EXIT SUB
 	END IF
 	index = globalMenuOptions(globalSelectedMenuOption)
-notarg:
 END SUB
 
 SUB navy (who, chx)
@@ -2568,7 +2569,7 @@ SUB chooseCityMenu (index)
 			IF index < 1 THEN index = 40
 			IF globalCityP(index) <> globalSide GOTO minus1 ELSE GOTO morecap
 		CASE 2
-			GOTO fnew
+			EXIT SUB
 		CASE 3
 			plus1:
 			index = index + 1
@@ -2577,7 +2578,6 @@ SUB chooseCityMenu (index)
 		CASE ELSE
 			index = 0
 		END SELECT
-fnew:
 END SUB
 
 SUB calculateCasualties (xbar, vary, result)
@@ -2764,7 +2764,7 @@ SUB resolveRailroadMoves (who)
 END SUB
 
 SUB recruitArmy (who)
-	IF globalCash(who) < 100 GOTO menu1
+	IF globalCash(who) < 100 THEN EXIT SUB
 	globalSize = 0
 	COLOR 12
 	globalMenuText$(0) = "Recruit"
@@ -2801,7 +2801,7 @@ SUB recruitArmy (who)
 	foe:
 	NEXT i
 	alldone:
-	IF globalSize = 0 GOTO menu1
+	IF globalSize = 0 THEN EXIT SUB
 	IF who = globalSide AND globalRFlag = 0 THEN 
 		FOR i = 1 TO globalSize
 			globalRCity(i) = globalMenuOptions(i)
@@ -2811,7 +2811,7 @@ SUB recruitArmy (who)
 	CALL sortMenuOptions(globalSize)
 
 	levy:
-	IF globalCash(who) < 100 GOTO menu1
+	IF globalCash(who) < 100 THEN EXIT SUB
 	IF (who = globalSide) OR (globalPlayer = 2) THEN
 		CALL clearBottom
 		PRINT globalForce$(who); " funds available "; globalCash(who);
@@ -2827,7 +2827,7 @@ SUB recruitArmy (who)
 	IF globalSelectedMenuOption > 0 THEN globalSelectedMenuOption = 21 + globalSelectedMenuOption
 	CALL genericMenu(2)
 	CALL clearRight
-	IF globalSelectedMenuOption < 1 GOTO menu1
+	IF globalSelectedMenuOption < 1 THEN EXIT SUB
 	auto1:
 	empty = 0
 	index = globalMenuOptions(globalSelectedMenuOption)
@@ -2838,7 +2838,7 @@ SUB recruitArmy (who)
 	END IF
 	CALL assignArmyCommander((who), empty)
 
-	IF who <> globalSide AND empty = 0 GOTO menu1
+	IF who <> globalSide AND empty = 0 THEN EXIT SUB
 	IF empty = 0 GOTO levy
 	globalArmyLoc(empty) = index
 	GOSUB playb
@@ -2905,7 +2905,6 @@ SUB recruitArmy (who)
 	IF globalSide = 1 AND globalDifficult < 3 THEN globalArmySize(empty) = globalArmySize(empty) + 15 - 5 * globalDifficult
 	IF globalSide = 2 AND globalDifficult > 3 THEN globalArmySize(empty) = globalArmySize(empty) + 5 * globalDifficult - 15
 	RETURN
-menu1:
 END SUB
 
 SUB shiptype (who, i)

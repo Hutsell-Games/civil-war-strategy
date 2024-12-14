@@ -57,3 +57,8 @@
 ===
 44. a$ => someText$
 45. Minor code reformatting.
+==
+46. Replace line labels dudd, nocity, noshow, notarg, fnew, and menu1 with EXIT SUB
+    - In noshow's case I also took multiple IF conditions that had the same result and condensed them into a single IF
+47. x in resolveBattle now attackStrength; x1 => defendStrength
+48. Code reformatting
