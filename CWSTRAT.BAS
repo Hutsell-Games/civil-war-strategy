@@ -57,10 +57,8 @@ IF side = 2 THEN randbal = 3
 
 FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
 choose = 0
-a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 
-band:           SHELL "cwstitle.exe"
-notitle2:
+
 SCREEN 12
 	DEF SEG = VARSEG(graphic(1))
 	BLOAD "cwsicon.vga", VARPTR(graphic(1))
@@ -177,9 +175,9 @@ IF pcode > 0 THEN
 	GOTO newgame
 END IF
 
-'±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 '                              Main Menu
-'±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 menu0:
 CALL topbar
 IF player = 2 AND side = 0 THEN side = 1
@@ -414,15 +412,15 @@ utile:
 	a$ = STR$(difficult): IF side = 1 THEN a$ = STR$(6 - difficult)
 	mtx$(6) = "Balance" + a$
 	mtx$(7) = "End Cond"
-	a$ = "û": IF randbal = 0 THEN a$ = ""
+	a$ = "ï¿½": IF randbal = 0 THEN a$ = ""
 	mtx$(8) = "Rndom Evt " + a$
 	mtx$(9) = "Vary Start"
-	a$ = "": IF jancam = 1 THEN a$ = "û"
+	a$ = "": IF jancam = 1 THEN a$ = "ï¿½"
 	mtx$(10) = "Jan Campgn" + a$
-	a$ = "": IF realism = 1 THEN a$ = "û"
+	a$ = "": IF realism = 1 THEN a$ = "ï¿½"
 	mtx$(11) = "Realism " + a$
 	mtx$(12) = "Chk Links"
-	a$ = "": IF history = 1 THEN a$ = "û"
+	a$ = "": IF history = 1 THEN a$ = "ï¿½"
 	mtx$(13) = "History" + a$
 	size = 13: tlx = 67: tly = 11
 	COLOR 11: LOCATE tly - 2, tlx: PRINT "esc=Main Menu"
@@ -975,8 +973,8 @@ COLOR c
 LOCATE 1, 1: PRINT "Attack Loss: ";
 PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
 CALL strong(attack)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) ²";
-COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) ï¿½";
+COLOR 16 - c: PRINT "ï¿½ Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
 CALL strong(defend)
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / armysize(defend)))))); "%)"
 '---------------------------------------------------------------------------
@@ -1005,12 +1003,6 @@ s = 1: IF win > 20 THEN s = 2
 batwon(s) = batwon(s) + 1
 victory(s) = victory(s) + 1
 CALL icon(armyloc(defend), 0, 8)
-END SUB
-
-SUB burn (who)
-SHELL "cityburn.exe"
-SCREEN 12
-CALL usa
 END SUB
 
 SUB combine (who)
@@ -1190,7 +1182,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	mtx$(0) = "Save Game"
 	FOR k = 1 TO 9
 	mtx$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF LEN(DIR$(mtx$(k))) > 0 THEN mtx$(k) = mtx$(k) + " û"
+	IF LEN(DIR$(mtx$(k))) > 0 THEN mtx$(k) = mtx$(k) + " ï¿½"
 	NEXT k
 	tlx = 67: size = 9
 	CALL menu(0)
@@ -2574,9 +2566,9 @@ GOTO allthru
 upbox:
 LINE (450, 318)-(526, 420), 1, BF
 LINE (527, 315)-(527, 439), 10
-COLOR 14: LOCATE 23, 50: PRINT "ÉÍÍÍÍÍÍÍÍÍÍÍÍÍ»"
-LOCATE 24, 50: PRINT "º U P D A T E º"
-LOCATE 25, 50: PRINT "ÈÍÍÍÍÍÍÍÍÍÍÍÍÍ¼"
+COLOR 14: LOCATE 23, 50: PRINT "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»"
+LOCATE 24, 50: PRINT "ï¿½ U P D A T E ï¿½"
+LOCATE 25, 50: PRINT "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼"
 RETURN
 
 allthru:

@@ -13,7 +13,7 @@ There a number of files which are no longer needed:
 - WRHGAMES.DOC and README.1ST - outdated documents.
 - PRINTDOC.BAT, INSTALL.BAT, GO.BAT - not needed on modern systems.
 - CWSDOC.COM - a very basic guide to CWS
-- .MAK, .LNK - Used by the QB compiler but not necessary for QB64.
+- .MAK, .LNK, .BTM - Used by the QB compiler but not necessary for QB64.
 
 In addition there are a few files we want to change formats on:
 
@@ -26,3 +26,28 @@ Finally, we add two files:
 
 - This file which records the changes we are making.
 - A .gitignore file that excludes executables and JetBrain's .idea files.
+
+## Code Cleanup
+
+The next thing we need to do is some minimal code cleanup.
+
+Particularly, we want to remove references in the code to the files that we deleted above.
+
+There are four code files for CWS:
+
+- CWS14.BI - Contains subroutine and variable declarations used throughout the game.
+- CWSMENU.BAS - Contains a (somewhat) generic menu system for the game.
+- CWSTRAT.BAS - Contains the main game code.
+- CWSTRAT2.BAS - Continues the main game code.
+
+In the original QB there were limits to the length of a code file so the main game code is split into two files.
+
+We will use find/replace to remove references to the files we deleted above.
+
+- Remove lines 60, 62, 63 from CWSTRAT.BAS
+- Remove the entire burn SUB found in CWSTRAT.BAS
+    - the line that calls it in CWSTRAT2.BAS on line 202. 
+    - the declaration found in CWS14.BI.
+- Remove the reference to abelinco.exe found in CWSTRAT2.BAS
+- Remove a reference to cwsdoc.com found in CWSMENU.BAS, on lines 237-280.
+- Remove the instruction to press F1 for HELP as this called the old CWSDOC.COM file, it's found in CWSTRAT2.BAS

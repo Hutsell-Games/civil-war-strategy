@@ -270,14 +270,6 @@ arrows:
 	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
 	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
 	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
-	 IF a$ = ";" AND switch = 0 THEN
-		SCREEN 0: CLS
-		SHELL "cwsdoc.com"
-		SCREEN 12: CALL usa
-		CALL choices(b1, wide)
-		CALL topbar
-		RETURN
-	  END IF
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL usa
