@@ -127,7 +127,7 @@ NEXT k
 
 filel = 1: vicflag(1) = 1
 CALL filer(1)
-IF LEN(DIR$("mtn.vga")) > 0 THEN
+IF _FILEEXISTS("mtn.vga") THEN
 	DEF SEG = VARSEG(mtn(1))
 	BLOAD "mtn.vga", VARPTR(mtn(1))
 	DEF SEG
@@ -228,7 +228,7 @@ END IF
 IF choose = 3 THEN CLS : END
 IF history = 1 THEN
 	CLS
-	IF LEN(DIR$("cws.his")) > 0 THEN SHELL "copy cws.his oldhist.ory"
+	IF _FILEEXISTS("cws.his") THEN SHELL "copy cws.his oldhist.ory"
 	OPEN "O", 2, "cws.his"
 	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; DATE$; " ]"
 	CLOSE #2
@@ -762,7 +762,7 @@ utile:
 '                               Files
 '==========================================================================
 	CASE 9
-	IF LEN(DIR$("*.sav")) = 0 THEN filel = 0
+	IF NOT _FILEEXISTS("*.sav") THEN filel = 0
 filex:
 	choose = 23: chosit = 30: IF year = 1861 THEN choose = 22
 	mtx$(0) = "Options"
@@ -1001,7 +1001,7 @@ IF graf > 2 THEN
 	CALL cannon
 	k = fort(armyloc(defend))
 	t$ = "fort" + LTRIM$(STR$(k)) + ".vga"
-	IF LEN(DIR$(t$)) > 0 THEN
+	IF _FILEEXISTS(t$) THEN
 		DEF SEG = VARSEG(graphic(1))
 		BLOAD t$, VARPTR(graphic(1))
 		DEF SEG
@@ -1228,12 +1228,12 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	CLOSE #1
 
 	CASE 2
-	IF LEN(DIR$("*.sav")) = 0 THEN choose = -1: EXIT SUB
+	IF NOT _FILEEXISTS("*.sav") THEN choose = -1: EXIT SUB
 	mtx$(0) = "Load"
 	size = 0
 	FOR k = 1 TO 9
 		t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
-		IF LEN(DIR$(t$)) > 0 THEN
+		IF _FILEEXISTS(t$) THEN
 			size = size + 1: mtx$(size) = t$: array(size) = k
 		END IF
 	NEXT k
@@ -1279,7 +1279,7 @@ FOR i = 1 TO 8: INPUT #1, starx(i), stary(i): NEXT i  ' star locations on flag
 	mtx$(0) = "Save Game"
 	FOR k = 1 TO 9
 	mtx$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-	IF LEN(DIR$(mtx$(k))) > 0 THEN mtx$(k) = mtx$(k) + " +"
+	IF _FILEEXISTS(mtx$(k)) THEN mtx$(k) = mtx$(k) + " +"
 	NEXT k
 	tlx = 67: size = 9
 	CALL menu(0)
@@ -3478,7 +3478,7 @@ mtx$(3) = "Cities"
 mtx$(4) = "Force Summary"
 mtx$(5) = "Intelligence"
 mtx$(6) = "Battles": size = 6
-IF LEN(DIR$("cws.his")) > 0 THEN mtx$(7) = "Recap": size = 7
+IF _FILEEXISTS("cws.his") THEN mtx$(7) = "Recap": size = 7
 CALL menu(0)
 SELECT CASE choose
 CASE IS < 0
@@ -4144,7 +4144,7 @@ LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
 COLOR 10
 '==========================  Mountains =================================
-IF LEN(DIR$("mtn.vga")) > 0 THEN
+IF _FILEEXISTS("mtn.vga") THEN
 	PUT (380, 30), mtn, PSET
 	PUT (270, 200), mtn, PSET
 	PUT (310, 160), mtn, PSET
@@ -4810,7 +4810,7 @@ sel1:
 				LINE (548, 148)-(592, 216), 15, B
 				a = row: IF side = 1 THEN a = 6 - row
 				t$ = "face" + LTRIM$(STR$(a)) + ".vga"
-				IF LEN(DIR$(t$)) > 0 THEN
+				IF _FILEEXISTS(t$) THEN
 					DEF SEG = VARSEG(graft(1))
 					BLOAD t$, VARPTR(graft(1))
 					DEF SEG

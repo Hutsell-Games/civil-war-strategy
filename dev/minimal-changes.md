@@ -108,3 +108,26 @@ We follow the same process for the contents of CWSMENU.BAS - declarations at the
 We can then delete these other code files - CWSTRAT2.BAS, CWSMENU.BAS, CWS14.BI.
 
 This makes for quite the lengthy code file, something that I'm not a huge fan of, but we can break it up later.
+
+### Fixing File Management
+
+Technically, `DIR$` was part of PDS and not QB and thus it is not supported in QB64. We need to replace all instances of `DIR$` with `_FILEEXISTS`.
+
+So a line like:
+```vb
+IF LEN(DIR$("mtn.vga")) > 0 THEN
+```
+Becomes:
+```vb
+IF _FILEEXISTS("mtn.vga") THEN
+```
+
+Note that in the following instance we are charging if the file doesn't exist so we'll need to use `NOT` to invert the result. This:
+```vb
+IF LEN(DIR$("*.sav")) = 0 THEN filel = 0
+```
+Becomes:
+```vb
+IF NOT _FILEEXISTS("*.sav") = 0 THEN filel = 0
+```
+We need to keep this in mind for the rest of the code and add `NOT` where appropriate.
