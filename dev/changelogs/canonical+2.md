@@ -66,3 +66,24 @@
 49. Rename dull2 and dull1 line labels to playTune2 and playTune1 to be more descriptive.
 50. float1 => seShips (se for special event), mercen => seMercenaries; money => seLoan; cotton => seCotton; purse => addMoney; uprising => seUprising; riot = seRiot
 51. Replace line label holdup with EXIT SUB
+===
+52. relee; tally5; nocity2 => EXIT SUB
+53. Move stars line label inline, only referenced once.
+54. x when opening cities replaced with cityP; x to globalSide under Case 3
+55. In combineArmies x => bestLeader; best => bestArmy
+56. In fortifyCity x => occupierIndex
+57. In turnIterate x => aggressivenessRebel; y => aggressivenessUnion
+58. anchor => navyMenu
+59. Minor code reformatting
+===
+60. x => armySize in createNewArmy
+61. x => citiesCounted in chooseCityMenu; morecap => displayCityMenu; minus1 => previousCity; plus1 => nextCity
+62. resolveRailroadMoves: puter => nextArmy; puted => nextCity
+63. recruitArmy: foe => skipEnemyCity; add2 => increaseArmySize; randsel => randomSelection; playb => adjustArmySize
+64. aiSmarts: signup => recruitNewArmy; city2 => checkOtherCities; capital => fortifyCapital; endlook => nextArmy; isok => navalCommands; deadman => nextArmyMove; nocap => notCapital; remove unused move9 label
+65. Remove unused label counter
+66. shiptype: x => currentShipType
+67. drawTrainEngine: notrain => EXIT SUB
+68. drawShips: sink => nextShip; float => drawShip
+69. checkTrainCapacity: x => trainCapacityLimit
+70. victor: x => totalArmySize; y => totalArmySize1; finis => victoryConditionMet; death => endGame; stale => checkNextSide

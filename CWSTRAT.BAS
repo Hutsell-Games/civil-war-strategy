@@ -215,9 +215,9 @@ FOR i = 1 TO 40
 	NEXT j
 	INPUT #1, globalFort(i)
 	IF globalCityP(i) > 0 THEN 
-		x = globalCityP(i)
-		globalControl(x) = globalControl(x) + 1
-		globalVictory(x) = globalVictory(x) + globalCityV(i)
+		globalCity = globalCityP(i)
+		globalControl(cityP) = globalControl(cityP) + 1
+		globalVictory(cityP) = globalVictory(cityP) + globalCityV(i)
 	END IF
 	IF globalCityP(i) > 0 THEN
 		globalCash(globalCityP(i)) = globalCash(globalCityP(i)) + globalCityV(i)
@@ -282,9 +282,9 @@ IF globalPlayer = 1 AND globalSide = 2 THEN globalIncome(1) = globalIncome(1) + 
 
 FOR i = 1 TO 40
 IF globalCityP(i) > 0 THEN 
-	x = globalCityP(i)
-	globalControl(x) = globalControl(x) + 1
-	globalIncome(x) = globalIncome(x) + globalCityV(i)
+	cityP = globalCityP(i)
+	globalControl(cityP) = globalControl(cityP) + 1
+	globalIncome(cityP) = globalIncome(cityP) + globalCityV(i)
 END IF
 globalArmyMove(i) = 0
 NEXT i
@@ -462,9 +462,8 @@ SELECT CASE globalSelectedMenuOption
 				globalSelectedMenuOption = 23
 				GOTO optmen
 			CASE 3 ' Combine
-				x = globalSide
-				CALL combineArmies(x)
-				IF x < 0 THEN
+				CALL combineArmies(globalSide)
+				IF globalSide < 0 THEN
 					CALL clearBottom
 					COLOR 11
 					PRINT "No eligible armies in same city to combine";
@@ -1363,7 +1362,8 @@ SUB combineArmies (who)
 	globalColour = 3
 	target = 0
 	globalHilite = 3
-	globalTLX = 67: globalTLY = 2
+	globalTLX = 67
+	globalTLY = 2
 	CALL setArmyRange(star, fin, who)
 	globalSize = 0
 	FOR i = 1 TO 40
@@ -1392,7 +1392,7 @@ SUB combineArmies (who)
 	CALL genericMenu(9)
 	CALL clearRight
 	join:
-	IF globalSelectedMenuOption < 1 THEN GOTO nocity2
+	IF globalSelectedMenuOption < 1 THEN EXIT SUB
 	target = globalMenuOptions(globalSelectedMenuOption)
 	CALL clearBottom
 	PRINT "Combining "; globalForce$(who); " armies in "; globalCity$(target);
@@ -1406,8 +1406,8 @@ SUB combineArmies (who)
 	globalSupply(0) = 0
 	globalArmyMove(0) = 0
 
-	best = 0
-	x = 0
+	bestArmy = 0
+	bestLeader = 0
 	spin = 0
 	FOR j = star TO fin
 		IF globalArmyMove(j) <> 0 OR globalArmyLoc(j) <> target OR globalArmySize(j) = 0 THEN GOTO dork1
@@ -1418,11 +1418,11 @@ SUB combineArmies (who)
 			GOTO dork1
 		END IF
 
-		IF globalArmyLead(j) > x THEN
-			x = globalArmyLead(j)
+		IF globalArmyLead(j) > bestLeader THEN
+			bestLeader = globalArmyLead(j)
 			globalArmyName$(0) = globalArmyName$(j)
 			globalArmyLead(0) = globalArmyLead(j)
-			best = j
+			bestArmy = j
 		END IF
 
 		globalArmySize(0) = globalArmySize(0) + globalArmySize(j)
@@ -1453,16 +1453,16 @@ SUB combineArmies (who)
 		TICK globalTurbo!
 		EXIT SUB
 	END IF
-	globalArmySize(best) = globalArmySize(0)
-	globalArmyLead(best) = globalArmyLead(0)
-	globalArmyExper(best) = globalArmyExper(0)
-	globalSupply(best) = globalSupply(0)
-	globalArmyLoc(best) = target
-	globalArmyName$(best) = globalArmyName$(0)
-	globalLName$(best) = ""
+	globalArmySize(bestArmy) = globalArmySize(0)
+	globalArmyLead(bestArmy) = globalArmyLead(0)
+	globalArmyExper(bestArmy) = globalArmyExper(0)
+	globalSupply(bestArmy) = globalSupply(0)
+	globalArmyLoc(bestArmy) = target
+	globalArmyName$(bestArmy) = globalArmyName$(0)
+	globalLName$(bestArmy) = ""
 	IF spin > 1 THEN
-		PRINT "New army "; best; " of "; : CALL strong(best): PRINT " is commanded by "; globalArmyName$(best);
-		globalArmyMove(best) = -1
+		PRINT "New army "; bestArmy; " of "; : CALL strong(bestArmy): PRINT " is commanded by "; globalArmyName$(bestArmy);
+		globalArmyMove(bestArmy) = -1
 	ELSE
 		PRINT "Only 1 eligible army -- cannot combine at this time";
 	END IF
@@ -1470,11 +1470,10 @@ SUB combineArmies (who)
 	IF globalNoise > 0 THEN SOUND 4000, .7
 	       
 	CALL drawCity
-	CALL placeArmy(best)
+	CALL placeArmy(bestArmy)
 	CALL drawArmyMove(target, 0, 6)
-	globalOccupied(target) = best
+	globalOccupied(target) = bestArmy
 	CALL stax(who)
-nocity2:
 END SUB
 
 SUB checkCityCutoff (who, target, a)
@@ -1692,8 +1691,8 @@ SUB fortifyCity (target)
 	IF globalSelectedMenuOption < 0 THEN EXIT SUB
 	target = globalMenuOptions(globalSelectedMenuOption)
 	CALL checkCityOccupied(target)
-	x = globalOccupied(target)
-	IF x < 0 THEN EXIT SUB
+	occupierIndex = globalOccupied(target)
+	IF occupierIndex < 0 THEN EXIT SUB
 	IF globalFort(target) > 1 THEN 
 		CALL clearBottom
 		PRINT globalCity$(target); " at MAXIMUM fortification level of 2";
@@ -1714,9 +1713,11 @@ SUB fortifyCity (target)
 	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
 	CALL drawArmyMove(target, 0, 6)
 	CALL drawCity
-	IF globalArmyMove(x) > 0 THEN CALL drawArmyMove(globalArmyLoc(x), globalArmyMove(x), 5)
-	globalArmyMove(x) = -1
-	CALL placeArmy(x)
+	IF globalArmyMove(occupierIndex) > 0 THEN 
+		CALL drawArmyMove(globalArmyLoc(occupierIndex), globalArmyMove(occupierIndex), 5)
+	END IF
+	globalArmyMove(occupierIndex) = -1
+	CALL placeArmy(occupierIndex)
 	CALL stax(who)
 END SUB
 
@@ -1836,21 +1837,21 @@ SUB turnIterate
 	FOR k = 1 TO 2
 		CALL stax(k)
 	NEXT k
-	y = 0
+	aggressivenessUnion = 0
 	FOR i = 1 TO 20
-		y = y + .1 * globalArmySize(i)
+		aggressivenessUnion = aggressivenessUnion + .1 * globalArmySize(i)
 	NEXT i
-	x = 0
+	aggressivenessRebel = 0
 	FOR i = 21 TO 40
-		x = x + .1 * globalArmySize(i)
+		aggressivenessRebel = aggressivenessRebel + .1 * globalArmySize(i)
 	NEXT i
-	IF globalSide = 2 AND x > 0 THEN 
-		globalAggress! = y / x 
+	IF globalSide = 2 AND aggressivenessRebel > 0 THEN 
+		globalAggress! = aggressivenessUnion / aggressivenessRebel 
 	ELSE 
 		globalAggress! = 1
 	END IF
-	IF globalSide = 1 AND y > 0 THEN 
-		globalAggress! = x / y 
+	IF globalSide = 1 AND aggressivenessUnion > 0 THEN 
+		globalAggress! = aggressivenessRebel / aggressivenessUnion 
 	ELSE 
 		IF globalSide = 1 THEN 
 			globalAggress! = 1
@@ -1983,12 +1984,12 @@ SUB navy (who, chx)
 
 	IF chx > 0 THEN 
 		globalSelectedMenuOption = chx
-		GOTO anchor
+		GOTO navyMenu
 	END IF
 	IF globalNFlag > 0 AND globalSelectedMenuOption <> 1 THEN EXIT SUB
 	CALL genericMenu(0)
 	CALL clearRight
-	anchor:
+	navyMenu:
 	SELECT CASE globalSelectedMenuOption
 		CASE 1 ' Build Ship
 			IF globalCash(who) < cost OR globalNavyLoc(who) = 99 GOTO ahoy
@@ -2090,7 +2091,7 @@ SUB navy (who, chx)
 			IF chx = 2 AND globalCityP(globalNavyLoc(who)) = who THEN EXIT SUB
 			IF chx = 2 AND globalOccupied(globalNavyLoc(who)) > 0 AND RND > .5 THEN 
 				chx = 3
-				GOTO anchor
+				GOTO navyMenu
 			END IF
 			IF chx = 2 AND globalCityP(globalNavyLoc(who)) = 0 THEN 
 				chx = 3
@@ -2291,7 +2292,7 @@ SUB navy (who, chx)
 			CALL assignArmyCommander((who), empty)
 			IF chx > 0 AND empty = 0 THEN 
 				chx = 3
-				GOTO anchor
+				GOTO navyMenu
 			END IF
 			x = 35
 			CALL sinkShip(who)
@@ -2512,12 +2513,12 @@ SUB createNewArmy (who, empty, target)
 	CALL clearBottom
 	PRINT "Placing NEW army "; empty; globalArmyName$(empty); " in "; globalCity$(target);
 
-	x = 70
-	IF globalRealism > 0 THEN x = 3 * globalCityV(target) + 33
+	armySize = 70
+	IF globalRealism > 0 THEN armySize = 3 * globalCityV(target) + 33
 	CALL checkCityCutoff(who, target, a)
-	IF a < 1 THEN x = x \ 3
+	IF a < 1 THEN armySize = armySize \ 3
 	globalOccupied(target) = empty
-	globalArmySize(empty) = x
+	globalArmySize(empty) = armySize
 	PRINT " Size = "; : CALL strong(empty)
 	globalCash(who) = globalCash(who) - 100
 	IF globalNoise > 0 THEN SOUND 2222, .5
@@ -2532,7 +2533,7 @@ SUB chooseCityMenu (index)
 	globalMenuText$(3) = "  FI"
 	globalSize = 3
 	someText$ = globalCity$(index)
-	morecap:
+	displayCityMenu:
 	globalTLX = 68
 	globalTLY = 15
 	globalColour = 3
@@ -2546,34 +2547,42 @@ SUB chooseCityMenu (index)
 			EXIT SUB
 		CASE IS < 1
 			someText$ = CHR$(ABS(globalSelectedMenuOption))
-			x = 0
+			citiesCounted = 0
 			FOR k = 1 TO 40
 				IF LEFT$(globalCity$(k), 1) = someText$ THEN
 					y = index
 					index = k
 					spin2:
-					IF globalCityP(index) = globalSide GOTO morecap
+					IF globalCityP(index) = globalSide THEN GOTO displayCityMenu
 					index = index + 1
 					IF index > 40 THEN index = 1
-					x = x + 1
-					IF x < 39 GOTO spin2
+					citiesCounted = citiesCounted + 1
+					IF citiesCounted < 39 THEN GOTO spin2
 					index = y
-					GOTO morecap
+					GOTO displayCityMenu
 				END IF
 			NEXT k
-			GOTO morecap
+			GOTO displayCityMenu
 		CASE 1
-			minus1:
+			previousCity:
 			index = index - 1
 			IF index < 1 THEN index = 40
-			IF globalCityP(index) <> globalSide GOTO minus1 ELSE GOTO morecap
+			IF globalCityP(index) <> globalSide THEN
+				GOTO previousCity 
+			ELSE 
+				GOTO displayCityMenu
+			END IF
 		CASE 2
 			EXIT SUB
 		CASE 3
-			plus1:
+			nextCity:
 			index = index + 1
 			IF index > 40 THEN index = 1
-			IF globalCityP(index) <> globalSide GOTO plus1 ELSE GOTO morecap
+			IF globalCityP(index) <> globalSide THEN
+				GOTO nextCity 
+			ELSE 
+				GOTO displayCityMenu
+			END IF
 		CASE ELSE
 			index = 0
 		END SELECT
@@ -2612,13 +2621,13 @@ SUB resolveRailroadMoves (who)
 			max = 32767
 			index = 0
 			FOR i = star TO fin
-				IF globalArmyLoc(i) = 0 OR globalArmyMove(i) <> 0 GOTO puter
+				IF globalArmyLoc(i) = 0 OR globalArmyMove(i) <> 0 GOTO nextArmy
 				x = 0
 				FOR j = 1 TO 6
 					from = globalMatrix(globalArmyLoc(i), j)
 					IF from > 0 AND globalCityP(from) <> who THEN x = x + 1
 				NEXT j
-				IF globalOccupied(globalCapCity(who)) > 0 AND x > 1 GOTO puter
+				IF globalOccupied(globalCapCity(who)) > 0 AND x > 1 GOTO nextArmy
 				CALL calculateMilitaryPresence(globalArmyLoc(i), defend)
 				IF globalVicFlag(5) > 0 AND globalOccupied(globalCapCity(who)) = 0 THEN
 					IF defend > max THEN defend = max - 1
@@ -2626,9 +2635,12 @@ SUB resolveRailroadMoves (who)
 				IF defend < max THEN 
 					target = globalArmyLoc(i)
 					GOSUB route
-					IF x > 1 THEN max = defend: index = i
+					IF x > 1 THEN 
+						max = defend
+						index = i
+					END IF
 				END IF
-			puter:  
+			nextArmy:  
 			NEXT i
 		IF index = 0 OR max > .3 * globalArmySize(index) GOTO toot
 		CALL checkTrainCapacity(who, limit)
@@ -2636,17 +2648,17 @@ SUB resolveRailroadMoves (who)
 		from = globalArmyLoc(index)
 		x1 = 0
 		FOR i = 1 TO 40
-			IF globalCityP(i) <> who GOTO puted
+			IF globalCityP(i) <> who GOTO nextCity
 			CALL calculateMilitaryPresence(i, defend)
-			IF defend = 0 OR defend > 3 * globalArmySize(index) GOTO puted
-			IF globalOccupied(i) > 0 GOTO puted
+			IF defend = 0 OR defend > 3 * globalArmySize(index) GOTO nextCity
+			IF globalOccupied(i) > 0 GOTO nextCity
 			target = i
 			GOSUB route
-			IF x = 0 GOTO puted
+			IF x = 0 GOTO nextCity
 			IF globalSide = 1 AND globalCityY(i) < globalCityY(from) THEN x1 = i
 			IF globalSide = 2 AND globalCityY(i) > globalCityY(from) THEN x1 = i
 			IF globalFort(i) > 0 AND globalOccupied(i) = 0 THEN x1 = i: EXIT FOR
-		puted:
+		nextCity:
 		NEXT i
 		IF globalVicFlag(5) > 0 AND globalOccupied(globalCapCity(who)) = 0 THEN
 			GOSUB route
@@ -2655,7 +2667,11 @@ SUB resolveRailroadMoves (who)
 				IF defend > 0 THEN x1 = globalCapCity(who)
 			END IF
 		END IF
-		IF x1 > 0 GOTO haul ELSE GOTO toot
+		IF x1 > 0 THEN
+			GOTO haul 
+		ELSE 
+			GOTO toot
+		END IF
 		human:
 		CALL chooseMoveArmyFrom(index, a)
 		IF a < 1 OR index < 1 THEN 
@@ -2791,13 +2807,13 @@ SUB recruitArmy (who)
 		globalMenuOptions(i) = 0
 		IF globalOccupied(i) > 0 AND globalCityP(i) = who THEN pct! = .4
 		IF RND < pct! AND globalCityP(i) = who THEN
-			IF globalRealism > 0 AND globalCityO(i) = 3 - who GOTO foe
+			IF globalRealism > 0 AND globalCityO(i) = 3 - who GOTO skipEnemyCity
 			globalSize = globalSize + 1
 			globalMenuText$(globalSize) = globalCity$(i)
 			globalMenuOptions(globalSize) = i
 			IF globalSize > max - 1 GOTO alldone
 		END IF
-	foe:
+	skipEnemyCity:
 	NEXT i
 	alldone:
 	IF globalSize = 0 THEN EXIT SUB
@@ -2819,7 +2835,7 @@ SUB recruitArmy (who)
 	globalTLY = 12
 	globalColour = 3
 	IF who <> globalSide THEN
-		GOSUB randsel
+		GOSUB randomSelection
 		GOTO auto1
 	END IF
 
@@ -2827,24 +2843,25 @@ SUB recruitArmy (who)
 	CALL genericMenu(2)
 	CALL clearRight
 	IF globalSelectedMenuOption < 1 THEN EXIT SUB
+
 	auto1:
 	empty = 0
 	index = globalMenuOptions(globalSelectedMenuOption)
 	CALL checkCityOccupied(index)
 	IF globalOccupied(index) > 0 THEN
 		i = globalOccupied(index)
-		GOTO add2
+		GOTO increaseArmySize
 	END IF
 	CALL assignArmyCommander((who), empty)
 
 	IF who <> globalSide AND empty = 0 THEN EXIT SUB
 	IF empty = 0 GOTO levy
 	globalArmyLoc(empty) = index
-	GOSUB playb
+	GOSUB adjustArmySize
 	CALL createNewArmy(who, empty, index)
 	GOTO levy
 
-	add2:
+	increaseArmySize:
 	target = globalMenuOptions(globalSelectedMenuOption)
 	x = 45
 	someText$ = ""
@@ -2856,7 +2873,7 @@ SUB recruitArmy (who)
 	END IF
 	globalArmySize(i) = globalArmySize(i) + x
 
-	GOSUB playb
+	GOSUB adjustArmySize
 	globalCash(who) = globalCash(who) - 100
 	from = globalArmyLoc(i)
 	x = globalCityX(from) - 12
@@ -2871,7 +2888,7 @@ SUB recruitArmy (who)
 	PUT (x - 9, y - 7), globalAnima, PSET
 	CALL TICK(globalTurbo! - .5)
 	GOTO levy
-	randsel:
+	randomSelection:
 	globalSelectedMenuOption = 0
 	x = 0
 	FOR i = 1 TO globalSize
@@ -2900,16 +2917,16 @@ SUB recruitArmy (who)
 	END IF
 	IF globalCash(who) < 100 THEN globalSelectedMenuOption = globalSize
 	RETURN
-	playb:
+	adjustArmySize:
 	IF globalSide = 1 AND globalDifficult < 3 THEN globalArmySize(empty) = globalArmySize(empty) + 15 - 5 * globalDifficult
 	IF globalSide = 2 AND globalDifficult > 3 THEN globalArmySize(empty) = globalArmySize(empty) + 5 * globalDifficult - 15
 	RETURN
 END SUB
 
 SUB shiptype (who, i)
-	a = 1
-	IF MID$(globalFleet$(who), i, 1) = "I" THEN a = 2
-	CALL drawShipIcon(who, a)
+	currentShipType = 1
+	IF MID$(globalFleet$(who), i, 1) = "I" THEN currentShipType = 2
+	CALL drawShipIcon(who, currentShipType)
 END SUB
 
 SUB drawCity
@@ -2947,32 +2964,32 @@ SUB aiSmarts
 	NEXT i
 	'                       Fortify Capital or Other City
 	cost = 200
-	IF cost > globalCash(who) GOTO signup
+	IF cost > globalCash(who) GOTO recruitNewArmy
 
 	target = 0
-	IF globalOccupied(globalCapCity(who)) = 0 OR globalFort(globalCapCity(who)) > 1 GOTO city2
+	IF globalOccupied(globalCapCity(who)) = 0 OR globalFort(globalCapCity(who)) > 1 GOTO checkOtherCities
 	target = globalCapCity(who)
-	IF globalCityP(target) = who GOTO capital ELSE GOTO city2
-	IF target > 0 GOTO capital
+	IF globalCityP(target) = who GOTO fortifyCapital ELSE GOTO checkOtherCities
+	IF target > 0 GOTO fortifyCapital
 
-	city2:
-	IF 1 + RND < globalBold + globalAggress! GOTO signup
+	checkOtherCities:
+	IF 1 + RND < globalBold + globalAggress! GOTO recruitNewArmy
 	target = 0
 	FOR i = star TO fin
 		x = globalArmyLoc(i)
-		IF x = 0 OR globalArmyMove(globalOccupied(x)) < 0 OR globalArmyMove(i) < 0 GOTO endlook
-		IF globalFort(x) > 1 GOTO endlook
+		IF x = 0 OR globalArmyMove(globalOccupied(x)) < 0 OR globalArmyMove(i) < 0 GOTO nextArmy
+		IF globalFort(x) > 1 GOTO nextArmy
 		CALL calculateMilitaryPresence(x, defend)
 		IF defend > globalArmySize(i) THEN 
 			target = globalArmyLoc(i)
-			GOTO capital
+			GOTO fortifyCapital
 		END IF
-	endlook:
+	nextArmy:
 	NEXT i
 
-	capital:
-	IF target = 0 GOTO signup
-	IF globalFort(target) > 1 GOTO signup
+	fortifyCapital:
+	IF target = 0 GOTO recruitNewArmy
+	IF globalFort(target) > 1 GOTO recruitNewArmy
 	globalFort(target) = globalFort(target) + 1
 	x = globalOccupied(target)
 	globalArmyMove(x) = -1
@@ -2981,26 +2998,26 @@ SUB aiSmarts
 	PRINT globalCity$(target); " fortifications increased to "; globalFort(target);
 	CALL drawArmyMove(target, 0, 6)
 	CALL drawCity
-	IF who = 1 AND globalNavySize(1) < 1 AND RND > .5 AND globalCash < 222 GOTO signup
-	IF 3 * RND > 1 + globalAggress! AND globalCash(who) >= cost GOTO city2
-	'                       Recruit New Armies
-	signup:
+	IF who = 1 AND globalNavySize(1) < 1 AND RND > .5 AND globalCash < 222 GOTO recruitNewArmy
+	IF 3 * RND > 1 + globalAggress! AND globalCash(who) >= cost GOTO checkOtherCities
+	
+	recruitNewArmy: ' Recruit New Armies
 	IF who = 1 AND globalNavySize(1) < 1 AND globalCash(1) > 100 THEN 
 		CALL navy(1, 1)
-		IF globalCash(who) < 100 GOTO isok
+		IF globalCash(who) < 100 GOTO navalCommands
 	END IF
-	GOSUB enufarmies
-	IF x > 2 + 3 * globalSide + 3 * RND GOTO isok
+	GOSUB checkArmyCount
+	IF x > 2 + 3 * globalSide + 3 * RND GOTO navalCommands
 	IF globalNavySize(who) < 5 AND globalCash(who) > 100 AND globalNavyLoc(who) <> 99 THEN 
 		IF globalCityP(globalNavyLoc(who)) = who THEN 
 			slush = slush + 100
 			globalCash(who) = globalCash(who) - 100
-			IF globalCash(who) < 100 GOTO isok
+			IF globalCash(who) < 100 GOTO navalCommands
 		END IF
 	END IF
 	CALL recruitArmy(who)
 	'                         Naval Commands
-	isok:
+	navalCommands:
 	globalCash(who) = globalCash(who) + slush
 	dock:
 	IF globalSide = 2 AND globalNavyLoc(1) = 0 AND globalNavySize(1) < 1 AND globalCityP(30) = 1 AND globalCash(1) > 100 THEN 
@@ -3044,28 +3061,28 @@ SUB aiSmarts
 	'                               Top Priority
 	FOR i = star TO fin
 		target = globalArmyLoc(i)
-		IF globalArmyLoc(i) < 1 OR globalArmyMove(i) < 0 GOTO deadman
+		IF globalArmyLoc(i) < 1 OR globalArmyMove(i) < 0 GOTO nextArmyMove
 		x = globalArmySize(i)
-		IF globalSupply(i) < 1 AND RND > .1 GOTO deadman
+		IF globalSupply(i) < 1 AND RND > .1 GOTO nextArmyMove
 
 		globalSelectedMenuOption = 0
 
 		CALL calculateMilitaryPresence(target, defend)
 
-		IF defend > 0 AND target = globalCapCity(who) AND globalOccupied(target) = i GOTO deadman   'hold capital
-		IF target <> globalCapCity(who) GOTO nocap
-		IF globalVicFlag(5) = 0 GOTO nocap
+		IF defend > 0 AND target = globalCapCity(who) AND globalOccupied(target) = i GOTO nextArmyMove   'hold capital
+		IF target <> globalCapCity(who) GOTO notCapital
+		IF globalVicFlag(5) = 0 GOTO notCapital
 		FOR j = 1 TO 6
 			k = globalMatrix(target, j)
 			' TODO: It isn't ever possible?
-			IF j = 0 GOTO nocap
+			IF j = 0 GOTO notCapital
 			CALL calculateMilitaryPresence(k, flag)
-			IF flag > 0 GOTO deadman
+			IF flag > 0 GOTO nextArmyMove
 		NEXT j
-		nocap:
+		notCapital:
 		CALL aiEvaluateArmyMoves(i, best)
-		IF best = 0 GOTO deadman
-		move9:
+		IF best = 0 GOTO nextArmyMove
+
 		IF best = 0 THEN globalSelectedMenuOption = 1 + INT((j - 1) * RND)
 		IF globalSelectedMenuOption = 0 THEN globalSelectedMenuOption = best
 		globalArmyMove(i) = globalMatrix(target, globalSelectedMenuOption)
@@ -3075,13 +3092,13 @@ SUB aiSmarts
 			IF y > 0 THEN 
 				IF globalArmyMove(y) = x THEN 
 					globalArmyMove(i) = 0
-					GOTO deadman  ' eliminate crossing moves
+					GOTO nextArmyMove  ' eliminate crossing moves
 				END IF
 			END IF
 		END IF
 		IF globalMonth = 1 AND globalJanCam = 0 AND globalCityP(globalArmyMove(i)) <> who THEN 
 			globalArmyMove(i) = 0
-			GOTO deadman
+			GOTO nextArmyMove
 		END IF
 
 		IF globalTurbo! > 1 THEN
@@ -3093,7 +3110,7 @@ SUB aiSmarts
 		CALL drawArmyMove(globalArmyLoc(i), globalArmyMove(i), 9)
 		CALL TICK(globalTurbo! - 1)
 		PUT (globalCityX(globalArmyLoc(i)) - 20, globalCityY(globalArmyLoc(i)) - 19), globalImage, PSET
-	deadman:
+	nextArmyMove:
 	NEXT i
 	FOR i = star TO fin
 		IF globalArmyMove(i) = 0 AND globalArmyExper(i) < 6 AND globalArmyExper(i) < globalArmyLead(i) THEN
@@ -3109,7 +3126,7 @@ SUB aiSmarts
 	NEXT i
 	EXIT SUB
 
-	enufarmies:
+	checkArmyCount:
 	CALL setArmyRange(star, fin, 3 - who)
 	FOR i = star TO fin
 		IF globalArmyLoc(i) > 0 THEN y = y + .1 * globalArmySize(i)
@@ -3538,7 +3555,6 @@ END SUB
 
 SUB cancel (globalSide)
 	CALL setArmyRange(star, fin, (globalSide))
-	counter:
 	CALL clearRight
 	globalSize = 0
 	FOR j = star TO fin
@@ -3800,7 +3816,7 @@ SUB setEndGameConditions
 END SUB
 
 SUB drawTrainEngine
-	IF globalRR(1) + globalRR(2) = 0 GOTO notrain
+	IF globalRR(1) + globalRR(2) = 0 THEN EXIT SUB
 	LINE (5, 17)-(100, 63), 3, BF
 	LINE (5, 17)-(100, 47), 0, B
 	LINE (5, 47)-(100, 63), 0, B
@@ -3816,8 +3832,6 @@ SUB drawTrainEngine
 		LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(globalCity$(globalArmyMove(globalRR(i))), 5)
 	notrane:
 	NEXT i
-
-notrain:
 END SUB
 
 SUB aiEvaluateArmyMoves (index, x)
@@ -4695,7 +4709,19 @@ SUB drawRebelWin
 	PAINT (4, 20), 1, 15
 
 	LINE (2, 239)-(637, 438), 2, BF
-	GOSUB stars
+	
+	' stars
+	FOR i = 1 TO 8
+		x = globalStarX(i)
+		y = globalStarY(i)
+		PSET (x, y), 0
+		LINE (x + 2, y - 1)-(x + 8, y + 16), 15
+		LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
+		LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
+		LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
+		LINE -(x, y - 9): LINE -(x + 16, y - 9)
+		LINE -(x + 2, y - 1): PAINT (x, y), 15
+	NEXT i
 
 	'                               landscape
 	PSET (1, 240)
@@ -4734,7 +4760,7 @@ SUB drawRebelWin
 		LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF
 	NEXT i
 
-	IF globalNoise < 2 GOTO relee
+	IF globalNoise < 2 THEN EXIT SUB
 	PLAY "MBMS T120"
 	PLAY "O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
 	PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8"
@@ -4744,29 +4770,15 @@ SUB drawRebelWin
 	PLAY "O3 a O4 d4. O3 T150 L16 g a b T120 L8 O4 c e d. c16"
 	PLAY "L8 O3 a b O4 c. O3 a16 g e O4 c. O3 e16 e d4 e c4. e d4. a"
 	PLAY "L8 g e O4 c. e16 d c4 O3 e c4. e d4. a g e O4 e4. c16 d c4"
-
-	GOTO relee
-
-	stars:
-	FOR i = 1 TO 8
-		x = globalStarX(i)
-		y = globalStarY(i)
-		PSET (x, y), 0
-		LINE (x + 2, y - 1)-(x + 8, y + 16), 15
-		LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
-		LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
-		LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
-		LINE -(x, y - 9): LINE -(x + 16, y - 9)
-		LINE -(x + 2, y - 1): PAINT (x, y), 15
-	NEXT i
-	RETURN
-relee:
 END SUB
 
 SUB showAndSaveHistory (someText$, flag)
 	SELECT CASE flag
-			CASE 1: CALL clearBottom: PRINT someText$;
-			CASE 2: CALL drawOverlayBox(someText$, 4)
+			CASE 1: 
+				CALL clearBottom
+				PRINT someText$;
+			CASE 2: 
+				CALL drawOverlayBox(someText$, 4)
 	END SELECT
 	IF globalHistory > 0 THEN
 		OPEN "A", 2, "cws.his"
@@ -4804,7 +4816,6 @@ SUB drawShipIcon (who, flag)
 			DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
 			PSET (x + 8, y - 1)
 			GOSUB jack
-
 		CASE 2 ' ironclad
 			DRAW "BL15BD4E1"
 			DRAW "C0R30H1L2C8L24E1R1"
@@ -4829,23 +4840,23 @@ SUB drawShips
 	FOR s = 1 TO 2
 		IF globalNavySize(s) = 0 OR globalNavyLoc(s) = 0 THEN 
 			globalNavyLoc(s) = 0
-			GOTO sink
+			GOTO nextShip
 		END IF
 		IF globalNavyLoc(s) = 30 THEN 
 			x = 515: y = 268
-			GOTO float
+			GOTO drawShip
 		END IF
 		IF globalNavyLoc(s) = 28 THEN 
 			x = 517: y = 172
-			GOTO float
+			GOTO drawShip
 		END IF
 		IF globalNavyLoc(s) = 17 THEN 
 			x = 380: y = 425
-			GOTO float
+			GOTO drawShip
 		END IF
 		IF globalNavyLoc(s) = 99 THEN
 			x = 495: y = 310
-			GOTO float
+			GOTO drawShip
 		END IF
 		x = globalCityX(globalNavyLoc(s)) + 25
 		y = globalCityY(globalNavyLoc(s)) + 25
@@ -4853,12 +4864,12 @@ SUB drawShips
 			y = y + 5
 			x = x - 5
 		END IF
-		float:
+		drawShip:
 		PSET (x, y), 1
 		a = 1
 		IF LEFT$(globalFleet$(s), 1) = "I" THEN a = 2
 		CALL drawShipIcon(s, a)
-		sink:
+		nextShip:
 	NEXT s
 END SUB
 
@@ -5005,7 +5016,11 @@ SUB drawSurrender (who)
 	LINE -(w + 48, 260): LINE -(w + 37, 258)
 	LINE -(w + 36, 255): LINE -(w + 37, 250)
 	LINE -(w + 39, 246): LINE -(w + 40, 243)
-	c = 0: IF s = 2 THEN c = 15: LINE (547, 263)-(558, 263), 15
+	c = 0
+	IF s = 2 THEN 
+		c = 15
+		LINE (547, 263)-(558, 263), 15
+	END IF
 	PAINT (w + 33, 250), c, 0
 	PAINT (w + 42, 264), c, 0
 
@@ -5124,12 +5139,12 @@ SUB checkTrainCapacity (who, limit)
 		limit = globalTrain(who)
 		EXIT SUB
 	END IF
-	x = 11
-	IF globalSide = 2 THEN x = 23
-	limit = globalTrain(who) + 5 * (globalControl(who) - x)
-	x = 2 * globalTrain(who)
-	IF limit > x THEN limit = x
-	IF limit < x \ 4 THEN limit = x \ 4
+	trainCapacityLimit = 11
+	IF globalSide = 2 THEN trainCapacityLimit = 23
+	limit = globalTrain(who) + 5 * (globalControl(who) - trainCapacityLimit)
+	trainCapacityLimit = 2 * globalTrain(who)
+	IF limit > trainCapacityLimit THEN limit = trainCapacityLimit
+	IF limit < trainCapacityLimit \ 4 THEN limit = trainCapacityLimit \ 4
 END SUB
 
 SUB drawUSAMap
@@ -5467,7 +5482,9 @@ SUB drawUSAMap
 
 	IF globalPlayer = 2 GOTO nosee
 	FOR i = 1 TO 40
-		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN CALL drawArmyMove(globalArmyLoc(i), globalArmyMove(i), 1)
+		IF globalArmyLoc(i) > 0 AND globalArmyMove(i) > 0 THEN 
+			CALL drawArmyMove(globalArmyLoc(i), globalArmyMove(i), 1)
+		END IF
 	NEXT i
 	nosee:
 	CALL drawShips
@@ -5476,13 +5493,13 @@ SUB drawUSAMap
 END SUB
 
 SUB victor
-	x = 0
+	totalArmySize = 0
 	FOR j = 1 TO 20
-		IF globalArmyLoc(j) > 0 THEN x = x + globalArmySize(j)
+		IF globalArmyLoc(j) > 0 THEN totalArmySize = totalArmySize + globalArmySize(j)
 	NEXT j
-	y = 0
+	totalArmySize1 = 0
 	FOR j = 21 TO 40
-		IF globalArmyLoc(j) > 0 THEN y = y + globalArmySize(j)
+		IF globalArmyLoc(j) > 0 THEN totalArmySize1 = totalArmySize1 + globalArmySize(j)
 	NEXT j
 
 	CALL clearBottom
@@ -5492,37 +5509,37 @@ SUB victor
 		CALL drawOverlayBox(someText$, 4)
 	END IF
     FOR i = 1 TO 2
-		IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN 
+		IF (i = 1 AND totalArmySize1 = 0) OR (i = 2 AND totalArmySize = 0) THEN 
 			j = 7
 			globalVictory(i) = globalVictory(i) + 300
-			GOTO finis
+			GOTO victoryConditionMet
 		END IF
 
 		IF globalYear >= globalVicFlag(2) AND globalMonth >= globalVicFlag(1) AND globalVicFlag(2) > 0 THEN 
 			j = 2
-			GOTO finis
+			GOTO victoryConditionMet
 		END IF
 		IF globalControl(i) >= globalVicFlag(3) AND globalVicFlag(3) > 0 THEN 
 			j = 3
-			GOTO finis
+			GOTO victoryConditionMet
 		END IF
 		IF globalIncome(i) / (globalIncome(1) + globalIncome(2)) >= .01 * globalVicFlag(4) AND globalVicFlag(4) > 0 THEN 
 			j = 4
-			GOTO finis
+			GOTO victoryConditionMet
 		END IF
 		IF globalVicFlag(5) > 0 AND globalCapCity(3 - i) = 0 AND globalCapCity(i) > 0 THEN 
 			j = 5
-			GOTO finis
+			GOTO victoryConditionMet
 		END IF
 
 		IF globalVicFlag(6) > 0 THEN
 			IF i = 1 THEN
-				IF y = 0 THEN j = 7: GOTO finis
-				IF x / y > globalVicFlag(6) THEN j = 6: GOTO finis
+				IF totalArmySize1 = 0 THEN j = 7: GOTO victoryConditionMet
+				IF totalArmySize / totalArmySize1 > globalVicFlag(6) THEN j = 6: GOTO victoryConditionMet
 			END IF
 			IF i = 2 THEN
-				IF x = 0 THEN j = 7: GOTO finis
-				IF y / x > globalVicFlag(6) THEN j = 6: GOTO finis
+				IF totalArmySize = 0 THEN j = 7: GOTO victoryConditionMet
+				IF totalArmySize1 / totalArmySize > globalVicFlag(6) THEN j = 6: GOTO victoryConditionMet
 			END IF
 		END IF
 
@@ -5538,15 +5555,15 @@ SUB victor
 			CALL drawOverlayBox(someText$, 4)
 		END IF
 
-		IF globalVicFlag(6) > 0 AND x > 0 AND y > 0 THEN
-			IF (i = 1 AND x / y > .9 * globalVicFlag(6)) OR (i = 2 AND y / x > .9 * globalVicFlag(6)) THEN
+		IF globalVicFlag(6) > 0 AND totalArmySize > 0 AND totalArmySize1 > 0 THEN
+			IF (i = 1 AND totalArmySize / totalArmySize1 > .9 * globalVicFlag(6)) OR (i = 2 AND totalArmySize1 / totalArmySize > .9 * globalVicFlag(6)) THEN
 			someText$ = globalForce$(i) + "side close to" + STR$(globalVicFlag(6)) + ":1 strength ratio"
 			CALL drawOverlayBox(someText$, 4)
 			END IF
 		END IF
-		GOTO stale
+		GOTO checkNextSide
 
-		finis:
+		victoryConditionMet:
 		SELECT CASE j
 			CASE IS < 3
 			someText$ = "TIME EXPIRED"
@@ -5625,19 +5642,19 @@ SUB victor
 				globalVictory(k) = .7 * globalVictory(k)
 			NEXT k
 			CALL drawRebelWin
-			GOTO death
+			GOTO endGame
 		END IF
 
 		IF i = 1 THEN
 			CALL drawCapitol
 			COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(globalVictory(1)): PRINT t$
-			GOTO death
+			GOTO endGame
 		END IF
 		IF i = 2 THEN
 			CALL drawRebelWin
 			COLOR 15: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(globalVictory(2)): PRINT t$
 		END IF
-		death:
+		endGame:
 		COLOR 14: LOCATE 4, 40 - .5 * LEN(someText$)
 		IF globalHistory > 0 THEN
 			CALL showAndSaveHistory(t$, 0)
@@ -5645,7 +5662,7 @@ SUB victor
 		END IF
 		PRINT someText$: CALL drawHallOfFame
 		EXIT SUB
-	stale:
+	checkNextSide:
 	NEXT i
 END SUB
 
@@ -5653,7 +5670,7 @@ SUB calculateMilitaryPresence (a, y)
 	y = 0
 	FOR j = 1 TO 6
 		x = globalMatrix(a, j)
-		IF x = 0 GOTO tally5
+		IF x = 0 THEN EXIT SUB
 		IF globalCityP(x) = globalSide AND globalOccupied(x) > 0 THEN y = y + globalArmySize(globalOccupied(x))
 		FOR k = 1 TO 6
 			m = globalMatrix(x, k)
@@ -5662,7 +5679,6 @@ SUB calculateMilitaryPresence (a, y)
 		tally4:
 		NEXT k
 	NEXT j
-tally5:
 END SUB
 
 '============================================================================
@@ -6183,8 +6199,8 @@ SUB drawSchooner
 	LINE (297, 463)-(319, 468), 11
 
 	FOR k = 1 TO 4
-	x = 185 + 200 * RND
-	LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
+		x = 185 + 200 * RND
+		LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
 	NEXT k
 END SUB
 
