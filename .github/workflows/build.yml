@@ -1,0 +1,80 @@
+# Builds the game (CWSTRAT.BAS) with QB64Rust on Windows.
+# The result is an artifact named civil-war-strategy: cws.exe with the data files it reads,
+# ready to unzip and play.
+name: Build
+
+# When something reaches main (a merge or a push to it), or by hand with "Run workflow".
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # The QB64Rust commit the game is built with. Change it to take a newer compiler.
+  QB64RUST_REF: main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      # Keep the files' bytes as committed: the runner's default would turn LF into CR LF.
+      - run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v7
+        with:
+          path: game
+
+      - uses: actions/checkout@v7
+        with:
+          repository: davidshq/QB64Rust
+          ref: ${{ env.QB64RUST_REF }}
+          path: qb64rust
+
+      # Installs the Rust toolchain named in QB64Rust's rust-toolchain.toml.
+      - run: rustup toolchain install
+        working-directory: qb64rust
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: qb64rust
+
+      - run: cargo build --release --locked
+        working-directory: qb64rust
+
+      # The C++ toolchain qb64rust builds with (llvm-mingw, a 190 MB download). Its version is
+      # pinned in toolchain.rs, so the cache is kept until that file changes.
+      - uses: actions/cache@v6
+        with:
+          path: ~\AppData\Local\qb64rust\toolchain
+          key: qb64rust-toolchain-${{ hashFiles('qb64rust/crates/driver/src/toolchain.rs') }}
+
+      - run: qb64rust\target\release\qb64rust.exe toolchain install
+
+      # The build takes the name of the DOS program. It is made in a folder of its own, so that
+      # it does not matter whether the DOS program CWS.EXE is still in the repo.
+      - name: Build the game
+        working-directory: game
+        run: |
+          New-Item -ItemType Directory ..\dist | Out-Null
+          ..\qb64rust\target\release\qb64rust.exe -x CWSTRAT.BAS -o ..\dist\cws.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # The program, the two files it needs beside it (its settings and its Hall of Fame), the
+      # data folders (FOLDERS.BI), and the game's own documents in docs. Sources, DOS programs
+      # and the developer notes are left out.
+      - name: Put the playable folder together
+        run: |
+          Copy-Item game\CWS.CFG, game\HISCORE.CWS, game\README.md, game\LICENSE -Destination dist
+          Copy-Item game\graphics, game\scenarios -Destination dist -Recurse
+          New-Item -ItemType Directory dist\docs | Out-Null
+          Copy-Item game\docs\CWS.DOC, game\docs\README.1ST, game\docs\WRHGAMES.DOC, game\docs\CWSDOC.TXT -Destination dist\docs
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: civil-war-strategy
+          path: dist
+          if-no-files-found: error

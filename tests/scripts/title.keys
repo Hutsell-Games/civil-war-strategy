@@ -1,0 +1,5 @@
+# The title menu, then Quit to DOS.
+play until 2:V
+state
+text q
+repeat space

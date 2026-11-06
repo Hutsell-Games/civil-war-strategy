@@ -1,0 +1,93 @@
+' ===========================================================================
+' SCRIPT.BM - hooks for the whole-game scripts of tests\play.py.
+' Included at the end of CWSTRAT.BAS. See tests\README.md.
+'
+' A program started with the environment variable CWS_SEED set is
+' "scripted":
+'   - RANDOMIZE takes that number instead of TIMER, so every run is the same;
+'   - each wait for a key is announced in bytes &H4F0 to &H4F2 of memory,
+'     which QB64 does not use, so that a keys file gives each key only when
+'     the program waits for it (QB64Rust's tools\screen\README.md, "Prompts");
+'   - a timed pause (TICK of less than 99 seconds) returns at once, and a
+'     longer one, which the game uses as "press a key", waits for a key;
+'   - PLAY and SOUND are silent (PLAY "V0"): they take their time, unheard;
+'   - the history file holds the date 01-01-2000 instead of today's;
+'   - the history file is copied in BASIC, not by SHELL "copy ...".
+' A program started without it plays as before: announce does nothing.
+' ===========================================================================
+
+' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER.
+SUB scriptstart
+seed$ = ENVIRON$("CWS_SEED")
+IF seed$ = "" THEN RANDOMIZE TIMER: EXIT SUB
+scripted = 1
+RANDOMIZE VAL(seed$)
+PLAY "V0"
+END SUB
+
+' The date the history file starts with: today, or a fixed one when the
+' program is scripted, so that the file is the same in every run.
+FUNCTION scriptdate$
+IF scripted THEN scriptdate$ = "01-01-2000" ELSE scriptdate$ = DATE$
+END FUNCTION
+
+' TICK's pause when the program is scripted. Gives 0 when it is not, and
+' TICK then pauses as before. A pause of 99 seconds or more is how the game
+' says "press a key" (the map's links, "There are still defenders"), so a
+' script waits there for a key; a shorter one returns at once.
+FUNCTION scripttick% (sec!)
+scripttick% = 0
+IF scripted = 0 THEN EXIT FUNCTION
+scripttick% = -1
+IF sec! < 99 THEN EXIT FUNCTION
+CALL announce(1, "L")
+DO WHILE INKEY$ = "": LOOP
+END FUNCTION
+
+' SHELL cmd$, or under a script the same work done in BASIC. The game runs
+' "copy <from> <to>" (the history file of the game before). A SHELL starts
+' cmd.exe, whose console window shows on the user's desktop even when the
+' program runs on a hidden one, so the scripts must not run it. Copy
+' replaces <to>, as copy does.
+SUB scriptshell (cmd$)
+IF scripted = 0 THEN SHELL cmd$: EXIT SUB
+c$ = LTRIM$(RTRIM$(cmd$))
+sp = INSTR(c$, " "): verb$ = LCASE$(LEFT$(c$, sp - 1)): args$ = LTRIM$(MID$(c$, sp + 1))
+sp = INSTR(args$, " "): from$ = LEFT$(args$, sp - 1): into$ = LTRIM$(MID$(args$, sp + 1))
+IF verb$ <> "copy" THEN SHELL cmd$: EXIT SUB
+IF NOT _FILEEXISTS(from$) THEN EXIT SUB
+f = FREEFILE: OPEN from$ FOR BINARY AS #f
+d$ = SPACE$(LOF(f)): GET #f, , d$: CLOSE #f
+IF _FILEEXISTS(into$) THEN KILL into$
+f = FREEFILE: OPEN into$ FOR BINARY AS #f: PUT #f, , d$: CLOSE #f
+END SUB
+
+' Says that the program is about to wait for a key. place names the kind of
+' wait (1 to 255) and letter$ narrows it (its first character, or ""):
+'   1  a pause that any key ends; letter$ says which:
+'        R  the Random Events menu's "press a key" (CWSTRAT.BAS)
+'        T  a player's turn begins, in a two-player game (blanken)
+'        P  a battle: the odds are shown, before the picture (battle)
+'        B  a battle: "hit any key to continue" (battle)
+'        U  the month's update: "press any key for ... events" (tupdate)
+'        K  the month's update ends, in a two-player game: "press a key"
+'        I  the special development: ironclad ships (events)
+'        N  a special event good for the Union (events)
+'        S  a special event good for the South (events)
+'        H  the game is over: "press a key" before the Hall of Fame (maxx)
+'        G  "Game Over" (maxx)
+'        F  a report: "press a key" (report)
+'        L  TICK of 99 seconds or more
+'   2  a menu; letter$ is the first letter of the menu's title
+'   4  a line of text: the name of the commander for the Hall of Fame
+' Byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits.
+SUB announce (place, letter$)
+IF scripted = 0 THEN EXIT SUB
+code = 0
+IF letter$ <> "" THEN code = ASC(UCASE$(letter$))
+DEF SEG = 0
+POKE &H4F1, place
+POKE &H4F2, code
+POKE &H4F0, (PEEK(&H4F0) + 1) AND 255
+DEF SEG
+END SUB

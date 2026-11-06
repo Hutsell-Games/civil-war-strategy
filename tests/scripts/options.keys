@@ -1,0 +1,175 @@
+#! seed 1861
+# Civil War Strategy: every entry of the Utility menu, then a game with what they set (QB64Rust's
+# tools/screen/README.md, "Places and rules"). Vary Start first (it reads the configuration and the start again);
+# Graphics four times round; sound on, the last Sounds entry (silent: under a script the game plays at volume 0); Display Very
+# Slow, the other colors, Fast; Balance Rebel ++; End Cond time off and on; Random Events Neutral, OFF, Favor
+# Rebels, Favor Union; Jan Campgn off; Realism off and on; Chk Links; History on; Aggress six times round; Side
+# Rebel and back; 2 Player and back. Then END TURN by rules: in November 1861 the Rebels win on cities (the
+# other colors, sound and history on), the Hall of Fame, Game Over, Quit. A run takes about 26 s: the notes take
+# their time.
+
+# The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
+# the End Turn and End Game menus: Yes; the Options at the end: Quit this Game.
+rule 1:R key space
+rule 1:P key space
+rule 1:B key space
+rule 1:U key space
+rule 1:K key space
+rule 1:I key space
+rule 1:N key space
+rule 1:S key space
+rule 1:H key space
+rule 1:G key space
+rule 1:F key space
+rule 1:L key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+rule 2:O text q
+# The title menu: Start NEW Game; March 1861, the main menu: UTILITY.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+text u
+# Vary Start first: it reads the configuration again
+prompt
+text v
+# Graphics four times round
+prompt
+text g
+prompt
+text g
+prompt
+text g
+prompt
+text g
+# Noise: the last entry (its first character is a note): up from the first
+prompt
+text n
+prompt
+key up
+prompt
+key enter
+prompt
+digest
+# Display: Very Slow, Reg Color, Fast
+text d
+prompt
+text v
+prompt
+text d
+prompt
+text r
+prompt
+text d
+prompt
+text f
+# Balance: Rebel ++
+prompt
+text b
+prompt
+text r
+# End Cond: time off and on, out
+prompt
+text e
+prompt
+key enter
+prompt
+key enter
+prompt
+key esc
+# Random events: Neutral, OFF, Favor Rebels (the second F, by arrows), Favor Union
+prompt
+text r
+prompt
+text n
+prompt
+key space
+prompt
+text r
+prompt
+text o
+prompt
+key space
+prompt
+text r
+prompt
+key up
+prompt
+key enter
+prompt
+key space
+prompt
+text r
+prompt
+text f
+prompt
+key space
+# Jan Campgn, then Realism twice (the row below it)
+prompt
+text j
+prompt
+key down
+prompt
+key enter
+prompt
+key enter
+# Chk Links, which goes to the main menu: UTILITY again.
+prompt
+text c
+play until 2:M
+digest
+text u
+# History on; Aggress six times round
+prompt
+text h
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text a
+# Side: Rebel, and back to Union (each goes to the main menu)
+prompt
+text s
+prompt
+text u
+prompt
+text s
+prompt
+text u
+# 2 Player, and back (the entry then reads 2 Player)
+prompt
+text 1
+prompt
+text 2
+prompt
+state
+key esc
+# Four turns: the main menu, END TURN (and Yes by the rule).
+repeat 4
+play until 2:M
+digest
+text e
+end
+# November 1861: the Rebels control 80 % of the cities; End Game (Yes by the rule), the Options: Quit.
+play until 2:O
+state
+text q
+# The Union Hall of Fame: the commander's name; Game Over; the title menu: Quit; END's key.
+play until 4
+state
+text Grant
+key enter
+play until 2:V
+state
+text q
+repeat space

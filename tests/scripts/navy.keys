@@ -1,0 +1,81 @@
+#! seed 1861
+# Civil War Strategy: the Union navy against New Orleans (QB64Rust's tools/screen/README.md, "Places
+# and rules"). In March 1861 two ships are built and sail to New Orleans (the To menu takes a letter at once). In
+# May, July and September they attack it: its forts are damaged twice, then it turns neutral. In November Attack is
+# "-" (its key does nothing) and the ships land an army there (Invasion). Then END TURN by rules to the game's end,
+# the Hall of Fame, Game Over, Quit.
+
+# The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
+# the End Turn and End Game menus: Yes. The Options at the end are answered by steps.
+rule 1:R key space
+rule 1:P key space
+rule 1:B key space
+rule 1:U key space
+rule 1:K key space
+rule 1:I key space
+rule 1:N key space
+rule 1:S key space
+rule 1:H key space
+rule 1:G key space
+rule 1:F key space
+rule 1:L key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+
+# The title menu: Start NEW Game; March 1861: Ships: Build twice, Sail to New Orleans; END TURN, Yes.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+text s
+prompt
+text b
+prompt
+text b
+prompt
+text s
+prompt
+digest
+text n
+prompt
+text e
+prompt
+text y
+# May, July and September: Ships: Attack; out; END TURN, Yes.
+repeat 3
+play until 2:M
+digest
+text s
+prompt
+text a
+prompt
+digest
+key esc
+prompt
+text e
+prompt
+text y
+end
+# November: Ships: Attack is "-" (no key), Invasion.
+play until 2:M
+digest
+text s
+prompt
+state
+text a
+prompt
+text i
+# The turns to the game's end by rules; the Options: Quit; the Hall of Fame: a name; Game Over; the title menu: Quit.
+play until 2:O
+state
+text q
+play until 4
+state
+text Grant
+key enter
+play until 2:V
+digest
+text q
+repeat space

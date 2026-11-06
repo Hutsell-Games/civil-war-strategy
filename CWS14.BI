@@ -1,4 +1,5 @@
 DEFINT A-Z
+' $INCLUDE: 'folders.bi'
 DECLARE SUB animate (index%, flag%)
 DECLARE SUB armies ()
 DECLARE SUB armystat (index%)
@@ -84,4 +85,8 @@ DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2
 DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fort(40), rr(2)
 DIM SHARED victory(2), capcity(2), emancipate, price(3), tracks(2), fleet$(2)
 DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
-
+' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
+DIM SHARED graphic(1 TO 1564), Ncap(60)
+DIM SHARED graft(1 TO 1564)
+' Set by scriptstart (SCRIPT.BM) when tests\play.py runs the program.
+DIM SHARED scripted

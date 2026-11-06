@@ -1,0 +1,70 @@
+# A whole game as the Rebel side, which only ends each turn; the computer plays the Union side, on the alternate map.
+# Every victory condition but the time limit is turned off first.
+# A digest at each of the 10 main menus, at Game Over and at the title menus.
+# Written by tests/make_scripts.py.
+#! seed 1869
+#! cfg side=2 history=1 bold=4 randbal=3
+#! altmap
+#! files cws.his HISCORE.CWS
+#! timeout 900
+
+# Pauses that any key ends; End Turn and End Game: Yes; a Retreat: the first city; the
+# Options at the game's end: Quit this Game.
+rule 1 key space
+rule 2:E text y
+rule 2:R key enter
+rule 2:O text q
+
+# The title menu: Start NEW Game.
+play until 2:V
+digest
+text s
+
+# The main menu: UTILITY, End Cond. Victory Conditions starts on Time: down and Enter
+# turn off each of the four others. Esc there, and Esc at the Utility menu.
+play until 2:M
+text u
+prompt
+text e
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+key esc
+prompt
+key esc
+
+# Each month's main menu: a digest, then END TURN.
+repeat 10
+play until 2:M
+digest
+text e
+end
+
+# The game ends. The Hall of Fame asks for the commander's name.
+play until 4
+text Tester
+key enter
+play until 1:G
+digest
+key space
+
+# The title menu: Quit to DOS, and a key for END's "Press any key to continue".
+play until 2:V
+digest
+text q
+repeat space

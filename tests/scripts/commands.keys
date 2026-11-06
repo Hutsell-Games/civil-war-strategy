@@ -1,0 +1,171 @@
+#! seed 1861
+# Civil War Strategy: the commands of the main menu as the Union (QB64Rust's tools/screen/README.md,
+# "Places and rules"). In March 1861: a recruit; a move, cancelled; each entry of COMMANDS (Cancel twice, Fortify,
+# Army Drill, Relieve, Supply and Join with nothing to do; Detach and Capital are "-" for the Union this month); each
+# report of Inform; two ships built and sailed to Baltimore; a railroad move. In May 1861 the ships land an army
+# at Baltimore (Invasion). Then END TURN by rules to the game's end, the Hall of Fame, Game Over and Quit.
+
+# The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
+# the End Turn and End Game menus: Yes; the Options at the end: Quit this Game.
+rule 1:R key space
+rule 1:P key space
+rule 1:B key space
+rule 1:U key space
+rule 1:K key space
+rule 1:I key space
+rule 1:N key space
+rule 1:S key space
+rule 1:H key space
+rule 1:G key space
+rule 1:F key space
+rule 1:L key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+rule 2:O text q
+
+# The title menu: Start NEW Game.
+play until 2:V
+digest
+text s
+# March 1861. Troops: recruit at the first city, out.
+play until 2:M
+digest
+text t
+prompt
+key enter
+prompt
+key esc
+# Moves: McClellan from Cincinnati to the first city.
+prompt
+text m
+prompt
+key enter
+prompt
+key enter
+# COMMANDS: Cancel that move; Cancel again (no orders left); Fortify the first city; Army Drill the first army;
+# Relieve the first army's leader with the first new one; Supply (all have supplies: to the main menu).
+prompt
+text c
+prompt
+digest
+text c
+prompt
+key enter
+prompt
+text c
+prompt
+text f
+prompt
+key enter
+prompt
+text a
+prompt
+key enter
+prompt
+text r
+prompt
+key enter
+prompt
+digest
+key enter
+prompt
+text s
+# COMMANDS: Join (no two armies in one city: to the main menu).
+prompt
+text c
+prompt
+text j
+# Inform: each report, a key after each.
+prompt
+text i
+prompt
+text u
+prompt
+digest
+key space
+prompt
+text i
+prompt
+text r
+prompt
+key space
+prompt
+text i
+prompt
+text c
+prompt
+key space
+prompt
+text i
+prompt
+text f
+prompt
+digest
+key space
+prompt
+text i
+prompt
+text i
+prompt
+digest
+key space
+prompt
+text i
+prompt
+text b
+prompt
+key space
+# Ships: build two, sail to Baltimore, the first port.
+prompt
+text s
+prompt
+text b
+prompt
+text b
+prompt
+text s
+prompt
+digest
+key enter
+# Railroad: from Cincinnati, to the next city of the picker.
+prompt
+text r
+prompt
+key enter
+prompt
+key down
+prompt
+state
+key enter
+# END TURN, Yes.
+prompt
+text e
+prompt
+text y
+# May 1861. Ships: Invasion at Baltimore.
+play until 2:M
+digest
+text s
+prompt
+digest
+text i
+# Four more turns: the main menu, END TURN (and Yes by the rule).
+repeat 4
+play until 2:M
+digest
+text e
+end
+# The game's end: End Game (Yes by the rule), the Options: Quit; the Hall of Fame: the commander's name; Game Over;
+# the title menu: Quit; END's key.
+play until 2:O
+state
+text q
+play until 4
+state
+text Grant
+key enter
+play until 2:V
+state
+text q
+repeat space

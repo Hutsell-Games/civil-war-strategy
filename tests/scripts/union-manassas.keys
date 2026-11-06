@@ -1,0 +1,224 @@
+#! seed 1861
+# Civil War Strategy played from the start (QB64Rust's tools/screen/README.md, "Prompts").
+# Two turns as the Union, from March to July 1861: recruit, two moves, a ship, a railroad move, the Union Armies,
+# Cities and Battles reports, Fortify, the Utility menu, a save; END TURN twice, so that the computer moves and two
+# battles are fought; then Files, Quit, Yes. A prompt before every key: the game announces each wait, a menu after
+# every arrow key. A state at each new kind of screen.
+
+# title menu: Start NEW Game
+prompt
+state
+key enter
+# March 1861, main menu: Troops
+prompt
+state
+key enter
+# Recruit: Pope, then out
+prompt
+state
+key enter
+prompt
+key esc
+# main menu on Moves; From: Cincinnati
+prompt
+key enter
+prompt
+state
+key enter
+# To: down to Lexington
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+state
+key enter
+# Moves again; From: down to Washington; To: down to Manassas
+prompt
+key enter
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+state
+key enter
+# main menu on Moves: down to Ships; Build one, then out
+prompt
+key down
+prompt
+key enter
+prompt
+state
+key enter
+prompt
+key esc
+prompt
+key enter
+# Railroad: From Columbus; To: the picker starts on Columbus, down twice to Harrisburg
+prompt
+key enter
+prompt
+key down
+prompt
+key down
+prompt
+state
+key enter
+# main menu on END TURN: down to Inform
+prompt
+key down
+prompt
+key enter
+# Information: Union Armies, then a key
+prompt
+state
+key enter
+prompt
+state
+key space
+# main menu on Inform: Information again, down twice to Cities
+prompt
+key enter
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+state
+key space
+# main menu on Inform: down to COMMANDS
+prompt
+key down
+prompt
+key enter
+# Commands: down to Fortify, Cincinnati
+prompt
+state
+key down
+prompt
+key enter
+prompt
+state
+key enter
+# main menu on COMMANDS: down to UTILITY; look at it, out
+prompt
+key down
+prompt
+key enter
+prompt
+state
+key esc
+# main menu on UTILITY: down to Files; Options: Save; Save Game: cws1.sav
+prompt
+key down
+prompt
+key enter
+prompt
+key enter
+prompt
+state
+key enter
+# main menu on Files: up four times to END TURN; End Turn: up to Yes
+prompt
+key up
+prompt
+key up
+prompt
+key up
+prompt
+key up
+prompt
+key enter
+prompt
+key up
+prompt
+state
+key enter
+# The computer's turn: the month's events, the battle at Harper's Ferry, "hit any key to continue"
+prompt
+state
+key space
+prompt
+state
+key space
+prompt
+state
+key space
+# May 1861, main menu on Troops: down five times to Inform; Information: down five times to Battles
+prompt
+state
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+state
+key space
+# main menu on Inform: up to END TURN; End Turn: up to Yes
+prompt
+key up
+prompt
+key enter
+prompt
+key up
+prompt
+key enter
+# The computer's turn: the month's events, the battle at Harper's Ferry, "hit any key to continue"
+prompt
+key space
+prompt
+key space
+prompt
+key space
+# July 1861, main menu on Troops: up (round) to Files
+prompt
+key up
+prompt
+key enter
+# Options on Save: down twice to Quit; Quit: up to Yes; END's "Press any key to continue"
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+key up
+prompt
+state
+key enter
+repeat space

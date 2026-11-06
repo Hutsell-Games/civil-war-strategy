@@ -1,0 +1,164 @@
+VGA Civil War Strategy Game v1.4- ONLINE HELP
+
+H E L P !
+
+  F1 - Object of the Game
+  F2 - Map Display
+  F3 - Getting Started
+  F4 - Customizing
+  F5 - Back to the Game
+
+Select an option
+
+FOR MORE INFORMATION, SEE THE FILE CWS.TXT
+
+
+OBJECT OF THE GAME
+This is a 1 or 2 person strategic level game of the American Civil War.
+The side that gets the most VICTORY POINTS before any END OF GAME
+CONDITIONS are reached wins.
+
+You get victory points for
+    - capturing cities (larger cities are worth more points)
+    - destroying enemy armies (25 victory points)
+    - winning battles (1 point per battle won)
+    - special events.
+
+End of game conditions are based on
+    - Time (Month & Year)                 [ March 1865 ]
+    - % Cities Controlled by Either Side  [ 80% ]
+    - % Income for Either Side            [ 80% ]
+    - Capital Capture By Either Side      [ yes ]
+    - Ratio of Total Army Strength        [ 3 : 1 ]
+
+Values in brackets are default values.
+
+
+MAP
+You see a map of the eastern U.S. along with the Main Menu to the right.
+Above the menu is a flag showing the side currently selected.
+
+The Fcolored circles on the map display are cities.
+    - BLUE circles are Union controlled cities
+    - GRAY circles are Confederate controlled cities
+    - RED circles are neutral cities
+Richmond and Washington are CAPITAL CITIES (marked with yellow crosses).
+
+Dashed lines show which cities CONNECT.
+
+A HOLLOW BLACK box around a city means it is FORTIFIED.
+A SOLID BLACK box is HEAVILY FORTIFIED.
+
+Flag icons that appear next to some cities are ARMIES.
+
+
+GETTING STARTED
+While you don't have to do any of the commands in any particular order,
+the following sequence will get you acquainted with some of the key
+features of game play:
+                                           +-----------+
+                                           |  Main     |
+  RECRUIT an army. Move the                +-----------+
+  highlighted bar on the Main Menu using   |  Troops   |
+  the "up" and "down" arrow keys until     |  Moves    |
+  the word "TROOPS" is                     |  Ships    |
+  highlighted. Press ENTER. You will see   |  Railroad |
+  a new menu of city locations showing     |  END TURN |
+  where you can recruit. Select one of     |  Inform   |
+  these and press ENTER. A message will    |  COMMANDS |
+  appear at the bottom of the screen       |  UTILITY  |
+  announcing where the army was raised,    |  Files    |
+  and how strong it currently is.          +-----------+
+
+
+
+  BUILD new ship. Move the                 +-----------+      +----------+
+  highlighted bar until the word           |  Main     |      |  Ships   |
+  "SHIPS" is highlighted. Press            +-----------+      +----------+
+  ENTER. You will see an option of         |  Troops   |      | Build    |
+  possible ship actions. Select            |  Moves    |      | Attack   |
+  "BUILD" and press ENTER. (If you         |  Ships    |      | Sail     |
+  are playing the Rebels, you will next    |  Railroad |      | Raid     |
+  need to choose the port where the ship   |  END TURN |      | Invasion |
+  will be built. The Union fleet starts    |  Inform   |      +----------+
+  in Philadelphia). You will then see      |  COMMANDS |          
+  the two types ships you can build.       |  UTILITY  |      +---------+
+  Select "WOODEN" and press ENTER.         |  Files    |      | Type    |
+  You have just enlarged your navy with    +-----------+      +---------+
+  a wooden ship.                                              | Wooden  |
+                                                              | Ironclad|
+                                                              +---------+
+
+  MOVE your navy. Select the "SHIPS"       +-----------+      +----------+
+  option again, but this time, select      |  Main     |      |  Ships   |
+  the "SAIL" option for your navy.         +-----------+      +----------+
+  Choose a destination and press ENTER.    |  Troops   |      | Build    |
+                                           |  Moves    |      | Attack   |
+                                           |  Ships    |      | Sail     |
+                                           |  Railroad |      | Raid     |
+                                           |  END TURN |      | Invasion |
+                                           |  Inform   |      +----------+
+                                           |  COMMANDS |
+                                           |  UTILITY  |
+                                           |  Files    |
+                                           +-----------+
+
+  RAILROAD an army to speed it to a        +-----------+
+  destination. Select the "RAILROAD"       |  Main     |
+  option, and press ENTER. Select one of   +-----------+
+  the armies that is presented in the      |  Troops   |
+  menu. Then use the "up" and "down"       |  Moves    |
+  keys to select a destination city for    |  Ships    |
+  that army. Press ENTER. Notice the       |  Railroad |
+  army disappears and a train icon         |  END TURN |
+  appears to show that it is enroute to    |  Inform   |
+  the destination.                         |  COMMANDS |
+                                           |  UTILITY  |
+                                           |  Files    |
+                                           +-----------+
+
+  MOVE another army to capture a           +-----------+
+  city. Select the "MOVES" option, and     |  Main     |
+  press ENTER. A menu of armies            +-----------+
+  available to move appears. Choose one    |  Troops   |
+  and press ENTER. Now a menu of           |  Moves    |
+  possible destinations appears. Choose    |  Ships    |
+  one and press ENTER. Notice that a       |  Railroad |
+  dotted line connects the army to the     |  END TURN |
+  destination city on the map, but the     |  Inform   |
+  army hasn't moved yet.                   |  COMMANDS |
+                                           |  UTILITY  |
+                                           |  Files    |
+                                           +-----------+
+
+  FINALLY, select the "END TURN"           +-----------+
+  option, and confirm by answering "yes"   |  Main     |
+  to the prompt. Various messgaes will     +-----------+
+  appear as the enemy makes his moves.     |  Troops   |
+  Press any key when you have finished     |  Moves    |
+  reading a message to go on. The word     |  Ships    |
+  "UPDATE" will appear on the map.         |  Railroad |
+  Your army on the train will reach its    |  END TURN |
+  destination. Your army moving will       |  Inform   |
+  move across the map to the destination   |  COMMANDS |
+  city. Other movement will take place,    |  UTILITY  |
+  and BATTLES may occur. Follow            |  Files    |
+  the screen prompts and respond if        +-----------+
+  necessary.
+
+
+That gives you a sample of what you can do. The rest is up to you !
+
+
+CUSTOMIZING
+
+The "UTILITY" option lets you customize the game for your use:
+   - change SIDES to play either Union or Rebels
+   - play 2-PERSON or 1-PERSON games
+   - adjust DIFFICULTY
+   - adjust SOUND and GRAPHICS
+   - other options
+
+
+To SAVE the new settings, select FILES and then SAVE.
+The next time you start the game, it will use these new settings.

@@ -1,0 +1,142 @@
+#! seed 1861
+# Civil War Strategy: three games in one run, each to another ending (QB64Rust's tools/screen/
+# README.md, "Places and rules"). After Game Over the game starts again at its title menu. Each game sets its end
+# conditions in the Utility menu (End Cond, which starts on Time and toggles the row it is on), then END TURN by
+# rules: game 1 with only the income condition: in July 1863 the Rebels hold 80 % of the income; game 2 with only
+# the capital, the enemy made passive (Aggress three times): in March 1870 the Rebels take Washington; game 3 with
+# only the time, the enemy as configured: the Union is annihilated before the time runs out, which ends the game
+# without the Options menu. Each game's end: the Hall of Fame and a name, Game Over. At the end, Quit.
+
+# The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
+# the End Turn and End Game menus: Yes. The Options at an end are answered by steps.
+rule 1:R key space
+rule 1:P key space
+rule 1:B key space
+rule 1:U key space
+rule 1:K key space
+rule 1:I key space
+rule 1:N key space
+rule 1:S key space
+rule 1:H key space
+rule 1:G key space
+rule 1:F key space
+rule 1:L key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+# Game 1. The title menu: Start NEW Game; the main menu: UTILITY, End Cond: Time, Cities, Capital and Force Ratio off.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+text u
+prompt
+text e
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key esc
+prompt
+key esc
+# July 1863, the income: the Options: Quit; the Hall of Fame: a name.
+play until 2:O
+state
+text q
+play until 4
+text Grant
+key enter
+# Game 2. Start NEW Game; UTILITY, Aggress three times, End Cond: Time, Cities, Income and Force Ratio off.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+text u
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text e
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+key esc
+prompt
+key esc
+# March 1870, Washington taken: the Options: Quit; the Hall of Fame: a name.
+play until 2:O
+state
+text q
+play until 4
+text Grant
+key enter
+# Game 3. Start NEW Game; UTILITY, End Cond: Cities, Income, Capital and Force Ratio off.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+text u
+prompt
+text e
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key esc
+prompt
+key esc
+# The Union annihilated: the Hall of Fame: a name; Game Over; the title menu: Quit; END's key.
+play until 4
+state
+text Grant
+key enter
+play until 2:V
+state
+text q
+repeat space

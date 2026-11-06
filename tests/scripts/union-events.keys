@@ -1,0 +1,146 @@
+#! seed 1861
+# Civil War Strategy: a whole game as the Union with random events in its favor (QB64Rust's
+# tools/screen/README.md, "Places and rules"). In the Utility menu: the enemy made passive (Aggress three times),
+# Balance Rebel ++ (which makes an event about three times as likely each month: the chance grows with the square of
+# 6 - balance), Random Events Favor Union, and every end condition but the time off. In March 1861: COMMANDS, the
+# "-" of Detach chosen by its key (the Union's message); the capital moves (COMMANDS, Capital: the picker down, up,
+# to Philadelphia by its letter); the navy raids commerce. Then each month recruits at the first three cities the
+# Recruit menu offers (so the named leaders run out) and END TURN, to the time limit in March 1865: the end screen,
+# the Hall of Fame, Game Over, Quit.
+
+# The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
+# the End Turn and End Game menus: Yes. The Options at the end are answered by steps.
+rule 1:R key space
+rule 1:P key space
+rule 1:B key space
+rule 1:U key space
+rule 1:K key space
+rule 1:I key space
+rule 1:N key space
+rule 1:S key space
+rule 1:H key space
+rule 1:G key space
+rule 1:F key space
+rule 1:L key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+# The title menu: Start NEW Game; March 1861, the main menu: UTILITY; Aggress three times; Balance: Rebel ++;
+# Random Events: Favor Union, a key; End Cond: the four after Time off; out twice.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+text u
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text b
+prompt
+text r
+prompt
+text r
+prompt
+text f
+prompt
+key space
+prompt
+text e
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key esc
+prompt
+key esc
+# COMMANDS: the "-" of Detach by its key (the Union cannot detach: a message, the main menu).
+prompt
+text c
+prompt
+text -
+# COMMANDS: Capital, the fifth row; the picker: down, up, p (Philadelphia), Enter; out.
+prompt
+text c
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+key down
+prompt
+digest
+key up
+prompt
+text p
+prompt
+state
+key enter
+prompt
+digest
+key esc
+# Ships: Raid.
+prompt
+text s
+prompt
+text r
+# 24 months: Troops, recruits at the first three cities the menu offers (so the named leaders run out and generic
+# ones are made), out; END TURN, Yes.
+repeat 24
+play until 2:M
+digest
+text t
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key esc
+prompt
+text e
+prompt
+text y
+end
+# March 1865: time expired; End Game (Yes by the rule), the Options: Quit; the Hall of Fame: a name; Game Over;
+# the title menu: Quit; END's key.
+play until 2:O
+state
+text q
+play until 4
+state
+text Grant
+key enter
+play until 2:V
+digest
+text q
+repeat space

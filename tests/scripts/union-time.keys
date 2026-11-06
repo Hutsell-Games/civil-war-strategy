@@ -1,0 +1,102 @@
+#! seed 1861
+# Civil War Strategy, a whole game as the Union to the time limit (QB64Rust's tools/screen/README.md,
+# "Places and rules"). In the Utility menu: the enemy made passive (Aggress three times: normal, bold, reckless,
+# passive), the balance Union +, and every end condition but the time turned off. Then the main menu's keys F3, F4
+# and F7 (which ends the first turn), and END TURN at each of the other 23 main menus to January 1865, with a digest
+# of each, the waits between answered by rules; in March 1865 the time runs out: the end screen, the Union Hall of
+# Fame and its commander's name, Game Over, and Quit at the title menu. Display speed is not set: under a script TICK returns
+# at once.
+
+# The waits of the computer's turns: a space each (the pauses of place 1: R random events, P and B a battle, U and
+# K the month's update, I, N and S events, H and G the high scores, F a report, L a long pause). A Retreat menu: the city it starts on. A main menu: END TURN;
+# the End Turn and End Game menus: Yes; the Options at the end: Quit this Game.
+rule 1:R key space
+rule 1:P key space
+rule 1:B key space
+rule 1:U key space
+rule 1:K key space
+rule 1:I key space
+rule 1:N key space
+rule 1:S key space
+rule 1:H key space
+rule 1:G key space
+rule 1:F key space
+rule 1:L key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+rule 2:O text q
+
+# The title menu: Start NEW Game.
+play until 2:V
+digest
+text s
+# March 1861, the main menu: UTILITY; Aggress three times; Balance: Union +; End Cond.
+play until 2:M
+digest
+text u
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text b
+prompt
+text u
+prompt
+text e
+# Victory Conditions, on Time: down and toggle each of the four others; out, and out of the Utility menu.
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+state
+key esc
+prompt
+key esc
+# The main menu's keys: F3 draws the screen again, F4 shows the force report (a key), F7 ends the turn at once.
+prompt
+key f3
+prompt
+digest
+key f4
+prompt
+digest
+key space
+prompt
+key f7
+# 23 turns: the main menu, END TURN (and Yes by the rule).
+repeat 23
+play until 2:M
+digest
+text e
+end
+# March 1865: time expired; the End Game menu (Yes by the rule) and the Options: the screen behind them.
+play until 2:O
+state
+text q
+# The Union Hall of Fame: the commander's name.
+play until 4
+state
+text Grant
+key enter
+# Game Over, and the title menu again: Quit; END's "Press any key to continue".
+play until 2:V
+state
+text q
+repeat space

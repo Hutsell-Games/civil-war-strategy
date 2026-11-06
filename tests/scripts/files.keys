@@ -1,0 +1,147 @@
+#! seed 1861
+#! files cws1.sav cws2.sav cws.his oldhist.ory CWS.CFG
+# Civil War Strategy: the Files menu and Resume Saved Game (QB64Rust's tools/screen/README.md, "Places and rules").
+# Resume Saved Game at the title menu finds no saved game and goes to the main menu. Files shows Load as "-",
+# and it stays "-" for the rest of this game, also after a save: its key goes back to the Files menu. Save writes
+# cws1.sav; after a recruit, Save writes cws2.sav (cws1.sav is marked as used). Quit, No. New Game goes back to
+# the title menu, where Resume Saved Game now lists the two saved games: cws1.sav, the game before the recruit.
+# In that game Load is offered: cws2.sav, the game after the recruit; Load again, left with Esc. History on, and
+# New Game writes the configuration; Start NEW Game begins a history file; Inform has Recap; one more New Game
+# and Start NEW Game copy the history file to oldhist.ory. Then END TURN by rules to the game's end, the Hall of
+# Fame, Game Over and Quit. The saved games, the history files and the configuration are checked after the run.
+
+# The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
+# the End Turn and End Game menus: Yes; the Options at the end: Quit this Game.
+rule 1 key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+rule 2:O text q
+
+# The title menu: Resume Saved Game (none is found: the main menu comes).
+play until 2:V
+digest
+text r
+# March 1861. Files: Load is "-". Save, to cws1.sav.
+play until 2:M
+digest
+text f
+prompt
+digest
+text s
+prompt
+digest
+key enter
+# Troops: recruit at the first city, then out.
+prompt
+text t
+prompt
+key enter
+prompt
+key esc
+# Files: the "-" of Load, by its key: the Files menu again. Save: cws1.sav is marked; down to cws2.sav.
+prompt
+text f
+prompt
+text -
+prompt
+digest
+text s
+prompt
+digest
+key down
+prompt
+key enter
+# Files: Quit, No.
+prompt
+text f
+prompt
+text q
+prompt
+digest
+text n
+# Files: New Game, to the title menu: Resume Saved Game; the Load menu: cws1.sav.
+prompt
+text f
+prompt
+text n
+prompt
+text r
+prompt
+digest
+key enter
+# The game before the recruit. Files: Load is offered now; down to cws2.sav: the game after the recruit.
+prompt
+digest
+text f
+prompt
+digest
+text l
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+# Files: Load, left with Esc.
+text f
+prompt
+text l
+prompt
+key esc
+# UTILITY: History on, out. Files: New Game (the configuration written with history on), to the title menu again:
+# Start NEW Game, which begins a history file.
+prompt
+text u
+prompt
+text h
+prompt
+key esc
+prompt
+text f
+prompt
+text n
+prompt
+digest
+text s
+# Inform: Recap, now that there is a history file; a key.
+prompt
+text i
+prompt
+key up
+prompt
+key enter
+prompt
+digest
+key space
+# Files: New Game once more; Start NEW Game: the history file is kept as oldhist.ory and a new one begun.
+prompt
+text f
+prompt
+text n
+prompt
+text s
+play until 2:M
+state
+text e
+# Turns to the end: the main menu, END TURN (and Yes by the rule).
+repeat 7
+play until 2:M
+digest
+text e
+end
+# The game's end: End Game (Yes by the rule), the Options: Quit; the Hall of Fame: the commander's name; Game Over;
+# the title menu: Quit; END's key.
+play until 2:O
+state
+text q
+play until 4
+text Grant
+key enter
+play until 1:G
+digest
+key space
+play until 2:V
+digest
+text q
+repeat space

@@ -1,0 +1,101 @@
+#! seed 1861
+# Civil War Strategy as the Rebels, attacking Washington (QB64Rust's tools/screen/README.md, "Places
+# and rules"). In the Utility menu: Side (the Rebels), and the enemy made passive (Aggress three times). In March
+# 1861 Jackson moves from Front Royal to Manassas; in May, July and September he attacks Washington from there and
+# loses. In November the Union wins on a 3:1 force ratio: No-Override at the End Game menu (the condition becomes
+# 4:1) and the game goes on; in January 1862 it is reached again: Press Onward at the Options (5:1); in March it is
+# reached again: Quit this Game. The Union's victory screen, the Rebel Hall of Fame, Game Over, Quit.
+
+# The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
+# the End Turn menu: Yes. The menus at the game's end are answered by steps.
+rule 1:R key space
+rule 1:P key space
+rule 1:B key space
+rule 1:U key space
+rule 1:K key space
+rule 1:I key space
+rule 1:N key space
+rule 1:S key space
+rule 1:H key space
+rule 1:G key space
+rule 1:F key space
+rule 1:L key space
+rule 2:M text e
+rule 2:E text y
+rule 2:R key enter
+
+# The title menu: Start NEW Game; March 1861, the main menu: UTILITY, Side, UTILITY, Aggress three times, out.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+text u
+prompt
+text s
+prompt
+digest
+text u
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+key esc
+# Moves: from Front Royal to Manassas; END TURN, Yes.
+prompt
+text m
+prompt
+digest
+text f
+prompt
+digest
+text m
+prompt
+text e
+prompt
+text y
+# Three months: Moves from Manassas to Washington; END TURN, Yes.
+repeat 3
+play until 2:M
+digest
+text m
+prompt
+text m
+prompt
+digest
+text w
+prompt
+text e
+prompt
+text y
+end
+# November 1861: the End Game menu, No-Override; a month.
+play until 2:E
+state
+text n
+play until 2:M
+digest
+text e
+# January 1862: the Options, Press Onward; a month.
+play until 2:O
+digest
+text n
+play until 2:M
+digest
+text e
+# March 1862: the Options, Quit this Game; the Union's victory screen; the Rebel Hall of Fame: the commander's name;
+# Game Over; the title menu: Quit; END's key.
+play until 2:O
+state
+text q
+play until 4
+state
+text Lee
+key enter
+play until 2:V
+digest
+text q
+repeat space

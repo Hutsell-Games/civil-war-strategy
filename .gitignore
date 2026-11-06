@@ -1,0 +1,17 @@
+# Builds, runs and reports of tests/play.py and tests/make_scripts.py.
+tests/out/
+__pycache__/
+*.pyc
+*.exe
+
+# Saved games, written by playing (Files, Save).
+*.sav
+*.SAV
+
+# The history of a game, the one before it, and the battle summary, written by playing.
+cws.his
+CWS.HIS
+oldhist.ory
+OLDHIST.ORY
+battsumm
+BATTSUMM

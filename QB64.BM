@@ -1,0 +1,17 @@
+' ===========================================================================
+' QB64.BM - what the game needs from BASIC PDS 7.1 that QB64 does not have:
+' DIR$. Included at the end of CWSTRAT.BAS.
+' DIR$ is that of the World War 2 port (Hutsell-Games/world-war-2).
+' ===========================================================================
+
+' PDS 7.1's DIR$: the first file that matches spec$, or the next match of
+' the last search when spec$ is "" (PDS: DIR$ with no argument). Folders are
+' skipped, and the name is in upper case, as DOS gave it.
+' Without this FUNCTION, QB64pe and QB64Rust read DIR$("*.sav") as an array.
+FUNCTION DIR$ (spec$)
+IF spec$ = "" THEN f$ = _FILES$ ELSE f$ = _FILES$(spec$)
+DO WHILE RIGHT$(f$, 1) = CHR$(92) OR RIGHT$(f$, 1) = "/"
+	f$ = _FILES$
+LOOP
+DIR$ = UCASE$(f$)
+END FUNCTION
