@@ -1,7 +1,7 @@
 digest 6DD1509368F04EC9
-digest 7DBC3D8603931C7D
+digest F81F4FC4305EC512
 digest C744EA8D818755BC
-digest 1518B8FD311D4FB7
+digest 958489D6CA24F32E
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,16 off color 11 background 0
@@ -458,10 +458,10 @@ p 00 0C*5 00*3 0C*5 00*4 0C*4 00*3 0C*5 00*12 0C*3 00 0C 00*2 0C*3 00 0C*2 00 0C
 p 00*640
 = 19
 end
-digest 627E029EF74A969F
-digest 24A05FDB5379B789
-digest B106BD3B08B2F18E
-digest B6D998E393E3A290
+digest E7DE9973E5671BD0
+digest 6A81413F93BE0924
+digest C89712AC593059BE
+digest 9737466E74ABD1BE
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,22 off color 15 background 0

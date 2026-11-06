@@ -26,7 +26,8 @@ back.
 
 Four things of the DOS game are pictures and text in `docs` now, because the DOS programs that showed them
 have no source: the title screen, the burning capital, the picture of Lincoln, and the help screens of F1
-([docs/devnotes.md](docs/devnotes.md), items 5 and 6).
+([docs/devnotes.md](docs/devnotes.md), items 5 and 6). The game no longer has F1 help. The quick help is
+[docs/CWSDOC.TXT](docs/CWSDOC.TXT), and the full manual is [docs/CWS.DOC](docs/CWS.DOC).
 
 The branch `main` holds an earlier port, of 2024, for QB64pe. This branch does not build on it.
 

@@ -1,5 +1,5 @@
 digest 6DD1509368F04EC9
-digest 7DBC3D8603931C7D
+digest F81F4FC4305EC512
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,22 off color 15 background 0
@@ -433,7 +433,7 @@ p 04*640
 = 18
 end
 digest 6DD1509368F04EC9
-digest 4022979884D02DDF
+digest E99E5BE9CBF9A54C
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,22 off color 15 background 0
@@ -871,7 +871,7 @@ p 04*640
 = 18
 end
 digest 6DD1509368F04EC9
-digest 3C4816108F39EE49
+digest 6EA1F1F446BEBF92
 screen-state 1
 pages 8 display 0 write 0 read 0
 page 0 mode 0 text 80x25 bits 16 font 16 cursor 34,14 on color 15 background 1

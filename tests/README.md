@@ -107,7 +107,7 @@ plain keys, or `play until` that menu.
 A menu takes Up, Down, PgUp and PgDn, and the first letter of an entry, which chooses it at once. A "-" entry
 (one that is not available) is chosen by the key `-`. A letter that matches no entry is ignored, and the menu
 announces its wait again. At a main menu, F3 draws the screen again, F4 shows the force report and F7 ends the
-turn without the End Turn menu. F1 showed the help in DOS; now it only draws the screen again.
+turn without the End Turn menu. F1 showed the help in DOS; the port removed it, and a menu ignores F1.
 
 ## The scripts
 

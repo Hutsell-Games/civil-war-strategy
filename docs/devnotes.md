@@ -43,10 +43,12 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
    DOSBox 0.74-3 on 2026-11-06, the programs drew [CWSTITLE.png](CWSTITLE.png), [CITYBURN.png](CITYBURN.png)
    and [ABELINCO.png](ABELINCO.png). Each waits for a key. The game's own title screen, with the two flags and
    the menu, still shows. `burn` still draws the map again, as it did after the picture.
-6. **The help screens are a text file in `docs\`.** F1 at a menu ran `SHELL "cwsdoc.com"`: a text viewer made
-   with TXT2COM that holds four pages of help. The `SHELL` line is a comment now, so F1 clears the screen and
-   draws the map again. The text is [CWSDOC.TXT](CWSDOC.TXT), as the branch `main` keeps it. The top right of
-   the screen still says "F1 = HELP"; a `TODO.md` row.
+6. **The help screens are a text file in `docs\`, and F1 is gone.** F1 at a menu ran `SHELL "cwsdoc.com"`: a
+   text viewer made with TXT2COM that holds four topics of help. The port removes F1's branch from `menu`
+   (`CWSMENU.BM`) and the "F1 = HELP" label from `topbar` (`CWSTRAT2.BM`), as the branch `main` did. F1 at a
+   menu is now ignored, like any other key the menu does not use. The text is [CWSDOC.TXT](CWSDOC.TXT), as
+   `main` keeps it, and the full manual is [CWS.DOC](CWS.DOC). A pager in the game was considered and not
+   built: players who want the instructions can read the documents (user, 2026-11-06).
 7. **Every `GOSUB` routine in a SUB ends by `RETURN`.** QB64 keeps one `GOSUB` stack for the whole program
    ("The searches", section 2). Two routines could leave their SUB:
    - `crsr` in `menu` (`CWSMENU.BM`): Esc, an entry chosen by its first letter, F7 at a main menu, and any key
@@ -128,7 +130,7 @@ name in `CWSMENU.BAS`. Both compilers accept the label beside the SUB.
 |---|---|---|---|
 | `DEF SEG = VARSEG(a(1))`, `BLOAD "<name>.vga", VARPTR(a(1))` | `CWSTRAT.BAS` lines 32 to 34 (`mtn.vga`), 65 to 67 (`cwsicon.vga`), 910 to 912 (the forts); `CWSMENU.BAS` lines 216 to 218 (the faces) | Loaded a picture saved by `BSAVE` into an array, which `PUT` then drew | Kept. Both compilers draw the pictures, and the same |
 | `SHELL "cwstitle.exe"`, `"cityburn.exe"`, `"abelinco.exe"` | `CWSTRAT.BAS` lines 62 and 1011; `CWSTRAT2.BAS` line 525 | Showed a picture and waited for a key | Comments; the pictures are in `docs\` (item 5) |
-| `SHELL "cwsdoc.com"` | `CWSMENU.BAS` line 275 | Showed the help text | A comment; the text is in `docs\` (item 6) |
+| `SHELL "cwsdoc.com"` | `CWSMENU.BAS` line 275 | Showed the help text | Removed with F1 and its label; the text is in `docs\` (item 6) |
 | `SHELL "copy cws.his oldhist.ory"` | `CWSTRAT.BAS` line 134 | Kept the history file of the game before | Kept: `copy` works on Windows. Under a script it is done in BASIC ("The test hooks"). A `TODO.md` row for Linux |
 | `RANDOMIZE TIMER` | `CWSTRAT.BAS` line 113; `CWSMENU.BAS` line 494 (`scrnsavr`) | Seeded the random numbers | The first takes the scripts' seed ("The test hooks"). The second is the boss screen's, which no script reaches |
 | `DATE$` | `CWSTRAT.BAS` line 136 | The first line of the history file | A fixed date under a script |

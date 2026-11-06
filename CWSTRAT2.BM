@@ -1346,7 +1346,6 @@ SUB topbar
 a$ = "  Snd": IF noise < 2 THEN a$ = "   Snd": IF noise = 0 THEN a$ = "      "
 IF graf > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(graf))
 a$ = a$ + STR$(player)
-COLOR 15: LOCATE 1, 68: PRINT "F1 =  H E L P";
 COLOR c
 LOCATE 26, 68: PRINT "F3 Redrw Scrn"
 LOCATE 27, 68: PRINT "F7 End Turn"

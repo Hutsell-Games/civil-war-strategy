@@ -26,9 +26,6 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
 Each of these is how the game behaves, in DOS too by its code. Decide whether to change it. A change to how a
 game plays changes the recorded screens.
 
-- **The F1 help pager, next** (decided 2026-11-06, QB64Rust's `study\46` D3). "F1 = HELP" still shows at the
-  top right, though F1 no longer shows the help (`docs\devnotes.md`, item 6). Write a pager that shows
-  `docs\CWSDOC.TXT` in the game, its four pages chosen by F1 to F4, as `CWSDOC.COM` did, with a script for it.
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
   The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
   its title.
