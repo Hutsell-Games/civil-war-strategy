@@ -1,7 +1,7 @@
 # To do
 
-Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. The plan is QB64Rust's
-`study\46-civil-war-strategy-port.md`.
+Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. The plan is
+`docs\port-study.md`.
 
 ## The tests
 

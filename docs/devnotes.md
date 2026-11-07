@@ -2,7 +2,7 @@
 
 This branch starts from `canonical-source`, the BASIC PDS 7.1 source as W.R. Hutsell gave it. It changes that
 source as little as possible so that the game builds with QB64Rust and with QB64pe, and so that its SUBs can be
-tested. The plan is QB64Rust's `study\46-civil-war-strategy-port.md`. It follows the ports of World War 2
+tested. The plan is `docs\port-study.md` (QB64Rust's study 46 until 2026-11-06). It follows the ports of World War 2
 (`Hutsell-Games/world-war-2`) and Civil War Battleset (`Hutsell-Games/civil-war-battleset`), both on a branch
 `qb64rust`, and the principles in QB64Rust's `docs\PORTING-PDS.md`, section 0.
 
@@ -206,7 +206,7 @@ The lines changed for them:
 The menu's loop reads keys as before. Its label stays, so the wait is announced again after a key the menu
 ignores.
 
-Choices made here (QB64Rust's `study\46`, section 4):
+Choices made here (`docs\port-study.md`, section 4):
 
 - **`TICK` of 99 seconds or more waits for a key** under a script, as in Civil War Battleset. The game uses
   `TICK 99` twice as "read this, then press a key": after Chk Links, and at "There are still defenders".
