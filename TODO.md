@@ -111,5 +111,9 @@ Left alone by group 8 (the colors):
   only, so these stay. A `side_color(side)` FUNCTION would be the next step.
 - **`COLOR 16 - c` shows the other side's color** (`rules\battle.bm` lines 39, 65 and 167): 16 - 9 is 7 and
   16 - 7 is 9. It stays as written; it would go with `side_color`.
+- **`CALL wait_seconds(99)`, "press a key", stays a number** (`CWSTRAT.BAS` line 638, Chk Links;
+  `rules\turn.bm` line 212, "There are still defenders"; left alone by group 9). It goes with phase 7's
+  `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
+  pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
 - **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 56): 0 there means "no color set",
   not black, so the test keeps its 0.

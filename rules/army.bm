@@ -2,7 +2,7 @@ SUB army_combine (side)
 DIM fin AS INTEGER
 DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM best AS INTEGER: DIM x AS INTEGER: DIM spin AS INTEGER: DIM pct!
 	menu_color = COLOR_CYAN: target = 0: menu_highlight = COLOR_CYAN
-	menu_col = 67: menu_row = 2
+	menu_col = PANEL_COL: menu_row = 2
 	CALL side_army_range(star, fin, side)
 	menu_item_count = 0
 	FOR i = 1 TO MAX_CITIES

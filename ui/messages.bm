@@ -18,7 +18,7 @@ y = 16 * (menu_row + 1)
 	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + 3)), 15, B
 	COLOR COLOR_YELLOW
 	LOCATE menu_row + 2, menu_col + 2: PRINT text$
-	CALL wait_seconds(9)
+	CALL wait_seconds(PAUSE_LONG)
 	PUT (8 * menu_col - 4, 16 * menu_row - 3), g2, PSET
 END SUB
 

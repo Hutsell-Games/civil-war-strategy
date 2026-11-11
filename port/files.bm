@@ -46,7 +46,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 		END IF
 	NEXT k
 	CALL menu_bubble_sort((menu_item_count))
-	menu_col = 67: menu_row = 14 - .5 * menu_item_count
+	menu_col = PANEL_COL: menu_row = 14 - .5 * menu_item_count
 	CALL menu_select(MENU_PLAIN)
 	CALL clear_right_panel
 	IF menu_choice < 1 THEN EXIT SUB
@@ -89,7 +89,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	menu_text$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
 	IF LEN(DIR$(menu_text$(k))) > 0 THEN menu_text$(k) = menu_text$(k) + " û"
 	NEXT k
-	menu_col = 67: menu_item_count = 9
+	menu_col = PANEL_COL: menu_item_count = 9
 	CALL menu_select(MENU_PLAIN)
 	IF menu_choice < 1 THEN clear_right_panel: EXIT SUB
 	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Saving";

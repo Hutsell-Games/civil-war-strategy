@@ -153,7 +153,7 @@ lines into data anyway.
 | `"H"`, `"P"`, `"I"`, `"Q"` after a 0 byte | Up, Down, Page Up, Page Down. | 6 | `KEY_UP$`, `KEY_DOWN$`, `KEY_PAGE_UP$`, `KEY_PAGE_DOWN$` | |
 | `"="`, `">"`, `"A"` after a 0 byte | F3, F4, F7. | 3 | `KEY_F3$`, `KEY_F4$`, `KEY_F7$` | |
 | `TICK 9` | A long pause that a key ends. | 13 | `PAUSE_LONG` | |
-| `TICK 99` | Wait for a key. | 2 | Goes away: `wait_key` (`sub-names.md`, "Waiting for a key"). | |
+| `TICK 99` | Wait for a key. | 2 | Goes away in phase 7, with `wait_key` (`sub-names.md`, "Waiting for a key"). Phase 3 left it: outside a script, `TICK 99` gives up after 99 seconds, which the key loops do not. | |
 | `tlx = 67` | The column of the right panel, where most menus go. | 22 | `PANEL_COL` | |
 
 ## Answers (user, 2026-11-11)

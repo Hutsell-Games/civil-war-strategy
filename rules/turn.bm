@@ -202,7 +202,7 @@ crushed:
 	army_experience(index) = 0: army_order(index) = ORDER_NONE: army_supply(index) = 0
 	army_supply(active) = army_supply(active) + army_supply(index): army_supply(index) = 0
 	IF army_supply(active) > MAX_SUPPLY THEN army_supply(active) = MAX_SUPPLY
-	CALL wait_seconds(9): CALL clear_right_panel
+	CALL wait_seconds(PAUSE_LONG): CALL clear_right_panel
 	IF army_city(active) = 0 GOTO digin
 '---------------------------------------------------------------------------
 '                       check for more defenders !
@@ -225,7 +225,7 @@ CALL draw_army_flag(active)
 	IF city_owner(army_city(active)) = s GOTO horde
 	c = army_city(active)
 	IF opt_players = PLAYERS_ONE AND s = current_side AND city_fort(c) > 0 AND flag = 0 THEN
-		menu_col = 67: menu_row = 15
+		menu_col = PANEL_COL: menu_row = 15
 		menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN
 		menu_text$(0) = "Raze ?"
 		menu_text$(1) = "No"
@@ -276,20 +276,20 @@ IF raiding_side > 0 THEN
 		PSET (500, 465), 0: CALL draw_ship_icon(raiding_side, a)
 		IF opt_sound >= SOUND_EFFECTS THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
 		IF raiding_side = current_side THEN fleet_pursuit = 1
-		wait_seconds 9
+		wait_seconds PAUSE_LONG
 	ELSE
 		raid_loss = 0
 		CALL navy_remove_ship(raiding_side)
 		COLOR COLOR_WHITE: PRINT side_name$(raiding_side); " raiders have lost a ship ("; fleet_size(raiding_side); " remain)";
 		IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 		IF fleet_city(raiding_side) > 0 THEN
-			wait_seconds 9
+			wait_seconds PAUSE_LONG
 			GOTO allthru
 		ELSE
 			raiding_side = SIDE_NONE
 			LINE (447, 291)-(525, 335), 1, BF
 			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
-			wait_seconds 9
+			wait_seconds PAUSE_LONG
 			LINE (447, 291)-(525, 335), 1, BF
 		END IF
 	END IF

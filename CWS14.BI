@@ -121,6 +121,20 @@ CONST COLOR_LIGHT_RED = 12
 CONST COLOR_LIGHT_MAGENTA = 13
 CONST COLOR_YELLOW = 14
 CONST COLOR_WHITE = 15
+' Keys: ASC of INKEY$, and the second byte of a key that starts with CHR$(0).
+CONST KEY_ENTER = 13
+CONST KEY_ESC = 27
+CONST KEY_UP$ = "H"
+CONST KEY_DOWN$ = "P"
+CONST KEY_PAGE_UP$ = "I"
+CONST KEY_PAGE_DOWN$ = "Q"
+CONST KEY_F3$ = "="
+CONST KEY_F4$ = ">"
+CONST KEY_F7$ = "A"
+' A long pause that a key ends (wait_seconds). A pause of 99 means "press a key"; see port/script.bm.
+CONST PAUSE_LONG = 9
+' The column of the right panel, where most menus go.
+CONST PANEL_COL = 67
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

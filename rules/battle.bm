@@ -123,7 +123,7 @@ LOCATE 4, 71: PRINT "in"
 LOCATE 5, 69: PRINT city_name$(army_city(defender))
 a = army_side(winner)
 CALL draw_flag(a, 0, 0)
-CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(9)
+CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(PAUSE_LONG)
 '===========================================================================
 pct! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender)): IF winner = attacker THEN pct! = 1.3 * pct!
 SELECT CASE army_size(defender)

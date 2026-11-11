@@ -138,11 +138,11 @@ sel1:
 	leave = 0: GOSUB crsr
 	IF leave = 1 GOTO called
 	IF menu_item_show_beside <> MENU_RAW_KEYS GOTO reglr
-	IF a$ = "H" THEN menu_choice = 1: GOTO called
-	IF ASC(a$) = 13 THEN menu_choice = 2: GOTO called
-	IF a$ = "P" THEN menu_choice = 3: GOTO called
+	IF a$ = KEY_UP$ THEN menu_choice = 1: GOTO called
+	IF ASC(a$) = KEY_ENTER THEN menu_choice = 2: GOTO called
+	IF a$ = KEY_DOWN$ THEN menu_choice = 3: GOTO called
 reglr:
-	IF ASC(a$) = 13 GOTO called
+	IF ASC(a$) = KEY_ENTER GOTO called
 	IF menu_item_show_beside = MENU_CITY_ARMY THEN LOCATE menu_row + 2 + row1, menu_col + 2: PRINT SPACE$(wide);
 	COLOR menu_color
 	LOCATE menu_row + 2 + row1, menu_col + 2: PRINT menu_text$(row1)
@@ -157,10 +157,10 @@ reglr:
 	menu_choice = row
 	GOTO sel1
 crsr:   CALL script_mark_key_wait(2, menu_text$(0)): DO: a$ = INKEY$: LOOP WHILE a$ = ""
-	IF ASC(a$) = 13 THEN RETURN
+	IF ASC(a$) = KEY_ENTER THEN RETURN
 	IF LEN(a$) = 2 GOTO arrows
 	IF menu_item_show_beside = MENU_RAW_KEYS THEN menu_choice = -ASC(UCASE$(a$)): leave = 1: RETURN
-	IF ASC(a$) = 27 THEN menu_choice = MENU_ESCAPED: leave = 1: RETURN
+	IF ASC(a$) = KEY_ESC THEN menu_choice = MENU_ESCAPED: leave = 1: RETURN
 		row1 = row
 		FOR k = 1 TO menu_item_count
 		c1$ = UCASE$(LEFT$(LTRIM$(menu_text$(k)), 1))
@@ -170,23 +170,23 @@ crsr:   CALL script_mark_key_wait(2, menu_text$(0)): DO: a$ = INKEY$: LOOP WHILE
 arrows:
 	a$ = RIGHT$(a$, 1)
 	row1 = row
-	 IF a$ = "H" THEN row = row - 1: GOSUB limits: RETURN
-	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
-	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
-	 IF a$ = "Q" THEN row = menu_item_count: GOSUB limits: RETURN
-	 IF a$ = "=" AND menu_item_show_beside = MENU_PLAIN THEN
+	 IF a$ = KEY_UP$ THEN row = row - 1: GOSUB limits: RETURN
+	 IF a$ = KEY_PAGE_UP$ THEN row = 1: GOSUB limits: RETURN
+	 IF a$ = KEY_DOWN$ THEN row = row + 1: GOSUB limits: RETURN
+	 IF a$ = KEY_PAGE_DOWN$ THEN row = menu_item_count: GOSUB limits: RETURN
+	 IF a$ = KEY_F3$ AND menu_item_show_beside = MENU_PLAIN THEN
 		CLS
 		CALL draw_map
 		CALL draw_menu(b1, wide)
 		CALL draw_top_bar
 		RETURN
 	 END IF
-	 IF a$ = "A" AND menu_item_show_beside = MENU_PLAIN THEN
+	 IF a$ = KEY_F7$ AND menu_item_show_beside = MENU_PLAIN THEN
 		menu_choice = MENU_END_TURN_KEY
 		leave = 1
 		RETURN
 	 END IF
-	 IF a$ = ">" AND menu_item_show_beside = MENU_PLAIN THEN
+	 IF a$ = KEY_F4$ AND menu_item_show_beside = MENU_PLAIN THEN
 		CALL menu_report(-1)
 		CALL draw_menu(b1, wide)
 		CALL draw_top_bar

@@ -49,7 +49,7 @@ aboard:
 	CALL menu_city_select(x1): IF x1 = from OR x1 = 0 GOTO toot
 
 	target = x1: GOSUB route: IF x > 1 GOTO haul
-	CALL clear_bottom_line: PRINT army_name$(index); "'s train cannot go to "; city_name$(x1); " - select another city"; : CALL wait_seconds(9)
+	CALL clear_bottom_line: PRINT army_name$(index); "'s train cannot go to "; city_name$(x1); " - select another city"; : CALL wait_seconds(PAUSE_LONG)
 	GOTO aboard
 haul:
 	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(index); " is taking the train from "; city_name$(from); " to "; city_name$(x1);
@@ -100,7 +100,7 @@ NEXT j
 RETURN
 
 toot:
-	IF side = current_side THEN CALL wait_seconds(9)
+	IF side = current_side THEN CALL wait_seconds(PAUSE_LONG)
 	CALL clear_right_panel
 	clear_bottom_line
 END SUB

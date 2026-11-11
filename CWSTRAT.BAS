@@ -35,7 +35,7 @@ IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
 	BLOAD GFXDIR + "mtn.vga", VARPTR(pic_mountain(1))
 	DEF SEG
 ELSE
-	COLOR COLOR_WHITE: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": wait_seconds 9
+	COLOR COLOR_WHITE: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": wait_seconds PAUSE_LONG
 END IF
 
 RESTORE
@@ -188,7 +188,7 @@ IF side_cash(current_side) < COST_SHIP AND fleet_city(current_side) = 0 THEN tur
 
 menu_highlight = COLOR_LIGHT_CYAN
 menu_color = COLOR_RED
-menu_col = 67: menu_row = 13
+menu_col = PANEL_COL: menu_row = 13
 menu_text$(0) = "Main"
 menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN menu_text$(1) = "-": chosit = 23
 menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF chosit = 23 THEN chosit = 24
@@ -238,7 +238,7 @@ ELSE
 END IF
 '==========================================================================
 	CASE 5
-	menu_col = 67: menu_row = 15
+	menu_col = PANEL_COL: menu_row = 15
 	menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN: menu_choice = MENU_START + 2
 	menu_text$(0) = "End Turn"
 	menu_text$(1) = "Yes"
@@ -260,7 +260,7 @@ endrnd:
 '==========================================================================
 	CASE 7
 optmen:
-	menu_col = 67: menu_row = 13
+	menu_col = PANEL_COL: menu_row = 13
 	COLOR COLOR_LIGHT_CYAN: LOCATE menu_row - 2, menu_col: PRINT "esc=Main Menu"
 	menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN: chosit = 24
 	menu_text$(0) = "Commands"
@@ -313,7 +313,7 @@ optmen:
 		CASE 4
 		CALL side_army_range(star, fin, (current_side))
 		menu_text$(0) = "Supply"
-		menu_col = 67: menu_row = 5: menu_color = COLOR_MAGENTA
+		menu_col = PANEL_COL: menu_row = 5: menu_color = COLOR_MAGENTA
 		menu_item_count = 0
 		FOR i = star TO fin
 		IF army_city(i) = 0 OR army_supply(i) > 1 GOTO alone
@@ -353,7 +353,7 @@ alone:
 	CALL clear_bottom_line: PRINT side_name$(current_side); " capital moved from "; a$; " to "; city_name$(side_capital(current_side));
 	CALL clear_right_panel
 	CALL draw_cities
-	CALL wait_seconds(9): CALL clear_bottom_line
+	CALL wait_seconds(PAUSE_LONG): CALL clear_bottom_line
 '-------------------------------------------------------------------------
 '                               Detach
 '-------------------------------------------------------------------------
@@ -425,7 +425,7 @@ utile:
 	menu_text$(12) = "Chk Links"
 	a$ = "": IF opt_history = 1 THEN a$ = "û"
 	menu_text$(13) = "History" + a$
-	menu_item_count = 13: menu_col = 67: menu_row = 11
+	menu_item_count = 13: menu_col = PANEL_COL: menu_row = 11
 	COLOR COLOR_LIGHT_CYAN: LOCATE menu_row - 2, menu_col: PRINT "esc=Main Menu"
 	IF opt_players = PLAYERS_ONE THEN menu_item_count = 14: menu_text$(14) = "Aggress" + STR$(opt_ai_aggression)
 	CALL menu_select(-1): CALL clear_right_panel
@@ -473,7 +473,7 @@ utile:
 		menu_text$(1) = "Quiet"
 		menu_text$(2) = "Sound"
 		menu_text$(3) = " & Sound"
-		menu_item_count = 3: menu_col = 67: menu_row = 12
+		menu_item_count = 3: menu_col = PANEL_COL: menu_row = 12
 		CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 		IF menu_choice < 1 GOTO menu0
 		COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Sound Option : "; menu_text$(menu_choice);
@@ -491,7 +491,7 @@ utile:
 		menu_text$(3) = "Slow"
 		menu_text$(4) = "Very Slow"
 		menu_text$(5) = "Reg Color": IF opt_alt_colors > 0 THEN menu_text$(5) = "Alt Color"
-		menu_col = 67: menu_row = 15: menu_item_count = 5
+		menu_col = PANEL_COL: menu_row = 15: menu_item_count = 5
 		CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 		SELECT CASE menu_choice
 			CASE IS < 1
@@ -518,7 +518,7 @@ utile:
 		menu_text$(3) = "Balanced"
 		menu_text$(4) = "Union +"
 		menu_text$(5) = "Union ++"
-		menu_col = 67: menu_row = 15: menu_item_count = 5
+		menu_col = PANEL_COL: menu_row = 15: menu_item_count = 5
 		CALL menu_select(MENU_FACES): CALL clear_right_panel
 		IF menu_choice < 1 GOTO menu0
 		CALL clear_bottom_line
@@ -676,7 +676,7 @@ filex:
 	menu_text$(2) = "Save"
 	menu_text$(3) = "New Game"
 	menu_text$(4) = "Quit to DOS"
-	menu_item_count = 4: menu_col = 67: menu_row = 15
+	menu_item_count = 4: menu_col = PANEL_COL: menu_row = 15
 	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 	SELECT CASE menu_choice
 		CASE IS < 1: GOTO menu0
@@ -711,7 +711,7 @@ menu_text$(0) = "Quit"
 menu_text$(1) = "Yes"
 menu_text$(2) = "No"
 menu_item_count = 2: menu_color = COLOR_MAGENTA
-menu_col = 67: menu_row = 15
+menu_col = PANEL_COL: menu_row = 15
 CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice = 1 THEN END ELSE GOTO menu0
 '............................................................................
 unionplus: union_income_bonus = 120 * opt_difficulty: IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty

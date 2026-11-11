@@ -4,7 +4,7 @@ CALL menu_army_select(index, target): IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN turn_moves_done = 1
 	GOTO dudd
 tent:
-menu_col = 67: menu_row = 12
+menu_col = PANEL_COL: menu_row = 12
 
 CALL draw_army_stats(index)
 COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68: PRINT city_name$(target)
@@ -16,7 +16,7 @@ CALL menu_bubble_sort(menu_item_count)
 
 menu_highlight = COLOR_LIGHT_GREEN: menu_color = COLOR_CYAN: CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
 IF menu_choice < 0 GOTO dudd
-IF turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(menu_value(menu_choice)) <> current_side THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "No campaigns in January"; : CALL wait_seconds(9): CALL clear_bottom_line: GOTO dudd
+IF turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(menu_value(menu_choice)) <> current_side THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "No campaigns in January"; : CALL wait_seconds(PAUSE_LONG): CALL clear_bottom_line: GOTO dudd
 
 CALL clear_bottom_line: PRINT "Army "; index; " "; army_name$(index); " is moving from "; city_name$(target); " to "; city_name$(menu_value(menu_choice));
 IF opt_sound >= SOUND_EFFECTS THEN SOUND 2200, .5: SOUND 2900, .7
@@ -30,7 +30,7 @@ SUB menu_city_fortify (city)
 DIM fin AS INTEGER
 DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM cost AS INTEGER
 	city = 0: menu_highlight = COLOR_LIGHT_CYAN
-	menu_col = 67: menu_row = 2
+	menu_col = PANEL_COL: menu_row = 2
 	who = current_side
 	CALL side_army_range(star, fin, who)
 	menu_item_count = 0
@@ -67,7 +67,7 @@ END SUB
 SUB menu_army_select (army, city)
 DIM fin AS INTEGER
 DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
-	menu_color = COLOR_CYAN: menu_col = 67: menu_row = 5: army = 0: menu_item_count = 0: city = 0
+	menu_color = COLOR_CYAN: menu_col = PANEL_COL: menu_row = 5: army = 0: menu_item_count = 0: city = 0
 	who = current_side: CALL side_army_range(star, fin, who)
 	FOR i = star TO fin
 	IF army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(army_city(i)): menu_value(menu_item_count) = army_city(i)
@@ -76,7 +76,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
 	menu_text$(0) = "From"
 	CALL menu_bubble_sort(menu_item_count)
 movopt:
-	menu_col = 67: menu_row = 5
+	menu_col = PANEL_COL: menu_row = 5
 		menu_highlight = COLOR_WHITE: CALL menu_select(MENU_CITY_BOX): CALL clear_right_panel
 		IF menu_choice < 0 THEN city = 0: GOTO notarg
 		city = menu_value(menu_choice)
@@ -88,7 +88,7 @@ movopt:
 		IF menu_item_count = 1 GOTO notarg
 		menu_text$(0) = "Which"
 		CALL menu_bubble_sort(menu_item_count)
-		menu_col = 67: menu_row = 15: CALL menu_select(MENU_ARMY_STATS): CALL clear_right_panel
+		menu_col = PANEL_COL: menu_row = 15: CALL menu_select(MENU_ARMY_STATS): CALL clear_right_panel
 		IF menu_choice < 0 THEN army = 0: GOTO notarg
 		army = menu_value(menu_choice)
 notarg:
@@ -169,7 +169,7 @@ alldone:
 levy:
 	IF side_cash(side) < COST_RECRUIT GOTO menu1
 	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
-	menu_col = 67: menu_row = 12: menu_color = COLOR_CYAN
+	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
 	IF side <> current_side THEN GOSUB randsel: GOTO auto1
       
 	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
@@ -257,7 +257,7 @@ CALL clear_right_panel
 	IF army_city(j) > 0 AND army_order(j) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = a$: menu_value(menu_item_count) = army_city(j)
 	NEXT j
 	CALL menu_bubble_sort(menu_item_count)
-	menu_col = 67: menu_row = 2: menu_box_type = BOX_DOUBLE
+	menu_col = PANEL_COL: menu_row = 2: menu_box_type = BOX_DOUBLE
 	menu_text$(0) = "Cancel"
 	IF menu_item_count < 1 THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "No units have orders to cancel"; : EXIT SUB
 	CALL menu_select(MENU_CITY_BOX)
@@ -284,7 +284,7 @@ SUB menu_army_relieve (side)
 DIM fin AS INTEGER
 DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM index AS INTEGER: DIM t$
 menu_color = COLOR_CYAN: target = 0: menu_highlight = COLOR_CYAN
-menu_col = 67: menu_row = 2
+menu_col = PANEL_COL: menu_row = 2
 CALL side_army_range(star, fin, side)
 menu_item_count = 0
 FOR i = star TO fin
@@ -322,14 +322,14 @@ CALL menu_bubble_sort(menu_item_count)
 
 have2:
 menu_text$(0) = "New Leader"
-menu_col = 67: menu_row = 2
+menu_col = PANEL_COL: menu_row = 2
 CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 IF menu_choice < 1 GOTO have2
 army_order(index) = ORDER_BUSY
 army_leader_rating(index) = leader_rating(menu_value(menu_choice))
 IF army_leader_rating(index) > 0 THEN army_leader_rating(index) = army_leader_rating(index) - 1
 IF army_experience(index) > 0 THEN army_experience(index) = army_experience(index) - 1
-COLOR COLOR_WHITE: CALL clear_bottom_line: PRINT leader_name$(menu_value(menu_choice)); " has replaced "; t$; " in "; city_name$(army_city(index)); : wait_seconds 9
+COLOR COLOR_WHITE: CALL clear_bottom_line: PRINT leader_name$(menu_value(menu_choice)); " has replaced "; t$; " in "; city_name$(army_city(index)); : wait_seconds PAUSE_LONG
 army_name$(index) = leader_name$(menu_value(menu_choice))
 leader_name$(menu_value(menu_choice)) = ""
 CALL draw_map_marker(army_city(index), 0, MARK_RESTORE)
@@ -343,7 +343,7 @@ IF opt_players = PLAYERS_ONE THEN
 	IF (current_side = SIDE_UNION AND army_side(defender) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(defender) = SIDE_UNION) THEN EXIT SUB
 END IF
 
-menu_highlight = COLOR_LIGHT_MAGENTA: menu_color = COLOR_CYAN: menu_col = 67: menu_row = 5: menu_item_count = 0
+menu_highlight = COLOR_LIGHT_MAGENTA: menu_color = COLOR_CYAN: menu_col = PANEL_COL: menu_row = 5: menu_item_count = 0
 y = army_city(defender)
 who = army_side(defender)
 FOR k = 1 TO MAX_ROADS
