@@ -8,7 +8,7 @@ DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: 
 	FOR i = 1 TO MAX_CITIES
 		IF city_owner(i) = side AND city_army(i) > 0 THEN
 			FOR j = star TO fin
-			IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
+			IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
 			NEXT j
 		END IF
 	NEXT i
@@ -18,7 +18,7 @@ DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: 
 
 	IF side <> current_side THEN menu_choice = 1 + INT(menu_item_count * RND): GOTO join
 	menu_text$(0) = "Join"
-		menu_choice = 31: menu_highlight = 11
+		menu_choice = MENU_START + 10: menu_highlight = 11
 		CALL menu_select(9): CALL clear_right_panel
 join:
 		IF menu_choice < 1 GOTO nocity2
@@ -26,11 +26,11 @@ join:
 		CALL clear_bottom_line: PRINT "Combining "; side_name$(side); " armies in "; city_name$(target); :  CALL wait_seconds(opt_pause!)
 
 		army_size(0) = 0: army_leader_rating(0) = 0: army_experience(0) = 0: army_city(0) = target
-		army_name$(0) = "": army_supply(0) = 0: army_order(0) = 0
+		army_name$(0) = "": army_supply(0) = 0: army_order(0) = ORDER_NONE
 '...........................................................................
 		best = 0: x = 0: spin = 0
 		FOR j = star TO fin
-		IF army_order(j) <> 0 OR army_city(j) <> target OR army_size(j) = 0 GOTO dork1
+		IF army_order(j) <> ORDER_NONE OR army_city(j) <> target OR army_size(j) = 0 GOTO dork1
 		IF army_size(0) + army_size(j) > 1250 THEN CALL clear_bottom_line: PRINT "Cannot combine "; army_name$(j); "... TOO LARGE"; : CALL wait_seconds(opt_pause!): GOTO dork1
 
 		IF army_leader_rating(j) > x THEN
@@ -48,7 +48,7 @@ join:
 		CALL clear_bottom_line: PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces"; : CALL wait_seconds(opt_pause!)
 		army_supply(0) = army_supply(0) + army_supply(j)
 		IF army_supply(0) > MAX_SUPPLY THEN army_supply(0) = MAX_SUPPLY
-		army_size(j) = 0: army_city(j) = 0: army_experience(j) = 0: army_order(j) = 0
+		army_size(j) = 0: army_city(j) = 0: army_experience(j) = 0: army_order(j) = ORDER_NONE
 		leader_name$(j) = army_name$(j)
 		army_leader_rating(j) = 0: army_supply(j) = 0: army_name$(j) = ""
 dork1:
@@ -68,7 +68,7 @@ dork1:
 		leader_name$(best) = ""
 		IF spin > 1 THEN
 		PRINT "New army "; best; " of "; : CALL print_army_size(best): PRINT " is commanded by "; army_name$(best);
-		army_order(best) = -1
+		army_order(best) = ORDER_BUSY
 		ELSE
 		PRINT "Only 1 eligible army -- cannot combine at this time";
 		END IF
@@ -98,7 +98,7 @@ DIM x AS INTEGER: DIM a AS INTEGER
 	side_cash(side) = side_cash(side) - 100: IF opt_sound > 0 THEN SOUND 2222, .5
 	army_city(slot) = city: CALL draw_army_flag(slot)
 	CALL wait_seconds(opt_pause! - .5)
-	army_order(slot) = -1
+	army_order(slot) = ORDER_BUSY
 END SUB
 
 SUB sort_move_order (limit)

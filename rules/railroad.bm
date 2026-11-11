@@ -6,7 +6,7 @@ SELECT CASE train_army(side)
 	IF side = current_side GOTO human
 	CALL side_army_range(star, fin, side): max = 32767
 	index = 0
-	FOR i = star TO fin: IF army_city(i) = 0 OR army_order(i) <> 0 GOTO puter
+	FOR i = star TO fin: IF army_city(i) = 0 OR army_order(i) <> ORDER_NONE GOTO puter
 	x = 0: FOR j = 1 TO MAX_ROADS: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
 	NEXT j
 	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter
@@ -74,7 +74,7 @@ haul:
 	train_city(side) = army_order(index)
 	CALL draw_train(side, 1)
 
-	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = -1
+	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = ORDER_BUSY
 	COLOR 11: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound > 0 THEN SOUND 1200, 2
 	CALL wait_seconds(opt_pause!)
 	x = city_x(army_city(index)) - 12: y = city_y(army_city(index)) - 11

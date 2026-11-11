@@ -125,7 +125,7 @@ FOR k = 1 TO fleet_size(side)
 	IF MID$(fleet_ships$(side), k, 1) = "I" THEN x = x + 1
 NEXT k
 IF x > 0 THEN PRINT "("; x; "Ironclads) ";
-IF fleet_city(side) > 0 AND fleet_city(side) < 99 THEN PRINT "in "; city_name$(fleet_city(side)) ELSE PRINT
+IF fleet_city(side) > 0 AND fleet_city(side) < FLEET_AT_SEA THEN PRINT "in "; city_name$(fleet_city(side)) ELSE PRINT
 IF train_army(side) > 0 THEN COLOR 14: PRINT " Army #"; train_army(side); army_name$(train_army(side)); " on train to "; city_name$(army_order(train_army(side)));
 LINE (0, 0)-(639, 449), 15, B
 LINE (0, 62)-(639, 62), 15

@@ -59,8 +59,8 @@ remenu:
 
 	IF wide = 0 THEN CALL menu_measure_width(wide)
 	IF menu_col = 0 THEN GOSUB noadjust
-	IF menu_choice < 21 THEN menu_choice = 1
-	IF menu_choice > 21 THEN menu_choice = menu_choice - 21
+	IF menu_choice < MENU_START THEN menu_choice = 1
+	IF menu_choice > MENU_START THEN menu_choice = menu_choice - MENU_START
 	IF menu_choice > 21 THEN menu_choice = 1
 	row = menu_choice: IF row < 1 THEN row = 1
 	IF row > menu_item_count THEN row = 1
@@ -160,7 +160,7 @@ crsr:   CALL script_mark_key_wait(2, menu_text$(0)): DO: a$ = INKEY$: LOOP WHILE
 	IF ASC(a$) = 13 THEN RETURN
 	IF LEN(a$) = 2 GOTO arrows
 	IF menu_item_show_beside = 3 THEN menu_choice = -ASC(UCASE$(a$)): leave = 1: RETURN
-	IF ASC(a$) = 27 THEN menu_choice = -1: leave = 1: RETURN
+	IF ASC(a$) = 27 THEN menu_choice = MENU_ESCAPED: leave = 1: RETURN
 		row1 = row
 		FOR k = 1 TO menu_item_count
 		c1$ = UCASE$(LEFT$(LTRIM$(menu_text$(k)), 1))
@@ -182,7 +182,7 @@ arrows:
 		RETURN
 	 END IF
 	 IF a$ = "A" AND menu_item_show_beside = 0 THEN
-		menu_choice = 99
+		menu_choice = MENU_END_TURN_KEY
 		leave = 1
 		RETURN
 	 END IF

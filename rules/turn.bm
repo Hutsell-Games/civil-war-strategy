@@ -17,8 +17,8 @@ IF side_cash(s) >= .2 * army_size(i) THEN
 		side_cash(s) = side_cash(s) - .2 * army_size(i)
 	END IF
 END IF
-IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(i)) < 99 THEN army_supply(i) = army_supply(i) - 1
-IF city_port_type(army_city(i)) = 99 AND fleet_city(other_side(s)) = army_city(i) THEN army_supply(i) = army_supply(i) - 1: CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
+IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(i)) < PORT_SEA THEN army_supply(i) = army_supply(i) - 1
+IF city_port_type(army_city(i)) = PORT_SEA AND fleet_city(other_side(s)) = army_city(i) THEN army_supply(i) = army_supply(i) - 1: CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
 COLOR 13
 IF army_supply(i) < 1 THEN
 	army_supply(i) = 0
@@ -60,8 +60,8 @@ FOR i = SIDE_UNION TO SIDE_REBEL: IF train_army(i) > 0 THEN CALL railroad_move(i
 NEXT i
 
 FOR i = 1 TO MAX_ARMIES
-move_order_key(i) = 999
-IF army_order(i) < 0 THEN army_order(i) = 0
+move_order_key(i) = MOVE_KEY_NONE
+IF army_order(i) < 0 THEN army_order(i) = ORDER_NONE
 IF army_city(i) > 0 AND army_order(i) > 0 THEN move_order_key(i) = INT(4 + 4 * RND) * 100 + i
 IF army_supply(i) < 1 AND army_order(i) > 0 THEN move_order_key(i) = 900 + i
 SELECT CASE army_size(i)         'bigger armies move slower
@@ -74,7 +74,7 @@ SELECT CASE army_size(i)         'bigger armies move slower
 	CASE ELSE
 		x = 1
 END SELECT
-IF move_order_key(i) <> 999 AND army_leader_rating(i) > 10 * RND THEN
+IF move_order_key(i) <> MOVE_KEY_NONE AND army_leader_rating(i) > 10 * RND THEN
 		move_order_key(i) = move_order_key(i) - 100 * (army_leader_rating(i) \ 2)
 		IF move_order_key(i) < 100 THEN move_order_key(i) = 100 + i
 END IF
@@ -86,7 +86,7 @@ CALL sort_move_order(MAX_ARMIES)
 '==========================================================================
 FOR j = 1 TO MAX_ARMIES
 flag = 0
-IF move_order_key(j) = 999 GOTO allthru
+IF move_order_key(j) = MOVE_KEY_NONE GOTO allthru
 active = INT(move_order_key(j) / 100): active = move_order_key(j) - 100 * active: s = army_side(active)
 IF army_order(active) < 1 GOTO digin
 COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " is moving to "; city_name$(army_order(active));
@@ -143,9 +143,9 @@ army_city(active) = army_order(active)
 CALL draw_army_flag(army_city(active))
 CALL draw_army_flag(active)
 city_army(army_city(active)) = active
-army_order(active) = -2
+army_order(active) = ORDER_DONE
 	      
-IF 11 * RND > army_leader_rating(defend) THEN CALL draw_map_marker(army_city(defend), army_order(defend), 4): IF army_order(defend) > 0 THEN army_order(defend) = -2
+IF 11 * RND > army_leader_rating(defend) THEN CALL draw_map_marker(army_city(defend), army_order(defend), 4): IF army_order(defend) > 0 THEN army_order(defend) = ORDER_DONE
 
 CALL wait_seconds(opt_pause!): GOTO digin
 '==========================================================================
@@ -184,7 +184,7 @@ outta:
 	CALL draw_army_flag(defend)                  ' in new city
        
 	CALL draw_map_marker(target, 0, 6)
-	army_order(defend) = -2
+	army_order(defend) = ORDER_DONE
 	GOTO holdon
 
 deadmeat:
@@ -199,7 +199,7 @@ crushed:
 	side_victory_points(other_side(s)) = side_victory_points(other_side(s)) + 25
 	army_city(index) = 0: leader_name$(index) = "": army_name$(index) = ""
 	army_size(index) = 0: army_leader_rating(index) = 0
-	army_experience(index) = 0: army_order(index) = 0: army_supply(index) = 0
+	army_experience(index) = 0: army_order(index) = ORDER_NONE: army_supply(index) = 0
 	army_supply(active) = army_supply(active) + army_supply(index): army_supply(index) = 0
 	IF army_supply(active) > MAX_SUPPLY THEN army_supply(active) = MAX_SUPPLY
 	CALL wait_seconds(9): CALL clear_right_panel
@@ -216,7 +216,7 @@ holdon:
 '==========================================================================
 easy:
 CALL draw_map_marker(army_city(active), target, 4)
-army_city(active) = target: army_order(active) = -2
+army_city(active) = target: army_order(active) = ORDER_DONE
 CALL city_update_occupier(army_city(active))
 CALL draw_army_flag(active)
 '---------------------------------------------------------------------------

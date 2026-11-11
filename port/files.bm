@@ -36,7 +36,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	CLOSE #1
 
 	CASE 2
-	IF LEN(DIR$("*.sav")) = 0 THEN menu_choice = -1: EXIT SUB
+	IF LEN(DIR$("*.sav")) = 0 THEN menu_choice = MENU_ESCAPED: EXIT SUB
 	menu_text$(0) = "Load"
 	menu_item_count = 0
 	FOR k = 1 TO 9

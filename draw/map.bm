@@ -2,7 +2,6 @@ SUB draw_map_marker (from_city, to_city, mark)
 DIM x AS INTEGER: DIM y AS INTEGER: DIM x1 AS INTEGER: DIM y1 AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
 IF from_city < 1 OR from_city > MAX_CITIES GOTO noshow
 IF to_city < 0 GOTO noshow
-IF from_city = 999 GOTO noshow
 x = city_x(from_city) - 12: y = city_y(from_city) - 11
 x1 = city_x(to_city): y1 = city_y(to_city)
 SELECT CASE mark
@@ -111,7 +110,7 @@ FOR k = 1 TO MAX_CITIES
 	IF a > 527 GOTO nextc
 	PSET (a, city_y(k) + 12), 10
 	
-	IF city_port_type(k) < 90 THEN
+	IF city_port_type(k) < PORT_RIVER THEN
 		IF opt_alt_colors = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
 	ELSE
 		DRAW "C10"
@@ -129,7 +128,7 @@ IF fleet_size(s) = 0 OR fleet_city(s) = 0 THEN fleet_city(s) = 0: GOTO sink
 IF fleet_city(s) = 30 THEN x = 515: y = 268: GOTO float
 IF fleet_city(s) = 28 THEN x = 517: y = 172: GOTO float
 IF fleet_city(s) = 17 THEN x = 380: y = 425: GOTO float
-IF fleet_city(s) = 99 THEN x = 495: y = 310: GOTO float
+IF fleet_city(s) = FLEET_AT_SEA THEN x = 495: y = 310: GOTO float
 x = city_x(fleet_city(s)) + 25: y = city_y(fleet_city(s)) + 25
 IF fleet_city(s) = 24 THEN y = y + 5: x = x - 5
 float:

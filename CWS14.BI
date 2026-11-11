@@ -16,6 +16,21 @@ CONST MAX_SUPPLY = 10
 CONST MAX_EXPERIENCE = 10
 CONST MAX_LEADER_RATING = 9
 CONST MAX_CASH = 19999
+' fleet_city(): the fleet is at sea, raiding commerce.
+CONST FLEET_AT_SEA = 99
+' city_port_type(): 0 for no port.
+CONST PORT_RIVER = 90
+CONST PORT_SEA = 99
+' army_order(): a city to move to, or one of these.
+CONST ORDER_NONE = 0
+CONST ORDER_BUSY = -1
+CONST ORDER_DONE = -2
+' move_order_key(): the army does not move this turn.
+CONST MOVE_KEY_NONE = 999
+' menu_choice: set to MENU_START + n before menu_select to start on option n; after it, these.
+CONST MENU_START = 21
+CONST MENU_ESCAPED = -1
+CONST MENU_END_TURN_KEY = 99
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

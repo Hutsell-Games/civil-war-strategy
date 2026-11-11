@@ -29,10 +29,10 @@ SELECT CASE who
 
 	CALL clear_bottom_line
 	IF RND > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
-	IF fleet_size(SIDE_REBEL) > 0 AND fleet_city(SIDE_REBEL) <> 99 THEN empty = fleet_city(SIDE_REBEL): GOTO float1
+	IF fleet_size(SIDE_REBEL) > 0 AND fleet_city(SIDE_REBEL) <> FLEET_AT_SEA THEN empty = fleet_city(SIDE_REBEL): GOTO float1
 		empty = 0
 		FOR i = 1 TO MAX_CITIES
-		IF city_owner(i) = SIDE_REBEL AND city_port_type(i) = 99 AND fleet_city(SIDE_UNION) <> i THEN empty = i: EXIT FOR
+		IF city_owner(i) = SIDE_REBEL AND city_port_type(i) = PORT_SEA AND fleet_city(SIDE_UNION) <> i THEN empty = i: EXIT FOR
 		NEXT i
 	IF empty = 0 GOTO mercen
 float1:

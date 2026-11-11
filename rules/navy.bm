@@ -29,19 +29,19 @@ IF action = 1 THEN
 END IF
 menu_text$(0) = "Ships"
 menu_text$(1) = "Build"
-IF fleet_city(side) <> 99 THEN
-IF side_cash(side) < cost OR fleet_size(side) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(side)) <> side THEN menu_text$(1) = "-": menu_choice = 23
+IF fleet_city(side) <> FLEET_AT_SEA THEN
+IF side_cash(side) < cost OR fleet_size(side) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(side)) <> side THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
 END IF
 menu_text$(2) = "Attack"
-IF fleet_city(side) <> 99 THEN
-IF city_owner(fleet_city(side)) <> other_side(side) THEN menu_text$(2) = "-": menu_choice = 22
+IF fleet_city(side) <> FLEET_AT_SEA THEN
+IF city_owner(fleet_city(side)) <> other_side(side) THEN menu_text$(2) = "-": menu_choice = MENU_START + 1
 ELSE
-menu_text$(1) = "-": menu_text$(2) = "-": menu_choice = 24
+menu_text$(1) = "-": menu_text$(2) = "-": menu_choice = MENU_START + 3
 END IF
 menu_text$(3) = "Sail": IF fleet_city(side) < 1 THEN menu_text$(3) = "-": IF action = 3 THEN action = 1
 menu_text$(4) = "Raid": IF fleet_size(side) < 1 OR raiding_side = side THEN menu_text$(4) = "-"
 menu_col = 67: menu_row = 12: menu_item_count = 4
-IF fleet_city(side) <> 99 THEN
+IF fleet_city(side) <> FLEET_AT_SEA THEN
 IF side = SIDE_UNION AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion": CALL city_nearby_enemy_strength(fleet_city(SIDE_UNION), defend): IF action > 0 AND defend < 100 THEN action = 5
 IF opt_realism = 0 AND side = SIDE_REBEL AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion": CALL city_nearby_enemy_strength(fleet_city(SIDE_UNION), defend): IF action > 0 AND defend < 100 THEN action = 5
 END IF
@@ -56,13 +56,13 @@ SELECT CASE menu_choice
 '                               Build Ship
 '---------------------------------------------------------------------------
 	CASE 1
-	IF side_cash(side) < cost OR fleet_city(side) = 99 GOTO ahoy
+	IF side_cash(side) < cost OR fleet_city(side) = FLEET_AT_SEA GOTO ahoy
 	IF action = 1 AND fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
 	IF action = 0 AND fleet_size(side) >= MAX_FLEET_SHIPS THEN GOTO ahoy
 
 	IF action = 0 AND fleet_city(side) > 0 THEN
 		IF city_owner(fleet_city(side)) <> side GOTO ahoy
-		IF city_port_type(fleet_city(side)) < 99 GOTO ahoy
+		IF city_port_type(fleet_city(side)) < PORT_SEA GOTO ahoy
 	END IF
 	IF action = 1 AND RND < .07 * fleet_size(side) THEN EXIT SUB
 	a$ = "W"
@@ -94,7 +94,7 @@ noiron:
 	IF fleet_size(side) > 1 GOTO add2ship
 ships:
 	menu_text$(0) = "Port": menu_item_count = 0: menu_col = 67: menu_row = 12
-	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) = 99 AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) = PORT_SEA AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
 	NEXT i
 	IF action = 1 THEN menu_choice = 1 + INT(menu_item_count * RND)
 	IF menu_item_count < 1 THEN
@@ -124,7 +124,7 @@ add2ship:
 '                               Attack City
 '---------------------------------------------------------------------------
 	CASE 2
-	IF fleet_city(side) = 99 GOTO ahoy
+	IF fleet_city(side) = FLEET_AT_SEA GOTO ahoy
 	IF action = 2 AND city_owner(fleet_city(side)) = side THEN EXIT SUB
 	IF action = 2 AND city_army(fleet_city(side)) > 0 AND RND > .5 THEN action = 3: GOTO anchor
 	IF action = 2 AND city_owner(fleet_city(side)) = SIDE_NONE THEN action = 3: GOTO ahoy
@@ -182,7 +182,7 @@ blast:
 	IF fleet_city(side) < 1 OR fleet_size(side) < 1 THEN CALL clear_bottom_line: PRINT "No ships remain"; : wait_seconds 1: GOTO ahoy
 
 	menu_item_count = 0
-	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) > 90 AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) > PORT_RIVER AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
 	NEXT i
 	IF action = 3 THEN
 		IF menu_item_count = 0 THEN EXIT SUB
@@ -267,7 +267,7 @@ admiral:
 	ELSE
 		wait_seconds opt_pause!
 	END IF
-	fleet_city(side) = 99: raiding_side = side
+	fleet_city(side) = FLEET_AT_SEA: raiding_side = side
 	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) GOTO pirate
 	CLS : CALL draw_map
 	EXIT SUB
@@ -382,7 +382,7 @@ hitme1:
 	 CASE 2
 	 target = 0
 	 FOR i = 1 TO MAX_CITIES
-	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = 99 THEN target = i: IF RND > .3 GOTO found1
+	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN target = i: IF RND > .3 GOTO found1
 	 NEXT i
 found1:
 	 CALL clear_bottom_line: COLOR 11: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
@@ -440,7 +440,7 @@ xout:
 sail3:
 	raiding_side = SIDE_NONE
 	FOR k = SIDE_UNION TO SIDE_REBEL
-	IF fleet_city(k) = 99 THEN raiding_side = k
+	IF fleet_city(k) = FLEET_AT_SEA THEN raiding_side = k
 	NEXT k
 	CLS : CALL draw_map
 END SUB

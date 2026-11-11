@@ -63,3 +63,15 @@ how the game plays.
   report needs laying out again.
 - **Vary Start gives each fleet `10 * RND` ships** (`CWSTRAT.BAS` lines 591 and 592). That is a random
   size, not the fleet limit, so it stays 10 rather than `MAX_FLEET_SHIPS`.
+
+Left alone by group 2 (the special values):
+
+- **`fleet_city() = 0`, "the side has no fleet", has no constant.** It appears in 18 tests and assignments.
+  `docs\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
+- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 66). The 900
+  is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
+- **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
+  after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
+  `MENU_START`, so it stays.
+- **Tests of `army_order()` and `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
+  `docs\constants.md`, section 2.

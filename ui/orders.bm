@@ -44,7 +44,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 	IF menu_item_count = 0 THEN CALL clear_bottom_line: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
 	CALL menu_bubble_sort(menu_item_count)
 	menu_text$(0) = "Fortify"
-		menu_choice = 31
+		menu_choice = MENU_START + 10
 		CALL menu_select(9): CALL clear_right_panel
 		IF menu_choice < 0 GOTO nocity
 		city = menu_value(menu_choice): CALL city_update_occupier(city): x = city_army(city): IF x < 0 GOTO nocity
@@ -58,7 +58,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 		CALL draw_map_marker(city, 0, 6)
 		CALL draw_cities
 		IF army_order(x) > 0 THEN CALL draw_map_marker(army_city(x), army_order(x), 5)
-		army_order(x) = -1
+		army_order(x) = ORDER_BUSY
 		CALL draw_army_flag(x)
 		CALL draw_stack_markers(who)
 nocity:
@@ -70,7 +70,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
 	menu_color = 3: menu_col = 67: menu_row = 5: army = 0: menu_item_count = 0: city = 0
 	who = current_side: CALL side_army_range(star, fin, who)
 	FOR i = star TO fin
-	IF army_city(i) > 0 AND army_order(i) = 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(army_city(i)): menu_value(menu_item_count) = army_city(i)
+	IF army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(army_city(i)): menu_value(menu_item_count) = army_city(i)
 	NEXT i
 	IF menu_item_count = 0 THEN army = -1: GOTO notarg
 	menu_text$(0) = "From"
@@ -83,7 +83,7 @@ movopt:
 
 		menu_item_count = 0
 		FOR i = star TO fin
-		IF army_city(i) = city AND army_order(i) = 0 THEN army = i: menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = "Army" + STR$(i): menu_value(menu_item_count) = i
+		IF army_city(i) = city AND army_order(i) = ORDER_NONE THEN army = i: menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = "Army" + STR$(i): menu_value(menu_item_count) = i
 		NEXT i
 		IF menu_item_count = 1 GOTO notarg
 		menu_text$(0) = "Which"
@@ -100,7 +100,7 @@ DIM a$: DIM x AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER
 		menu_text$(3) = "  "
 		menu_item_count = 3: a$ = city_name$(city)
 morecap:
-		menu_col = 68: menu_row = 15: menu_color = 3: menu_choice = 23
+		menu_col = 68: menu_row = 15: menu_color = 3: menu_choice = MENU_START + 2
 		menu_text$(2) = city_name$(city)
 		CALL menu_select(3): CALL clear_right_panel
 	       SELECT CASE menu_choice
@@ -172,7 +172,7 @@ levy:
 	menu_col = 67: menu_row = 12: menu_color = 3
 	IF side <> current_side THEN GOSUB randsel: GOTO auto1
       
-	IF menu_choice > 0 THEN menu_choice = 21 + menu_choice
+	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
 	CALL menu_select(2): CALL clear_right_panel
 	IF menu_choice < 1 GOTO menu1
 auto1:
@@ -271,7 +271,7 @@ CALL clear_right_panel
 
 		CALL clear_bottom_line: COLOR 11: PRINT army_name$(index); " has cancelled move to "; city_name$(army_order(index)); : CALL wait_seconds(turbo + 1)
 		CALL draw_map_marker(army_city(index), army_order(index), 4)
-		army_order(index) = 0: IF opt_sound > 0 THEN SOUND 2999, .5
+		army_order(index) = ORDER_NONE: IF opt_sound > 0 THEN SOUND 2999, .5
 		CALL draw_stack_markers(side)
 	 CASE ELSE
 		GOTO finix
@@ -288,7 +288,7 @@ menu_col = 67: menu_row = 2
 CALL side_army_range(star, fin, side)
 menu_item_count = 0
 FOR i = star TO fin
-IF army_size(i) > 0 AND army_city(i) > 0 AND army_order(i) = 0 THEN
+IF army_size(i) > 0 AND army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN
 	menu_item_count = menu_item_count + 1
 	menu_text$(menu_item_count) = army_name$(i)
 	IF LEN(menu_text$(menu_item_count)) > 11 THEN menu_text$(menu_item_count) = LEFT$(menu_text$(menu_item_count), 11)
@@ -299,7 +299,7 @@ NEXT i
 IF menu_item_count = 0 THEN EXIT SUB
 CALL menu_bubble_sort(menu_item_count)
 menu_text$(0) = "Relieve"
-menu_choice = 31: menu_highlight = 11
+menu_choice = MENU_START + 10: menu_highlight = 11
 CALL menu_select(6): CALL clear_right_panel
 
 IF menu_choice < 1 THEN EXIT SUB
@@ -325,7 +325,7 @@ menu_text$(0) = "New Leader"
 menu_col = 67: menu_row = 2
 CALL menu_select(0): CALL clear_right_panel
 IF menu_choice < 1 GOTO have2
-army_order(index) = -1
+army_order(index) = ORDER_BUSY
 army_leader_rating(index) = leader_rating(menu_value(menu_choice))
 IF army_leader_rating(index) > 0 THEN army_leader_rating(index) = army_leader_rating(index) - 1
 IF army_experience(index) > 0 THEN army_experience(index) = army_experience(index) - 1

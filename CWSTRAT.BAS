@@ -21,7 +21,7 @@ DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM a AS INTE
 replay = 0
 newgame:
 game_over = 0: turn_recruit_state = 0
-FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = 0: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
+FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = ORDER_NONE: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
 union_income_bonus = 0: emancipation_done = 0
 FOR k = SIDE_UNION TO SIDE_REBEL
 fleet_size(k) = 0: fleet_city(k) = 0: navymove(k) = 0
@@ -123,7 +123,7 @@ menu_text$(1) = "Resume Saved Game"
 menu_text$(2) = "Start NEW Game"
 menu_text$(3) = "Quit to DOS"
 menu_col = 33: menu_row = 20: menu_color = 5: menu_item_count = 3
-menu_choice = 23
+menu_choice = MENU_START + 2
 CALL menu_select(0)
 IF menu_choice = 1 THEN
 	CLS
@@ -160,7 +160,7 @@ IF opt_players = 1 AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = 
 
 FOR i = 1 TO MAX_CITIES
 IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_income(x) = side_income(x) + city_value(i)
-army_order(i) = 0
+army_order(i) = ORDER_NONE
 NEXT i
 
 FOR i = SIDE_UNION TO SIDE_REBEL: navymove(i) = 0: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + 100
@@ -239,7 +239,7 @@ END IF
 '==========================================================================
 	CASE 5
 	menu_col = 67: menu_row = 15
-	menu_highlight = 15: menu_color = 3: menu_choice = 23
+	menu_highlight = 15: menu_color = 3: menu_choice = MENU_START + 2
 	menu_text$(0) = "End Turn"
 	menu_text$(1) = "Yes"
 	menu_text$(2) = "NOT YET"
@@ -282,7 +282,7 @@ optmen:
 '---------------------------------------------------------------------------
 		CASE 1
 	CALL menu_army_cancel(current_side): turn_moves_done = 0
-	menu_choice = 22
+	menu_choice = MENU_START + 1
 '---------------------------------------------------------------------------
 '                               Fortify
 '---------------------------------------------------------------------------
@@ -290,7 +290,7 @@ optmen:
 	IF side_cash(current_side) < 200 THEN COLOR 11: CALL clear_bottom_line: PRINT "Not enough money for fort"; : GOTO menu0
 	CALL menu_city_fortify(target)
 	IF side_cash(current_side) < 200 GOTO menu0
-	menu_choice = 23
+	menu_choice = MENU_START + 2
 	GOTO optmen
 '---------------------------------------------------------------------------
 '                               Combine
@@ -305,7 +305,7 @@ optmen:
 		CALL draw_stack_markers(current_side)
 		GOTO menu0
 	END IF
-	menu_choice = 24
+	menu_choice = MENU_START + 3
 	GOTO optmen
 '---------------------------------------------------------------------------
 '                               Supply
@@ -335,7 +335,7 @@ alone:
 		CALL army_resupply(index)
 		CALL draw_army_flag(index)
 		END IF
-		menu_choice = 25
+		menu_choice = MENU_START + 4
 		GOTO optmen
 '-------------------------------------------------------------------------
 '                               Move Capital
@@ -365,13 +365,13 @@ alone:
 	CALL army_get_commander(2, empty): IF empty = 0 GOTO menu0
 	army_supply(empty) = .3 * army_supply(index): army_supply(index) = army_supply(index) - army_supply(empty): IF army_supply(index) < 0 THEN army_supply(index) = 0
 	army_size(empty) = .3 * army_size(index): army_size(index) = army_size(index) - army_size(empty)
-	army_city(empty) = target: army_experience(empty) = army_experience(index): army_order(empty) = 0
+	army_city(empty) = target: army_experience(empty) = army_experience(index): army_order(empty) = ORDER_NONE
 	army_leader_rating(empty) = leader_rating(empty)
 	army_name$(empty) = leader_name$(empty): leader_name$(empty) = ""
 	army_experience(empty) = army_experience(index)
 	COLOR 11: CALL clear_bottom_line: PRINT "Unit #"; empty; " with "; : CALL print_army_size(empty): PRINT " men detached under "; army_name$(empty); : CALL wait_seconds(opt_pause!): IF opt_sound > 0 THEN SOUND 2222, 1
 	CALL draw_stack_markers(current_side)
-	menu_choice = 27
+	menu_choice = MENU_START + 6
 	GOTO optmen
 '-------------------------------------------------------------------------
 '                               Drill
@@ -384,22 +384,22 @@ alone:
 	army_experience(index) = army_experience(index) + 1
 	CALL clear_bottom_line: PRINT army_name$(index); " has drilled to reach experience level "; army_experience(index); : IF opt_sound > 0 THEN SOUND 2222, 1
 	CALL wait_seconds(opt_pause!): clear_bottom_line
-	army_order(index) = -1
-	menu_choice = 28
+	army_order(index) = ORDER_BUSY
+	menu_choice = MENU_START + 7
 	GOTO optmen
 '-------------------------------------------------------------------------
 '                               Relieve
 '-------------------------------------------------------------------------
 		CASE 8
 		CALL menu_army_relieve(current_side)
-		menu_choice = 29
+		menu_choice = MENU_START + 8
 		GOTO optmen
 '-------------------------------------------------------------------------
 		CASE ELSE
 		chosit = 28
 		GOTO menu0
       END SELECT
-	menu_choice = 21 + menu_choice: GOTO optmen
+	menu_choice = MENU_START + menu_choice: GOTO optmen
 '==========================================================================
 '                               Utility Menu
 '==========================================================================
@@ -449,7 +449,7 @@ utile:
 		IF opt_sound > 0 THEN SOUND 999, 1
 		a$ = "Solo": IF opt_players = 2 THEN a$ = "2 Player"
 		PRINT a$; " Game";
-		menu_choice = 23: GOTO utile
+		menu_choice = MENU_START + 2: GOTO utile
 '-------------------------------------------------------------------------
 '                               Graphics
 '-------------------------------------------------------------------------
@@ -463,7 +463,7 @@ utile:
 		CLS
 		CALL draw_map
 		CALL clear_bottom_line: COLOR 11: PRINT "Graphics : "; a$; : IF opt_sound > 0 THEN SOUND 2700, 1
-		menu_choice = 24: GOTO utile
+		menu_choice = MENU_START + 3: GOTO utile
 '-------------------------------------------------------------------------
 '                               Sounds
 '-------------------------------------------------------------------------
@@ -479,7 +479,7 @@ utile:
 		COLOR 11: CALL clear_bottom_line: PRINT "Sound Option : "; menu_text$(menu_choice);
 		opt_sound = menu_choice - 1
 		IF opt_sound > 0 THEN SOUND 999, 1
-		menu_choice = 25: GOTO utile
+		menu_choice = MENU_START + 4: GOTO utile
 '-------------------------------------------------------------------------
 '                               Display Speed
 '-------------------------------------------------------------------------
@@ -506,7 +506,7 @@ utile:
 				CALL draw_map
 				CALL draw_top_bar
 		END SELECT
-		menu_choice = 26: GOTO utile
+		menu_choice = MENU_START + 5: GOTO utile
 '-------------------------------------------------------------------------
 '                               Play Balance
 '-------------------------------------------------------------------------
@@ -525,13 +525,13 @@ utile:
 		COLOR 11: CALL clear_bottom_line: PRINT "Play Balance : "; menu_text$(menu_choice);
 		opt_difficulty = menu_choice
 		GOSUB unionplus
-		menu_choice = 27: GOTO utile
+		menu_choice = MENU_START + 6: GOTO utile
 '-------------------------------------------------------------------------
 '                               Ending Conditions
 '-------------------------------------------------------------------------
 	   CASE 7
 		CALL menu_victory_conditions
-		menu_choice = 28: GOTO utile
+		menu_choice = MENU_START + 7: GOTO utile
 '-------------------------------------------------------------------------
 '                           Random Events Options
 '-------------------------------------------------------------------------
@@ -565,7 +565,7 @@ utile:
 		 CALL script_mark_key_wait(1, "R"): DO WHILE INKEY$ = "": LOOP
 		 CLS
 		 CALL draw_map
-		 menu_choice = 29
+		 menu_choice = MENU_START + 8
 		 GOTO utile
 '-------------------------------------------------------------------------
 '                              Vary Start Conditions
@@ -578,13 +578,13 @@ utile:
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
 			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-			army_experience(k) = 0: army_order(k) = 0: army_supply(k) = 0
+			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
 			END IF
 		NEXT k
 		FOR k = 21 TO 6
 			IF RND > .6 THEN
 			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-			army_experience(k) = 0: army_order(k) = 0: army_supply(k) = 0
+			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
 			END IF
 		NEXT k
 		FOR k = 1 TO MAX_CITIES: CALL city_update_occupier(k): NEXT k
@@ -605,7 +605,7 @@ utile:
 		NEXT k
 		CLS
 		CALL draw_map
-		menu_choice = 30: GOTO utile
+		menu_choice = MENU_START + 9: GOTO utile
 '-------------------------------------------------------------------------
 '                               January Campaigns
 '-------------------------------------------------------------------------
@@ -615,7 +615,7 @@ utile:
 		COLOR 11
 		CALL clear_bottom_line
 		PRINT "January Campaigns : "; a$;
-		menu_choice = 31: GOTO utile
+		menu_choice = MENU_START + 10: GOTO utile
 '-------------------------------------------------------------------------
 '                               Realism Switch
 '-------------------------------------------------------------------------
@@ -629,7 +629,7 @@ utile:
 		IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
 		GOSUB unionplus
 	END IF
-		menu_choice = 32: GOTO utile
+		menu_choice = MENU_START + 11: GOTO utile
 '-------------------------------------------------------------------------
 '                               Check Map Linakges
 '-------------------------------------------------------------------------
@@ -644,7 +644,7 @@ utile:
 		opt_history = 1 - opt_history
 		a$ = "OFF": IF opt_history = 1 THEN a$ = "ON"
 		CALL clear_bottom_line: PRINT "History is now "; a$;
-		menu_choice = 34: GOTO utile
+		menu_choice = MENU_START + 13: GOTO utile
 '-------------------------------------------------------------------------
 '                               Aggression
 '-------------------------------------------------------------------------
@@ -661,7 +661,7 @@ utile:
 		CALL clear_bottom_line
 		COLOR 11
 		PRINT "Enemy Aggression : "; a$; " ("; opt_ai_aggression; ")";
-		menu_choice = 35: GOTO utile
+		menu_choice = MENU_START + 14: GOTO utile
 		CASE ELSE
 	   END SELECT
 '==========================================================================
@@ -670,9 +670,9 @@ utile:
 	CASE 9
 	IF LEN(DIR$("*.sav")) = 0 THEN saves_exist = 0
 filex:
-	menu_choice = 23: chosit = 30: IF turn_year = 1861 THEN menu_choice = 22
+	menu_choice = MENU_START + 2: chosit = 30: IF turn_year = 1861 THEN menu_choice = MENU_START + 1
 	menu_text$(0) = "Options"
-	menu_text$(1) = "Load": IF saves_exist = 0 THEN menu_text$(1) = "-": menu_choice = 23
+	menu_text$(1) = "Load": IF saves_exist = 0 THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
 	menu_text$(2) = "Save"
 	menu_text$(3) = "New Game"
 	menu_text$(4) = "Quit to DOS"
@@ -695,7 +695,7 @@ loader:
 		CASE 4: GOTO rusure
 	END SELECT
 '==========================================================================
-	CASE 99
+	CASE MENU_END_TURN_KEY
 	GOTO endrnd
 CASE ELSE
 	chosit = 22
@@ -706,7 +706,7 @@ GOTO menu0
 '                               Subs
 '............................................................................
 rusure:
-menu_choice = 23
+menu_choice = MENU_START + 2
 menu_text$(0) = "Quit"
 menu_text$(1) = "Yes"
 menu_text$(2) = "No"

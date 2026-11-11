@@ -69,9 +69,9 @@ IF army_side(defender) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_diffic
 IF army_side(defender) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN x1 = x1 + 6 - 2 * opt_difficulty
 LOCATE 22, y: PRINT "Difclt  "; x1
 
-a$ = "Fort": IF army_order(defender) = 0 THEN x1 = x1 * (1 + city_fort(army_city(defender)))
+a$ = "Fort": IF army_order(defender) = ORDER_NONE THEN x1 = x1 * (1 + city_fort(army_city(defender)))
 IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
-IF city_fort(army_city(defender)) > 0 AND army_order(defender) = 0 THEN
+IF city_fort(army_city(defender)) > 0 AND army_order(defender) = ORDER_NONE THEN
 	COLOR 13: a$ = "Fort+"
 	IF city_fort(army_city(defender)) = MAX_FORT THEN a$ = "Fort++"
 END IF

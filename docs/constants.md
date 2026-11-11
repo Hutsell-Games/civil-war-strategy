@@ -38,7 +38,7 @@ Names in the tables use the SUB names of today. Phase 2 has renamed the SUBs by 
 | Number | Meaning | Uses | Proposed | Your name |
 |--------|---------|-----:|----------|-----------|
 | `navyloc() = 99` | The fleet is at sea, raiding commerce. | about 12 | `FLEET_AT_SEA` | |
-| `matrix(c, 7) = 99` | The city is a port. Also written `> 90` and `< 99`. | 5 and about 10 | Goes away: `city_is_port(c)` (`variable-names.md`, note 1). | |
+| `matrix(c, 7) = 99` | The city is a port. Also written `> 90` and `< 99`. | 5 and about 10 | `PORT_SEA = 99` and `PORT_RIVER = 90`: phase 4 made the column `city_port_type()`, not `city_is_port` (`variable-names.md`, note 1). | |
 | `armymove() = 0` | The army has no order. | (read case by case) | `ORDER_NONE` | |
 | `armymove() = -1` | The army cannot be given an order this turn: it drilled, fortified, combined, was just raised or came by train. | 8 | `ORDER_BUSY` | |
 | `armymove() = -2` | The army has moved or lost its order in this turn's update. | 2 | `ORDER_DONE` | |
@@ -46,7 +46,11 @@ Names in the tables use the SUB names of today. Phase 2 has renamed the SUBs by 
 | `choose = 99` | The player pressed F7 in a plain menu (end the turn). | 1 set, read in the main module | `MENU_END_TURN_KEY` | |
 | `choose = 21 + n` going in | Start the menu on option `n`. Written `choose = 23`. | 55 | `MENU_START + 2`, with `MENU_START = 21` | |
 | `brray() = 999` | The army does not move this turn. | 3 | `MOVE_KEY_NONE` | |
-| `icon(999, …)` | No city: draw nothing. | 1 | `CITY_NONE_MARK`, or delete the test if phase 3 finds that no caller can pass 999 | |
+| `icon(999, …)` | No city: draw nothing. | 1 | Deleted: the line above it already sends every city above 40 to `noshow`. | |
+
+Tests by sign keep their numbers: `army_order() > 0` (the army has a city to move to) and `choose < 0` or
+`< 1`. The `menu` mode that `newcity` uses returns a letter as a negative number, so `< 0` is not the same
+test as `= MENU_ESCAPED`.
 
 ## 3. Map marks: the third argument of `icon`
 
