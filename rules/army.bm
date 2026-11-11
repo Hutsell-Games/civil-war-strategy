@@ -19,7 +19,7 @@ DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: 
 	IF side <> current_side THEN menu_choice = 1 + INT(menu_item_count * RND): GOTO join
 	menu_text$(0) = "Join"
 		menu_choice = MENU_START + 10: menu_highlight = 11
-		CALL menu_select(9): CALL clear_right_panel
+		CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
 join:
 		IF menu_choice < 1 GOTO nocity2
 		target = menu_value(menu_choice)

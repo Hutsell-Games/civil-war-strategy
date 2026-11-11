@@ -48,7 +48,7 @@ END IF
 
 IF action > 0 THEN menu_choice = action: GOTO anchor
 IF turn_navy_done > 0 AND menu_choice <> 1 THEN EXIT SUB
-CALL menu_select(0): CALL clear_right_panel
+CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 anchor:
 '---------------------------------------------------------------------------
 SELECT CASE menu_choice
@@ -75,7 +75,7 @@ SELECT CASE menu_choice
 			menu_text$(1) = "Wooden"
 			menu_text$(2) = "Ironclad"
 			menu_item_count = 2
-			CALL menu_select(0)
+			CALL menu_select(MENU_PLAIN)
 			CALL clear_right_panel
 			IF menu_choice < 1 GOTO ahoy
 			IF menu_choice = 2 THEN a$ = "I": cost = 2 * cost
@@ -102,7 +102,7 @@ ships:
 		IF action = 0 THEN CALL clear_bottom_line: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
 		IF action = 1 THEN EXIT SUB
 	END IF
-	IF action = 0 THEN CALL menu_select(9): CALL clear_right_panel
+	IF action = 0 THEN CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
 
 	IF menu_choice < 1 GOTO ships
 	fleet_city(side) = menu_value(menu_choice)
@@ -198,7 +198,7 @@ blast:
 	menu_text$(0) = "To"
 	menu_color = 3: menu_col = 67: menu_row = 12
       
-	CALL menu_select(9): CALL clear_right_panel: IF menu_choice < 1 THEN EXIT SUB
+	CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel: IF menu_choice < 1 THEN EXIT SUB
 admiral:
 	IF menu_value(menu_choice) = fleet_city(side) THEN EXIT SUB
 	IF menu_value(menu_choice) < 1 THEN EXIT SUB
@@ -328,7 +328,7 @@ wave:
 	menu_text$(2) = "Retreat"
 	IF action > 0 THEN menu_choice = 1: GOTO powder
       
-	menu_item_count = 2: menu_color = 3: menu_highlight = 14: menu_col = 50: menu_row = 18: CALL menu_select(0)
+	menu_item_count = 2: menu_color = 3: menu_highlight = 14: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
 powder:
 	SELECT CASE menu_choice
 	 CASE 1

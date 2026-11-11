@@ -42,6 +42,17 @@ CONST MARK_BOX = 7
 CONST MARK_RESTORE = 8
 CONST MARK_POINTER = 9
 CONST MARK_ROAD = 11
+' The modes of menu_select: what it shows beside the option the player is on.
+CONST MENU_PLAIN = 0
+CONST MENU_CITY_BOX = 1
+CONST MENU_CITY_ARMY = 2
+CONST MENU_RAW_KEYS = 3
+CONST MENU_ARMY_STATS = 4
+CONST MENU_ARMY_POINTER = 6
+CONST MENU_FACES = 8
+CONST MENU_CITY_POINTER = 9
+' menu_box_type: a double line round the menu (0, no line, and 1, a single line, have no caller).
+CONST BOX_DOUBLE = 2
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

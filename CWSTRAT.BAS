@@ -114,7 +114,7 @@ CLOSE #1: CALL clear_bottom_line
 
 CALL script_start
 wait_seconds .3
-menu_box_type = 2
+menu_box_type = BOX_DOUBLE
 menu_highlight = 15
 replay = 1
 IF opt_players = 2 THEN GOSUB blanken
@@ -124,7 +124,7 @@ menu_text$(2) = "Start NEW Game"
 menu_text$(3) = "Quit to DOS"
 menu_col = 33: menu_row = 20: menu_color = 5: menu_item_count = 3
 menu_choice = MENU_START + 2
-CALL menu_select(0)
+CALL menu_select(MENU_PLAIN)
 IF menu_choice = 1 THEN
 	CLS
 	GOTO loader
@@ -202,7 +202,7 @@ menu_text$(9) = "Files"
 
 menu_item_count = 9
 menu_choice = chosit
-CALL menu_select(0): CALL clear_right_panel
+CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 '==========================================================================
 '                            Main Menu
 '==========================================================================
@@ -243,7 +243,7 @@ END IF
 	menu_text$(0) = "End Turn"
 	menu_text$(1) = "Yes"
 	menu_text$(2) = "NOT YET"
-	menu_item_count = 2: CALL menu_select(0): CALL clear_right_panel: IF menu_choice <> 1 THEN chosit = 24: GOTO menu0
+	menu_item_count = 2: CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
 	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
 	IF opt_players = 2 THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN GOSUB blanken: CALL draw_map: GOTO menu0
@@ -274,7 +274,7 @@ optmen:
 	menu_text$(8) = "Relieve"
 	menu_text$(9) = "MAIN MENU"
 	menu_item_count = 9
-	CALL menu_select(0): CALL clear_right_panel
+	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 	chosit = 28
      SELECT CASE menu_choice
 '---------------------------------------------------------------------------
@@ -328,7 +328,7 @@ optmen:
 alone:
 		NEXT i
 		IF menu_item_count = 0 THEN COLOR 11: CALL clear_bottom_line: PRINT "All eligible "; side_name$(current_side); " armies have supplies"; : GOTO menu0
-		CALL menu_select(6): CALL clear_right_panel
+		CALL menu_select(MENU_ARMY_POINTER): CALL clear_right_panel
 		IF menu_choice < 0 GOTO menu0
 		index = menu_value(menu_choice)
 		IF army_supply(index) < 2 THEN
@@ -474,7 +474,7 @@ utile:
 		menu_text$(2) = "Sound"
 		menu_text$(3) = " & Sound"
 		menu_item_count = 3: menu_col = 67: menu_row = 12
-		CALL menu_select(0): CALL clear_right_panel
+		CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 		IF menu_choice < 1 GOTO menu0
 		COLOR 11: CALL clear_bottom_line: PRINT "Sound Option : "; menu_text$(menu_choice);
 		opt_sound = menu_choice - 1
@@ -492,7 +492,7 @@ utile:
 		menu_text$(4) = "Very Slow"
 		menu_text$(5) = "Reg Color": IF opt_alt_colors > 0 THEN menu_text$(5) = "Alt Color"
 		menu_col = 67: menu_row = 15: menu_item_count = 5
-		CALL menu_select(0): CALL clear_right_panel
+		CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 		SELECT CASE menu_choice
 			CASE IS < 1
 			CASE IS < 5
@@ -519,7 +519,7 @@ utile:
 		menu_text$(4) = "Union +"
 		menu_text$(5) = "Union ++"
 		menu_col = 67: menu_row = 15: menu_item_count = 5
-		CALL menu_select(8): CALL clear_right_panel
+		CALL menu_select(MENU_FACES): CALL clear_right_panel
 		IF menu_choice < 1 GOTO menu0
 		CALL clear_bottom_line
 		COLOR 11: CALL clear_bottom_line: PRINT "Play Balance : "; menu_text$(menu_choice);
@@ -543,7 +543,7 @@ utile:
 		 menu_text$(3) = "Neutral     ": IF opt_event_balance = 5 THEN menu_text$(3) = menu_text$(3) + " "
 		 menu_text$(4) = "Favor Rebels": IF opt_event_balance = 7 THEN menu_text$(4) = menu_text$(4) + " "
 		 menu_color = 5
-		 CALL menu_select(0)
+		 CALL menu_select(MENU_PLAIN)
 		 menu_color = 4
 
 		 SELECT CASE menu_choice
@@ -677,7 +677,7 @@ filex:
 	menu_text$(3) = "New Game"
 	menu_text$(4) = "Quit to DOS"
 	menu_item_count = 4: menu_col = 67: menu_row = 15
-	CALL menu_select(0): CALL clear_right_panel
+	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 	SELECT CASE menu_choice
 		CASE IS < 1: GOTO menu0
 		CASE 1, 2
@@ -712,7 +712,7 @@ menu_text$(1) = "Yes"
 menu_text$(2) = "No"
 menu_item_count = 2: menu_color = 5
 menu_col = 67: menu_row = 15
-CALL menu_select(0): CALL clear_right_panel: IF menu_choice = 1 THEN END ELSE GOTO menu0
+CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice = 1 THEN END ELSE GOTO menu0
 '............................................................................
 unionplus: union_income_bonus = 120 * opt_difficulty: IF opt_players = 2 THEN union_income_bonus = 50 * opt_difficulty
 	   IF opt_realism > 0 THEN union_income_bonus = union_income_bonus * .7

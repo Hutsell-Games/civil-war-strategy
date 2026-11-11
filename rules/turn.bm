@@ -231,7 +231,7 @@ CALL draw_army_flag(active)
 		menu_text$(1) = "No"
 		menu_text$(2) = "Yes"
 		menu_item_count = 2
-		CALL menu_select(0)
+		CALL menu_select(MENU_PLAIN)
 		CALL clear_right_panel
 		IF menu_choice = 2 GOTO smoke
 	END IF

@@ -73,5 +73,8 @@ Left alone by group 2 (the special values):
 - **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
   `MENU_START`, so it stays.
+- **The Utility menu calls `menu_select(-1)`** (`CWSTRAT.BAS` line 431). No mode has that number, so it is a
+  plain menu without the F3, F4 and F7 keys. `docs\constants.md` has no row for it, so it keeps the -1
+  (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
 - **Tests of `army_order()` and `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
   `docs\constants.md`, section 2.

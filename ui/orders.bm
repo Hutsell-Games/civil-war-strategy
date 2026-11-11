@@ -14,7 +14,7 @@ FOR i = 1 TO MAX_ROADS: IF city_road(target, i) > 0 THEN menu_item_count = menu_
 NEXT i
 CALL menu_bubble_sort(menu_item_count)
 
-menu_highlight = 10: menu_color = 3: CALL menu_select(2): CALL clear_right_panel
+menu_highlight = 10: menu_color = 3: CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
 IF menu_choice < 0 GOTO dudd
 IF turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(menu_value(menu_choice)) <> current_side THEN COLOR 11: CALL clear_bottom_line: PRINT "No campaigns in January"; : CALL wait_seconds(9): CALL clear_bottom_line: GOTO dudd
 
@@ -45,7 +45,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 	CALL menu_bubble_sort(menu_item_count)
 	menu_text$(0) = "Fortify"
 		menu_choice = MENU_START + 10
-		CALL menu_select(9): CALL clear_right_panel
+		CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
 		IF menu_choice < 0 GOTO nocity
 		city = menu_value(menu_choice): CALL city_update_occupier(city): x = city_army(city): IF x < 0 GOTO nocity
 		IF city_fort(city) >= MAX_FORT THEN CALL clear_bottom_line: PRINT city_name$(city); " at MAXIMUM fortification level of 2"; : CALL wait_seconds(4): GOTO nocity
@@ -77,7 +77,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
 	CALL menu_bubble_sort(menu_item_count)
 movopt:
 	menu_col = 67: menu_row = 5
-		menu_highlight = 15: CALL menu_select(1): CALL clear_right_panel
+		menu_highlight = 15: CALL menu_select(MENU_CITY_BOX): CALL clear_right_panel
 		IF menu_choice < 0 THEN city = 0: GOTO notarg
 		city = menu_value(menu_choice)
 
@@ -88,7 +88,7 @@ movopt:
 		IF menu_item_count = 1 GOTO notarg
 		menu_text$(0) = "Which"
 		CALL menu_bubble_sort(menu_item_count)
-		menu_col = 67: menu_row = 15: CALL menu_select(4): CALL clear_right_panel
+		menu_col = 67: menu_row = 15: CALL menu_select(MENU_ARMY_STATS): CALL clear_right_panel
 		IF menu_choice < 0 THEN army = 0: GOTO notarg
 		army = menu_value(menu_choice)
 notarg:
@@ -102,7 +102,7 @@ DIM a$: DIM x AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER
 morecap:
 		menu_col = 68: menu_row = 15: menu_color = 3: menu_choice = MENU_START + 2
 		menu_text$(2) = city_name$(city)
-		CALL menu_select(3): CALL clear_right_panel
+		CALL menu_select(MENU_RAW_KEYS): CALL clear_right_panel
 	       SELECT CASE menu_choice
 		CASE IS = -27
 		city = 0: EXIT SUB
@@ -173,7 +173,7 @@ levy:
 	IF side <> current_side THEN GOSUB randsel: GOTO auto1
       
 	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
-	CALL menu_select(2): CALL clear_right_panel
+	CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
 	IF menu_choice < 1 GOTO menu1
 auto1:
 	empty = 0
@@ -257,10 +257,10 @@ CALL clear_right_panel
 	IF army_city(j) > 0 AND army_order(j) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = a$: menu_value(menu_item_count) = army_city(j)
 	NEXT j
 	CALL menu_bubble_sort(menu_item_count)
-	menu_col = 67: menu_row = 2: menu_box_type = 2
+	menu_col = 67: menu_row = 2: menu_box_type = BOX_DOUBLE
 	menu_text$(0) = "Cancel"
 	IF menu_item_count < 1 THEN CALL clear_bottom_line: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
-	CALL menu_select(1)
+	CALL menu_select(MENU_CITY_BOX)
 	SELECT CASE menu_choice
 	 CASE 1 TO menu_item_count
 		target = menu_value(menu_choice)
@@ -300,7 +300,7 @@ IF menu_item_count = 0 THEN EXIT SUB
 CALL menu_bubble_sort(menu_item_count)
 menu_text$(0) = "Relieve"
 menu_choice = MENU_START + 10: menu_highlight = 11
-CALL menu_select(6): CALL clear_right_panel
+CALL menu_select(MENU_ARMY_POINTER): CALL clear_right_panel
 
 IF menu_choice < 1 THEN EXIT SUB
 index = menu_value(menu_choice)
@@ -323,7 +323,7 @@ CALL menu_bubble_sort(menu_item_count)
 have2:
 menu_text$(0) = "New Leader"
 menu_col = 67: menu_row = 2
-CALL menu_select(0): CALL clear_right_panel
+CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 IF menu_choice < 1 GOTO have2
 army_order(index) = ORDER_BUSY
 army_leader_rating(index) = leader_rating(menu_value(menu_choice))
@@ -353,7 +353,7 @@ NEXT k
 	IF menu_item_count = 1 THEN x = menu_value(1): EXIT SUB
 	menu_text$(0) = "Retreat"
 	CALL menu_bubble_sort(menu_item_count)
-	CALL menu_select(9)
+	CALL menu_select(MENU_CITY_POINTER)
 	CALL clear_right_panel
 	IF menu_choice < 0 OR menu_choice > menu_item_count THEN x = 0: EXIT SUB
 	x = menu_value(menu_choice)
