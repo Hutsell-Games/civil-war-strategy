@@ -19,6 +19,7 @@ END SELECT
 END SUB
 
 SUB sort_move_order (limit)
+DIM FALSE AS INTEGER: DIM i AS INTEGER: DIM swaps%
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -31,6 +32,7 @@ LOOP WHILE swaps%
 END SUB
 
 SUB menu_bubble_sort (limit)
+DIM FALSE AS INTEGER: DIM i AS INTEGER: DIM swaps%
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -44,6 +46,8 @@ LOOP WHILE swaps%
 END SUB
 
 SUB menu_army_cancel (side)
+DIM fin AS INTEGER
+DIM star AS INTEGER: DIM j AS INTEGER: DIM a$: DIM target AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM index AS INTEGER: DIM turbo AS INTEGER
 CALL side_army_range(star, fin, (side))
 counter:
 CALL clear_right_panel
@@ -77,6 +81,7 @@ finix:
 END SUB
 
 SUB draw_cannon
+DIM x AS INTEGER: DIM y AS INTEGER
 CALL clear_right_panel
 LINE (528, 80)-(639, 310), 3, BF
 LINE (528, 310)-(639, 435), 2, BF
@@ -126,6 +131,7 @@ x = POINT(0): y = POINT(1): PAINT (x, y), 14, 15
 END SUB
 
 SUB draw_union_victory
+DIM x AS INTEGER: DIM i AS INTEGER
 SCREEN 12
 CLS
 LINE (1, 1)-(639, 150), 4, BF
@@ -174,6 +180,7 @@ IF opt_sound = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g1
 END SUB
 
 SUB city_capture (active, c, side, weaken_fort)
+DIM a$: DIM x AS INTEGER: DIM y AS INTEGER
 	city_owner(c) = side: CALL clear_bottom_line
 	a$ = army_name$(active) + " has captured " + city_name$(c)
 	COLOR 11: PRINT army_name$(active) + " has captured " + city_name$(c);
@@ -194,6 +201,7 @@ SUB city_capture (active, c, side, weaken_fort)
 END SUB
 
 SUB print_centered (y, text$)
+DIM x AS INTEGER
 x = LEN(text$)
 x = 26 - x \ 2
 LOCATE y, 7 + x: PRINT text$
@@ -234,6 +242,8 @@ VIEW
 END SUB
 
 SUB army_get_commander (side, slot)
+DIM fin AS INTEGER: DIM a$
+DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
 	slot = 0
 	CALL side_army_range(star, fin, side)
 	FOR i = star TO fin
@@ -255,6 +265,7 @@ SUB army_get_commander (side, slot)
 END SUB
 
 SUB menu_victory_conditions
+DIM a$: DIM t$: DIM i AS INTEGER: DIM chosit AS INTEGER
 	a$ = STR$(ABS(victory_rule(3)) * 2.5) + "% Cities"
 	t$ = STR$(ABS(victory_rule(3)) * 2.5) + "% Total Income"
 	menu_text$(8) = "Time: " + month_name$(victory_rule(1)) + STR$(ABS(victory_rule(2)))
@@ -290,6 +301,7 @@ cheer:
 END SUB
 
 SUB draw_train_box
+DIM i AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 IF train_army(1) + train_army(2) = 0 GOTO notrain
 LINE (5, 17)-(100, 63), 3, BF
 LINE (5, 17)-(100, 47), 0, B
@@ -308,6 +320,8 @@ notrain:
 END SUB
 
 SUB ai_evaluate_move (army, x)
+DIM fin AS INTEGER: DIM max AS INTEGER: DIM m AS INTEGER
+DIM from AS INTEGER: DIM defend AS INTEGER: DIM best AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM y AS INTEGER: DIM star AS INTEGER: DIM k AS INTEGER: DIM c AS INTEGER: DIM x1 AS INTEGER: DIM odds!
 from = army_city(army)
 x = 200: IF ai_strength_ratio! > 1.5 THEN x = 80: IF ai_strength_ratio! > 2 THEN x = 20: IF ai_strength_ratio! > 3 THEN x = 5
 CALL city_nearby_enemy_strength(from, defend): IF defend = 0 THEN x = 0
@@ -396,6 +410,7 @@ NEXT j
 END SUB
 
 SUB special_events
+DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM who AS INTEGER: DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM a$: DIM index AS INTEGER
 '==========================================================================
 '                              Special Events
 '==========================================================================
@@ -547,6 +562,7 @@ dull1:
 END SUB
 
 SUB draw_flag (side, w, a)
+DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
 x = 585 + w: y = 200: IF w = 0 THEN y = 180
 IF a <> 0 THEN y = a
 SELECT CASE side
@@ -582,6 +598,8 @@ END SELECT
 END SUB
 
 SUB show_message_box (text$, seconds)
+DIM x AS INTEGER: DIM y AS INTEGER
+DIM wide AS INTEGER
 DIM g2(1 TO 8000)
 menu_text$(1) = text$
 menu_col = 32 - LEN(text$) \ 2
@@ -604,6 +622,7 @@ y = 16 * (menu_row + 1)
 END SUB
 
 SUB check_map_links
+DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM index AS INTEGER
 CLS : COLOR 15
 x = 0: y = 0
 FOR i = 1 TO 40
@@ -624,6 +643,7 @@ IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB
 
 SUB draw_city_names
+DIM k AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER
 FOR k = 1 TO 40
 	FOR j = 1 TO LEN(city_name$(k))
 	a = city_x(k) + 6 * (j - 4) - 3
@@ -643,6 +663,7 @@ NEXT k
 END SUB
 
 SUB hall_of_fame
+DIM i AS INTEGER: DIM s AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM a$
 DIM hall_score(2, 5)
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : CALL script_mark_key_wait(1, "H"): DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
@@ -690,6 +711,7 @@ foun:
 END SUB
 
 SUB city_update_occupier (x)
+DIM i AS INTEGER
 city_army(x) = 0
 FOR i = 1 TO 40
 IF army_city(i) = x THEN city_army(x) = i: GOTO holdup
@@ -698,6 +720,8 @@ holdup:
 END SUB
 
 SUB menu_army_relieve (side)
+DIM fin AS INTEGER
+DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM index AS INTEGER: DIM t$
 menu_color = 3: target = 0: menu_highlight = 3
 menu_col = 67: menu_row = 2
 CALL side_army_range(star, fin, side)
@@ -752,6 +776,8 @@ CALL clear_bottom_line
 END SUB
 
 SUB menu_report (side)
+DIM fin AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER: DIM a$: DIM z AS INTEGER: DIM j AS INTEGER
+DIM star AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 DIM summ(40)
 IF side = -1 GOTO frep
 IF side > 100 GOTO batrep
@@ -961,6 +987,7 @@ END IF
 END SUB
 
 SUB army_resupply (army)
+DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 		who = 1: IF army > 20 THEN who = 2
 		IF opt_realism > 0 THEN
 			CALL city_is_connected(who, army_city(army), a)
@@ -976,6 +1003,7 @@ nocash:
 END SUB
 
 SUB menu_army_retreat (defender, x)
+DIM y AS INTEGER: DIM who AS INTEGER: DIM k AS INTEGER
 x = 0
 IF opt_players = 1 THEN
 	IF (current_side = 1 AND defender > 20) OR (current_side = 2 AND defender < 21) THEN EXIT SUB
@@ -998,6 +1026,7 @@ NEXT k
 END SUB
 
 SUB army_generate_name (army, name$)
+DIM x AS INTEGER: DIM k AS INTEGER
 name$ = "Union ": IF army > 20 THEN name$ = "Rebel "
 IF army > 20 THEN army = army - 20
 IF army > 10 THEN name$ = name$ + "X": army = army - 10
@@ -1024,6 +1053,8 @@ RETURN
 END SUB
 
 SUB draw_rebel_victory
+DIM i AS INTEGER
+DIM x AS INTEGER: DIM y AS INTEGER
 LINE (2, 2)-(637, 239), 4, BF
 COLOR 15: LINE (2, 40)-(597, 239): LINE -(637, 239): LINE -(637, 199): LINE -(40, 2): LINE -(2, 2): LINE -(2, 40)
 COLOR 15: LINE (2, 199)-(2, 239): LINE -(40, 239): LINE -(637, 40): LINE -(637, 2): LINE -(597, 2): LINE -(2, 199)
@@ -1126,6 +1157,7 @@ END IF
 END SUB
 
 SUB draw_ship_icon (side, ship_type)
+DIM x AS INTEGER: DIM y AS INTEGER
 	x = POINT(0) - 10: y = POINT(1) - 10
 	CIRCLE (x, y), 18, 9, , , .4
 	PAINT (x + 3, y + 4), 9, 9
@@ -1159,6 +1191,7 @@ jack:
 END SUB
 
 SUB draw_fleets
+DIM s AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
 FOR s = 1 TO 2
 IF fleet_size(s) = 0 OR fleet_city(s) = 0 THEN fleet_city(s) = 0: GOTO sink
 IF fleet_city(s) = 30 THEN x = 515: y = 268: GOTO float
@@ -1180,6 +1213,8 @@ star = 1: fin = 20: IF side = 2 THEN star = 21: fin = 40
 END SUB
 
 SUB draw_stack_markers (side)
+DIM fin AS INTEGER: DIM y AS INTEGER
+DIM star AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER
 CALL side_army_range(star, fin, side)
 FOR i = star TO fin
 IF army_size(i) > 0 AND city_army(army_city(i)) <> i THEN
@@ -1191,6 +1226,7 @@ NEXT i
 END SUB
 
 SUB draw_surrender (side)
+DIM s AS INTEGER: DIM c AS INTEGER: DIM w AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 SCREEN 12
 s = 1: c = 1: COLOR 0: w = 514
 IF side > 20 THEN c = 7: s = 2
@@ -1315,12 +1351,14 @@ IF side < 99 THEN CALL wait_seconds(opt_pause!)
 END SUB
 
 SUB wait_seconds (seconds!)
+DIM start!
 IF script_tick(seconds!) THEN EXIT SUB
 start! = TIMER
 DO WHILE TIMER - start! < seconds! AND INKEY$ = "": LOOP
 END SUB
 
 SUB draw_top_bar
+DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER: DIM a$
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR 11
 	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR 14: PRINT month_name$(turn_month); ","; turn_year; "  "
@@ -1415,6 +1453,7 @@ LINE (66, 375)-(52, 375), 10
 END SUB
 
 SUB railroad_capacity (side, limit)
+DIM x AS INTEGER
 IF opt_realism = 0 THEN limit = train_capacity(side): EXIT SUB
 x = 11: IF current_side = 2 THEN x = 23
 limit = train_capacity(side) + 5 * (side_city_count(side) - x)
@@ -1424,6 +1463,7 @@ IF limit < x \ 4 THEN limit = x \ 4
 END SUB
 
 SUB draw_map
+DIM y AS INTEGER: DIM a$: DIM j AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER
 SCREEN 12
 LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
@@ -1746,6 +1786,8 @@ COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); "
 END SUB
 
 SUB check_victory_conditions
+DIM t$: DIM k AS INTEGER
+DIM x AS INTEGER: DIM j AS INTEGER: DIM y AS INTEGER: DIM a$: DIM i AS INTEGER: DIM c AS INTEGER
 	x = 0: FOR j = 1 TO 20: IF army_city(j) > 0 THEN x = x + army_size(j)
 	NEXT j
 	y = 0: FOR j = 21 TO 40: IF army_city(j) > 0 THEN y = y + army_size(j)
@@ -1875,6 +1917,7 @@ stale:
 END SUB
 
 SUB city_nearby_enemy_strength (a, y)
+DIM j AS INTEGER: DIM x AS INTEGER: DIM k AS INTEGER: DIM m AS INTEGER
   y = 0
 FOR j = 1 TO 6
   x = city_road(a, j): IF x = 0 GOTO tally5

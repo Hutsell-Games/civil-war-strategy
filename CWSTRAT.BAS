@@ -1,3 +1,4 @@
+OPTION _EXPLICIT
 DEFINT A-Z
 DECLARE SUB draw_flag_icon (x%, y%, z%)
 DECLARE SUB navy_remove_ship (who%)
@@ -14,6 +15,8 @@ DECLARE SUB draw_train (who%, flag%)
 DECLARE SUB railroad_capacity (who%, limit%)
 DECLARE SUB draw_top_bar ()
 ' $INCLUDE: 'cws14.bi'
+DIM fin AS INTEGER: DIM max AS INTEGER: DIM index AS INTEGER: DIM empty AS INTEGER: DIM t$: DIM c AS INTEGER
+DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM a AS INTEGER: DIM j AS INTEGER: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER: DIM target AS INTEGER
 
 replay = 0
 newgame:

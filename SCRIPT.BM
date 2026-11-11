@@ -18,6 +18,7 @@
 
 ' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER.
 SUB script_start
+DIM seed$
 seed$ = ENVIRON$("CWS_SEED")
 IF seed$ = "" THEN RANDOMIZE TIMER: EXIT SUB
 scripted = 1
@@ -50,6 +51,8 @@ END FUNCTION
 ' program runs on a hidden one, so the scripts must not run it. Copy
 ' replaces <to>, as copy does.
 SUB script_shell (cmd$)
+DIM sp AS INTEGER: DIM d$
+DIM c$: DIM args$: DIM verb$: DIM from$: DIM f AS INTEGER: DIM into$
 IF scripted = 0 THEN SHELL cmd$: EXIT SUB
 c$ = LTRIM$(RTRIM$(cmd$))
 sp = INSTR(c$, " "): verb$ = LCASE$(LEFT$(c$, sp - 1)): args$ = LTRIM$(MID$(c$, sp + 1))
@@ -82,6 +85,7 @@ END SUB
 '   4  a line of text: the name of the commander for the Hall of Fame
 ' Byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits.
 SUB script_mark_key_wait (place, letter$)
+DIM code AS INTEGER
 IF scripted = 0 THEN EXIT SUB
 code = 0
 IF letter$ <> "" THEN code = ASC(UCASE$(letter$))

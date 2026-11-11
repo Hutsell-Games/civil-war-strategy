@@ -1,4 +1,6 @@
 SUB animate_army (army, background_saved)
+DIM y AS INTEGER: DIM y1 AS INTEGER
+DIM from AS INTEGER: DIM to2 AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM x1 AS INTEGER
 from = army_city(army): to2 = army_order(army): army_city(army) = 0
 x = city_x(from) - 12
 y = city_y(from) - 11
@@ -25,6 +27,7 @@ already:
 END SUB
 
 SUB menu_army_move
+DIM index AS INTEGER: DIM target AS INTEGER: DIM i AS INTEGER
 CALL menu_army_select(index, target): IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN turn_moves_done = 1
 	GOTO dudd
@@ -73,6 +76,9 @@ END IF
 END SUB
 
 SUB calculate_battle (attacker, defender, winner, loser)
+DIM vary AS INTEGER: DIM killd AS INTEGER: DIM s AS INTEGER
+DIM x1 AS INTEGER: DIM R!: DIM a$: DIM spin AS INTEGER: DIM scale AS INTEGER: DIM odds!: DIM a AS INTEGER: DIM k AS INTEGER: DIM t$: DIM i AS INTEGER: DIM hit AS INTEGER: DIM hit1 AS INTEGER: DIM star AS INTEGER: DIM fin AS INTEGER: DIM pct!: DIM xbar AS INTEGER: DIM killa AS INTEGER
+DIM y AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER
 IF army_size(defender) < 1 THEN army_size(defender) = 1
 IF army_size(attacker) < 1 THEN army_size(attacker) = 1
 
@@ -267,6 +273,8 @@ CALL draw_map_marker(army_city(defender), 0, 8)
 END SUB
 
 SUB army_combine (side)
+DIM fin AS INTEGER
+DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM best AS INTEGER: DIM x AS INTEGER: DIM spin AS INTEGER: DIM pct!
 	menu_color = 3: target = 0: menu_highlight = 3
 	menu_col = 67: menu_row = 2
 	CALL side_army_range(star, fin, side)
@@ -350,6 +358,7 @@ nocity2:
 END SUB
 
 SUB city_is_connected (side, city, a)
+DIM j AS INTEGER: DIM y AS INTEGER
 a = 0
 FOR j = 1 TO 6
 y = city_road(city, j)
@@ -358,6 +367,9 @@ NEXT j
 END SUB
 
 SUB file_management (job)
+DIM fin AS INTEGER
+DIM k AS INTEGER: DIM t$: DIM who AS INTEGER: DIM star AS INTEGER: DIM myside AS INTEGER
+DIM i AS INTEGER: DIM a AS INTEGER
 SELECT CASE job
 	CASE 1
 	OPEN "I", 1, SCNDIR + "cwslead.dat"
@@ -470,6 +482,7 @@ END SELECT
 END SUB
 
 SUB animate_city (city)
+DIM c AS INTEGER
 FOR c = 1 TO 15 STEP 2
 CIRCLE (city_x(city), city_y(city)), 4, 0
 CIRCLE (city_x(city), city_y(city)), 3, c
@@ -484,6 +497,8 @@ PAINT (city_x(city), city_y(city)), c, c
 END SUB
 
 SUB menu_city_fortify (city)
+DIM fin AS INTEGER
+DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM cost AS INTEGER
 	city = 0: menu_highlight = 11
 	menu_col = 67: menu_row = 2
 	who = current_side
@@ -520,6 +535,7 @@ nocity:
 END SUB
 
 SUB draw_map_marker (from_city, to_city, mark)
+DIM x AS INTEGER: DIM y AS INTEGER: DIM x1 AS INTEGER: DIM y1 AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
 IF from_city < 1 OR from_city > 40 GOTO noshow
 IF to_city < 0 GOTO noshow
 IF from_city = 999 GOTO noshow
@@ -595,6 +611,7 @@ noshow:
 END SUB
 
 SUB turn_date_and_supply
+DIM i AS INTEGER: DIM s AS INTEGER: DIM a AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER: DIM x AS INTEGER
 '---------------------------------------------------------------------------
 FOR i = 1 TO 40: IF army_city(i) > 0 THEN CALL draw_army_flag(i)
 NEXT i
@@ -633,6 +650,8 @@ IF current_side = 1 AND y > 0 THEN ai_strength_ratio! = x / y ELSE IF current_si
 END SUB
 
 SUB menu_army_select (army, city)
+DIM fin AS INTEGER
+DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
 	menu_color = 3: menu_col = 67: menu_row = 5: army = 0: menu_item_count = 0: city = 0
 	who = current_side: CALL side_army_range(star, fin, who)
 	FOR i = star TO fin
@@ -661,6 +680,8 @@ notarg:
 END SUB
 
 SUB navy_commands (side, action)
+DIM empty AS INTEGER: DIM c AS INTEGER: DIM k AS INTEGER: DIM best AS INTEGER
+DIM cost AS INTEGER: DIM defend AS INTEGER: DIM a$: DIM a AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM target AS INTEGER: DIM index AS INTEGER: DIM pct!: DIM killd AS INTEGER
 DIM hit(2)
 IF action > 0 THEN
 	IF fleet_city(side) < 1 THEN
@@ -1097,6 +1118,7 @@ sail3:
 END SUB
 
 SUB army_new (side, slot, city)
+DIM x AS INTEGER: DIM a AS INTEGER
 	army_supply(slot) = 3 + 5 * RND: IF side = 1 THEN army_supply(slot) = army_supply(slot) + 2
 	army_experience(slot) = 1: IF side = 2 THEN army_experience(slot) = 2
 	army_leader_rating(slot) = leader_rating(slot)
@@ -1114,6 +1136,7 @@ SUB army_new (side, slot, city)
 END SUB
 
 SUB menu_city_select (city)
+DIM a$: DIM x AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER
 		menu_text$(1) = "  "
 		menu_text$(3) = "  "
 		menu_item_count = 3: a$ = city_name$(city)
@@ -1156,6 +1179,7 @@ fnew:
 END SUB
 
 SUB normal_random_number (xbar, vary, result)
+DIM pct!: DIM k AS INTEGER
 ' NOTE : vary is VARIANCE
 pct! = 0
 FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
@@ -1164,6 +1188,7 @@ result = xbar + pct! * SQR(vary)
 END SUB
 
 SUB draw_army_flag (army)
+DIM who AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 who = 1: IF army > 20 THEN who = 2
 x = city_x(army_city(army)) - 12
 y = city_y(army_city(army)) - 11
@@ -1177,6 +1202,8 @@ END IF
 END SUB
 
 SUB railroad_move (side)
+DIM fin AS INTEGER: DIM target AS INTEGER: DIM y AS INTEGER: DIM m AS INTEGER: DIM z AS INTEGER
+DIM star AS INTEGER: DIM max AS INTEGER: DIM index AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM from AS INTEGER: DIM defend AS INTEGER: DIM limit AS INTEGER: DIM x1 AS INTEGER: DIM a AS INTEGER
 SELECT CASE train_army(side)
 	CASE 0
 	IF side = current_side GOTO human
@@ -1282,6 +1309,7 @@ toot:
 END SUB
 
 SUB menu_army_recruit (side)
+DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM index AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM a$: DIM a AS INTEGER: DIM from AS INTEGER: DIM y AS INTEGER
 	IF side_cash(side) < 100 GOTO menu1
 	menu_item_count = 0: COLOR 12
 	menu_text$(0) = "Recruit"
@@ -1389,11 +1417,14 @@ menu1:
 END SUB
 
 SUB draw_fleet_ship (side, i)
+DIM a AS INTEGER
 a = 1: IF MID$(fleet_ships$(side), i, 1) = "I" THEN a = 2
 CALL draw_ship_icon(side, a)
 END SUB
 
 SUB draw_cities
+DIM x AS INTEGER: DIM y AS INTEGER: DIM j AS INTEGER
+DIM i AS INTEGER: DIM c AS INTEGER
 FOR i = 1 TO 40
 c = 9: IF city_owner(i) = 2 THEN c = 7
 IF city_owner(i) = 0 THEN c = 12
@@ -1420,6 +1451,8 @@ NEXT i
 END SUB
 
 SUB ai_turn
+DIM fin AS INTEGER: DIM side_cash AS INTEGER: DIM z AS INTEGER
+DIM slush AS INTEGER: DIM who AS INTEGER: DIM c AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM cost AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM defend AS INTEGER: DIM a AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM flag AS INTEGER: DIM best AS INTEGER: DIM y AS INTEGER
 CALL special_events
 slush = 0: who = 3 - current_side
 c = 9: IF current_side = 1 THEN c = 15
@@ -1589,11 +1622,13 @@ IF put_back = 1 THEN PUT (x - 10, y - 10), saved_under_marker, PSET
 END SUB
 
 SUB print_army_size (army)
+DIM a$
 a$ = LTRIM$(RTRIM$(STR$(army_size(army)))) + "00"
 PRINT a$;
 END SUB
 
 SUB draw_train (side, show)
+DIM from AS INTEGER: DIM x AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER
 	IF train_city(side) = 0 THEN EXIT SUB
 	from = train_city(side)
 	x = city_x(from) - 12: y = city_y(from) - 11
@@ -1609,6 +1644,8 @@ END SELECT
 END SUB
 
 SUB turn_resolve
+DIM index AS INTEGER: DIM flee AS INTEGER: DIM best AS INTEGER: DIM move2 AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER: DIM k AS INTEGER
+DIM flag AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM s AS INTEGER: DIM active AS INTEGER: DIM target AS INTEGER: DIM defend AS INTEGER: DIM win AS INTEGER: DIM lose AS INTEGER: DIM a$
 flag = 0
 IF opt_players = 1 THEN
 	CALL ai_turn

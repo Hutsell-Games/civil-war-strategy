@@ -140,7 +140,8 @@ in the working tree: `tools\refactor\rename_vars.py` renamed 83 shared variables
 (not `side`, `matrix`, `navymove`); checks pass as for phase 2. Step B is committed (`e89f206`): `side` to
 `current_side` and the parameters. The `matrix()` split is done in the working tree
 (`tools\refactor\split_matrix.py`: `city_road()`, `city_port_type()`, and a local `hall_score` in
-`hall_of_fame`); checks pass as before. **Next:** `OPTION _EXPLICIT`.
+`hall_of_fame`); checks pass as before. `OPTION _EXPLICIT` is on in `CWSTRAT.BAS`; `tools\refactor\declare_locals.py` added the
+`DIM` lines (about 94, at the top of each SUB). That ends phase 4. **Next:** phase 6 (move SUBs into files).
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and

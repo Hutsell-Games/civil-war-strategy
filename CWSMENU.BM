@@ -16,6 +16,7 @@
 '               if >10 then 10's digit=box color  1's digit= window type
 
 SUB draw_menu (b1, wide)
+DIM boxc AS INTEGER: DIM i AS INTEGER
 boxc = menu_color: IF menu_box_type > 10 THEN boxc = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * boxc
 COLOR boxc
 VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
@@ -35,6 +36,7 @@ NEXT i
 END SUB
 
 SUB draw_ironclad
+DIM k AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 SCREEN 12
 LINE (1, 240)-(639, 309), 3, BF
 LINE (639, 309)-(1, 479), 1, BF
@@ -140,6 +142,8 @@ LINE (110, 313)-(114, 315), 0, BF
 END SUB
 
 SUB menu_select (menu_item_show_beside%)
+DIM row1 AS INTEGER: DIM brx AS INTEGER: DIM a AS INTEGER: DIM leave AS INTEGER: DIM a$: DIM k AS INTEGER: DIM c1$
+DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER: DIM b1 AS INTEGER: DIM target AS INTEGER: DIM flag AS INTEGER: DIM t$: DIM x AS INTEGER: DIM y AS INTEGER
 remenu:
 	IF menu_color = 0 THEN menu_color = 7
 	LOCATE 1, 1, 0
@@ -303,6 +307,7 @@ called:
 END SUB
 
 SUB menu_measure_width (wide)
+DIM i AS INTEGER: DIM x AS INTEGER
 	wide = LEN(menu_text$(0)) + 1
 	FOR i = 1 TO menu_item_count
 	x = LEN(menu_text$(i))
@@ -311,6 +316,7 @@ SUB menu_measure_width (wide)
 END SUB
 
 SUB draw_schooner
+DIM k AS INTEGER: DIM x AS INTEGER
 SCREEN 12
 LINE (1, 240)-(639, 309), 3, BF
 LINE (639, 309)-(1, 479), 1, BF
