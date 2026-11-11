@@ -59,9 +59,9 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
 8. **Four graphics lines are changed as `main` changed them**, because QB64 draws three shapes differently from
    DOS and `PAINT` then floods the map ("What DOS did that QB64 does not", below):
    - the railroad's small train (`CWSTRAT.BAS`): `U8` is `U9` in its `DRAW` string;
-   - the cannon's wheel (`cannon`, `CWSTRAT2.BM`): the arc `CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4` has the
+   - the cannon's wheel (`cannon`, now in `drawings\cannon.bm`): the arc `CIRCLE (x + 5, y), 29, 1, 4, 1.5, 1.4` has the
      radius 27;
-   - `touchup` (`CWSTRAT2.BM`): `PAINT (502, 160), 1, 10` and `PAINT (108, 400), 1, 10` are comments.
+   - `touchup` (now in `drawings\map.bm`): `PAINT (502, 160), 1, 10` and `PAINT (108, 400), 1, 10` are comments.
 9. **The data files are in folders**, named in `FOLDERS.BI`, which `CWS14.BI` includes: the pictures in
    `graphics\` and the map, the setup and the leaders in `scenarios\`, with the alternate map's three files and
    `ALTMAP.BAT`. Nine lines name a folder now. `CWS.CFG`, `HISCORE.CWS`, the saved games and the history files
@@ -69,6 +69,24 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
 10. **The test hooks**: `SCRIPT.BM`, included at the end of `CWSTRAT.BAS`, and calls to it in the sources. When
     the environment variable `CWS_SEED` is not set, the program behaves as before. Each changed line is listed
     in "The test hooks", below.
+11. **The 12 SUBs that only draw a picture are in six files in `drawings\`** (branch `extract-graphics`,
+    2026-11-11). They are 881 lines, and they were spread over the three `.BM` files. `CWSTRAT.BAS` and
+    `tests\rules_test.bas` include the six files after `cwsmenu.bm`.
+
+    | File | SUBs | Moved from |
+    |---|---|---|
+    | `map.bm` | `maptext`, `touchup`, `usa` | `CWSTRAT2.BM` |
+    | `schooner.bm` | `schooner` | `CWSMENU.BM` |
+    | `ironclad.bm` | `ironclad` | `CWSMENU.BM` |
+    | `cannon.bm` | `cannon` | `CWSTRAT2.BM` |
+    | `capitol.bm` | `capitol` | `CWSTRAT2.BM` |
+    | `icons.bm` | `chessie`, `engine`, `flags`, `shipicon`, `tinytrain` | `CWSTRAT2.BM`; `tinytrain` from `CWSTRAT1.BM` |
+
+    They moved unchanged. Each SUB, with the blank line after its `END SUB`, has the same bytes as before, and
+    so does everything left in the three `.BM` files. The 25 scripts show the same screens. SUBs that draw and
+    also hold rules of the game (`icon`, `showcity`, `rwin`, `victor`, `scrnsavr`) did not move. This is the
+    one place where the branch rearranges the source for the reader, not for the build or the tests.
+    `git blame -C` follows a moved SUB back to its old file.
 
 Not changed: the code is not reformatted, no variable is renamed, and no feature of the game is removed. The
 text "Registered Edition" and the version stay. The DOS line-drawing characters in the sources (code page 437)

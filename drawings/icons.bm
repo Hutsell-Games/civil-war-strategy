@@ -1,0 +1,124 @@
+SUB chessie
+COLOR 10
+LINE (500, 185)-(505, 180): LINE -(505, 175)
+LINE -(500, 170): LINE -(490, 165)
+LINE -(495, 160): LINE -(490, 155)
+LINE -(485, 150): LINE -(495, 155)
+LINE -(495, 145): LINE -(490, 140)
+LINE -(485, 130): LINE -(470, 120)
+LINE -(470, 110): LINE -(475, 120)
+LINE -(485, 120): LINE -(485, 115)
+LINE -(480, 100): LINE -(485, 90)
+LINE -(495, 80): LINE -(500, 80)
+LINE -(500, 85): LINE -(495, 90)
+LINE -(495, 100): LINE -(495, 115)
+LINE -(500, 120): LINE -(500, 130)
+LINE -(515, 135): LINE -(515, 140)
+LINE -(510, 160): LINE -(520, 145)
+LINE -(525, 120): LINE -(525, 115)
+LINE -(515, 85): LINE -(527, 95)
+PAINT (500, 400), 1, 10
+PAINT (510, 110), 2
+END SUB
+
+SUB engine
+IF rr(1) + rr(2) = 0 GOTO notrain
+LINE (5, 17)-(100, 63), 3, BF
+LINE (5, 17)-(100, 47), 0, B
+LINE (5, 47)-(100, 63), 0, B
+
+FOR i = 1 TO 2
+IF rr(i) = 0 GOTO notrane
+PSET (15, 25), 3: c = 9: IF i = 2 THEN c = 15: PSET (60, 25), 3
+DRAW "C0S4R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4"
+x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
+LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(city$(armymove(rr(i))), 5)
+notrane:
+NEXT i
+
+notrain:
+END SUB
+
+SUB flags (who, w, a)
+x = 585 + w: y = 200: IF w = 0 THEN y = 180
+IF a <> 0 THEN y = a
+SELECT CASE who
+	CASE 1
+	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+	FOR i = -13 TO 9 STEP 5
+	LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
+	NEXT i
+	LINE (x - 17, y - 15)-(x, y), 1, BF
+	IF w = 0 THEN COLOR 9: LOCATE 10, 70: PRINT "U N I O N"
+	FOR i = -16 TO -1 STEP 3
+		FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
+	NEXT i
+	CASE 2
+	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+	LINE (x - 17, y - 13)-(x + 15, y + 7), 7
+	LINE (x - 15, y - 15)-(x + 17, y + 5), 7
+
+	LINE (x - 17, y + 7)-(x + 17, y - 15), 1
+	LINE (x - 17, y + 6)-(x + 16, y - 15), 1
+	LINE (x - 16, y + 7)-(x + 17, y - 14), 1
+	LINE (x - 17, y + 5)-(x + 15, y - 15), 7
+	LINE (x - 15, y + 7)-(x + 17, y - 13), 7
+
+	LINE (x - 17, y - 15)-(x + 17, y + 7), 1
+	LINE (x - 17, y - 14)-(x + 16, y + 7), 1
+	LINE (x - 16, y - 15)-(x + 17, y + 6), 1
+	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
+
+	IF w = 0 THEN COLOR 4: LOCATE 10, 70: PRINT "R E B E L"
+	CASE ELSE
+END SELECT
+END SUB
+
+SUB shipicon (who, flag)
+	x = POINT(0) - 10: y = POINT(1) - 10
+	CIRCLE (x, y), 18, 9, , , .4
+	PAINT (x + 3, y + 4), 9, 9
+	CIRCLE (x, y), 18, 10, , , .4
+SELECT CASE flag
+CASE 1                          'wooden ship
+	DRAW "BF5R5D1C4L20C0H1R22E1L9": DRAW "BL6": DRAW "C0L10H1L1H2": DRAW "BR9D2"
+	DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
+	DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
+	PSET (x + 8, y - 1)
+	GOSUB jack
+
+CASE 2                          'ironclad
+	DRAW "BL15BD4E1"
+	DRAW "C0R30H1L2C8L24E1R1"
+	DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1": DRAW "C0R2BR3C0R2BR3C0R2"
+	DRAW "BU3BL10D1": DRAW "C0U4R1D4BR9"
+	PSET (x + 8, y - 1)
+	GOSUB jack
+CASE ELSE
+END SELECT
+EXIT SUB
+jack:
+	SELECT CASE who
+	CASE 1
+	DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
+	CASE 2
+	DRAW "C4R4U1L4U1R4U1L4C3F4BU4C3G4BD2BR2BU1"
+	END SELECT
+	RETURN
+END SUB
+
+SUB tinytrain (who, flag)
+	IF tracks(who) = 0 THEN EXIT SUB
+	from = tracks(who)
+	x = cityx(from) - 12: y = cityy(from) - 11
+SELECT CASE flag
+	CASE IS > 0
+	LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
+	PSET (x - 6, y - 2), 3: c = 9: IF who = 2 THEN c = 15
+	DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
+	x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
+	CASE ELSE
+	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+END SELECT
+END SUB
+

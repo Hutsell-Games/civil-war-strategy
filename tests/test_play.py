@@ -203,17 +203,20 @@ class CoverageTest(unittest.TestCase):
         "file\t0\taaaa\trules_test.bas.test-entry.bas\n"
         "file\t1\tbbbb\trules_test.bas\n"
         "file\t2\tcccc\t../cwstrat2.bm\n"
+        "file\t3\tdddd\t../drawings/map.bm\n"
         "0\t3\t1\t1\t\n"
         "1\t9\t1\t1\t\n"
         "2\t10\t1\t1\tLEN\n"
         "2\t11\t1\t0\t\n"
+        "3\t5\t1\t0\t\n"
         "end\n"
     )
 
     def test_rebase_keeps_only_the_games_files(self):
         self.assertEqual(
             play.rebase_records(self.UNIT * 2),
-            ("coverage 2\nfile\t2\tcccc\tcwstrat2.bm\n2\t10\t1\t1\tLEN\n2\t11\t1\t0\t\nend\n") * 2,
+            ("coverage 2\nfile\t2\tcccc\tcwstrat2.bm\nfile\t3\tdddd\tdrawings/map.bm\n"
+             "2\t10\t1\t1\tLEN\n2\t11\t1\t0\t\n3\t5\t1\t0\t\nend\n") * 2,
         )
 
     def test_reached_only_by_the_unit_tests(self):

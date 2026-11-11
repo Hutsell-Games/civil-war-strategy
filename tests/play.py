@@ -44,6 +44,8 @@ OUT = GAME / "tests" / "out"
 
 # The source files of the game; a build is made again when one of them changes.
 SOURCE_SUFFIXES = {".bas", ".bi", ".bm"}
+# The folders that hold source files besides the repo's own folder.
+SOURCE_FOLDERS: tuple[str, ...] = ("drawings",)
 # Top-level files that a run does not need: sources, DOS programs and objects, documents.
 NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
     ".exe", ".obj", ".lnk", ".mak", ".zip", ".md", ".qlb", ".com", ".drv", ".bat", ".btm",
@@ -126,9 +128,10 @@ def find_tools(args: argparse.Namespace) -> Tools:
 def source_stamp(tools: Tools, compiler: str) -> str:
     """A hash of what a build depends on: the game's sources, the compiler, the screen hook."""
     h = hashlib.sha256()
-    for path in sorted(GAME.iterdir()):
-        if path.is_file() and path.suffix.lower() in SOURCE_SUFFIXES:
-            h.update(path.name.encode() + b"\0" + path.read_bytes() + b"\0")
+    for folder in (GAME, *(GAME / name for name in SOURCE_FOLDERS)):
+        for path in sorted(folder.iterdir()):
+            if path.is_file() and path.suffix.lower() in SOURCE_SUFFIXES:
+                h.update(path.relative_to(GAME).as_posix().encode() + b"\0" + path.read_bytes() + b"\0")
     exe = tools.exes[compiler]
     st = exe.stat()
     h.update(f"{exe}\0{st.st_size}\0{st.st_mtime_ns}\0".encode())
@@ -757,7 +760,7 @@ def unit_test_counts(tools: Tools, folder: Path, jobs: int) -> Path | None:
 
 def rebase_records(text: str) -> str:
     """Coverage records of the unit tests, made from tests/, as records of the game's folder. A file
-    named `../<name>` becomes `<name>`; the test entry point, the test library and the test file are
+    named `../<name>` becomes `<name>`, in a folder of SOURCE_FOLDERS too; the test entry point, the test library and the test file are
     left out with their counts, as they are not files of the game."""
     out: list[str] = []
     keep: set[str] = set()
@@ -765,7 +768,7 @@ def rebase_records(text: str) -> str:
         parts = line.split("\t")
         if parts[0] == "file" and len(parts) == 4:
             name = parts[3]
-            if name.startswith("../") and "/" not in name[3:]:
+            if name.startswith("../") and name[3:].rpartition("/")[0].lower() in ("", *SOURCE_FOLDERS):
                 keep.add(parts[1])
                 out.append("\t".join([*parts[:3], name[3:]]))
         elif len(parts) >= 4 and parts[0].isdigit():
@@ -807,7 +810,9 @@ def sub_table(count_files: list[Path], main: str = PROGRAMS[DEFAULT_PROGRAM].low
     # Each file's lines, mapped to the procedure they are in.
     starts: dict[str, list[tuple[int, str]]] = {}
     for name in {k[0] for k in counts}:
-        source = next((p for p in GAME.iterdir() if p.name.lower() == name), None)
+        folder = GAME / name.rpartition("/")[0]
+        files = folder.iterdir() if folder.is_dir() else ()
+        source = next((p for p in files if p.name.lower() == name.rpartition("/")[2]), None)
         found: list[tuple[int, str]] = []
         if source:
             for n, text in enumerate(source.read_text(encoding="latin-1").splitlines(), 1):
@@ -825,9 +830,10 @@ def sub_table(count_files: list[Path], main: str = PROGRAMS[DEFAULT_PROGRAM].low
         entry[0] += 1
         entry[1] += count > 0
     rows = sorted(table.items(), key=lambda kv: (-(kv[1][0] - kv[1][1]), kv[0]))
-    out = [f"{'file':10} {'procedure':22} {'statements':>10} {'run':>6} {'not run':>8} {'run %':>6}"]
+    wide = max([10, *(len(name) for name, _ in table)])
+    out = [f"{'file':{wide}} {'procedure':22} {'statements':>10} {'run':>6} {'not run':>8} {'run %':>6}"]
     for (name, proc), (total, run) in rows:
-        out.append(f"{name:10} {proc:22} {total:10} {run:6} {total - run:8} {100 * run / total:6.1f}")
+        out.append(f"{name:{wide}} {proc:22} {total:10} {run:6} {total - run:8} {100 * run / total:6.1f}")
     return "\n".join(out) + "\n"
 
 
