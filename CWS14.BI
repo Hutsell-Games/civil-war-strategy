@@ -3,7 +3,7 @@ DEFINT A-Z
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
-COMMON SHARED side_cash(), side_city_count(), matrix(), side_income(), saved_under_army(), leader_rating(), turn_recruit_state
+COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_state
 COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), pic_mountain(), train_from_city()
 COMMON SHARED saved_under_marker(), side_name$(), army_city(), army_name$(), opt_players, ai_strength_ratio!
 COMMON SHARED army_size(), army_leader_rating(), army_experience(), army_supply(), month_name$()
@@ -15,7 +15,7 @@ COMMON SHARED train_capacity(), map_font$(), move_order_key(), opt_winter_campai
 COMMON SHARED game_over, opt_history, victory_reason, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
 '==========================================================================
 DIM SHARED city_x(40), city_y(40), city_value(40), city_owner(40), city_name$(40), leader_name$(40), turn_recruit_city(5)
-DIM SHARED side_cash(2), side_city_count(2), matrix(40, 7), side_income(2), saved_under_army(300), leader_rating(40)
+DIM SHARED side_cash(2), side_city_count(2), city_road(40, 6), city_port_type(40), side_income(2), saved_under_army(300), leader_rating(40)
 DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(40), army_name$(40), victory_rule(6)
 DIM SHARED army_size(40), army_leader_rating(40), army_experience(40), army_supply(40), month_name$(12)
 DIM SHARED army_order(40), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)

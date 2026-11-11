@@ -47,7 +47,7 @@ Indexed by city, 1 to 40.
 | `cityo()` | Its owner when the game began. | 3 | `city_first_owner()` | `cities(c).first_owner` | |
 | `fort()` | Its fort level, 0 to 2. | 44 | `city_fort()` | `cities(c).fort` | |
 | `occupied()` | The first army found in the city, or 0. Set by `occupy`. | 59 | `city_army()` | `cities(c).army` | |
-| `matrix()` | `matrix(c, 1 TO 6)`: the cities joined to city `c` by road, 0 for none. `matrix(c, 7)`: 99 when the city is a port. | 43 | `city_road()` and `city_is_port()` (see note 1) | `cities(c).road(1 TO 6)`, `.is_port` | |
+| `matrix()` | `matrix(c, 1 TO 6)`: the cities joined to city `c` by road, 0 for none. `matrix(c, 7)`: 99 when the city is a port. | 43 | `city_road()` and `city_port_type()` (see note 1) | `cities(c).road(1 TO 6)`, `.is_port` | |
 | `capcity()` | By side: the side's capital city, 0 when it has fallen. | 37 | `side_capital()` | `sides(s).capital` | |
 
 ## Sides
@@ -183,7 +183,7 @@ A parameter gets the name of what is passed, the same in every SUB.
 | `switch` | `filer` | Which job: 1 scenario, 2 load, 3 save. | `job` (with constants) |
 | `chx` | `navy` | The naval action the computer wants, 0 for the player's menu. | `action` |
 | `empty` | `newarmy`, `commander` | A free army slot. | `slot` |
-| `flag` | `animate`, `snapshot`, `tinytrain`, `scribe`, `shipicon`, `capture` | A different yes-or-no or choice in each. | Named in each SUB: for example `erase`, `restore`, `show_box`. |
+| `flag` | `animate`, `snapshot`, `tinytrain`, `scribe`, `shipicon`, `capture` | A different yes-or-no or choice in each. | Named in each SUB: `show` (draw_train), `ship_type` (draw_ship_icon), `background_saved` (animate_army), `weaken_fort` (city_capture), `display` (scribe_message), `put_back` (screen_snapshot). |
 | `a`, `x`, `y`, `limit`, `result` | `cutoff`, `void`, `evaluate`, `retreat`, `traincapacity`, `normal` | The value the SUB gives back. | Goes away in phase 5, when the SUB becomes a FUNCTION. |
 | `x`, `y`, `z` | `armyxy`, `snapshot` | A screen position; `z` a side. | `x`, `y` kept; `z` to `side` |
 | `a$` | `center`, `image2`, `scribe`, `roman` | A text. | `text$`; `name$` in `roman` |
@@ -192,8 +192,9 @@ A parameter gets the name of what is passed, the same in every SUB.
 ## Notes
 
 1. **`matrix()` holds two things.** Columns 1 to 6 are roads and column 7 is the port mark. The proposal
-   splits it into `city_road(c, 1 TO 6)` and `city_is_port(c)`. That is more than a rename: each
-   `matrix(i, 7) = 99` becomes `city_is_port(i)`. The split is its own step in phase 4, after the plain
+   splits it into `city_road(c, 1 TO 6)` and `city_port_type(c)`. Column 7 is not a yes-or-no: it is 0 for
+   no port, 90 for a river port and 99 for a sea port (`cities.grd`), so it is `city_port_type`, not
+   `city_is_port`. That is more than a rename: each `matrix(i, 7) = 99` becomes `city_port_type(i) = 99`. The split is its own step in phase 4, after the plain
    renames. `maxx` also uses `matrix()` as scratch space for the Hall of Fame's scores; it gets a local
    array of its own in the same step.
 2. **`navymove()` is never read**, but `filer` writes it to the saved game, and the save format is frozen

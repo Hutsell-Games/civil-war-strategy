@@ -316,14 +316,14 @@ IF opt_ai_aggression > 1 THEN x = .5 * x
 best = army_size(army)
 
 FOR j = 1 TO 6: menu_value(j) = -1
-a = matrix(from, j): IF a > 0 THEN IF city_army(a) > 0 THEN best = best - army_size(city_army(a)): y = 1
+a = city_road(from, j): IF a > 0 THEN IF city_army(a) > 0 THEN best = best - army_size(city_army(a)): y = 1
 NEXT j: best = .01 * best
 IF opt_ai_aggression > 0 THEN best = best + 20 * opt_ai_aggression
 
 CALL side_army_range(star, fin, 3 - current_side)
 
 FOR j = 1 TO 6
-	y = -1: a = matrix(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
+	y = -1: a = city_road(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
       
 	c = city_army(a)
 	FOR k = star TO fin: IF army_city(k) > 0 THEN IF army_order(k) = a AND c = 0 GOTO alle
@@ -369,7 +369,7 @@ ourn:
 	IF current_side = 1 AND city_y(a) < city_y(from) THEN y = y + 2
 	IF current_side = 2 AND city_y(a) > city_y(from) THEN y = y + 2
 '---------------------------------------------------------------------------
-	FOR k = 1 TO 6: m = matrix(a, k): IF m = 0 GOTO tally3
+	FOR k = 1 TO 6: m = city_road(a, k): IF m = 0 GOTO tally3
 	IF city_owner(m) = 0 THEN y = y + 3 * city_value(m) + 4 * city_fort(m)
 	IF city_owner(m) = current_side THEN y = y + 3 * city_value(m) + 4 * city_fort(m)
 	IF city_owner(m) = current_side AND c > 0 THEN
@@ -428,7 +428,7 @@ SELECT CASE who
 	IF fleet_size(2) > 0 AND fleet_city(2) <> 99 THEN empty = fleet_city(2): GOTO float1
 		empty = 0
 		FOR i = 1 TO 40
-		IF city_owner(i) = 2 AND matrix(i, 7) = 99 AND fleet_city(1) <> i THEN empty = i: EXIT FOR
+		IF city_owner(i) = 2 AND city_port_type(i) = 99 AND fleet_city(1) <> i THEN empty = i: EXIT FOR
 		NEXT i
 	IF empty = 0 GOTO mercen
 float1:
@@ -607,11 +607,11 @@ SUB check_map_links
 CLS : COLOR 15
 x = 0: y = 0
 FOR i = 1 TO 40
-FOR j = 1 TO 6: IF matrix(i, j) = 0 GOTO done
-	index = matrix(i, j)
+FOR j = 1 TO 6: IF city_road(i, j) = 0 GOTO done
+	index = city_road(i, j)
 	FOR k = 1 TO 6
-	IF matrix(index, k) = i GOTO ret
-	IF matrix(index, k) = 0 THEN matrix(index, k) = i: PRINT "+ Adding return route from "; city_name$(index); " to "; city_name$(i): y = y + 1: GOTO ret
+	IF city_road(index, k) = i GOTO ret
+	IF city_road(index, k) = 0 THEN city_road(index, k) = i: PRINT "+ Adding return route from "; city_name$(index); " to "; city_name$(i): y = y + 1: GOTO ret
 	NEXT k
 	x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; city_name$(index); ": no return route to "; city_name$(i): wait_seconds 1
 ret:
@@ -631,7 +631,7 @@ FOR k = 1 TO 40
 	IF a > 527 GOTO nextc
 	PSET (a, city_y(k) + 12), 10
 	
-	IF matrix(k, 7) < 90 THEN
+	IF city_port_type(k) < 90 THEN
 		IF opt_alt_colors = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
 	ELSE
 		DRAW "C10"
@@ -643,6 +643,7 @@ NEXT k
 END SUB
 
 SUB hall_of_fame
+DIM hall_score(2, 5)
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : CALL script_mark_key_wait(1, "H"): DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
@@ -654,14 +655,14 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 		FOR s = 1 TO 2
 		COLOR 14, 4: LOCATE 3, 30 * (s - 1) + 10: PRINT side_name$(s); " HALL of FAME"
 		COLOR 15, 0: FOR i = 1 TO 5
-		INPUT #1, city_name$(5 * (s - 1) + i), matrix(s, i)
-		LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, city_name$(5 * (s - 1) + i), matrix(s, i)
+		INPUT #1, city_name$(5 * (s - 1) + i), hall_score(s, i)
+		LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, city_name$(5 * (s - 1) + i), hall_score(s, i)
 		NEXT i: NEXT s: CLOSE #1
 		      
 			FOR s = 1 TO 2: FOR i = 1 TO 5
-			IF side_victory_points(s) < matrix(s, i) GOTO oldskor
+			IF side_victory_points(s) < hall_score(s, i) GOTO oldskor
 				FOR j = 5 TO i + 1 STEP -1
-				matrix(s, j) = matrix(s, j - 1)
+				hall_score(s, j) = hall_score(s, j - 1)
 				city_name$(5 * (s - 1) + j) = city_name$(5 * (s - 1) + j - 1)
 				NEXT j
 
@@ -674,7 +675,7 @@ who4:
 			PRINT "What is name of "; side_name$(s); " commander"; : CALL script_mark_key_wait(4, ""): INPUT a$: IF a$ = "" GOTO who4
 automate:
 			city_name$(5 * (s - 1) + i) = a$
-			matrix(s, i) = side_victory_points(s): GOTO foun
+			hall_score(s, i) = side_victory_points(s): GOTO foun
 oldskor:
 			NEXT i
 foun:
@@ -683,7 +684,7 @@ foun:
 		OPEN "O", 1, "hiscore.cws"
 		FOR s = 1 TO 2
 			FOR i = 1 TO 5
-			WRITE #1, city_name$(5 * (s - 1) + i), matrix(s, i)
+			WRITE #1, city_name$(5 * (s - 1) + i), hall_score(s, i)
 			NEXT i
 		NEXT s: CLOSE #1: PRINT "Game Over": CALL script_mark_key_wait(1, "G"): DO WHILE INKEY$ = "": LOOP: game_over = 1
 END SUB
@@ -984,7 +985,7 @@ menu_highlight = 13: menu_color = 3: menu_col = 67: menu_row = 5: menu_item_coun
 y = army_city(defender)
 who = 1: IF defender > 20 THEN who = 2
 FOR k = 1 TO 6
-	IF matrix(y, k) > 0 AND city_owner(matrix(y, k)) = who THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(matrix(y, k)): menu_value(menu_item_count) = matrix(y, k)
+	IF city_road(y, k) > 0 AND city_owner(city_road(y, k)) = who THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(city_road(y, k)): menu_value(menu_item_count) = city_road(y, k)
 NEXT k
 	IF menu_item_count = 0 THEN EXIT SUB
 	IF menu_item_count = 1 THEN x = menu_value(1): EXIT SUB
@@ -1876,9 +1877,9 @@ END SUB
 SUB city_nearby_enemy_strength (a, y)
   y = 0
 FOR j = 1 TO 6
-  x = matrix(a, j): IF x = 0 GOTO tally5
+  x = city_road(a, j): IF x = 0 GOTO tally5
   IF city_owner(x) = current_side AND city_army(x) > 0 THEN y = y + army_size(city_army(x))
-	FOR k = 1 TO 6: m = matrix(x, k): IF m = 0 OR m = a GOTO tally4
+	FOR k = 1 TO 6: m = city_road(x, k): IF m = 0 OR m = a GOTO tally4
 	IF city_owner(m) = current_side AND city_army(m) > 0 THEN y = y + .1 * army_size(city_army(m))
 tally4:
 	NEXT k

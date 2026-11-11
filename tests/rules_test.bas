@@ -86,7 +86,7 @@ END SUB
 ' a counts the cities linked to target that who holds; 0 means cut off.
 
 SUB TestCutoffCountsFriendlyNeighbors
-matrix(5, 1) = 2: matrix(5, 2) = 3: matrix(5, 3) = 4
+city_road(5, 1) = 2: city_road(5, 2) = 3: city_road(5, 3) = 4
 city_owner(2) = 1: city_owner(3) = 2: city_owner(4) = 1
 CALL city_is_connected(1, 5, a): AssertEqualInt 2, a, "the Union holds two neighbors"
 CALL city_is_connected(2, 5, a): AssertEqualInt 1, a, "the Rebels hold one"
@@ -128,16 +128,16 @@ END SUB
 
 SUB TestVoidAddsNearbyArmies
 current_side = 1
-matrix(1, 1) = 2: city_owner(2) = 1: city_army(2) = 4: army_size(4) = 50
-matrix(2, 1) = 3: city_owner(3) = 1: city_army(3) = 6: army_size(6) = 40
-matrix(2, 2) = 1
+city_road(1, 1) = 2: city_owner(2) = 1: city_army(2) = 4: army_size(4) = 50
+city_road(2, 1) = 3: city_owner(3) = 1: city_army(3) = 6: army_size(6) = 40
+city_road(2, 2) = 1
 CALL city_nearby_enemy_strength(1, y)
 AssertEqualInt 54, y, "50 beside and a tenth of 40 further"
 END SUB
 
 SUB TestVoidIsZeroWithNoArmyNear
 current_side = 1
-matrix(1, 1) = 2: city_owner(2) = 2: city_army(2) = 24: army_size(24) = 50
+city_road(1, 1) = 2: city_owner(2) = 2: city_army(2) = 24: army_size(24) = 50
 CALL city_nearby_enemy_strength(1, y)
 AssertEqualInt 0, y, "the enemy's army does not count"
 END SUB

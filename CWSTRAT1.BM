@@ -35,7 +35,7 @@ CALL draw_army_stats(index)
 COLOR 11: LOCATE 11, 68: PRINT city_name$(target)
 menu_item_count = 0
 menu_text$(0) = "To"
-FOR i = 1 TO 6: IF matrix(target, i) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(matrix(target, i)): menu_value(menu_item_count) = matrix(target, i)
+FOR i = 1 TO 6: IF city_road(target, i) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(city_road(target, i)): menu_value(menu_item_count) = city_road(target, i)
 NEXT i
 CALL menu_bubble_sort(menu_item_count)
 
@@ -352,7 +352,7 @@ END SUB
 SUB city_is_connected (side, city, a)
 a = 0
 FOR j = 1 TO 6
-y = matrix(city, j)
+y = city_road(city, j)
 IF y > 0 AND city_owner(y) = side THEN a = a + 1
 NEXT j
 END SUB
@@ -612,8 +612,8 @@ IF side_cash(s) >= .2 * army_size(i) THEN
 		side_cash(s) = side_cash(s) - .2 * army_size(i)
 	END IF
 END IF
-IF (turn_month < 7 OR turn_month > 10) AND matrix(army_city(i), 7) < 99 THEN army_supply(i) = army_supply(i) - 1
-IF matrix(army_city(i), 7) = 99 AND fleet_city(3 - s) = army_city(i) THEN army_supply(i) = army_supply(i) - 1: CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
+IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(i)) < 99 THEN army_supply(i) = army_supply(i) - 1
+IF city_port_type(army_city(i)) = 99 AND fleet_city(3 - s) = army_city(i) THEN army_supply(i) = army_supply(i) - 1: CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
 COLOR 13
 IF army_supply(i) < 1 THEN
 	army_supply(i) = 0
@@ -713,7 +713,7 @@ SELECT CASE menu_choice
 
 	IF action = 0 AND fleet_city(side) > 0 THEN
 		IF city_owner(fleet_city(side)) <> side GOTO ahoy
-		IF matrix(fleet_city(side), 7) < 99 GOTO ahoy
+		IF city_port_type(fleet_city(side)) < 99 GOTO ahoy
 	END IF
 	IF action = 1 AND RND < .07 * fleet_size(side) THEN EXIT SUB
 	a$ = "W"
@@ -745,7 +745,7 @@ noiron:
 	IF fleet_size(side) > 1 GOTO add2ship
 ships:
 	menu_text$(0) = "Port": menu_item_count = 0: menu_col = 67: menu_row = 12
-	FOR i = 1 TO 40: IF matrix(i, 7) = 99 AND city_owner(i) = side AND fleet_city(3 - side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+	FOR i = 1 TO 40: IF city_port_type(i) = 99 AND city_owner(i) = side AND fleet_city(3 - side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
 	NEXT i
 	IF action = 1 THEN menu_choice = 1 + INT(menu_item_count * RND)
 	IF menu_item_count < 1 THEN
@@ -833,7 +833,7 @@ blast:
 	IF fleet_city(side) < 1 OR fleet_size(side) < 1 THEN CALL clear_bottom_line: PRINT "No ships remain"; : wait_seconds 1: GOTO ahoy
 
 	menu_item_count = 0
-	FOR i = 1 TO 40: IF matrix(i, 7) > 90 AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+	FOR i = 1 TO 40: IF city_port_type(i) > 90 AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
 	NEXT i
 	IF action = 3 THEN
 		IF menu_item_count = 0 THEN EXIT SUB
@@ -1033,7 +1033,7 @@ hitme1:
 	 CASE 2
 	 target = 0
 	 FOR i = 1 TO 40
-	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND matrix(i, 7) = 99 THEN target = i: IF RND > .3 GOTO found1
+	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = 99 THEN target = i: IF RND > .3 GOTO found1
 	 NEXT i
 found1:
 	 CALL clear_bottom_line: COLOR 11: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
@@ -1183,7 +1183,7 @@ SELECT CASE train_army(side)
 	CALL side_army_range(star, fin, side): max = 32767
 	index = 0
 	FOR i = star TO fin: IF army_city(i) = 0 OR army_order(i) <> 0 GOTO puter
-	x = 0: FOR j = 1 TO 6: from = matrix(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
+	x = 0: FOR j = 1 TO 6: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
 	NEXT j
 	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter
 	CALL city_nearby_enemy_strength(army_city(i), defend)
@@ -1264,11 +1264,11 @@ END SELECT
 
 route:
 	x = 0: FOR j = 1 TO 6
-	y = matrix(target, j)
+	y = city_road(target, j)
 	IF y > 0 AND city_owner(y) = side THEN
 	x = x + 1
 		FOR m = 1 TO 6
-		z = matrix(y, m)
+		z = city_road(y, m)
 		IF z > 0 AND z <> target AND city_owner(z) = side THEN x = x + 1
 		NEXT m
 	END IF
@@ -1413,7 +1413,7 @@ ELSE
 	PAINT (city_x(i), city_y(i)), c, c
 END IF
 IF opt_graphics = 0 GOTO nocon
-	FOR j = 1 TO 6: IF matrix(i, j) > 0 THEN CALL draw_map_marker(i, matrix(i, j), 11)
+	FOR j = 1 TO 6: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), 11)
 	NEXT j
 nocon:
 NEXT i
@@ -1532,7 +1532,7 @@ IF defend > 0 AND target = side_capital(who) AND city_army(target) = i GOTO dead
 IF target <> side_capital(who) GOTO nocap
 IF victory_rule(5) = 0 GOTO nocap
 	FOR j = 1 TO 6
-	k = matrix(target, j): IF j = 0 GOTO nocap
+	k = city_road(target, j): IF j = 0 GOTO nocap
 	CALL city_nearby_enemy_strength(k, flag): IF flag > 0 GOTO deadman
 	NEXT j
 nocap:
@@ -1540,7 +1540,7 @@ CALL ai_evaluate_move(i, best): IF best = 0 GOTO deadman
 move9:
 	IF best = 0 THEN menu_choice = 1 + INT((j - 1) * RND)
 	IF menu_choice = 0 THEN menu_choice = best
-	army_order(i) = matrix(target, menu_choice)
+	army_order(i) = city_road(target, menu_choice)
 
 	IF city_owner(army_order(i)) = who THEN y = city_army(army_order(i)): IF y > 0 THEN IF army_order(y) = x THEN army_order(i) = 0: GOTO deadman  ' eliminate crossing moves
 	IF turn_month = 1 AND opt_winter_campaigns = 0 AND city_owner(army_order(i)) <> who THEN army_order(i) = 0: GOTO deadman
@@ -1728,7 +1728,7 @@ kickbutt:
 
 	best = 0: flee = 0
 	FOR i = 1 TO 6
-	x = matrix(target, i)
+	x = city_road(target, i)
 	IF x > 0 AND (city_owner(x) = 3 - s) AND city_value(x) > best THEN
 		IF best = 0 THEN
 			flee = i: best = city_value(x)
@@ -1738,7 +1738,7 @@ kickbutt:
 	END IF
 	NEXT i
 	IF flee = 0 GOTO deadmeat
-	move2 = matrix(target, flee)
+	move2 = city_road(target, flee)
 outta:
 	CALL draw_army_flag(defend)                  ' in old city
 

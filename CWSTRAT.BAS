@@ -102,7 +102,7 @@ total_income = union_income_bonus + 200
 FOR i = 1 TO 40: INPUT #1, a, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
 city_first_owner(i) = city_owner(i)
 CALL city_update_occupier(i)
-FOR j = 1 TO 7: INPUT #1, matrix(i, j): NEXT j: INPUT #1, city_fort(i)
+FOR j = 1 TO 6: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
 IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_victory_points(x) = side_victory_points(x) + city_value(i)
 IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
 total_income = total_income + city_value(i)
