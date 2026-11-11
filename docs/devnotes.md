@@ -39,8 +39,9 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
 5. **The title screen, the burning capital and the picture of Lincoln are pictures in `docs\`.** The DOS game
    ran three DOS programs that have no source: `SHELL "cwstitle.exe"` at its start, `SHELL "cityburn.exe"` when
    a capital falls (`burn`, only with full graphics), and `SHELL "abelinco.exe"` at the Emancipation
-   Proclamation (`events`). 64-bit Windows cannot run them. The last `SHELL` line is a comment now. The first
-   was removed on 2026-11-11, with the jump past it (item 13). Run in
+   Proclamation (`events`). 64-bit Windows cannot run them. All three `SHELL` lines are removed: the first
+   with the jump past it (item 13), the last a comment until then (2026-11-11). The game will not show the
+   pictures (user, 2026-11-11). Run in
    DOSBox 0.74-3 on 2026-11-06, the programs drew [CWSTITLE.png](CWSTITLE.png), [CITYBURN.png](CITYBURN.png)
    and [ABELINCO.png](ABELINCO.png). Each waits for a key. The game's own title screen, with the two flags and
    the menu, still shows. `burn`, its `DECLARE` and its call in `capture` are removed (user, 2026-11-11): with
@@ -57,7 +58,7 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
    - `crsr` in `menu` (`CWSMENU.BM`): Esc, an entry chosen by its first letter, F7 at a main menu, and any key
      at a menu of switch 3 set `leave` to 1. The line after `GOSUB crsr` goes to `called` for 1, as the
      routine did. Ctrl+B set `leave` to 2, for the boss screen, which is gone (item 12).
-   - `riot` in `events` (`CWSTRAT2.BM`): `IF control(who) = 1 THEN EXIT SUB` is now `... THEN RETURN`. Both
+   - `riot` in `events` (`turn.bm`): `IF control(who) = 1 THEN EXIT SUB` is now `... THEN RETURN`. Both
      lines that call it are `GOSUB riot: EXIT SUB`, so the SUB ends either way.
 8. **Four graphics lines are changed as `main` changed them**, because QB64 draws three shapes differently from
    DOS and `PAINT` then floods the map ("What DOS did that QB64 does not", below):
@@ -90,8 +91,8 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
     They moved unchanged. Each SUB, with the blank line after its `END SUB`, has the same bytes as before, and
     so does everything left in the three `.BM` files. The 25 scripts show the same screens. Two SUBs that draw
     did not move: `icon` animates the map with sounds and `GET`/`PUT` of the shared `image` array, and `victor`
-    holds rules of the game. This is the one place where the branch rearranges the source for the reader, not
-    for the build or the tests. `git blame -C` follows a moved SUB back to its old file.
+    holds rules of the game. This and item 14 are the two places where the branch rearranges the source for the
+    reader, not for the build or the tests. `git blame -C` follows a moved SUB back to its old file.
 12. **The boss screen is removed** (user, 2026-11-11: "it is no longer needed"). Ctrl+B at a menu showed boxes
     and circles moving over a black screen, to hide the game, until Ctrl+B again. `SUB scrnsavr` and three
     places in `menu` are gone: Ctrl+B's line in `crsr`, `IF leave = 2 GOTO boss`, and the lines `boss:` to
@@ -107,6 +108,27 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
     Vary Start (Utility menu) had `FOR k = 21 TO 6`, which never ran. It is now `FOR k = 21 TO 26`, so it clears
     some of the Rebels' first six armies, as the loop before it does for the Union's. This changes the game:
     the script `options` was recorded again.
+14. **19 more SUBs are in eight files by subject, beside `CWSTRAT.BAS`** (2026-11-11). They are 2,057 lines:
+    1,332 from `CWSTRAT1.BM`, which keeps 491, and 725 from `CWSTRAT2.BM`, which keeps 335. `CWSTRAT.BAS` and
+    `tests\rules_test.bas` include the eight files after `cwsmenu.bm`.
+
+    | File | SUBs | Moved from |
+    |---|---|---|
+    | `battle.bm` | `battle`, `capture`, `retreat` | `battle` from `CWSTRAT1.BM`; the others from `CWSTRAT2.BM` |
+    | `computer.bm` | `evaluate`, `smarts`: the computer player | `smarts` from `CWSTRAT1.BM`; `evaluate` from `CWSTRAT2.BM` |
+    | `ending.bm` | `endit`, `maxx`, `victor`: the ending conditions, the Hall of Fame, the end of the game | `CWSTRAT2.BM` |
+    | `files.bm` | `filer`: the settings and the saved games | `CWSTRAT1.BM` |
+    | `navy.bm` | `barnacle`, `navy`, `ships`, `shiptype` | `CWSTRAT1.BM`; `ships` from `CWSTRAT2.BM` |
+    | `railroad.bm` | `railroad`, `traincapacity` | `railroad` from `CWSTRAT1.BM`; `traincapacity` from `CWSTRAT2.BM` |
+    | `report.bm` | `report` | `CWSTRAT2.BM` |
+    | `turn.bm` | `events`, `iterate`, `tupdate`: the end of a turn | `CWSTRAT1.BM`; `events` from `CWSTRAT2.BM` |
+
+    They moved unchanged, by the rule of item 11: each SUB with the blank line after its `END SUB` has the same
+    bytes as before, and so does everything left in the two `.BM` files. The 25 scripts show the same screens
+    with both compilers. Left in `CWSTRAT1.BM` and `CWSTRAT2.BM` are the armies' orders (`recruit`, `combine`,
+    `fortify`, `relieve`, `cancel`) and the small SUBs that many others call. Two of those were looked at and
+    stay: `void` is called from `navy` and `railroad` as well as the computer player, and `armystat` from
+    `armies` and `menu`, not from `report`.
 
 Not changed: the code is not reformatted, no variable is renamed, and no feature of the game is removed but F1's
 help (item 6) and the boss screen (item 12). No rule of the game is changed but Vary Start's loop (item 13). The
@@ -168,7 +190,7 @@ name in `CWSTRAT2.BAS`. It was removed on 2026-11-11.
 | Statement | Where | What it did in DOS | What the port does |
 |---|---|---|---|
 | `DEF SEG = VARSEG(a(1))`, `BLOAD "<name>.vga", VARPTR(a(1))` | `CWSTRAT.BAS` lines 32 to 34 (`mtn.vga`), 65 to 67 (`cwsicon.vga`), 910 to 912 (the forts); `CWSMENU.BAS` lines 216 to 218 (the faces) | Loaded a picture saved by `BSAVE` into an array, which `PUT` then drew | Kept. Both compilers draw the pictures, and the same |
-| `SHELL "cwstitle.exe"`, `"cityburn.exe"`, `"abelinco.exe"` | `CWSTRAT.BAS` lines 62 and 1011; `CWSTRAT2.BAS` line 525 | Showed a picture and waited for a key | `abelinco.exe` is a comment; the other two are removed. The pictures are in `docs\` (item 5) |
+| `SHELL "cwstitle.exe"`, `"cityburn.exe"`, `"abelinco.exe"` | `CWSTRAT.BAS` lines 62 and 1011; `CWSTRAT2.BAS` line 525 | Showed a picture and waited for a key | All three are removed. The pictures are in `docs\` (item 5) |
 | `SHELL "cwsdoc.com"` | `CWSMENU.BAS` line 275 | Showed the help text | Removed with F1 and its label; the text is in `docs\` (item 6) |
 | `SHELL "copy cws.his oldhist.ory"` | `CWSTRAT.BAS` line 134 | Kept the history file of the game before | Kept: `copy` works on Windows. Under a script it is done in BASIC ("The test hooks"). A `TODO.md` row for Linux |
 | `RANDOMIZE TIMER` | `CWSTRAT.BAS` line 113; `CWSMENU.BAS` line 494 (`scrnsavr`) | Seeded the random numbers | The first takes the scripts' seed ("The test hooks"). The second is the boss screen's, which no script reaches |
@@ -239,7 +261,7 @@ The lines changed for them:
 | `CWSTRAT.BAS`, the same place | `DATE$` | `scriptdate$` |
 | `TICK`, `CWSTRAT2.BM` | | first line `IF scripttick(sec!) THEN EXIT SUB` |
 | 12 loops `DO WHILE INKEY$ = "": LOOP` | | `CALL announce(1, "<letter>")` before each |
-| `maxx`, `CWSTRAT2.BM` | `INPUT a$` | `CALL announce(4, ""): INPUT a$` |
+| `maxx`, `ending.bm` | `INPUT a$` | `CALL announce(4, ""): INPUT a$` |
 | `crsr` in `menu`, `CWSMENU.BM` | `crsr:   a$ = INKEY$: IF a$ = "" GOTO crsr` | `crsr:   CALL announce(2, mtx$(0)): DO: a$ = INKEY$: LOOP WHILE a$ = ""` |
 
 The menu's loop reads keys as before. Its label stays, so the wait is announced again after a key the menu

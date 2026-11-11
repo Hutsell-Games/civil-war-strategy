@@ -24,9 +24,6 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
 Each of these is how the game behaves, in DOS too by its code. Decide whether to change it. A change to how a
 game plays changes the recorded screens.
 
-- **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
-  The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
-  its title.
 - **Load stays "-" after a game's first save.** The Files menu sets `filel` to 0 when it finds no saved game,
   and only a new game sets it back. A player who saves for the first time cannot load in the same game.
 - **Resume Saved Game with no saved game shows the main menu on a black screen.** The map is not drawn until
@@ -37,7 +34,7 @@ game plays changes the recorded screens.
 - **`traincapacity` counts cities from the player's side, not from the side it is asked about**
   (`TestTraincapacityCountsByPlayersSide`): it uses `side` where the rest of the SUB uses `who`.
 - **`smarts` never stops at an empty slot of `matrix`** when the computer weighs its capital's neighbors
-  (`CWSTRAT1.BM`). Inside `FOR j = 1 TO 6`, `IF j = 0 GOTO nocap` can never be true. It was probably meant to
+  (`computer.bm`). Inside `FOR j = 1 TO 6`, `IF j = 0 GOTO nocap` can never be true. It was probably meant to
   be `k = 0`, where `k = matrix(target, j)`. A fix changes how the computer plays.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and

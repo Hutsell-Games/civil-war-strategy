@@ -1,0 +1,460 @@
+SUB events
+'==========================================================================
+'                              Special Events
+'==========================================================================
+IF realism > 0 AND year = 1862 AND month < 3 THEN
+	COLOR 14: CALL clrbot
+	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
+	IF noise > 0 THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
+	CALL announce(1, "I"): DO WHILE INKEY$ = "": LOOP
+	EXIT SUB
+END IF
+IF randbal = 0 THEN EXIT SUB
+plus = difficult: IF side = 1 THEN plus = 6 - difficult
+pct! = .005 * (year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
+IF RND > pct! THEN EXIT SUB
+
+CALL clrbot: COLOR 14: PRINT "SPECIAL EVENT...";
+who = 1: IF RND > .1 * randbal THEN who = 2
+
+SELECT CASE who
+'----------------------------------------------------------------------------
+'                               good for South
+'----------------------------------------------------------------------------
+	CASE 1
+	IF year = 1864 AND month = 1 THEN victory(2) = victory(2) + 50
+	IF year = 1865 AND month = 1 THEN victory(2) = victory(2) + 100
+	IF RND > .9 THEN GOSUB riot: EXIT SUB
+
+	CALL clrbot
+	IF RND > .2 OR navysize(2) > 9 GOTO mercen
+	IF navysize(2) > 0 AND navyloc(2) <> 99 THEN empty = navyloc(2): GOTO float1
+		empty = 0
+		FOR i = 1 TO 40
+		IF cityp(i) = 2 AND matrix(i, 7) = 99 AND navyloc(1) <> i THEN empty = i: EXIT FOR
+		NEXT i
+	IF empty = 0 GOTO mercen
+float1:
+	CALL scribe("England has given ships to the South", 2)
+	navysize(2) = navysize(2) + 2 * plus
+	IF navysize(2) > 10 THEN navysize(2) = 10
+	x = navysize(2) - LEN(fleet$(2))
+	fleet$(2) = fleet$(2) + STRING$(x, "W")
+	navyloc(2) = empty: CALL ships
+	GOTO dull1
+mercen:
+	IF RND > .1 OR control(2) < 30 GOTO money
+	a$ = "French": IF RND > .5 THEN a$ = "British"
+	CALL scribe(a$ + " mercenaries join " + armyname$(index) + "'s army", 2)
+	armysize(index) = armysize(index) + 100 * plus
+	armyexper(index) = 10: supply(index) = 10
+	GOTO dull1
+money:
+	IF RND > .3 OR control(2) < 12 GOTO cotton
+		CALL scribe("The South has obtained a loan from Europe", 2)
+		GOTO purse
+cotton:
+	IF RND > .5 OR control(2) < 12 GOTO uprising
+	CALL scribe("Cash from cotton sales fill the Rebel Treasury", 2)
+purse:
+	cash(2) = cash(2) + 100 * plus
+	GOTO dull1
+uprising:
+	pct! = .9
+	a$ = "Union troops diverted to fight Western Indian uprisings"
+	IF RND > .5 THEN a$ = "Union 90-day enlistees return home"
+	IF year = 1864 AND month > 5 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
+	CALL scribe(a$, 2)
+	FOR k = 1 TO 20
+	armysize(k) = pct! * armysize(k)
+	NEXT k
+	GOTO dull1
+'----------------------------------------------------------------------------
+riot:
+	IF realism = 0 THEN RETURN
+	IF control(who) = 1 THEN RETURN
+	FOR k = 1 TO 99
+	x = 1 + INT(40 * RND)
+		IF cityo(x) <> who AND cityp(x) = who AND occupied(x) = 0 THEN
+			CALL clrbot: COLOR 15
+			PRINT " Riots have broken out in "; city$(x);
+			cityp(x) = 0
+			CALL showcity
+			TICK turbo!
+			CALL clrbot
+			CALL image2(city$(x) + " is now NEUTRAL !", 4)
+			TICK turbo!
+			RETURN
+		END IF
+	NEXT k
+	RETURN
+'----------------------------------------------------------------------------
+'                               good for Union
+'----------------------------------------------------------------------------
+	CASE 2
+	IF RND > .1 OR navyloc(1) = 0 OR navysize(1) > 9 GOTO event2
+	IF RND > .95 THEN GOSUB riot: EXIT SUB
+	CALL scribe("Union shipworks have produced extra ships", 2)
+	navysize(1) = navysize(1) + plus
+	IF navysize(1) > 10 THEN navysize(1) = 10
+	x = navysize(1) - LEN(fleet$(1))
+	fleet$(1) = fleet$(1) + STRING$(x, "W")
+	GOTO dull2
+event2:
+	IF RND < .7 GOTO abe
+	CALL scribe("Volunteer troops swell the Union ranks", 2)
+	x = 0: FOR i = 1 TO 20: x = x + 1: IF x > 5 GOTO dull2
+	IF armysize(i) > 0 AND RND > .5 THEN armysize(i) = armysize(i) * 1.1 + plus
+	NEXT i: GOTO dull2
+abe:
+	IF emancipate = 0 AND year > 1862 THEN
+
+		emancipate = 1
+		CALL scribe("Abraham Lincoln announces the Emancipation Proclamation", 2)
+		victory(1) = victory(1) + 100: victory(2) = victory(2) - 100
+		CALL usa
+		GOTO dull2
+	END IF
+	IF year = 1864 AND month = 11 THEN
+		CALL scribe("Lincoln has been reelected", 2)
+		victory(2) = .5 * victory(2)
+		GOTO dull2
+	END IF
+	IF RND > .5 THEN
+		CALL scribe("Wealthy Unionists give generously to the Federal Cause", 2)
+		cash(1) = cash(1) + 100 * plus
+		GOTO dull2
+	END IF
+	IF RND > .5 AND year > 1861 THEN
+		CALL scribe("Rebel deserters leave the battlefield to go home", 2)
+		FOR i = 21 TO 40: armysize(i) = .92 * armysize(i): NEXT i: GOTO dull2
+	END IF
+	IF RND > .5 AND year > 1861 THEN
+		CALL scribe("Union soldiers now have repeating rifles", 2)
+		FOR i = 1 TO 20
+			IF armyexper(i) < 9 THEN armyexper(i) = armyexper(i) + 2
+		NEXT i
+	END IF
+		CALL scribe("Secretary of War Stanton predicts the end of the Rebellion", 2)
+		victory(1) = victory(1) + 10: GOTO dull2
+	CASE ELSE
+END SELECT
+
+dull2:
+	IF noise = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+	CALL announce(1, "N"): DO WHILE INKEY$ = "": LOOP: EXIT SUB
+dull1:
+	IF noise = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+	CALL announce(1, "S"): DO WHILE INKEY$ = "": LOOP
+END SUB
+
+SUB iterate
+'---------------------------------------------------------------------------
+FOR i = 1 TO 40: IF armyloc(i) > 0 THEN CALL placearmy(i)
+NEXT i
+'---------------------------------------------------------------------------
+month = month + 2
+IF month > 12 THEN month = 1: year = year + 1
+'---------------------------------------------------------------------------
+s = 1
+FOR i = 1 TO 40: IF armyloc(i) < 1 GOTO rip
+IF i > 20 THEN s = 2
+IF cash(s) >= .2 * armysize(i) THEN
+	a = 1: IF realism > 0 THEN CALL cutoff(s, armyloc(i), a)
+	IF a > 0 THEN
+		supply(i) = supply(i) + 1
+		cash(s) = cash(s) - .2 * armysize(i)
+	END IF
+END IF
+IF (month < 7 OR month > 10) AND matrix(armyloc(i), 7) < 99 THEN supply(i) = supply(i) - 1
+IF matrix(armyloc(i), 7) = 99 AND navyloc(3 - s) = armyloc(i) THEN supply(i) = supply(i) - 1: CALL clrbot: PRINT armyname$(i); " is blockaded"; : CALL TICK(turbo!)
+COLOR 13
+IF supply(i) < 1 THEN
+	supply(i) = 0
+	CALL clrbot
+	PRINT armyname$(i); " is out of supplies";
+	CALL placearmy(i)
+	CALL TICK(turbo!)
+	IF RND > .8 AND armysize(i) > 50 THEN armysize(i) = .9 * armysize(i)
+END IF
+rip:
+NEXT i
+FOR k = 1 TO 2: CALL stax(k): NEXT k
+y = 0: FOR i = 1 TO 20: y = y + .1 * armysize(i): NEXT i
+x = 0: FOR i = 21 TO 40: x = x + .1 * armysize(i): NEXT i
+IF side = 2 AND x > 0 THEN aggress! = y / x ELSE aggress! = 1
+IF side = 1 AND y > 0 THEN aggress! = x / y ELSE IF side = 1 THEN aggress! = 1
+END SUB
+
+SUB tupdate
+flag = 0
+IF player = 1 THEN
+	CALL smarts
+ELSE
+	FOR i = 1 TO 40
+	IF armyloc(i) > 0 AND armymove(i) > 0 THEN CALL icon(armyloc(i), armymove(i), 1)
+	NEXT i
+END IF
+COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
+LOCATE 1, 20: PRINT "Update for "; month$(month); ","; year
+CALL clrbot: PRINT "press any key for "; month$(month); ","; year; " events";
+CALL announce(1, "U"): DO WHILE INKEY$ = "": LOOP
+GOSUB upbox
+'==========================================================================
+'                       Assign Time of Action
+'==========================================================================
+FOR i = 1 TO 2: IF rr(i) > 0 THEN CALL railroad(i): LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B: CALL engine
+NEXT i
+
+FOR i = 1 TO 40
+brray(i) = 999
+IF armymove(i) < 0 THEN armymove(i) = 0
+IF armyloc(i) > 0 AND armymove(i) > 0 THEN brray(i) = INT(4 + 4 * RND) * 100 + i
+IF supply(i) < 1 AND armymove(i) > 0 THEN brray(i) = 900 + i
+SELECT CASE armysize(i)         'bigger armies move slower
+	CASE IS > 400
+		IF brray(i) < 900 THEN brray(i) = brray(i) + 100: x = 2
+	CASE IS > 800
+		IF brray(i) < 800 THEN brray(i) = brray(i) + 200: x = 3
+	CASE IS > 1000
+		IF brray(i) < 700 THEN brray(i) = brray(i) + 300: x = 4
+	CASE ELSE
+		x = 1
+END SELECT
+IF brray(i) <> 999 AND armylead(i) > 10 * RND THEN
+		brray(i) = brray(i) - 100 * (armylead(i) \ 2)
+		IF brray(i) < 100 THEN brray(i) = 100 + i
+END IF
+NEXT i
+
+CALL bub2(40)
+'==========================================================================
+'                       Begin Main Loop
+'==========================================================================
+FOR j = 1 TO 40
+flag = 0
+IF brray(j) = 999 GOTO allthru
+active = INT(brray(j) / 100): active = brray(j) - 100 * active: s = 1: IF active > 20 THEN s = 2
+IF armymove(active) < 1 GOTO digin
+COLOR 11: CALL clrbot: PRINT armyname$(active); " is moving to "; city$(armymove(active));
+
+supply(active) = supply(active) - 1: IF supply(active) < 0 THEN supply(active) = 0: CALL TICK(turbo!): CALL clrbot: PRINT armyname$(active); " is out of supplies !";
+
+CALL placearmy(active)
+CALL icon(armyloc(active), armymove(active), 5)
+
+CALL animate(active, 0)
+'==========================================================================
+target = armymove(active)
+IF occupied(target) = 0 GOTO easy
+IF (s = 1 AND occupied(target) < 21) OR (s = 2 AND occupied(target) > 20) GOTO friend ELSE GOTO enemy
+'==========================================================================
+'                         Join Forces
+'==========================================================================
+friend:
+COLOR 11: CALL clrbot: PRINT armyname$(active); " and "; armyname$(occupied(target)); " meet in "; city$(target); : CALL TICK(turbo!)
+CALL icon(armymove(active), 0, 6)
+CALL clrbot
+GOTO easy
+'==========================================================================
+'                       Attack
+'==========================================================================
+enemy:
+CALL icon(target, 0, 3)
+defend = occupied(target)
+
+COLOR 11: CALL clrbot: PRINT armyname$(active); " attacks "; armyname$(defend); " in "; city$(armyloc(defend)); : CALL TICK(turbo! - 1)
+IF armysize(defend) > 0 THEN CALL battle(active, defend, win, lose): flag = 1: IF graf > 0 THEN GOSUB upbox
+IF armyexper(win) < 10 THEN armyexper(win) = armyexper(win) + 1
+
+IF armysize(lose) < 2 THEN
+	CALL clrbot
+	a$ = armyname$(lose) + "'s army is crushed in " + city$(armyloc(defend))
+	CALL scribe(a$, 2)
+	index = lose: GOTO crushed
+END IF
+
+CALL clrrite
+'==========================================================================
+'                       Attacker Loses
+'==========================================================================
+IF win = active GOTO kickbutt
+armymove(active) = armyloc(active)
+armyloc(active) = target
+COLOR 11: CALL clrbot: PRINT armyname$(active); " withdrew to "; city$(armymove(active));
+
+CALL placearmy(armyloc(active))
+CALL animate(active, 1)
+
+armyloc(active) = armymove(active)
+CALL placearmy(armyloc(active))
+CALL placearmy(active)
+occupied(armyloc(active)) = active
+armymove(active) = -2
+	      
+IF 11 * RND > armylead(defend) THEN CALL icon(armyloc(defend), armymove(defend), 4): IF armymove(defend) > 0 THEN armymove(defend) = -2
+
+CALL TICK(turbo!): GOTO digin
+'==========================================================================
+'                       Defender Retreats
+'==========================================================================
+kickbutt:
+	CALL icon(armyloc(active), target, 4)
+	IF armymove(defend) > 0 THEN CALL icon(target, armymove(defend), 4)
+
+	CALL retreat(defend, flee): IF flee > 0 THEN move2 = flee: GOTO outta
+
+	best = 0: flee = 0
+	FOR i = 1 TO 6
+	x = matrix(target, i)
+	IF x > 0 AND (cityp(x) = 3 - s) AND cityv(x) > best THEN
+		IF best = 0 THEN
+			flee = i: best = cityv(x)
+		ELSE
+			IF occupied(x) = 0 THEN flee = i: best = cityv(x)
+		END IF
+	END IF
+	NEXT i
+	IF flee = 0 GOTO deadmeat
+	move2 = matrix(target, flee)
+outta:
+	CALL placearmy(defend)                  ' in old city
+
+	armymove(defend) = move2
+	CALL animate(defend, 0)                 ' animate retreat
+       
+	armyloc(defend) = move2
+	occupied(move2) = defend
+	CALL clrbot
+	PRINT armyname$(defend) + " is withdrawing to " + city$(move2);
+
+	CALL placearmy(defend)                  ' in new city
+       
+	CALL icon(target, 0, 6)
+	armymove(defend) = -2
+	GOTO holdon
+
+deadmeat:
+	index = defend
+	a$ = armyname$(index) + " surrenders to " + armyname$(active) + " in " + city$(armyloc(index))
+	CALL scribe(a$, 2)
+crushed:
+	IF graf > 2 THEN CALL surrender(index): COLOR 14: LOCATE 3, 68: PRINT armyname$(index): LOCATE 4, 68: PRINT "surrenders !"
+	x = 1: IF index > 20 THEN x = 2
+	IF noise > 1 AND x <> side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
+	IF armymove(index) > 0 THEN CALL icon(armyloc(index), armymove(index), 4)
+	victory(3 - s) = victory(3 - s) + 25
+	armyloc(index) = 0: lname$(index) = "": armyname$(index) = ""
+	armysize(index) = 0: armylead(index) = 0
+	armyexper(index) = 0: armymove(index) = 0: supply(index) = 0
+	supply(active) = supply(active) + supply(index): supply(index) = 0
+	IF supply(active) > 10 THEN supply(active) = 10
+	CALL TICK(9): CALL clrrite
+	IF armyloc(active) = 0 GOTO digin
+'---------------------------------------------------------------------------
+'                       check for more defenders !
+'---------------------------------------------------------------------------
+holdon:
+	CALL occupy(target): IF occupied(target) = 0 GOTO easy
+	COLOR 11: CALL clrbot: PRINT "There are still defenders in "; city$(target); : CALL TICK(99)
+	GOTO enemy
+'==========================================================================
+'                       Move Into New City
+'==========================================================================
+easy:
+CALL icon(armyloc(active), target, 4)
+armyloc(active) = target: armymove(active) = -2
+CALL occupy(armyloc(active))
+CALL placearmy(active)
+'---------------------------------------------------------------------------
+'                            City Capture
+'---------------------------------------------------------------------------
+	IF cityp(armyloc(active)) = s GOTO horde
+	c = armyloc(active)
+	IF player = 1 AND s = side AND fort(c) > 0 AND flag = 0 THEN
+		tlx = 67: tly = 15
+		hilite = 15: colour = 3
+		mtx$(0) = "Raze ?"
+		mtx$(1) = "No"
+		mtx$(2) = "Yes"
+		size = 2
+		CALL menu(0)
+		CALL clrrite
+		IF choose = 2 GOTO smoke
+	END IF
+	IF player = 1 AND s <> side AND fort(c) > 0 AND flag = 0 THEN
+		IF realism > 0 AND cityy(c) > 150 THEN
+smoke:
+			fort(c) = 0
+			x = cityx(c)
+			y = cityy(c)
+			LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+			CALL showcity
+			CALL clrbot
+			PRINT armyname$(active); " has destroyed the forts at "; city$(c);
+			TICK 3
+		END IF
+	END IF
+	CALL capture(active, c, s, flag)
+horde:
+IF supply(active) < 10 THEN supply(active) = supply(active) + 1: IF RND > .8 GOTO horde
+digin:
+NEXT j
+GOTO allthru
+
+upbox:
+LINE (450, 318)-(526, 420), 1, BF
+LINE (527, 315)-(527, 439), 10
+COLOR 14: LOCATE 23, 50: PRINT "ษอออออออออออออป"
+LOCATE 24, 50: PRINT "บ U P D A T E บ"
+LOCATE 25, 50: PRINT "ศอออออออออออออผ"
+RETURN
+
+allthru:
+IF navysize(commerce) < 1 THEN commerce = 0
+IF commerce > 0 THEN
+	CALL clrbot
+	IF RND < .8 + .02 * navysize(commerce) THEN
+		raider = .05 * navysize(commerce) * (1 + RND) * (income(3 - commerce))
+		IF raider < 1 THEN raider = 1
+		IF raider / income(3 - commerce) > .3 THEN raider = .3 * income(3 - commerce)
+		COLOR 15: PRINT force$(commerce); " raiders have sunk $"; raider; " of "; force$(3 - commerce); " commerce";
+		a = 1: IF LEFT$(fleet$(commerce), 1) = "I" THEN a = 2
+		PSET (500, 465), 0: CALL shipicon(commerce, a)
+		IF noise > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
+		IF commerce = side THEN grudge = 1
+		TICK 9
+	ELSE
+		raider = 0
+		CALL barnacle(commerce)
+		COLOR 15: PRINT force$(commerce); " raiders have lost a ship ("; navysize(commerce); " remain)";
+		IF noise > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
+		IF navyloc(commerce) > 0 THEN
+			TICK 9
+			GOTO allthru
+		ELSE
+			commerce = 0
+			LINE (447, 291)-(525, 335), 1, BF
+			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
+			TICK 9
+			LINE (447, 291)-(525, 335), 1, BF
+		END IF
+	END IF
+END IF
+
+CALL touchup: CALL ships: CALL iterate
+
+CALL clrbot
+LINE (390, 350)-(520, 400), 1, BF
+COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month$(month), 3)); ","; year
+victory(1) = .8 * victory(1) + .3 * (income(1) + control(1))
+IF control(1) > 29 THEN victory(1) = victory(1) + 50: IF control(1) > 34 THEN victory(1) = victory(1) + 100
+IF side = 2 AND control(1) < 11 THEN aggress! = aggress! + .7
+
+IF victory(1) < 1 THEN victory(1) = 0
+victory(2) = .8 * victory(2) + .3 * (income(2) + control(2))
+IF control(2) > 29 THEN victory(2) = victory(2) + 50: IF control(2) > 34 THEN victory(2) = victory(1) + 100
+IF side = 1 AND control(2) < 11 THEN aggress! = aggress! + .7
+IF player = 2 THEN CALL clrbot: COLOR 14: PRINT "press a key"; : CALL announce(1, "K"): DO WHILE INKEY$ = "": LOOP
+END SUB
+
