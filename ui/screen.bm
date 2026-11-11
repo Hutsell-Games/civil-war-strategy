@@ -50,11 +50,11 @@ END SUB
 SUB draw_top_bar
 DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER: DIM a$
 	LOCATE 1, 1: PRINT SPACE$(80);
-	COLOR 11
-	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR 14: PRINT month_name$(turn_month); ","; turn_year; "  "
+	COLOR COLOR_LIGHT_CYAN
+	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR COLOR_YELLOW: PRINT month_name$(turn_month); ","; turn_year; "  "
 
 	CALL draw_flag((current_side), 0, 0)
-	COLOR 4: IF opt_alt_colors > 0 THEN COLOR 7
+	COLOR COLOR_RED: IF opt_alt_colors > 0 THEN COLOR COLOR_GRAY
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
 	LOCATE 7, 68: PRINT "Funds:"; side_cash(current_side);
 

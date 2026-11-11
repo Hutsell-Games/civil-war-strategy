@@ -148,9 +148,9 @@ their names (renaming them to `cws.bas` and `cws.bi` touches CI and the scripts,
 Phase 6 is committed (`19ac90a`). Phase 3 group 1 (sides and limits) is committed (`8db43da`): the
 CONSTs in `CWS14.BI`, and `army_side` and `other_side` in `rules\army.bm`. Each number was read in place
 (not by a script from a table), so no script goes into `tools\refactor\`.
-Groups 2 to 6 are committed (`cfc9030`, `dd8c456`, `b608f8d`, `8953dfc`, `e0d1b2f`). Group 7 (rule
-numbers) is done in the working tree.
-**Next:** phase 3 groups 8 and 9, then phase 5 (Opus).
+Groups 2 to 7 are committed (`cfc9030`, `dd8c456`, `b608f8d`, `8953dfc`, `e0d1b2f`, `b57be0b`). Group 8
+(colors) is done in the working tree.
+**Next:** phase 3 group 9, then phase 5 (Opus).
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and

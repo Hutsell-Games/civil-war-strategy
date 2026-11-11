@@ -7,16 +7,16 @@ tent:
 menu_col = 67: menu_row = 12
 
 CALL draw_army_stats(index)
-COLOR 11: LOCATE 11, 68: PRINT city_name$(target)
+COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68: PRINT city_name$(target)
 menu_item_count = 0
 menu_text$(0) = "To"
 FOR i = 1 TO MAX_ROADS: IF city_road(target, i) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(city_road(target, i)): menu_value(menu_item_count) = city_road(target, i)
 NEXT i
 CALL menu_bubble_sort(menu_item_count)
 
-menu_highlight = 10: menu_color = 3: CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
+menu_highlight = COLOR_LIGHT_GREEN: menu_color = COLOR_CYAN: CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
 IF menu_choice < 0 GOTO dudd
-IF turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(menu_value(menu_choice)) <> current_side THEN COLOR 11: CALL clear_bottom_line: PRINT "No campaigns in January"; : CALL wait_seconds(9): CALL clear_bottom_line: GOTO dudd
+IF turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(menu_value(menu_choice)) <> current_side THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "No campaigns in January"; : CALL wait_seconds(9): CALL clear_bottom_line: GOTO dudd
 
 CALL clear_bottom_line: PRINT "Army "; index; " "; army_name$(index); " is moving from "; city_name$(target); " to "; city_name$(menu_value(menu_choice));
 IF opt_sound >= SOUND_EFFECTS THEN SOUND 2200, .5: SOUND 2900, .7
@@ -29,7 +29,7 @@ END SUB
 SUB menu_city_fortify (city)
 DIM fin AS INTEGER
 DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM cost AS INTEGER
-	city = 0: menu_highlight = 11
+	city = 0: menu_highlight = COLOR_LIGHT_CYAN
 	menu_col = 67: menu_row = 2
 	who = current_side
 	CALL side_army_range(star, fin, who)
@@ -41,7 +41,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 		menu_value(menu_item_count) = army_city(i)
 	END IF
 	NEXT i
-	IF menu_item_count = 0 THEN CALL clear_bottom_line: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
+	IF menu_item_count = 0 THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "No cities eligible to fortify"; : EXIT SUB
 	CALL menu_bubble_sort(menu_item_count)
 	menu_text$(0) = "Fortify"
 		menu_choice = MENU_START + 10
@@ -51,7 +51,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 		IF city_fort(city) >= MAX_FORT THEN CALL clear_bottom_line: PRINT city_name$(city); " at MAXIMUM fortification level of 2"; : CALL wait_seconds(4): GOTO nocity
 		cost = COST_FORT
 		IF side_cash(current_side) < cost THEN CALL clear_bottom_line: PRINT "Fortifications for "; city_name$(city); " cost "; cost; " and you only have "; side_cash(current_side); : CALL wait_seconds(4): GOTO nocity
-		COLOR 3
+		COLOR COLOR_CYAN
 		city_fort(city) = city_fort(city) + 1
 		side_cash(current_side) = side_cash(current_side) - cost
 		CALL clear_bottom_line: PRINT city_name$(city); " fortifications increased to "; city_fort(city);
@@ -67,7 +67,7 @@ END SUB
 SUB menu_army_select (army, city)
 DIM fin AS INTEGER
 DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
-	menu_color = 3: menu_col = 67: menu_row = 5: army = 0: menu_item_count = 0: city = 0
+	menu_color = COLOR_CYAN: menu_col = 67: menu_row = 5: army = 0: menu_item_count = 0: city = 0
 	who = current_side: CALL side_army_range(star, fin, who)
 	FOR i = star TO fin
 	IF army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(army_city(i)): menu_value(menu_item_count) = army_city(i)
@@ -77,7 +77,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
 	CALL menu_bubble_sort(menu_item_count)
 movopt:
 	menu_col = 67: menu_row = 5
-		menu_highlight = 15: CALL menu_select(MENU_CITY_BOX): CALL clear_right_panel
+		menu_highlight = COLOR_WHITE: CALL menu_select(MENU_CITY_BOX): CALL clear_right_panel
 		IF menu_choice < 0 THEN city = 0: GOTO notarg
 		city = menu_value(menu_choice)
 
@@ -100,7 +100,7 @@ DIM a$: DIM x AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER
 		menu_text$(3) = "  "
 		menu_item_count = 3: a$ = city_name$(city)
 morecap:
-		menu_col = 68: menu_row = 15: menu_color = 3: menu_choice = MENU_START + 2
+		menu_col = 68: menu_row = 15: menu_color = COLOR_CYAN: menu_choice = MENU_START + 2
 		menu_text$(2) = city_name$(city)
 		CALL menu_select(MENU_RAW_KEYS): CALL clear_right_panel
 	       SELECT CASE menu_choice
@@ -140,7 +140,7 @@ END SUB
 SUB menu_army_recruit (side)
 DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM index AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM a$: DIM a AS INTEGER: DIM from AS INTEGER: DIM y AS INTEGER
 	IF side_cash(side) < COST_RECRUIT GOTO menu1
-	menu_item_count = 0: COLOR 12
+	menu_item_count = 0: COLOR COLOR_LIGHT_RED
 	menu_text$(0) = "Recruit"
 	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: x = turn_recruit_city(i): menu_text$(i) = city_name$(x): menu_value(i) = x: NEXT i: menu_item_count = turn_recruit_state: GOTO alldone
 	max = 4: IF RND > .8 THEN max = max - 1
@@ -169,7 +169,7 @@ alldone:
 levy:
 	IF side_cash(side) < COST_RECRUIT GOTO menu1
 	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
-	menu_col = 67: menu_row = 12: menu_color = 3
+	menu_col = 67: menu_row = 12: menu_color = COLOR_CYAN
 	IF side <> current_side THEN GOSUB randsel: GOTO auto1
       
 	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
@@ -205,7 +205,7 @@ add2:
 	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
 	CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
-	COLOR 11: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
 	IF a$ <> "" THEN PRINT a$;
 	PUT (x - 9, y - 7), saved_under_army, PSET
 	CALL wait_seconds(opt_pause! - .5)
@@ -259,7 +259,7 @@ CALL clear_right_panel
 	CALL menu_bubble_sort(menu_item_count)
 	menu_col = 67: menu_row = 2: menu_box_type = BOX_DOUBLE
 	menu_text$(0) = "Cancel"
-	IF menu_item_count < 1 THEN CALL clear_bottom_line: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
+	IF menu_item_count < 1 THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "No units have orders to cancel"; : EXIT SUB
 	CALL menu_select(MENU_CITY_BOX)
 	SELECT CASE menu_choice
 	 CASE 1 TO menu_item_count
@@ -269,7 +269,7 @@ CALL clear_right_panel
 		IF army_city(i) = target THEN x = INSTR(army_name$(i), menu_text$(menu_choice)): IF x > 0 AND army_order(i) > 0 THEN index = i
 		NEXT i
 
-		CALL clear_bottom_line: COLOR 11: PRINT army_name$(index); " has cancelled move to "; city_name$(army_order(index)); : CALL wait_seconds(turbo + 1)
+		CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(index); " has cancelled move to "; city_name$(army_order(index)); : CALL wait_seconds(turbo + 1)
 		CALL draw_map_marker(army_city(index), army_order(index), MARK_ERASE_ARMY)
 		army_order(index) = ORDER_NONE: IF opt_sound >= SOUND_EFFECTS THEN SOUND 2999, .5
 		CALL draw_stack_markers(side)
@@ -283,7 +283,7 @@ END SUB
 SUB menu_army_relieve (side)
 DIM fin AS INTEGER
 DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM index AS INTEGER: DIM t$
-menu_color = 3: target = 0: menu_highlight = 3
+menu_color = COLOR_CYAN: target = 0: menu_highlight = COLOR_CYAN
 menu_col = 67: menu_row = 2
 CALL side_army_range(star, fin, side)
 menu_item_count = 0
@@ -299,7 +299,7 @@ NEXT i
 IF menu_item_count = 0 THEN EXIT SUB
 CALL menu_bubble_sort(menu_item_count)
 menu_text$(0) = "Relieve"
-menu_choice = MENU_START + 10: menu_highlight = 11
+menu_choice = MENU_START + 10: menu_highlight = COLOR_LIGHT_CYAN
 CALL menu_select(MENU_ARMY_POINTER): CALL clear_right_panel
 
 IF menu_choice < 1 THEN EXIT SUB
@@ -329,7 +329,7 @@ army_order(index) = ORDER_BUSY
 army_leader_rating(index) = leader_rating(menu_value(menu_choice))
 IF army_leader_rating(index) > 0 THEN army_leader_rating(index) = army_leader_rating(index) - 1
 IF army_experience(index) > 0 THEN army_experience(index) = army_experience(index) - 1
-COLOR 15: CALL clear_bottom_line: PRINT leader_name$(menu_value(menu_choice)); " has replaced "; t$; " in "; city_name$(army_city(index)); : wait_seconds 9
+COLOR COLOR_WHITE: CALL clear_bottom_line: PRINT leader_name$(menu_value(menu_choice)); " has replaced "; t$; " in "; city_name$(army_city(index)); : wait_seconds 9
 army_name$(index) = leader_name$(menu_value(menu_choice))
 leader_name$(menu_value(menu_choice)) = ""
 CALL draw_map_marker(army_city(index), 0, MARK_RESTORE)
@@ -343,7 +343,7 @@ IF opt_players = PLAYERS_ONE THEN
 	IF (current_side = SIDE_UNION AND army_side(defender) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(defender) = SIDE_UNION) THEN EXIT SUB
 END IF
 
-menu_highlight = 13: menu_color = 3: menu_col = 67: menu_row = 5: menu_item_count = 0
+menu_highlight = COLOR_LIGHT_MAGENTA: menu_color = COLOR_CYAN: menu_col = 67: menu_row = 5: menu_item_count = 0
 y = army_city(defender)
 who = army_side(defender)
 FOR k = 1 TO MAX_ROADS

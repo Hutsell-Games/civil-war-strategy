@@ -36,7 +36,7 @@ puted:  NEXT i
 	END IF
 	IF x1 > 0 GOTO haul ELSE GOTO toot
 human:
-	CALL menu_army_select(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clear_bottom_line: PRINT "Railroad move not allowed"; : GOTO toot
+	CALL menu_army_select(index, a): IF a < 1 OR index < 1 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Railroad move not allowed"; : GOTO toot
 	x = army_side(index)
 	CALL railroad_capacity(side, limit)
 	IF army_size(index) > limit THEN CALL clear_bottom_line: PRINT "Too many troops for railroad capacity"; : GOTO toot
@@ -52,7 +52,7 @@ aboard:
 	CALL clear_bottom_line: PRINT army_name$(index); "'s train cannot go to "; city_name$(x1); " - select another city"; : CALL wait_seconds(9)
 	GOTO aboard
 haul:
-	COLOR 11: CALL clear_bottom_line: PRINT army_name$(index); " is taking the train from "; city_name$(from); " to "; city_name$(x1);
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(index); " is taking the train from "; city_name$(from); " to "; city_name$(x1);
 	train_city(side) = army_city(index)
 	from = army_city(index)
 	train_from_city(side) = from
@@ -75,7 +75,7 @@ haul:
 	CALL draw_train(side, DRAW_SHOW)
 
 	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = ORDER_BUSY
-	COLOR 11: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2
 	CALL wait_seconds(opt_pause!)
 	x = city_x(army_city(index)) - 12: y = city_y(army_city(index)) - 11
 	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF

@@ -1,12 +1,12 @@
 SUB draw_army_stats (army)
 LINE (530, 60)-(639, 150), 0, BF
-COLOR 15
+COLOR COLOR_WHITE
 LOCATE 5, 68: PRINT army_name$(army)
-COLOR 9: IF army_side(army) = SIDE_REBEL THEN COLOR 7
+COLOR COLOR_LIGHT_BLUE: IF army_side(army) = SIDE_REBEL THEN COLOR COLOR_GRAY
 LOCATE 6, 68: PRINT "Size:"; : CALL print_army_size(army)
 LOCATE 7, 68: PRINT "Leader:"; TAB(75); army_leader_rating(army)
 LOCATE 8, 68: PRINT "Exper:"; TAB(75); army_experience(army)
-IF army_supply(army) < 2 THEN COLOR 12
+IF army_supply(army) < 2 THEN COLOR COLOR_LIGHT_RED
 LOCATE 9, 68: PRINT "Supply:"; TAB(75); army_supply(army)
 END SUB
 
@@ -22,8 +22,8 @@ DIM a$: DIM t$: DIM i AS INTEGER: DIM chosit AS INTEGER
 	t$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Total Income"
 	menu_text$(8) = "Time: " + month_name$(victory_rule(VICTORY_MONTH)) + STR$(ABS(victory_rule(VICTORY_YEAR)))
 	menu_text$(9) = RTRIM$(STR$(ABS(victory_rule(VICTORY_FORCE_RATIO)))) + ":1 Force Ratio"
-	COLOR 15: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
-	COLOR 14: PRINT "				ESC when done"
+	COLOR COLOR_WHITE: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
+	COLOR COLOR_YELLOW: PRINT "				ESC when done"
 what4:
 	FOR i = 2 TO 6: IF victory_rule(i) > 0 THEN menu_text$(i - 1) = "û " ELSE menu_text$(i - 1) = "  "
 	NEXT i
@@ -35,7 +35,7 @@ what4:
 	menu_text$(4) = menu_text$(4) + "Capital Captured"
 	menu_text$(5) = menu_text$(5) + menu_text$(9)
 	menu_text$(6) = "DONE"
-	menu_box_type = BOX_DOUBLE: menu_color = 3: menu_item_count = 6: menu_highlight = 14
+	menu_box_type = BOX_DOUBLE: menu_color = COLOR_CYAN: menu_item_count = 6: menu_highlight = COLOR_YELLOW
 	CALL menu_select(MENU_PLAIN)
 	chosit = 21 + menu_choice
 SELECT CASE menu_choice
@@ -88,7 +88,7 @@ IF menu_choice = 4 GOTO frep
 CALL side_army_range(star, fin, side)
 CLS : LOCATE 1, 1: c = 9: IF side = SIDE_REBEL THEN c = 15
 COLOR c
-PRINT " Report for "; side_name$(side); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49); : COLOR 14: PRINT " Victory Points "; side_victory_points(side);
+PRINT " Report for "; side_name$(side); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49); : COLOR COLOR_YELLOW: PRINT " Victory Points "; side_victory_points(side);
 IF c = 15 THEN c = 7
 x = side_victory_points(side) + side_victory_points(other_side(side))
 IF x = 0 THEN
@@ -99,11 +99,11 @@ ELSE
 END IF
 CALL draw_flag_icon(215, 8, side)
 COLOR c: PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(side_city_count(side) * 2.5 + .5): PRINT x; "%)";
-PRINT TAB(50); : COLOR 12: PRINT "Capital: "; city_name$(side_capital(side))
+PRINT TAB(50); : COLOR COLOR_LIGHT_RED: PRINT "Capital: "; city_name$(side_capital(side))
 y = total_income: IF side_capital(SIDE_UNION) > 0 THEN y = y + CAPITAL_INCOME
 IF side_capital(SIDE_REBEL) > 0 THEN y = y + CAPITAL_INCOME
-PRINT side_income(side); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (side_income(side) / total_income) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; side_cash(side)
-COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
+PRINT side_income(side); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (side_income(side) / total_income) * 100: PRINT x; "%)   "; : COLOR COLOR_YELLOW: PRINT "Cash:"; side_cash(side)
+COLOR COLOR_LIGHT_CYAN: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
 x = 0: FOR i = star TO fin
 COLOR c
 IF army_city(i) < 1 GOTO deadeye
@@ -126,7 +126,7 @@ FOR k = 1 TO fleet_size(side)
 NEXT k
 IF x > 0 THEN PRINT "("; x; "Ironclads) ";
 IF fleet_city(side) > 0 AND fleet_city(side) < FLEET_AT_SEA THEN PRINT "in "; city_name$(fleet_city(side)) ELSE PRINT
-IF train_army(side) > 0 THEN COLOR 14: PRINT " Army #"; train_army(side); army_name$(train_army(side)); " on train to "; city_name$(army_order(train_army(side)));
+IF train_army(side) > 0 THEN COLOR COLOR_YELLOW: PRINT " Army #"; train_army(side); army_name$(train_army(side)); " on train to "; city_name$(army_order(train_army(side)));
 LINE (0, 0)-(639, 449), 15, B
 LINE (0, 62)-(639, 62), 15
 GOTO endrep
@@ -134,24 +134,24 @@ GOTO endrep
 '                               City Report
 '..........................................................................
 cityrep:
-CLS : LOCATE 1, 1: COLOR 14
-PRINT "City Report"; TAB(20); month_name$(turn_month); ","; turn_year: COLOR 15
+CLS : LOCATE 1, 1: COLOR COLOR_YELLOW
+PRINT "City Report"; TAB(20); month_name$(turn_month); ","; turn_year: COLOR COLOR_WHITE
 PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
 LINE (1, 30)-(630, 30), 15
-FOR i = 1 TO 20: COLOR 4: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR 9: a$ = "UNION"
-IF city_owner(i) = SIDE_REBEL THEN COLOR 7: a$ = "REBEL"
+FOR i = 1 TO 20: COLOR COLOR_RED: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR COLOR_LIGHT_BLUE: a$ = "UNION"
+IF city_owner(i) = SIDE_REBEL THEN COLOR COLOR_GRAY: a$ = "REBEL"
 LOCATE 2 + i, 1: PRINT i; TAB(6); city_name$(i); TAB(18); a$; TAB(29); city_value(i)
 NEXT i
 
-FOR i = 21 TO 40: COLOR 4: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR 9: a$ = "UNION"
-IF city_owner(i) = SIDE_REBEL THEN COLOR 7: a$ = "REBEL"
+FOR i = 21 TO 40: COLOR COLOR_RED: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR COLOR_LIGHT_BLUE: a$ = "UNION"
+IF city_owner(i) = SIDE_REBEL THEN COLOR COLOR_GRAY: a$ = "REBEL"
 LOCATE i - 18, 41: PRINT i; TAB(46); city_name$(i); TAB(58); a$; TAB(69); city_value(i)
 NEXT i
 LINE (1, 360)-(630, 360), 15
-COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
-COLOR 9: PRINT side_name$(SIDE_UNION); TAB(12); side_city_count(SIDE_UNION); TAB(23); side_income(SIDE_UNION); TAB(32); side_cash(SIDE_UNION)
-COLOR 7: PRINT side_name$(SIDE_REBEL); TAB(12); side_city_count(SIDE_REBEL); TAB(23); side_income(SIDE_REBEL); TAB(32); side_cash(SIDE_REBEL)
-COLOR 4: PRINT side_name$(SIDE_NONE); TAB(12); MAX_CITIES - side_city_count(SIDE_UNION) - side_city_count(SIDE_REBEL)
+COLOR COLOR_LIGHT_BLUE: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
+COLOR COLOR_LIGHT_BLUE: PRINT side_name$(SIDE_UNION); TAB(12); side_city_count(SIDE_UNION); TAB(23); side_income(SIDE_UNION); TAB(32); side_cash(SIDE_UNION)
+COLOR COLOR_GRAY: PRINT side_name$(SIDE_REBEL); TAB(12); side_city_count(SIDE_REBEL); TAB(23); side_income(SIDE_REBEL); TAB(32); side_cash(SIDE_REBEL)
+COLOR COLOR_RED: PRINT side_name$(SIDE_NONE); TAB(12); MAX_CITIES - side_city_count(SIDE_UNION) - side_city_count(SIDE_REBEL)
 LINE (1, 382)-(630, 382), 15
 GOTO endrep
 '..........................................................................
@@ -201,7 +201,7 @@ IF summ(k) > 0 THEN
 	LOCATE INT(city_y(k) / 16 + 1), city_x(k) / 8: PRINT summ(k)
 END IF
 NEXT k
-COLOR 14: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
+COLOR COLOR_YELLOW: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
 GOTO endrep
 '..........................................................................
 '                               Battle Report
@@ -211,7 +211,7 @@ VIEW (200, 123)-(400, 284)
 CLS 1
 VIEW
 LINE (200, 123)-(400, 284), 15, B
-COLOR 14
+COLOR COLOR_YELLOW
 LOCATE 9, 32: PRINT "BATTLE SUMMARY"
 CALL draw_flag_icon(320, 160, 1)
 CALL draw_flag_icon(370, 160, 2)
@@ -244,10 +244,10 @@ CLS : x = 0
 OPEN "I", 2, "cws.his"
 DO WHILE NOT EOF(2)
 INPUT #2, a$
-COLOR 7: IF INSTR(a$, "[") THEN COLOR 15
-IF INSTR(a$, ">") THEN COLOR 14
-IF INSTR(a$, "..") THEN COLOR 11
-IF INSTR(a$, "!") THEN COLOR 12
+COLOR COLOR_GRAY: IF INSTR(a$, "[") THEN COLOR COLOR_WHITE
+IF INSTR(a$, ">") THEN COLOR COLOR_YELLOW
+IF INSTR(a$, "..") THEN COLOR COLOR_LIGHT_CYAN
+IF INSTR(a$, "!") THEN COLOR COLOR_LIGHT_RED
 LOCATE 29, 1: PRINT a$
 x = x + 1
 IF x > 27 THEN wait_seconds .4
@@ -255,7 +255,7 @@ LOOP
 CLOSE #2
 
 endrep:
-COLOR 14: LOCATE 29, 29: PRINT "press a key";
+COLOR COLOR_YELLOW: LOCATE 29, 29: PRINT "press a key";
 CALL script_mark_key_wait(1, "F"): DO WHILE INKEY$ = "": LOOP
 IF side < 3 THEN
 	CLS

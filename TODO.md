@@ -103,3 +103,13 @@ Left alone by group 7 (the rule numbers):
   the date of an event, not `IRONCLAD_YEAR`, so it stays; phase 11 moves the events' dates to data.
 - **`ai_turn` compares `side_cash` with no index**: `side_cash < 222` (`ai\ai.bm` line 44). Every other use
   is `side_cash(who)`. Check what the two compilers make of it before the line is touched.
+
+Left alone by group 8 (the colors):
+
+- **A side's color is set as a number in a variable**, as in `c = 9: IF city_owner(i) = SIDE_REBEL THEN c = 7`
+  and then `COLOR c` or `LINE ..., c`. The table names colors in `COLOR` statements and the menu's variables
+  only, so these stay. A `side_color(side)` FUNCTION would be the next step.
+- **`COLOR 16 - c` shows the other side's color** (`rules\battle.bm` lines 39, 65 and 167): 16 - 9 is 7 and
+  16 - 7 is 9. It stays as written; it would go with `side_color`.
+- **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 56): 0 there means "no color set",
+  not black, so the test keeps its 0.

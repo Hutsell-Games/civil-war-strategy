@@ -219,7 +219,7 @@ DIM y AS INTEGER: DIM a$: DIM j AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: 
 SCREEN 12
 LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
-COLOR 10
+COLOR COLOR_LIGHT_GREEN
 '==========================  Mountains =================================
 IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
 	PUT (380, 30), pic_mountain, PSET
@@ -534,5 +534,5 @@ NEXT i
 nosee:
 CALL draw_fleets
 CALL draw_train_box
-COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
 END SUB

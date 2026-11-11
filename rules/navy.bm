@@ -19,7 +19,7 @@ IF action > 0 THEN
 		IF fleet_pursuit > 0 THEN action = NAVY_SAIL
 	END IF
 END IF
-COLOR 11
+COLOR COLOR_LIGHT_CYAN
 ahoy:
 cost = COST_SHIP: city_owner(0) = side
 IF action = NAVY_ASK THEN CALL clear_bottom_line: PRINT "Funds available "; side_cash(side);
@@ -69,7 +69,7 @@ SELECT CASE menu_choice
 
 	IF opt_realism >= REALISM_ON AND ((turn_year < IRONCLAD_YEAR) OR (turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH)) GOTO noiron
 	IF side_cash(side) >= 2 * cost THEN
-		menu_col = 67: menu_row = 12: menu_color = 9
+		menu_col = 67: menu_row = 12: menu_color = COLOR_LIGHT_BLUE
 		IF side = current_side THEN
 			menu_text$(0) = "Type"
 			menu_text$(1) = "Wooden"
@@ -108,7 +108,7 @@ ships:
 	fleet_city(side) = menu_value(menu_choice)
 	side_cash(side) = side_cash(side) - cost: fleet_size(side) = 1
 	x = city_x(menu_value(menu_choice)) + 25: y = city_y(menu_value(menu_choice)) + 25: CALL draw_fleets
-	CALL clear_bottom_line: COLOR 11: PRINT side_name$(side); " is building NEW fleet in "; city_name$(menu_value(menu_choice));
+	CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is building NEW fleet in "; city_name$(menu_value(menu_choice));
 	PSET (400, 465), 0: CALL draw_ship_icon(side, a)
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 3000, 1
 	CALL wait_seconds(opt_pause!)
@@ -131,7 +131,7 @@ add2ship:
 	IF fleet_city(side) < 1 THEN EXIT SUB
 	IF side = current_side THEN turn_navy_done = 1
 	IF city_owner(fleet_city(side)) <> other_side(side) GOTO ahoy
-	CALL clear_bottom_line: COLOR 12: PRINT side_name$(side); " fleet bombards "; city_name$(fleet_city(side));
+	CALL clear_bottom_line: COLOR COLOR_LIGHT_RED: PRINT side_name$(side); " fleet bombards "; city_name$(fleet_city(side));
 	CALL draw_map_marker(fleet_city(side), 0, MARK_EXPLOSION)
 	      
 	target = fleet_city(side): index = city_army(target): IF index = 0 GOTO deserted
@@ -189,14 +189,14 @@ blast:
 		IF fleet_pursuit > 0 THEN menu_choice = 1: menu_value(1) = fleet_city(other_side(side)): GOTO admiral
 		GOSUB nest: IF menu_choice > 0 GOTO admiral ELSE EXIT SUB
 	END IF
-	COLOR 11: LOCATE 11, 68
+	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68
 	IF fleet_city(side) < 41 THEN
 		PRINT city_name$(fleet_city(side))
 	ELSE
 		PRINT "Raiding"
 	END IF
 	menu_text$(0) = "To"
-	menu_color = 3: menu_col = 67: menu_row = 12
+	menu_color = COLOR_CYAN: menu_col = 67: menu_row = 12
       
 	CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel: IF menu_choice < 1 THEN EXIT SUB
 admiral:
@@ -296,7 +296,7 @@ GOTO ahoy
 '                               Ship vs. Ship
 '---------------------------------------------------------------------------
 pirate:
-	CLS : LOCATE 1, 30: COLOR 11: PRINT "NAVAL COMBAT"
+	CLS : LOCATE 1, 30: COLOR COLOR_LIGHT_CYAN: PRINT "NAVAL COMBAT"
 	FOR k = SIDE_UNION TO SIDE_REBEL
 	hit(k) = 10
 	IF RIGHT$(fleet_ships$(k), 1) = "I" THEN hit(k) = 20
@@ -305,30 +305,30 @@ cannon:
 	LOCATE 9, 1: PRINT SPACE$(79)
 	LOCATE 15, 1: PRINT SPACE$(79)
 	x = 10: y = 100
-	COLOR 9: LOCATE 5, 25: PRINT "UNION"; fleet_size(SIDE_UNION); "ship(s)"
+	COLOR COLOR_LIGHT_BLUE: LOCATE 5, 25: PRINT "UNION"; fleet_size(SIDE_UNION); "ship(s)"
 	GOSUB boxes
-	COLOR 1
+	COLOR COLOR_BLUE
 	FOR i = 1 TO fleet_size(SIDE_UNION)
 	x = x + 50: PSET (x, y)
 	CALL draw_fleet_ship(SIDE_UNION, i)
 	NEXT i
-	COLOR 11: LOCATE 11, 22: PRINT "CONFEDERATES "; fleet_size(SIDE_REBEL); "ship(s)"
+	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 22: PRINT "CONFEDERATES "; fleet_size(SIDE_REBEL); "ship(s)"
 	LINE (10, 180)-(530, 210), 1, BF
 	LINE (10, 180)-(530, 210), 11, B
 	x = 10: y = 200
-	COLOR 1
+	COLOR COLOR_BLUE
 	FOR i = 1 TO fleet_size(SIDE_REBEL)
 	x = x + 50: PSET (x, y)
 	CALL draw_fleet_ship(SIDE_REBEL, i)
 	NEXT i
-	COLOR 11
+	COLOR COLOR_LIGHT_CYAN
 wave:
 	menu_text$(0) = "Options"
 	menu_text$(1) = "Attack"
 	menu_text$(2) = "Retreat"
 	IF action > 0 THEN menu_choice = 1: GOTO powder
       
-	menu_item_count = 2: menu_color = 3: menu_highlight = 14: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
+	menu_item_count = 2: menu_color = COLOR_CYAN: menu_highlight = COLOR_YELLOW: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
 powder:
 	SELECT CASE menu_choice
 	 CASE 1
@@ -348,7 +348,7 @@ hitem:
 	 LOCATE 17, 5: PRINT side_name$(other_side(side)); " ship SUNK!": CALL wait_seconds(opt_pause! + 1): GOSUB clr1
 	 CALL navy_remove_ship(other_side(side))
 	 IF fleet_size(other_side(side)) < 1 THEN
-		LOCATE 19, 5: COLOR 12
+		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
 		PRINT side_name$(other_side(side)); " fleet DEFEATED"
 		CALL wait_seconds(opt_pause!)
 		fleet_city(other_side(side)) = 0: fleet_ships$(other_side(side)) = ""
@@ -367,7 +367,7 @@ hitme1:
 	 LOCATE 17, 5: PRINT "One of the "; side_name$(side); " ships was SUNK!": CALL wait_seconds(opt_pause!): GOSUB clr1
 	 CALL navy_remove_ship(side)
 	 IF fleet_size(side) < 1 THEN
-		LOCATE 19, 5: COLOR 12
+		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
 		PRINT "Attacking "; side_name$(side); " fleet has been ELIMINATED !"
 		CALL wait_seconds(opt_pause!)
 		fleet_city(side) = 0: fleet_ships$(side) = ""
@@ -385,7 +385,7 @@ hitme1:
 	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN target = i: IF RND > .3 GOTO found1
 	 NEXT i
 found1:
-	 CALL clear_bottom_line: COLOR 11: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
+	 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
 	 fleet_city(side) = target
 	 GOTO sail3
 	 CASE ELSE

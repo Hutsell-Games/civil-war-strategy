@@ -7,7 +7,7 @@ IF army_size(attacker) < 1 THEN army_size(attacker) = 1
 
 CALL draw_map_marker(army_city(defender), 0, MARK_POINTER)
 LOCATE 1, 1: PRINT SPACE$(80)
-CALL clear_right_panel: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
+CALL clear_right_panel: y = 68: COLOR COLOR_LIGHT_CYAN: LOCATE 1, y: PRINT "Attacker"
 c = 9: IF army_side(attacker) = SIDE_REBEL THEN c = 7
 COLOR c: LOCATE 2, y: PRINT army_name$(attacker)
 LOCATE 3, y: CALL print_army_size(attacker)
@@ -23,7 +23,7 @@ IF army_size(attacker) / army_size(defender) > 3 THEN x = x + 2: IF x > rule_str
 IF army_size(attacker) / army_size(defender) > 10 THEN x = rule_strength_cap
 IF army_size(attacker) / army_size(defender) <= .2 THEN x = 1
 LOCATE 7, y: PRINT "Outman  "; x
-IF army_supply(attacker) < 1 THEN x = .5 * x: COLOR 13
+IF army_supply(attacker) < 1 THEN x = .5 * x: COLOR COLOR_LIGHT_MAGENTA
 LOCATE 8, y: PRINT "Supply  "; x: COLOR c
 IF x < 1 THEN x = 1
 '                       Adjust attack advantage
@@ -31,7 +31,7 @@ IF army_side(attacker) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_diffic
 IF army_side(attacker) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN x = x + 6 - 2 * opt_difficulty
 LOCATE 9, y: PRINT "Difclt  "; x
 IF x > rule_strength_cap THEN x = rule_strength_cap
-COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
+COLOR COLOR_LIGHT_CYAN: LOCATE 11, y: PRINT "Attack  "; x
 LINE (530, 155)-(635, 175), 11, B
 
 x1 = .013 * army_size(defender) + 1: IF opt_realism = REALISM_ON THEN x1 = .02 * army_size(defender) + 2: IF x1 > 20 THEN x1 = 20
@@ -61,7 +61,7 @@ END SELECT
 	IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
 
 LOCATE 20, y: PRINT "Outman  "; x1
-IF army_supply(defender) < 1 THEN x1 = .5 * x1: COLOR 13
+IF army_supply(defender) < 1 THEN x1 = .5 * x1: COLOR COLOR_LIGHT_MAGENTA
 LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
 IF x1 < 1 THEN x1 = 1
 '                       Adjust defend advantage
@@ -72,12 +72,12 @@ LOCATE 22, y: PRINT "Difclt  "; x1
 a$ = "Fort": IF army_order(defender) = ORDER_NONE THEN x1 = x1 * (1 + city_fort(army_city(defender)))
 IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
 IF city_fort(army_city(defender)) > 0 AND army_order(defender) = ORDER_NONE THEN
-	COLOR 13: a$ = "Fort+"
+	COLOR COLOR_LIGHT_MAGENTA: a$ = "Fort+"
 	IF city_fort(army_city(defender)) = MAX_FORT THEN a$ = "Fort++"
 END IF
 LOCATE 23, y: PRINT a$; TAB(76); x1
 IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
-COLOR 11: LOCATE 25, y: PRINT "Defend  "; x1
+COLOR COLOR_LIGHT_CYAN: LOCATE 25, y: PRINT "Defend  "; x1
 LINE (530, 380)-(635, 400), 11, B
 
 spin = 0
@@ -86,7 +86,7 @@ scale = scale + 1
 
 odds! = x / (x + x1): a = INT(100 * odds!): IF a < 1 THEN a = 1
 a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
-COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
+COLOR COLOR_YELLOW: LOCATE 27, y: PRINT "Odds:  "; a$;
 LINE (530, 412)-(635, 435), 14, B
 LINE (528, 410)-(637, 437), 14, B
 CALL script_mark_key_wait(1, "P"): DO WHILE INKEY$ = "": LOOP
@@ -118,12 +118,12 @@ IF hit = 1 AND hit1 = 1 GOTO grapple
 winner = defender: loser = attacker: IF hit = 1 THEN winner = attacker: loser = defender
 '---------------------------------------------------------------------------
 a$ = "UNION": IF army_side(winner) = SIDE_REBEL THEN a$ = "REBEL"
-COLOR 14: LOCATE 3, 68: PRINT a$; " VICTORY"
+COLOR COLOR_YELLOW: LOCATE 3, 68: PRINT a$; " VICTORY"
 LOCATE 4, 71: PRINT "in"
 LOCATE 5, 69: PRINT city_name$(army_city(defender))
 a = army_side(winner)
 CALL draw_flag(a, 0, 0)
-CALL clear_bottom_line: COLOR 11: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(9)
+CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(9)
 '===========================================================================
 pct! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender)): IF winner = attacker THEN pct! = 1.3 * pct!
 SELECT CASE army_size(defender)
@@ -178,7 +178,7 @@ a$ = city_name$(army_city(defender)) + ": " + menu_text$(3) + menu_text$(1) + " 
 CALL scribe_message(a$, SHOW_NOT)
 
 IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
-COLOR 14: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL script_mark_key_wait(1, "B"): DO WHILE INKEY$ = "": LOOP
+COLOR COLOR_YELLOW: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL script_mark_key_wait(1, "B"): DO WHILE INKEY$ = "": LOOP
 END IF
 
 army_size(attacker) = army_size(attacker) - killa

@@ -104,6 +104,23 @@ CONST IRONCLAD_YEAR = 1862
 CONST IRONCLAD_MONTH = 3
 CONST MIN_DETACH_SIZE = 65
 CONST RESUPPLY_LEVEL = 5
+' The 16 colors, for COLOR statements and the menu's colors. The pictures keep their numbers.
+CONST COLOR_BLACK = 0
+CONST COLOR_BLUE = 1
+CONST COLOR_GREEN = 2
+CONST COLOR_CYAN = 3
+CONST COLOR_RED = 4
+CONST COLOR_MAGENTA = 5
+CONST COLOR_BROWN = 6
+CONST COLOR_GRAY = 7
+CONST COLOR_DARK_GRAY = 8
+CONST COLOR_LIGHT_BLUE = 9
+CONST COLOR_LIGHT_GREEN = 10
+CONST COLOR_LIGHT_CYAN = 11
+CONST COLOR_LIGHT_RED = 12
+CONST COLOR_LIGHT_MAGENTA = 13
+CONST COLOR_YELLOW = 14
+CONST COLOR_WHITE = 15
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

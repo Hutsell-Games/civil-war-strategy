@@ -51,7 +51,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	CALL clear_right_panel
 	IF menu_choice < 1 THEN EXIT SUB
 	OPEN "I", 1, "cws" + LTRIM$(STR$(menu_value(menu_choice))) + ".sav"
-	COLOR 11: CALL clear_bottom_line: PRINT "Loading";
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Loading";
 	INPUT #1, turn_month, turn_year, union_income_bonus, a
 	FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
 	IF army_city(i) > 0 THEN
@@ -92,7 +92,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	menu_col = 67: menu_item_count = 9
 	CALL menu_select(MENU_PLAIN)
 	IF menu_choice < 1 THEN clear_right_panel: EXIT SUB
-	COLOR 11: CALL clear_bottom_line: PRINT "Saving";
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Saving";
 
 	OPEN "O", 1, "cws" + LTRIM$(STR$(menu_choice)) + ".sav"
 	WRITE #1, turn_month, turn_year, union_income_bonus, current_side

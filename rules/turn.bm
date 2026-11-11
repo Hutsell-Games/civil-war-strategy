@@ -19,7 +19,7 @@ IF side_cash(s) >= .2 * army_size(i) THEN
 END IF
 IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(i)) < PORT_SEA THEN army_supply(i) = army_supply(i) - 1
 IF city_port_type(army_city(i)) = PORT_SEA AND fleet_city(other_side(s)) = army_city(i) THEN army_supply(i) = army_supply(i) - 1: CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
-COLOR 13
+COLOR COLOR_LIGHT_MAGENTA
 IF army_supply(i) < 1 THEN
 	army_supply(i) = 0
 	CALL clear_bottom_line
@@ -48,7 +48,7 @@ ELSE
 	IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
 	NEXT i
 END IF
-COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
+COLOR COLOR_YELLOW: LOCATE 1, 1: PRINT SPACE$(80);
 LOCATE 1, 20: PRINT "Update for "; month_name$(turn_month); ","; turn_year
 CALL clear_bottom_line: PRINT "press any key for "; month_name$(turn_month); ","; turn_year; " events";
 CALL script_mark_key_wait(1, "U"): DO WHILE INKEY$ = "": LOOP
@@ -89,7 +89,7 @@ flag = 0
 IF move_order_key(j) = MOVE_KEY_NONE GOTO allthru
 active = INT(move_order_key(j) / 100): active = move_order_key(j) - 100 * active: s = army_side(active)
 IF army_order(active) < 1 GOTO digin
-COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " is moving to "; city_name$(army_order(active));
+COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " is moving to "; city_name$(army_order(active));
 
 army_supply(active) = army_supply(active) - 1: IF army_supply(active) < 0 THEN army_supply(active) = 0: CALL wait_seconds(opt_pause!): CALL clear_bottom_line: PRINT army_name$(active); " is out of supplies !";
 
@@ -105,7 +105,7 @@ IF army_side(city_army(target)) = s GOTO friend ELSE GOTO enemy
 '                         Join Forces
 '==========================================================================
 friend:
-COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " and "; army_name$(city_army(target)); " meet in "; city_name$(target); : CALL wait_seconds(opt_pause!)
+COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " and "; army_name$(city_army(target)); " meet in "; city_name$(target); : CALL wait_seconds(opt_pause!)
 CALL draw_map_marker(army_order(active), 0, MARK_FLASH_FRAME)
 CALL clear_bottom_line
 GOTO easy
@@ -116,7 +116,7 @@ enemy:
 CALL draw_map_marker(target, 0, MARK_EXPLOSION)
 defend = city_army(target)
 
-COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " attacks "; army_name$(defend); " in "; city_name$(army_city(defend)); : CALL wait_seconds(opt_pause! - 1)
+COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " attacks "; army_name$(defend); " in "; city_name$(army_city(defend)); : CALL wait_seconds(opt_pause! - 1)
 IF army_size(defend) > 0 THEN CALL calculate_battle(active, defend, win, lose): flag = 1: IF opt_graphics >= GRAPHICS_BASIC THEN GOSUB upbox
 IF army_experience(win) < MAX_EXPERIENCE THEN army_experience(win) = army_experience(win) + 1
 
@@ -134,7 +134,7 @@ CALL clear_right_panel
 IF win = active GOTO kickbutt
 army_order(active) = army_city(active)
 army_city(active) = target
-COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " withdrew to "; city_name$(army_order(active));
+COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " withdrew to "; city_name$(army_order(active));
 
 CALL draw_army_flag(army_city(active))
 CALL animate_army(active, ANIMATE_PICTURE_TAKEN)
@@ -192,7 +192,7 @@ deadmeat:
 	a$ = army_name$(index) + " surrenders to " + army_name$(active) + " in " + city_name$(army_city(index))
 	CALL scribe_message(a$, SHOW_BOX)
 crushed:
-	IF opt_graphics >= GRAPHICS_FULL THEN CALL draw_surrender(index): COLOR 14: LOCATE 3, 68: PRINT army_name$(index): LOCATE 4, 68: PRINT "surrenders !"
+	IF opt_graphics >= GRAPHICS_FULL THEN CALL draw_surrender(index): COLOR COLOR_YELLOW: LOCATE 3, 68: PRINT army_name$(index): LOCATE 4, 68: PRINT "surrenders !"
 	x = army_side(index)
 	IF opt_sound >= SOUND_MUSIC AND x <> current_side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
 	IF army_order(index) > 0 THEN CALL draw_map_marker(army_city(index), army_order(index), MARK_ERASE_ARMY)
@@ -209,7 +209,7 @@ crushed:
 '---------------------------------------------------------------------------
 holdon:
 	CALL city_update_occupier(target): IF city_army(target) = 0 GOTO easy
-	COLOR 11: CALL clear_bottom_line: PRINT "There are still defenders in "; city_name$(target); : CALL wait_seconds(99)
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "There are still defenders in "; city_name$(target); : CALL wait_seconds(99)
 	GOTO enemy
 '==========================================================================
 '                       Move Into New City
@@ -226,7 +226,7 @@ CALL draw_army_flag(active)
 	c = army_city(active)
 	IF opt_players = PLAYERS_ONE AND s = current_side AND city_fort(c) > 0 AND flag = 0 THEN
 		menu_col = 67: menu_row = 15
-		menu_highlight = 15: menu_color = 3
+		menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN
 		menu_text$(0) = "Raze ?"
 		menu_text$(1) = "No"
 		menu_text$(2) = "Yes"
@@ -258,7 +258,7 @@ GOTO allthru
 upbox:
 LINE (450, 318)-(526, 420), 1, BF
 LINE (527, 315)-(527, 439), 10
-COLOR 14: LOCATE 23, 50: PRINT "ษอออออออออออออป"
+COLOR COLOR_YELLOW: LOCATE 23, 50: PRINT "ษอออออออออออออป"
 LOCATE 24, 50: PRINT "บ U P D A T E บ"
 LOCATE 25, 50: PRINT "ศอออออออออออออผ"
 RETURN
@@ -271,7 +271,7 @@ IF raiding_side > 0 THEN
 		raid_loss = .05 * fleet_size(raiding_side) * (1 + RND) * (side_income(other_side(raiding_side)))
 		IF raid_loss < 1 THEN raid_loss = 1
 		IF raid_loss / side_income(other_side(raiding_side)) > .3 THEN raid_loss = .3 * side_income(other_side(raiding_side))
-		COLOR 15: PRINT side_name$(raiding_side); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raiding_side)); " commerce";
+		COLOR COLOR_WHITE: PRINT side_name$(raiding_side); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raiding_side)); " commerce";
 		a = 1: IF LEFT$(fleet_ships$(raiding_side), 1) = "I" THEN a = 2
 		PSET (500, 465), 0: CALL draw_ship_icon(raiding_side, a)
 		IF opt_sound >= SOUND_EFFECTS THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
@@ -280,7 +280,7 @@ IF raiding_side > 0 THEN
 	ELSE
 		raid_loss = 0
 		CALL navy_remove_ship(raiding_side)
-		COLOR 15: PRINT side_name$(raiding_side); " raiders have lost a ship ("; fleet_size(raiding_side); " remain)";
+		COLOR COLOR_WHITE: PRINT side_name$(raiding_side); " raiders have lost a ship ("; fleet_size(raiding_side); " remain)";
 		IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 		IF fleet_city(raiding_side) > 0 THEN
 			wait_seconds 9
@@ -299,7 +299,7 @@ CALL draw_map_touchup: CALL draw_fleets: CALL turn_date_and_supply
 
 CALL clear_bottom_line
 LINE (390, 350)-(520, 400), 1, BF
-COLOR 13: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
 side_victory_points(SIDE_UNION) = .8 * side_victory_points(SIDE_UNION) + .3 * (side_income(SIDE_UNION) + side_city_count(SIDE_UNION))
 IF side_city_count(SIDE_UNION) > 29 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 50: IF side_city_count(SIDE_UNION) > 34 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100
 IF current_side = SIDE_REBEL AND side_city_count(SIDE_UNION) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
@@ -308,5 +308,5 @@ IF side_victory_points(SIDE_UNION) < 1 THEN side_victory_points(SIDE_UNION) = 0
 side_victory_points(SIDE_REBEL) = .8 * side_victory_points(SIDE_REBEL) + .3 * (side_income(SIDE_REBEL) + side_city_count(SIDE_REBEL))
 IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50: IF side_city_count(SIDE_REBEL) > 34 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_UNION) + 100
 IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
-IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR 14: PRINT "press a key"; : CALL script_mark_key_wait(1, "K"): DO WHILE INKEY$ = "": LOOP
+IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL script_mark_key_wait(1, "K"): DO WHILE INKEY$ = "": LOOP
 END SUB

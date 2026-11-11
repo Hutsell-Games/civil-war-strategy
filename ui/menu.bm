@@ -53,7 +53,7 @@ SUB menu_select (menu_item_show_beside%)
 DIM row1 AS INTEGER: DIM brx AS INTEGER: DIM a AS INTEGER: DIM leave AS INTEGER: DIM a$: DIM k AS INTEGER: DIM c1$
 DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER: DIM b1 AS INTEGER: DIM target AS INTEGER: DIM flag AS INTEGER: DIM t$: DIM x AS INTEGER: DIM y AS INTEGER
 remenu:
-	IF menu_color = 0 THEN menu_color = 7
+	IF menu_color = 0 THEN menu_color = COLOR_GRAY
 	LOCATE 1, 1, 0
 	IF menu_text$(0) = "" THEN menu_text$(0) = "M E N U"
 
@@ -99,7 +99,7 @@ sel1:
 			flag = 1
 			t$ = army_name$(target)
 			IF LEN(t$) > wide THEN t$ = LEFT$(t$, wide)
-			COLOR 12
+			COLOR COLOR_LIGHT_RED
 			LOCATE menu_row + 2 + row, menu_col + 2: PRINT SPACE$(wide);
 			LOCATE menu_row + 2 + row, menu_col + 2: PRINT t$;
 			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
