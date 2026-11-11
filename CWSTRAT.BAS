@@ -41,7 +41,7 @@ END IF
 RESTORE
 FOR k = 1 TO 26: READ map_font$(k): NEXT k
 
-IF opt_realism >= REALISM_ON AND turn_year < 1862 THEN
+IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
 		FOR i = SIDE_UNION TO SIDE_REBEL
 			a$ = STRING$(LEN(fleet_ships$(i)), "W")
 			fleet_ships$(i) = a$
@@ -163,7 +163,7 @@ IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_coun
 army_order(i) = ORDER_NONE
 NEXT i
 
-FOR i = SIDE_UNION TO SIDE_REBEL: navymove(i) = 0: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + 100
+FOR i = SIDE_UNION TO SIDE_REBEL: navymove(i) = 0: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + CAPITAL_INCOME
 side_cash(i) = side_cash(i) + side_income(i)
 IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
 NEXT i
@@ -184,13 +184,13 @@ END IF
 menu0:
 CALL draw_top_bar
 IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
-IF side_cash(current_side) < 100 AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
+IF side_cash(current_side) < COST_SHIP AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
 
 menu_highlight = 11
 menu_color = 4
 menu_col = 67: menu_row = 13
 menu_text$(0) = "Main"
-menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < 100 THEN menu_text$(1) = "-": chosit = 23
+menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN menu_text$(1) = "-": chosit = 23
 menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF chosit = 23 THEN chosit = 24
 menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN menu_text$(3) = "-": IF chosit = 24 THEN chosit = 25
 menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN menu_text$(4) = "-": IF chosit = 25 THEN chosit = 26
@@ -208,7 +208,7 @@ CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 '==========================================================================
 SELECT CASE menu_choice
 	CASE 1
-	IF side_cash(current_side) < 100 OR turn_recruit_state < 0 THEN turn_recruit_state = -1: GOTO menu0
+	IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN turn_recruit_state = -1: GOTO menu0
 	CALL menu_army_recruit((current_side))
 	chosit = 23
 	GOTO menu0
@@ -265,10 +265,10 @@ optmen:
 	menu_highlight = 15: menu_color = 3: chosit = 24
 	menu_text$(0) = "Commands"
 	menu_text$(1) = "Cancel"
-	menu_text$(2) = "Fortify": IF side_cash(current_side) < 200 THEN menu_text$(2) = "-"
+	menu_text$(2) = "Fortify": IF side_cash(current_side) < COST_FORT THEN menu_text$(2) = "-"
 	menu_text$(3) = "Join"
 	menu_text$(4) = "Supply"
-	menu_text$(5) = "Capital": IF side_capital(current_side) = 0 OR side_cash(current_side) < 500 THEN menu_text$(5) = "-"
+	menu_text$(5) = "Capital": IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN menu_text$(5) = "-"
 	menu_text$(6) = "Detach": IF current_side = SIDE_UNION THEN menu_text$(6) = "-"
 	menu_text$(7) = "Army Drill"
 	menu_text$(8) = "Relieve"
@@ -287,9 +287,9 @@ optmen:
 '                               Fortify
 '---------------------------------------------------------------------------
 		CASE 2
-	IF side_cash(current_side) < 200 THEN COLOR 11: CALL clear_bottom_line: PRINT "Not enough money for fort"; : GOTO menu0
+	IF side_cash(current_side) < COST_FORT THEN COLOR 11: CALL clear_bottom_line: PRINT "Not enough money for fort"; : GOTO menu0
 	CALL menu_city_fortify(target)
-	IF side_cash(current_side) < 200 GOTO menu0
+	IF side_cash(current_side) < COST_FORT GOTO menu0
 	menu_choice = MENU_START + 2
 	GOTO optmen
 '---------------------------------------------------------------------------
@@ -341,8 +341,8 @@ alone:
 '                               Move Capital
 '-------------------------------------------------------------------------
 		CASE 5
-	IF side_capital(current_side) = 0 OR side_cash(current_side) < 500 THEN CALL clear_bottom_line: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
-	side_cash(current_side) = side_cash(current_side) - 500
+	IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN CALL clear_bottom_line: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
+	side_cash(current_side) = side_cash(current_side) - COST_MOVE_CAPITAL
 	side_victory_points(other_side(current_side)) = side_victory_points(other_side(current_side)) + 50
 	CALL clear_right_panel
 	menu_text$(0) = "Capital"
@@ -361,7 +361,7 @@ alone:
 	IF current_side = SIDE_UNION THEN CALL clear_bottom_line: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
 	COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
 	CALL menu_army_select(index, target): IF target < 1 OR index < 1 GOTO menu0
-	IF army_size(index) < 65 THEN CALL clear_bottom_line: PRINT "Too small to detach"; : CALL wait_seconds(opt_pause!): GOTO menu0
+	IF army_size(index) < MIN_DETACH_SIZE THEN CALL clear_bottom_line: PRINT "Too small to detach"; : CALL wait_seconds(opt_pause!): GOTO menu0
 	CALL army_get_commander(2, empty): IF empty = 0 GOTO menu0
 	army_supply(empty) = .3 * army_supply(index): army_supply(index) = army_supply(index) - army_supply(empty): IF army_supply(index) < 0 THEN army_supply(index) = 0
 	army_size(empty) = .3 * army_size(index): army_size(index) = army_size(index) - army_size(empty)
@@ -670,7 +670,7 @@ utile:
 	CASE 9
 	IF LEN(DIR$("*.sav")) = 0 THEN saves_exist = 0
 filex:
-	menu_choice = MENU_START + 2: chosit = 30: IF turn_year = 1861 THEN menu_choice = MENU_START + 1
+	menu_choice = MENU_START + 2: chosit = 30: IF turn_year = FIRST_YEAR THEN menu_choice = MENU_START + 1
 	menu_text$(0) = "Options"
 	menu_text$(1) = "Load": IF saves_exist = 0 THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
 	menu_text$(2) = "Save"

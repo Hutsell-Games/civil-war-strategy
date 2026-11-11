@@ -93,6 +93,17 @@ CONST VICTORY_CITIES = 3
 CONST VICTORY_INCOME = 4
 CONST VICTORY_CAPITAL = 5
 CONST VICTORY_FORCE_RATIO = 6
+' The Civil War's own rule numbers. Phase 11 moves them to game\.
+CONST COST_RECRUIT = 100
+CONST COST_SHIP = 100
+CONST COST_FORT = 200
+CONST COST_MOVE_CAPITAL = 500
+CONST CAPITAL_INCOME = 100
+CONST FIRST_YEAR = 1861
+CONST IRONCLAD_YEAR = 1862
+CONST IRONCLAD_MONTH = 3
+CONST MIN_DETACH_SIZE = 65
+CONST RESUPPLY_LEVEL = 5
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

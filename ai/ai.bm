@@ -15,7 +15,7 @@ NEXT i
 '==========================================================================
 '                       Fortify Capital or Other City
 '==========================================================================
-cost = 200
+cost = COST_FORT
 IF cost > side_cash(who) GOTO signup
 
 target = 0: IF city_army(side_capital(who)) = 0 OR city_fort(side_capital(who)) > 1 GOTO city2
@@ -47,10 +47,10 @@ capital:
 '                       Recruit New Armies
 '==========================================================================
 signup:
-IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > 100 THEN CALL navy_commands(SIDE_UNION, NAVY_BUILD): IF side_cash(who) < 100 GOTO isok
+IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > COST_SHIP THEN CALL navy_commands(SIDE_UNION, NAVY_BUILD): IF side_cash(who) < COST_RECRUIT GOTO isok
 GOSUB enufarmies
 IF x > 2 + 3 * current_side + 3 * RND GOTO isok
-IF fleet_size(who) < 5 AND side_cash(who) > 100 AND fleet_city(who) <> FLEET_AT_SEA THEN IF city_owner(fleet_city(who)) = who THEN slush = slush + 100: side_cash(who) = side_cash(who) - 100: IF side_cash(who) < 100 GOTO isok
+IF fleet_size(who) < 5 AND side_cash(who) > COST_SHIP AND fleet_city(who) <> FLEET_AT_SEA THEN IF city_owner(fleet_city(who)) = who THEN slush = slush + COST_SHIP: side_cash(who) = side_cash(who) - COST_SHIP: IF side_cash(who) < COST_RECRUIT GOTO isok
 CALL menu_army_recruit(who)
 '==========================================================================
 '                         Naval Commands
@@ -58,12 +58,12 @@ CALL menu_army_recruit(who)
 isok:
 	side_cash(who) = side_cash(who) + slush
 dock:
-	IF current_side = SIDE_REBEL AND fleet_city(SIDE_UNION) = 0 AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > 100 THEN fleet_city(SIDE_UNION) = 30: CALL navy_commands(SIDE_UNION, NAVY_BUILD): GOTO movenavy
+	IF current_side = SIDE_REBEL AND fleet_city(SIDE_UNION) = 0 AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > COST_SHIP THEN fleet_city(SIDE_UNION) = 30: CALL navy_commands(SIDE_UNION, NAVY_BUILD): GOTO movenavy
 	IF fleet_city(who) = FLEET_AT_SEA THEN
 		IF RND < .9 THEN CALL navy_commands(who, NAVY_SAIL)
 		GOTO movearmy
 	END IF
-	IF side_cash(who) < 100 OR fleet_size(who) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(who)) <> who GOTO movenavy
+	IF side_cash(who) < COST_SHIP OR fleet_size(who) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(who)) <> who GOTO movenavy
 	CALL navy_commands(who, NAVY_BUILD)
 '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 movenavy:

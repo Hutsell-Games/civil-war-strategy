@@ -21,7 +21,7 @@ IF action > 0 THEN
 END IF
 COLOR 11
 ahoy:
-cost = 100: city_owner(0) = side
+cost = COST_SHIP: city_owner(0) = side
 IF action = NAVY_ASK THEN CALL clear_bottom_line: PRINT "Funds available "; side_cash(side);
 IF action = NAVY_BUILD THEN
 	IF side_cash(side) < cost THEN EXIT SUB
@@ -67,7 +67,7 @@ SELECT CASE menu_choice
 	IF action = NAVY_BUILD AND RND < .07 * fleet_size(side) THEN EXIT SUB
 	a$ = "W"
 
-	IF opt_realism >= REALISM_ON AND ((turn_year < 1862) OR (turn_year = 1862 AND turn_month < 3)) GOTO noiron
+	IF opt_realism >= REALISM_ON AND ((turn_year < IRONCLAD_YEAR) OR (turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH)) GOTO noiron
 	IF side_cash(side) >= 2 * cost THEN
 		menu_col = 67: menu_row = 12: menu_color = 9
 		IF side = current_side THEN
@@ -280,7 +280,7 @@ admiral:
 	x = 35
 	CALL navy_remove_ship(side)
 	c = fleet_city(side): CALL army_new((side), empty, c)
-	side_cash(side) = side_cash(side) + 100     'compensate for cost of recruiting new army
+	side_cash(side) = side_cash(side) + COST_RECRUIT     'compensate for cost of recruiting new army
 	CALL city_capture(empty, c, side, 0)
 	army_size(empty) = x
 	IF side = current_side THEN turn_navy_done = 1

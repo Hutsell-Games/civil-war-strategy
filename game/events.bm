@@ -3,7 +3,7 @@ DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM who AS INTEGER: DIM empty A
 '==========================================================================
 '                              Special Events
 '==========================================================================
-IF opt_realism >= REALISM_ON AND turn_year = 1862 AND turn_month < 3 THEN
+IF opt_realism >= REALISM_ON AND turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH THEN
 	COLOR 14: CALL clear_bottom_line
 	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
 	IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
@@ -127,11 +127,11 @@ abe:
 		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * plus
 		GOTO dull2
 	END IF
-	IF RND > .5 AND turn_year > 1861 THEN
+	IF RND > .5 AND turn_year > FIRST_YEAR THEN
 		CALL scribe_message("Rebel deserters leave the battlefield to go home", SHOW_BOX)
 		FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: army_size(i) = .92 * army_size(i): NEXT i: GOTO dull2
 	END IF
-	IF RND > .5 AND turn_year > 1861 THEN
+	IF RND > .5 AND turn_year > FIRST_YEAR THEN
 		CALL scribe_message("Union soldiers now have repeating rifles", SHOW_BOX)
 		FOR i = 1 TO ARMIES_PER_SIDE
 			IF army_experience(i) < 9 THEN army_experience(i) = army_experience(i) + 2

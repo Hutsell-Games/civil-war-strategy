@@ -95,7 +95,7 @@ DIM x AS INTEGER: DIM a AS INTEGER
 	CALL city_is_connected(side, city, a): IF a < 1 THEN x = x \ 3
 	city_army(city) = slot: army_size(slot) = x
 	PRINT " Size = "; : CALL print_army_size(slot)
-	side_cash(side) = side_cash(side) - 100: IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, .5
+	side_cash(side) = side_cash(side) - COST_RECRUIT: IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, .5
 	army_city(slot) = city: CALL draw_army_flag(slot)
 	CALL wait_seconds(opt_pause! - .5)
 	army_order(slot) = ORDER_BUSY
@@ -145,7 +145,7 @@ DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 			IF a < 1 THEN EXIT SUB
 		END IF
 		IF army_size(army) > 0 THEN x = side_cash(who) / army_size(army) * 10
-		y = x + army_supply(army): IF y > 5 THEN x = 5 - army_supply(army)
+		y = x + army_supply(army): IF y > RESUPPLY_LEVEL THEN x = RESUPPLY_LEVEL - army_supply(army)
 		IF x < 1 THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army); : GOTO nocash
 		army_supply(army) = army_supply(army) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(army)
 		CALL clear_bottom_line: PRINT army_name$(army); " has received supplies "; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 4500, .5

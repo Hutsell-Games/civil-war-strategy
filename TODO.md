@@ -93,3 +93,13 @@ Left alone by group 6 (the settings and victory rules):
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
   (`port\files.bm` line 15) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which
   also maps a rule to a menu row (`i - 1`).
+
+Left alone by group 7 (the rule numbers):
+
+- **`total_income = union_income_bonus + 200`** (`CWSTRAT.BAS` line 104), where the cities are read. The 200
+  may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
+  `total_income` out again from the sides' income. It stays a number.
+- **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 111). That is
+  the date of an event, not `IRONCLAD_YEAR`, so it stays; phase 11 moves the events' dates to data.
+- **`ai_turn` compares `side_cash` with no index**: `side_cash < 222` (`ai\ai.bm` line 44). Every other use
+  is `side_cash(who)`. Check what the two compilers make of it before the line is touched.

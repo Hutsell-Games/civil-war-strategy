@@ -100,8 +100,8 @@ END IF
 CALL draw_flag_icon(215, 8, side)
 COLOR c: PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(side_city_count(side) * 2.5 + .5): PRINT x; "%)";
 PRINT TAB(50); : COLOR 12: PRINT "Capital: "; city_name$(side_capital(side))
-y = total_income: IF side_capital(SIDE_UNION) > 0 THEN y = y + 100
-IF side_capital(SIDE_REBEL) > 0 THEN y = y + 100
+y = total_income: IF side_capital(SIDE_UNION) > 0 THEN y = y + CAPITAL_INCOME
+IF side_capital(SIDE_REBEL) > 0 THEN y = y + CAPITAL_INCOME
 PRINT side_income(side); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (side_income(side) / total_income) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; side_cash(side)
 COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
 x = 0: FOR i = star TO fin

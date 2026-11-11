@@ -49,7 +49,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 		IF menu_choice < 0 GOTO nocity
 		city = menu_value(menu_choice): CALL city_update_occupier(city): x = city_army(city): IF x < 0 GOTO nocity
 		IF city_fort(city) >= MAX_FORT THEN CALL clear_bottom_line: PRINT city_name$(city); " at MAXIMUM fortification level of 2"; : CALL wait_seconds(4): GOTO nocity
-		cost = 200
+		cost = COST_FORT
 		IF side_cash(current_side) < cost THEN CALL clear_bottom_line: PRINT "Fortifications for "; city_name$(city); " cost "; cost; " and you only have "; side_cash(current_side); : CALL wait_seconds(4): GOTO nocity
 		COLOR 3
 		city_fort(city) = city_fort(city) + 1
@@ -139,7 +139,7 @@ END SUB
 
 SUB menu_army_recruit (side)
 DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM index AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM a$: DIM a AS INTEGER: DIM from AS INTEGER: DIM y AS INTEGER
-	IF side_cash(side) < 100 GOTO menu1
+	IF side_cash(side) < COST_RECRUIT GOTO menu1
 	menu_item_count = 0: COLOR 12
 	menu_text$(0) = "Recruit"
 	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: x = turn_recruit_city(i): menu_text$(i) = city_name$(x): menu_value(i) = x: NEXT i: menu_item_count = turn_recruit_state: GOTO alldone
@@ -167,7 +167,7 @@ alldone:
 	CALL menu_bubble_sort(menu_item_count)
 '............................................................................
 levy:
-	IF side_cash(side) < 100 GOTO menu1
+	IF side_cash(side) < COST_RECRUIT GOTO menu1
 	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
 	menu_col = 67: menu_row = 12: menu_color = 3
 	IF side <> current_side THEN GOSUB randsel: GOTO auto1
@@ -200,7 +200,7 @@ add2:
 	army_size(i) = army_size(i) + x
 
 	GOSUB playb
-	side_cash(side) = side_cash(side) - 100
+	side_cash(side) = side_cash(side) - COST_RECRUIT
 	from = army_city(i): x = city_x(from) - 12: y = city_y(from) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
 	CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
@@ -236,7 +236,7 @@ randsel:
 		IF y > x AND RND > .5 THEN x = y: menu_choice = i
 		NEXT i
 	END IF
-	IF side_cash(side) < 100 THEN menu_choice = menu_item_count
+	IF side_cash(side) < COST_RECRUIT THEN menu_choice = menu_item_count
 	RETURN
 playb:
 	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(empty) = army_size(empty) + 15 - 5 * opt_difficulty
