@@ -206,8 +206,6 @@ a table per SUB, the least covered first (`tests\out\coverage\subs.txt`).
 
 Not covered:
 
-- **The boss screen** (`scrnsavr`). Ctrl+B at a menu starts it, and only Ctrl+B ends it. A keys file cannot
-  give Ctrl+B.
 - **The title music** (the tune in `CWSTRAT.BAS` and `shen`), which plays only when the game starts with
   `noise` 2.
 - **The real `SHELL "copy ..."`**, which `scriptshell` replaces under a script.

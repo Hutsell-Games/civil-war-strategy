@@ -746,6 +746,8 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'drawings/ironclad.bm'
 ' $INCLUDE: 'drawings/cannon.bm'
 ' $INCLUDE: 'drawings/capitol.bm'
+' $INCLUDE: 'drawings/rwin.bm'
+' $INCLUDE: 'drawings/surrender.bm'
 ' $INCLUDE: 'drawings/icons.bm'
 ' $INCLUDE: 'qb64.bm'
 ' $INCLUDE: 'script.bm'

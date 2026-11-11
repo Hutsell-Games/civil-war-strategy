@@ -5,8 +5,6 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
 
 ## The tests
 
-- **The boss screen** (`scrnsavr`, 89 statements) starts and ends only with Ctrl+B, which a keys file cannot
-  give. It also runs `RANDOMIZE TIMER`, so a script that reached it would not play the same game twice.
 - **The title music.** It plays only when the game starts with `noise` 2, before the hooks make the game
   silent. So the tune in `CWSTRAT.BAS` and `shen` (the Rebels' tune) are not run by any test.
 - **The real `SHELL "copy ..."`.** Under a script, `scriptshell` (`SCRIPT.BM`) copies in BASIC, because a

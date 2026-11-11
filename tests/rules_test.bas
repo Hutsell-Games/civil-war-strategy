@@ -251,6 +251,8 @@ END SUB
 '$INCLUDE: '../drawings/ironclad.bm'
 '$INCLUDE: '../drawings/cannon.bm'
 '$INCLUDE: '../drawings/capitol.bm'
+'$INCLUDE: '../drawings/rwin.bm'
+'$INCLUDE: '../drawings/surrender.bm'
 '$INCLUDE: '../drawings/icons.bm'
 '$INCLUDE: '../qb64.bm'
 '$INCLUDE: '../script.bm'

@@ -39,10 +39,13 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
 5. **The title screen, the burning capital and the picture of Lincoln are pictures in `docs\`.** The DOS game
    ran three DOS programs that have no source: `SHELL "cwstitle.exe"` at its start, `SHELL "cityburn.exe"` when
    a capital falls (`burn`, only with full graphics), and `SHELL "abelinco.exe"` at the Emancipation
-   Proclamation (`events`). 64-bit Windows cannot run them. The three `SHELL` lines are comments now. Run in
+   Proclamation (`events`). 64-bit Windows cannot run them. The first and the last `SHELL` lines are comments
+   now. Run in
    DOSBox 0.74-3 on 2026-11-06, the programs drew [CWSTITLE.png](CWSTITLE.png), [CITYBURN.png](CITYBURN.png)
    and [ABELINCO.png](ABELINCO.png). Each waits for a key. The game's own title screen, with the two flags and
-   the menu, still shows. `burn` still draws the map again, as it did after the picture.
+   the menu, still shows. `burn`, its `DECLARE` and its call in `capture` are removed (user, 2026-11-11): with
+   the picture gone, the SUB only ran `SCREEN 12` and `CALL usa`. The 25 scripts reach that call and show the
+   same screens without it.
 6. **The help screens are a text file in `docs\`, and F1 is gone.** F1 at a menu ran `SHELL "cwsdoc.com"`: a
    text viewer made with TXT2COM that holds four topics of help. The port removes F1's branch from `menu`
    (`CWSMENU.BM`) and the "F1 = HELP" label from `topbar` (`CWSTRAT2.BM`), as the branch `main` did. F1 at a
@@ -52,8 +55,8 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
 7. **Every `GOSUB` routine in a SUB ends by `RETURN`.** QB64 keeps one `GOSUB` stack for the whole program
    ("The searches", section 2). Two routines could leave their SUB:
    - `crsr` in `menu` (`CWSMENU.BM`): Esc, an entry chosen by its first letter, F7 at a main menu, and any key
-     at a menu of switch 3 set `leave` to 1; Ctrl+B sets it to 2. The lines after `GOSUB crsr` go to `called`
-     for 1 and to `boss` for 2, as the routine did.
+     at a menu of switch 3 set `leave` to 1. The line after `GOSUB crsr` goes to `called` for 1, as the
+     routine did. Ctrl+B set `leave` to 2, for the boss screen, which is gone (item 12).
    - `riot` in `events` (`CWSTRAT2.BM`): `IF control(who) = 1 THEN EXIT SUB` is now `... THEN RETURN`. Both
      lines that call it are `GOSUB riot: EXIT SUB`, so the SUB ends either way.
 8. **Four graphics lines are changed as `main` changed them**, because QB64 draws three shapes differently from
@@ -69,26 +72,34 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
 10. **The test hooks**: `SCRIPT.BM`, included at the end of `CWSTRAT.BAS`, and calls to it in the sources. When
     the environment variable `CWS_SEED` is not set, the program behaves as before. Each changed line is listed
     in "The test hooks", below.
-11. **The 12 SUBs that only draw a picture are in six files in `drawings\`** (branch `extract-graphics`,
-    2026-11-11). They are 881 lines, and they were spread over the three `.BM` files. `CWSTRAT.BAS` and
-    `tests\rules_test.bas` include the six files after `cwsmenu.bm`.
+11. **The 17 SUBs that only draw are in eight files in `drawings\`** (branch `extract-graphics`,
+    2026-11-11). They are 1,138 lines, and they were spread over the three `.BM` files. `CWSTRAT.BAS` and
+    `tests\rules_test.bas` include the eight files after `cwsmenu.bm`.
 
     | File | SUBs | Moved from |
     |---|---|---|
-    | `map.bm` | `maptext`, `touchup`, `usa` | `CWSTRAT2.BM` |
+    | `map.bm` | `maptext`, `showcity`, `touchup`, `usa` | `CWSTRAT2.BM`; `showcity` from `CWSTRAT1.BM` |
     | `schooner.bm` | `schooner` | `CWSMENU.BM` |
     | `ironclad.bm` | `ironclad` | `CWSMENU.BM` |
     | `cannon.bm` | `cannon` | `CWSTRAT2.BM` |
-    | `capitol.bm` | `capitol` | `CWSTRAT2.BM` |
-    | `icons.bm` | `chessie`, `engine`, `flags`, `shipicon`, `tinytrain` | `CWSTRAT2.BM`; `tinytrain` from `CWSTRAT1.BM` |
+    | `capitol.bm` | `capitol`, the Union's victory | `CWSTRAT2.BM` |
+    | `rwin.bm` | `rwin`, the Rebels' victory | `CWSTRAT2.BM` |
+    | `surrender.bm` | `surrender`, an army's surrender | `CWSTRAT2.BM` |
+    | `icons.bm` | `armyxy`, `chessie`, `engine`, `flags`, `flashcity`, `shipicon`, `tinytrain` | `CWSTRAT2.BM`; `flashcity` and `tinytrain` from `CWSTRAT1.BM` |
 
     They moved unchanged. Each SUB, with the blank line after its `END SUB`, has the same bytes as before, and
-    so does everything left in the three `.BM` files. The 25 scripts show the same screens. SUBs that draw and
-    also hold rules of the game (`icon`, `showcity`, `rwin`, `victor`, `scrnsavr`) did not move. This is the
-    one place where the branch rearranges the source for the reader, not for the build or the tests.
-    `git blame -C` follows a moved SUB back to its old file.
+    so does everything left in the three `.BM` files. The 25 scripts show the same screens. Two SUBs that draw
+    did not move: `icon` animates the map with sounds and `GET`/`PUT` of the shared `image` array, and `victor`
+    holds rules of the game. This is the one place where the branch rearranges the source for the reader, not
+    for the build or the tests. `git blame -C` follows a moved SUB back to its old file.
+12. **The boss screen is removed** (user, 2026-11-11: "it is no longer needed"). Ctrl+B at a menu showed boxes
+    and circles moving over a black screen, to hide the game, until Ctrl+B again. `SUB scrnsavr` and three
+    places in `menu` are gone: Ctrl+B's line in `crsr`, `IF leave = 2 GOTO boss`, and the lines `boss:` to
+    `GOTO remenu`. Ctrl+B is now a key the menus ignore, or a key like any other at a menu of switch 3. The
+    manual, `docs\CWS.DOC` section 1.8, still describes the screen saver: it is the original text, kept as given.
 
-Not changed: the code is not reformatted, no variable is renamed, and no feature of the game is removed. The
+Not changed: the code is not reformatted, no variable is renamed, and no feature of the game is removed but F1's
+help (item 6) and the boss screen (item 12). The
 text "Registered Edition" and the version stay. The DOS line-drawing characters in the sources (code page 437)
 stay as they are, and both compilers draw them as DOS did.
 
@@ -234,7 +245,6 @@ Choices made here (`docs\port-study.md`, section 4):
   A script must not start with `noise` 2 in its `CWS.CFG`: the title music plays before `scriptstart` runs.
 - **Under a script the history file is copied in BASIC** (`scriptshell`), because a `SHELL` starts `cmd.exe`,
   whose console window shows on the user's desktop even when the program runs on a hidden one.
-- **The boss screen (Ctrl+B) announces no wait.** A keys file cannot give Ctrl+B, so no script reaches it.
 
 ## The tests
 
