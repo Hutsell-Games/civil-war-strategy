@@ -199,7 +199,7 @@ A parameter gets the name of what is passed, the same in every SUB.
    array of its own in the same step.
 2. **`navymove()` is never read**, but `filer` writes it to the saved game, and the save format is frozen
    (decision 6). It could become a constant 0 in the `WRITE #` and a dummy in the `INPUT #`, and the array
-   could go. That is proposed for phase 7, when `filer` is split.
+   could go. That is proposed for phase 7, when `filer` is split. Done in phase 7 step 1.
 3. **`side` and `who`.** Today the shared `side` is "the side that gives orders now", and 17 SUBs take a
    parameter `who` for "the side this call is about". Decision 11's example renames `who` to `side`. Both
    cannot be `side`, so the shared one becomes `current_side`. The rename script must do the shared one

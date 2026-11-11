@@ -59,7 +59,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `files.bm` | `file_management` (mixed: saves, loads and reads the scenario) |
+| `files.bm` | `load_scenario`, `load_game` (mixed), `save_game` (mixed), `config_read`, `config_write` (`file_management` until phase 7 split it) |
 | `qb64.bm` | `DIR$` (from `QB64.BM`) |
 | `script.bm` | `script_start`, `script_date$`, `script_tick%`, `script_shell`, `script_mark_key_wait` (from `SCRIPT.BM`) |
 

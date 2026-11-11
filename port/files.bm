@@ -1,9 +1,5 @@
-SUB file_management (job)
-DIM fin AS INTEGER
-DIM k AS INTEGER: DIM t$: DIM who AS INTEGER: DIM star AS INTEGER: DIM myside AS INTEGER
-DIM i AS INTEGER: DIM a AS INTEGER
-SELECT CASE job
-	CASE 1
+SUB load_scenario
+DIM k AS INTEGER: DIM i AS INTEGER: DIM a AS INTEGER
 	OPEN "I", 1, SCNDIR + "cwslead.dat"
 	FOR i = 1 TO 40: INPUT #1, leader_name$(i), leader_rating(i): NEXT i
 	CLOSE #1
@@ -31,11 +27,13 @@ FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i): NEXT i
 
 FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
 	CLOSE #1
-	OPEN "I", 1, "cws.cfg"
-	INPUT #1, current_side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-	CLOSE #1
+	CALL config_read(current_side)
+END SUB
 
-	CASE 2
+SUB load_game
+DIM fin AS INTEGER
+DIM k AS INTEGER: DIM t$: DIM who AS INTEGER: DIM star AS INTEGER: DIM myside AS INTEGER
+DIM i AS INTEGER: DIM a AS INTEGER: DIM unused AS INTEGER
 	IF LEN(DIR$("*.sav")) = 0 THEN menu_choice = MENU_ESCAPED: EXIT SUB
 	menu_text$(0) = "Load"
 	menu_item_count = 0
@@ -68,22 +66,22 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	NEXT i
 	FOR i = 1 TO MAX_CITIES: INPUT #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
 	FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
-	INPUT #1, fleet_ships$(i), fleet_city(i), navymove(i), train_army(i), train_city(i)
+	INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
 	fleet_size(i) = LEN(fleet_ships$(i))
 	NEXT i
        
 	CLOSE #1
-	OPEN "I", 1, "cws.cfg"
-	INPUT #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-	CLOSE #1
+	CALL config_read(myside)
 	SCREEN 12: CLS
 	CLOSE #1: CALL draw_map: CALL clear_bottom_line
 	FOR k = SIDE_UNION TO SIDE_REBEL
 	IF train_army(k) > 0 THEN CALL draw_train(k, DRAW_SHOW)
 	NEXT k
 	current_side = a
+END SUB
 
-	CASE 3
+SUB save_game
+DIM k AS INTEGER: DIM i AS INTEGER: DIM myside AS INTEGER
 	menu_text$(0) = "Save Game"
 	FOR k = 1 TO 9
 	menu_text$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
@@ -100,15 +98,24 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	NEXT i
 	FOR i = 1 TO MAX_CITIES: WRITE #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
 	FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
-	WRITE #1, fleet_ships$(i), fleet_city(i), navymove(i), train_army(i), train_city(i)
+	WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
 	NEXT i
 	CLOSE #1
        
 	myside = current_side
 	IF myside < 1 OR myside > 2 THEN myside = 1
-	OPEN "O", 1, "cws.cfg"
-	WRITE #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-	CLOSE #1
+	CALL config_write(myside)
 	CLS : CALL draw_map
-END SELECT
+END SUB
+
+SUB config_read (side)
+	OPEN "I", 1, "cws.cfg"
+	INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+	CLOSE #1
+END SUB
+
+SUB config_write (side)
+	OPEN "O", 1, "cws.cfg"
+	WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+	CLOSE #1
 END SUB

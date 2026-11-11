@@ -24,12 +24,12 @@ game_over = 0: turn_recruit_state = 0
 FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = ORDER_NONE: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
 union_income_bonus = 0: emancipation_done = 0
 FOR k = SIDE_UNION TO SIDE_REBEL
-fleet_size(k) = 0: fleet_city(k) = 0: navymove(k) = 0
+fleet_size(k) = 0: fleet_city(k) = 0
 train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
 NEXT k
 
 saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
-CALL file_management(1)
+CALL load_scenario
 IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
 	DEF SEG = VARSEG(pic_mountain(1))
 	BLOAD GFXDIR + "mtn.vga", VARPTR(pic_mountain(1))
@@ -163,7 +163,7 @@ IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_coun
 army_order(i) = ORDER_NONE
 NEXT i
 
-FOR i = SIDE_UNION TO SIDE_REBEL: navymove(i) = 0: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + CAPITAL_INCOME
+FOR i = SIDE_UNION TO SIDE_REBEL: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + CAPITAL_INCOME
 side_cash(i) = side_cash(i) + side_income(i)
 IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
 NEXT i
@@ -571,7 +571,7 @@ utile:
 '                              Vary Start Conditions
 '-------------------------------------------------------------------------
 	   CASE 9
-		CALL file_management(1)
+		CALL load_scenario
 		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
 		side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
 		opt_ai_aggression = 5 * RND
@@ -683,13 +683,11 @@ filex:
 		CASE 1, 2
 loader:
 			IF menu_choice = 1 AND saves_exist = 0 GOTO filex
-			CALL file_management(menu_choice + 1)
+			IF menu_choice = 1 THEN CALL load_game ELSE CALL save_game
 			IF menu_choice = 1 THEN turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
 			GOTO menu0
 		CASE 3
-			OPEN "O", 1, "cws.cfg"
-			WRITE #1, current_side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-			CLOSE #1
+			CALL config_write(current_side)
 			CLS
 			GOTO newgame
 		CASE 4: GOTO rusure

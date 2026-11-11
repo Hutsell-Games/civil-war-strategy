@@ -156,7 +156,8 @@ Phase 5 step 1 is committed (`b870824`): `city_is_connected`, `city_nearby_enemy
 the working tree: `side_army_range` became `side_first_army` and `side_last_army` (user, 2026-11-11).
 `army_get_commander` stays a SUB, because it also makes up a leader, draws a random number and prints
 (user, 2026-11-11). That ends phase 5.
-**Next:** phase 7 (Fable). Stop and tell the user to switch model.
+Phase 7 step 1 is done in the working tree (2026-11-11): `file_management` is split, see "Phase 7" below.
+**Next:** phase 7 step 2, `menu_report`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -279,3 +280,65 @@ Each step is one commit (decision 15). The 25 scripts that exist keep their reco
 9. Run `play.py coverage`. For each SUB of decision 13, each line still not run is reached or listed above
    with its reason.
 10. Record the new scripts with both compilers (`play.py record`), then `play.py compare`.
+
+## Phase 7: break up the big pieces
+
+Started 2026-11-11. The pieces and their names are those of "Worth breaking out" in `sub-names.md`. Each
+step is one commit (decision 15), and each ends with `play.py check`, `play.py compare` and the unit tests
+passing on unchanged recordings.
+
+### Phase 0 was not finished
+
+Only step 1 of phase 0 (the deletions) was done. Steps 2 to 10 were skipped: there is no forced dice, no
+prepared save and no new script. So decision 13's bar is not met. Measured on 2026-11-11 before step 1
+(`play.py coverage`, 25 scripts): 3,354 of 3,786 lines run in full, 232 in part, 200 not run. By
+statements not run: the main module 116, `rules\navy.bm` 104, `ui\orders.bm` 74, `game\events.bm` 59,
+`rules\army.bm` 59, `rules\turn.bm` 39, `ai\ai.bm` 32, `rules\railroad.bm` 24.
+
+Until the user decides otherwise, each step of this phase works like this:
+
+- Before the step, read `tests\out\coverage\report.txt` for the lines the step moves or rewrites.
+- A line that no test runs is either reached first by a new script or unit test, or moved whole with no
+  change inside it. The hand-over names the lines that moved without a test.
+- A step that must rewrite lines no test runs (the `GOTO` knots of `navy_commands` and `turn_resolve`)
+  waits for its tests.
+
+### Steps
+
+1. **Done: `file_management` into three SUBs.** `load_scenario`, `load_game` and `save_game`, still in
+   `port\files.bm`. The line that reads or writes `cws.cfg` was there three times, and a fourth time in
+   the Files menu's New Game. It is now `config_read (side)` and `config_write (side)`. `navymove()` is
+   gone (decision 21): `save_game` writes a 0 in its place and `load_game` reads the field into a local,
+   so the save format is the same. The Files menu calls `load_game` or `save_game` by `menu_choice`, and
+   then still tests the `menu_choice` those SUBs' own menus left, as before. Lines moved without a test:
+   none; the four half-run lines are `EXIT FOR`, `EXIT SUB` and one `THEN`, moved whole.
+2. **`menu_report` into one SUB for each report**: the armies, the cities, the force summary,
+   intelligence, the battle summary and the recap. `menu_report` keeps the menu. The F4 key and the end
+   of the game call their report by name in place of `menu_report(-1)` and `menu_report(100 + side)`.
+   Proposed names: `report_armies (side)`, `report_cities`, `report_force_summary`,
+   `report_intelligence`, `report_battle_summary`, `report_recap`.
+3. **`wait_key (letter$)`** for the 12 loops `CALL script_mark_key_wait(1, "X"): DO WHILE INKEY$ = "":
+   LOOP`. The two `wait_seconds(99)` stay as they are until the user decides whether they may wait
+   forever (`TODO.md`, "The code").
+4. **Small shared pieces**: `army_clear`, `draw_city_dot`, `city_redraw_fort`, the train's `DRAW` string,
+   `load_picture`.
+5. **The main module's pieces that stand alone**: `load_cities`, `draw_title`, `play_title_music`,
+   `turn_collect_income`, `draw_player_turn` (the `GOSUB` routine `blanken`), `set_union_advantage`
+   (`unionplus`), `army_detach`, `army_drill`, `menu_supply`, `menu_move_capital`,
+   `vary_start_conditions`. The Supply menu (lines 314 to 339) and the title tune (82 to 96) are not run
+   by any script; they need a script first. The menus' `GOTO menu0` web stays for phase 9.
+6. **`turn_resolve`'s outer parts**: `turn_set_move_order`, `navy_commerce_raid`,
+   `turn_update_victory_points`, `draw_update_box`.
+7. **`special_events` and `ai_turn`**: `event_riot`; one `ai_` SUB for each headed section of `ai_turn`,
+   and `ai_count_armies`. The events need phase 0's forced dice first (59 statements not run).
+8. **`menu_army_recruit` and `railroad_move`**, each split into the human's menu, the computer's choice
+   and the rule (`sub-names.md`, "Other SUBs that serve both the human and the computer").
+9. **`check_victory_conditions`**: `victory_warnings` and `end_game`. The Hall of Fame gets its own
+   arrays in place of `city_name$()`.
+10. **`navy_commands`**: `navy_combat`, `ai_pick_port` and `draw_fleet_sailing` first. Then `ai_navy`,
+    `menu_navy` and `navy_action`, and last one SUB for each action. It has 104 statements not run, so
+    its scripts come first.
+11. **The attack, retreat and surrender knot in the middle of `turn_resolve`.**
+12. **`menu_select`'s highlight**: `menu_highlight` and `menu_unhighlight`.
+
+The splits of `calculate_battle` (losses, strengths) are phase 8's: they part a rule from its screen.
