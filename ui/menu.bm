@@ -187,7 +187,9 @@ arrows:
 		RETURN
 	 END IF
 	 IF a$ = KEY_F4$ AND menu_item_show_beside = MENU_PLAIN THEN
-		CALL menu_report(-1)
+		CALL report_force_summary
+		CLS
+		CALL draw_map
 		CALL draw_menu(b1, wide)
 		CALL draw_top_bar
 		RETURN

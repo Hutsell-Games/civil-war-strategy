@@ -53,11 +53,6 @@ cheer:
 END SUB
 
 SUB menu_report (side)
-DIM fin AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER: DIM a$: DIM z AS INTEGER: DIM j AS INTEGER
-DIM star AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-DIM summ(MAX_CITIES)
-IF side = -1 GOTO frep
-IF side > 100 GOTO batrep
 menu_text$(0) = "Information"
 menu_text$(1) = side_name$(current_side) + " Armies"
 menu_text$(2) = side_name$(other_side(current_side)) + " Armies"
@@ -72,19 +67,24 @@ CASE IS < 0
 	CLS
 	CALL draw_map
 	EXIT SUB
-CASE 2: side = other_side(current_side)
-CASE 3: GOTO cityrep
-CASE 4: GOTO frep
-CASE 5: GOTO srep
-CASE 6: GOTO batrep
-CASE 7: GOTO recap
-CASE ELSE
+CASE 2: CALL report_armies(other_side(current_side))
+CASE 3: CALL report_cities
+CASE 4: CALL report_force_summary
+CASE 5: CALL report_intelligence
+CASE 6: CALL report_battle_summary
+CASE 7: CALL report_recap
+CASE ELSE: CALL report_armies(side)
 END SELECT
+CLS
+CALL draw_map
+END SUB
+
 '..........................................................................
 '                               Army Report
 '..........................................................................
-IF menu_choice < 0 GOTO endrep
-IF menu_choice = 4 GOTO frep
+SUB report_armies (side)
+DIM fin AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER: DIM star AS INTEGER
+DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 star = side_first_army(side): fin = side_last_army(side)
 CLS : LOCATE 1, 1: c = 9: IF side = SIDE_REBEL THEN c = 15
 COLOR c
@@ -129,11 +129,14 @@ IF fleet_city(side) > 0 AND fleet_city(side) < FLEET_AT_SEA THEN PRINT "in "; ci
 IF train_army(side) > 0 THEN COLOR COLOR_YELLOW: PRINT " Army #"; train_army(side); army_name$(train_army(side)); " on train to "; city_name$(army_order(train_army(side)));
 LINE (0, 0)-(639, 449), 15, B
 LINE (0, 62)-(639, 62), 15
-GOTO endrep
+CALL report_wait_key
+END SUB
+
 '..........................................................................
 '                               City Report
 '..........................................................................
-cityrep:
+SUB report_cities
+DIM i AS INTEGER: DIM a$
 CLS : LOCATE 1, 1: COLOR COLOR_YELLOW
 PRINT "City Report"; TAB(20); month_name$(turn_month); ","; turn_year: COLOR COLOR_WHITE
 PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
@@ -153,11 +156,15 @@ COLOR COLOR_LIGHT_BLUE: PRINT side_name$(SIDE_UNION); TAB(12); side_city_count(S
 COLOR COLOR_GRAY: PRINT side_name$(SIDE_REBEL); TAB(12); side_city_count(SIDE_REBEL); TAB(23); side_income(SIDE_REBEL); TAB(32); side_cash(SIDE_REBEL)
 COLOR COLOR_RED: PRINT side_name$(SIDE_NONE); TAB(12); MAX_CITIES - side_city_count(SIDE_UNION) - side_city_count(SIDE_REBEL)
 LINE (1, 382)-(630, 382), 15
-GOTO endrep
+CALL report_wait_key
+END SUB
+
 '..........................................................................
 '                               Intelligence
 '..........................................................................
-srep:
+SUB report_intelligence
+DIM fin AS INTEGER: DIM k AS INTEGER: DIM z AS INTEGER: DIM j AS INTEGER
+DIM star AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 c = 9: IF current_side = SIDE_REBEL THEN c = 7
 CALL draw_map
 star = side_first_army(current_side): fin = side_last_army(current_side)
@@ -180,11 +187,15 @@ FOR k = star TO fin
 	wait_seconds 1
 END IF
 NEXT k
-GOTO endrep
+CALL report_wait_key
+END SUB
+
 '..........................................................................
 '                               Force Summary
 '..........................................................................
-frep:
+SUB report_force_summary
+DIM k AS INTEGER: DIM j AS INTEGER: DIM c AS INTEGER
+DIM summ(MAX_CITIES)
 FOR k = 1 TO MAX_CITIES
 	IF city_army(k) > 0 THEN
 		FOR j = 1 TO MAX_ARMIES
@@ -202,11 +213,13 @@ IF summ(k) > 0 THEN
 END IF
 NEXT k
 COLOR COLOR_YELLOW: LOCATE 1, 20: PRINT "Total Forces in Cities (100's)"
-GOTO endrep
+CALL report_wait_key
+END SUB
+
 '..........................................................................
 '                               Battle Report
 '..........................................................................
-batrep:
+SUB report_battle_summary
 VIEW (200, 123)-(400, 284)
 CLS 1
 VIEW
@@ -226,20 +239,14 @@ LOCATE 14, 38: PRINT side_battles_won(SIDE_UNION)
 LOCATE 14, 45: PRINT side_battles_won(SIDE_REBEL)
 LOCATE 17, 38: PRINT INT(.1 * side_casualties&(SIDE_UNION))
 LOCATE 17, 45: PRINT INT(.1 * side_casualties&(SIDE_REBEL))
-IF opt_history > 0 AND side > 2 THEN
-	OPEN "O", #1, "battsumm"
-	PRINT #1, " SIDE      BATTLES WON       LOSSES"
-	FOR k = SIDE_UNION TO SIDE_REBEL
-	a$ = " ": IF victory_reason = k THEN a$ = "*"
-	PRINT #1, a$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
-	NEXT k
-	CLOSE #1
-END IF
-GOTO endrep
+CALL report_wait_key
+END SUB
+
 '..........................................................................
 '                               Recap (History)
 '..........................................................................
-recap:
+SUB report_recap
+DIM x AS INTEGER: DIM a$
 CLS : x = 0
 OPEN "I", 2, "cws.his"
 DO WHILE NOT EOF(2)
@@ -253,12 +260,10 @@ x = x + 1
 IF x > 27 THEN wait_seconds .4
 LOOP
 CLOSE #2
+CALL report_wait_key
+END SUB
 
-endrep:
+SUB report_wait_key
 COLOR COLOR_YELLOW: LOCATE 29, 29: PRINT "press a key";
 CALL script_mark_key_wait(1, "F"): DO WHILE INKEY$ = "": LOOP
-IF side < 3 THEN
-	CLS
-	CALL draw_map
-END IF
 END SUB

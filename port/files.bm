@@ -119,3 +119,16 @@ SUB config_write (side)
 	WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
 	CLOSE #1
 END SUB
+
+SUB save_battle_summary
+DIM k AS INTEGER: DIM a$
+IF opt_history > 0 THEN
+	OPEN "O", #1, "battsumm"
+	PRINT #1, " SIDE      BATTLES WON       LOSSES"
+	FOR k = SIDE_UNION TO SIDE_REBEL
+	a$ = " ": IF victory_reason = k THEN a$ = "*"
+	PRINT #1, a$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
+	NEXT k
+	CLOSE #1
+END IF
+END SUB

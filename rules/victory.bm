@@ -160,7 +160,7 @@ play4ever:
 	END IF
 
 	victory_reason = i
-	CALL draw_map: CALL menu_report(100 + current_side)
+	CALL draw_map: CALL save_battle_summary: CALL report_battle_summary
 	IF j = 2 THEN FOR k = SIDE_UNION TO SIDE_REBEL: side_victory_points(k) = .7 * side_victory_points(k): NEXT k: CALL draw_rebel_victory: GOTO death
 
 	IF i = SIDE_UNION THEN CALL draw_union_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(SIDE_UNION)): PRINT t$: GOTO death

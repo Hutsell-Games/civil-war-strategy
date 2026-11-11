@@ -157,7 +157,8 @@ the working tree: `side_army_range` became `side_first_army` and `side_last_army
 `army_get_commander` stays a SUB, because it also makes up a leader, draws a random number and prints
 (user, 2026-11-11). That ends phase 5.
 Phase 7 step 1 is done in the working tree (2026-11-11): `file_management` is split, see "Phase 7" below.
-**Next:** phase 7 step 2, `menu_report`.
+Step 2 is done in the working tree too: `menu_report` is split.
+**Next:** phase 7 step 3, `wait_key`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -312,11 +313,15 @@ Until the user decides otherwise, each step of this phase works like this:
    so the save format is the same. The Files menu calls `load_game` or `save_game` by `menu_choice`, and
    then still tests the `menu_choice` those SUBs' own menus left, as before. Lines moved without a test:
    none; the four half-run lines are `EXIT FOR`, `EXIT SUB` and one `THEN`, moved whole.
-2. **`menu_report` into one SUB for each report**: the armies, the cities, the force summary,
-   intelligence, the battle summary and the recap. `menu_report` keeps the menu. The F4 key and the end
-   of the game call their report by name in place of `menu_report(-1)` and `menu_report(100 + side)`.
-   Proposed names: `report_armies (side)`, `report_cities`, `report_force_summary`,
-   `report_intelligence`, `report_battle_summary`, `report_recap`.
+2. **Done: `menu_report` into one SUB for each report**: `report_armies (side)`, `report_cities`,
+   `report_force_summary`, `report_intelligence`, `report_battle_summary` and `report_recap`, in
+   `ui\reports.bm`. Each ends with `report_wait_key` ("press a key"). `menu_report` keeps the menu and
+   draws the map again after a report. The F4 key calls `report_force_summary` in place of
+   `menu_report(-1)`. The end of the game calls `report_battle_summary` in place of
+   `menu_report(100 + side)`. The file `battsumm`, which only the end of the game wrote, is now written
+   by `save_battle_summary` (`port\files.bm`), called just before the report is drawn and not just after.
+   Two tests after the menu that could never be true are gone (`menu_choice < 0`, `menu_choice = 4`).
+   Lines moved without a test: the `PRINT` for a side with no victory points, in `report_armies`.
 3. **`wait_key (letter$)`** for the 12 loops `CALL script_mark_key_wait(1, "X"): DO WHILE INKEY$ = "":
    LOOP`. The two `wait_seconds(99)` stay as they are until the user decides whether they may wait
    forever (`TODO.md`, "The code").
