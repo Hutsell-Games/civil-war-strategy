@@ -125,7 +125,6 @@ CALL menu(0)
 IF choose = 1 THEN
 	CLS
 	GOTO loader
-	GOTO menu0
 END IF
 IF choose = 3 THEN CLS : END
 IF history = 1 THEN
@@ -702,12 +701,6 @@ END SELECT
 GOTO menu0
 '............................................................................
 '                               Subs
-'............................................................................
-topbar:
-LOCATE 1, 1: PRINT SPACE$(80);
-COLOR 11
-LOCATE 1, 10: PRINT "Input your decisions now for "; force$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
-RETURN
 '............................................................................
 rusure:
 choose = 23
