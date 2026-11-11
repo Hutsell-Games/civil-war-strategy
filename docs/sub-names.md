@@ -310,7 +310,7 @@ for a SUB that writes at the cursor, as a `PRINT` statement does.
 | `showcity` | `draw_cities` |
 | `smarts` | `ai_turn` |
 | `snapshot` | `screen_snapshot` |
-| `starfin` | `side_army_range` |
+| `starfin` | `side_army_range`; in phase 5 the FUNCTIONs `side_first_army` and `side_last_army` (user, 2026-11-11) |
 | `stax` | `draw_stack_markers` |
 | `strong` | `print_army_size` |
 | `surrender` | `draw_surrender` |

@@ -6,7 +6,7 @@ slush = 0: who = other_side(current_side)
 c = 9: IF current_side = SIDE_UNION THEN c = 15
 LOCATE 1, 1: PRINT SPACE$(80);
 COLOR c: LOCATE 1, 10: PRINT side_name$(who); " Side is making decisions";
-CALL side_army_range(star, fin, who)
+star = side_first_army(who): fin = side_last_army(who)
 '==========================================================================
 '                       Check Supply
 '==========================================================================
@@ -151,11 +151,11 @@ NEXT i
 EXIT SUB
 '---------------------------------------------------------------------------
 enufarmies:
-CALL side_army_range(star, fin, other_side(who))
+star = side_first_army(other_side(who)): fin = side_last_army(other_side(who))
 FOR i = star TO fin
 	IF army_city(i) > 0 THEN y = y + .1 * army_size(i)
 NEXT i
-CALL side_army_range(star, fin, who)
+star = side_first_army(who): fin = side_last_army(who)
 x = 0: z = 0: FOR i = star TO fin: IF army_city(i) > 0 THEN x = x + 1: z = z + .1 * army_size(i)
 NEXT i
 IF y > z THEN x = x - 2
@@ -165,8 +165,8 @@ RETURN
 END SUB
 
 SUB ai_evaluate_move (army, x)
-DIM fin AS INTEGER: DIM max AS INTEGER: DIM m AS INTEGER
-DIM from AS INTEGER: DIM defend AS INTEGER: DIM best AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM y AS INTEGER: DIM star AS INTEGER: DIM k AS INTEGER: DIM c AS INTEGER: DIM x1 AS INTEGER: DIM odds!
+DIM max AS INTEGER: DIM m AS INTEGER
+DIM from AS INTEGER: DIM defend AS INTEGER: DIM best AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM y AS INTEGER: DIM k AS INTEGER: DIM c AS INTEGER: DIM x1 AS INTEGER: DIM odds!
 from = army_city(army)
 x = 200: IF ai_strength_ratio! > 1.5 THEN x = 80: IF ai_strength_ratio! > 2 THEN x = 20: IF ai_strength_ratio! > 3 THEN x = 5
 defend = city_nearby_enemy_strength(from): IF defend = 0 THEN x = 0
@@ -179,13 +179,12 @@ a = city_road(from, j): IF a > 0 THEN IF city_army(a) > 0 THEN best = best - arm
 NEXT j: best = .01 * best
 IF opt_ai_aggression > 0 THEN best = best + 20 * opt_ai_aggression
 
-CALL side_army_range(star, fin, other_side(current_side))
 
 FOR j = 1 TO MAX_ROADS
 	y = -1: a = city_road(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
       
 	c = city_army(a)
-	FOR k = star TO fin: IF army_city(k) > 0 THEN IF army_order(k) = a AND c = 0 GOTO alle
+	FOR k = side_first_army(other_side(current_side)) TO side_last_army(other_side(current_side)): IF army_city(k) > 0 THEN IF army_order(k) = a AND c = 0 GOTO alle
 	NEXT k
 	
 	y = best - x * city_fort(from) - city_value(from) + 30 * RND

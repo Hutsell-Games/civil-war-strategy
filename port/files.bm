@@ -59,7 +59,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 			leader_name$(i) = ""
 		ELSE
 			who = army_side(i)
-			CALL side_army_range(star, fin, who)
+			star = side_first_army(who): fin = side_last_army(who)
 			FOR k = star TO fin
 			IF army_name$(i) = leader_name$(k) THEN leader_name$(k) = "": EXIT FOR
 			NEXT k

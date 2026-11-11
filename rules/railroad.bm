@@ -1,12 +1,12 @@
 SUB railroad_move (side)
-DIM fin AS INTEGER: DIM target AS INTEGER: DIM y AS INTEGER: DIM m AS INTEGER: DIM z AS INTEGER
-DIM star AS INTEGER: DIM max AS INTEGER: DIM index AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM from AS INTEGER: DIM defend AS INTEGER: DIM limit AS INTEGER: DIM x1 AS INTEGER: DIM a AS INTEGER
+DIM target AS INTEGER: DIM y AS INTEGER: DIM m AS INTEGER: DIM z AS INTEGER
+DIM max AS INTEGER: DIM index AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM from AS INTEGER: DIM defend AS INTEGER: DIM limit AS INTEGER: DIM x1 AS INTEGER: DIM a AS INTEGER
 SELECT CASE train_army(side)
 	CASE 0
 	IF side = current_side GOTO human
-	CALL side_army_range(star, fin, side): max = 32767
+	max = 32767
 	index = 0
-	FOR i = star TO fin: IF army_city(i) = 0 OR army_order(i) <> ORDER_NONE GOTO puter
+	FOR i = side_first_army(side) TO side_last_army(side): IF army_city(i) = 0 OR army_order(i) <> ORDER_NONE GOTO puter
 	x = 0: FOR j = 1 TO MAX_ROADS: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
 	NEXT j
 	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter

@@ -12,10 +12,10 @@
 ' The first and last army of a side.
 
 SUB TestStarfinGivesEachSidesArmies
-CALL side_army_range(star, fin, 1)
+star = side_first_army(1): fin = side_last_army(1)
 AssertEqualInt 1, star, "the Union's first"
 AssertEqualInt 20, fin, "the Union's last"
-CALL side_army_range(star, fin, 2)
+star = side_first_army(2): fin = side_last_army(2)
 AssertEqualInt 21, star, "the Rebels' first"
 AssertEqualInt 40, fin, "the Rebels' last"
 END SUB

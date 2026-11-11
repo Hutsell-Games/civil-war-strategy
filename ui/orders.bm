@@ -27,14 +27,12 @@ dudd:
 END SUB
 
 SUB menu_city_fortify (city)
-DIM fin AS INTEGER
-DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM cost AS INTEGER
+DIM who AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM cost AS INTEGER
 	city = 0: menu_highlight = COLOR_LIGHT_CYAN
 	menu_col = PANEL_COL: menu_row = 2
 	who = current_side
-	CALL side_army_range(star, fin, who)
 	menu_item_count = 0
-	FOR i = star TO fin
+	FOR i = side_first_army(who) TO side_last_army(who)
 	IF army_city(i) > 0 AND city_fort(army_city(i)) < MAX_FORT THEN
 		menu_item_count = menu_item_count + 1
 		menu_text$(menu_item_count) = city_name$(army_city(i))
@@ -68,7 +66,7 @@ SUB menu_army_select (army, city)
 DIM fin AS INTEGER
 DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER
 	menu_color = COLOR_CYAN: menu_col = PANEL_COL: menu_row = 5: army = 0: menu_item_count = 0: city = 0
-	who = current_side: CALL side_army_range(star, fin, who)
+	who = current_side: star = side_first_army(who): fin = side_last_army(who)
 	FOR i = star TO fin
 	IF army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(army_city(i)): menu_value(menu_item_count) = army_city(i)
 	NEXT i
@@ -248,7 +246,7 @@ END SUB
 SUB menu_army_cancel (side)
 DIM fin AS INTEGER
 DIM star AS INTEGER: DIM j AS INTEGER: DIM a$: DIM target AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM index AS INTEGER: DIM turbo AS INTEGER
-CALL side_army_range(star, fin, (side))
+star = side_first_army((side)): fin = side_last_army((side))
 counter:
 CALL clear_right_panel
 	menu_item_count = 0
@@ -285,7 +283,7 @@ DIM fin AS INTEGER
 DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM index AS INTEGER: DIM t$
 menu_color = COLOR_CYAN: target = 0: menu_highlight = COLOR_CYAN
 menu_col = PANEL_COL: menu_row = 2
-CALL side_army_range(star, fin, side)
+star = side_first_army(side): fin = side_last_army(side)
 menu_item_count = 0
 FOR i = star TO fin
 IF army_size(i) > 0 AND army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN

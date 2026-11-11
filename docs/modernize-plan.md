@@ -150,11 +150,13 @@ CONSTs in `CWS14.BI`, and `army_side` and `other_side` in `rules\army.bm`. Each 
 (not by a script from a table), so no script goes into `tools\refactor\`.
 Groups 2 to 9 are committed (`cfc9030`, `dd8c456`, `b608f8d`, `8953dfc`, `e0d1b2f`, `b57be0b`,
 `c19189e`, `f05fdd8`), which ends phase 3. What the groups left alone is in `TODO.md`, "The code".
-Phase 5 step 1 is done in the working tree: `city_is_connected`, `city_nearby_enemy_strength`,
+Phase 5 step 1 is committed (`b870824`): `city_is_connected`, `city_nearby_enemy_strength`,
 `railroad_capacity` and `menu_measure_width` are FUNCTIONs and keep their settled names. Each call
-`CALL f(args, v)` became `v = f(args)`, with the same variable and in the same place.
-**Next:** phase 5 step 2, `side_army_range` (two results) and `army_get_commander` (it also makes a leader),
-once the user has chosen what they become.
+`CALL f(args, v)` became `v = f(args)`, with the same variable and in the same place. Step 2 is done in
+the working tree: `side_army_range` became `side_first_army` and `side_last_army` (user, 2026-11-11).
+`army_get_commander` stays a SUB, because it also makes up a leader, draws a random number and prints
+(user, 2026-11-11). That ends phase 5.
+**Next:** phase 7 (Fable). Stop and tell the user to switch model.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and

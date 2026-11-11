@@ -85,7 +85,7 @@ END SELECT
 '..........................................................................
 IF menu_choice < 0 GOTO endrep
 IF menu_choice = 4 GOTO frep
-CALL side_army_range(star, fin, side)
+star = side_first_army(side): fin = side_last_army(side)
 CLS : LOCATE 1, 1: c = 9: IF side = SIDE_REBEL THEN c = 15
 COLOR c
 PRINT " Report for "; side_name$(side); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49); : COLOR COLOR_YELLOW: PRINT " Victory Points "; side_victory_points(side);
@@ -160,7 +160,7 @@ GOTO endrep
 srep:
 c = 9: IF current_side = SIDE_REBEL THEN c = 7
 CALL draw_map
-CALL side_army_range(star, fin, current_side)
+star = side_first_army(current_side): fin = side_last_army(current_side)
 FOR k = star TO fin
 	IF army_size(k) > 0 THEN
 	COLOR c

@@ -251,7 +251,7 @@ endrnd:
 '==========================================================================
 	CASE 6
 	CALL menu_report((current_side)): chosit = 27
-	CALL side_army_range(star, fin, current_side)
+	star = side_first_army(current_side): fin = side_last_army(current_side)
 	FOR i = star TO fin
 	IF army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
 	NEXT i
@@ -311,7 +311,7 @@ optmen:
 '                               Supply
 '---------------------------------------------------------------------------
 		CASE 4
-		CALL side_army_range(star, fin, (current_side))
+		star = side_first_army((current_side)): fin = side_last_army((current_side))
 		menu_text$(0) = "Supply"
 		menu_col = PANEL_COL: menu_row = 5: menu_color = COLOR_MAGENTA
 		menu_item_count = 0

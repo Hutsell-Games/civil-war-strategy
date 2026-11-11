@@ -140,10 +140,9 @@ NEXT s
 END SUB
 
 SUB draw_stack_markers (side)
-DIM fin AS INTEGER: DIM y AS INTEGER
-DIM star AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER
-CALL side_army_range(star, fin, side)
-FOR i = star TO fin
+DIM y AS INTEGER
+DIM i AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER
+FOR i = side_first_army(side) TO side_last_army(side)
 IF army_size(i) > 0 AND city_army(army_city(i)) <> i THEN
 	target = army_city(i)
 	x = city_x(target) - 12: y = city_y(target) - 12
