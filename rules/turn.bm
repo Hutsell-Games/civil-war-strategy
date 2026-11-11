@@ -45,7 +45,7 @@ IF opt_players = 1 THEN
 	CALL ai_turn
 ELSE
 	FOR i = 1 TO MAX_ARMIES
-	IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), 1)
+	IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
 	NEXT i
 END IF
 COLOR 14: LOCATE 1, 1: PRINT SPACE$(80);
@@ -94,7 +94,7 @@ COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " is moving to "; ci
 army_supply(active) = army_supply(active) - 1: IF army_supply(active) < 0 THEN army_supply(active) = 0: CALL wait_seconds(opt_pause!): CALL clear_bottom_line: PRINT army_name$(active); " is out of supplies !";
 
 CALL draw_army_flag(active)
-CALL draw_map_marker(army_city(active), army_order(active), 5)
+CALL draw_map_marker(army_city(active), army_order(active), MARK_ERASE_LINE)
 
 CALL animate_army(active, 0)
 '==========================================================================
@@ -106,14 +106,14 @@ IF army_side(city_army(target)) = s GOTO friend ELSE GOTO enemy
 '==========================================================================
 friend:
 COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " and "; army_name$(city_army(target)); " meet in "; city_name$(target); : CALL wait_seconds(opt_pause!)
-CALL draw_map_marker(army_order(active), 0, 6)
+CALL draw_map_marker(army_order(active), 0, MARK_FLASH_FRAME)
 CALL clear_bottom_line
 GOTO easy
 '==========================================================================
 '                       Attack
 '==========================================================================
 enemy:
-CALL draw_map_marker(target, 0, 3)
+CALL draw_map_marker(target, 0, MARK_EXPLOSION)
 defend = city_army(target)
 
 COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " attacks "; army_name$(defend); " in "; city_name$(army_city(defend)); : CALL wait_seconds(opt_pause! - 1)
@@ -145,15 +145,15 @@ CALL draw_army_flag(active)
 city_army(army_city(active)) = active
 army_order(active) = ORDER_DONE
 	      
-IF 11 * RND > army_leader_rating(defend) THEN CALL draw_map_marker(army_city(defend), army_order(defend), 4): IF army_order(defend) > 0 THEN army_order(defend) = ORDER_DONE
+IF 11 * RND > army_leader_rating(defend) THEN CALL draw_map_marker(army_city(defend), army_order(defend), MARK_ERASE_ARMY): IF army_order(defend) > 0 THEN army_order(defend) = ORDER_DONE
 
 CALL wait_seconds(opt_pause!): GOTO digin
 '==========================================================================
 '                       Defender Retreats
 '==========================================================================
 kickbutt:
-	CALL draw_map_marker(army_city(active), target, 4)
-	IF army_order(defend) > 0 THEN CALL draw_map_marker(target, army_order(defend), 4)
+	CALL draw_map_marker(army_city(active), target, MARK_ERASE_ARMY)
+	IF army_order(defend) > 0 THEN CALL draw_map_marker(target, army_order(defend), MARK_ERASE_ARMY)
 
 	CALL menu_army_retreat(defend, flee): IF flee > 0 THEN move2 = flee: GOTO outta
 
@@ -183,7 +183,7 @@ outta:
 
 	CALL draw_army_flag(defend)                  ' in new city
        
-	CALL draw_map_marker(target, 0, 6)
+	CALL draw_map_marker(target, 0, MARK_FLASH_FRAME)
 	army_order(defend) = ORDER_DONE
 	GOTO holdon
 
@@ -195,7 +195,7 @@ crushed:
 	IF opt_graphics > 2 THEN CALL draw_surrender(index): COLOR 14: LOCATE 3, 68: PRINT army_name$(index): LOCATE 4, 68: PRINT "surrenders !"
 	x = army_side(index)
 	IF opt_sound > 1 AND x <> current_side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
-	IF army_order(index) > 0 THEN CALL draw_map_marker(army_city(index), army_order(index), 4)
+	IF army_order(index) > 0 THEN CALL draw_map_marker(army_city(index), army_order(index), MARK_ERASE_ARMY)
 	side_victory_points(other_side(s)) = side_victory_points(other_side(s)) + 25
 	army_city(index) = 0: leader_name$(index) = "": army_name$(index) = ""
 	army_size(index) = 0: army_leader_rating(index) = 0
@@ -215,7 +215,7 @@ holdon:
 '                       Move Into New City
 '==========================================================================
 easy:
-CALL draw_map_marker(army_city(active), target, 4)
+CALL draw_map_marker(army_city(active), target, MARK_ERASE_ARMY)
 army_city(active) = target: army_order(active) = ORDER_DONE
 CALL city_update_occupier(army_city(active))
 CALL draw_army_flag(active)

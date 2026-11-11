@@ -20,7 +20,7 @@ IF turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(menu_value(menu_ch
 
 CALL clear_bottom_line: PRINT "Army "; index; " "; army_name$(index); " is moving from "; city_name$(target); " to "; city_name$(menu_value(menu_choice));
 IF opt_sound > 0 THEN SOUND 2200, .5: SOUND 2900, .7
-CALL draw_map_marker(target, menu_value(menu_choice), 1)
+CALL draw_map_marker(target, menu_value(menu_choice), MARK_MOVE_LINE)
 army_order(index) = menu_value(menu_choice): CALL wait_seconds(opt_pause!): CALL clear_bottom_line
 CALL clear_right_panel
 dudd:
@@ -55,9 +55,9 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 		city_fort(city) = city_fort(city) + 1
 		side_cash(current_side) = side_cash(current_side) - cost
 		CALL clear_bottom_line: PRINT city_name$(city); " fortifications increased to "; city_fort(city);
-		CALL draw_map_marker(city, 0, 6)
+		CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
 		CALL draw_cities
-		IF army_order(x) > 0 THEN CALL draw_map_marker(army_city(x), army_order(x), 5)
+		IF army_order(x) > 0 THEN CALL draw_map_marker(army_city(x), army_order(x), MARK_ERASE_LINE)
 		army_order(x) = ORDER_BUSY
 		CALL draw_army_flag(x)
 		CALL draw_stack_markers(who)
@@ -203,7 +203,7 @@ add2:
 	side_cash(side) = side_cash(side) - 100
 	from = army_city(i): x = city_x(from) - 12: y = city_y(from) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
-	CALL draw_map_marker(army_city(i), 0, 2)
+	CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
 	IF opt_sound > 0 THEN SOUND 2222, 1
 	COLOR 11: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
 	IF a$ <> "" THEN PRINT a$;
@@ -270,7 +270,7 @@ CALL clear_right_panel
 		NEXT i
 
 		CALL clear_bottom_line: COLOR 11: PRINT army_name$(index); " has cancelled move to "; city_name$(army_order(index)); : CALL wait_seconds(turbo + 1)
-		CALL draw_map_marker(army_city(index), army_order(index), 4)
+		CALL draw_map_marker(army_city(index), army_order(index), MARK_ERASE_ARMY)
 		army_order(index) = ORDER_NONE: IF opt_sound > 0 THEN SOUND 2999, .5
 		CALL draw_stack_markers(side)
 	 CASE ELSE
@@ -304,7 +304,7 @@ CALL menu_select(6): CALL clear_right_panel
 
 IF menu_choice < 1 THEN EXIT SUB
 index = menu_value(menu_choice)
-CALL draw_map_marker(army_city(index), 0, 9)
+CALL draw_map_marker(army_city(index), 0, MARK_POINTER)
 
 t$ = army_name$(index)
 leader_name$(index) = t$
@@ -332,7 +332,7 @@ IF army_experience(index) > 0 THEN army_experience(index) = army_experience(inde
 COLOR 15: CALL clear_bottom_line: PRINT leader_name$(menu_value(menu_choice)); " has replaced "; t$; " in "; city_name$(army_city(index)); : wait_seconds 9
 army_name$(index) = leader_name$(menu_value(menu_choice))
 leader_name$(menu_value(menu_choice)) = ""
-CALL draw_map_marker(army_city(index), 0, 8)
+CALL draw_map_marker(army_city(index), 0, MARK_RESTORE)
 CALL clear_bottom_line
 END SUB
 

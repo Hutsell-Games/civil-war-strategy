@@ -132,7 +132,7 @@ add2ship:
 	IF side = current_side THEN turn_navy_done = 1
 	IF city_owner(fleet_city(side)) <> other_side(side) GOTO ahoy
 	CALL clear_bottom_line: COLOR 12: PRINT side_name$(side); " fleet bombards "; city_name$(fleet_city(side));
-	CALL draw_map_marker(fleet_city(side), 0, 3)
+	CALL draw_map_marker(fleet_city(side), 0, MARK_EXPLOSION)
 	      
 	target = fleet_city(side): index = city_army(target): IF index = 0 GOTO deserted
 	pct! = .005 * fleet_size(side) + .02 * RND: killd = army_size(index) * pct!: IF killd < 1 THEN killd = 1

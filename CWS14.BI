@@ -31,6 +31,17 @@ CONST MOVE_KEY_NONE = 999
 CONST MENU_START = 21
 CONST MENU_ESCAPED = -1
 CONST MENU_END_TURN_KEY = 99
+' The marks of draw_map_marker, its third argument.
+CONST MARK_MOVE_LINE = 1
+CONST MARK_RECRUIT = 2
+CONST MARK_EXPLOSION = 3
+CONST MARK_ERASE_ARMY = 4
+CONST MARK_ERASE_LINE = 5
+CONST MARK_FLASH_FRAME = 6
+CONST MARK_BOX = 7
+CONST MARK_RESTORE = 8
+CONST MARK_POINTER = 9
+CONST MARK_ROAD = 11
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

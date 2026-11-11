@@ -5,7 +5,7 @@ DIM y AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER
 IF army_size(defender) < 1 THEN army_size(defender) = 1
 IF army_size(attacker) < 1 THEN army_size(attacker) = 1
 
-CALL draw_map_marker(army_city(defender), 0, 9)
+CALL draw_map_marker(army_city(defender), 0, MARK_POINTER)
 LOCATE 1, 1: PRINT SPACE$(80)
 CALL clear_right_panel: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
 c = 9: IF army_side(attacker) = SIDE_REBEL THEN c = 7
@@ -192,7 +192,7 @@ side_casualties&(other_side(s)) = side_casualties&(other_side(s)) + killd
 s = army_side(winner)
 side_battles_won(s) = side_battles_won(s) + 1
 side_victory_points(s) = side_victory_points(s) + 1
-CALL draw_map_marker(army_city(defender), 0, 8)
+CALL draw_map_marker(army_city(defender), 0, MARK_RESTORE)
 END SUB
 
 SUB normal_random_number (xbar, vary, result)

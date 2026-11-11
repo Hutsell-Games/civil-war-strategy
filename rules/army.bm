@@ -77,7 +77,7 @@ dork1:
 	       
 		CALL draw_cities
 		CALL draw_army_flag(best)
-		CALL draw_map_marker(target, 0, 6)
+		CALL draw_map_marker(target, 0, MARK_FLASH_FRAME)
 		city_army(target) = best
 		CALL draw_stack_markers(side)
 nocity2:

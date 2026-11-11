@@ -5,16 +5,16 @@ IF to_city < 0 GOTO noshow
 x = city_x(from_city) - 12: y = city_y(from_city) - 11
 x1 = city_x(to_city): y1 = city_y(to_city)
 SELECT CASE mark
-	CASE 1
+	CASE MARK_MOVE_LINE
 	LINE (x, y)-(x1, y1), 15, , &HF0F0
        
-	CASE 2
+	CASE MARK_RECRUIT
 	FOR i = 6 TO 8
 	LINE (x - i, y - i + 3)-(x + i, y + i - 3), 14, B
 	NEXT i
 	CALL wait_seconds(.1)
        
-	CASE 3
+	CASE MARK_EXPLOSION
 	x = city_x(from_city): y = city_y(from_city)
 	CALL screen_snapshot(x, y, 0)
 	FOR j = 1 TO 3
@@ -27,15 +27,15 @@ SELECT CASE mark
 	CALL screen_snapshot(x, y, 1)
 	NEXT j
        
-	CASE 4
+	CASE MARK_ERASE_ARMY
 	IF city_army(from_city) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
 	IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
 	IF from_city = 27 OR from_city = 28 THEN CALL draw_map_touchup
 
-	CASE 5
+	CASE MARK_ERASE_LINE
 	IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
 
-	CASE 6
+	CASE MARK_FLASH_FRAME
 	x = city_x(from_city): y = city_y(from_city)
 	CALL screen_snapshot(x, y, 0)
 	LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
@@ -43,16 +43,16 @@ SELECT CASE mark
 	IF opt_sound > 0 THEN SOUND 3999, .3
 	CALL wait_seconds(opt_pause! - .5)
 	CALL screen_snapshot(x, y, 1)
-	CASE 7          ' draw white box
+	CASE MARK_BOX          ' draw white box
 	x = city_x(from_city) - 12: y = city_y(from_city) - 11
 	GET (x - 8, y - 8)-(x + 8, y + 8), saved_under_marker
 	LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
 	LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
-	     CASE 8     ' replace old image
+	     CASE MARK_RESTORE     ' replace old image
 	x = city_x(from_city) - 12: y = city_y(from_city) - 11
 	IF x > 0 THEN PUT (x - 8, y - 8), saved_under_marker, PSET
        
-	CASE 9          ' draw arrow pointer
+	CASE MARK_POINTER          ' draw arrow pointer
 	x = city_x(from_city) - 12: y = city_y(from_city) - 11
 	GET (x - 8, y - 8)-(x + 10, y + 7), saved_under_marker
 	x = x + 7: y = y + 5
@@ -65,7 +65,7 @@ SELECT CASE mark
 	LINE -(x + 1, y), 12
 	PAINT (x - 2, y - 1), 15, 12
 
-	CASE 11
+	CASE MARK_ROAD
 	LINE (x + 12, y + 11)-(x1, y1), 0, , &H1111
 
 	CASE ELSE
@@ -95,7 +95,7 @@ ELSE
 	PAINT (city_x(i), city_y(i)), c, c
 END IF
 IF opt_graphics = 0 GOTO nocon
-	FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), 11)
+	FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
 	NEXT j
 nocon:
 NEXT i
@@ -529,7 +529,7 @@ CALL draw_stack_markers(k)
 NEXT k
 
 IF opt_players = 2 GOTO nosee
-FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), 1)
+FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
 NEXT i
 nosee:
 CALL draw_fleets

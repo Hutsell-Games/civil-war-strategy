@@ -92,8 +92,8 @@ remenu:
 	CALL draw_menu(b1, wide)
 sel1:
 	SELECT CASE menu_item_show_beside
-		CASE 1: CALL draw_map_marker(menu_value(row), 0, 7)
-		CASE 2: CALL draw_map_marker(menu_value(row), 0, 9)
+		CASE 1: CALL draw_map_marker(menu_value(row), 0, MARK_BOX)
+		CASE 2: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
 			target = city_army(menu_value(row))
 			IF target > 0 THEN
 			flag = 1
@@ -110,7 +110,7 @@ sel1:
 			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
 			END IF
 		CASE 4: CALL draw_army_stats(menu_value(row))
-		CASE 6: CALL draw_map_marker(army_city(menu_value(row)), 0, 9)
+		CASE 6: CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_POINTER)
 		CASE 8
 			IF opt_graphics > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
@@ -127,7 +127,7 @@ sel1:
 					END IF
 				END IF
 			END IF
-		CASE 9: CALL draw_map_marker(menu_value(row), 0, 9)
+		CASE 9: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
 	END SELECT
 	IF flag = 0 THEN
 		COLOR menu_highlight
@@ -149,9 +149,9 @@ reglr:
 
 	SELECT CASE menu_item_show_beside
 		CASE 1, 2, 9
-			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(menu_value(row1), 0, 8)
+			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(menu_value(row1), 0, MARK_RESTORE)
 		CASE 6
-			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(army_city(menu_value(row1)), 0, 8)
+			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(army_city(menu_value(row1)), 0, MARK_RESTORE)
 	END SELECT
 
 	menu_choice = row
@@ -207,9 +207,9 @@ called:
 	menu_col = 0: menu_row = 0
 	SELECT CASE menu_item_show_beside
 	CASE 1, 2, 9
-		CALL draw_map_marker(menu_value(row), 0, 8)
+		CALL draw_map_marker(menu_value(row), 0, MARK_RESTORE)
 	CASE 6
-		CALL draw_map_marker(army_city(menu_value(row)), 0, 8)
+		CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_RESTORE)
 	END SELECT
 	VIEW
 END SUB

@@ -39,7 +39,7 @@ capital:
 	x = city_army(target): army_order(x) = ORDER_BUSY
 	side_cash(who) = side_cash(who) - cost
 	CALL clear_bottom_line: PRINT city_name$(target); " fortifications increased to "; city_fort(target);
-	CALL draw_map_marker(target, 0, 6)
+	CALL draw_map_marker(target, 0, MARK_FLASH_FRAME)
 	CALL draw_cities
 	IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND RND > .5 AND side_cash < 222 GOTO signup
 	IF 3 * RND > 1 + ai_strength_ratio! AND side_cash(who) >= cost GOTO city2
@@ -130,8 +130,8 @@ move9:
 		COLOR c: CALL clear_bottom_line
 		PRINT army_name$(i); " plans to move from "; city_name$(army_city(i)); " to "; city_name$(army_order(i));
 	END IF
-		CALL draw_map_marker(army_city(i), army_order(i), 1)
-		CALL draw_map_marker(army_city(i), army_order(i), 9)
+		CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+		CALL draw_map_marker(army_city(i), army_order(i), MARK_POINTER)
 	CALL wait_seconds(opt_pause! - 1)
 	PUT (city_x(army_city(i)) - 20, city_y(army_city(i)) - 19), saved_under_marker, PSET
 deadman:
