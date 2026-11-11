@@ -10,16 +10,16 @@ SELECT CASE train_army(side)
 	x = 0: FOR j = 1 TO MAX_ROADS: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
 	NEXT j
 	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter
-	CALL city_nearby_enemy_strength(army_city(i), defend)
+	defend = city_nearby_enemy_strength(army_city(i))
 	IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN IF defend > max THEN defend = max - 1
 	IF defend < max THEN target = army_city(i): GOSUB route: IF x > 1 THEN max = defend: index = i
 puter:  NEXT i
 	IF index = 0 OR max > .3 * army_size(index) GOTO toot
-	CALL railroad_capacity(side, limit)
+	limit = railroad_capacity(side)
 	IF army_size(index) > limit THEN GOTO toot
 	from = army_city(index)
 	x1 = 0: FOR i = 1 TO MAX_CITIES: IF city_owner(i) <> side GOTO puted
-	CALL city_nearby_enemy_strength(i, defend): IF defend = 0 OR defend > 3 * army_size(index) GOTO puted
+	defend = city_nearby_enemy_strength(i): IF defend = 0 OR defend > 3 * army_size(index) GOTO puted
 	IF city_army(i) > 0 GOTO puted
 	target = i
 	GOSUB route: IF x = 0 GOTO puted
@@ -30,7 +30,7 @@ puted:  NEXT i
 	IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN
 		GOSUB route
 		IF x > 0 THEN
-			CALL city_nearby_enemy_strength(side_capital(side), defend)
+			defend = city_nearby_enemy_strength(side_capital(side))
 			IF defend > 0 THEN x1 = side_capital(side)
 		END IF
 	END IF
@@ -38,7 +38,7 @@ puted:  NEXT i
 human:
 	CALL menu_army_select(index, a): IF a < 1 OR index < 1 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Railroad move not allowed"; : GOTO toot
 	x = army_side(index)
-	CALL railroad_capacity(side, limit)
+	limit = railroad_capacity(side)
 	IF army_size(index) > limit THEN CALL clear_bottom_line: PRINT "Too many troops for railroad capacity"; : GOTO toot
 	
 	target = army_city(index): GOSUB route: IF x > 1 GOTO aboard
@@ -105,12 +105,14 @@ toot:
 	clear_bottom_line
 END SUB
 
-SUB railroad_capacity (side, limit)
-DIM x AS INTEGER
-IF opt_realism = REALISM_OFF THEN limit = train_capacity(side): EXIT SUB
+' The largest army that side's railroad can carry.
+FUNCTION railroad_capacity (side)
+DIM x AS INTEGER: DIM limit AS INTEGER
+IF opt_realism = REALISM_OFF THEN railroad_capacity = train_capacity(side): EXIT FUNCTION
 x = 11: IF current_side = SIDE_REBEL THEN x = 23
 limit = train_capacity(side) + 5 * (side_city_count(side) - x)
 x = 2 * train_capacity(side)
 IF limit > x THEN limit = x
 IF limit < x \ 4 THEN limit = x \ 4
-END SUB
+railroad_capacity = limit
+END FUNCTION

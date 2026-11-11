@@ -11,7 +11,7 @@ s = SIDE_UNION
 FOR i = 1 TO MAX_ARMIES: IF army_city(i) < 1 GOTO rip
 IF army_side(i) = SIDE_REBEL THEN s = SIDE_REBEL
 IF side_cash(s) >= .2 * army_size(i) THEN
-	a = 1: IF opt_realism >= REALISM_ON THEN CALL city_is_connected(s, army_city(i), a)
+	a = 1: IF opt_realism >= REALISM_ON THEN a = city_is_connected(s, army_city(i))
 	IF a > 0 THEN
 		army_supply(i) = army_supply(i) + 1
 		side_cash(s) = side_cash(s) - .2 * army_size(i)

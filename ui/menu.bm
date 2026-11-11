@@ -57,7 +57,7 @@ remenu:
 	LOCATE 1, 1, 0
 	IF menu_text$(0) = "" THEN menu_text$(0) = "M E N U"
 
-	IF wide = 0 THEN CALL menu_measure_width(wide)
+	IF wide = 0 THEN wide = menu_measure_width
 	IF menu_col = 0 THEN GOSUB noadjust
 	IF menu_choice < MENU_START THEN menu_choice = 1
 	IF menu_choice > MENU_START THEN menu_choice = menu_choice - MENU_START
@@ -214,11 +214,13 @@ called:
 	VIEW
 END SUB
 
-SUB menu_measure_width (wide)
-DIM i AS INTEGER: DIM x AS INTEGER
+' The width a menu needs: its longest option, or its title and a space.
+FUNCTION menu_measure_width
+DIM i AS INTEGER: DIM x AS INTEGER: DIM wide AS INTEGER
 	wide = LEN(menu_text$(0)) + 1
 	FOR i = 1 TO menu_item_count
 	x = LEN(menu_text$(i))
 	IF x > wide THEN wide = x
 	NEXT i
-END SUB
+	menu_measure_width = wide
+END FUNCTION

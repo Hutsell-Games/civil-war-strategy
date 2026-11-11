@@ -28,7 +28,7 @@ IF 1 + RND < opt_ai_aggression + ai_strength_ratio! GOTO signup
 target = 0: FOR i = star TO fin
 x = army_city(i): IF x = 0 OR army_order(city_army(x)) < 0 OR army_order(i) < 0 GOTO endlook
 IF city_fort(x) >= MAX_FORT GOTO endlook
-	CALL city_nearby_enemy_strength(x, defend): IF defend > army_size(i) THEN target = army_city(i): GOTO capital
+	defend = city_nearby_enemy_strength(x): IF defend > army_size(i) THEN target = army_city(i): GOTO capital
 endlook:
 NEXT i
 
@@ -107,14 +107,14 @@ x = army_size(i): IF army_supply(i) < 1 AND RND > .1 GOTO deadman
 
 menu_choice = 0
 
-CALL city_nearby_enemy_strength(target, defend)
+defend = city_nearby_enemy_strength(target)
 
 IF defend > 0 AND target = side_capital(who) AND city_army(target) = i GOTO deadman   'hold capital
 IF target <> side_capital(who) GOTO nocap
 IF victory_rule(VICTORY_CAPITAL) = 0 GOTO nocap
 	FOR j = 1 TO MAX_ROADS
 	k = city_road(target, j): IF j = 0 GOTO nocap
-	CALL city_nearby_enemy_strength(k, flag): IF flag > 0 GOTO deadman
+	flag = city_nearby_enemy_strength(k): IF flag > 0 GOTO deadman
 	NEXT j
 nocap:
 CALL ai_evaluate_move(i, best): IF best = 0 GOTO deadman
@@ -169,7 +169,7 @@ DIM fin AS INTEGER: DIM max AS INTEGER: DIM m AS INTEGER
 DIM from AS INTEGER: DIM defend AS INTEGER: DIM best AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM y AS INTEGER: DIM star AS INTEGER: DIM k AS INTEGER: DIM c AS INTEGER: DIM x1 AS INTEGER: DIM odds!
 from = army_city(army)
 x = 200: IF ai_strength_ratio! > 1.5 THEN x = 80: IF ai_strength_ratio! > 2 THEN x = 20: IF ai_strength_ratio! > 3 THEN x = 5
-CALL city_nearby_enemy_strength(from, defend): IF defend = 0 THEN x = 0
+defend = city_nearby_enemy_strength(from): IF defend = 0 THEN x = 0
 IF opt_ai_aggression > 1 THEN x = .5 * x
 
 best = army_size(army)
@@ -254,8 +254,10 @@ NEXT j
 	x = best
 END SUB
 
-SUB city_nearby_enemy_strength (a, y)
-DIM j AS INTEGER: DIM x AS INTEGER: DIM k AS INTEGER: DIM m AS INTEGER
+' The player's strength near city a: in full in the cities next to it, a tenth two roads away. The sum is an
+' INTEGER, rounded at each step, as it was when it was a SUB's parameter.
+FUNCTION city_nearby_enemy_strength (a)
+DIM j AS INTEGER: DIM x AS INTEGER: DIM k AS INTEGER: DIM m AS INTEGER: DIM y AS INTEGER
   y = 0
 FOR j = 1 TO MAX_ROADS
   x = city_road(a, j): IF x = 0 GOTO tally5
@@ -266,4 +268,5 @@ tally4:
 	NEXT k
 NEXT j
 tally5:
-END SUB
+city_nearby_enemy_strength = y
+END FUNCTION

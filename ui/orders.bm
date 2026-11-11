@@ -194,7 +194,7 @@ add2:
 	x = 45: a$ = ""
 	IF opt_realism >= REALISM_ON THEN
 		x = 2 * city_value(army_city(i)) + 20
-		CALL city_is_connected(side, target, a)
+		a = city_is_connected(side, target)
 		IF a < 1 THEN x = x \ 3: a$ = " ISOLATED !"
 	END IF
 	army_size(i) = army_size(i) + x
@@ -226,11 +226,11 @@ randsel:
 		target = menu_value(i)
 		IF city_army(target) = 0 THEN
 			y = 3 * city_value(target) + 33
-			CALL city_is_connected(side, target, a)
+			a = city_is_connected(side, target)
 			IF a < 1 THEN y = y \ 3
 		ELSE
 			y = 2 * city_value(target) + 20
-			CALL city_is_connected(side, target, a)
+			a = city_is_connected(side, target)
 			IF a < 1 THEN y = y \ 3
 		END IF
 		IF y > x AND RND > .5 THEN x = y: menu_choice = i

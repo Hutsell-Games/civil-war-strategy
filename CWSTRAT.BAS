@@ -12,7 +12,7 @@ DECLARE SUB draw_schooner ()
 DECLARE SUB draw_fleet_ship (who%, i%)
 DECLARE SUB draw_stack_markers (who%)
 DECLARE SUB draw_train (who%, flag%)
-DECLARE SUB railroad_capacity (who%, limit%)
+DECLARE FUNCTION railroad_capacity% (who%)
 DECLARE SUB draw_top_bar ()
 ' $INCLUDE: 'cws14.bi'
 DIM fin AS INTEGER: DIM max AS INTEGER: DIM index AS INTEGER: DIM empty AS INTEGER: DIM t$: DIM c AS INTEGER
@@ -230,7 +230,7 @@ IF train_army(current_side) = 0 THEN
 	x = POINT(0): y = POINT(1)
 	PAINT (x, y), z, 15
 	COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN COLOR COLOR_LIGHT_CYAN
-	CALL railroad_capacity(current_side, limit)
+	limit = railroad_capacity(current_side)
 	CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 	CALL railroad_move(current_side)
 ELSE
@@ -318,7 +318,7 @@ optmen:
 		FOR i = star TO fin
 		IF army_city(i) = 0 OR army_supply(i) > 1 GOTO alone
 		IF opt_realism >= REALISM_ON THEN
-			CALL city_is_connected(current_side, army_city(i), a)
+			a = city_is_connected(current_side, army_city(i))
 			IF a < 1 THEN CALL clear_bottom_line: COLOR COLOR_WHITE: PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !"; : wait_seconds opt_pause!: GOTO alone
 		END IF
 		menu_item_count = menu_item_count + 1

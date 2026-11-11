@@ -148,10 +148,13 @@ their names (renaming them to `cws.bas` and `cws.bi` touches CI and the scripts,
 Phase 6 is committed (`19ac90a`). Phase 3 group 1 (sides and limits) is committed (`8db43da`): the
 CONSTs in `CWS14.BI`, and `army_side` and `other_side` in `rules\army.bm`. Each number was read in place
 (not by a script from a table), so no script goes into `tools\refactor\`.
-Groups 2 to 8 are committed (`cfc9030`, `dd8c456`, `b608f8d`, `8953dfc`, `e0d1b2f`, `b57be0b`,
-`c19189e`). Group 9 (keys and pauses) is done in the working tree; it ends phase 3. What the groups left
-alone is in `TODO.md`, "The code".
-**Next:** phase 5 (Opus). Its first step lists the FUNCTION names for the user (decision 12).
+Groups 2 to 9 are committed (`cfc9030`, `dd8c456`, `b608f8d`, `8953dfc`, `e0d1b2f`, `b57be0b`,
+`c19189e`, `f05fdd8`), which ends phase 3. What the groups left alone is in `TODO.md`, "The code".
+Phase 5 step 1 is done in the working tree: `city_is_connected`, `city_nearby_enemy_strength`,
+`railroad_capacity` and `menu_measure_width` are FUNCTIONs and keep their settled names. Each call
+`CALL f(args, v)` became `v = f(args)`, with the same variable and in the same place.
+**Next:** phase 5 step 2, `side_army_range` (two results) and `army_get_commander` (it also makes a leader),
+once the user has chosen what they become.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and

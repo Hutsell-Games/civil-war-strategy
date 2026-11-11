@@ -5,7 +5,7 @@ DIM g2(1 TO 8000)
 menu_text$(1) = text$
 menu_col = 32 - LEN(text$) \ 2
 menu_row = 10: menu_item_count = 1
-CALL menu_measure_width(wide)
+wide = menu_measure_width
 IF wide > 59 THEN wide = 59: text$ = LEFT$(text$, 59)
 x = 8 * (menu_col + wide)
 y = 16 * (menu_row + 1)

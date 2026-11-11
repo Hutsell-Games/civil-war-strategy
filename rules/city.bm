@@ -1,11 +1,13 @@
-SUB city_is_connected (side, city, a)
-DIM j AS INTEGER: DIM y AS INTEGER
+' The number of cities next to city that side holds: 0 when the city is cut off.
+FUNCTION city_is_connected (side, city)
+DIM j AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
 a = 0
 FOR j = 1 TO MAX_ROADS
 y = city_road(city, j)
 IF y > 0 AND city_owner(y) = side THEN a = a + 1
 NEXT j
-END SUB
+city_is_connected = a
+END FUNCTION
 
 SUB city_capture (active, c, side, weaken_fort)
 DIM a$: DIM x AS INTEGER: DIM y AS INTEGER

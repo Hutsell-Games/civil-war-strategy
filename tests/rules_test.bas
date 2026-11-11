@@ -88,10 +88,10 @@ END SUB
 SUB TestCutoffCountsFriendlyNeighbors
 city_road(5, 1) = 2: city_road(5, 2) = 3: city_road(5, 3) = 4
 city_owner(2) = 1: city_owner(3) = 2: city_owner(4) = 1
-CALL city_is_connected(1, 5, a): AssertEqualInt 2, a, "the Union holds two neighbors"
-CALL city_is_connected(2, 5, a): AssertEqualInt 1, a, "the Rebels hold one"
+a = city_is_connected(1, 5): AssertEqualInt 2, a, "the Union holds two neighbors"
+a = city_is_connected(2, 5): AssertEqualInt 1, a, "the Rebels hold one"
 city_owner(3) = 0
-CALL city_is_connected(2, 5, a): AssertEqualInt 0, a, "cut off"
+a = city_is_connected(2, 5): AssertEqualInt 0, a, "cut off"
 END SUB
 
 ' ------------------------------------------------------------ traincapacity
@@ -102,24 +102,24 @@ END SUB
 
 SUB TestTraincapacityWithoutRealism
 train_capacity(1) = 600: train_capacity(2) = 300: opt_realism = 0
-CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "the Union"
-CALL railroad_capacity(2, limit): AssertEqualInt 300, limit, "the Rebels"
+limit = railroad_capacity(1): AssertEqualInt 600, limit, "the Union"
+limit = railroad_capacity(2): AssertEqualInt 300, limit, "the Rebels"
 END SUB
 
 SUB TestTraincapacityWithRealism
 train_capacity(1) = 600: opt_realism = 1: current_side = 1
-side_city_count(1) = 14: CALL railroad_capacity(1, limit): AssertEqualInt 615, limit, "14 cities"
-side_city_count(1) = 11: CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "11 cities"
-side_city_count(1) = 5: CALL railroad_capacity(1, limit): AssertEqualInt 570, limit, "5 cities"
+side_city_count(1) = 14: limit = railroad_capacity(1): AssertEqualInt 615, limit, "14 cities"
+side_city_count(1) = 11: limit = railroad_capacity(1): AssertEqualInt 600, limit, "11 cities"
+side_city_count(1) = 5: limit = railroad_capacity(1): AssertEqualInt 570, limit, "5 cities"
 train_capacity(1) = 20
-side_city_count(1) = 0: CALL railroad_capacity(1, limit): AssertEqualInt 10, limit, "never less than half"
-side_city_count(1) = 40: CALL railroad_capacity(1, limit): AssertEqualInt 40, limit, "never more than twice"
+side_city_count(1) = 0: limit = railroad_capacity(1): AssertEqualInt 10, limit, "never less than half"
+side_city_count(1) = 40: limit = railroad_capacity(1): AssertEqualInt 40, limit, "never more than twice"
 END SUB
 
 SUB TestTraincapacityCountsByPlayersSide
 train_capacity(1) = 600: opt_realism = 1: side_city_count(1) = 23
 current_side = 2
-CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
+limit = railroad_capacity(1): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
 END SUB
 
 ' --------------------------------------------------------------------- void
@@ -131,14 +131,14 @@ current_side = 1
 city_road(1, 1) = 2: city_owner(2) = 1: city_army(2) = 4: army_size(4) = 50
 city_road(2, 1) = 3: city_owner(3) = 1: city_army(3) = 6: army_size(6) = 40
 city_road(2, 2) = 1
-CALL city_nearby_enemy_strength(1, y)
+y = city_nearby_enemy_strength(1)
 AssertEqualInt 54, y, "50 beside and a tenth of 40 further"
 END SUB
 
 SUB TestVoidIsZeroWithNoArmyNear
 current_side = 1
 city_road(1, 1) = 2: city_owner(2) = 2: city_army(2) = 24: army_size(24) = 50
-CALL city_nearby_enemy_strength(1, y)
+y = city_nearby_enemy_strength(1)
 AssertEqualInt 0, y, "the enemy's army does not count"
 END SUB
 
@@ -206,10 +206,10 @@ END SUB
 
 SUB TestMxwIsTheLongestEntry
 menu_text$(0) = "Main": menu_text$(1) = "Troops": menu_text$(2) = "Railroad": menu_text$(3) = "END TURN": menu_item_count = 3
-CALL menu_measure_width(wide)
+wide = menu_measure_width
 AssertEqualInt 8, wide, "Railroad"
 menu_text$(0) = "VGA CIVILWAR STRATEGY"
-CALL menu_measure_width(wide)
+wide = menu_measure_width
 AssertEqualInt 22, wide, "the title and one more"
 END SUB
 
