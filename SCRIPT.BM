@@ -74,8 +74,8 @@ END SUB
 '        I  the special development: ironclad ships (events)
 '        N  a special event good for the Union (events)
 '        S  a special event good for the South (events)
-'        H  the game is over: "press a key" before the Hall of Fame (maxx)
-'        G  "Game Over" (maxx)
+'        H  the game is over: "press a key" before the Hall of Fame (update_high_scores)
+'        G  "Game Over" (update_high_scores)
 '        F  a report: "press a key" (report)
 '        L  TICK of 99 seconds or more
 '   2  a menu; letter$ is the first letter of the menu's title

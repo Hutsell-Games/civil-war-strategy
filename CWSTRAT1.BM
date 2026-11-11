@@ -5,7 +5,7 @@ y = cityy(from) - 11
 x1 = .5 * (cityx(to2) + cityx(from))
 y1 = .5 * (cityy(to2) + cityy(from))
 
-CALL occupy(from): IF occupied(from) > 0 THEN CALL placearmy(occupied(from))
+CALL update_occupant(from): IF occupied(from) > 0 THEN CALL draw_army(occupied(from))
        
 IF flag > 0 GOTO already
 	GET (x - 9, y - 7)-(x + 9, y + 6), anima
@@ -24,8 +24,8 @@ already:
 	armyloc(index) = from
 END SUB
 
-SUB armies
-CALL movefrom(index, target): IF target > 0 AND index > 0 GOTO tent
+SUB order_army_move
+CALL choose_army_to_move(index, target): IF target > 0 AND index > 0 GOTO tent
 	IF index = -1 THEN mflag = 1
 	GOTO dudd
 tent:
@@ -39,15 +39,15 @@ FOR i = 1 TO 6: IF matrix(target, i) > 0 THEN size = size + 1: mtx$(size) = city
 NEXT i
 CALL bubble(size)
 
-hilite = 10: colour = 3: CALL menu(2): CALL clrrite
+hilite = 10: colour = 3: CALL menu(2): CALL clear_right
 IF choose < 0 GOTO dudd
-IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clrbot: PRINT "No campaigns in January"; : CALL TICK(9): CALL clrbot: GOTO dudd
+IF month < 3 AND jancam = 0 AND cityp(array(choose)) <> side THEN COLOR 11: CALL clear_bottom: PRINT "No campaigns in January"; : CALL TICK(9): CALL clear_bottom: GOTO dudd
 
-CALL clrbot: PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(target); " to "; city$(array(choose));
+CALL clear_bottom: PRINT "Army "; index; " "; armyname$(index); " is moving from "; city$(target); " to "; city$(array(choose));
 IF noise > 0 THEN SOUND 2200, .5: SOUND 2900, .7
 CALL icon(target, array(choose), 1)
-armymove(index) = array(choose): CALL TICK(turbo!): CALL clrbot
-CALL clrrite
+armymove(index) = array(choose): CALL TICK(turbo!): CALL clear_bottom
+CALL clear_right
 dudd:
 END SUB
 
@@ -56,7 +56,7 @@ LINE (530, 60)-(639, 150), 0, BF
 COLOR 15
 LOCATE 5, 68: PRINT armyname$(index)
 COLOR 9: IF index > 20 THEN COLOR 7
-LOCATE 6, 68: PRINT "Size:"; : CALL strong(index)
+LOCATE 6, 68: PRINT "Size:"; : PRINT army_strength$(index);
 LOCATE 7, 68: PRINT "Leader:"; TAB(75); armylead(index)
 LOCATE 8, 68: PRINT "Exper:"; TAB(75); armyexper(index)
 IF supply(index) < 2 THEN COLOR 12
@@ -82,11 +82,11 @@ SUB combine (who)
 	IF who <> side THEN choose = 1 + INT(size * RND): GOTO join
 	mtx$(0) = "Join"
 		choose = 31: hilite = 11
-		CALL menu(9): CALL clrrite
+		CALL menu(9): CALL clear_right
 join:
 		IF choose < 1 GOTO nocity2
 		target = array(choose)
-		CALL clrbot: PRINT "Combining "; force$(who); " armies in "; city$(target); :  CALL TICK(turbo!)
+		CALL clear_bottom: PRINT "Combining "; force$(who); " armies in "; city$(target); :  CALL TICK(turbo!)
 
 		armysize(0) = 0: armylead(0) = 0: armyexper(0) = 0: armyloc(0) = target
 		armyname$(0) = "": supply(0) = 0: armymove(0) = 0
@@ -94,7 +94,7 @@ join:
 		best = 0: x = 0: spin = 0
 		FOR j = star TO fin
 		IF armymove(j) <> 0 OR armyloc(j) <> target OR armysize(j) = 0 GOTO dork1
-		IF armysize(0) + armysize(j) > 1250 THEN CALL clrbot: PRINT "Cannot combine "; armyname$(j); "... TOO LARGE"; : CALL TICK(turbo!): GOTO dork1
+		IF armysize(0) + armysize(j) > 1250 THEN CALL clear_bottom: PRINT "Cannot combine "; armyname$(j); "... TOO LARGE"; : CALL TICK(turbo!): GOTO dork1
 
 		IF armylead(j) > x THEN
 			x = armylead(j)
@@ -108,7 +108,7 @@ join:
 		pct! = (armysize(j) / armysize(0))
 		spin = spin + 1
 		armyexper(0) = (1 - pct!) * armyexper(0) + pct! * armyexper(j)
-		CALL clrbot: PRINT armyname$(j); " is combining his "; : CALL strong(j): PRINT " forces"; : CALL TICK(turbo!)
+		CALL clear_bottom: PRINT armyname$(j); " is combining his "; : PRINT army_strength$(j); : PRINT " forces"; : CALL TICK(turbo!)
 		supply(0) = supply(0) + supply(j)
 		IF supply(0) > 10 THEN supply(0) = 10
 		armysize(j) = 0: armyloc(j) = 0: armyexper(j) = 0: armymove(j) = 0
@@ -117,7 +117,7 @@ join:
 dork1:
 		NEXT j
 
-		CALL clrbot
+		CALL clear_bottom
 		IF who <> side AND spin = 0 THEN EXIT SUB
 		IF spin = 0 THEN
 				PRINT "No valid armies to combine at this time in "; city$(target);
@@ -130,7 +130,7 @@ dork1:
 		armyname$(best) = armyname$(0)
 		lname$(best) = ""
 		IF spin > 1 THEN
-		PRINT "New army "; best; " of "; : CALL strong(best): PRINT " is commanded by "; armyname$(best);
+		PRINT "New army "; best; " of "; : PRINT army_strength$(best); : PRINT " is commanded by "; armyname$(best);
 		armymove(best) = -1
 		ELSE
 		PRINT "Only 1 eligible army -- cannot combine at this time";
@@ -139,20 +139,22 @@ dork1:
 		IF noise > 0 THEN SOUND 4000, .7
 	       
 		CALL showcity
-		CALL placearmy(best)
+		CALL draw_army(best)
 		CALL icon(target, 0, 6)
 		occupied(target) = best
-		CALL stax(who)
+		CALL draw_army_stacks(who)
 nocity2:
 END SUB
 
-SUB cutoff (who, target, a)
+FUNCTION is_cut_off (who, target)
+' True when who holds none of the cities linked to target.
 a = 0
 FOR j = 1 TO 6
 y = matrix(target, j)
 IF y > 0 AND cityp(y) = who THEN a = a + 1
 NEXT j
-END SUB
+is_cut_off = (a = 0)
+END FUNCTION
 
 SUB fortify (target)
 	target = 0: hilite = 11
@@ -167,26 +169,26 @@ SUB fortify (target)
 		array(size) = armyloc(i)
 	END IF
 	NEXT i
-	IF size = 0 THEN CALL clrbot: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
+	IF size = 0 THEN CALL clear_bottom: COLOR 11: PRINT "No cities eligible to fortify"; : EXIT SUB
 	CALL bubble(size)
 	mtx$(0) = "Fortify"
 		choose = 31
-		CALL menu(9): CALL clrrite
+		CALL menu(9): CALL clear_right
 		IF choose < 0 GOTO nocity
-		target = array(choose): CALL occupy(target): x = occupied(target): IF x < 0 GOTO nocity
-		IF fort(target) > 1 THEN CALL clrbot: PRINT city$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): GOTO nocity
+		target = array(choose): CALL update_occupant(target): x = occupied(target): IF x < 0 GOTO nocity
+		IF fort(target) > 1 THEN CALL clear_bottom: PRINT city$(target); " at MAXIMUM fortification level of 2"; : CALL TICK(4): GOTO nocity
 		cost = 200
-		IF cash(side) < cost THEN CALL clrbot: PRINT "Fortifications for "; city$(target); " cost "; cost; " and you only have "; cash(side); : CALL TICK(4): GOTO nocity
+		IF cash(side) < cost THEN CALL clear_bottom: PRINT "Fortifications for "; city$(target); " cost "; cost; " and you only have "; cash(side); : CALL TICK(4): GOTO nocity
 		COLOR 3
 		fort(target) = fort(target) + 1
 		cash(side) = cash(side) - cost
-		CALL clrbot: PRINT city$(target); " fortifications increased to "; fort(target);
+		CALL clear_bottom: PRINT city$(target); " fortifications increased to "; fort(target);
 		CALL icon(target, 0, 6)
 		CALL showcity
 		IF armymove(x) > 0 THEN CALL icon(armyloc(x), armymove(x), 5)
 		armymove(x) = -1
-		CALL placearmy(x)
-		CALL stax(who)
+		CALL draw_army(x)
+		CALL draw_army_stacks(who)
 nocity:
 END SUB
 
@@ -265,7 +267,7 @@ END SELECT
 noshow:
 END SUB
 
-SUB movefrom (index, target)
+SUB choose_army_to_move (index, target)
 	colour = 3: tlx = 67: tly = 5: index = 0: size = 0: target = 0
 	who = side: CALL starfin(star, fin, who)
 	FOR i = star TO fin
@@ -275,7 +277,7 @@ SUB movefrom (index, target)
 	mtx$(0) = "From"
 	CALL bubble(size)
 	tlx = 67: tly = 5
-		hilite = 15: CALL menu(1): CALL clrrite
+		hilite = 15: CALL menu(1): CALL clear_right
 		IF choose < 0 THEN target = 0: GOTO notarg
 		target = array(choose)
 
@@ -286,7 +288,7 @@ SUB movefrom (index, target)
 		IF size = 1 GOTO notarg
 		mtx$(0) = "Which"
 		CALL bubble(size)
-		tlx = 67: tly = 15: CALL menu(4): CALL clrrite
+		tlx = 67: tly = 15: CALL menu(4): CALL clear_right
 		IF choose < 0 THEN index = 0: GOTO notarg
 		index = array(choose)
 notarg:
@@ -297,26 +299,26 @@ SUB newarmy (who, empty, target)
 	armyexper(empty) = 1: IF who = 2 THEN armyexper(empty) = 2
 	armylead(empty) = rating(empty)
 	armyname$(empty) = lname$(empty): lname$(empty) = ""
-	COLOR 12: CALL clrbot: PRINT "Placing NEW army "; empty; armyname$(empty); " in "; city$(target);
+	COLOR 12: CALL clear_bottom: PRINT "Placing NEW army "; empty; armyname$(empty); " in "; city$(target);
 
 	x = 70: IF realism > 0 THEN x = 3 * cityv(target) + 33
-	CALL cutoff(who, target, a): IF a < 1 THEN x = x \ 3
+	IF is_cut_off(who, target) THEN x = x \ 3
 	occupied(target) = empty: armysize(empty) = x
-	PRINT " Size = "; : CALL strong(empty)
+	PRINT " Size = "; : PRINT army_strength$(empty);
 	cash(who) = cash(who) - 100: IF noise > 0 THEN SOUND 2222, .5
-	armyloc(empty) = target: CALL placearmy(empty)
+	armyloc(empty) = target: CALL draw_army(empty)
 	CALL TICK(turbo! - .5)
 	armymove(empty) = -1
 END SUB
 
-SUB newcity (index)
+SUB choose_new_city (index)
 		mtx$(1) = "  "
 		mtx$(3) = "  "
 		size = 3: a$ = city$(index)
 morecap:
 		tlx = 68: tly = 15: colour = 3: choose = 23
 		mtx$(2) = city$(index)
-		CALL menu(3): CALL clrrite
+		CALL menu(3): CALL clear_right
 	       SELECT CASE choose
 		CASE IS = -27
 		index = 0: EXIT SUB
@@ -351,15 +353,15 @@ plus1:
 fnew:
 END SUB
 
-SUB normal (xbar, vary, result)
+FUNCTION gaussian_random_number (xbar, vary)
 ' NOTE : vary is VARIANCE
 pct! = 0
 FOR k = 1 TO 12: pct! = pct! + RND: NEXT k
 pct! = pct! - 5.5
-result = xbar + pct! * SQR(vary)
-END SUB
+gaussian_random_number = xbar + pct! * SQR(vary)
+END FUNCTION
 
-SUB placearmy (which)
+SUB draw_army (which)
 who = 1: IF which > 20 THEN who = 2
 x = cityx(armyloc(which)) - 12
 y = cityy(armyloc(which)) - 11
@@ -402,17 +404,17 @@ alldone:
 '............................................................................
 levy:
 	IF cash(who) < 100 GOTO menu1
-	IF (who = side) OR (player = 2) THEN CALL clrbot: PRINT force$(who); " funds available "; cash(who);
+	IF (who = side) OR (player = 2) THEN CALL clear_bottom: PRINT force$(who); " funds available "; cash(who);
 	tlx = 67: tly = 12: colour = 3
 	IF who <> side THEN GOSUB randsel: GOTO auto1
       
 	IF choose > 0 THEN choose = 21 + choose
-	CALL menu(2): CALL clrrite
+	CALL menu(2): CALL clear_right
 	IF choose < 1 GOTO menu1
 auto1:
 	empty = 0
 	index = array(choose)
-	CALL occupy(index)
+	CALL update_occupant(index)
 	IF occupied(index) > 0 THEN i = occupied(index): GOTO add2
 	CALL commander((who), empty)
        
@@ -428,8 +430,7 @@ add2:
 	x = 45: a$ = ""
 	IF realism > 0 THEN
 		x = 2 * cityv(armyloc(i)) + 20
-		CALL cutoff(who, target, a)
-		IF a < 1 THEN x = x \ 3: a$ = " ISOLATED !"
+		IF is_cut_off(who, target) THEN x = x \ 3: a$ = " ISOLATED !"
 	END IF
 	armysize(i) = armysize(i) + x
 
@@ -439,7 +440,7 @@ add2:
 	GET (x - 9, y - 7)-(x + 9, y + 6), anima
 	CALL icon(armyloc(i), 0, 2)
 	IF noise > 0 THEN SOUND 2222, 1
-	COLOR 11: CALL clrbot: PRINT "Army "; i; armyname$(i); " in "; city$(armyloc(i)); " strength increased to "; : CALL strong(i)
+	COLOR 11: CALL clear_bottom: PRINT "Army "; i; armyname$(i); " in "; city$(armyloc(i)); " strength increased to "; : PRINT army_strength$(i);
 	IF a$ <> "" THEN PRINT a$;
 	PUT (x - 9, y - 7), anima, PSET
 	CALL TICK(turbo! - .5)
@@ -460,12 +461,10 @@ randsel:
 		target = array(i)
 		IF occupied(target) = 0 THEN
 			y = 3 * cityv(target) + 33
-			CALL cutoff(who, target, a)
-			IF a < 1 THEN y = y \ 3
+			IF is_cut_off(who, target) THEN y = y \ 3
 		ELSE
 			y = 2 * cityv(target) + 20
-			CALL cutoff(who, target, a)
-			IF a < 1 THEN y = y \ 3
+			IF is_cut_off(who, target) THEN y = y \ 3
 		END IF
 		IF y > x AND RND > .5 THEN x = y: choose = i
 		NEXT i
@@ -484,8 +483,8 @@ IF flag = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), image
 IF flag = 1 THEN PUT (x - 10, y - 10), image, PSET
 END SUB
 
-SUB strong (index)
-a$ = LTRIM$(RTRIM$(STR$(armysize(index)))) + "00"
-PRINT a$;
-END SUB
+FUNCTION army_strength$ (index)
+' The army's size as the game shows it: armysize counts hundreds of men.
+army_strength$ = LTRIM$(RTRIM$(STR$(armysize(index)))) + "00"
+END FUNCTION
 

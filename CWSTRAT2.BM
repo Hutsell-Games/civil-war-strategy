@@ -25,7 +25,7 @@ END SUB
 
 SUB cancel (side)
 CALL starfin(star, fin, (side))
-CALL clrrite
+CALL clear_right
 	size = 0
 	FOR j = star TO fin
 	a$ = armyname$(j): IF LEN(a$) > 10 THEN x = INSTR(a$, " "): a$ = RIGHT$(a$, LEN(a$) - x)
@@ -34,7 +34,7 @@ CALL clrrite
 	CALL bubble(size)
 	tlx = 67: tly = 2: wtype = 2
 	mtx$(0) = "Cancel"
-	IF size < 1 THEN CALL clrbot: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
+	IF size < 1 THEN CALL clear_bottom: COLOR 11: PRINT "No units have orders to cancel"; : EXIT SUB
 	CALL menu(1)
 	SELECT CASE choose
 	 CASE 1 TO size
@@ -44,15 +44,15 @@ CALL clrrite
 		IF armyloc(i) = target THEN x = INSTR(armyname$(i), mtx$(choose)): IF x > 0 AND armymove(i) > 0 THEN index = i
 		NEXT i
 
-		CALL clrbot: COLOR 11: PRINT armyname$(index); " has cancelled move to "; city$(armymove(index)); : CALL TICK(turbo + 1)
+		CALL clear_bottom: COLOR 11: PRINT armyname$(index); " has cancelled move to "; city$(armymove(index)); : CALL TICK(turbo + 1)
 		CALL icon(armyloc(index), armymove(index), 4)
 		armymove(index) = 0: IF noise > 0 THEN SOUND 2999, .5
-		CALL stax(side)
+		CALL draw_army_stacks(side)
 	 CASE ELSE
 		GOTO finix
 	END SELECT
 finix:
-	CALL clrrite
+	CALL clear_right
 END SUB
 
 SUB center (y, a$)
@@ -61,12 +61,12 @@ x = 26 - x \ 2
 LOCATE y, 7 + x: PRINT a$
 END SUB
 
-SUB clrbot
+SUB clear_bottom
 LOCATE 29, 1: PRINT SPACE$(79);
 LOCATE 29, 1
 END SUB
 
-SUB clrrite
+SUB clear_right
 VIEW (528, 1)-(639, 450)
 CLS 1
 VIEW
@@ -83,14 +83,14 @@ SUB commander (who, empty)
 	FOR i = star TO fin
 	IF armyloc(i) = 0 THEN
 		x = i
-		CALL roman(x, a$)
+		CALL generate_generic_name(x, a$)
 		empty = i
 		lname$(i) = a$
 		rating(i) = 1 + 8 * RND
 		EXIT SUB
 	END IF
 	NEXT i
-	CALL clrbot: PRINT "No more "; force$(who); " commanders available"; : CALL TICK(turbo!)
+	CALL clear_bottom: PRINT "No more "; force$(who); " commanders available"; : CALL TICK(turbo!)
 END SUB
 
 SUB image2 (a$, s)
@@ -135,7 +135,7 @@ IF y > 0 THEN PRINT "* "; y; " fixes made to provide RETURN ROUTES"
 IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB
 
-SUB occupy (x)
+SUB update_occupant (x)
 occupied(x) = 0
 FOR i = 1 TO 40
 IF armyloc(i) = x THEN occupied(x) = i: GOTO holdup
@@ -161,7 +161,7 @@ IF size = 0 THEN EXIT SUB
 CALL bubble(size)
 mtx$(0) = "Relieve"
 choose = 31: hilite = 11
-CALL menu(6): CALL clrrite
+CALL menu(6): CALL clear_right
 
 IF choose < 1 THEN EXIT SUB
 index = array(choose)
@@ -184,35 +184,34 @@ CALL bubble(size)
 have2:
 mtx$(0) = "New Leader"
 tlx = 67: tly = 2
-CALL menu(0): CALL clrrite
+CALL menu(0): CALL clear_right
 IF choose < 1 GOTO have2
 armymove(index) = -1
 armylead(index) = rating(array(choose))
 IF armylead(index) > 0 THEN armylead(index) = armylead(index) - 1
 IF armyexper(index) > 0 THEN armyexper(index) = armyexper(index) - 1
-COLOR 15: CALL clrbot: PRINT lname$(array(choose)); " has replaced "; t$; " in "; city$(armyloc(index)); : TICK 9
+COLOR 15: CALL clear_bottom: PRINT lname$(array(choose)); " has replaced "; t$; " in "; city$(armyloc(index)); : TICK 9
 armyname$(index) = lname$(array(choose))
 lname$(array(choose)) = ""
 CALL icon(armyloc(index), 0, 8)
-CALL clrbot
+CALL clear_bottom
 END SUB
 
 SUB resupply (index)
 		who = 1: IF index > 20 THEN who = 2
 		IF realism > 0 THEN
-			CALL cutoff(who, armyloc(index), a)
-			IF a < 1 THEN EXIT SUB
+			IF is_cut_off(who, armyloc(index)) THEN EXIT SUB
 		END IF
 		IF armysize(index) > 0 THEN x = cash(who) / armysize(index) * 10
 		y = x + supply(index): IF y > 5 THEN x = 5 - supply(index)
-		IF x < 1 THEN CALL clrbot: PRINT "Not enough funds in the Treasury to supply "; armyname$(index); : GOTO nocash
+		IF x < 1 THEN CALL clear_bottom: PRINT "Not enough funds in the Treasury to supply "; armyname$(index); : GOTO nocash
 		supply(index) = supply(index) + x: cash(who) = cash(who) - .1 * x * armysize(index)
-		CALL clrbot: PRINT armyname$(index); " has received supplies "; : IF noise > 0 THEN SOUND 4500, .5
+		CALL clear_bottom: PRINT armyname$(index); " has received supplies "; : IF noise > 0 THEN SOUND 4500, .5
 nocash:
 		CALL TICK(turbo!): IF cash(who) < 0 THEN cash(who) = 0
 END SUB
 
-SUB roman (target, a$)
+SUB generate_generic_name (target, a$)
 a$ = "Union ": IF target > 20 THEN a$ = "Rebel "
 IF target > 20 THEN target = target - 20
 IF target > 10 THEN a$ = a$ + "X": target = target - 10
@@ -240,7 +239,7 @@ END SUB
 
 SUB scribe (a$, flag)
 SELECT CASE flag
-		CASE 1: CALL clrbot: PRINT a$;
+		CASE 1: CALL clear_bottom: PRINT a$;
 		CASE 2: CALL image2(a$, 4)
 END SELECT
 IF history > 0 THEN
@@ -271,7 +270,7 @@ SUB starfin (star, fin, who)
 star = 1: fin = 20: IF who = 2 THEN star = 21: fin = 40
 END SUB
 
-SUB stax (who)
+SUB draw_army_stacks (who)
 CALL starfin(star, fin, who)
 FOR i = star TO fin
 IF armysize(i) > 0 AND occupied(armyloc(i)) <> i THEN
@@ -320,7 +319,10 @@ LOCATE 27, 68: PRINT "F7 End Turn"
 LOCATE 28, 68: PRINT a$
 END SUB
 
-SUB void (a, y)
+FUNCTION enemy_strength_near (a)
+' The armies of side, the player at the keyboard, in the cities linked to
+' city a, and a tenth of those one city further. Only the computer uses
+' the result, so side is its enemy.
   y = 0
 FOR j = 1 TO 6
   x = matrix(a, j): IF x = 0 GOTO tally5
@@ -331,5 +333,6 @@ tally4:
 	NEXT k
 NEXT j
 tally5:
-END SUB
+enemy_strength_near = y
+END FUNCTION
 

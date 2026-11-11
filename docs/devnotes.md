@@ -129,8 +129,59 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
     `fortify`, `relieve`, `cancel`) and the small SUBs that many others call. Two of those were looked at and
     stay: `void` is called from `navy` and `railroad` as well as the computer player, and `armystat` from
     `armies` and `menu`, not from `report`.
+15. **The code's names follow a convention, and 19 SUBs are renamed to it** (user, 2026-11-11: "changing
+    variable names is okay, we are working on the game now, not just bringing to parity on this branch").
+    Before this, the branch kept every name as given. The convention, for new and renamed names:
+    - **Names are snake_case.** BASIC ignores case, so `DrawArmy` and `DRAWARMY` are the same name and
+      CamelCase drifts as people type. No old name has `_`, so a new name cannot clash with one. A name never
+      starts or ends with `_`: QB64 keeps a leading `_` for its own words, and a trailing `_` continues a line.
+      QB 4.5 and PDS 7.1 do not take `_` in a name; the game is built with QB64pe and QB64Rust only.
+    - **A SUB that acts is named verb first:** `draw_army`, `clear_bottom`, `update_occupant`.
+    - **A routine that only works out a value is a FUNCTION named for the value**, not a SUB with a
+      parameter for the result.
+    - **Families share a first word:** `draw_`, `menu_`, `ai_`, `check_`, `navy_`.
+    - **`check_` and `is_` mean a yes or no.** A routine that counts or changes something is not `check_`.
+    - **Type suffixes stay.** The game runs under `DEFINT A-Z`, so `$` and `!` are what mark a string or a float.
 
-Not changed: the code is not reformatted, no variable is renamed, and no feature of the game is removed but F1's
+    Renamed, with no other change:
+
+    | Was | Now | What it does |
+    |---|---|---|
+    | `armies` | `order_army_move` | The Move order: pick an army and its destination |
+    | `barnacle` | `navy_lose_ship` | Takes the last ship off a fleet: sunk, or landed as an army |
+    | `clrbot` | `clear_bottom` | Clears the message line |
+    | `clrrite` | `clear_right` | Clears the panel at the right |
+    | `endit` | `menu_victory_conditions` | The menu that turns victory conditions on and off |
+    | `maxx` | `update_high_scores` | The Hall of Fame: asks the winner's name, writes `hiscore.cws` |
+    | `movefrom` | `choose_army_to_move` | Picks the city and the army for a move |
+    | `newcity` | `choose_new_city` | Picks one of the player's cities: for the capital, or a train's destination |
+    | `occupy` | `update_occupant` | Sets `occupied(x)` to the first army in city x |
+    | `placearmy` | `draw_army` | Draws an army at its city, and its out-of-supply mark |
+    | `roman` | `generate_generic_name` | Makes up a general's name, such as "Union IV" |
+    | `smarts` | `ai_turn` | The computer side's turn |
+    | `stax` | `draw_army_stacks` | Rings each army that shares a city with another |
+    | `victor` | `check_game_over` | Checks whether the game is over |
+
+    Changed to a FUNCTION, each call rewritten to match:
+
+    | Was | Now | The calls |
+    |---|---|---|
+    | `void (a, y)` | `enemy_strength_near (a)` | `CALL void(c, d)` is `d = enemy_strength_near(c)` (9 calls) |
+    | `cutoff (who, target, a)` | `is_cut_off (who, target)`, true when the count was 0 | Every call only tested `a < 1` or `a > 0`; each is now an `IF is_cut_off(...)` (7 calls) |
+    | `strong (index)` | `army_strength$ (index)` | It printed; `CALL strong(i)` is `PRINT army_strength$(i);` (12 calls) |
+    | `normal (xbar, vary, result)` | `gaussian_random_number (xbar, vary)` | `CALL normal(x, v, r)` is `r = gaussian_random_number(x, v)` (2 calls) |
+
+    `filer (switch)` is split into the SUBs of its three cases: `load_scenario` (was `filer(1)`), `load_game`
+    (2) and `save_game` (3). The Files menu's `CALL filer(choose + 1)` is
+    `IF choose = 1 THEN CALL load_game ELSE CALL save_game`.
+
+    Names were changed in code only, not in the game's text or in comments that use the word in its usual
+    sense. The SUBs stay where they were in their files. The unit tests are renamed with them, and the test of
+    `is_cut_off` now checks a yes or no instead of the count. The 23 unit tests pass, and the 25 scripts show
+    the same screens with both compilers. The items above keep the names of their day. Not yet renamed: the
+    other SUBs (`iterate`, `tupdate`, `starfin`, `icon` and more) and the variables.
+
+Not changed: the code is not reformatted, no variable is renamed (SUBs are, item 15), and no feature of the game is removed but F1's
 help (item 6) and the boss screen (item 12). No rule of the game is changed but Vary Start's loop (item 13). The
 text "Registered Edition" and the version stay. The DOS line-drawing characters in the sources (code page 437)
 stay as they are, and both compilers draw them as DOS did.
@@ -261,7 +312,7 @@ The lines changed for them:
 | `CWSTRAT.BAS`, the same place | `DATE$` | `scriptdate$` |
 | `TICK`, `CWSTRAT2.BM` | | first line `IF scripttick(sec!) THEN EXIT SUB` |
 | 12 loops `DO WHILE INKEY$ = "": LOOP` | | `CALL announce(1, "<letter>")` before each |
-| `maxx`, `ending.bm` | `INPUT a$` | `CALL announce(4, ""): INPUT a$` |
+| `update_high_scores` (was `maxx`), `ending.bm` | `INPUT a$` | `CALL announce(4, ""): INPUT a$` |
 | `crsr` in `menu`, `CWSMENU.BM` | `crsr:   a$ = INKEY$: IF a$ = "" GOTO crsr` | `crsr:   CALL announce(2, mtx$(0)): DO: a$ = INKEY$: LOOP WHILE a$ = ""` |
 
 The menu's loop reads keys as before. Its label stays, so the wait is announced again after a key the menu

@@ -411,11 +411,11 @@ LINE (447, 291)-(525, 335), 1, BF
 END IF
 
 FOR i = 1 TO 40
-IF armyloc(i) > 0 THEN CALL placearmy(i)
+IF armyloc(i) > 0 THEN CALL draw_army(i)
 NEXT i
 
 FOR k = 1 TO 2
-CALL stax(k)
+CALL draw_army_stacks(k)
 NEXT k
 
 IF player = 2 GOTO nosee

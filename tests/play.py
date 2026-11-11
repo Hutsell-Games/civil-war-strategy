@@ -58,7 +58,7 @@ TEST_DATA = GAME / "tests" / "data"
 # The name of the configuration file the run starts with; play.py writes it.
 CFG_NAME = "CWS.CFG"
 
-# The fields of CWS.CFG in the order the game reads and writes them (filer, files.bm; Files,
+# The fields of CWS.CFG in the order the game reads and writes them (files.bm; Files,
 # New Game, CWSTRAT.BAS), with the values a run starts with. They are those of the CWS.CFG that
 # came with the game, but noise: 0 (no sound, and no title music, which waits for its notes)
 # where the file has 2.

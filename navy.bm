@@ -1,4 +1,4 @@
-SUB barnacle (who)
+SUB navy_lose_ship (who)
 navysize(who) = navysize(who) - 1
 IF navysize(who) > 0 THEN
 	fleet$(who) = LEFT$(fleet$(who), navysize(who))
@@ -20,7 +20,7 @@ END IF
 COLOR 11
 ahoy:
 cost = 100: cityp(0) = who
-IF chx = 0 THEN CALL clrbot: PRINT "Funds available "; cash(who);
+IF chx = 0 THEN CALL clear_bottom: PRINT "Funds available "; cash(who);
 IF chx = 1 THEN
 	IF cash(who) < cost THEN EXIT SUB
 	IF navysize(who) > 9 THEN EXIT SUB
@@ -40,13 +40,13 @@ mtx$(3) = "Sail": IF navyloc(who) < 1 THEN mtx$(3) = "-": IF chx = 3 THEN chx = 
 mtx$(4) = "Raid": IF navysize(who) < 1 OR commerce = who THEN mtx$(4) = "-"
 tlx = 67: tly = 12: size = 4
 IF navyloc(who) <> 99 THEN
-IF who = 1 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN size = 5: mtx$(5) = "Invasion": CALL void(navyloc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
-IF realism = 0 AND who = 2 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN size = 5: mtx$(5) = "Invasion": CALL void(navyloc(1), defend): IF chx > 0 AND defend < 100 THEN chx = 5
+IF who = 1 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN size = 5: mtx$(5) = "Invasion": defend = enemy_strength_near(navyloc(1)): IF chx > 0 AND defend < 100 THEN chx = 5
+IF realism = 0 AND who = 2 AND navysize(who) > 1 AND cityp(navyloc(who)) = 0 THEN size = 5: mtx$(5) = "Invasion": defend = enemy_strength_near(navyloc(1)): IF chx > 0 AND defend < 100 THEN chx = 5
 END IF
 
 IF chx > 0 THEN choose = chx: GOTO anchor
 IF nflag > 0 AND choose <> 1 THEN EXIT SUB
-CALL menu(0): CALL clrrite
+CALL menu(0): CALL clear_right
 anchor:
 '---------------------------------------------------------------------------
 SELECT CASE choose
@@ -74,7 +74,7 @@ SELECT CASE choose
 			mtx$(2) = "Ironclad"
 			size = 2
 			CALL menu(0)
-			CALL clrrite
+			CALL clear_right
 			IF choose < 1 GOTO ahoy
 			IF choose = 2 THEN a$ = "I": cost = 2 * cost
 		ELSE
@@ -97,23 +97,23 @@ ships:
 	IF chx = 1 THEN choose = 1 + INT(size * RND)
 	IF size < 1 THEN
 		navysize(who) = 0: fleet$(who) = ""
-		IF chx = 0 THEN CALL clrbot: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
+		IF chx = 0 THEN CALL clear_bottom: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
 		IF chx = 1 THEN EXIT SUB
 	END IF
-	IF chx = 0 THEN CALL menu(9): CALL clrrite
+	IF chx = 0 THEN CALL menu(9): CALL clear_right
 
 	IF choose < 1 GOTO ships
 	navyloc(who) = array(choose)
 	cash(who) = cash(who) - cost: navysize(who) = 1
 	x = cityx(array(choose)) + 25: y = cityy(array(choose)) + 25: CALL ships
-	CALL clrbot: COLOR 11: PRINT force$(who); " is building NEW fleet in "; city$(array(choose));
+	CALL clear_bottom: COLOR 11: PRINT force$(who); " is building NEW fleet in "; city$(array(choose));
 	PSET (400, 465), 0: CALL shipicon(who, a)
 	IF noise > 0 THEN SOUND 3000, 1
 	CALL TICK(turbo!)
 	GOTO ahoy
 add2ship:
 	cash(who) = cash(who) - cost
-	CALL clrbot: PRINT force$(who); " navy increased to "; navysize(who);
+	CALL clear_bottom: PRINT force$(who); " navy increased to "; navysize(who);
 	PSET (400, 465), 0: CALL shipicon(who, a)
 	CALL ships
 	IF noise > 0 THEN SOUND 3000, 1
@@ -129,12 +129,12 @@ add2ship:
 	IF navyloc(who) < 1 THEN EXIT SUB
 	IF who = side THEN nflag = 1
 	IF cityp(navyloc(who)) <> 3 - who GOTO ahoy
-	CALL clrbot: COLOR 12: PRINT force$(who); " fleet bombards "; city$(navyloc(who));
+	CALL clear_bottom: COLOR 12: PRINT force$(who); " fleet bombards "; city$(navyloc(who));
 	CALL icon(navyloc(who), 0, 3)
 	      
 	target = navyloc(who): index = occupied(target): IF index = 0 GOTO deserted
 	pct! = .005 * navysize(who) + .02 * RND: killd = armysize(index) * pct!: IF killd < 1 THEN killd = 1
-	CALL clrbot: PRINT armyname$(index); " suffered "; 100 * killd; " casualties";
+	CALL clear_bottom: PRINT armyname$(index); " suffered "; 100 * killd; " casualties";
 	x = .5 * navysize(who) + 1: IF x > supply(index) THEN x = supply(index)
 	supply(index) = supply(index) - x
 	CALL TICK(turbo!)
@@ -143,8 +143,8 @@ add2ship:
 deserted:
 	IF fort(target) = 0 GOTO blast
 	IF RND < .7 + .03 * (navysize(who) - fort(target)) GOTO hurt1
-	CALL barnacle(who)
-	CALL clrbot
+	CALL navy_lose_ship(who)
+	CALL clear_bottom
 	PRINT force$(cityp(target)); " shore battery sunk an attacking ship!"; navysize(who); "ship(s) left! ";
 	IF noise > 0 THEN SOUND 77, .5: SOUND 59, .5
 	CALL TICK(turbo!)
@@ -158,16 +158,16 @@ deserted:
 	END IF
 	GOTO deserted
 hurt1:
-	CALL clrbot: PRINT city$(target); " fortifications damaged";
+	CALL clear_bottom: PRINT city$(target); " fortifications damaged";
 	fort(target) = fort(target) - 1: x = cityx(target): y = cityy(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
 	CALL showcity
 	CALL TICK(turbo!)
 	EXIT SUB
 blast:
-	IF RND > .25 + .07 * navysize(who) THEN CALL clrbot: PRINT "Citizens of "; city$(target); " stand firm against the attack"; : CALL TICK(turbo!): EXIT SUB
-	IF navyloc(who) = capcity(3 - who) THEN CALL clrbot: PRINT "The CAPITAL steadfastly stands loyal"; : CALL TICK(turbo!): EXIT SUB
+	IF RND > .25 + .07 * navysize(who) THEN CALL clear_bottom: PRINT "Citizens of "; city$(target); " stand firm against the attack"; : CALL TICK(turbo!): EXIT SUB
+	IF navyloc(who) = capcity(3 - who) THEN CALL clear_bottom: PRINT "The CAPITAL steadfastly stands loyal"; : CALL TICK(turbo!): EXIT SUB
 	cityp(navyloc(who)) = 0
-	CALL clrbot: PRINT city$(navyloc(who)); " is now  NEUTRAL";
+	CALL clear_bottom: PRINT city$(navyloc(who)); " is now  NEUTRAL";
 	CALL showcity
 	victory(who) = victory(who) + cityv(navyloc(who))
 	EXIT SUB
@@ -177,7 +177,7 @@ blast:
 	CASE 3
 	navysize(who) = LEN(fleet$(who))
 	IF navysize(who) < 1 AND chx > 0 THEN EXIT SUB
-	IF navyloc(who) < 1 OR navysize(who) < 1 THEN CALL clrbot: PRINT "No ships remain"; : TICK 1: GOTO ahoy
+	IF navyloc(who) < 1 OR navysize(who) < 1 THEN CALL clear_bottom: PRINT "No ships remain"; : TICK 1: GOTO ahoy
 
 	size = 0
 	FOR i = 1 TO 40: IF matrix(i, 7) > 90 AND navyloc(who) <> i THEN size = size + 1: mtx$(size) = city$(i): array(size) = i
@@ -196,7 +196,7 @@ blast:
 	mtx$(0) = "To"
 	colour = 3: tlx = 67: tly = 12
       
-	CALL menu(9): CALL clrrite: IF choose < 1 THEN EXIT SUB
+	CALL menu(9): CALL clear_right: IF choose < 1 THEN EXIT SUB
 admiral:
 	IF array(choose) = navyloc(who) THEN EXIT SUB
 	IF array(choose) < 1 THEN EXIT SUB
@@ -276,7 +276,7 @@ admiral:
 	CALL commander((who), empty)
 	IF chx > 0 AND empty = 0 THEN chx = 3: GOTO anchor
 	x = 35
-	CALL barnacle(who)
+	CALL navy_lose_ship(who)
 	c = navyloc(who): CALL newarmy((who), empty, c)
 	cash(who) = cash(who) + 100     'compensate for cost of recruiting new army
 	CALL capture(empty, c, who, 0)
@@ -344,7 +344,7 @@ hitem:
 	 y = 90: IF who = 1 THEN y = 190
 	 GOSUB xout
 	 LOCATE 17, 5: PRINT force$(3 - who); " ship SUNK!": CALL TICK(turbo! + 1): GOSUB clr1
-	 CALL barnacle(3 - who)
+	 CALL navy_lose_ship(3 - who)
 	 IF navysize(3 - who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
 		PRINT force$(3 - who); " fleet DEFEATED"
@@ -363,7 +363,7 @@ hitme1:
 	 y = 190: IF who = 1 THEN y = 90
 	 GOSUB xout
 	 LOCATE 17, 5: PRINT "One of the "; force$(who); " ships was SUNK!": CALL TICK(turbo!): GOSUB clr1
-	 CALL barnacle(who)
+	 CALL navy_lose_ship(who)
 	 IF navysize(who) < 1 THEN
 		LOCATE 19, 5: COLOR 12
 		PRINT "Attacking "; force$(who); " fleet has been ELIMINATED !"
@@ -383,7 +383,7 @@ hitme1:
 	 IF cityp(i) = who THEN IF i <> navyloc(who) AND matrix(i, 7) = 99 THEN target = i: IF RND > .3 GOTO found1
 	 NEXT i
 found1:
-	 CALL clrbot: COLOR 11: PRINT force$(who); " is retreating to "; city$(target); : CALL TICK(turbo!)
+	 CALL clear_bottom: COLOR 11: PRINT force$(who); " is retreating to "; city$(target); : CALL TICK(turbo!)
 	 navyloc(who) = target
 	 GOTO sail3
 	 CASE ELSE

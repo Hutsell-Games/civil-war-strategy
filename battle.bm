@@ -4,10 +4,10 @@ IF armysize(attack) < 1 THEN armysize(attack) = 1
 
 CALL icon(armyloc(defend), 0, 9)
 LOCATE 1, 1: PRINT SPACE$(80)
-CALL clrrite: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
+CALL clear_right: y = 68: COLOR 11: LOCATE 1, y: PRINT "Attacker"
 c = 9: IF attack > 20 THEN c = 7
 COLOR c: LOCATE 2, y: PRINT armyname$(attack)
-LOCATE 3, y: CALL strong(attack)
+LOCATE 3, y: PRINT army_strength$(attack);
 x = .01 * armysize(attack): IF x > TCR THEN x = TCR
 LOCATE 4, y: PRINT "Base    "; x
 IF armysize(attack) / armysize(defend) > .2 THEN x = x + .3 * armylead(attack) + .3 * armyexper(attack): IF x > TCR THEN x = TCR
@@ -34,7 +34,7 @@ LINE (530, 155)-(635, 175), 11, B
 x1 = .013 * armysize(defend) + 1: IF realism = 1 THEN x1 = .02 * armysize(defend) + 2: IF x1 > 20 THEN x1 = 20
 LOCATE 13, y: PRINT "Defender"
 COLOR 16 - c: LOCATE 14, y: PRINT armyname$(defend)
-LOCATE 15, y: CALL strong(defend)
+LOCATE 15, y: PRINT army_strength$(defend);
 LOCATE 16, y: PRINT "Base    "; INT(.01 * armysize(defend))
 LOCATE 17, y: PRINT "Defense "; x1
 IF armysize(defend) / armysize(attack) > .2 THEN x1 = x1 + .3 * armylead(defend) + .3 * armyexper(defend): IF x1 > TCR THEN x1 = TCR
@@ -98,7 +98,7 @@ IF graf > 2 THEN
 		PUT (550, 270), graphic, PSET
 	END IF
 ELSE
-	CALL clrrite
+	CALL clear_right
 END IF
 FOR i = 1 TO 2: IF supply(i) > 0 THEN supply(i) = supply(i) - 1
 NEXT i
@@ -120,7 +120,7 @@ LOCATE 4, 71: PRINT "in"
 LOCATE 5, 69: PRINT city$(armyloc(defend))
 a = 1: IF win > 20 THEN a = 2
 CALL flags(a, 0, 0)
-CALL clrbot: COLOR 11: PRINT armyname$(win); " defeats "; armyname$(lose); " in "; city$(armyloc(defend)); : CALL TICK(9)
+CALL clear_bottom: COLOR 11: PRINT armyname$(win); " defeats "; armyname$(lose); " in "; city$(armyloc(defend)); : CALL TICK(9)
 '===========================================================================
 pct! = .01 * DEFAC - .03 * fort(armyloc(defend)): IF win = attack THEN pct! = 1.3 * pct!
 SELECT CASE armysize(defend)
@@ -131,7 +131,7 @@ SELECT CASE armysize(defend)
 END SELECT
 xbar = armysize(attack) * pct!
 vary = xbar * (1 - pct!)
-CALL normal(xbar, vary, killd)
+killd = gaussian_random_number(xbar, vary)
 '...........................................................................
 pct! = .01 * ATKFAC + .02 * fort(armyloc(defend)): IF win = defend THEN pct! = 1.5 * pct!
 SELECT CASE armysize(attack)
@@ -142,7 +142,7 @@ SELECT CASE armysize(attack)
 END SELECT
 xbar = armysize(defend) * pct!
 vary = xbar * (1 - pct!)
-CALL normal(xbar, vary, killa)
+killa = gaussian_random_number(xbar, vary)
 '===========================================================================
 
 killa = .8 * killa + .2 * killd: IF killa < 1 THEN killa = 1
@@ -159,10 +159,10 @@ a$ = LTRIM$(RTRIM$(STR$(x))) + "%"
 COLOR c
 LOCATE 1, 1: PRINT "Attack Loss: ";
 PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
-CALL strong(attack)
+PRINT army_strength$(attack);
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / armysize(attack)))))); "%) ²";
 COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
-CALL strong(defend)
+PRINT army_strength$(defend);
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / armysize(defend)))))); "%)"
 '---------------------------------------------------------------------------
 mtx$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(armysize(attack)) + "00") + ") "
@@ -175,7 +175,7 @@ a$ = city$(armyloc(defend)) + ": " + mtx$(3) + mtx$(1) + " defeats " + mtx$(4) +
 CALL scribe(a$, 0)
 
 IF player = 1 AND (side = 1 AND attack > 20) OR (side = 2 AND attack < 21) THEN
-COLOR 14: CALL clrbot: PRINT "hit any key to continue"; : CALL announce(1, "B"): DO WHILE INKEY$ = "": LOOP
+COLOR 14: CALL clear_bottom: PRINT "hit any key to continue"; : CALL announce(1, "B"): DO WHILE INKEY$ = "": LOOP
 END IF
 
 armysize(attack) = armysize(attack) - killa
@@ -193,7 +193,7 @@ CALL icon(armyloc(defend), 0, 8)
 END SUB
 
 SUB capture (active, c, s, flag)
-	cityp(c) = s: CALL clrbot
+	cityp(c) = s: CALL clear_bottom
 	a$ = armyname$(active) + " has captured " + city$(c)
 	COLOR 11: PRINT armyname$(active) + " has captured " + city$(c);
 	IF active < 21 AND noise > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
@@ -229,7 +229,7 @@ NEXT k
 	mtx$(0) = "Retreat"
 	CALL bubble(size)
 	CALL menu(9)
-	CALL clrrite
+	CALL clear_right
 	IF choose < 0 OR choose > size THEN x = 0: EXIT SUB
 	x = array(choose)
 END SUB

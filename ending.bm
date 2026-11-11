@@ -1,4 +1,4 @@
-SUB endit
+SUB menu_victory_conditions
 	a$ = STR$(ABS(vicflag(3)) * 2.5) + "% Cities"
 	t$ = STR$(ABS(vicflag(3)) * 2.5) + "% Total Income"
 	mtx$(8) = "Time: " + month$(vicflag(1)) + STR$(ABS(vicflag(2)))
@@ -33,7 +33,7 @@ cheer:
 	CALL usa
 END SUB
 
-SUB maxx
+SUB update_high_scores
 COLOR 14: LOCATE 28, 1: PRINT "press a key"; : CALL announce(1, "H"): DO WHILE INKEY$ = "": LOOP
 SCREEN 0: COLOR 14, 5: CLS : COLOR 11, 0
 
@@ -79,13 +79,13 @@ foun:
 		NEXT s: CLOSE #1: PRINT "Game Over": CALL announce(1, "G"): DO WHILE INKEY$ = "": LOOP: pcode = 1
 END SUB
 
-SUB victor
+SUB check_game_over
 	x = 0: FOR j = 1 TO 20: IF armyloc(j) > 0 THEN x = x + armysize(j)
 	NEXT j
 	y = 0: FOR j = 21 TO 40: IF armyloc(j) > 0 THEN y = y + armysize(j)
 	NEXT j
 
-	CALL clrbot: COLOR 14
+	CALL clear_bottom: COLOR 14
 	IF vicflag(2) > 0 AND year >= vicflag(2) AND month < vicflag(1) THEN
 		a$ = "Time almost expired (" + month$(vicflag(1)) + "," + STR$(vicflag(2)) + ")"
 		CALL image2(a$, 4)
@@ -109,7 +109,7 @@ SUB victor
 		END IF
 	END IF
 
-	CALL clrbot: COLOR 14
+	CALL clear_bottom: COLOR 14
 	IF vicflag(3) > 0 AND control(i) >= .9 * vicflag(3) THEN
 		a$ = force$(i) + " side almost controls" + STR$(vicflag(3)) + " cities"
 		CALL image2(a$, 4)
@@ -202,7 +202,7 @@ death:
 		CALL scribe(t$, 0)
 		CALL scribe(a$, 0)
 	END IF
-	PRINT a$: CALL maxx
+	PRINT a$: CALL update_high_scores
 	EXIT SUB
 stale:
     NEXT i

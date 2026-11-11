@@ -53,7 +53,7 @@ COLOR c
 IF armyloc(i) < 1 GOTO deadeye
 x = x + armysize(i)
 PRINT i; TAB(5); armyname$(i); TAB(25); : y = CSRLIN
-CALL strong(i): PRINT TAB(32); city$(armyloc(i));
+PRINT army_strength$(i); : PRINT TAB(32); city$(armyloc(i));
 IF who <> side THEN PRINT : GOTO deadeye
 PRINT TAB(43); armylead(i); TAB(47); armyexper(i); TAB(52); supply(i);
 PRINT TAB(57); : IF armymove(i) > -1 THEN PRINT city$(armymove(i)) ELSE PRINT "Resting"
@@ -116,7 +116,7 @@ FOR k = star TO fin
 	FOR j = 0 TO 3
 	LOCATE y + j, x: PRINT SPACE$(z);
 	NEXT j
-	LOCATE y, x: PRINT "Siz:"; : CALL strong(k)
+	LOCATE y, x: PRINT "Siz:"; : PRINT army_strength$(k);
 	LOCATE y + 1, x: PRINT "Ldr:"; armylead(k)
 	LOCATE y + 2, x: PRINT "Xpr:"; armyexper(k)
 	LOCATE y + 3, x: PRINT "Sup:"; supply(k);

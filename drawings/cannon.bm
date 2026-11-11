@@ -1,5 +1,5 @@
 SUB cannon
-CALL clrrite
+CALL clear_right
 LINE (528, 80)-(639, 310), 3, BF
 LINE (528, 310)-(639, 435), 2, BF
 LINE (528, 405)-(639, 420), 0, BF

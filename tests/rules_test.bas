@@ -44,54 +44,66 @@ AssertEqualStr "Richmond", mtx$(3), "third"
 AssertEqualInt 25, array(3), "its city"
 END SUB
 
-' -------------------------------------------------------------------- roman
+' ---------------------------------------------------- generate_generic_name
 ' The name of a general the game makes up: the side and the army's number
 ' in Roman numerals. It changes target, which the caller gives as a copy.
 
-SUB TestRomanNamesUnionArmies
-t = 1: CALL roman(t, a$): AssertEqualStr "Union I", a$, "1"
-t = 3: CALL roman(t, a$): AssertEqualStr "Union III", a$, "3"
-t = 4: CALL roman(t, a$): AssertEqualStr "Union IV", a$, "4"
-t = 5: CALL roman(t, a$): AssertEqualStr "Union V", a$, "5"
-t = 8: CALL roman(t, a$): AssertEqualStr "Union VIII", a$, "8"
-t = 9: CALL roman(t, a$): AssertEqualStr "Union IX", a$, "9"
-t = 10: CALL roman(t, a$): AssertEqualStr "Union X", a$, "10"
-t = 14: CALL roman(t, a$): AssertEqualStr "Union XIV", a$, "14"
-t = 20: CALL roman(t, a$): AssertEqualStr "Union XX", a$, "20"
+SUB TestGenericNameNamesUnionArmies
+t = 1: CALL generate_generic_name(t, a$): AssertEqualStr "Union I", a$, "1"
+t = 3: CALL generate_generic_name(t, a$): AssertEqualStr "Union III", a$, "3"
+t = 4: CALL generate_generic_name(t, a$): AssertEqualStr "Union IV", a$, "4"
+t = 5: CALL generate_generic_name(t, a$): AssertEqualStr "Union V", a$, "5"
+t = 8: CALL generate_generic_name(t, a$): AssertEqualStr "Union VIII", a$, "8"
+t = 9: CALL generate_generic_name(t, a$): AssertEqualStr "Union IX", a$, "9"
+t = 10: CALL generate_generic_name(t, a$): AssertEqualStr "Union X", a$, "10"
+t = 14: CALL generate_generic_name(t, a$): AssertEqualStr "Union XIV", a$, "14"
+t = 20: CALL generate_generic_name(t, a$): AssertEqualStr "Union XX", a$, "20"
 END SUB
 
-SUB TestRomanNamesRebelArmiesFromOne
-t = 21: CALL roman(t, a$): AssertEqualStr "Rebel I", a$, "21"
-t = 36: CALL roman(t, a$): AssertEqualStr "Rebel XVI", a$, "36"
-t = 40: CALL roman(t, a$): AssertEqualStr "Rebel XX", a$, "40"
+SUB TestGenericNameNamesRebelArmiesFromOne
+t = 21: CALL generate_generic_name(t, a$): AssertEqualStr "Rebel I", a$, "21"
+t = 36: CALL generate_generic_name(t, a$): AssertEqualStr "Rebel XVI", a$, "36"
+t = 40: CALL generate_generic_name(t, a$): AssertEqualStr "Rebel XX", a$, "40"
 END SUB
 
-SUB TestRomanChangesItsTarget
-t = 36: CALL roman(t, a$)
+SUB TestGenericNameChangesItsTarget
+t = 36: CALL generate_generic_name(t, a$)
 AssertEqualInt 6, t, "36 comes back as 6"
 END SUB
 
-' ------------------------------------------------------------------- occupy
+' ---------------------------------------------------------- update_occupant
 ' occupied(x) is the first army in city x, or 0.
 
-SUB TestOccupyFindsTheFirstArmyInACity
+SUB TestUpdateOccupantFindsTheFirstArmy
 armyloc(3) = 7: armyloc(5) = 7: armyloc(22) = 9
-CALL occupy(7): AssertEqualInt 3, occupied(7), "two armies: the first"
-CALL occupy(9): AssertEqualInt 22, occupied(9), "a Rebel army"
+CALL update_occupant(7): AssertEqualInt 3, occupied(7), "two armies: the first"
+CALL update_occupant(9): AssertEqualInt 22, occupied(9), "a Rebel army"
 occupied(8) = 4
-CALL occupy(8): AssertEqualInt 0, occupied(8), "no army: set back to 0"
+CALL update_occupant(8): AssertEqualInt 0, occupied(8), "no army: set back to 0"
 END SUB
 
-' ------------------------------------------------------------------- cutoff
-' a counts the cities linked to target that who holds; 0 means cut off.
+' --------------------------------------------------------------- is_cut_off
+' True (-1) when who holds none of the cities linked to target.
 
-SUB TestCutoffCountsFriendlyNeighbors
+SUB TestIsCutOffNeedsNoFriendlyNeighbor
 matrix(5, 1) = 2: matrix(5, 2) = 3: matrix(5, 3) = 4
 cityp(2) = 1: cityp(3) = 2: cityp(4) = 1
-CALL cutoff(1, 5, a): AssertEqualInt 2, a, "the Union holds two neighbors"
-CALL cutoff(2, 5, a): AssertEqualInt 1, a, "the Rebels hold one"
+AssertEqualInt 0, is_cut_off(1, 5), "the Union holds two neighbors"
+AssertEqualInt 0, is_cut_off(2, 5), "the Rebels hold one"
 cityp(3) = 0
-CALL cutoff(2, 5, a): AssertEqualInt 0, a, "cut off"
+AssertEqualInt -1, is_cut_off(2, 5), "cut off"
+END SUB
+
+SUB TestIsCutOffWithNoLinks
+AssertEqualInt -1, is_cut_off(1, 9), "a city with no links is cut off"
+END SUB
+
+' ----------------------------------------------------------- army_strength$
+' armysize counts hundreds of men; the text has the two zeros added.
+
+SUB TestArmyStrengthShowsMen
+armysize(3) = 125: AssertEqualStr "12500", army_strength$(3), "125 hundreds"
+armysize(4) = 0: AssertEqualStr "000", army_strength$(4), "an empty army"
 END SUB
 
 ' ------------------------------------------------------------ traincapacity
@@ -122,62 +134,62 @@ side = 2
 CALL traincapacity(1, limit): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
 END SUB
 
-' --------------------------------------------------------------------- void
+' ------------------------------------------------------ enemy_strength_near
 ' The strength the player's side has around city a: the armies in the
 ' cities linked to it, and a tenth of those one city further.
 
-SUB TestVoidAddsNearbyArmies
+SUB TestEnemyStrengthNearAddsNearbyArmies
 side = 1
 matrix(1, 1) = 2: cityp(2) = 1: occupied(2) = 4: armysize(4) = 50
 matrix(2, 1) = 3: cityp(3) = 1: occupied(3) = 6: armysize(6) = 40
 matrix(2, 2) = 1
-CALL void(1, y)
+y = enemy_strength_near(1)
 AssertEqualInt 54, y, "50 beside and a tenth of 40 further"
 END SUB
 
-SUB TestVoidIsZeroWithNoArmyNear
+SUB TestEnemyStrengthNearIsZeroWithNoArmy
 side = 1
 matrix(1, 1) = 2: cityp(2) = 2: occupied(2) = 24: armysize(24) = 50
-CALL void(1, y)
+y = enemy_strength_near(1)
 AssertEqualInt 0, y, "the enemy's army does not count"
 END SUB
 
-' ----------------------------------------------------------------- barnacle
+' ----------------------------------------------------------- navy_lose_ship
 ' A fleet loses its last ship.
 
-SUB TestBarnacleRemovesTheLastShip
+SUB TestNavyLoseShipRemovesTheLastShip
 navysize(1) = 3: fleet$(1) = "WIW": navyloc(1) = 30
-CALL barnacle(1)
+CALL navy_lose_ship(1)
 AssertEqualInt 2, navysize(1), "two ships left"
 AssertEqualStr "WI", fleet$(1), "the last one gone"
 AssertEqualInt 30, navyloc(1), "still there"
 END SUB
 
-SUB TestBarnacleEndsAFleetOfOne
+SUB TestNavyLoseShipEndsAFleetOfOne
 navysize(2) = 1: fleet$(2) = "I": navyloc(2) = 27
-CALL barnacle(2)
+CALL navy_lose_ship(2)
 AssertEqualInt 0, navysize(2), "no ships"
 AssertEqualStr "", fleet$(2), "no fleet"
 AssertEqualInt 0, navyloc(2), "nowhere"
 END SUB
 
-' ------------------------------------------------------------------- normal
+' --------------------------------------------------- gaussian_random_number
 ' A draw around xbar with the variance vary. It sums 12 RNDs and takes off
 ' 5.5, though the sum averages 6, so the draws center on xbar + SQR(vary) / 2.
 
-SUB TestNormalDrawsHigh
+SUB TestGaussianDrawsHigh
 RANDOMIZE 1
 total& = 0
 FOR i = 1 TO 2000
-	CALL normal(100, 100, r)
+	r = gaussian_random_number(100, 100)
 	total& = total& + r
 NEXT i
 avg! = total& / 2000
 AssertTrue avg! > 103 AND avg! < 107, "the average of 2000 draws is near 105, not 100:" + STR$(avg!)
 END SUB
 
-SUB TestNormalWithNoVarianceIsTheMean
-CALL normal(70, 0, r)
+SUB TestGaussianWithNoVarianceIsTheMean
+r = gaussian_random_number(70, 0)
 AssertEqualInt 70, r, "variance 0"
 END SUB
 

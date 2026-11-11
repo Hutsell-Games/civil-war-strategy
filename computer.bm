@@ -1,7 +1,7 @@
 SUB evaluate (index, x)
 from = armyloc(index)
 x = 200: IF aggress! > 1.5 THEN x = 80: IF aggress! > 2 THEN x = 20: IF aggress! > 3 THEN x = 5
-CALL void(from, defend): IF defend = 0 THEN x = 0
+defend = enemy_strength_near(from): IF defend = 0 THEN x = 0
 IF bold > 1 THEN x = .5 * x
 
 best = armysize(index)
@@ -86,7 +86,7 @@ NEXT j
 	x = best
 END SUB
 
-SUB smarts
+SUB ai_turn
 CALL events
 slush = 0: who = 3 - side
 c = 9: IF side = 1 THEN c = 15
@@ -114,7 +114,7 @@ IF 1 + RND < bold + aggress! GOTO signup
 target = 0: FOR i = star TO fin
 x = armyloc(i): IF x = 0 OR armymove(occupied(x)) < 0 OR armymove(i) < 0 GOTO endlook
 IF fort(x) > 1 GOTO endlook
-	CALL void(x, defend): IF defend > armysize(i) THEN target = armyloc(i): GOTO capital
+	defend = enemy_strength_near(x): IF defend > armysize(i) THEN target = armyloc(i): GOTO capital
 endlook:
 NEXT i
 
@@ -124,7 +124,7 @@ capital:
 	fort(target) = fort(target) + 1
 	x = occupied(target): armymove(x) = -1
 	cash(who) = cash(who) - cost
-	CALL clrbot: PRINT city$(target); " fortifications increased to "; fort(target);
+	CALL clear_bottom: PRINT city$(target); " fortifications increased to "; fort(target);
 	CALL icon(target, 0, 6)
 	CALL showcity
 	IF who = 1 AND navysize(1) < 1 AND RND > .5 AND cash < 222 GOTO signup
@@ -192,14 +192,14 @@ x = armysize(i): IF supply(i) < 1 AND RND > .1 GOTO deadman
 
 choose = 0
 
-CALL void(target, defend)
+defend = enemy_strength_near(target)
 
 IF defend > 0 AND target = capcity(who) AND occupied(target) = i GOTO deadman   'hold capital
 IF target <> capcity(who) GOTO nocap
 IF vicflag(5) = 0 GOTO nocap
 	FOR j = 1 TO 6
 	k = matrix(target, j): IF j = 0 GOTO nocap
-	CALL void(k, flag): IF flag > 0 GOTO deadman
+	flag = enemy_strength_near(k): IF flag > 0 GOTO deadman
 	NEXT j
 nocap:
 CALL evaluate(i, best): IF best = 0 GOTO deadman
@@ -210,7 +210,7 @@ CALL evaluate(i, best): IF best = 0 GOTO deadman
 	IF month = 1 AND jancam = 0 AND cityp(armymove(i)) <> who THEN armymove(i) = 0: GOTO deadman
 
 	IF turbo! > 1 THEN
-		COLOR c: CALL clrbot
+		COLOR c: CALL clear_bottom
 		PRINT armyname$(i); " plans to move from "; city$(armyloc(i)); " to "; city$(armymove(i));
 	END IF
 		CALL icon(armyloc(i), armymove(i), 1)
@@ -224,7 +224,7 @@ NEXT i
 		armyexper(i) = armyexper(i) + 1
 
 		IF turbo! > 1 THEN
-		CALL clrbot
+		CALL clear_bottom
 			PRINT armyname$(i); " has drilled to reach experience level "; armyexper(i);
 		END IF
 		armymove(i) = -1

@@ -92,7 +92,7 @@ sel1:
 			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
 			END IF
 		CASE 4: CALL armystat(array(row))
-		CASE 5: COLOR 11: CALL clrbot: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
+		CASE 5: COLOR 11: CALL clear_bottom: PRINT armyname$(index); "  Exp="; armyexper(index); " Cash="; cash(side);
 		CASE 6: CALL icon(armyloc(array(row)), 0, 9)
 		CASE 8
 			IF graf > 2 AND row > 0 THEN

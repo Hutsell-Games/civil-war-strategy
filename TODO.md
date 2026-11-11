@@ -28,14 +28,18 @@ game plays changes the recorded screens.
   and only a new game sets it back. A player who saves for the first time cannot load in the same game.
 - **Resume Saved Game with no saved game shows the main menu on a black screen.** The map is not drawn until
   F3 or a menu draws it.
-- **`normal` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
-  on `xbar + SQR(vary) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
-  Battleset. A fix changes the battles, so every script would need `record` again.
+- **`gaussian_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so
+  every draw centers on `xbar + SQR(vary) / 2` (`TestGaussianDrawsHigh` in `tests\rules_test.bas`), as in World
+  War 2 and Civil War Battleset. A fix changes the battles, so every script would need `record` again.
 - **`traincapacity` counts cities from the player's side, not from the side it is asked about**
   (`TestTraincapacityCountsByPlayersSide`): it uses `side` where the rest of the SUB uses `who`.
-- **`smarts` never stops at an empty slot of `matrix`** when the computer weighs its capital's neighbors
+- **`ai_turn` never stops at an empty slot of `matrix`** when the computer weighs its capital's neighbors
   (`computer.bm`). Inside `FOR j = 1 TO 6`, `IF j = 0 GOTO nocap` can never be true. It was probably meant to
   be `k = 0`, where `k = matrix(target, j)`. A fix changes how the computer plays.
+- **The computer judges a Rebel landing by the Union fleet's city** (`navy.bm` line 44). The Rebels' "Invasion"
+  line calls `enemy_strength_near(navyloc(1))`, where the Union's line above it has `navyloc(1)` rightly. It
+  was probably meant to be `navyloc(who)`. Only the computer reads the result, and only without realism. A
+  fix changes how the computer plays.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
