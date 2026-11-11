@@ -107,7 +107,7 @@ CALL railroad_capacity(2, limit): AssertEqualInt 300, limit, "the Rebels"
 END SUB
 
 SUB TestTraincapacityWithRealism
-train_capacity(1) = 600: opt_realism = 1: side = 1
+train_capacity(1) = 600: opt_realism = 1: current_side = 1
 side_city_count(1) = 14: CALL railroad_capacity(1, limit): AssertEqualInt 615, limit, "14 cities"
 side_city_count(1) = 11: CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "11 cities"
 side_city_count(1) = 5: CALL railroad_capacity(1, limit): AssertEqualInt 570, limit, "5 cities"
@@ -118,7 +118,7 @@ END SUB
 
 SUB TestTraincapacityCountsByPlayersSide
 train_capacity(1) = 600: opt_realism = 1: side_city_count(1) = 23
-side = 2
+current_side = 2
 CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
 END SUB
 
@@ -127,7 +127,7 @@ END SUB
 ' cities linked to it, and a tenth of those one city further.
 
 SUB TestVoidAddsNearbyArmies
-side = 1
+current_side = 1
 matrix(1, 1) = 2: city_owner(2) = 1: city_army(2) = 4: army_size(4) = 50
 matrix(2, 1) = 3: city_owner(3) = 1: city_army(3) = 6: army_size(6) = 40
 matrix(2, 2) = 1
@@ -136,7 +136,7 @@ AssertEqualInt 54, y, "50 beside and a tenth of 40 further"
 END SUB
 
 SUB TestVoidIsZeroWithNoArmyNear
-side = 1
+current_side = 1
 matrix(1, 1) = 2: city_owner(2) = 2: city_army(2) = 24: army_size(24) = 50
 CALL city_nearby_enemy_strength(1, y)
 AssertEqualInt 0, y, "the enemy's army does not count"

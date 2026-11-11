@@ -158,6 +158,10 @@ def rename_line(line, table, hidden, stats, where):
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "report"
     table = load_table()
+    # `old=new` arguments replace the table: python rename_vars.py apply side=current_side
+    pairs = [a.split("=", 1) for a in sys.argv[2:] if "=" in a]
+    if pairs:
+        table = {key_of(o): n for o, n in pairs}
     stats = {"count": {}, "shadowed": [], "label_or_sub": []}
     new_text = {}
     all_tokens = set()

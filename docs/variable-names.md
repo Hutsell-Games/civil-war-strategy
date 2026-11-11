@@ -148,7 +148,7 @@ Saved in `CWS.CFG`, except `bw`.
 | Current | What it holds | Uses | Proposed | Your name |
 |---------|---------------|-----:|----------|-----------|
 | `graphic()` | A picture loaded with `BLOAD`: the icon sheet, then a general's face before a battle. | 6 | `pic_loaded()` | |
-| `graft()` | A picture loaded by `menu`: a fort. | 3 | `pic_fort()` | |
+| `graft()` | A picture loaded by `menu`: a leader's face (case 8). | 3 | `pic_face()` | |
 | `mtn()` | The mountain picture, drawn 8 times by `usa`. | 10 | `pic_mountain()` | |
 | `Ncap()` | The capital's star, cut from the icon sheet. | 2 | `pic_capital()` | |
 | `image()` | The piece of screen saved under a map marker or a moving army. | 8 | `saved_under_marker()` | |
@@ -179,7 +179,8 @@ A parameter gets the name of what is passed, the same in every SUB.
 | `target` | `cutoff`, `fortify`, `newarmy`, `movefrom`, `roman` | A city (in `roman` an army). | `city`; `army` in `roman` |
 | `from`, `dest` | `icon` | Two cities. | `from_city`, `to_city` |
 | `kind` | `icon` | Which mark to draw, 1 to 11. | `mark` (with the `MARK_` constants) |
-| `switch` | `menu`, `filer` | Which behavior, a bare number. | `mode` (with constants) |
+| `switch` | `menu` | What to show beside the highlighted item, a bare number (3 changes how keys return). | `menu_item_show_beside` (with constants) |
+| `switch` | `filer` | Which job: 1 scenario, 2 load, 3 save. | `job` (with constants) |
 | `chx` | `navy` | The naval action the computer wants, 0 for the player's menu. | `action` |
 | `empty` | `newarmy`, `commander` | A free army slot. | `slot` |
 | `flag` | `animate`, `snapshot`, `tinytrain`, `scribe`, `shipicon`, `capture` | A different yes-or-no or choice in each. | Named in each SUB: for example `erase`, `restore`, `show_box`. |

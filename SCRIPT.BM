@@ -35,11 +35,11 @@ END FUNCTION
 ' TICK then pauses as before. A pause of 99 seconds or more is how the game
 ' says "press a key" (the map's links, "There are still defenders"), so a
 ' script waits there for a key; a shorter one returns at once.
-FUNCTION script_tick% (sec!)
+FUNCTION script_tick% (seconds!)
 script_tick% = 0
 IF scripted = 0 THEN EXIT FUNCTION
 script_tick% = -1
-IF sec! < 99 THEN EXIT FUNCTION
+IF seconds! < 99 THEN EXIT FUNCTION
 CALL script_mark_key_wait(1, "L")
 DO WHILE INKEY$ = "": LOOP
 END FUNCTION

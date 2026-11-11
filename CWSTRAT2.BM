@@ -1,6 +1,6 @@
-SUB draw_flag_icon (x, y, z)
+SUB draw_flag_icon (x, y, side)
 LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
-SELECT CASE z
+SELECT CASE side
 	CASE 1
 	LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
 	LINE (x - 7, y - 5)-(x - 1, y), 1, BF
@@ -173,30 +173,30 @@ FOR i = -565 TO 50 STEP 50: CALL draw_flag(1, i, 0): NEXT i
 IF opt_sound = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
-SUB city_capture (active, c, s, flag)
-	city_owner(c) = s: CALL clear_bottom_line
+SUB city_capture (active, c, side, weaken_fort)
+	city_owner(c) = side: CALL clear_bottom_line
 	a$ = army_name$(active) + " has captured " + city_name$(c)
 	COLOR 11: PRINT army_name$(active) + " has captured " + city_name$(c);
 	IF active < 21 AND opt_sound > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	IF active > 20 AND opt_sound > 1 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-	IF c <> side_capital(3 - s) THEN CALL animate_city(c)
-	side_victory_points(s) = side_victory_points(s) + city_value(c)
-	IF c = side_capital(3 - s) THEN
-		side_victory_points(s) = side_victory_points(s) + 100
-		side_victory_points(3 - s) = side_victory_points(3 - s) - 100
-		a$ = side_name$(3 - s) + " CAPITAL captured !"
+	IF c <> side_capital(3 - side) THEN CALL animate_city(c)
+	side_victory_points(side) = side_victory_points(side) + city_value(c)
+	IF c = side_capital(3 - side) THEN
+		side_victory_points(side) = side_victory_points(side) + 100
+		side_victory_points(3 - side) = side_victory_points(3 - side) - 100
+		a$ = side_name$(3 - side) + " CAPITAL captured !"
 		CALL scribe_message(a$, 1)
-		CALL show_message_box(city_name$(side_capital(3 - s)) + " has fallen!", 4)
-		side_capital(3 - s) = 0
+		CALL show_message_box(city_name$(side_capital(3 - side)) + " has fallen!", 4)
+		side_capital(3 - side) = 0
 		CALL animate_city(c)
 	END IF
-	IF city_fort(c) > 0 AND flag > 0 THEN city_fort(c) = city_fort(c) - 1: x = city_x(c): y = city_y(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL draw_cities
+	IF city_fort(c) > 0 AND weaken_fort > 0 THEN city_fort(c) = city_fort(c) - 1: x = city_x(c): y = city_y(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL draw_cities
 END SUB
 
-SUB print_centered (y, a$)
-x = LEN(a$)
+SUB print_centered (y, text$)
+x = LEN(text$)
 x = 26 - x \ 2
-LOCATE y, 7 + x: PRINT a$
+LOCATE y, 7 + x: PRINT text$
 END SUB
 
 SUB draw_chesapeake
@@ -233,11 +233,11 @@ CLS 1
 VIEW
 END SUB
 
-SUB army_get_commander (who, empty)
-	empty = 0
-	CALL side_army_range(star, fin, who)
+SUB army_get_commander (side, slot)
+	slot = 0
+	CALL side_army_range(star, fin, side)
 	FOR i = star TO fin
-	IF army_city(i) = 0 AND leader_name$(i) <> "" THEN empty = i: EXIT SUB
+	IF army_city(i) = 0 AND leader_name$(i) <> "" THEN slot = i: EXIT SUB
 	NEXT i
 
 '                 generic leaders if set list is exhausted
@@ -245,13 +245,13 @@ SUB army_get_commander (who, empty)
 	IF army_city(i) = 0 THEN
 		x = i
 		CALL army_generate_name(x, a$)
-		empty = i
+		slot = i
 		leader_name$(i) = a$
 		leader_rating(i) = 1 + 8 * RND
 		EXIT SUB
 	END IF
 	NEXT i
-	CALL clear_bottom_line: PRINT "No more "; side_name$(who); " commanders available"; : CALL wait_seconds(opt_pause!)
+	CALL clear_bottom_line: PRINT "No more "; side_name$(side); " commanders available"; : CALL wait_seconds(opt_pause!)
 END SUB
 
 SUB menu_victory_conditions
@@ -307,20 +307,20 @@ NEXT i
 notrain:
 END SUB
 
-SUB ai_evaluate_move (index, x)
-from = army_city(index)
+SUB ai_evaluate_move (army, x)
+from = army_city(army)
 x = 200: IF ai_strength_ratio! > 1.5 THEN x = 80: IF ai_strength_ratio! > 2 THEN x = 20: IF ai_strength_ratio! > 3 THEN x = 5
 CALL city_nearby_enemy_strength(from, defend): IF defend = 0 THEN x = 0
 IF opt_ai_aggression > 1 THEN x = .5 * x
 
-best = army_size(index)
+best = army_size(army)
 
 FOR j = 1 TO 6: menu_value(j) = -1
 a = matrix(from, j): IF a > 0 THEN IF city_army(a) > 0 THEN best = best - army_size(city_army(a)): y = 1
 NEXT j: best = .01 * best
 IF opt_ai_aggression > 0 THEN best = best + 20 * opt_ai_aggression
 
-CALL side_army_range(star, fin, 3 - side)
+CALL side_army_range(star, fin, 3 - current_side)
 
 FOR j = 1 TO 6
 	y = -1: a = matrix(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
@@ -330,26 +330,26 @@ FOR j = 1 TO 6
 	NEXT k
 	
 	y = best - x * city_fort(from) - city_value(from) + 30 * RND
-	IF city_fort(from) > 0 THEN IF index = city_army(from) THEN y = y - 25: IF opt_realism > 0 THEN y = y - 50
-	IF a = side_capital(side) THEN IF victory_rule(5) > 0 THEN y = y + 200
-	IF city_owner(a) <> 3 - side THEN y = y + 5 * city_value(a) + 10 * city_fort(a)
-	IF city_owner(a) <> side GOTO ourn
+	IF city_fort(from) > 0 THEN IF army = city_army(from) THEN y = y - 25: IF opt_realism > 0 THEN y = y - 50
+	IF a = side_capital(current_side) THEN IF victory_rule(5) > 0 THEN y = y + 200
+	IF city_owner(a) <> 3 - current_side THEN y = y + 5 * city_value(a) + 10 * city_fort(a)
+	IF city_owner(a) <> current_side GOTO ourn
 	   IF c = 0 THEN y = y + 10 * city_value(a): GOTO ourn
 	   x1 = 1: IF city_fort(a) = 1 THEN x1 = 2: IF city_fort(a) = 3 THEN x1 = 3
 
 	   IF army_size(c) > 0 THEN
-		odds! = army_size(index) / (x1 * army_size(c))
+		odds! = army_size(army) / (x1 * army_size(c))
 		IF opt_realism > 1 THEN odds! = .8 * odds!
 	   ELSE
 		odds! = 5
 	   END IF
 
-	   IF army_size(index) < 15 THEN y = y - 300: odds! = .1
-	   IF opt_ai_aggression < 3 AND army_size(index) < 40 AND odds! < .8 THEN y = 0
+	   IF army_size(army) < 15 THEN y = y - 300: odds! = .1
+	   IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN y = 0
 	   IF opt_realism > 0 THEN y = y - 15
 	   IF odds! < .5 THEN y = y - 200
-	   IF opt_ai_aggression = 0 AND RND > .9 THEN y = y + 10 * (army_leader_rating(index) - army_leader_rating(c) + army_experience(index) - army_leader_rating(index))
-	   IF army_supply(index) < 1 THEN y = y - 100
+	   IF opt_ai_aggression = 0 AND RND > .9 THEN y = y + 10 * (army_leader_rating(army) - army_leader_rating(c) + army_experience(army) - army_leader_rating(army))
+	   IF army_supply(army) < 1 THEN y = y - 100
 	   SELECT CASE odds! + .5 * opt_ai_aggression
 		CASE IS < .3
 		y = -9999
@@ -362,22 +362,22 @@ FOR j = 1 TO 6
 		CASE 1.2 TO 1.5
 		y = y + 10
 		CASE ELSE
-		y = y + .5 * (army_size(index) - army_size(c)) + 50 * RND
+		y = y + .5 * (army_size(army) - army_size(c)) + 50 * RND
 	   END SELECT
 ourn:
-	IF city_owner(a) = 3 - side AND c > 0 AND army_order(c) = 0 THEN y = y - army_size(c)
-	IF side = 1 AND city_y(a) < city_y(from) THEN y = y + 2
-	IF side = 2 AND city_y(a) > city_y(from) THEN y = y + 2
+	IF city_owner(a) = 3 - current_side AND c > 0 AND army_order(c) = 0 THEN y = y - army_size(c)
+	IF current_side = 1 AND city_y(a) < city_y(from) THEN y = y + 2
+	IF current_side = 2 AND city_y(a) > city_y(from) THEN y = y + 2
 '---------------------------------------------------------------------------
 	FOR k = 1 TO 6: m = matrix(a, k): IF m = 0 GOTO tally3
 	IF city_owner(m) = 0 THEN y = y + 3 * city_value(m) + 4 * city_fort(m)
-	IF city_owner(m) = side THEN y = y + 3 * city_value(m) + 4 * city_fort(m)
-	IF city_owner(m) = side AND c > 0 THEN
+	IF city_owner(m) = current_side THEN y = y + 3 * city_value(m) + 4 * city_fort(m)
+	IF city_owner(m) = current_side AND c > 0 THEN
 		odds! = 5 - 4 * RND
-		IF army_size(c) > 0 THEN odds! = army_size(index) / army_size(c) ELSE odds! = 5
+		IF army_size(c) > 0 THEN odds! = army_size(army) / army_size(c) ELSE odds! = 5
 		IF odds! < 1 THEN y = y - 2
 	END IF
-	IF city_owner(m) = side_capital(side) THEN y = y + 50
+	IF city_owner(m) = side_capital(current_side) THEN y = y + 50
 tally3:
 	NEXT k
 '---------------------------------------------------------------------------
@@ -391,7 +391,7 @@ IF menu_value(j) < 0 GOTO allof
 	IF menu_value(j) > x THEN x = menu_value(j): best = j
 allof:
 NEXT j
-	IF defend > army_size(index) AND menu_value(best) < 50 THEN best = 0
+	IF defend > army_size(army) AND menu_value(best) < 50 THEN best = 0
 	x = best
 END SUB
 
@@ -407,7 +407,7 @@ IF opt_realism > 0 AND turn_year = 1862 AND turn_month < 3 THEN
 	EXIT SUB
 END IF
 IF opt_event_balance = 0 THEN EXIT SUB
-plus = opt_difficulty: IF side = 1 THEN plus = 6 - opt_difficulty
+plus = opt_difficulty: IF current_side = 1 THEN plus = 6 - opt_difficulty
 pct! = .005 * (turn_year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
 IF RND > pct! THEN EXIT SUB
 
@@ -546,10 +546,10 @@ dull1:
 	CALL script_mark_key_wait(1, "S"): DO WHILE INKEY$ = "": LOOP
 END SUB
 
-SUB draw_flag (who, w, a)
+SUB draw_flag (side, w, a)
 x = 585 + w: y = 200: IF w = 0 THEN y = 180
 IF a <> 0 THEN y = a
-SELECT CASE who
+SELECT CASE side
 	CASE 1
 	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
 	FOR i = -13 TO 9 STEP 5
@@ -581,13 +581,13 @@ SELECT CASE who
 END SELECT
 END SUB
 
-SUB show_message_box (a$, s)
+SUB show_message_box (text$, seconds)
 DIM g2(1 TO 8000)
-menu_text$(1) = a$
-menu_col = 32 - LEN(a$) \ 2
+menu_text$(1) = text$
+menu_col = 32 - LEN(text$) \ 2
 menu_row = 10: menu_item_count = 1
 CALL menu_measure_width(wide)
-IF wide > 59 THEN wide = 59: a$ = LEFT$(a$, 59)
+IF wide > 59 THEN wide = 59: text$ = LEFT$(text$, 59)
 x = 8 * (menu_col + wide)
 y = 16 * (menu_row + 1)
 	GET (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 15, 16 * (menu_row + 3) + 7), g2
@@ -595,10 +595,10 @@ y = 16 * (menu_row + 1)
 	CLS 1
 	VIEW
 	LINE (8 * menu_col, 16 * menu_row - 1)-(8 * (menu_col + wide + 1) + 15, 16 * (menu_row + 3) + 7), 0, BF
-	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + 3)), s, BF
+	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + 3)), seconds, BF
 	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + 3)), 15, B
 	COLOR 14
-	LOCATE menu_row + 2, menu_col + 2: PRINT a$
+	LOCATE menu_row + 2, menu_col + 2: PRINT text$
 	CALL wait_seconds(9)
 	PUT (8 * menu_col - 4, 16 * menu_row - 3), g2, PSET
 END SUB
@@ -669,7 +669,7 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 			FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
 			LOCATE 12, 1: PRINT "Congratulations ! Score of"; side_victory_points(s)
 			PRINT "New Entry into "; side_name$(s); " HALL of FAME in place "; i
-			IF opt_players = 1 AND s <> side THEN a$ = "COMPUTER": PRINT a$; " was "; side_name$(s); " commander": GOTO automate
+			IF opt_players = 1 AND s <> current_side THEN a$ = "COMPUTER": PRINT a$; " was "; side_name$(s); " commander": GOTO automate
 who4:
 			PRINT "What is name of "; side_name$(s); " commander"; : CALL script_mark_key_wait(4, ""): INPUT a$: IF a$ = "" GOTO who4
 automate:
@@ -696,10 +696,10 @@ NEXT i
 holdup:
 END SUB
 
-SUB menu_army_relieve (who)
+SUB menu_army_relieve (side)
 menu_color = 3: target = 0: menu_highlight = 3
 menu_col = 67: menu_row = 2
-CALL side_army_range(star, fin, who)
+CALL side_army_range(star, fin, side)
 menu_item_count = 0
 FOR i = star TO fin
 IF army_size(i) > 0 AND army_city(i) > 0 AND army_order(i) = 0 THEN
@@ -750,13 +750,13 @@ CALL draw_map_marker(army_city(index), 0, 8)
 CALL clear_bottom_line
 END SUB
 
-SUB menu_report (who)
+SUB menu_report (side)
 DIM summ(40)
-IF who = -1 GOTO frep
-IF who > 100 GOTO batrep
+IF side = -1 GOTO frep
+IF side > 100 GOTO batrep
 menu_text$(0) = "Information"
-menu_text$(1) = side_name$(side) + " Armies"
-menu_text$(2) = side_name$(3 - side) + " Armies"
+menu_text$(1) = side_name$(current_side) + " Armies"
+menu_text$(2) = side_name$(3 - current_side) + " Armies"
 menu_text$(3) = "Cities"
 menu_text$(4) = "Force Summary"
 menu_text$(5) = "Intelligence"
@@ -768,7 +768,7 @@ CASE IS < 0
 	CLS
 	CALL draw_map
 	EXIT SUB
-CASE 2: who = 3 - side
+CASE 2: side = 3 - current_side
 CASE 3: GOTO cityrep
 CASE 4: GOTO frep
 CASE 5: GOTO srep
@@ -781,24 +781,24 @@ END SELECT
 '..........................................................................
 IF menu_choice < 0 GOTO endrep
 IF menu_choice = 4 GOTO frep
-CALL side_army_range(star, fin, who)
-CLS : LOCATE 1, 1: c = 9: IF who = 2 THEN c = 15
+CALL side_army_range(star, fin, side)
+CLS : LOCATE 1, 1: c = 9: IF side = 2 THEN c = 15
 COLOR c
-PRINT " Report for "; side_name$(who); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49); : COLOR 14: PRINT " Victory Points "; side_victory_points(who);
+PRINT " Report for "; side_name$(side); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49); : COLOR 14: PRINT " Victory Points "; side_victory_points(side);
 IF c = 15 THEN c = 7
-x = side_victory_points(who) + side_victory_points(3 - who)
+x = side_victory_points(side) + side_victory_points(3 - side)
 IF x = 0 THEN
 	PRINT
 ELSE
-	y = (side_victory_points(who) / x) * 100
+	y = (side_victory_points(side) / x) * 100
 	PRINT "("; y; " %)";
 END IF
-CALL draw_flag_icon(215, 8, who)
-COLOR c: PRINT side_city_count(who); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(side_city_count(who) * 2.5 + .5): PRINT x; "%)";
-PRINT TAB(50); : COLOR 12: PRINT "Capital: "; city_name$(side_capital(who))
+CALL draw_flag_icon(215, 8, side)
+COLOR c: PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(side_city_count(side) * 2.5 + .5): PRINT x; "%)";
+PRINT TAB(50); : COLOR 12: PRINT "Capital: "; city_name$(side_capital(side))
 y = total_income: IF side_capital(1) > 0 THEN y = y + 100
 IF side_capital(2) > 0 THEN y = y + 100
-PRINT side_income(who); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (side_income(who) / total_income) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; side_cash(who)
+PRINT side_income(side); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (side_income(side) / total_income) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; side_cash(side)
 COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
 x = 0: FOR i = star TO fin
 COLOR c
@@ -806,7 +806,7 @@ IF army_city(i) < 1 GOTO deadeye
 x = x + army_size(i)
 PRINT i; TAB(5); army_name$(i); TAB(25); : y = CSRLIN
 CALL print_army_size(i): PRINT TAB(32); city_name$(army_city(i));
-IF who <> side THEN PRINT : GOTO deadeye
+IF side <> current_side THEN PRINT : GOTO deadeye
 PRINT TAB(43); army_leader_rating(i); TAB(47); army_experience(i); TAB(52); army_supply(i);
 PRINT TAB(57); : IF army_order(i) > -1 THEN PRINT city_name$(army_order(i)) ELSE PRINT "Resting"
 IF city_fort(army_city(i)) > 0 THEN LOCATE y, 68: PRINT "FORT +"; city_fort(army_city(i))
@@ -815,14 +815,14 @@ NEXT i
 PRINT " "; STRING$(70, "Ä")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(ai_strength_ratio! * x))); "00 ]"
 PRINT " "; STRING$(70, "Ä")
-PRINT " "; side_name$(who); " NAVY has "; fleet_size(who); " ship(s) ";
+PRINT " "; side_name$(side); " NAVY has "; fleet_size(side); " ship(s) ";
 x = 0
-FOR k = 1 TO fleet_size(who)
-	IF MID$(fleet_ships$(who), k, 1) = "I" THEN x = x + 1
+FOR k = 1 TO fleet_size(side)
+	IF MID$(fleet_ships$(side), k, 1) = "I" THEN x = x + 1
 NEXT k
 IF x > 0 THEN PRINT "("; x; "Ironclads) ";
-IF fleet_city(who) > 0 AND fleet_city(who) < 99 THEN PRINT "in "; city_name$(fleet_city(who)) ELSE PRINT
-IF train_army(who) > 0 THEN COLOR 14: PRINT " Army #"; train_army(who); army_name$(train_army(who)); " on train to "; city_name$(army_order(train_army(who)));
+IF fleet_city(side) > 0 AND fleet_city(side) < 99 THEN PRINT "in "; city_name$(fleet_city(side)) ELSE PRINT
+IF train_army(side) > 0 THEN COLOR 14: PRINT " Army #"; train_army(side); army_name$(train_army(side)); " on train to "; city_name$(army_order(train_army(side)));
 LINE (0, 0)-(639, 449), 15, B
 LINE (0, 62)-(639, 62), 15
 GOTO endrep
@@ -854,9 +854,9 @@ GOTO endrep
 '                               Intelligence
 '..........................................................................
 srep:
-c = 9: IF side = 2 THEN c = 7
+c = 9: IF current_side = 2 THEN c = 7
 CALL draw_map
-CALL side_army_range(star, fin, side)
+CALL side_army_range(star, fin, current_side)
 FOR k = star TO fin
 	IF army_size(k) > 0 THEN
 	COLOR c
@@ -922,7 +922,7 @@ LOCATE 14, 38: PRINT side_battles_won(1)
 LOCATE 14, 45: PRINT side_battles_won(2)
 LOCATE 17, 38: PRINT INT(.1 * side_casualties&(1))
 LOCATE 17, 45: PRINT INT(.1 * side_casualties&(2))
-IF opt_history > 0 AND who > 2 THEN
+IF opt_history > 0 AND side > 2 THEN
 	OPEN "O", #1, "battsumm"
 	PRINT #1, " SIDE      BATTLES WON       LOSSES"
 	FOR k = 1 TO 2
@@ -953,36 +953,36 @@ CLOSE #2
 endrep:
 COLOR 14: LOCATE 29, 29: PRINT "press a key";
 CALL script_mark_key_wait(1, "F"): DO WHILE INKEY$ = "": LOOP
-IF who < 3 THEN
+IF side < 3 THEN
 	CLS
 	CALL draw_map
 END IF
 END SUB
 
-SUB army_resupply (index)
-		who = 1: IF index > 20 THEN who = 2
+SUB army_resupply (army)
+		who = 1: IF army > 20 THEN who = 2
 		IF opt_realism > 0 THEN
-			CALL city_is_connected(who, army_city(index), a)
+			CALL city_is_connected(who, army_city(army), a)
 			IF a < 1 THEN EXIT SUB
 		END IF
-		IF army_size(index) > 0 THEN x = side_cash(who) / army_size(index) * 10
-		y = x + army_supply(index): IF y > 5 THEN x = 5 - army_supply(index)
-		IF x < 1 THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(index); : GOTO nocash
-		army_supply(index) = army_supply(index) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(index)
-		CALL clear_bottom_line: PRINT army_name$(index); " has received supplies "; : IF opt_sound > 0 THEN SOUND 4500, .5
+		IF army_size(army) > 0 THEN x = side_cash(who) / army_size(army) * 10
+		y = x + army_supply(army): IF y > 5 THEN x = 5 - army_supply(army)
+		IF x < 1 THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army); : GOTO nocash
+		army_supply(army) = army_supply(army) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(army)
+		CALL clear_bottom_line: PRINT army_name$(army); " has received supplies "; : IF opt_sound > 0 THEN SOUND 4500, .5
 nocash:
 		CALL wait_seconds(opt_pause!): IF side_cash(who) < 0 THEN side_cash(who) = 0
 END SUB
 
-SUB menu_army_retreat (defend, x)
+SUB menu_army_retreat (defender, x)
 x = 0
 IF opt_players = 1 THEN
-	IF (side = 1 AND defend > 20) OR (side = 2 AND defend < 21) THEN EXIT SUB
+	IF (current_side = 1 AND defender > 20) OR (current_side = 2 AND defender < 21) THEN EXIT SUB
 END IF
 
 menu_highlight = 13: menu_color = 3: menu_col = 67: menu_row = 5: menu_item_count = 0
-y = army_city(defend)
-who = 1: IF defend > 20 THEN who = 2
+y = army_city(defender)
+who = 1: IF defender > 20 THEN who = 2
 FOR k = 1 TO 6
 	IF matrix(y, k) > 0 AND city_owner(matrix(y, k)) = who THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(matrix(y, k)): menu_value(menu_item_count) = matrix(y, k)
 NEXT k
@@ -996,28 +996,28 @@ NEXT k
 	x = menu_value(menu_choice)
 END SUB
 
-SUB army_generate_name (target, a$)
-a$ = "Union ": IF target > 20 THEN a$ = "Rebel "
-IF target > 20 THEN target = target - 20
-IF target > 10 THEN a$ = a$ + "X": target = target - 10
-SELECT CASE target
+SUB army_generate_name (army, name$)
+name$ = "Union ": IF army > 20 THEN name$ = "Rebel "
+IF army > 20 THEN army = army - 20
+IF army > 10 THEN name$ = name$ + "X": army = army - 10
+SELECT CASE army
 	CASE IS < 4
-	x = target: GOSUB add1s
+	x = army: GOSUB add1s
 	CASE 4
-	a$ = a$ + "IV"
+	name$ = name$ + "IV"
 	CASE 5 TO 8
-	a$ = a$ + "V"
-	x = target - 5
+	name$ = name$ + "V"
+	x = army - 5
 	GOSUB add1s
 	CASE 9
-	a$ = a$ + "IX"
+	name$ = name$ + "IX"
 	CASE 10
-	a$ = a$ + "X"
+	name$ = name$ + "X"
 END SELECT
 EXIT SUB
 
 add1s:
-IF x > 0 THEN FOR k = 1 TO x: a$ = a$ + "I": NEXT k
+IF x > 0 THEN FOR k = 1 TO x: name$ = name$ + "I": NEXT k
 RETURN
 
 END SUB
@@ -1095,15 +1095,15 @@ RETURN
 relee:
 END SUB
 
-SUB scribe_message (a$, flag)
-SELECT CASE flag
-		CASE 1: CALL clear_bottom_line: PRINT a$;
-		CASE 2: CALL show_message_box(a$, 4)
+SUB scribe_message (text$, display)
+SELECT CASE display
+		CASE 1: CALL clear_bottom_line: PRINT text$;
+		CASE 2: CALL show_message_box(text$, 4)
 END SELECT
 IF opt_history > 0 THEN
 	OPEN "A", 2, "cws.his"
-	a$ = LTRIM$(RTRIM$(a$))
-	PRINT #2, a$
+	text$ = LTRIM$(RTRIM$(text$))
+	PRINT #2, text$
 	CLOSE #2
 END IF
 END SUB
@@ -1124,12 +1124,12 @@ IF opt_sound = 2 THEN
 END IF
 END SUB
 
-SUB draw_ship_icon (who, flag)
+SUB draw_ship_icon (side, ship_type)
 	x = POINT(0) - 10: y = POINT(1) - 10
 	CIRCLE (x, y), 18, 9, , , .4
 	PAINT (x + 3, y + 4), 9, 9
 	CIRCLE (x, y), 18, 10, , , .4
-SELECT CASE flag
+SELECT CASE ship_type
 CASE 1                          'wooden ship
 	DRAW "BF5R5D1C4L20C0H1R22E1L9": DRAW "BL6": DRAW "C0L10H1L1H2": DRAW "BR9D2"
 	DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
@@ -1148,7 +1148,7 @@ CASE ELSE
 END SELECT
 EXIT SUB
 jack:
-	SELECT CASE who
+	SELECT CASE side
 	CASE 1
 	DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
 	CASE 2
@@ -1174,12 +1174,12 @@ sink:
 NEXT s
 END SUB
 
-SUB side_army_range (star, fin, who)
-star = 1: fin = 20: IF who = 2 THEN star = 21: fin = 40
+SUB side_army_range (star, fin, side)
+star = 1: fin = 20: IF side = 2 THEN star = 21: fin = 40
 END SUB
 
-SUB draw_stack_markers (who)
-CALL side_army_range(star, fin, who)
+SUB draw_stack_markers (side)
+CALL side_army_range(star, fin, side)
 FOR i = star TO fin
 IF army_size(i) > 0 AND city_army(army_city(i)) <> i THEN
 	target = army_city(i)
@@ -1189,10 +1189,10 @@ END IF
 NEXT i
 END SUB
 
-SUB draw_surrender (who)
+SUB draw_surrender (side)
 SCREEN 12
 s = 1: c = 1: COLOR 0: w = 514
-IF who > 20 THEN c = 7: s = 2
+IF side > 20 THEN c = 7: s = 2
 '               background
 LINE (w + 15, 440)-(w + 125, 16), 2, BF
 LINE (w + 15, 16)-(w + 125, 290), 3, BF
@@ -1310,35 +1310,35 @@ PAINT (w + 33, 250), c, 0
 PAINT (w + 42, 264), c, 0
 
 CALL draw_flag(3 - s, 26, 0)
-IF who < 99 THEN CALL wait_seconds(opt_pause!)
+IF side < 99 THEN CALL wait_seconds(opt_pause!)
 END SUB
 
-SUB wait_seconds (sec!)
-IF script_tick(sec!) THEN EXIT SUB
+SUB wait_seconds (seconds!)
+IF script_tick(seconds!) THEN EXIT SUB
 start! = TIMER
-DO WHILE TIMER - start! < sec! AND INKEY$ = "": LOOP
+DO WHILE TIMER - start! < seconds! AND INKEY$ = "": LOOP
 END SUB
 
 SUB draw_top_bar
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR 11
-	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(side); " side "; : COLOR 14: PRINT month_name$(turn_month); ","; turn_year; "  "
+	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR 14: PRINT month_name$(turn_month); ","; turn_year; "  "
 
-	CALL draw_flag((side), 0, 0)
+	CALL draw_flag((current_side), 0, 0)
 	COLOR 4: IF opt_alt_colors > 0 THEN COLOR 7
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
-	LOCATE 7, 68: PRINT "Funds:"; side_cash(side);
+	LOCATE 7, 68: PRINT "Funds:"; side_cash(current_side);
 
 	FOR i = 1 TO 2: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
 	NEXT i
 	x = side_victory_points(1) + side_victory_points(2): y = 0
-	c = 9: IF side = 2 THEN c = 7
+	c = 9: IF current_side = 2 THEN c = 7
 	LINE (580, 15)-(580, 35), 15
 	LINE (530, 20)-(630, 30), 8 - c, BF
-	IF x > 0 THEN y = 100 * (side_victory_points(side) / x)
+	IF x > 0 THEN y = 100 * (side_victory_points(current_side) / x)
 
 	LINE (530, 20)-(530 + y, 30), c, BF
-	COLOR c: LOCATE 4, 68: PRINT "VP :"; side_victory_points(side)
+	COLOR c: LOCATE 4, 68: PRINT "VP :"; side_victory_points(current_side)
 
 	LOCATE 5, 68: PRINT "("; y; "%)"
 
@@ -1413,11 +1413,11 @@ LINE -(115, 420), 10
 LINE (66, 375)-(52, 375), 10
 END SUB
 
-SUB railroad_capacity (who, limit)
-IF opt_realism = 0 THEN limit = train_capacity(who): EXIT SUB
-x = 11: IF side = 2 THEN x = 23
-limit = train_capacity(who) + 5 * (side_city_count(who) - x)
-x = 2 * train_capacity(who)
+SUB railroad_capacity (side, limit)
+IF opt_realism = 0 THEN limit = train_capacity(side): EXIT SUB
+x = 11: IF current_side = 2 THEN x = 23
+limit = train_capacity(side) + 5 * (side_city_count(side) - x)
+x = 2 * train_capacity(side)
 IF limit > x THEN limit = x
 IF limit < x \ 4 THEN limit = x \ 4
 END SUB
@@ -1845,7 +1845,7 @@ play4ever:
 	menu_text$(0) = "Options"
 	menu_text$(1) = "Quit this Game"
 	menu_text$(2) = "Play More"
-	IF opt_players = 1 THEN menu_text$(2) = "No - Press Onward to " + city_name$(side_capital(3 - side))
+	IF opt_players = 1 THEN menu_text$(2) = "No - Press Onward to " + city_name$(side_capital(3 - current_side))
 	menu_item_count = 2: menu_color = 8
 	menu_col = 27: menu_row = 18
 	IF j <> 7 THEN
@@ -1856,7 +1856,7 @@ play4ever:
 	END IF
 
 	victory_reason = i
-	CALL draw_map: CALL menu_report(100 + side)
+	CALL draw_map: CALL menu_report(100 + current_side)
 	IF j = 2 THEN FOR k = 1 TO 2: side_victory_points(k) = .7 * side_victory_points(k): NEXT k: CALL draw_rebel_victory: GOTO death
 
 	IF i = 1 THEN CALL draw_union_victory: COLOR 15: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(1)): PRINT t$: GOTO death
@@ -1877,9 +1877,9 @@ SUB city_nearby_enemy_strength (a, y)
   y = 0
 FOR j = 1 TO 6
   x = matrix(a, j): IF x = 0 GOTO tally5
-  IF city_owner(x) = side AND city_army(x) > 0 THEN y = y + army_size(city_army(x))
+  IF city_owner(x) = current_side AND city_army(x) > 0 THEN y = y + army_size(city_army(x))
 	FOR k = 1 TO 6: m = matrix(x, k): IF m = 0 OR m = a GOTO tally4
-	IF city_owner(m) = side AND city_army(m) > 0 THEN y = y + .1 * army_size(city_army(m))
+	IF city_owner(m) = current_side AND city_army(m) > 0 THEN y = y + .1 * army_size(city_army(m))
 tally4:
 	NEXT k
 NEXT j
