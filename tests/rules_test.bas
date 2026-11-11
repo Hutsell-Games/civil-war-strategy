@@ -24,24 +24,24 @@ END SUB
 ' bub2 sorts brray. bubble sorts the menu's texts and keeps array beside them.
 
 SUB TestBub2SortsBrray
-brray(1) = 30: brray(2) = 10: brray(3) = 20: brray(4) = 5
+move_order_key(1) = 30: move_order_key(2) = 10: move_order_key(3) = 20: move_order_key(4) = 5
 CALL sort_move_order(3)
-AssertEqualInt 10, brray(1), "first"
-AssertEqualInt 20, brray(2), "second"
-AssertEqualInt 30, brray(3), "third"
-AssertEqualInt 5, brray(4), "past the limit: left alone"
+AssertEqualInt 10, move_order_key(1), "first"
+AssertEqualInt 20, move_order_key(2), "second"
+AssertEqualInt 30, move_order_key(3), "third"
+AssertEqualInt 5, move_order_key(4), "past the limit: left alone"
 END SUB
 
 SUB TestBubbleSortsTextsAndKeepsArrayBeside
-mtx$(1) = "Richmond": array(1) = 25
-mtx$(2) = "Atlanta": array(2) = 31
-mtx$(3) = "Memphis": array(3) = 17
+menu_text$(1) = "Richmond": menu_value(1) = 25
+menu_text$(2) = "Atlanta": menu_value(2) = 31
+menu_text$(3) = "Memphis": menu_value(3) = 17
 CALL menu_bubble_sort(3)
-AssertEqualStr "Atlanta", mtx$(1), "first"
-AssertEqualInt 31, array(1), "its city"
-AssertEqualStr "Memphis", mtx$(2), "second"
-AssertEqualStr "Richmond", mtx$(3), "third"
-AssertEqualInt 25, array(3), "its city"
+AssertEqualStr "Atlanta", menu_text$(1), "first"
+AssertEqualInt 31, menu_value(1), "its city"
+AssertEqualStr "Memphis", menu_text$(2), "second"
+AssertEqualStr "Richmond", menu_text$(3), "third"
+AssertEqualInt 25, menu_value(3), "its city"
 END SUB
 
 ' -------------------------------------------------------------------- roman
@@ -75,11 +75,11 @@ END SUB
 ' occupied(x) is the first army in city x, or 0.
 
 SUB TestOccupyFindsTheFirstArmyInACity
-armyloc(3) = 7: armyloc(5) = 7: armyloc(22) = 9
-CALL city_update_occupier(7): AssertEqualInt 3, occupied(7), "two armies: the first"
-CALL city_update_occupier(9): AssertEqualInt 22, occupied(9), "a Rebel army"
-occupied(8) = 4
-CALL city_update_occupier(8): AssertEqualInt 0, occupied(8), "no army: set back to 0"
+army_city(3) = 7: army_city(5) = 7: army_city(22) = 9
+CALL city_update_occupier(7): AssertEqualInt 3, city_army(7), "two armies: the first"
+CALL city_update_occupier(9): AssertEqualInt 22, city_army(9), "a Rebel army"
+city_army(8) = 4
+CALL city_update_occupier(8): AssertEqualInt 0, city_army(8), "no army: set back to 0"
 END SUB
 
 ' ------------------------------------------------------------------- cutoff
@@ -87,10 +87,10 @@ END SUB
 
 SUB TestCutoffCountsFriendlyNeighbors
 matrix(5, 1) = 2: matrix(5, 2) = 3: matrix(5, 3) = 4
-cityp(2) = 1: cityp(3) = 2: cityp(4) = 1
+city_owner(2) = 1: city_owner(3) = 2: city_owner(4) = 1
 CALL city_is_connected(1, 5, a): AssertEqualInt 2, a, "the Union holds two neighbors"
 CALL city_is_connected(2, 5, a): AssertEqualInt 1, a, "the Rebels hold one"
-cityp(3) = 0
+city_owner(3) = 0
 CALL city_is_connected(2, 5, a): AssertEqualInt 0, a, "cut off"
 END SUB
 
@@ -101,23 +101,23 @@ END SUB
 ' the player is the Rebels, whichever side who is.
 
 SUB TestTraincapacityWithoutRealism
-train(1) = 600: train(2) = 300: realism = 0
+train_capacity(1) = 600: train_capacity(2) = 300: opt_realism = 0
 CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "the Union"
 CALL railroad_capacity(2, limit): AssertEqualInt 300, limit, "the Rebels"
 END SUB
 
 SUB TestTraincapacityWithRealism
-train(1) = 600: realism = 1: side = 1
-control(1) = 14: CALL railroad_capacity(1, limit): AssertEqualInt 615, limit, "14 cities"
-control(1) = 11: CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "11 cities"
-control(1) = 5: CALL railroad_capacity(1, limit): AssertEqualInt 570, limit, "5 cities"
-train(1) = 20
-control(1) = 0: CALL railroad_capacity(1, limit): AssertEqualInt 10, limit, "never less than half"
-control(1) = 40: CALL railroad_capacity(1, limit): AssertEqualInt 40, limit, "never more than twice"
+train_capacity(1) = 600: opt_realism = 1: side = 1
+side_city_count(1) = 14: CALL railroad_capacity(1, limit): AssertEqualInt 615, limit, "14 cities"
+side_city_count(1) = 11: CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "11 cities"
+side_city_count(1) = 5: CALL railroad_capacity(1, limit): AssertEqualInt 570, limit, "5 cities"
+train_capacity(1) = 20
+side_city_count(1) = 0: CALL railroad_capacity(1, limit): AssertEqualInt 10, limit, "never less than half"
+side_city_count(1) = 40: CALL railroad_capacity(1, limit): AssertEqualInt 40, limit, "never more than twice"
 END SUB
 
 SUB TestTraincapacityCountsByPlayersSide
-train(1) = 600: realism = 1: control(1) = 23
+train_capacity(1) = 600: opt_realism = 1: side_city_count(1) = 23
 side = 2
 CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
 END SUB
@@ -128,8 +128,8 @@ END SUB
 
 SUB TestVoidAddsNearbyArmies
 side = 1
-matrix(1, 1) = 2: cityp(2) = 1: occupied(2) = 4: armysize(4) = 50
-matrix(2, 1) = 3: cityp(3) = 1: occupied(3) = 6: armysize(6) = 40
+matrix(1, 1) = 2: city_owner(2) = 1: city_army(2) = 4: army_size(4) = 50
+matrix(2, 1) = 3: city_owner(3) = 1: city_army(3) = 6: army_size(6) = 40
 matrix(2, 2) = 1
 CALL city_nearby_enemy_strength(1, y)
 AssertEqualInt 54, y, "50 beside and a tenth of 40 further"
@@ -137,7 +137,7 @@ END SUB
 
 SUB TestVoidIsZeroWithNoArmyNear
 side = 1
-matrix(1, 1) = 2: cityp(2) = 2: occupied(2) = 24: armysize(24) = 50
+matrix(1, 1) = 2: city_owner(2) = 2: city_army(2) = 24: army_size(24) = 50
 CALL city_nearby_enemy_strength(1, y)
 AssertEqualInt 0, y, "the enemy's army does not count"
 END SUB
@@ -146,19 +146,19 @@ END SUB
 ' A fleet loses its last ship.
 
 SUB TestBarnacleRemovesTheLastShip
-navysize(1) = 3: fleet$(1) = "WIW": navyloc(1) = 30
+fleet_size(1) = 3: fleet_ships$(1) = "WIW": fleet_city(1) = 30
 CALL navy_remove_ship(1)
-AssertEqualInt 2, navysize(1), "two ships left"
-AssertEqualStr "WI", fleet$(1), "the last one gone"
-AssertEqualInt 30, navyloc(1), "still there"
+AssertEqualInt 2, fleet_size(1), "two ships left"
+AssertEqualStr "WI", fleet_ships$(1), "the last one gone"
+AssertEqualInt 30, fleet_city(1), "still there"
 END SUB
 
 SUB TestBarnacleEndsAFleetOfOne
-navysize(2) = 1: fleet$(2) = "I": navyloc(2) = 27
+fleet_size(2) = 1: fleet_ships$(2) = "I": fleet_city(2) = 27
 CALL navy_remove_ship(2)
-AssertEqualInt 0, navysize(2), "no ships"
-AssertEqualStr "", fleet$(2), "no fleet"
-AssertEqualInt 0, navyloc(2), "nowhere"
+AssertEqualInt 0, fleet_size(2), "no ships"
+AssertEqualStr "", fleet_ships$(2), "no fleet"
+AssertEqualInt 0, fleet_city(2), "nowhere"
 END SUB
 
 ' ------------------------------------------------------------------- normal
@@ -186,9 +186,9 @@ END SUB
 ' or a made-up one when the list is used up.
 
 SUB TestCommanderTakesTheFirstFreeName
-lname$(1) = "Grant": armyloc(1) = 5
-lname$(2) = "Pope"
-lname$(3) = "Meade"
+leader_name$(1) = "Grant": army_city(1) = 5
+leader_name$(2) = "Pope"
+leader_name$(3) = "Meade"
 CALL army_get_commander(1, empty)
 AssertEqualInt 2, empty, "Grant has an army; Pope is next"
 END SUB
@@ -197,18 +197,18 @@ SUB TestCommanderMakesUpANameAfterTheList
 RANDOMIZE 1
 CALL army_get_commander(2, empty)
 AssertEqualInt 21, empty, "the Rebels' first army"
-AssertEqualStr "Rebel I", lname$(21), "its made-up name"
-AssertTrue rating(21) >= 1 AND rating(21) <= 9, "a rating from 1 to 9:" + STR$(rating(21))
+AssertEqualStr "Rebel I", leader_name$(21), "its made-up name"
+AssertTrue leader_rating(21) >= 1 AND leader_rating(21) <= 9, "a rating from 1 to 9:" + STR$(leader_rating(21))
 END SUB
 
 ' ---------------------------------------------------------------------- mxw
 ' The width of a menu: its longest entry, or its title and one more.
 
 SUB TestMxwIsTheLongestEntry
-mtx$(0) = "Main": mtx$(1) = "Troops": mtx$(2) = "Railroad": mtx$(3) = "END TURN": size = 3
+menu_text$(0) = "Main": menu_text$(1) = "Troops": menu_text$(2) = "Railroad": menu_text$(3) = "END TURN": menu_item_count = 3
 CALL menu_measure_width(wide)
 AssertEqualInt 8, wide, "Railroad"
-mtx$(0) = "VGA CIVILWAR STRATEGY"
+menu_text$(0) = "VGA CIVILWAR STRATEGY"
 CALL menu_measure_width(wide)
 AssertEqualInt 22, wide, "the title and one more"
 END SUB

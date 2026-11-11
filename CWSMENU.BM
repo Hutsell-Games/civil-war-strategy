@@ -16,21 +16,21 @@
 '               if >10 then 10's digit=box color  1's digit= window type
 
 SUB draw_menu (b1, wide)
-boxc = colour: IF wtype > 10 THEN boxc = INT(wtype / 10): wtype = wtype - 10 * boxc
+boxc = menu_color: IF menu_box_type > 10 THEN boxc = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * boxc
 COLOR boxc
-VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8)
+VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
 CLS 1
 VIEW
-LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8), colour, B
-LINE (8 * tlx - 2, 16 * (tly + 1) + 3)-(8 * (tlx + wide + 1) + 3, 16 * (tly + 1) + 6), colour, B
-IF ABS(wtype) = 2 THEN
-LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + size + 2) + 4), colour, B
+LINE (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8), menu_color, B
+LINE (8 * menu_col - 2, 16 * (menu_row + 1) + 3)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + 1) + 6), menu_color, B
+IF ABS(menu_box_type) = 2 THEN
+LINE (8 * menu_col - 2, 16 * menu_row - 8)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + menu_item_count + 2) + 4), menu_color, B
 END IF
-COLOR colour
+COLOR menu_color
 
-LOCATE tly + 1, tlx + b1: PRINT mtx$(0)
-FOR i = 1 TO size
-LOCATE tly + 2 + i, tlx + 2: PRINT mtx$(i);
+LOCATE menu_row + 1, menu_col + b1: PRINT menu_text$(0)
+FOR i = 1 TO menu_item_count
+LOCATE menu_row + 2 + i, menu_col + 2: PRINT menu_text$(i);
 NEXT i
 END SUB
 
@@ -141,118 +141,118 @@ END SUB
 
 SUB menu_select (switch%)
 remenu:
-	IF colour = 0 THEN colour = 7
+	IF menu_color = 0 THEN menu_color = 7
 	LOCATE 1, 1, 0
-	IF mtx$(0) = "" THEN mtx$(0) = "M E N U"
+	IF menu_text$(0) = "" THEN menu_text$(0) = "M E N U"
 
 	IF wide = 0 THEN CALL menu_measure_width(wide)
-	IF tlx = 0 THEN GOSUB noadjust
-	IF choose < 21 THEN choose = 1
-	IF choose > 21 THEN choose = choose - 21
-	IF choose > 21 THEN choose = 1
-	row = choose: IF row < 1 THEN row = 1
-	IF row > size THEN row = 1
-	choose = row
+	IF menu_col = 0 THEN GOSUB noadjust
+	IF menu_choice < 21 THEN menu_choice = 1
+	IF menu_choice > 21 THEN menu_choice = menu_choice - 21
+	IF menu_choice > 21 THEN menu_choice = 1
+	row = menu_choice: IF row < 1 THEN row = 1
+	IF row > menu_item_count THEN row = 1
+	menu_choice = row
 	row1 = row
        
-	IF tly = 0 THEN tly = INT(11.5 - .5 * size)
-	IF tly + size > 26 THEN tly = 26 - size
+	IF menu_row = 0 THEN menu_row = INT(11.5 - .5 * menu_item_count)
+	IF menu_row + menu_item_count > 26 THEN menu_row = 26 - menu_item_count
        
-	brx = tlx + wide + 1
-	bry = tly + size + 3
+	brx = menu_col + wide + 1
+	bry = menu_row + menu_item_count + 3
        
-	boxc = colour: IF wtype > 10 THEN boxc = INT(wtype / 10): wtype = wtype - 10 * boxc
+	boxc = menu_color: IF menu_box_type > 10 THEN boxc = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * boxc
 
 	COLOR boxc
 
-	VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8)
+	VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
 	CLS 1
 	VIEW
-	LINE (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8), colour, B
-	LINE (8 * tlx - 2, 16 * (tly + 1) + 3)-(8 * (tlx + wide + 1) + 3, 16 * (tly + 1) + 6), colour, B
-	IF ABS(wtype) = 2 THEN
-		LINE (8 * tlx - 2, 16 * tly - 8)-(8 * (tlx + wide + 1) + 3, 16 * (tly + size + 2) + 4), colour, B
+	LINE (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8), menu_color, B
+	LINE (8 * menu_col - 2, 16 * (menu_row + 1) + 3)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + 1) + 6), menu_color, B
+	IF ABS(menu_box_type) = 2 THEN
+		LINE (8 * menu_col - 2, 16 * menu_row - 8)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + menu_item_count + 2) + 4), menu_color, B
 	END IF
 
-	COLOR colour
-	b1 = INT(.5 * (wide - LEN(mtx$(0))) + .5) + 1
+	COLOR menu_color
+	b1 = INT(.5 * (wide - LEN(menu_text$(0))) + .5) + 1
 
 	CALL draw_menu(b1, wide)
 sel1:
 	SELECT CASE switch
-		CASE 1: CALL draw_map_marker(array(row), 0, 7)
-		CASE 2: CALL draw_map_marker(array(row), 0, 9)
-			target = occupied(array(row))
+		CASE 1: CALL draw_map_marker(menu_value(row), 0, 7)
+		CASE 2: CALL draw_map_marker(menu_value(row), 0, 9)
+			target = city_army(menu_value(row))
 			IF target > 0 THEN
 			flag = 1
-			t$ = armyname$(target)
+			t$ = army_name$(target)
 			IF LEN(t$) > wide THEN t$ = LEFT$(t$, wide)
 			COLOR 12
-			LOCATE tly + 2 + row, tlx + 2: PRINT SPACE$(wide);
-			LOCATE tly + 2 + row, tlx + 2: PRINT t$;
-			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
-			LOCATE tly + 4 + size, tlx + 1: PRINT "Size"; armysize(target);
+			LOCATE menu_row + 2 + row, menu_col + 2: PRINT SPACE$(wide);
+			LOCATE menu_row + 2 + row, menu_col + 2: PRINT t$;
+			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
+			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT "Size"; army_size(target);
 			x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
 			ELSE
 			flag = 0
-			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
+			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
 			END IF
-		CASE 4: CALL draw_army_stats(array(row))
-		CASE 6: CALL draw_map_marker(armyloc(array(row)), 0, 9)
+		CASE 4: CALL draw_army_stats(menu_value(row))
+		CASE 6: CALL draw_map_marker(army_city(menu_value(row)), 0, 9)
 		CASE 8
-			IF graf > 2 AND row > 0 THEN
+			IF opt_graphics > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
 				a = row: IF side = 1 THEN a = 6 - row
 				t$ = GFXDIR + "face" + LTRIM$(STR$(a)) + ".vga"
 				IF LEN(DIR$(t$)) > 0 THEN
-					DEF SEG = VARSEG(graft(1))
-					BLOAD t$, VARPTR(graft(1))
+					DEF SEG = VARSEG(pic_fort(1))
+					BLOAD t$, VARPTR(pic_fort(1))
 					DEF SEG
-					PUT (550, 150), graft, PSET
+					PUT (550, 150), pic_fort, PSET
 					IF side = 2 THEN
 						PAINT (560, 160), 8, 0
 						PAINT (570, 155), 7, 0
 					END IF
 				END IF
 			END IF
-		CASE 9: CALL draw_map_marker(array(row), 0, 9)
+		CASE 9: CALL draw_map_marker(menu_value(row), 0, 9)
 	END SELECT
 	IF flag = 0 THEN
-		COLOR hilite
-		LOCATE tly + 2 + row, tlx + 2
-		PRINT mtx$(row)
-		IF bw > 0 THEN LINE (8 * (tlx + 1), 16 * (tly + row + 1))-(8 * (tlx + LEN(mtx$(row)) + 1) - 1, 16 * (tly + row + 2) - 1), hilite, B
+		COLOR menu_highlight
+		LOCATE menu_row + 2 + row, menu_col + 2
+		PRINT menu_text$(row)
+		IF opt_alt_colors > 0 THEN LINE (8 * (menu_col + 1), 16 * (menu_row + row + 1))-(8 * (menu_col + LEN(menu_text$(row)) + 1) - 1, 16 * (menu_row + row + 2) - 1), menu_highlight, B
 	END IF
 	leave = 0: GOSUB crsr
 	IF leave = 1 GOTO called
 	IF switch <> 3 GOTO reglr
-	IF a$ = "H" THEN choose = 1: GOTO called
-	IF ASC(a$) = 13 THEN choose = 2: GOTO called
-	IF a$ = "P" THEN choose = 3: GOTO called
+	IF a$ = "H" THEN menu_choice = 1: GOTO called
+	IF ASC(a$) = 13 THEN menu_choice = 2: GOTO called
+	IF a$ = "P" THEN menu_choice = 3: GOTO called
 reglr:
 	IF ASC(a$) = 13 GOTO called
-	IF switch = 2 THEN LOCATE tly + 2 + row1, tlx + 2: PRINT SPACE$(wide);
-	COLOR colour
-	LOCATE tly + 2 + row1, tlx + 2: PRINT mtx$(row1)
+	IF switch = 2 THEN LOCATE menu_row + 2 + row1, menu_col + 2: PRINT SPACE$(wide);
+	COLOR menu_color
+	LOCATE menu_row + 2 + row1, menu_col + 2: PRINT menu_text$(row1)
 
 	SELECT CASE switch
 		CASE 1, 2, 9
-			IF mtx$(row1) <> "EXIT" THEN CALL draw_map_marker(array(row1), 0, 8)
+			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(menu_value(row1), 0, 8)
 		CASE 6
-			IF mtx$(row1) <> "EXIT" THEN CALL draw_map_marker(armyloc(array(row1)), 0, 8)
+			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(army_city(menu_value(row1)), 0, 8)
 	END SELECT
 
-	choose = row
+	menu_choice = row
 	GOTO sel1
-crsr:   CALL script_mark_key_wait(2, mtx$(0)): DO: a$ = INKEY$: LOOP WHILE a$ = ""
+crsr:   CALL script_mark_key_wait(2, menu_text$(0)): DO: a$ = INKEY$: LOOP WHILE a$ = ""
 	IF ASC(a$) = 13 THEN RETURN
 	IF LEN(a$) = 2 GOTO arrows
-	IF switch = 3 THEN choose = -ASC(UCASE$(a$)): leave = 1: RETURN
-	IF ASC(a$) = 27 THEN choose = -1: leave = 1: RETURN
+	IF switch = 3 THEN menu_choice = -ASC(UCASE$(a$)): leave = 1: RETURN
+	IF ASC(a$) = 27 THEN menu_choice = -1: leave = 1: RETURN
 		row1 = row
-		FOR k = 1 TO size
-		c1$ = UCASE$(LEFT$(LTRIM$(mtx$(k)), 1))
-		IF c1$ = UCASE$(a$) THEN choose = k: GOSUB limits: leave = 1: RETURN
+		FOR k = 1 TO menu_item_count
+		c1$ = UCASE$(LEFT$(LTRIM$(menu_text$(k)), 1))
+		IF c1$ = UCASE$(a$) THEN menu_choice = k: GOSUB limits: leave = 1: RETURN
 		NEXT k
 	GOTO crsr
 arrows:
@@ -261,7 +261,7 @@ arrows:
 	 IF a$ = "H" THEN row = row - 1: GOSUB limits: RETURN
 	 IF a$ = "I" THEN row = 1: GOSUB limits: RETURN
 	 IF a$ = "P" THEN row = row + 1: GOSUB limits: RETURN
-	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
+	 IF a$ = "Q" THEN row = menu_item_count: GOSUB limits: RETURN
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
 		CALL draw_map
@@ -270,7 +270,7 @@ arrows:
 		RETURN
 	 END IF
 	 IF a$ = "A" AND switch = 0 THEN
-		choose = 99
+		menu_choice = 99
 		leave = 1
 		RETURN
 	 END IF
@@ -283,29 +283,29 @@ arrows:
 	 RETURN
 
 limits:
-	IF row > size THEN row = 1
-	IF row < 1 THEN row = size
+	IF row > menu_item_count THEN row = 1
+	IF row < 1 THEN row = menu_item_count
 	RETURN
 noadjust:
-	IF tlx = 0 THEN tlx = INT(40.5 - .5 * wide)
+	IF menu_col = 0 THEN menu_col = INT(40.5 - .5 * wide)
 	RETURN
 called:
-	IF noise > 0 THEN SOUND 700, .5
-	COLOR colour
-	tlx = 0: tly = 0
+	IF opt_sound > 0 THEN SOUND 700, .5
+	COLOR menu_color
+	menu_col = 0: menu_row = 0
 	SELECT CASE switch
 	CASE 1, 2, 9
-		CALL draw_map_marker(array(row), 0, 8)
+		CALL draw_map_marker(menu_value(row), 0, 8)
 	CASE 6
-		CALL draw_map_marker(armyloc(array(row)), 0, 8)
+		CALL draw_map_marker(army_city(menu_value(row)), 0, 8)
 	END SELECT
 	VIEW
 END SUB
 
 SUB menu_measure_width (wide)
-	wide = LEN(mtx$(0)) + 1
-	FOR i = 1 TO size
-	x = LEN(mtx$(i))
+	wide = LEN(menu_text$(0)) + 1
+	FOR i = 1 TO menu_item_count
+	x = LEN(menu_text$(i))
 	IF x > wide THEN wide = x
 	NEXT i
 END SUB

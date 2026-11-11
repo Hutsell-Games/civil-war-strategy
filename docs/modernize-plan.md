@@ -135,8 +135,11 @@ output of `play.py check` and `play.py compare` (decision 15).
 Updated 2026-11-11. Phase 1 is committed (`1727bf9`). Phase 2 is done in the working tree, not committed:
 `tools\refactor\rename_subs.py` (from the "Settled names" table; `report` lists uses, `apply` rewrites).
 `play.py check` and `compare` pass 25 of 25 with no recording changed, and the 23 unit tests pass. The branch
-is `refactor_naming`. The user stages and commits. **Next: phase 4's rename script** (variables), tested on a
-copy first.
+is `refactor_naming`. The user stages and commits. Phase 2 is committed (`4097c02`). Phase 4 step A is done
+in the working tree: `tools\refactor\rename_vars.py` renamed 83 shared variables from `variable-names.md`
+(not `side`, `matrix`, `navymove`); checks pass as for phase 2. **Next, phase 4 step B:** `side` to
+`current_side`, then the parameters (`who` to `side` and the rest of the "Parameters" table); then the
+`matrix()` split; then `OPTION _EXPLICIT`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
