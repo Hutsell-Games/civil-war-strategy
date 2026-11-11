@@ -4,9 +4,7 @@ DECLARE SUB animate (index%, flag%)
 DECLARE SUB armies ()
 DECLARE SUB armystat (index%)
 DECLARE SUB armyxy (x%, y%, z%)
-DECLARE SUB banner (a$)
 DECLARE SUB battle (attack%, defend%, win%, lose%)
-DECLARE SUB blastem ()
 DECLARE SUB bub2 (limit%)
 DECLARE SUB bubble (size%)
 DECLARE SUB cancel (side%)
@@ -49,8 +47,6 @@ DECLARE SUB shipicon (who%, flag%)
 DECLARE SUB smarts ()
 DECLARE SUB showcity ()
 DECLARE SUB snapshot (x%, y%, flag%)
-DECLARE SUB sndblst (file$, flag%)
-DECLARE SUB sndfx (flag%)
 DECLARE SUB starfin (star%, fin%, who%)
 DECLARE SUB strong (index%)
 DECLARE SUB surrender (who%)
@@ -58,10 +54,8 @@ DECLARE SUB TICK (sec!)
 DECLARE SUB touchup ()
 DECLARE SUB tupdate ()
 DECLARE SUB usa ()
-DECLARE SUB usamap ()
 DECLARE SUB victor ()
 DECLARE SUB void (a%, y%)
-DECLARE SUB war ()
 '==========================================================================
 COMMON SHARED choose%, tlx%, tly%, size%, mtx$(), wtype%, colour%, hilite%
 COMMON SHARED cityx(), cityy(), cityv(), cityp(), city$(), lname$(), filel
@@ -69,7 +63,7 @@ COMMON SHARED cash(), control(), matrix(), income(), anima(), rating(), rflag
 COMMON SHARED nflag, bold, turbo!, rr(), starx(), stary(), mtn(), rrfrom()
 COMMON SHARED image(), force$(), armyloc(), armyname$(), player, aggress!
 COMMON SHARED armysize(), armylead(), armyexper(), supply(), month$()
-COMMON SHARED rcity(), price(), vicflag(), tracks(), batwon(), cityo()
+COMMON SHARED rcity(), vicflag(), tracks(), batwon(), cityo()
 COMMON SHARED armymove(), month, year, array(), mflag, side, ATKFAC, DEFAC, TCR
 COMMON SHARED navyloc(), navysize(), navymove(), occupied(), vptotal, fort()
 COMMON SHARED victory(), graf, noise, capcity(), difficult, usadv, bw
@@ -82,7 +76,7 @@ DIM SHARED mtx$(21), image(300), force$(2), armyloc(40), armyname$(40), vicflag(
 DIM SHARED armysize(40), armylead(40), armyexper(40), supply(40), month$(12)
 DIM SHARED armymove(40), array(40), starx(8), stary(8), mtn(1 TO 1564), rrfrom(2)
 DIM SHARED navyloc(2), navysize(2), navymove(2), occupied(40), fort(40), rr(2)
-DIM SHARED victory(2), capcity(2), emancipate, price(3), tracks(2), fleet$(2)
+DIM SHARED victory(2), capcity(2), emancipate, tracks(2), fleet$(2)
 DIM SHARED train(2), font$(26), brray(40), casualty&(2), batwon(2), cityo(40)
 ' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
 DIM SHARED graphic(1 TO 1564), Ncap(60)

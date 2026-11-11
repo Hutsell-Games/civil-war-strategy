@@ -44,7 +44,6 @@ IF realism > 0 AND year < 1862 THEN
 			fleet$(i) = a$
 		NEXT i
 END IF
-iron:
 IF player < 1 OR player > 2 THEN player = 1
 IF player = 2 OR side = 0 THEN side = 1
 IF side = 1 THEN randbal = 7
@@ -56,10 +55,7 @@ IF side = 2 THEN randbal = 3
 
 FOR i = 1 TO 2: income(i) = cash(i): cash(i) = cash(i) + 50 * RND: NEXT i
 choose = 0
-a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 
-band:           ' SHELL "cwstitle.exe" (a DOS program with no source; cannot run on 64-bit Windows)
-notitle2:
 SCREEN 12
 	DEF SEG = VARSEG(graphic(1))
 	BLOAD GFXDIR + "cwsicon.vga", VARPTR(graphic(1))
@@ -125,7 +121,6 @@ CALL menu(0)
 IF choose = 1 THEN
 	CLS
 	GOTO loader
-	GOTO menu0
 END IF
 IF choose = 3 THEN CLS : END
 IF history = 1 THEN
@@ -579,7 +574,7 @@ utile:
 			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
 			END IF
 		NEXT k
-		FOR k = 21 TO 6
+		FOR k = 21 TO 26
 			IF RND > .6 THEN
 			armyloc(k) = 0: armysize(k) = 0: armylead(k) = 0
 			armyexper(k) = 0: armymove(k) = 0: supply(k) = 0
@@ -702,12 +697,6 @@ END SELECT
 GOTO menu0
 '............................................................................
 '                               Subs
-'............................................................................
-topbar:
-LOCATE 1, 1: PRINT SPACE$(80);
-COLOR 11
-LOCATE 1, 10: PRINT "Input your decisions now for "; force$(side); " side "; : COLOR 14: PRINT month$(month); ","; year; "  "
-RETURN
 '............................................................................
 rusure:
 choose = 23

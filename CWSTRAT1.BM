@@ -627,7 +627,6 @@ SUB movefrom (index, target)
 	IF size = 0 THEN index = -1: GOTO notarg
 	mtx$(0) = "From"
 	CALL bubble(size)
-movopt:
 	tlx = 67: tly = 5
 		hilite = 15: CALL menu(1): CALL clrrite
 		IF choose < 0 THEN target = 0: GOTO notarg
@@ -1436,7 +1435,6 @@ CALL recruit(who)
 '==========================================================================
 isok:
 	cash(who) = cash(who) + slush
-dock:
 	IF side = 2 AND navyloc(1) = 0 AND navysize(1) < 1 AND cityp(30) = 1 AND cash(1) > 100 THEN navyloc(1) = 30: CALL navy(1, 1): GOTO movenavy
 	IF navyloc(who) = 99 THEN
 		IF RND < .9 THEN CALL navy(who, 3)
@@ -1497,8 +1495,6 @@ IF vicflag(5) = 0 GOTO nocap
 	NEXT j
 nocap:
 CALL evaluate(i, best): IF best = 0 GOTO deadman
-move9:
-	IF best = 0 THEN choose = 1 + INT((j - 1) * RND)
 	IF choose = 0 THEN choose = best
 	armymove(i) = matrix(target, choose)
 

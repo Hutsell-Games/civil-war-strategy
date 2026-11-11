@@ -36,8 +36,9 @@ game plays changes the recorded screens.
   Battleset. A fix changes the battles, so every script would need `record` again.
 - **`traincapacity` counts cities from the player's side, not from the side it is asked about**
   (`TestTraincapacityCountsByPlayersSide`): it uses `side` where the rest of the SUB uses `who`.
-- **Vary Start has a loop that never runs**: `FOR k = 21 TO 6` (`CWSTRAT.BAS`, Utility menu). The loop before
-  it clears some of the Union's first six armies; this one was probably meant for the Rebels' (21 to 26).
+- **`smarts` never stops at an empty slot of `matrix`** when the computer weighs its capital's neighbors
+  (`CWSTRAT1.BM`). Inside `FOR j = 1 TO 6`, `IF j = 0 GOTO nocap` can never be true. It was probably meant to
+  be `k = 0`, where `k = matrix(target, j)`. A fix changes how the computer plays.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.

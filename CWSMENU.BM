@@ -35,7 +35,6 @@ NEXT i
 END SUB
 
 SUB menu (switch%)
-remenu:
 	IF colour = 0 THEN colour = 7
 	LOCATE 1, 1, 0
 	IF mtx$(0) = "" THEN mtx$(0) = "M E N U"

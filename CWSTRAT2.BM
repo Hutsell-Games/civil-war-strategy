@@ -25,7 +25,6 @@ END SUB
 
 SUB cancel (side)
 CALL starfin(star, fin, (side))
-counter:
 CALL clrrite
 	size = 0
 	FOR j = star TO fin

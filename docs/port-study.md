@@ -107,10 +107,10 @@ only grows. The fix is made all the same (D6).
 differed in 25 scripts. The game's `docs\devnotes.md` ("The first builds") lists QB64Rust's five warnings.
 None is a bug of the game.
 
-**The game's own oddities**, each a row of the game's `TODO.md` and none changed: Load stays "-" after a game's
-first save; Resume Saved Game with no saved game shows the main menu on a black screen; `FOR k = 21 TO 6` in
-Vary Start never runs; `traincapacity` reads `side` where it means `who`; `normal` draws high, as in the other
-two games.
+**The game's own oddities**, each a row of the game's `TODO.md` and none changed but the third: Load stays "-"
+after a game's first save; Resume Saved Game with no saved game shows the main menu on a black screen;
+`FOR k = 21 TO 6` in Vary Start never runs (made `21 TO 26` on 2026-11-11, `devnotes.md` item 13);
+`traincapacity` reads `side` where it means `who`; `normal` draws high, as in the other two games.
 
 ## 4. Choices made, for the user to rule on
 

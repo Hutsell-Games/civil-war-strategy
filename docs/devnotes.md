@@ -39,8 +39,8 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
 5. **The title screen, the burning capital and the picture of Lincoln are pictures in `docs\`.** The DOS game
    ran three DOS programs that have no source: `SHELL "cwstitle.exe"` at its start, `SHELL "cityburn.exe"` when
    a capital falls (`burn`, only with full graphics), and `SHELL "abelinco.exe"` at the Emancipation
-   Proclamation (`events`). 64-bit Windows cannot run them. The first and the last `SHELL` lines are comments
-   now. Run in
+   Proclamation (`events`). 64-bit Windows cannot run them. The last `SHELL` line is a comment now. The first
+   was removed on 2026-11-11, with the jump past it (item 13). Run in
    DOSBox 0.74-3 on 2026-11-06, the programs drew [CWSTITLE.png](CWSTITLE.png), [CITYBURN.png](CITYBURN.png)
    and [ABELINCO.png](ABELINCO.png). Each waits for a key. The game's own title screen, with the two flags and
    the menu, still shows. `burn`, its `DECLARE` and its call in `capture` are removed (user, 2026-11-11): with
@@ -97,9 +97,19 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
     places in `menu` are gone: Ctrl+B's line in `crsr`, `IF leave = 2 GOTO boss`, and the lines `boss:` to
     `GOTO remenu`. Ctrl+B is now a key the menus ignore, or a key like any other at a menu of switch 3. The
     manual, `docs\CWS.DOC` section 1.8, still describes the screen saver: it is the original text, kept as given.
+13. **Dead code is removed, and Vary Start's loop for the Rebels runs** (2026-11-11). Removed: the main
+    module's `topbar:` routine, which nothing called (`CALL topbar` runs the SUB); a `GOTO menu0` after
+    `GOTO loader`; `a$ = COMMAND$` and its jump past the `cwstitle.exe` comment, with the comment; a line of
+    `smarts` that ran only when `best = 0`, after the line before had jumped away in that case; six
+    `DECLARE SUB`s with no SUB (`banner`, `blastem`, `sndblst`, `sndfx`, `usamap`, `war`); the unused array
+    `price`; and the labels `iron`, `band`, `notitle2`, `movopt`, `dock`, `move9`, `counter` and `remenu`, which
+    no jump named. None of these changes a screen.
+    Vary Start (Utility menu) had `FOR k = 21 TO 6`, which never ran. It is now `FOR k = 21 TO 26`, so it clears
+    some of the Rebels' first six armies, as the loop before it does for the Union's. This changes the game:
+    the script `options` was recorded again.
 
 Not changed: the code is not reformatted, no variable is renamed, and no feature of the game is removed but F1's
-help (item 6) and the boss screen (item 12). The
+help (item 6) and the boss screen (item 12). No rule of the game is changed but Vary Start's loop (item 13). The
 text "Registered Edition" and the version stay. The DOS line-drawing characters in the sources (code page 437)
 stay as they are, and both compilers draw them as DOS did.
 
@@ -150,20 +160,20 @@ is made all the same, as in the other two ports: it changes no screen, and a lat
 put a `RETURN` after a menu.
 
 The two routines of the main module, `unionplus` and `blanken`, were read too. Each ends by `RETURN`. The main
-module also has a label `topbar:` with a `RETURN`, which nothing calls: `CALL topbar` runs the SUB of that
-name in `CWSMENU.BAS`. Both compilers accept the label beside the SUB.
+module also had a label `topbar:` with a `RETURN`, which nothing called: `CALL topbar` runs the SUB of that
+name in `CWSTRAT2.BAS`. It was removed on 2026-11-11.
 
 ### 3. Memory, `BLOAD`, `SHELL` and the clock
 
 | Statement | Where | What it did in DOS | What the port does |
 |---|---|---|---|
 | `DEF SEG = VARSEG(a(1))`, `BLOAD "<name>.vga", VARPTR(a(1))` | `CWSTRAT.BAS` lines 32 to 34 (`mtn.vga`), 65 to 67 (`cwsicon.vga`), 910 to 912 (the forts); `CWSMENU.BAS` lines 216 to 218 (the faces) | Loaded a picture saved by `BSAVE` into an array, which `PUT` then drew | Kept. Both compilers draw the pictures, and the same |
-| `SHELL "cwstitle.exe"`, `"cityburn.exe"`, `"abelinco.exe"` | `CWSTRAT.BAS` lines 62 and 1011; `CWSTRAT2.BAS` line 525 | Showed a picture and waited for a key | Comments; the pictures are in `docs\` (item 5) |
+| `SHELL "cwstitle.exe"`, `"cityburn.exe"`, `"abelinco.exe"` | `CWSTRAT.BAS` lines 62 and 1011; `CWSTRAT2.BAS` line 525 | Showed a picture and waited for a key | `abelinco.exe` is a comment; the other two are removed. The pictures are in `docs\` (item 5) |
 | `SHELL "cwsdoc.com"` | `CWSMENU.BAS` line 275 | Showed the help text | Removed with F1 and its label; the text is in `docs\` (item 6) |
 | `SHELL "copy cws.his oldhist.ory"` | `CWSTRAT.BAS` line 134 | Kept the history file of the game before | Kept: `copy` works on Windows. Under a script it is done in BASIC ("The test hooks"). A `TODO.md` row for Linux |
 | `RANDOMIZE TIMER` | `CWSTRAT.BAS` line 113; `CWSMENU.BAS` line 494 (`scrnsavr`) | Seeded the random numbers | The first takes the scripts' seed ("The test hooks"). The second is the boss screen's, which no script reaches |
 | `DATE$` | `CWSTRAT.BAS` line 136 | The first line of the history file | A fixed date under a script |
-| `COMMAND$` | `CWSTRAT.BAS` line 60 | Any option skipped the title program (`CWS /Q`) | Kept. It now only skips a line that is a comment |
+| `COMMAND$` | `CWSTRAT.BAS` line 60 | Any option skipped the title program (`CWS /Q`) | Removed on 2026-11-11: it only skipped a line that is a comment |
 
 There is no `PEEK`, `POKE`, `CALL ABSOLUTE`, `CALL INTERRUPT`, `RUN`, `CHAIN`, `KILL`, `NAME` or `FILES`.
 
