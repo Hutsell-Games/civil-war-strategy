@@ -1,6 +1,6 @@
 SUB draw_map_marker (from_city, to_city, mark)
 DIM x AS INTEGER: DIM y AS INTEGER: DIM x1 AS INTEGER: DIM y1 AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-IF from_city < 1 OR from_city > 40 GOTO noshow
+IF from_city < 1 OR from_city > MAX_CITIES GOTO noshow
 IF to_city < 0 GOTO noshow
 IF from_city = 999 GOTO noshow
 x = city_x(from_city) - 12: y = city_y(from_city) - 11
@@ -77,26 +77,26 @@ END SUB
 SUB draw_cities
 DIM x AS INTEGER: DIM y AS INTEGER: DIM j AS INTEGER
 DIM i AS INTEGER: DIM c AS INTEGER
-FOR i = 1 TO 40
-c = 9: IF city_owner(i) = 2 THEN c = 7
-IF city_owner(i) = 0 THEN c = 12
+FOR i = 1 TO MAX_CITIES
+c = 9: IF city_owner(i) = SIDE_REBEL THEN c = 7
+IF city_owner(i) = SIDE_NONE THEN c = 12
 x = city_x(i): y = city_y(i)
-IF i = side_capital(1) OR i = side_capital(2) THEN
+IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
 	PUT (x - 6, y - 6), pic_capital, PSET
 	LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
 	LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
 	PSET (x + 8, y - 4)
 	IF city_fort(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
-	IF city_fort(i) = 2 THEN DRAW "C0e1R1F1D1G3R3"
+	IF city_fort(i) = MAX_FORT THEN DRAW "C0e1R1F1D1G3R3"
 ELSE
 	IF city_fort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
-	IF city_fort(i) > 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+	IF city_fort(i) >= MAX_FORT THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
 	CIRCLE (city_x(i), city_y(i)), 4, 0
 	CIRCLE (city_x(i), city_y(i)), 3, c
 	PAINT (city_x(i), city_y(i)), c, c
 END IF
 IF opt_graphics = 0 GOTO nocon
-	FOR j = 1 TO 6: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), 11)
+	FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), 11)
 	NEXT j
 nocon:
 NEXT i
@@ -104,7 +104,7 @@ END SUB
 
 SUB draw_city_names
 DIM k AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER
-FOR k = 1 TO 40
+FOR k = 1 TO MAX_CITIES
 	FOR j = 1 TO LEN(city_name$(k))
 	a = city_x(k) + 6 * (j - 4) - 3
 	x = ASC(MID$(UCASE$(city_name$(k)), j, 1)) - 64
@@ -124,7 +124,7 @@ END SUB
 
 SUB draw_fleets
 DIM s AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
-FOR s = 1 TO 2
+FOR s = SIDE_UNION TO SIDE_REBEL
 IF fleet_size(s) = 0 OR fleet_city(s) = 0 THEN fleet_city(s) = 0: GOTO sink
 IF fleet_city(s) = 30 THEN x = 515: y = 268: GOTO float
 IF fleet_city(s) = 28 THEN x = 517: y = 172: GOTO float
@@ -504,7 +504,7 @@ LINE -(380, 120), 1
 
 CALL draw_cities
 PSET (493, 280), 1
-IF fleet_city(1) = 30 OR fleet_city(2) = 30 THEN
+IF fleet_city(SIDE_UNION) = 30 OR fleet_city(SIDE_REBEL) = 30 THEN
 	DRAW "C11U7R4D3L3BR6BU3D7BU4R3U3D7BR3U7BD4BR4BU4D7R4"
 	LINE (485, 241)-(525, 270), 11, B
 END IF
@@ -521,16 +521,16 @@ ELSE
 LINE (447, 291)-(525, 335), 1, BF
 END IF
 
-FOR i = 1 TO 40
+FOR i = 1 TO MAX_ARMIES
 IF army_city(i) > 0 THEN CALL draw_army_flag(i)
 NEXT i
 
-FOR k = 1 TO 2
+FOR k = SIDE_UNION TO SIDE_REBEL
 CALL draw_stack_markers(k)
 NEXT k
 
 IF opt_players = 2 GOTO nosee
-FOR i = 1 TO 40: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), 1)
+FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), 1)
 NEXT i
 nosee:
 CALL draw_fleets

@@ -5,7 +5,7 @@ DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: 
 	menu_col = 67: menu_row = 2
 	CALL side_army_range(star, fin, side)
 	menu_item_count = 0
-	FOR i = 1 TO 40
+	FOR i = 1 TO MAX_CITIES
 		IF city_owner(i) = side AND city_army(i) > 0 THEN
 			FOR j = star TO fin
 			IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
@@ -47,7 +47,7 @@ join:
 		army_experience(0) = (1 - pct!) * army_experience(0) + pct! * army_experience(j)
 		CALL clear_bottom_line: PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces"; : CALL wait_seconds(opt_pause!)
 		army_supply(0) = army_supply(0) + army_supply(j)
-		IF army_supply(0) > 10 THEN army_supply(0) = 10
+		IF army_supply(0) > MAX_SUPPLY THEN army_supply(0) = MAX_SUPPLY
 		army_size(j) = 0: army_city(j) = 0: army_experience(j) = 0: army_order(j) = 0
 		leader_name$(j) = army_name$(j)
 		army_leader_rating(j) = 0: army_supply(j) = 0: army_name$(j) = ""
@@ -85,8 +85,8 @@ END SUB
 
 SUB army_new (side, slot, city)
 DIM x AS INTEGER: DIM a AS INTEGER
-	army_supply(slot) = 3 + 5 * RND: IF side = 1 THEN army_supply(slot) = army_supply(slot) + 2
-	army_experience(slot) = 1: IF side = 2 THEN army_experience(slot) = 2
+	army_supply(slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(slot) = army_supply(slot) + 2
+	army_experience(slot) = 1: IF side = SIDE_REBEL THEN army_experience(slot) = 2
 	army_leader_rating(slot) = leader_rating(slot)
 	army_name$(slot) = leader_name$(slot): leader_name$(slot) = ""
 	COLOR 12: CALL clear_bottom_line: PRINT "Placing NEW army "; slot; army_name$(slot); " in "; city_name$(city);
@@ -139,7 +139,7 @@ END SUB
 
 SUB army_resupply (army)
 DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-		who = 1: IF army > 20 THEN who = 2
+		who = army_side(army)
 		IF opt_realism > 0 THEN
 			CALL city_is_connected(who, army_city(army), a)
 			IF a < 1 THEN EXIT SUB
@@ -155,8 +155,8 @@ END SUB
 
 SUB army_generate_name (army, name$)
 DIM x AS INTEGER: DIM k AS INTEGER
-name$ = "Union ": IF army > 20 THEN name$ = "Rebel "
-IF army > 20 THEN army = army - 20
+name$ = "Union ": IF army_side(army) = SIDE_REBEL THEN name$ = "Rebel "
+IF army_side(army) = SIDE_REBEL THEN army = army - ARMIES_PER_SIDE
 IF army > 10 THEN name$ = name$ + "X": army = army - 10
 SELECT CASE army
 	CASE IS < 4
@@ -181,5 +181,14 @@ RETURN
 END SUB
 
 SUB side_army_range (star, fin, side)
-star = 1: fin = 20: IF side = 2 THEN star = 21: fin = 40
+star = 1: fin = ARMIES_PER_SIDE: IF side = SIDE_REBEL THEN star = ARMIES_PER_SIDE + 1: fin = MAX_ARMIES
 END SUB
+
+' The side an army slot belongs to. Slot 0, no army, counts as the Union's, as the old tests army < 21 did.
+FUNCTION army_side (army)
+army_side = SIDE_UNION: IF army > ARMIES_PER_SIDE THEN army_side = SIDE_REBEL
+END FUNCTION
+
+FUNCTION other_side (side)
+other_side = SIDE_UNION + SIDE_REBEL - side
+END FUNCTION

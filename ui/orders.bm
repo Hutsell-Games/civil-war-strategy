@@ -10,7 +10,7 @@ CALL draw_army_stats(index)
 COLOR 11: LOCATE 11, 68: PRINT city_name$(target)
 menu_item_count = 0
 menu_text$(0) = "To"
-FOR i = 1 TO 6: IF city_road(target, i) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(city_road(target, i)): menu_value(menu_item_count) = city_road(target, i)
+FOR i = 1 TO MAX_ROADS: IF city_road(target, i) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(city_road(target, i)): menu_value(menu_item_count) = city_road(target, i)
 NEXT i
 CALL menu_bubble_sort(menu_item_count)
 
@@ -35,7 +35,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 	CALL side_army_range(star, fin, who)
 	menu_item_count = 0
 	FOR i = star TO fin
-	IF army_city(i) > 0 AND city_fort(army_city(i)) < 2 THEN
+	IF army_city(i) > 0 AND city_fort(army_city(i)) < MAX_FORT THEN
 		menu_item_count = menu_item_count + 1
 		menu_text$(menu_item_count) = city_name$(army_city(i))
 		menu_value(menu_item_count) = army_city(i)
@@ -48,7 +48,7 @@ DIM who AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM
 		CALL menu_select(9): CALL clear_right_panel
 		IF menu_choice < 0 GOTO nocity
 		city = menu_value(menu_choice): CALL city_update_occupier(city): x = city_army(city): IF x < 0 GOTO nocity
-		IF city_fort(city) > 1 THEN CALL clear_bottom_line: PRINT city_name$(city); " at MAXIMUM fortification level of 2"; : CALL wait_seconds(4): GOTO nocity
+		IF city_fort(city) >= MAX_FORT THEN CALL clear_bottom_line: PRINT city_name$(city); " at MAXIMUM fortification level of 2"; : CALL wait_seconds(4): GOTO nocity
 		cost = 200
 		IF side_cash(current_side) < cost THEN CALL clear_bottom_line: PRINT "Fortifications for "; city_name$(city); " cost "; cost; " and you only have "; side_cash(current_side); : CALL wait_seconds(4): GOTO nocity
 		COLOR 3
@@ -109,13 +109,13 @@ morecap:
 		CASE IS < 1
 		a$ = CHR$(ABS(menu_choice))
 		x = 0
-		FOR k = 1 TO 40
+		FOR k = 1 TO MAX_CITIES
 		IF LEFT$(city_name$(k), 1) = a$ THEN
 			y = city: city = k
 spin2:
 			IF city_owner(city) = current_side GOTO morecap
 				city = city + 1
-				IF city > 40 THEN city = 1
+				IF city > MAX_CITIES THEN city = 1
 				x = x + 1: IF x < 39 GOTO spin2
 				city = y: GOTO morecap
 		END IF
@@ -123,13 +123,13 @@ spin2:
 		GOTO morecap
 		CASE 1
 minus1:
-		city = city - 1: IF city < 1 THEN city = 40
+		city = city - 1: IF city < 1 THEN city = MAX_CITIES
 		IF city_owner(city) <> current_side GOTO minus1 ELSE GOTO morecap
 		CASE 2
 		GOTO fnew
 		CASE 3
 plus1:
-		city = city + 1: IF city > 40 THEN city = 1
+		city = city + 1: IF city > MAX_CITIES THEN city = 1
 		IF city_owner(city) <> current_side GOTO plus1 ELSE GOTO morecap
 		CASE ELSE
 		city = 0
@@ -146,14 +146,14 @@ DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM index 
 	max = 4: IF RND > .8 THEN max = max - 1
 	IF opt_difficulty < 3 THEN max = max + 1
 
-	FOR i = 1 TO 40
+	FOR i = 1 TO MAX_CITIES
 	IF side_city_count(side) > 0 THEN pct! = .6 * max / side_city_count(side) ELSE pct! = .3
 	IF menu_item_count = 0 AND i > 20 THEN pct! = .3
 	IF menu_item_count < 2 AND i > 30 THEN pct! = .3
 	menu_value(i) = 0
 	IF city_army(i) > 0 AND city_owner(i) = side THEN pct! = .4
 	IF RND < pct! AND city_owner(i) = side THEN
-		IF opt_realism > 0 AND city_first_owner(i) = 3 - side GOTO foe
+		IF opt_realism > 0 AND city_first_owner(i) = other_side(side) GOTO foe
 		menu_item_count = menu_item_count + 1
 		menu_text$(menu_item_count) = city_name$(i)
 		menu_value(menu_item_count) = i
@@ -239,8 +239,8 @@ randsel:
 	IF side_cash(side) < 100 THEN menu_choice = menu_item_count
 	RETURN
 playb:
-	IF current_side = 1 AND opt_difficulty < 3 THEN army_size(empty) = army_size(empty) + 15 - 5 * opt_difficulty
-	IF current_side = 2 AND opt_difficulty > 3 THEN army_size(empty) = army_size(empty) + 5 * opt_difficulty - 15
+	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(empty) = army_size(empty) + 15 - 5 * opt_difficulty
+	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN army_size(empty) = army_size(empty) + 5 * opt_difficulty - 15
 	RETURN
 menu1:
 END SUB
@@ -340,13 +340,13 @@ SUB menu_army_retreat (defender, x)
 DIM y AS INTEGER: DIM who AS INTEGER: DIM k AS INTEGER
 x = 0
 IF opt_players = 1 THEN
-	IF (current_side = 1 AND defender > 20) OR (current_side = 2 AND defender < 21) THEN EXIT SUB
+	IF (current_side = SIDE_UNION AND army_side(defender) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(defender) = SIDE_UNION) THEN EXIT SUB
 END IF
 
 menu_highlight = 13: menu_color = 3: menu_col = 67: menu_row = 5: menu_item_count = 0
 y = army_city(defender)
-who = 1: IF defender > 20 THEN who = 2
-FOR k = 1 TO 6
+who = army_side(defender)
+FOR k = 1 TO MAX_ROADS
 	IF city_road(y, k) > 0 AND city_owner(city_road(y, k)) = who THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(city_road(y, k)): menu_value(menu_item_count) = city_road(y, k)
 NEXT k
 	IF menu_item_count = 0 THEN EXIT SUB

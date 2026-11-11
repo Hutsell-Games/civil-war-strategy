@@ -40,6 +40,26 @@ game plays changes the recorded screens.
   (`TestTraincapacityCountsByPlayersSide`): it uses `side` where the rest of the SUB uses `who`.
 - **Vary Start has a loop that never runs**: `FOR k = 21 TO 6` (`CWSTRAT.BAS`, Utility menu). The loop before
   it clears some of the Union's first six armies; this one was probably meant for the Rebels' (21 to 26).
+- **Casualties are counted for the wrong side when Union armies 3 to 20 attack.** `calculate_battle`
+  (`rules\battle.bm`) has `s = 1: IF attacker > 2 THEN s = 2`, most likely meant as `attacker > 20`. Phase 3
+  of `docs\modernize-plan.md` left this line as it is, without `army_side`: the FUNCTION would fix the bug,
+  which changes the game.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
+
+## The code
+
+Left alone by phase 3, group 1, of `docs\modernize-plan.md` (the sides and limits). None of these changes
+how the game plays.
+
+- **The 40 leaders have no constant.** `leader_name$()` and `leader_rating()` hold 40 leaders. Their loops
+  (`port\files.bm` line 8, Vary Start in `CWSTRAT.BAS` line 602) and their `DIM` keep the number 40.
+  `docs\constants.md` has no row for them; a `MAX_LEADERS` would be a new name to agree.
+- **`draw_surrender (side)` is passed an army, not a side** (`game\victory_screens.bm`, called from
+  `turn_resolve`). Its test now reads `army_side(side)`. The parameter wants the name `army`.
+- **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 141 and 146).
+  The numbers are the screen layout, so they stay. If another war has a different count of cities, the
+  report needs laying out again.
+- **Vary Start gives each fleet `10 * RND` ships** (`CWSTRAT.BAS` lines 591 and 592). That is a random
+  size, not the fleet limit, so it stays 10 rather than `MAX_FLEET_SHIPS`.

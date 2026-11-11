@@ -21,9 +21,9 @@ DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM a AS INTE
 replay = 0
 newgame:
 game_over = 0: turn_recruit_state = 0
-FOR k = 1 TO 40: army_size(k) = 0: army_city(k) = 0: army_order(k) = 0: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
+FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = 0: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
 union_income_bonus = 0: emancipation_done = 0
-FOR k = 1 TO 2
+FOR k = SIDE_UNION TO SIDE_REBEL
 fleet_size(k) = 0: fleet_city(k) = 0: navymove(k) = 0
 train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
 NEXT k
@@ -42,22 +42,22 @@ RESTORE
 FOR k = 1 TO 26: READ map_font$(k): NEXT k
 
 IF opt_realism > 0 AND turn_year < 1862 THEN
-		FOR i = 1 TO 2
+		FOR i = SIDE_UNION TO SIDE_REBEL
 			a$ = STRING$(LEN(fleet_ships$(i)), "W")
 			fleet_ships$(i) = a$
 		NEXT i
 END IF
 iron:
 IF opt_players < 1 OR opt_players > 2 THEN opt_players = 1
-IF opt_players = 2 OR current_side = 0 THEN current_side = 1
-IF current_side = 1 THEN opt_event_balance = 7
-IF current_side = 2 THEN opt_event_balance = 3
+IF opt_players = 2 OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
+IF current_side = SIDE_UNION THEN opt_event_balance = 7
+IF current_side = SIDE_REBEL THEN opt_event_balance = 3
 	IF opt_pause! < 1 THEN opt_pause! = 2
-	IF current_side = 1 AND opt_difficulty < 3 THEN side_cash(2) = side_cash(2) + 600 - 100 * opt_difficulty
-	IF current_side = 2 AND opt_difficulty > 3 THEN side_cash(1) = side_cash(1) + 100 * opt_difficulty
+	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
+	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
 
 
-FOR i = 1 TO 2: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
+FOR i = SIDE_UNION TO SIDE_REBEL: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
 menu_choice = 0
 a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 
@@ -77,9 +77,9 @@ COLOR 14: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
 LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
-CALL draw_flag(1, -440, 0): CALL draw_flag(2, -100, 0)
+CALL draw_flag(SIDE_UNION, -440, 0): CALL draw_flag(SIDE_REBEL, -100, 0)
 IF replay = 0 AND opt_sound = 2 AND menu_choice = 0 THEN
-IF current_side = 1 THEN
+IF current_side = SIDE_UNION THEN
 	IF INKEY$ <> "" GOTO notitle
 	PLAY "MST170o1e8o0b8o1e8"
 	IF INKEY$ <> "" GOTO notitle
@@ -102,10 +102,10 @@ GOSUB unionplus
 city_name$(0) = "NONE"
 OPEN "I", 1, SCNDIR + "cities.grd"
 total_income = union_income_bonus + 200
-FOR i = 1 TO 40: INPUT #1, a, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
+FOR i = 1 TO MAX_CITIES: INPUT #1, a, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
 city_first_owner(i) = city_owner(i)
 CALL city_update_occupier(i)
-FOR j = 1 TO 6: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
+FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
 IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_victory_points(x) = side_victory_points(x) + city_value(i)
 IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
 total_income = total_income + city_value(i)
@@ -145,36 +145,36 @@ GOTO menu0
 '                              New Month
 '==========================================================================
 newmonth:
-IF current_side > 2 THEN current_side = 1
+IF current_side > 2 THEN current_side = SIDE_UNION
 a$ = "--------> EVENTS FOR " + month_name$(turn_month) + " " + STR$(turn_year) + " --------"
 CALL scribe_message(a$, 0)
 CALL turn_resolve
-side_city_count(1) = 0: side_city_count(2) = 0
+side_city_count(SIDE_UNION) = 0: side_city_count(SIDE_REBEL) = 0
 
-FOR i = 1 TO 2
+FOR i = SIDE_UNION TO SIDE_REBEL
 side_income(i) = 0
-IF side_cash(i) > 19999 THEN side_cash(i) = 19999
+IF side_cash(i) > MAX_CASH THEN side_cash(i) = MAX_CASH
 IF side_cash(i) < 0 THEN side_cash(i) = 0
 NEXT i
-IF opt_players = 1 AND current_side = 2 THEN side_income(1) = side_income(1) + union_income_bonus
+IF opt_players = 1 AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
 
-FOR i = 1 TO 40
+FOR i = 1 TO MAX_CITIES
 IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_income(x) = side_income(x) + city_value(i)
 army_order(i) = 0
 NEXT i
 
-FOR i = 1 TO 2: navymove(i) = 0: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + 100
+FOR i = SIDE_UNION TO SIDE_REBEL: navymove(i) = 0: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + 100
 side_cash(i) = side_cash(i) + side_income(i)
 IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
 NEXT i
-total_income = side_income(1) + side_income(2)
+total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
 
 chosit = 22
 IF opt_players = 2 THEN GOSUB blanken: CALL draw_map
 CALL check_victory_conditions
 ON ERROR GOTO 0
 IF game_over > 0 THEN
-	FOR k = 1 TO 40: army_city(k) = 0: NEXT k
+	FOR k = 1 TO MAX_ARMIES: army_city(k) = 0: NEXT k
 	GOTO newgame
 END IF
 
@@ -183,7 +183,7 @@ END IF
 '±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 menu0:
 CALL draw_top_bar
-IF opt_players = 2 AND current_side = 0 THEN current_side = 1
+IF opt_players = 2 AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
 IF side_cash(current_side) < 100 AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
 
 menu_highlight = 11
@@ -226,10 +226,10 @@ IF train_army(current_side) = 0 THEN
 	COLOR 15: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 	PSET (550, 20), 0
 	DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U9L2U5R1BF4"
-	z = 9: IF current_side = 2 THEN z = 7
+	z = 9: IF current_side = SIDE_REBEL THEN z = 7
 	x = POINT(0): y = POINT(1)
 	PAINT (x, y), z, 15
-	COLOR 15: IF current_side = 1 THEN COLOR 11
+	COLOR 15: IF current_side = SIDE_UNION THEN COLOR 11
 	CALL railroad_capacity(current_side, limit)
 	CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
 	CALL railroad_move(current_side)
@@ -246,7 +246,7 @@ END IF
 	menu_item_count = 2: CALL menu_select(0): CALL clear_right_panel: IF menu_choice <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
 	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
-	IF opt_players = 2 THEN current_side = current_side + 1: IF current_side = 2 THEN GOSUB blanken: CALL draw_map: GOTO menu0
+	IF opt_players = 2 THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN GOSUB blanken: CALL draw_map: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
@@ -269,7 +269,7 @@ optmen:
 	menu_text$(3) = "Join"
 	menu_text$(4) = "Supply"
 	menu_text$(5) = "Capital": IF side_capital(current_side) = 0 OR side_cash(current_side) < 500 THEN menu_text$(5) = "-"
-	menu_text$(6) = "Detach": IF current_side = 1 THEN menu_text$(6) = "-"
+	menu_text$(6) = "Detach": IF current_side = SIDE_UNION THEN menu_text$(6) = "-"
 	menu_text$(7) = "Army Drill"
 	menu_text$(8) = "Relieve"
 	menu_text$(9) = "MAIN MENU"
@@ -343,7 +343,7 @@ alone:
 		CASE 5
 	IF side_capital(current_side) = 0 OR side_cash(current_side) < 500 THEN CALL clear_bottom_line: COLOR 11: PRINT "Cannot move capital"; : GOTO menu0
 	side_cash(current_side) = side_cash(current_side) - 500
-	side_victory_points(3 - current_side) = side_victory_points(3 - current_side) + 50
+	side_victory_points(other_side(current_side)) = side_victory_points(other_side(current_side)) + 50
 	CALL clear_right_panel
 	menu_text$(0) = "Capital"
 	a$ = city_name$(side_capital(current_side))
@@ -358,7 +358,7 @@ alone:
 '                               Detach
 '-------------------------------------------------------------------------
 		CASE 6
-	IF current_side = 1 THEN CALL clear_bottom_line: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
+	IF current_side = SIDE_UNION THEN CALL clear_bottom_line: COLOR 11: PRINT "Option not available to Union"; : GOTO menu0
 	COLOR 14: LOCATE 4, 68: PRINT "DETACH UNIT"
 	CALL menu_army_select(index, target): IF target < 1 OR index < 1 GOTO menu0
 	IF army_size(index) < 65 THEN CALL clear_bottom_line: PRINT "Too small to detach"; : CALL wait_seconds(opt_pause!): GOTO menu0
@@ -412,7 +412,7 @@ utile:
 	menu_text$(3) = "Graphics" + STR$(opt_graphics)
 	menu_text$(4) = "Noise": IF opt_sound > 0 THEN menu_text$(4) = menu_text$(4) + STRING$(opt_sound, "*")
 	menu_text$(5) = "Display" + STR$(opt_pause!)
-	a$ = STR$(opt_difficulty): IF current_side = 1 THEN a$ = STR$(6 - opt_difficulty)
+	a$ = STR$(opt_difficulty): IF current_side = SIDE_UNION THEN a$ = STR$(6 - opt_difficulty)
 	menu_text$(6) = "Balance" + a$
 	menu_text$(7) = "End Cond"
 	a$ = "û": IF opt_event_balance = 0 THEN a$ = ""
@@ -435,10 +435,10 @@ utile:
 '-------------------------------------------------------------------------
 	    CASE 1
 		IF opt_players = 2 GOTO menu0
-		current_side = 3 - current_side: COLOR 9: IF current_side = 2 THEN COLOR 7
+		current_side = other_side(current_side): COLOR 9: IF current_side = SIDE_REBEL THEN COLOR 7
 		CALL clear_bottom_line: PRINT "Now playing "; side_name$(current_side); " side"; : IF opt_sound > 0 THEN SOUND 999, 1
-		IF current_side = 1 THEN opt_event_balance = 7
-		IF current_side = 2 THEN opt_event_balance = 3
+		IF current_side = SIDE_UNION THEN opt_event_balance = 7
+		IF current_side = SIDE_REBEL THEN opt_event_balance = 3
 		CALL draw_top_bar
 		GOTO menu0
 '-------------------------------------------------------------------------
@@ -572,8 +572,8 @@ utile:
 '-------------------------------------------------------------------------
 	   CASE 9
 		CALL file_management(1)
-		side_cash(1) = side_cash(1) - 100 + 200 * RND
-		side_cash(2) = side_cash(2) + 100 + 200 * RND
+		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
+		side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
 		opt_ai_aggression = 5 * RND
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
@@ -587,20 +587,20 @@ utile:
 			army_experience(k) = 0: army_order(k) = 0: army_supply(k) = 0
 			END IF
 		NEXT k
-		FOR k = 1 TO 40: CALL city_update_occupier(k): NEXT k
-		fleet_size(1) = 10 * RND: IF fleet_size(1) = 0 THEN fleet_city(1) = 0
-		fleet_size(2) = 10 * RND: IF fleet_size(2) > 0 THEN fleet_city(2) = 27
-		FOR i = 1 TO 2
+		FOR k = 1 TO MAX_CITIES: CALL city_update_occupier(k): NEXT k
+		fleet_size(SIDE_UNION) = 10 * RND: IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
+		fleet_size(SIDE_REBEL) = 10 * RND: IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
+		FOR i = SIDE_UNION TO SIDE_REBEL
 			fleet_ships$(i) = ""
 			FOR j = 1 TO fleet_size(i)
 			a$ = "W": IF RND > .45 * current_side THEN a$ = "I"
 			fleet_ships$(i) = fleet_ships$(i) + a$
 		NEXT j
 		NEXT i
-		IF RND > .7 THEN side_capital(2) = 25
+		IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
 
 		FOR k = 1 TO 40
-		IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > 9 THEN leader_rating(k) = 9
+		IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
 		IF leader_rating(k) < 1 THEN leader_rating(k) = 1
 		NEXT k
 		CLS
@@ -626,7 +626,7 @@ utile:
 		PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
 	ELSE
 		PRINT "REALISM ON: Recruiting based on CITY SIZE";
-		IF current_side = 2 AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
+		IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
 		GOSUB unionplus
 	END IF
 		menu_choice = 32: GOTO utile
@@ -688,7 +688,7 @@ loader:
 			GOTO menu0
 		CASE 3
 			OPEN "O", 1, "cws.cfg"
-			WRITE #1, current_side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(1), train_capacity(2), opt_winter_campaigns, opt_realism, side_battles_won(1), side_battles_won(2), side_casualties&(1), side_casualties&(2), opt_history, opt_ai_aggression
+			WRITE #1, current_side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
 			CLOSE #1
 			CLS
 			GOTO newgame
@@ -718,7 +718,7 @@ unionplus: union_income_bonus = 120 * opt_difficulty: IF opt_players = 2 THEN un
 	   IF opt_realism > 0 THEN union_income_bonus = union_income_bonus * .7
 	   RETURN
 '............................................................................
-blanken:        c = 1: IF current_side = 2 THEN c = 7
+blanken:        c = 1: IF current_side = SIDE_REBEL THEN c = 7
 		CLS : LINE (100, 200)-(500, 300), c, BF
 		LINE (100, 200)-(500, 300), 8 - c, B
 		COLOR 7: LOCATE 14, 31: PRINT " "; month_name$(turn_month); turn_year

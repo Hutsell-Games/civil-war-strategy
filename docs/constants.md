@@ -161,3 +161,4 @@ lines into data anyway.
 2. **Colors: the 16 are named and used in text only.** `COLOR_BLACK` to `COLOR_WHITE` go into the `COLOR`
    statements and the menu's color variables. The pictures keep their numbers.
 3. **Phase 3 does all nine groups**, each group as its own commit.
+4. **The proposed names are taken as they stand.** No name in the "Your name" column (user, 2026-11-11).

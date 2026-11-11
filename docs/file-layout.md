@@ -14,7 +14,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `army.bm` | `army_combine`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_army_range`, `sort_move_order` |
+| `army.bm` | `army_combine`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_army_range`, `sort_move_order`, `army_side`, `other_side` |
 | `city.bm` | `city_capture` (mixed), `city_is_connected`, `city_update_occupier`, `check_map_links` |
 | `battle.bm` | `calculate_battle` (mixed), `normal_random_number` |
 | `navy.bm` | `navy_remove_ship`, `navy_commands` (mixed) |

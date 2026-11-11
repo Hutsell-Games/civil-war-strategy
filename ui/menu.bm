@@ -114,14 +114,14 @@ sel1:
 		CASE 8
 			IF opt_graphics > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
-				a = row: IF current_side = 1 THEN a = 6 - row
+				a = row: IF current_side = SIDE_UNION THEN a = 6 - row
 				t$ = GFXDIR + "face" + LTRIM$(STR$(a)) + ".vga"
 				IF LEN(DIR$(t$)) > 0 THEN
 					DEF SEG = VARSEG(pic_face(1))
 					BLOAD t$, VARPTR(pic_face(1))
 					DEF SEG
 					PUT (550, 150), pic_face, PSET
-					IF current_side = 2 THEN
+					IF current_side = SIDE_REBEL THEN
 						PAINT (560, 160), 8, 0
 						PAINT (570, 155), 7, 0
 					END IF

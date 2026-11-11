@@ -7,7 +7,7 @@ SELECT CASE train_army(side)
 	CALL side_army_range(star, fin, side): max = 32767
 	index = 0
 	FOR i = star TO fin: IF army_city(i) = 0 OR army_order(i) <> 0 GOTO puter
-	x = 0: FOR j = 1 TO 6: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
+	x = 0: FOR j = 1 TO MAX_ROADS: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
 	NEXT j
 	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter
 	CALL city_nearby_enemy_strength(army_city(i), defend)
@@ -18,13 +18,13 @@ puter:  NEXT i
 	CALL railroad_capacity(side, limit)
 	IF army_size(index) > limit THEN GOTO toot
 	from = army_city(index)
-	x1 = 0: FOR i = 1 TO 40: IF city_owner(i) <> side GOTO puted
+	x1 = 0: FOR i = 1 TO MAX_CITIES: IF city_owner(i) <> side GOTO puted
 	CALL city_nearby_enemy_strength(i, defend): IF defend = 0 OR defend > 3 * army_size(index) GOTO puted
 	IF city_army(i) > 0 GOTO puted
 	target = i
 	GOSUB route: IF x = 0 GOTO puted
-	IF current_side = 1 AND city_y(i) < city_y(from) THEN x1 = i
-	IF current_side = 2 AND city_y(i) > city_y(from) THEN x1 = i
+	IF current_side = SIDE_UNION AND city_y(i) < city_y(from) THEN x1 = i
+	IF current_side = SIDE_REBEL AND city_y(i) > city_y(from) THEN x1 = i
 	IF city_fort(i) > 0 AND city_army(i) = 0 THEN x1 = i: EXIT FOR
 puted:  NEXT i
 	IF victory_rule(5) > 0 AND city_army(side_capital(side)) = 0 THEN
@@ -37,7 +37,7 @@ puted:  NEXT i
 	IF x1 > 0 GOTO haul ELSE GOTO toot
 human:
 	CALL menu_army_select(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clear_bottom_line: PRINT "Railroad move not allowed"; : GOTO toot
-	x = 1: IF index > 20 THEN x = 2
+	x = army_side(index)
 	CALL railroad_capacity(side, limit)
 	IF army_size(index) > limit THEN CALL clear_bottom_line: PRINT "Too many troops for railroad capacity"; : GOTO toot
 	
@@ -87,11 +87,11 @@ haul:
 END SELECT
 
 route:
-	x = 0: FOR j = 1 TO 6
+	x = 0: FOR j = 1 TO MAX_ROADS
 	y = city_road(target, j)
 	IF y > 0 AND city_owner(y) = side THEN
 	x = x + 1
-		FOR m = 1 TO 6
+		FOR m = 1 TO MAX_ROADS
 		z = city_road(y, m)
 		IF z > 0 AND z <> target AND city_owner(z) = side THEN x = x + 1
 		NEXT m
@@ -108,7 +108,7 @@ END SUB
 SUB railroad_capacity (side, limit)
 DIM x AS INTEGER
 IF opt_realism = 0 THEN limit = train_capacity(side): EXIT SUB
-x = 11: IF current_side = 2 THEN x = 23
+x = 11: IF current_side = SIDE_REBEL THEN x = 23
 limit = train_capacity(side) + 5 * (side_city_count(side) - x)
 x = 2 * train_capacity(side)
 IF limit > x THEN limit = x

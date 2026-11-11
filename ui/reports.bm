@@ -2,7 +2,7 @@ SUB draw_army_stats (army)
 LINE (530, 60)-(639, 150), 0, BF
 COLOR 15
 LOCATE 5, 68: PRINT army_name$(army)
-COLOR 9: IF army > 20 THEN COLOR 7
+COLOR 9: IF army_side(army) = SIDE_REBEL THEN COLOR 7
 LOCATE 6, 68: PRINT "Size:"; : CALL print_army_size(army)
 LOCATE 7, 68: PRINT "Leader:"; TAB(75); army_leader_rating(army)
 LOCATE 8, 68: PRINT "Exper:"; TAB(75); army_experience(army)
@@ -55,12 +55,12 @@ END SUB
 SUB menu_report (side)
 DIM fin AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER: DIM a$: DIM z AS INTEGER: DIM j AS INTEGER
 DIM star AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-DIM summ(40)
+DIM summ(MAX_CITIES)
 IF side = -1 GOTO frep
 IF side > 100 GOTO batrep
 menu_text$(0) = "Information"
 menu_text$(1) = side_name$(current_side) + " Armies"
-menu_text$(2) = side_name$(3 - current_side) + " Armies"
+menu_text$(2) = side_name$(other_side(current_side)) + " Armies"
 menu_text$(3) = "Cities"
 menu_text$(4) = "Force Summary"
 menu_text$(5) = "Intelligence"
@@ -72,7 +72,7 @@ CASE IS < 0
 	CLS
 	CALL draw_map
 	EXIT SUB
-CASE 2: side = 3 - current_side
+CASE 2: side = other_side(current_side)
 CASE 3: GOTO cityrep
 CASE 4: GOTO frep
 CASE 5: GOTO srep
@@ -86,11 +86,11 @@ END SELECT
 IF menu_choice < 0 GOTO endrep
 IF menu_choice = 4 GOTO frep
 CALL side_army_range(star, fin, side)
-CLS : LOCATE 1, 1: c = 9: IF side = 2 THEN c = 15
+CLS : LOCATE 1, 1: c = 9: IF side = SIDE_REBEL THEN c = 15
 COLOR c
 PRINT " Report for "; side_name$(side); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49); : COLOR 14: PRINT " Victory Points "; side_victory_points(side);
 IF c = 15 THEN c = 7
-x = side_victory_points(side) + side_victory_points(3 - side)
+x = side_victory_points(side) + side_victory_points(other_side(side))
 IF x = 0 THEN
 	PRINT
 ELSE
@@ -100,8 +100,8 @@ END IF
 CALL draw_flag_icon(215, 8, side)
 COLOR c: PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(side_city_count(side) * 2.5 + .5): PRINT x; "%)";
 PRINT TAB(50); : COLOR 12: PRINT "Capital: "; city_name$(side_capital(side))
-y = total_income: IF side_capital(1) > 0 THEN y = y + 100
-IF side_capital(2) > 0 THEN y = y + 100
+y = total_income: IF side_capital(SIDE_UNION) > 0 THEN y = y + 100
+IF side_capital(SIDE_REBEL) > 0 THEN y = y + 100
 PRINT side_income(side); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (side_income(side) / total_income) * 100: PRINT x; "%)   "; : COLOR 14: PRINT "Cash:"; side_cash(side)
 COLOR 11: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
 x = 0: FOR i = star TO fin
@@ -138,27 +138,27 @@ CLS : LOCATE 1, 1: COLOR 14
 PRINT "City Report"; TAB(20); month_name$(turn_month); ","; turn_year: COLOR 15
 PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
 LINE (1, 30)-(630, 30), 15
-FOR i = 1 TO 20: COLOR 4: a$ = "neutral": IF city_owner(i) = 1 THEN COLOR 9: a$ = "UNION"
-IF city_owner(i) = 2 THEN COLOR 7: a$ = "REBEL"
+FOR i = 1 TO 20: COLOR 4: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR 9: a$ = "UNION"
+IF city_owner(i) = SIDE_REBEL THEN COLOR 7: a$ = "REBEL"
 LOCATE 2 + i, 1: PRINT i; TAB(6); city_name$(i); TAB(18); a$; TAB(29); city_value(i)
 NEXT i
 
-FOR i = 21 TO 40: COLOR 4: a$ = "neutral": IF city_owner(i) = 1 THEN COLOR 9: a$ = "UNION"
-IF city_owner(i) = 2 THEN COLOR 7: a$ = "REBEL"
+FOR i = 21 TO 40: COLOR 4: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR 9: a$ = "UNION"
+IF city_owner(i) = SIDE_REBEL THEN COLOR 7: a$ = "REBEL"
 LOCATE i - 18, 41: PRINT i; TAB(46); city_name$(i); TAB(58); a$; TAB(69); city_value(i)
 NEXT i
 LINE (1, 360)-(630, 360), 15
 COLOR 9: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
-COLOR 9: PRINT side_name$(1); TAB(12); side_city_count(1); TAB(23); side_income(1); TAB(32); side_cash(1)
-COLOR 7: PRINT side_name$(2); TAB(12); side_city_count(2); TAB(23); side_income(2); TAB(32); side_cash(2)
-COLOR 4: PRINT side_name$(0); TAB(12); 40 - side_city_count(1) - side_city_count(2)
+COLOR 9: PRINT side_name$(SIDE_UNION); TAB(12); side_city_count(SIDE_UNION); TAB(23); side_income(SIDE_UNION); TAB(32); side_cash(SIDE_UNION)
+COLOR 7: PRINT side_name$(SIDE_REBEL); TAB(12); side_city_count(SIDE_REBEL); TAB(23); side_income(SIDE_REBEL); TAB(32); side_cash(SIDE_REBEL)
+COLOR 4: PRINT side_name$(SIDE_NONE); TAB(12); MAX_CITIES - side_city_count(SIDE_UNION) - side_city_count(SIDE_REBEL)
 LINE (1, 382)-(630, 382), 15
 GOTO endrep
 '..........................................................................
 '                               Intelligence
 '..........................................................................
 srep:
-c = 9: IF current_side = 2 THEN c = 7
+c = 9: IF current_side = SIDE_REBEL THEN c = 7
 CALL draw_map
 CALL side_army_range(star, fin, current_side)
 FOR k = star TO fin
@@ -185,18 +185,18 @@ GOTO endrep
 '                               Force Summary
 '..........................................................................
 frep:
-FOR k = 1 TO 40
+FOR k = 1 TO MAX_CITIES
 	IF city_army(k) > 0 THEN
-		FOR j = 1 TO 40
+		FOR j = 1 TO MAX_ARMIES
 		IF army_city(j) = k THEN summ(k) = summ(k) + army_size(j)
 		NEXT j
 	END IF
 NEXT k
 
 CLS : CALL draw_map
-FOR k = 1 TO 40
+FOR k = 1 TO MAX_CITIES
 IF summ(k) > 0 THEN
-	c = 9: IF city_owner(k) = 2 THEN c = 7
+	c = 9: IF city_owner(k) = SIDE_REBEL THEN c = 7
 	COLOR c
 	LOCATE INT(city_y(k) / 16 + 1), city_x(k) / 8: PRINT summ(k)
 END IF
@@ -222,14 +222,14 @@ LOCATE 13, 27: PRINT "BATTLES"
 LOCATE 14, 27: PRINT "WON"
 LOCATE 16, 27: PRINT "MEN LOST"
 LOCATE 17, 27: PRINT "(1000's)"
-LOCATE 14, 38: PRINT side_battles_won(1)
-LOCATE 14, 45: PRINT side_battles_won(2)
-LOCATE 17, 38: PRINT INT(.1 * side_casualties&(1))
-LOCATE 17, 45: PRINT INT(.1 * side_casualties&(2))
+LOCATE 14, 38: PRINT side_battles_won(SIDE_UNION)
+LOCATE 14, 45: PRINT side_battles_won(SIDE_REBEL)
+LOCATE 17, 38: PRINT INT(.1 * side_casualties&(SIDE_UNION))
+LOCATE 17, 45: PRINT INT(.1 * side_casualties&(SIDE_REBEL))
 IF opt_history > 0 AND side > 2 THEN
 	OPEN "O", #1, "battsumm"
 	PRINT #1, " SIDE      BATTLES WON       LOSSES"
-	FOR k = 1 TO 2
+	FOR k = SIDE_UNION TO SIDE_REBEL
 	a$ = " ": IF victory_reason = k THEN a$ = "*"
 	PRINT #1, a$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
 	NEXT k

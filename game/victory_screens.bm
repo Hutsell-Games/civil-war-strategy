@@ -43,7 +43,7 @@ LOCATE 21, 20: PRINT "by the people, for the people,"
 IF opt_sound = 2 THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
 LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
 LOCATE 25, 40: PRINT "- Abraham Lincoln"
-FOR i = -565 TO 50 STEP 50: CALL draw_flag(1, i, 0): NEXT i
+FOR i = -565 TO 50 STEP 50: CALL draw_flag(SIDE_UNION, i, 0): NEXT i
 IF opt_sound = 2 THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
 END SUB
 
@@ -125,8 +125,8 @@ END SUB
 SUB draw_surrender (side)
 DIM s AS INTEGER: DIM c AS INTEGER: DIM w AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 SCREEN 12
-s = 1: c = 1: COLOR 0: w = 514
-IF side > 20 THEN c = 7: s = 2
+s = SIDE_UNION: c = 1: COLOR 0: w = 514
+IF army_side(side) = SIDE_REBEL THEN c = 7: s = SIDE_REBEL
 '               background
 LINE (w + 15, 440)-(w + 125, 16), 2, BF
 LINE (w + 15, 16)-(w + 125, 290), 3, BF
@@ -239,10 +239,10 @@ LINE -(w + 46, 266): LINE -(w + 48, 263)
 LINE -(w + 48, 260): LINE -(w + 37, 258)
 LINE -(w + 36, 255): LINE -(w + 37, 250)
 LINE -(w + 39, 246): LINE -(w + 40, 243)
-c = 0: IF s = 2 THEN c = 15: LINE (547, 263)-(558, 263), 15
+c = 0: IF s = SIDE_REBEL THEN c = 15: LINE (547, 263)-(558, 263), 15
 PAINT (w + 33, 250), c, 0
 PAINT (w + 42, 264), c, 0
 
-CALL draw_flag(3 - s, 26, 0)
+CALL draw_flag(other_side(s), 26, 0)
 IF side < 99 THEN CALL wait_seconds(opt_pause!)
 END SUB

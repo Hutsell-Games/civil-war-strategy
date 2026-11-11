@@ -34,8 +34,8 @@ CIRCLE (city_x(city), city_y(city)), 3, c
 PAINT (city_x(city), city_y(city)), c, c
 CALL wait_seconds(.1)
 NEXT c
-c = 9: IF city_owner(city) = 2 THEN c = 7
-IF city_owner(city) = 0 THEN c = 12
+c = 9: IF city_owner(city) = SIDE_REBEL THEN c = 7
+IF city_owner(city) = SIDE_NONE THEN c = 12
 CIRCLE (city_x(city), city_y(city)), 4, 0
 CIRCLE (city_x(city), city_y(city)), 3, c
 PAINT (city_x(city), city_y(city)), c, c
@@ -43,7 +43,7 @@ END SUB
 
 SUB draw_army_flag (army)
 DIM who AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-who = 1: IF army > 20 THEN who = 2
+who = army_side(army)
 x = city_x(army_city(army)) - 12
 y = city_y(army_city(army)) - 11
 CALL draw_flag_icon(x, y, who)
@@ -63,7 +63,7 @@ DIM from AS INTEGER: DIM x AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER
 SELECT CASE show
 	CASE IS > 0
 	LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-	PSET (x - 6, y - 2), 3: c = 9: IF side = 2 THEN c = 15
+	PSET (x - 6, y - 2), 3: c = 9: IF side = SIDE_REBEL THEN c = 15
 	DRAW "C0S2R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4S4"
 	x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
 	CASE ELSE

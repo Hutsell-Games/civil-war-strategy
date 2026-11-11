@@ -1,6 +1,22 @@
 DEFINT A-Z
 ' $INCLUDE: 'port/folders.bi'
 '==========================================================================
+' Sides. other_side and army_side (rules/army.bm) work with them.
+CONST SIDE_NONE = 0
+CONST SIDE_UNION = 1
+CONST SIDE_REBEL = 2
+' Limits. Army slots 1 to 20 are the Union's, 21 to 40 the Rebels'.
+CONST MAX_CITIES = 40
+CONST MAX_ARMIES = 40
+CONST ARMIES_PER_SIDE = 20
+CONST MAX_ROADS = 6
+CONST MAX_FLEET_SHIPS = 10
+CONST MAX_FORT = 2
+CONST MAX_SUPPLY = 10
+CONST MAX_EXPERIENCE = 10
+CONST MAX_LEADER_RATING = 9
+CONST MAX_CASH = 19999
+'==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
 COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_state
@@ -14,14 +30,14 @@ COMMON SHARED side_victory_points(), opt_graphics, opt_sound, side_capital(), op
 COMMON SHARED train_capacity(), map_font$(), move_order_key(), opt_winter_campaigns, opt_event_balance, opt_realism, side_casualties&()
 COMMON SHARED game_over, opt_history, victory_reason, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
 '==========================================================================
-DIM SHARED city_x(40), city_y(40), city_value(40), city_owner(40), city_name$(40), leader_name$(40), turn_recruit_city(5)
-DIM SHARED side_cash(2), side_city_count(2), city_road(40, 6), city_port_type(40), side_income(2), saved_under_army(300), leader_rating(40)
-DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(40), army_name$(40), victory_rule(6)
-DIM SHARED army_size(40), army_leader_rating(40), army_experience(40), army_supply(40), month_name$(12)
-DIM SHARED army_order(40), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)
-DIM SHARED fleet_city(2), fleet_size(2), navymove(2), city_army(40), city_fort(40), train_army(2)
+DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(40), turn_recruit_city(5)
+DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(40)
+DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
+DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(12)
+DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)
+DIM SHARED fleet_city(2), fleet_size(2), navymove(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
 DIM SHARED side_victory_points(2), side_capital(2), emancipation_done, train_city(2), fleet_ships$(2)
-DIM SHARED train_capacity(2), map_font$(26), move_order_key(40), side_casualties&(2), side_battles_won(2), city_first_owner(40)
+DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_casualties&(2), side_battles_won(2), city_first_owner(MAX_CITIES)
 ' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
 DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
 DIM SHARED pic_face(1 TO 1564)

@@ -23,12 +23,12 @@ END SUB
 
 SUB draw_train_box
 DIM i AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-IF train_army(1) + train_army(2) = 0 GOTO notrain
+IF train_army(SIDE_UNION) + train_army(SIDE_REBEL) = 0 GOTO notrain
 LINE (5, 17)-(100, 63), 3, BF
 LINE (5, 17)-(100, 47), 0, B
 LINE (5, 47)-(100, 63), 0, B
 
-FOR i = 1 TO 2
+FOR i = SIDE_UNION TO SIDE_REBEL
 IF train_army(i) = 0 GOTO notrane
 PSET (15, 25), 3: c = 9: IF i = 2 THEN c = 15: PSET (60, 25), 3
 DRAW "C0S4R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U8L2U5BF4"
@@ -58,10 +58,10 @@ DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER: DIM a$
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
 	LOCATE 7, 68: PRINT "Funds:"; side_cash(current_side);
 
-	FOR i = 1 TO 2: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
+	FOR i = SIDE_UNION TO SIDE_REBEL: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
 	NEXT i
-	x = side_victory_points(1) + side_victory_points(2): y = 0
-	c = 9: IF current_side = 2 THEN c = 7
+	x = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL): y = 0
+	c = 9: IF current_side = SIDE_REBEL THEN c = 7
 	LINE (580, 15)-(580, 35), 15
 	LINE (530, 20)-(630, 30), 8 - c, BF
 	IF x > 0 THEN y = 100 * (side_victory_points(current_side) / x)

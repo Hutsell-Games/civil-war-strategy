@@ -19,20 +19,20 @@ FOR i = 1 TO a
 	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
 NEXT i
 	INPUT #1, a             ' number of Rebel armies
-FOR i = 21 TO 20 + a
+FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + a
 	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
 	city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
 NEXT i
-FOR i = 1 TO 2: INPUT #1, side_cash(i): NEXT i
+FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i): NEXT i
 	INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
-	INPUT #1, fleet_ships$(1), fleet_city(1), fleet_ships$(2), fleet_city(2)
-	FOR k = 1 TO 2: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
-	INPUT #1, side_capital(1), side_capital(2)
+	INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
+	FOR k = SIDE_UNION TO SIDE_REBEL: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
+	INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
 
 FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, current_side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(1), train_capacity(2), opt_winter_campaigns, opt_realism, side_battles_won(1), side_battles_won(2), side_casualties&(1), side_casualties&(2), opt_history, opt_ai_aggression
+	INPUT #1, current_side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
 	CLOSE #1
 
 	CASE 2
@@ -53,12 +53,12 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	OPEN "I", 1, "cws" + LTRIM$(STR$(menu_value(menu_choice))) + ".sav"
 	COLOR 11: CALL clear_bottom_line: PRINT "Loading";
 	INPUT #1, turn_month, turn_year, union_income_bonus, a
-	FOR i = 1 TO 40: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+	FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
 	IF army_city(i) > 0 THEN
 		IF army_name$(i) = leader_name$(i) THEN
 			leader_name$(i) = ""
 		ELSE
-			who = 1: IF i > 20 THEN who = 2
+			who = army_side(i)
 			CALL side_army_range(star, fin, who)
 			FOR k = star TO fin
 			IF army_name$(i) = leader_name$(k) THEN leader_name$(k) = "": EXIT FOR
@@ -66,19 +66,19 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 		END IF
 	END IF
 	NEXT i
-	FOR i = 1 TO 40: INPUT #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+	FOR i = 1 TO MAX_CITIES: INPUT #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
+	FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
 	INPUT #1, fleet_ships$(i), fleet_city(i), navymove(i), train_army(i), train_city(i)
 	fleet_size(i) = LEN(fleet_ships$(i))
 	NEXT i
        
 	CLOSE #1
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(1), train_capacity(2), opt_winter_campaigns, opt_realism, side_battles_won(1), side_battles_won(2), side_casualties&(1), side_casualties&(2), opt_history, opt_ai_aggression
+	INPUT #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
 	CLOSE #1
 	SCREEN 12: CLS
 	CLOSE #1: CALL draw_map: CALL clear_bottom_line
-	FOR k = 1 TO 2
+	FOR k = SIDE_UNION TO SIDE_REBEL
 	IF train_army(k) > 0 THEN CALL draw_train(k, 1)
 	NEXT k
 	current_side = a
@@ -96,10 +96,10 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 
 	OPEN "O", 1, "cws" + LTRIM$(STR$(menu_choice)) + ".sav"
 	WRITE #1, turn_month, turn_year, union_income_bonus, current_side
-	FOR i = 1 TO 40: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+	FOR i = 1 TO MAX_ARMIES: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
 	NEXT i
-	FOR i = 1 TO 40: WRITE #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
-	FOR i = 1 TO 2: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+	FOR i = 1 TO MAX_CITIES: WRITE #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
+	FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
 	WRITE #1, fleet_ships$(i), fleet_city(i), navymove(i), train_army(i), train_city(i)
 	NEXT i
 	CLOSE #1
@@ -107,7 +107,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	myside = current_side
 	IF myside < 1 OR myside > 2 THEN myside = 1
 	OPEN "O", 1, "cws.cfg"
-	WRITE #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(1), train_capacity(2), opt_winter_campaigns, opt_realism, side_battles_won(1), side_battles_won(2), side_casualties&(1), side_casualties&(2), opt_history, opt_ai_aggression
+	WRITE #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
 	CLOSE #1
 	CLS : CALL draw_map
 END SELECT
