@@ -28,7 +28,7 @@ fleet_size(k) = 0: fleet_city(k) = 0: navymove(k) = 0
 train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
 NEXT k
 
-saves_exist = 1: victory_rule(1) = 1
+saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
 CALL file_management(1)
 IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
 	DEF SEG = VARSEG(pic_mountain(1))
@@ -41,15 +41,15 @@ END IF
 RESTORE
 FOR k = 1 TO 26: READ map_font$(k): NEXT k
 
-IF opt_realism > 0 AND turn_year < 1862 THEN
+IF opt_realism >= REALISM_ON AND turn_year < 1862 THEN
 		FOR i = SIDE_UNION TO SIDE_REBEL
 			a$ = STRING$(LEN(fleet_ships$(i)), "W")
 			fleet_ships$(i) = a$
 		NEXT i
 END IF
 iron:
-IF opt_players < 1 OR opt_players > 2 THEN opt_players = 1
-IF opt_players = 2 OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
+IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN opt_players = PLAYERS_ONE
+IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
 IF current_side = SIDE_UNION THEN opt_event_balance = 7
 IF current_side = SIDE_REBEL THEN opt_event_balance = 3
 	IF opt_pause! < 1 THEN opt_pause! = 2
@@ -78,7 +78,7 @@ LOCATE 28, 60: PRINT "v1.57"
 LINE (190, 170)-(440, 260), 1, B
 LINE (180, 180)-(450, 250), 7, B
 CALL draw_flag(SIDE_UNION, -440, 0): CALL draw_flag(SIDE_REBEL, -100, 0)
-IF replay = 0 AND opt_sound = 2 AND menu_choice = 0 THEN
+IF replay = 0 AND opt_sound = SOUND_MUSIC AND menu_choice = 0 THEN
 IF current_side = SIDE_UNION THEN
 	IF INKEY$ <> "" GOTO notitle
 	PLAY "MST170o1e8o0b8o1e8"
@@ -117,7 +117,7 @@ wait_seconds .3
 menu_box_type = BOX_DOUBLE
 menu_highlight = 15
 replay = 1
-IF opt_players = 2 THEN GOSUB blanken
+IF opt_players = PLAYERS_TWO THEN GOSUB blanken
 menu_text$(0) = "VGA CIVILWAR STRATEGY"
 menu_text$(1) = "Resume Saved Game"
 menu_text$(2) = "Start NEW Game"
@@ -156,7 +156,7 @@ side_income(i) = 0
 IF side_cash(i) > MAX_CASH THEN side_cash(i) = MAX_CASH
 IF side_cash(i) < 0 THEN side_cash(i) = 0
 NEXT i
-IF opt_players = 1 AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
+IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
 
 FOR i = 1 TO MAX_CITIES
 IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_income(x) = side_income(x) + city_value(i)
@@ -170,7 +170,7 @@ NEXT i
 total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
 
 chosit = 22
-IF opt_players = 2 THEN GOSUB blanken: CALL draw_map
+IF opt_players = PLAYERS_TWO THEN GOSUB blanken: CALL draw_map
 CALL check_victory_conditions
 ON ERROR GOTO 0
 IF game_over > 0 THEN
@@ -183,7 +183,7 @@ END IF
 '±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 menu0:
 CALL draw_top_bar
-IF opt_players = 2 AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
+IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
 IF side_cash(current_side) < 100 AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
 
 menu_highlight = 11
@@ -246,7 +246,7 @@ END IF
 	menu_item_count = 2: CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
 	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
-	IF opt_players = 2 THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN GOSUB blanken: CALL draw_map: GOTO menu0
+	IF opt_players = PLAYERS_TWO THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN GOSUB blanken: CALL draw_map: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
@@ -317,7 +317,7 @@ optmen:
 		menu_item_count = 0
 		FOR i = star TO fin
 		IF army_city(i) = 0 OR army_supply(i) > 1 GOTO alone
-		IF opt_realism > 0 THEN
+		IF opt_realism >= REALISM_ON THEN
 			CALL city_is_connected(current_side, army_city(i), a)
 			IF a < 1 THEN CALL clear_bottom_line: COLOR 15: PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !"; : wait_seconds opt_pause!: GOTO alone
 		END IF
@@ -369,7 +369,7 @@ alone:
 	army_leader_rating(empty) = leader_rating(empty)
 	army_name$(empty) = leader_name$(empty): leader_name$(empty) = ""
 	army_experience(empty) = army_experience(index)
-	COLOR 11: CALL clear_bottom_line: PRINT "Unit #"; empty; " with "; : CALL print_army_size(empty): PRINT " men detached under "; army_name$(empty); : CALL wait_seconds(opt_pause!): IF opt_sound > 0 THEN SOUND 2222, 1
+	COLOR 11: CALL clear_bottom_line: PRINT "Unit #"; empty; " with "; : CALL print_army_size(empty): PRINT " men detached under "; army_name$(empty); : CALL wait_seconds(opt_pause!): IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
 	CALL draw_stack_markers(current_side)
 	menu_choice = MENU_START + 6
 	GOTO optmen
@@ -382,7 +382,7 @@ alone:
 	IF target < 1 OR index < 1 THEN COLOR 11: CALL clear_bottom_line: PRINT "No armies remain eligible for drills in "; month_name$(turn_month); : GOTO menu0
 	IF army_experience(index) > 5 OR army_experience(index) >= army_leader_rating(index) THEN COLOR 12: CALL clear_bottom_line: PRINT army_name$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
 	army_experience(index) = army_experience(index) + 1
-	CALL clear_bottom_line: PRINT army_name$(index); " has drilled to reach experience level "; army_experience(index); : IF opt_sound > 0 THEN SOUND 2222, 1
+	CALL clear_bottom_line: PRINT army_name$(index); " has drilled to reach experience level "; army_experience(index); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
 	CALL wait_seconds(opt_pause!): clear_bottom_line
 	army_order(index) = ORDER_BUSY
 	menu_choice = MENU_START + 7
@@ -407,10 +407,10 @@ alone:
 utile:
 	chosit = 29
 	menu_text$(0) = "Utility"
-	menu_text$(1) = "Side": IF opt_players = 2 THEN menu_text$(2) = ""
-	menu_text$(2) = "1 Player": IF opt_players = 2 THEN menu_text$(2) = "2 Player"
+	menu_text$(1) = "Side": IF opt_players = PLAYERS_TWO THEN menu_text$(2) = ""
+	menu_text$(2) = "1 Player": IF opt_players = PLAYERS_TWO THEN menu_text$(2) = "2 Player"
 	menu_text$(3) = "Graphics" + STR$(opt_graphics)
-	menu_text$(4) = "Noise": IF opt_sound > 0 THEN menu_text$(4) = menu_text$(4) + STRING$(opt_sound, "*")
+	menu_text$(4) = "Noise": IF opt_sound >= SOUND_EFFECTS THEN menu_text$(4) = menu_text$(4) + STRING$(opt_sound, "*")
 	menu_text$(5) = "Display" + STR$(opt_pause!)
 	a$ = STR$(opt_difficulty): IF current_side = SIDE_UNION THEN a$ = STR$(6 - opt_difficulty)
 	menu_text$(6) = "Balance" + a$
@@ -420,23 +420,23 @@ utile:
 	menu_text$(9) = "Vary Start"
 	a$ = "": IF opt_winter_campaigns = 1 THEN a$ = "û"
 	menu_text$(10) = "Jan Campgn" + a$
-	a$ = "": IF opt_realism = 1 THEN a$ = "û"
+	a$ = "": IF opt_realism = REALISM_ON THEN a$ = "û"
 	menu_text$(11) = "Realism " + a$
 	menu_text$(12) = "Chk Links"
 	a$ = "": IF opt_history = 1 THEN a$ = "û"
 	menu_text$(13) = "History" + a$
 	menu_item_count = 13: menu_col = 67: menu_row = 11
 	COLOR 11: LOCATE menu_row - 2, menu_col: PRINT "esc=Main Menu"
-	IF opt_players = 1 THEN menu_item_count = 14: menu_text$(14) = "Aggress" + STR$(opt_ai_aggression)
+	IF opt_players = PLAYERS_ONE THEN menu_item_count = 14: menu_text$(14) = "Aggress" + STR$(opt_ai_aggression)
 	CALL menu_select(-1): CALL clear_right_panel
 	    SELECT CASE menu_choice
 '-------------------------------------------------------------------------
 '                               Swap Sides
 '-------------------------------------------------------------------------
 	    CASE 1
-		IF opt_players = 2 GOTO menu0
+		IF opt_players = PLAYERS_TWO GOTO menu0
 		current_side = other_side(current_side): COLOR 9: IF current_side = SIDE_REBEL THEN COLOR 7
-		CALL clear_bottom_line: PRINT "Now playing "; side_name$(current_side); " side"; : IF opt_sound > 0 THEN SOUND 999, 1
+		CALL clear_bottom_line: PRINT "Now playing "; side_name$(current_side); " side"; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
 		IF current_side = SIDE_UNION THEN opt_event_balance = 7
 		IF current_side = SIDE_REBEL THEN opt_event_balance = 3
 		CALL draw_top_bar
@@ -445,9 +445,9 @@ utile:
 '                               Solo or 2 Player
 '-------------------------------------------------------------------------
 	    CASE 2
-		opt_players = 3 - opt_players: CALL clear_bottom_line: COLOR 12
-		IF opt_sound > 0 THEN SOUND 999, 1
-		a$ = "Solo": IF opt_players = 2 THEN a$ = "2 Player"
+		opt_players = PLAYERS_ONE + PLAYERS_TWO - opt_players: CALL clear_bottom_line: COLOR 12
+		IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
+		a$ = "Solo": IF opt_players = PLAYERS_TWO THEN a$ = "2 Player"
 		PRINT a$; " Game";
 		menu_choice = MENU_START + 2: GOTO utile
 '-------------------------------------------------------------------------
@@ -455,20 +455,20 @@ utile:
 '-------------------------------------------------------------------------
 	    CASE 3
 		opt_graphics = opt_graphics + 1
-		IF opt_graphics > 3 THEN opt_graphics = 0
+		IF opt_graphics > GRAPHICS_FULL THEN opt_graphics = GRAPHICS_OFF
 		a$ = "ROADS"
-		IF opt_graphics = 0 THEN a$ = "DISABLED"
-		IF opt_graphics = 2 THEN a$ = "CITY NAMES"
-		IF opt_graphics = 3 THEN a$ = "FULL"
+		IF opt_graphics = GRAPHICS_OFF THEN a$ = "DISABLED"
+		IF opt_graphics = GRAPHICS_NAMES THEN a$ = "CITY NAMES"
+		IF opt_graphics = GRAPHICS_FULL THEN a$ = "FULL"
 		CLS
 		CALL draw_map
-		CALL clear_bottom_line: COLOR 11: PRINT "Graphics : "; a$; : IF opt_sound > 0 THEN SOUND 2700, 1
+		CALL clear_bottom_line: COLOR 11: PRINT "Graphics : "; a$; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 2700, 1
 		menu_choice = MENU_START + 3: GOTO utile
 '-------------------------------------------------------------------------
 '                               Sounds
 '-------------------------------------------------------------------------
 	    CASE 4
-		CALL clear_right_panel: menu_choice = opt_sound + 22
+		CALL clear_right_panel: menu_choice = MENU_START + 1 + opt_sound
 		menu_text$(0) = "SOUNDS"
 		menu_text$(1) = "Quiet"
 		menu_text$(2) = "Sound"
@@ -478,7 +478,7 @@ utile:
 		IF menu_choice < 1 GOTO menu0
 		COLOR 11: CALL clear_bottom_line: PRINT "Sound Option : "; menu_text$(menu_choice);
 		opt_sound = menu_choice - 1
-		IF opt_sound > 0 THEN SOUND 999, 1
+		IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
 		menu_choice = MENU_START + 4: GOTO utile
 '-------------------------------------------------------------------------
 '                               Display Speed
@@ -511,7 +511,7 @@ utile:
 '                               Play Balance
 '-------------------------------------------------------------------------
 	   CASE 6
-		menu_choice = opt_difficulty + 21
+		menu_choice = MENU_START + opt_difficulty
 		menu_text$(0) = "Balance"
 		menu_text$(1) = "Rebel ++"
 		menu_text$(2) = "Rebel +"
@@ -622,7 +622,7 @@ utile:
 	   CASE 11
 		opt_realism = 1 - opt_realism
 		CALL clear_bottom_line: COLOR 11
-	IF opt_realism = 0 THEN
+	IF opt_realism = REALISM_OFF THEN
 		PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
 	ELSE
 		PRINT "REALISM ON: Recruiting based on CITY SIZE";
@@ -714,8 +714,8 @@ menu_item_count = 2: menu_color = 5
 menu_col = 67: menu_row = 15
 CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: union_income_bonus = 120 * opt_difficulty: IF opt_players = 2 THEN union_income_bonus = 50 * opt_difficulty
-	   IF opt_realism > 0 THEN union_income_bonus = union_income_bonus * .7
+unionplus: union_income_bonus = 120 * opt_difficulty: IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
+	   IF opt_realism >= REALISM_ON THEN union_income_bonus = union_income_bonus * .7
 	   RETURN
 '............................................................................
 blanken:        c = 1: IF current_side = SIDE_REBEL THEN c = 7

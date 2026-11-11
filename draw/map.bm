@@ -21,7 +21,7 @@ SELECT CASE mark
 	FOR i = 4 TO 10 STEP 1
 	CIRCLE (x, y), i, 4
 	PAINT (x, y), 14, 4
-	IF opt_sound > 0 THEN SOUND 37 + 50 * RND, .03
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 37 + 50 * RND, .03
 	NEXT i
 	CALL wait_seconds(.1)
 	CALL screen_snapshot(x, y, SNAP_RESTORE)
@@ -40,7 +40,7 @@ SELECT CASE mark
 	CALL screen_snapshot(x, y, SNAP_SAVE)
 	LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
 	LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
-	IF opt_sound > 0 THEN SOUND 3999, .3
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 3999, .3
 	CALL wait_seconds(opt_pause! - .5)
 	CALL screen_snapshot(x, y, SNAP_RESTORE)
 	CASE MARK_BOX          ' draw white box
@@ -94,7 +94,7 @@ ELSE
 	CIRCLE (city_x(i), city_y(i)), 3, c
 	PAINT (city_x(i), city_y(i)), c, c
 END IF
-IF opt_graphics = 0 GOTO nocon
+IF opt_graphics = GRAPHICS_OFF GOTO nocon
 	FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
 	NEXT j
 nocon:
@@ -508,7 +508,7 @@ IF fleet_city(SIDE_UNION) = 30 OR fleet_city(SIDE_REBEL) = 30 THEN
 	LINE (485, 241)-(525, 270), 11, B
 END IF
 
-IF opt_graphics > 1 THEN CALL draw_city_names
+IF opt_graphics >= GRAPHICS_NAMES THEN CALL draw_city_names
 IF raiding_side > 0 THEN
 LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
 y = 312
@@ -528,7 +528,7 @@ FOR k = SIDE_UNION TO SIDE_REBEL
 CALL draw_stack_markers(k)
 NEXT k
 
-IF opt_players = 2 GOTO nosee
+IF opt_players = PLAYERS_TWO GOTO nosee
 FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
 NEXT i
 nosee:

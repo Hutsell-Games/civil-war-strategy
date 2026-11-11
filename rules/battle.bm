@@ -34,7 +34,7 @@ IF x > rule_strength_cap THEN x = rule_strength_cap
 COLOR 11: LOCATE 11, y: PRINT "Attack  "; x
 LINE (530, 155)-(635, 175), 11, B
 
-x1 = .013 * army_size(defender) + 1: IF opt_realism = 1 THEN x1 = .02 * army_size(defender) + 2: IF x1 > 20 THEN x1 = 20
+x1 = .013 * army_size(defender) + 1: IF opt_realism = REALISM_ON THEN x1 = .02 * army_size(defender) + 2: IF x1 > 20 THEN x1 = 20
 LOCATE 13, y: PRINT "Defender"
 COLOR 16 - c: LOCATE 14, y: PRINT army_name$(defender)
 LOCATE 15, y: CALL print_army_size(defender)
@@ -90,7 +90,7 @@ COLOR 14: LOCATE 27, y: PRINT "Odds:  "; a$;
 LINE (530, 412)-(635, 435), 14, B
 LINE (528, 410)-(637, 437), 14, B
 CALL script_mark_key_wait(1, "P"): DO WHILE INKEY$ = "": LOOP
-IF opt_graphics > 2 THEN
+IF opt_graphics >= GRAPHICS_FULL THEN
 	CALL draw_cannon
 	k = city_fort(army_city(defender))
 	t$ = GFXDIR + "fort" + LTRIM$(STR$(k)) + ".vga"
@@ -109,7 +109,7 @@ NEXT i
 grapple:
 hit = 0: hit1 = 0
 star = scale * RND: fin = scale * RND
-IF opt_sound > 0 THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
+IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
 IF star <= x THEN hit = 1
 IF fin <= x1 THEN hit1 = 1
 
@@ -177,7 +177,7 @@ IF winner = defender THEN menu_text$(3) = army_name$(winner): menu_text$(4) = "*
 a$ = city_name$(army_city(defender)) + ": " + menu_text$(3) + menu_text$(1) + " defeats " + menu_text$(4) + menu_text$(2)
 CALL scribe_message(a$, SHOW_NOT)
 
-IF opt_players = 1 AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
+IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
 COLOR 14: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL script_mark_key_wait(1, "B"): DO WHILE INKEY$ = "": LOOP
 END IF
 

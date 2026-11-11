@@ -72,6 +72,27 @@ CONST SNAP_RESTORE = 1
 ' animate_army's flag: take the picture of the army from its city first, or use the one taken already.
 CONST ANIMATE_TAKE_PICTURE = 0
 CONST ANIMATE_PICTURE_TAKEN = 1
+' Settings: opt_graphics, opt_sound, opt_realism, opt_players.
+CONST GRAPHICS_OFF = 0
+CONST GRAPHICS_BASIC = 1
+CONST GRAPHICS_NAMES = 2
+CONST GRAPHICS_FULL = 3
+CONST SOUND_OFF = 0
+CONST SOUND_EFFECTS = 1
+CONST SOUND_MUSIC = 2
+CONST REALISM_OFF = 0
+CONST REALISM_ON = 1
+CONST REALISM_HIGH = 2
+CONST PLAYERS_ONE = 1
+CONST PLAYERS_TWO = 2
+' The rules of victory_rule(): when the time runs out, and the cities, income, capital and force ratio
+' that win. A rule that is off is 0 or negative.
+CONST VICTORY_MONTH = 1
+CONST VICTORY_YEAR = 2
+CONST VICTORY_CITIES = 3
+CONST VICTORY_INCOME = 4
+CONST VICTORY_CAPITAL = 5
+CONST VICTORY_FORCE_RATIO = 6
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

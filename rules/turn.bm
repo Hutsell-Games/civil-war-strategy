@@ -11,7 +11,7 @@ s = SIDE_UNION
 FOR i = 1 TO MAX_ARMIES: IF army_city(i) < 1 GOTO rip
 IF army_side(i) = SIDE_REBEL THEN s = SIDE_REBEL
 IF side_cash(s) >= .2 * army_size(i) THEN
-	a = 1: IF opt_realism > 0 THEN CALL city_is_connected(s, army_city(i), a)
+	a = 1: IF opt_realism >= REALISM_ON THEN CALL city_is_connected(s, army_city(i), a)
 	IF a > 0 THEN
 		army_supply(i) = army_supply(i) + 1
 		side_cash(s) = side_cash(s) - .2 * army_size(i)
@@ -41,7 +41,7 @@ SUB turn_resolve
 DIM index AS INTEGER: DIM flee AS INTEGER: DIM best AS INTEGER: DIM move2 AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER: DIM k AS INTEGER
 DIM flag AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM s AS INTEGER: DIM active AS INTEGER: DIM target AS INTEGER: DIM defend AS INTEGER: DIM win AS INTEGER: DIM lose AS INTEGER: DIM a$
 flag = 0
-IF opt_players = 1 THEN
+IF opt_players = PLAYERS_ONE THEN
 	CALL ai_turn
 ELSE
 	FOR i = 1 TO MAX_ARMIES
@@ -117,7 +117,7 @@ CALL draw_map_marker(target, 0, MARK_EXPLOSION)
 defend = city_army(target)
 
 COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " attacks "; army_name$(defend); " in "; city_name$(army_city(defend)); : CALL wait_seconds(opt_pause! - 1)
-IF army_size(defend) > 0 THEN CALL calculate_battle(active, defend, win, lose): flag = 1: IF opt_graphics > 0 THEN GOSUB upbox
+IF army_size(defend) > 0 THEN CALL calculate_battle(active, defend, win, lose): flag = 1: IF opt_graphics >= GRAPHICS_BASIC THEN GOSUB upbox
 IF army_experience(win) < MAX_EXPERIENCE THEN army_experience(win) = army_experience(win) + 1
 
 IF army_size(lose) < 2 THEN
@@ -192,9 +192,9 @@ deadmeat:
 	a$ = army_name$(index) + " surrenders to " + army_name$(active) + " in " + city_name$(army_city(index))
 	CALL scribe_message(a$, SHOW_BOX)
 crushed:
-	IF opt_graphics > 2 THEN CALL draw_surrender(index): COLOR 14: LOCATE 3, 68: PRINT army_name$(index): LOCATE 4, 68: PRINT "surrenders !"
+	IF opt_graphics >= GRAPHICS_FULL THEN CALL draw_surrender(index): COLOR 14: LOCATE 3, 68: PRINT army_name$(index): LOCATE 4, 68: PRINT "surrenders !"
 	x = army_side(index)
-	IF opt_sound > 1 AND x <> current_side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
+	IF opt_sound >= SOUND_MUSIC AND x <> current_side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
 	IF army_order(index) > 0 THEN CALL draw_map_marker(army_city(index), army_order(index), MARK_ERASE_ARMY)
 	side_victory_points(other_side(s)) = side_victory_points(other_side(s)) + 25
 	army_city(index) = 0: leader_name$(index) = "": army_name$(index) = ""
@@ -224,7 +224,7 @@ CALL draw_army_flag(active)
 '---------------------------------------------------------------------------
 	IF city_owner(army_city(active)) = s GOTO horde
 	c = army_city(active)
-	IF opt_players = 1 AND s = current_side AND city_fort(c) > 0 AND flag = 0 THEN
+	IF opt_players = PLAYERS_ONE AND s = current_side AND city_fort(c) > 0 AND flag = 0 THEN
 		menu_col = 67: menu_row = 15
 		menu_highlight = 15: menu_color = 3
 		menu_text$(0) = "Raze ?"
@@ -235,8 +235,8 @@ CALL draw_army_flag(active)
 		CALL clear_right_panel
 		IF menu_choice = 2 GOTO smoke
 	END IF
-	IF opt_players = 1 AND s <> current_side AND city_fort(c) > 0 AND flag = 0 THEN
-		IF opt_realism > 0 AND city_y(c) > 150 THEN
+	IF opt_players = PLAYERS_ONE AND s <> current_side AND city_fort(c) > 0 AND flag = 0 THEN
+		IF opt_realism >= REALISM_ON AND city_y(c) > 150 THEN
 smoke:
 			city_fort(c) = 0
 			x = city_x(c)
@@ -274,14 +274,14 @@ IF raiding_side > 0 THEN
 		COLOR 15: PRINT side_name$(raiding_side); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raiding_side)); " commerce";
 		a = 1: IF LEFT$(fleet_ships$(raiding_side), 1) = "I" THEN a = 2
 		PSET (500, 465), 0: CALL draw_ship_icon(raiding_side, a)
-		IF opt_sound > 0 THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
+		IF opt_sound >= SOUND_EFFECTS THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
 		IF raiding_side = current_side THEN fleet_pursuit = 1
 		wait_seconds 9
 	ELSE
 		raid_loss = 0
 		CALL navy_remove_ship(raiding_side)
 		COLOR 15: PRINT side_name$(raiding_side); " raiders have lost a ship ("; fleet_size(raiding_side); " remain)";
-		IF opt_sound > 0 THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
+		IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 		IF fleet_city(raiding_side) > 0 THEN
 			wait_seconds 9
 			GOTO allthru
@@ -308,5 +308,5 @@ IF side_victory_points(SIDE_UNION) < 1 THEN side_victory_points(SIDE_UNION) = 0
 side_victory_points(SIDE_REBEL) = .8 * side_victory_points(SIDE_REBEL) + .3 * (side_income(SIDE_REBEL) + side_city_count(SIDE_REBEL))
 IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50: IF side_city_count(SIDE_REBEL) > 34 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_UNION) + 100
 IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
-IF opt_players = 2 THEN CALL clear_bottom_line: COLOR 14: PRINT "press a key"; : CALL script_mark_key_wait(1, "K"): DO WHILE INKEY$ = "": LOOP
+IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR 14: PRINT "press a key"; : CALL script_mark_key_wait(1, "K"): DO WHILE INKEY$ = "": LOOP
 END SUB

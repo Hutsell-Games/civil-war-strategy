@@ -1,6 +1,6 @@
 SUB play_shenandoah
 '                       Shenandoah
-IF opt_sound = 2 THEN
+IF opt_sound = SOUND_MUSIC THEN
 	IF INKEY$ <> "" THEN menu_choice = 1: EXIT SUB
 	PLAY "T90MFMNo1c4f8f8f4."
 	IF INKEY$ <> "" THEN menu_choice = 1: EXIT SUB

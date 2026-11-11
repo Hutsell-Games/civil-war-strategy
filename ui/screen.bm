@@ -71,8 +71,8 @@ DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER: DIM a$
 
 	LOCATE 5, 68: PRINT "("; y; "%)"
 
-a$ = "  Snd": IF opt_sound < 2 THEN a$ = "   Snd": IF opt_sound = 0 THEN a$ = "      "
-IF opt_graphics > 0 THEN a$ = a$ + " G" + LTRIM$(STR$(opt_graphics))
+a$ = "  Snd": IF opt_sound < SOUND_MUSIC THEN a$ = "   Snd": IF opt_sound = SOUND_OFF THEN a$ = "      "
+IF opt_graphics >= GRAPHICS_BASIC THEN a$ = a$ + " G" + LTRIM$(STR$(opt_graphics))
 a$ = a$ + STR$(opt_players)
 COLOR c
 LOCATE 26, 68: PRINT "F3 Redrw Scrn"

@@ -112,7 +112,7 @@ sel1:
 		CASE MENU_ARMY_STATS: CALL draw_army_stats(menu_value(row))
 		CASE MENU_ARMY_POINTER: CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_POINTER)
 		CASE MENU_FACES
-			IF opt_graphics > 2 AND row > 0 THEN
+			IF opt_graphics >= GRAPHICS_FULL AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
 				a = row: IF current_side = SIDE_UNION THEN a = 6 - row
 				t$ = GFXDIR + "face" + LTRIM$(STR$(a)) + ".vga"
@@ -202,7 +202,7 @@ noadjust:
 	IF menu_col = 0 THEN menu_col = INT(40.5 - .5 * wide)
 	RETURN
 called:
-	IF opt_sound > 0 THEN SOUND 700, .5
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 700, .5
 	COLOR menu_color
 	menu_col = 0: menu_row = 0
 	SELECT CASE menu_item_show_beside

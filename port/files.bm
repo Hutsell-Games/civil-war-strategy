@@ -13,7 +13,7 @@ SELECT CASE job
 	INPUT #1, turn_month, turn_year
 '               set end game conditions
 	FOR i = 1 TO 6: INPUT #1, victory_rule(i): NEXT i
-	victory_rule(3) = .4 * victory_rule(3)
+	victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
 	INPUT #1, a             ' number of Yankee armies
 FOR i = 1 TO a
 	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""

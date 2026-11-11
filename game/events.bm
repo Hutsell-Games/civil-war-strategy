@@ -3,10 +3,10 @@ DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM who AS INTEGER: DIM empty A
 '==========================================================================
 '                              Special Events
 '==========================================================================
-IF opt_realism > 0 AND turn_year = 1862 AND turn_month < 3 THEN
+IF opt_realism >= REALISM_ON AND turn_year = 1862 AND turn_month < 3 THEN
 	COLOR 14: CALL clear_bottom_line
 	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
-	IF opt_sound > 0 THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
+	IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
 	CALL script_mark_key_wait(1, "I"): DO WHILE INKEY$ = "": LOOP
 	EXIT SUB
 END IF
@@ -72,7 +72,7 @@ uprising:
 	GOTO dull1
 '----------------------------------------------------------------------------
 riot:
-	IF opt_realism = 0 THEN RETURN
+	IF opt_realism = REALISM_OFF THEN RETURN
 	IF side_city_count(who) = 1 THEN RETURN
 	FOR k = 1 TO 99
 	x = 1 + INT(MAX_CITIES * RND)
@@ -143,9 +143,9 @@ abe:
 END SELECT
 
 dull2:
-	IF opt_sound = 2 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	CALL script_mark_key_wait(1, "N"): DO WHILE INKEY$ = "": LOOP: EXIT SUB
 dull1:
-	IF opt_sound = 2 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	CALL script_mark_key_wait(1, "S"): DO WHILE INKEY$ = "": LOOP
 END SUB

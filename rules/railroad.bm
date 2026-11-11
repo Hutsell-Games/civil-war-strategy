@@ -11,7 +11,7 @@ SELECT CASE train_army(side)
 	NEXT j
 	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter
 	CALL city_nearby_enemy_strength(army_city(i), defend)
-	IF victory_rule(5) > 0 AND city_army(side_capital(side)) = 0 THEN IF defend > max THEN defend = max - 1
+	IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN IF defend > max THEN defend = max - 1
 	IF defend < max THEN target = army_city(i): GOSUB route: IF x > 1 THEN max = defend: index = i
 puter:  NEXT i
 	IF index = 0 OR max > .3 * army_size(index) GOTO toot
@@ -27,7 +27,7 @@ puter:  NEXT i
 	IF current_side = SIDE_REBEL AND city_y(i) > city_y(from) THEN x1 = i
 	IF city_fort(i) > 0 AND city_army(i) = 0 THEN x1 = i: EXIT FOR
 puted:  NEXT i
-	IF victory_rule(5) > 0 AND city_army(side_capital(side)) = 0 THEN
+	IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN
 		GOSUB route
 		IF x > 0 THEN
 			CALL city_nearby_enemy_strength(side_capital(side), defend)
@@ -58,7 +58,7 @@ haul:
 	train_from_city(side) = from
 	train_army(side) = index: army_city(index) = 0: army_order(index) = x1
 	CALL draw_train(side, DRAW_SHOW)
-	IF opt_sound > 0 THEN SOUND 2222, 1
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
 	CALL draw_train_box
 
 	CALL city_update_occupier(from)
@@ -75,7 +75,7 @@ haul:
 	CALL draw_train(side, DRAW_SHOW)
 
 	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = ORDER_BUSY
-	COLOR 11: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound > 0 THEN SOUND 1200, 2
+	COLOR 11: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2
 	CALL wait_seconds(opt_pause!)
 	x = city_x(army_city(index)) - 12: y = city_y(army_city(index)) - 11
 	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
@@ -107,7 +107,7 @@ END SUB
 
 SUB railroad_capacity (side, limit)
 DIM x AS INTEGER
-IF opt_realism = 0 THEN limit = train_capacity(side): EXIT SUB
+IF opt_realism = REALISM_OFF THEN limit = train_capacity(side): EXIT SUB
 x = 11: IF current_side = SIDE_REBEL THEN x = 23
 limit = train_capacity(side) + 5 * (side_city_count(side) - x)
 x = 2 * train_capacity(side)

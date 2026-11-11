@@ -20,7 +20,7 @@ already:
 	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), saved_under_marker
 	PUT (x1 - 10, y1 - 10), saved_under_army, PSET
 	IF opt_pause! > 1 THEN CALL wait_seconds(.1) ELSE CALL wait_seconds(.02)
-	IF opt_sound > 0 THEN SOUND 200, .1: SOUND 50, .1
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 200, .1: SOUND 50, .1
 	PUT (x1 - 10, y1 - 10), saved_under_marker, PSET
 	NEXT i
 	army_city(army) = from

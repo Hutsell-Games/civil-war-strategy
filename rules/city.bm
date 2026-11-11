@@ -12,8 +12,8 @@ DIM a$: DIM x AS INTEGER: DIM y AS INTEGER
 	city_owner(c) = side: CALL clear_bottom_line
 	a$ = army_name$(active) + " has captured " + city_name$(c)
 	COLOR 11: PRINT army_name$(active) + " has captured " + city_name$(c);
-	IF army_side(active) = SIDE_UNION AND opt_sound > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-	IF army_side(active) = SIDE_REBEL AND opt_sound > 1 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+	IF army_side(active) = SIDE_UNION AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+	IF army_side(active) = SIDE_REBEL AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	IF c <> side_capital(other_side(side)) THEN CALL animate_city(c)
 	side_victory_points(side) = side_victory_points(side) + city_value(c)
 	IF c = side_capital(other_side(side)) THEN

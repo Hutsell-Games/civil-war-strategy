@@ -111,7 +111,7 @@ CALL city_nearby_enemy_strength(target, defend)
 
 IF defend > 0 AND target = side_capital(who) AND city_army(target) = i GOTO deadman   'hold capital
 IF target <> side_capital(who) GOTO nocap
-IF victory_rule(5) = 0 GOTO nocap
+IF victory_rule(VICTORY_CAPITAL) = 0 GOTO nocap
 	FOR j = 1 TO MAX_ROADS
 	k = city_road(target, j): IF j = 0 GOTO nocap
 	CALL city_nearby_enemy_strength(k, flag): IF flag > 0 GOTO deadman
@@ -189,8 +189,8 @@ FOR j = 1 TO MAX_ROADS
 	NEXT k
 	
 	y = best - x * city_fort(from) - city_value(from) + 30 * RND
-	IF city_fort(from) > 0 THEN IF army = city_army(from) THEN y = y - 25: IF opt_realism > 0 THEN y = y - 50
-	IF a = side_capital(current_side) THEN IF victory_rule(5) > 0 THEN y = y + 200
+	IF city_fort(from) > 0 THEN IF army = city_army(from) THEN y = y - 25: IF opt_realism >= REALISM_ON THEN y = y - 50
+	IF a = side_capital(current_side) THEN IF victory_rule(VICTORY_CAPITAL) > 0 THEN y = y + 200
 	IF city_owner(a) <> other_side(current_side) THEN y = y + 5 * city_value(a) + 10 * city_fort(a)
 	IF city_owner(a) <> current_side GOTO ourn
 	   IF c = 0 THEN y = y + 10 * city_value(a): GOTO ourn
@@ -198,14 +198,14 @@ FOR j = 1 TO MAX_ROADS
 
 	   IF army_size(c) > 0 THEN
 		odds! = army_size(army) / (x1 * army_size(c))
-		IF opt_realism > 1 THEN odds! = .8 * odds!
+		IF opt_realism >= REALISM_HIGH THEN odds! = .8 * odds!
 	   ELSE
 		odds! = 5
 	   END IF
 
 	   IF army_size(army) < 15 THEN y = y - 300: odds! = .1
 	   IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN y = 0
-	   IF opt_realism > 0 THEN y = y - 15
+	   IF opt_realism >= REALISM_ON THEN y = y - 15
 	   IF odds! < .5 THEN y = y - 200
 	   IF opt_ai_aggression = 0 AND RND > .9 THEN y = y + 10 * (army_leader_rating(army) - army_leader_rating(c) + army_experience(army) - army_leader_rating(army))
 	   IF army_supply(army) < 1 THEN y = y - 100
