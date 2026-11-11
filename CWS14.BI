@@ -1,5 +1,5 @@
 DEFINT A-Z
-' $INCLUDE: 'folders.bi'
+' $INCLUDE: 'port/folders.bi'
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

@@ -62,7 +62,7 @@ the script again (`record <name>`) and say so in the commit message.
 
 ## How the game takes part
 
-The game has hooks for the scripts, all in `SCRIPT.BM`. They do nothing unless the program is started with the
+The game has hooks for the scripts, all in `port\script.bm`. They do nothing unless the program is started with the
 environment variable `CWS_SEED` set, as `play.py` does:
 
 1. **A fixed seed.** `RANDOMIZE` takes `CWS_SEED` instead of `TIMER`, so every run of a script is the same game.
@@ -87,8 +87,8 @@ The places a script can name (`play until <place>[:<letter>]`, `rule <place>[:<l
 | Place | Wait | Where |
 |---|---|---|
 | 1 | A pause that any key ends. The letter says which (below) | `DO WHILE INKEY$ = "": LOOP`, and `TICK` |
-| 2 | A menu. The letter is the first letter of the menu's title | `menu`, `CWSMENU.BM` |
-| 4 | A line of text: the commander's name for the Hall of Fame | `maxx`, `CWSTRAT2.BM` |
+| 2 | A menu. The letter is the first letter of the menu's title | `menu`, `ui\menu.bm` |
+| 4 | A line of text: the commander's name for the Hall of Fame | `maxx`, `rules\victory.bm` |
 
 The letters of place 1: `R` the Random Events menu's "press a key"; `T` a player's turn begins, in a two-player
 game; `P` a battle, when the odds show; `B` a battle's "hit any key to continue"; `U` the month's update, "press

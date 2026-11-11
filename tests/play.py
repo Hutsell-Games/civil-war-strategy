@@ -44,6 +44,7 @@ OUT = GAME / "tests" / "out"
 
 # The source files of the game; a build is made again when one of them changes.
 SOURCE_SUFFIXES = {".bas", ".bi", ".bm"}
+SOURCE_FOLDERS = ["rules", "ai", "ui", "draw", "game", "port"]
 # Top-level files that a run does not need: sources, DOS programs and objects, documents.
 NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
     ".exe", ".obj", ".lnk", ".mak", ".zip", ".md", ".qlb", ".com", ".drv", ".bat", ".btm",
@@ -126,9 +127,10 @@ def find_tools(args: argparse.Namespace) -> Tools:
 def source_stamp(tools: Tools, compiler: str) -> str:
     """A hash of what a build depends on: the game's sources, the compiler, the screen hook."""
     h = hashlib.sha256()
-    for path in sorted(GAME.iterdir()):
+    folders = [GAME] + [GAME / d for d in SOURCE_FOLDERS if (GAME / d).is_dir()]
+    for path in sorted(p for folder in folders for p in folder.iterdir()):
         if path.is_file() and path.suffix.lower() in SOURCE_SUFFIXES:
-            h.update(path.name.encode() + b"\0" + path.read_bytes() + b"\0")
+            h.update(path.relative_to(GAME).as_posix().encode() + b"\0" + path.read_bytes() + b"\0")
     exe = tools.exes[compiler]
     st = exe.stat()
     h.update(f"{exe}\0{st.st_size}\0{st.st_mtime_ns}\0".encode())

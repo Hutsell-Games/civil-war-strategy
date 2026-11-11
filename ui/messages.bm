@@ -1,0 +1,36 @@
+SUB show_message_box (text$, seconds)
+DIM x AS INTEGER: DIM y AS INTEGER
+DIM wide AS INTEGER
+DIM g2(1 TO 8000)
+menu_text$(1) = text$
+menu_col = 32 - LEN(text$) \ 2
+menu_row = 10: menu_item_count = 1
+CALL menu_measure_width(wide)
+IF wide > 59 THEN wide = 59: text$ = LEFT$(text$, 59)
+x = 8 * (menu_col + wide)
+y = 16 * (menu_row + 1)
+	GET (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 15, 16 * (menu_row + 3) + 7), g2
+	VIEW (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + 3) + 4)
+	CLS 1
+	VIEW
+	LINE (8 * menu_col, 16 * menu_row - 1)-(8 * (menu_col + wide + 1) + 15, 16 * (menu_row + 3) + 7), 0, BF
+	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + 3)), seconds, BF
+	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + 3)), 15, B
+	COLOR 14
+	LOCATE menu_row + 2, menu_col + 2: PRINT text$
+	CALL wait_seconds(9)
+	PUT (8 * menu_col - 4, 16 * menu_row - 3), g2, PSET
+END SUB
+
+SUB scribe_message (text$, display)
+SELECT CASE display
+		CASE 1: CALL clear_bottom_line: PRINT text$;
+		CASE 2: CALL show_message_box(text$, 4)
+END SELECT
+IF opt_history > 0 THEN
+	OPEN "A", 2, "cws.his"
+	text$ = LTRIM$(RTRIM$(text$))
+	PRINT #2, text$
+	CLOSE #2
+END IF
+END SUB

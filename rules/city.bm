@@ -1,0 +1,59 @@
+SUB city_is_connected (side, city, a)
+DIM j AS INTEGER: DIM y AS INTEGER
+a = 0
+FOR j = 1 TO 6
+y = city_road(city, j)
+IF y > 0 AND city_owner(y) = side THEN a = a + 1
+NEXT j
+END SUB
+
+SUB city_capture (active, c, side, weaken_fort)
+DIM a$: DIM x AS INTEGER: DIM y AS INTEGER
+	city_owner(c) = side: CALL clear_bottom_line
+	a$ = army_name$(active) + " has captured " + city_name$(c)
+	COLOR 11: PRINT army_name$(active) + " has captured " + city_name$(c);
+	IF active < 21 AND opt_sound > 1 THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+	IF active > 20 AND opt_sound > 1 THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+	IF c <> side_capital(3 - side) THEN CALL animate_city(c)
+	side_victory_points(side) = side_victory_points(side) + city_value(c)
+	IF c = side_capital(3 - side) THEN
+		side_victory_points(side) = side_victory_points(side) + 100
+		side_victory_points(3 - side) = side_victory_points(3 - side) - 100
+		a$ = side_name$(3 - side) + " CAPITAL captured !"
+		CALL scribe_message(a$, 1)
+		CALL show_message_box(city_name$(side_capital(3 - side)) + " has fallen!", 4)
+		side_capital(3 - side) = 0
+		CALL animate_city(c)
+	END IF
+	IF city_fort(c) > 0 AND weaken_fort > 0 THEN city_fort(c) = city_fort(c) - 1: x = city_x(c): y = city_y(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL draw_cities
+END SUB
+
+SUB check_map_links
+DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM index AS INTEGER
+CLS : COLOR 15
+x = 0: y = 0
+FOR i = 1 TO 40
+FOR j = 1 TO 6: IF city_road(i, j) = 0 GOTO done
+	index = city_road(i, j)
+	FOR k = 1 TO 6
+	IF city_road(index, k) = i GOTO ret
+	IF city_road(index, k) = 0 THEN city_road(index, k) = i: PRINT "+ Adding return route from "; city_name$(index); " to "; city_name$(i): y = y + 1: GOTO ret
+	NEXT k
+	x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; city_name$(index); ": no return route to "; city_name$(i): wait_seconds 1
+ret:
+NEXT j
+done:
+NEXT i
+IF x + y = 0 THEN PRINT "ALL MAP LINKS ARE OK": EXIT SUB
+IF y > 0 THEN PRINT "* "; y; " fixes made to provide RETURN ROUTES"
+IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
+END SUB
+
+SUB city_update_occupier (x)
+DIM i AS INTEGER
+city_army(x) = 0
+FOR i = 1 TO 40
+IF army_city(i) = x THEN city_army(x) = i: GOTO holdup
+NEXT i
+holdup:
+END SUB

@@ -1,0 +1,269 @@
+SUB ai_turn
+DIM fin AS INTEGER: DIM side_cash AS INTEGER: DIM z AS INTEGER
+DIM slush AS INTEGER: DIM who AS INTEGER: DIM c AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM cost AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM defend AS INTEGER: DIM a AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM flag AS INTEGER: DIM best AS INTEGER: DIM y AS INTEGER
+CALL special_events
+slush = 0: who = 3 - current_side
+c = 9: IF current_side = 1 THEN c = 15
+LOCATE 1, 1: PRINT SPACE$(80);
+COLOR c: LOCATE 1, 10: PRINT side_name$(who); " Side is making decisions";
+CALL side_army_range(star, fin, who)
+'==========================================================================
+'                       Check Supply
+'==========================================================================
+FOR i = star TO fin: IF army_city(i) > 0 AND army_supply(i) < 1 THEN CALL army_resupply(i)
+NEXT i
+'==========================================================================
+'                       Fortify Capital or Other City
+'==========================================================================
+cost = 200
+IF cost > side_cash(who) GOTO signup
+
+target = 0: IF city_army(side_capital(who)) = 0 OR city_fort(side_capital(who)) > 1 GOTO city2
+target = side_capital(who)
+IF city_owner(target) = who GOTO capital ELSE GOTO city2
+IF target > 0 GOTO capital
+
+city2:
+IF 1 + RND < opt_ai_aggression + ai_strength_ratio! GOTO signup
+target = 0: FOR i = star TO fin
+x = army_city(i): IF x = 0 OR army_order(city_army(x)) < 0 OR army_order(i) < 0 GOTO endlook
+IF city_fort(x) > 1 GOTO endlook
+	CALL city_nearby_enemy_strength(x, defend): IF defend > army_size(i) THEN target = army_city(i): GOTO capital
+endlook:
+NEXT i
+
+capital:
+	IF target = 0 GOTO signup
+	IF city_fort(target) > 1 GOTO signup
+	city_fort(target) = city_fort(target) + 1
+	x = city_army(target): army_order(x) = -1
+	side_cash(who) = side_cash(who) - cost
+	CALL clear_bottom_line: PRINT city_name$(target); " fortifications increased to "; city_fort(target);
+	CALL draw_map_marker(target, 0, 6)
+	CALL draw_cities
+	IF who = 1 AND fleet_size(1) < 1 AND RND > .5 AND side_cash < 222 GOTO signup
+	IF 3 * RND > 1 + ai_strength_ratio! AND side_cash(who) >= cost GOTO city2
+'==========================================================================
+'                       Recruit New Armies
+'==========================================================================
+signup:
+IF who = 1 AND fleet_size(1) < 1 AND side_cash(1) > 100 THEN CALL navy_commands(1, 1): IF side_cash(who) < 100 GOTO isok
+GOSUB enufarmies
+IF x > 2 + 3 * current_side + 3 * RND GOTO isok
+IF fleet_size(who) < 5 AND side_cash(who) > 100 AND fleet_city(who) <> 99 THEN IF city_owner(fleet_city(who)) = who THEN slush = slush + 100: side_cash(who) = side_cash(who) - 100: IF side_cash(who) < 100 GOTO isok
+CALL menu_army_recruit(who)
+'==========================================================================
+'                         Naval Commands
+'==========================================================================
+isok:
+	side_cash(who) = side_cash(who) + slush
+dock:
+	IF current_side = 2 AND fleet_city(1) = 0 AND fleet_size(1) < 1 AND city_owner(30) = 1 AND side_cash(1) > 100 THEN fleet_city(1) = 30: CALL navy_commands(1, 1): GOTO movenavy
+	IF fleet_city(who) = 99 THEN
+		IF RND < .9 THEN CALL navy_commands(who, 3)
+		GOTO movearmy
+	END IF
+	IF side_cash(who) < 100 OR fleet_size(who) > 9 OR city_owner(fleet_city(who)) <> who GOTO movenavy
+	CALL navy_commands(who, 1)
+'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+movenavy:
+	IF fleet_size(who) = 0 THEN fleet_city(who) = 0
+	IF fleet_city(who) = 0 GOTO movearmy
+'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+'                     move ships & prohibit further action this turn
+'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	IF fleet_city(who) <> 99 THEN
+		IF city_owner(fleet_city(who)) = who THEN CALL navy_commands(who, 3): GOTO movearmy   'move ships & prohibit further action this turn
+		IF city_owner(fleet_city(who)) = 0 THEN CALL navy_commands(who, 3): GOTO movearmy
+	ELSE
+		IF RND < .5 THEN CALL navy_commands(who, 3)
+		GOTO movearmy
+	END IF
+
+	IF city_owner(fleet_city(who)) <> who THEN
+		IF city_army(fleet_city(who)) = 0 OR RND > .3 THEN
+			CALL navy_commands(who, 2) 'attack
+		ELSE
+			CALL navy_commands(who, 3) 'move
+		END IF
+	END IF
+'==========================================================================
+'                       Give Move Orders to Each Army
+'==========================================================================
+movearmy:
+	CALL draw_fleets
+'---------------------------------------------------------------------------
+'                               Check to Combine
+'---------------------------------------------------------------------------
+a = who: CALL army_combine(a)
+CALL railroad_move(who)
+'---------------------------------------------------------------------------
+'                               Top Priority
+'---------------------------------------------------------------------------
+FOR i = star TO fin
+target = army_city(i)
+IF army_city(i) < 1 OR army_order(i) < 0 GOTO deadman
+x = army_size(i): IF army_supply(i) < 1 AND RND > .1 GOTO deadman
+
+menu_choice = 0
+
+CALL city_nearby_enemy_strength(target, defend)
+
+IF defend > 0 AND target = side_capital(who) AND city_army(target) = i GOTO deadman   'hold capital
+IF target <> side_capital(who) GOTO nocap
+IF victory_rule(5) = 0 GOTO nocap
+	FOR j = 1 TO 6
+	k = city_road(target, j): IF j = 0 GOTO nocap
+	CALL city_nearby_enemy_strength(k, flag): IF flag > 0 GOTO deadman
+	NEXT j
+nocap:
+CALL ai_evaluate_move(i, best): IF best = 0 GOTO deadman
+move9:
+	IF best = 0 THEN menu_choice = 1 + INT((j - 1) * RND)
+	IF menu_choice = 0 THEN menu_choice = best
+	army_order(i) = city_road(target, menu_choice)
+
+	IF city_owner(army_order(i)) = who THEN y = city_army(army_order(i)): IF y > 0 THEN IF army_order(y) = x THEN army_order(i) = 0: GOTO deadman  ' eliminate crossing moves
+	IF turn_month = 1 AND opt_winter_campaigns = 0 AND city_owner(army_order(i)) <> who THEN army_order(i) = 0: GOTO deadman
+
+	IF opt_pause! > 1 THEN
+		COLOR c: CALL clear_bottom_line
+		PRINT army_name$(i); " plans to move from "; city_name$(army_city(i)); " to "; city_name$(army_order(i));
+	END IF
+		CALL draw_map_marker(army_city(i), army_order(i), 1)
+		CALL draw_map_marker(army_city(i), army_order(i), 9)
+	CALL wait_seconds(opt_pause! - 1)
+	PUT (city_x(army_city(i)) - 20, city_y(army_city(i)) - 19), saved_under_marker, PSET
+deadman:
+NEXT i
+	FOR i = star TO fin
+	IF army_order(i) = 0 AND army_experience(i) < 6 AND army_experience(i) < army_leader_rating(i) THEN
+		army_experience(i) = army_experience(i) + 1
+
+		IF opt_pause! > 1 THEN
+		CALL clear_bottom_line
+			PRINT army_name$(i); " has drilled to reach experience level "; army_experience(i);
+		END IF
+		army_order(i) = -1
+		CALL wait_seconds(opt_pause! - 1)
+	END IF
+	NEXT i
+EXIT SUB
+'---------------------------------------------------------------------------
+enufarmies:
+CALL side_army_range(star, fin, 3 - who)
+FOR i = star TO fin
+	IF army_city(i) > 0 THEN y = y + .1 * army_size(i)
+NEXT i
+CALL side_army_range(star, fin, who)
+x = 0: z = 0: FOR i = star TO fin: IF army_city(i) > 0 THEN x = x + 1: z = z + .1 * army_size(i)
+NEXT i
+IF y > z THEN x = x - 2
+IF y > 2 * z THEN x = 0
+RETURN
+'---------------------------------------------------------------------------
+END SUB
+
+SUB ai_evaluate_move (army, x)
+DIM fin AS INTEGER: DIM max AS INTEGER: DIM m AS INTEGER
+DIM from AS INTEGER: DIM defend AS INTEGER: DIM best AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM y AS INTEGER: DIM star AS INTEGER: DIM k AS INTEGER: DIM c AS INTEGER: DIM x1 AS INTEGER: DIM odds!
+from = army_city(army)
+x = 200: IF ai_strength_ratio! > 1.5 THEN x = 80: IF ai_strength_ratio! > 2 THEN x = 20: IF ai_strength_ratio! > 3 THEN x = 5
+CALL city_nearby_enemy_strength(from, defend): IF defend = 0 THEN x = 0
+IF opt_ai_aggression > 1 THEN x = .5 * x
+
+best = army_size(army)
+
+FOR j = 1 TO 6: menu_value(j) = -1
+a = city_road(from, j): IF a > 0 THEN IF city_army(a) > 0 THEN best = best - army_size(city_army(a)): y = 1
+NEXT j: best = .01 * best
+IF opt_ai_aggression > 0 THEN best = best + 20 * opt_ai_aggression
+
+CALL side_army_range(star, fin, 3 - current_side)
+
+FOR j = 1 TO 6
+	y = -1: a = city_road(from, j): IF a = 0 THEN max = j - 1: GOTO alleval
+      
+	c = city_army(a)
+	FOR k = star TO fin: IF army_city(k) > 0 THEN IF army_order(k) = a AND c = 0 GOTO alle
+	NEXT k
+	
+	y = best - x * city_fort(from) - city_value(from) + 30 * RND
+	IF city_fort(from) > 0 THEN IF army = city_army(from) THEN y = y - 25: IF opt_realism > 0 THEN y = y - 50
+	IF a = side_capital(current_side) THEN IF victory_rule(5) > 0 THEN y = y + 200
+	IF city_owner(a) <> 3 - current_side THEN y = y + 5 * city_value(a) + 10 * city_fort(a)
+	IF city_owner(a) <> current_side GOTO ourn
+	   IF c = 0 THEN y = y + 10 * city_value(a): GOTO ourn
+	   x1 = 1: IF city_fort(a) = 1 THEN x1 = 2: IF city_fort(a) = 3 THEN x1 = 3
+
+	   IF army_size(c) > 0 THEN
+		odds! = army_size(army) / (x1 * army_size(c))
+		IF opt_realism > 1 THEN odds! = .8 * odds!
+	   ELSE
+		odds! = 5
+	   END IF
+
+	   IF army_size(army) < 15 THEN y = y - 300: odds! = .1
+	   IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN y = 0
+	   IF opt_realism > 0 THEN y = y - 15
+	   IF odds! < .5 THEN y = y - 200
+	   IF opt_ai_aggression = 0 AND RND > .9 THEN y = y + 10 * (army_leader_rating(army) - army_leader_rating(c) + army_experience(army) - army_leader_rating(army))
+	   IF army_supply(army) < 1 THEN y = y - 100
+	   SELECT CASE odds! + .5 * opt_ai_aggression
+		CASE IS < .3
+		y = -9999
+		CASE IS < .5
+		y = y - 300
+		CASE IS <= .8
+		y = y - 20
+		CASE .8 TO 1.2
+		y = y - 5
+		CASE 1.2 TO 1.5
+		y = y + 10
+		CASE ELSE
+		y = y + .5 * (army_size(army) - army_size(c)) + 50 * RND
+	   END SELECT
+ourn:
+	IF city_owner(a) = 3 - current_side AND c > 0 AND army_order(c) = 0 THEN y = y - army_size(c)
+	IF current_side = 1 AND city_y(a) < city_y(from) THEN y = y + 2
+	IF current_side = 2 AND city_y(a) > city_y(from) THEN y = y + 2
+'---------------------------------------------------------------------------
+	FOR k = 1 TO 6: m = city_road(a, k): IF m = 0 GOTO tally3
+	IF city_owner(m) = 0 THEN y = y + 3 * city_value(m) + 4 * city_fort(m)
+	IF city_owner(m) = current_side THEN y = y + 3 * city_value(m) + 4 * city_fort(m)
+	IF city_owner(m) = current_side AND c > 0 THEN
+		odds! = 5 - 4 * RND
+		IF army_size(c) > 0 THEN odds! = army_size(army) / army_size(c) ELSE odds! = 5
+		IF odds! < 1 THEN y = y - 2
+	END IF
+	IF city_owner(m) = side_capital(current_side) THEN y = y + 50
+tally3:
+	NEXT k
+'---------------------------------------------------------------------------
+	menu_value(j) = y
+alle:
+NEXT j: max = 6
+alleval:
+x = 0: best = 0
+FOR j = 1 TO max
+IF menu_value(j) < 0 GOTO allof
+	IF menu_value(j) > x THEN x = menu_value(j): best = j
+allof:
+NEXT j
+	IF defend > army_size(army) AND menu_value(best) < 50 THEN best = 0
+	x = best
+END SUB
+
+SUB city_nearby_enemy_strength (a, y)
+DIM j AS INTEGER: DIM x AS INTEGER: DIM k AS INTEGER: DIM m AS INTEGER
+  y = 0
+FOR j = 1 TO 6
+  x = city_road(a, j): IF x = 0 GOTO tally5
+  IF city_owner(x) = current_side AND city_army(x) > 0 THEN y = y + army_size(city_army(x))
+	FOR k = 1 TO 6: m = city_road(x, k): IF m = 0 OR m = a GOTO tally4
+	IF city_owner(m) = current_side AND city_army(m) > 0 THEN y = y + .1 * army_size(city_army(m))
+tally4:
+	NEXT k
+NEXT j
+tally5:
+END SUB

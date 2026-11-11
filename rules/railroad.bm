@@ -1,0 +1,116 @@
+SUB railroad_move (side)
+DIM fin AS INTEGER: DIM target AS INTEGER: DIM y AS INTEGER: DIM m AS INTEGER: DIM z AS INTEGER
+DIM star AS INTEGER: DIM max AS INTEGER: DIM index AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM from AS INTEGER: DIM defend AS INTEGER: DIM limit AS INTEGER: DIM x1 AS INTEGER: DIM a AS INTEGER
+SELECT CASE train_army(side)
+	CASE 0
+	IF side = current_side GOTO human
+	CALL side_army_range(star, fin, side): max = 32767
+	index = 0
+	FOR i = star TO fin: IF army_city(i) = 0 OR army_order(i) <> 0 GOTO puter
+	x = 0: FOR j = 1 TO 6: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
+	NEXT j
+	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter
+	CALL city_nearby_enemy_strength(army_city(i), defend)
+	IF victory_rule(5) > 0 AND city_army(side_capital(side)) = 0 THEN IF defend > max THEN defend = max - 1
+	IF defend < max THEN target = army_city(i): GOSUB route: IF x > 1 THEN max = defend: index = i
+puter:  NEXT i
+	IF index = 0 OR max > .3 * army_size(index) GOTO toot
+	CALL railroad_capacity(side, limit)
+	IF army_size(index) > limit THEN GOTO toot
+	from = army_city(index)
+	x1 = 0: FOR i = 1 TO 40: IF city_owner(i) <> side GOTO puted
+	CALL city_nearby_enemy_strength(i, defend): IF defend = 0 OR defend > 3 * army_size(index) GOTO puted
+	IF city_army(i) > 0 GOTO puted
+	target = i
+	GOSUB route: IF x = 0 GOTO puted
+	IF current_side = 1 AND city_y(i) < city_y(from) THEN x1 = i
+	IF current_side = 2 AND city_y(i) > city_y(from) THEN x1 = i
+	IF city_fort(i) > 0 AND city_army(i) = 0 THEN x1 = i: EXIT FOR
+puted:  NEXT i
+	IF victory_rule(5) > 0 AND city_army(side_capital(side)) = 0 THEN
+		GOSUB route
+		IF x > 0 THEN
+			CALL city_nearby_enemy_strength(side_capital(side), defend)
+			IF defend > 0 THEN x1 = side_capital(side)
+		END IF
+	END IF
+	IF x1 > 0 GOTO haul ELSE GOTO toot
+human:
+	CALL menu_army_select(index, a): IF a < 1 OR index < 1 THEN COLOR 11: CALL clear_bottom_line: PRINT "Railroad move not allowed"; : GOTO toot
+	x = 1: IF index > 20 THEN x = 2
+	CALL railroad_capacity(side, limit)
+	IF army_size(index) > limit THEN CALL clear_bottom_line: PRINT "Too many troops for railroad capacity"; : GOTO toot
+	
+	target = army_city(index): GOSUB route: IF x > 1 GOTO aboard
+	CALL clear_bottom_line: PRINT "Track from "; city_name$(target); " is blocked"; : GOTO toot
+aboard:
+	CALL clear_bottom_line: PRINT "Select destination for "; army_name$(index); " from "; city_name$(target);
+	menu_text$(0) = "To": from = target: x1 = from: IF from = 0 GOTO toot
+	CALL menu_city_select(x1): IF x1 = from OR x1 = 0 GOTO toot
+
+	target = x1: GOSUB route: IF x > 1 GOTO haul
+	CALL clear_bottom_line: PRINT army_name$(index); "'s train cannot go to "; city_name$(x1); " - select another city"; : CALL wait_seconds(9)
+	GOTO aboard
+haul:
+	COLOR 11: CALL clear_bottom_line: PRINT army_name$(index); " is taking the train from "; city_name$(from); " to "; city_name$(x1);
+	train_city(side) = army_city(index)
+	from = army_city(index)
+	train_from_city(side) = from
+	train_army(side) = index: army_city(index) = 0: army_order(index) = x1
+	CALL draw_train(side, 1)
+	IF opt_sound > 0 THEN SOUND 2222, 1
+	CALL draw_train_box
+
+	CALL city_update_occupier(from)
+       IF city_army(from) > 0 THEN CALL draw_army_flag(city_army(from))
+	GOTO toot
+
+	CASE IS > 0
+	CALL draw_train(side, 0)
+	CALL city_update_occupier(train_from_city(side))
+	IF city_army(train_from_city(side)) > 0 THEN CALL draw_army_flag(city_army(train_from_city(side)))
+
+	index = train_army(side)
+	train_city(side) = army_order(index)
+	CALL draw_train(side, 1)
+
+	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = -1
+	COLOR 11: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound > 0 THEN SOUND 1200, 2
+	CALL wait_seconds(opt_pause!)
+	x = city_x(army_city(index)) - 12: y = city_y(army_city(index)) - 11
+	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	IF city_owner(army_city(index)) <> side THEN CALL city_capture(index, army_city(index), side, 0)
+	CALL draw_army_flag(index)
+	IF city_army(army_city(index)) > 0 THEN CALL draw_stack_markers(side): GOTO toot
+	CALL city_update_occupier(army_city(index)): CALL draw_army_flag(index)
+	GOTO toot
+END SELECT
+
+route:
+	x = 0: FOR j = 1 TO 6
+	y = city_road(target, j)
+	IF y > 0 AND city_owner(y) = side THEN
+	x = x + 1
+		FOR m = 1 TO 6
+		z = city_road(y, m)
+		IF z > 0 AND z <> target AND city_owner(z) = side THEN x = x + 1
+		NEXT m
+	END IF
+NEXT j
+RETURN
+
+toot:
+	IF side = current_side THEN CALL wait_seconds(9)
+	CALL clear_right_panel
+	clear_bottom_line
+END SUB
+
+SUB railroad_capacity (side, limit)
+DIM x AS INTEGER
+IF opt_realism = 0 THEN limit = train_capacity(side): EXIT SUB
+x = 11: IF current_side = 2 THEN x = 23
+limit = train_capacity(side) + 5 * (side_city_count(side) - x)
+x = 2 * train_capacity(side)
+IF limit > x THEN limit = x
+IF limit < x \ 4 THEN limit = x \ 4
+END SUB

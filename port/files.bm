@@ -1,0 +1,114 @@
+SUB file_management (job)
+DIM fin AS INTEGER
+DIM k AS INTEGER: DIM t$: DIM who AS INTEGER: DIM star AS INTEGER: DIM myside AS INTEGER
+DIM i AS INTEGER: DIM a AS INTEGER
+SELECT CASE job
+	CASE 1
+	OPEN "I", 1, SCNDIR + "cwslead.dat"
+	FOR i = 1 TO 40: INPUT #1, leader_name$(i), leader_rating(i): NEXT i
+	CLOSE #1
+	OPEN "I", 1, SCNDIR + "cws.ini"
+	FOR i = 0 TO 2: INPUT #1, side_name$(i): NEXT i
+	FOR i = 1 TO 12: INPUT #1, month_name$(i): NEXT i
+	INPUT #1, turn_month, turn_year
+'               set end game conditions
+	FOR i = 1 TO 6: INPUT #1, victory_rule(i): NEXT i
+	victory_rule(3) = .4 * victory_rule(3)
+	INPUT #1, a             ' number of Yankee armies
+FOR i = 1 TO a
+	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
+NEXT i
+	INPUT #1, a             ' number of Rebel armies
+FOR i = 21 TO 20 + a
+	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
+	city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
+NEXT i
+FOR i = 1 TO 2: INPUT #1, side_cash(i): NEXT i
+	INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
+	INPUT #1, fleet_ships$(1), fleet_city(1), fleet_ships$(2), fleet_city(2)
+	FOR k = 1 TO 2: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
+	INPUT #1, side_capital(1), side_capital(2)
+
+FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
+	CLOSE #1
+	OPEN "I", 1, "cws.cfg"
+	INPUT #1, current_side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(1), train_capacity(2), opt_winter_campaigns, opt_realism, side_battles_won(1), side_battles_won(2), side_casualties&(1), side_casualties&(2), opt_history, opt_ai_aggression
+	CLOSE #1
+
+	CASE 2
+	IF LEN(DIR$("*.sav")) = 0 THEN menu_choice = -1: EXIT SUB
+	menu_text$(0) = "Load"
+	menu_item_count = 0
+	FOR k = 1 TO 9
+		t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
+		IF LEN(DIR$(t$)) > 0 THEN
+			menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = t$: menu_value(menu_item_count) = k
+		END IF
+	NEXT k
+	CALL menu_bubble_sort((menu_item_count))
+	menu_col = 67: menu_row = 14 - .5 * menu_item_count
+	CALL menu_select(0)
+	CALL clear_right_panel
+	IF menu_choice < 1 THEN EXIT SUB
+	OPEN "I", 1, "cws" + LTRIM$(STR$(menu_value(menu_choice))) + ".sav"
+	COLOR 11: CALL clear_bottom_line: PRINT "Loading";
+	INPUT #1, turn_month, turn_year, union_income_bonus, a
+	FOR i = 1 TO 40: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+	IF army_city(i) > 0 THEN
+		IF army_name$(i) = leader_name$(i) THEN
+			leader_name$(i) = ""
+		ELSE
+			who = 1: IF i > 20 THEN who = 2
+			CALL side_army_range(star, fin, who)
+			FOR k = star TO fin
+			IF army_name$(i) = leader_name$(k) THEN leader_name$(k) = "": EXIT FOR
+			NEXT k
+		END IF
+	END IF
+	NEXT i
+	FOR i = 1 TO 40: INPUT #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
+	FOR i = 1 TO 2: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+	INPUT #1, fleet_ships$(i), fleet_city(i), navymove(i), train_army(i), train_city(i)
+	fleet_size(i) = LEN(fleet_ships$(i))
+	NEXT i
+       
+	CLOSE #1
+	OPEN "I", 1, "cws.cfg"
+	INPUT #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(1), train_capacity(2), opt_winter_campaigns, opt_realism, side_battles_won(1), side_battles_won(2), side_casualties&(1), side_casualties&(2), opt_history, opt_ai_aggression
+	CLOSE #1
+	SCREEN 12: CLS
+	CLOSE #1: CALL draw_map: CALL clear_bottom_line
+	FOR k = 1 TO 2
+	IF train_army(k) > 0 THEN CALL draw_train(k, 1)
+	NEXT k
+	current_side = a
+
+	CASE 3
+	menu_text$(0) = "Save Game"
+	FOR k = 1 TO 9
+	menu_text$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
+	IF LEN(DIR$(menu_text$(k))) > 0 THEN menu_text$(k) = menu_text$(k) + " û"
+	NEXT k
+	menu_col = 67: menu_item_count = 9
+	CALL menu_select(0)
+	IF menu_choice < 1 THEN clear_right_panel: EXIT SUB
+	COLOR 11: CALL clear_bottom_line: PRINT "Saving";
+
+	OPEN "O", 1, "cws" + LTRIM$(STR$(menu_choice)) + ".sav"
+	WRITE #1, turn_month, turn_year, union_income_bonus, current_side
+	FOR i = 1 TO 40: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+	NEXT i
+	FOR i = 1 TO 40: WRITE #1, city_army(i), city_owner(i), city_fort(i): PRINT "."; : NEXT i
+	FOR i = 1 TO 2: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+	WRITE #1, fleet_ships$(i), fleet_city(i), navymove(i), train_army(i), train_city(i)
+	NEXT i
+	CLOSE #1
+       
+	myside = current_side
+	IF myside < 1 OR myside > 2 THEN myside = 1
+	OPEN "O", 1, "cws.cfg"
+	WRITE #1, myside, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(1), train_capacity(2), opt_winter_campaigns, opt_realism, side_battles_won(1), side_battles_won(2), side_casualties&(1), side_casualties&(2), opt_history, opt_ai_aggression
+	CLOSE #1
+	CLS : CALL draw_map
+END SELECT
+END SUB

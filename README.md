@@ -7,7 +7,7 @@ original source is kept unchanged on the branch `canonical-source`.
 
 This branch, `qb64rust`, changes that source as little as possible so that the game builds with QB64Rust
 and QB64pe, and so that its SUBs can be tested. It builds one program, `CWSTRAT.BAS`, which includes the other
-source files (`CWS14.BI`, `FOLDERS.BI`, `CWSTRAT1.BM`, `CWSTRAT2.BM`, `CWSMENU.BM`, `QB64.BM`, `SCRIPT.BM`):
+source files (`CWS14.BI` and the `.BM` files in `rules\`, `ai\`, `ui\`, `draw\`, `game\` and `port\`; `docs\file-layout.md` lists them):
 
 ```
 qb64rust -x CWSTRAT.BAS -o cws.exe

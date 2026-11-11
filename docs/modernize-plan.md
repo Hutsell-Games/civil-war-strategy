@@ -141,7 +141,11 @@ in the working tree: `tools\refactor\rename_vars.py` renamed 83 shared variables
 `current_side` and the parameters. The `matrix()` split is done in the working tree
 (`tools\refactor\split_matrix.py`: `city_road()`, `city_port_type()`, and a local `hall_score` in
 `hall_of_fame`); checks pass as before. `OPTION _EXPLICIT` is on in `CWSTRAT.BAS`; `tools\refactor\declare_locals.py` added the
-`DIM` lines (about 94, at the top of each SUB). That ends phase 4. **Next:** phase 6 (move SUBs into files).
+`DIM` lines (about 94, at the top of each SUB). That ends phase 4. Phase 6 is done in the working tree:
+`tools\refactor\move_subs.py` moved the 74 SUBs by the table of `file-layout.md` and `git mv`ed `SCRIPT.BM`,
+`QB64.BM` and `FOLDERS.BI` into `port\`; `play.py` hashes the six folders. `CWSTRAT.BAS` and `CWS14.BI` keep
+their names (renaming them to `cws.bas` and `cws.bi` touches CI and the scripts, so it is a step of its own).
+**Next:** phases 3 and 5 (Opus).
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
