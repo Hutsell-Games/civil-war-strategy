@@ -15,7 +15,7 @@
 '                            2=double line
 '               if >10 then 10's digit=box color  1's digit= window type
 
-SUB choices (b1, wide)
+SUB draw_menu (b1, wide)
 boxc = colour: IF wtype > 10 THEN boxc = INT(wtype / 10): wtype = wtype - 10 * boxc
 COLOR boxc
 VIEW (8 * tlx - 6, 16 * tly - 11)-(8 * (tlx + wide + 1) + 7, 16 * (tly + size + 2) + 8)
@@ -34,7 +34,7 @@ LOCATE tly + 2 + i, tlx + 2: PRINT mtx$(i);
 NEXT i
 END SUB
 
-SUB ironclad
+SUB draw_ironclad
 SCREEN 12
 LINE (1, 240)-(639, 309), 3, BF
 LINE (639, 309)-(1, 479), 1, BF
@@ -139,13 +139,13 @@ LINE (106, 320)-(101, 318), 0, BF
 LINE (110, 313)-(114, 315), 0, BF
 END SUB
 
-SUB menu (switch%)
+SUB menu_select (switch%)
 remenu:
 	IF colour = 0 THEN colour = 7
 	LOCATE 1, 1, 0
 	IF mtx$(0) = "" THEN mtx$(0) = "M E N U"
 
-	IF wide = 0 THEN CALL mxw(wide)
+	IF wide = 0 THEN CALL menu_measure_width(wide)
 	IF tlx = 0 THEN GOSUB noadjust
 	IF choose < 21 THEN choose = 1
 	IF choose > 21 THEN choose = choose - 21
@@ -177,11 +177,11 @@ remenu:
 	COLOR colour
 	b1 = INT(.5 * (wide - LEN(mtx$(0))) + .5) + 1
 
-	CALL choices(b1, wide)
+	CALL draw_menu(b1, wide)
 sel1:
 	SELECT CASE switch
-		CASE 1: CALL icon(array(row), 0, 7)
-		CASE 2: CALL icon(array(row), 0, 9)
+		CASE 1: CALL draw_map_marker(array(row), 0, 7)
+		CASE 2: CALL draw_map_marker(array(row), 0, 9)
 			target = occupied(array(row))
 			IF target > 0 THEN
 			flag = 1
@@ -197,8 +197,8 @@ sel1:
 			flag = 0
 			LOCATE tly + 4 + size, tlx + 1: PRINT SPACE$(12);
 			END IF
-		CASE 4: CALL armystat(array(row))
-		CASE 6: CALL icon(armyloc(array(row)), 0, 9)
+		CASE 4: CALL draw_army_stats(array(row))
+		CASE 6: CALL draw_map_marker(armyloc(array(row)), 0, 9)
 		CASE 8
 			IF graf > 2 AND row > 0 THEN
 				LINE (548, 148)-(592, 216), 15, B
@@ -215,7 +215,7 @@ sel1:
 					END IF
 				END IF
 			END IF
-		CASE 9: CALL icon(array(row), 0, 9)
+		CASE 9: CALL draw_map_marker(array(row), 0, 9)
 	END SELECT
 	IF flag = 0 THEN
 		COLOR hilite
@@ -237,14 +237,14 @@ reglr:
 
 	SELECT CASE switch
 		CASE 1, 2, 9
-			IF mtx$(row1) <> "EXIT" THEN CALL icon(array(row1), 0, 8)
+			IF mtx$(row1) <> "EXIT" THEN CALL draw_map_marker(array(row1), 0, 8)
 		CASE 6
-			IF mtx$(row1) <> "EXIT" THEN CALL icon(armyloc(array(row1)), 0, 8)
+			IF mtx$(row1) <> "EXIT" THEN CALL draw_map_marker(armyloc(array(row1)), 0, 8)
 	END SELECT
 
 	choose = row
 	GOTO sel1
-crsr:   CALL announce(2, mtx$(0)): DO: a$ = INKEY$: LOOP WHILE a$ = ""
+crsr:   CALL script_mark_key_wait(2, mtx$(0)): DO: a$ = INKEY$: LOOP WHILE a$ = ""
 	IF ASC(a$) = 13 THEN RETURN
 	IF LEN(a$) = 2 GOTO arrows
 	IF switch = 3 THEN choose = -ASC(UCASE$(a$)): leave = 1: RETURN
@@ -264,9 +264,9 @@ arrows:
 	 IF a$ = "Q" THEN row = size: GOSUB limits: RETURN
 	 IF a$ = "=" AND switch = 0 THEN
 		CLS
-		CALL usa
-		CALL choices(b1, wide)
-		CALL topbar
+		CALL draw_map
+		CALL draw_menu(b1, wide)
+		CALL draw_top_bar
 		RETURN
 	 END IF
 	 IF a$ = "A" AND switch = 0 THEN
@@ -275,9 +275,9 @@ arrows:
 		RETURN
 	 END IF
 	 IF a$ = ">" AND switch = 0 THEN
-		CALL report(-1)
-		CALL choices(b1, wide)
-		CALL topbar
+		CALL menu_report(-1)
+		CALL draw_menu(b1, wide)
+		CALL draw_top_bar
 		RETURN
 	 END IF
 	 RETURN
@@ -295,14 +295,14 @@ called:
 	tlx = 0: tly = 0
 	SELECT CASE switch
 	CASE 1, 2, 9
-		CALL icon(array(row), 0, 8)
+		CALL draw_map_marker(array(row), 0, 8)
 	CASE 6
-		CALL icon(armyloc(array(row)), 0, 8)
+		CALL draw_map_marker(armyloc(array(row)), 0, 8)
 	END SELECT
 	VIEW
 END SUB
 
-SUB mxw (wide)
+SUB menu_measure_width (wide)
 	wide = LEN(mtx$(0)) + 1
 	FOR i = 1 TO size
 	x = LEN(mtx$(i))
@@ -310,7 +310,7 @@ SUB mxw (wide)
 	NEXT i
 END SUB
 
-SUB schooner
+SUB draw_schooner
 SCREEN 12
 LINE (1, 240)-(639, 309), 3, BF
 LINE (639, 309)-(1, 479), 1, BF

@@ -132,11 +132,13 @@ output of `play.py check` and `play.py compare` (decision 15).
 
 ## Where to resume
 
-Updated 2026-11-11. Nothing is built yet and no game code has changed. Untracked: `docs\modernize-plan.md`,
-`docs\sub-names.md`, `docs\variable-names.md`, `docs\constants.md`. The branch is `refactor_naming`, from
-`qb64rust` at `8c3b185`. The user stages and commits.
+Updated 2026-11-11. Phase 1 is committed (`1727bf9`). Phase 2 is done in the working tree, not committed:
+`tools\refactor\rename_subs.py` (from the "Settled names" table; `report` lists uses, `apply` rewrites).
+`play.py check` and `compare` pass 25 of 25 with no recording changed, and the 23 unit tests pass. The branch
+is `refactor_naming`. The user stages and commits. **Next: phase 4's rename script** (variables), tested on a
+copy first.
 
-1. **Next: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
+1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
    the dead `GOTO menu0` after `GOTO loader` (line 128); `menu` mode 5; `price()`; every `DECLARE SUB` in
    `CWS14.BI`. Then `play.py check` and `play.py compare` must pass with no recording changed. The cause to

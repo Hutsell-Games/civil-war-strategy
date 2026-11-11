@@ -12,10 +12,10 @@
 ' The first and last army of a side.
 
 SUB TestStarfinGivesEachSidesArmies
-CALL starfin(star, fin, 1)
+CALL side_army_range(star, fin, 1)
 AssertEqualInt 1, star, "the Union's first"
 AssertEqualInt 20, fin, "the Union's last"
-CALL starfin(star, fin, 2)
+CALL side_army_range(star, fin, 2)
 AssertEqualInt 21, star, "the Rebels' first"
 AssertEqualInt 40, fin, "the Rebels' last"
 END SUB
@@ -25,7 +25,7 @@ END SUB
 
 SUB TestBub2SortsBrray
 brray(1) = 30: brray(2) = 10: brray(3) = 20: brray(4) = 5
-CALL bub2(3)
+CALL sort_move_order(3)
 AssertEqualInt 10, brray(1), "first"
 AssertEqualInt 20, brray(2), "second"
 AssertEqualInt 30, brray(3), "third"
@@ -36,7 +36,7 @@ SUB TestBubbleSortsTextsAndKeepsArrayBeside
 mtx$(1) = "Richmond": array(1) = 25
 mtx$(2) = "Atlanta": array(2) = 31
 mtx$(3) = "Memphis": array(3) = 17
-CALL bubble(3)
+CALL menu_bubble_sort(3)
 AssertEqualStr "Atlanta", mtx$(1), "first"
 AssertEqualInt 31, array(1), "its city"
 AssertEqualStr "Memphis", mtx$(2), "second"
@@ -49,25 +49,25 @@ END SUB
 ' in Roman numerals. It changes target, which the caller gives as a copy.
 
 SUB TestRomanNamesUnionArmies
-t = 1: CALL roman(t, a$): AssertEqualStr "Union I", a$, "1"
-t = 3: CALL roman(t, a$): AssertEqualStr "Union III", a$, "3"
-t = 4: CALL roman(t, a$): AssertEqualStr "Union IV", a$, "4"
-t = 5: CALL roman(t, a$): AssertEqualStr "Union V", a$, "5"
-t = 8: CALL roman(t, a$): AssertEqualStr "Union VIII", a$, "8"
-t = 9: CALL roman(t, a$): AssertEqualStr "Union IX", a$, "9"
-t = 10: CALL roman(t, a$): AssertEqualStr "Union X", a$, "10"
-t = 14: CALL roman(t, a$): AssertEqualStr "Union XIV", a$, "14"
-t = 20: CALL roman(t, a$): AssertEqualStr "Union XX", a$, "20"
+t = 1: CALL army_generate_name(t, a$): AssertEqualStr "Union I", a$, "1"
+t = 3: CALL army_generate_name(t, a$): AssertEqualStr "Union III", a$, "3"
+t = 4: CALL army_generate_name(t, a$): AssertEqualStr "Union IV", a$, "4"
+t = 5: CALL army_generate_name(t, a$): AssertEqualStr "Union V", a$, "5"
+t = 8: CALL army_generate_name(t, a$): AssertEqualStr "Union VIII", a$, "8"
+t = 9: CALL army_generate_name(t, a$): AssertEqualStr "Union IX", a$, "9"
+t = 10: CALL army_generate_name(t, a$): AssertEqualStr "Union X", a$, "10"
+t = 14: CALL army_generate_name(t, a$): AssertEqualStr "Union XIV", a$, "14"
+t = 20: CALL army_generate_name(t, a$): AssertEqualStr "Union XX", a$, "20"
 END SUB
 
 SUB TestRomanNamesRebelArmiesFromOne
-t = 21: CALL roman(t, a$): AssertEqualStr "Rebel I", a$, "21"
-t = 36: CALL roman(t, a$): AssertEqualStr "Rebel XVI", a$, "36"
-t = 40: CALL roman(t, a$): AssertEqualStr "Rebel XX", a$, "40"
+t = 21: CALL army_generate_name(t, a$): AssertEqualStr "Rebel I", a$, "21"
+t = 36: CALL army_generate_name(t, a$): AssertEqualStr "Rebel XVI", a$, "36"
+t = 40: CALL army_generate_name(t, a$): AssertEqualStr "Rebel XX", a$, "40"
 END SUB
 
 SUB TestRomanChangesItsTarget
-t = 36: CALL roman(t, a$)
+t = 36: CALL army_generate_name(t, a$)
 AssertEqualInt 6, t, "36 comes back as 6"
 END SUB
 
@@ -76,10 +76,10 @@ END SUB
 
 SUB TestOccupyFindsTheFirstArmyInACity
 armyloc(3) = 7: armyloc(5) = 7: armyloc(22) = 9
-CALL occupy(7): AssertEqualInt 3, occupied(7), "two armies: the first"
-CALL occupy(9): AssertEqualInt 22, occupied(9), "a Rebel army"
+CALL city_update_occupier(7): AssertEqualInt 3, occupied(7), "two armies: the first"
+CALL city_update_occupier(9): AssertEqualInt 22, occupied(9), "a Rebel army"
 occupied(8) = 4
-CALL occupy(8): AssertEqualInt 0, occupied(8), "no army: set back to 0"
+CALL city_update_occupier(8): AssertEqualInt 0, occupied(8), "no army: set back to 0"
 END SUB
 
 ' ------------------------------------------------------------------- cutoff
@@ -88,10 +88,10 @@ END SUB
 SUB TestCutoffCountsFriendlyNeighbors
 matrix(5, 1) = 2: matrix(5, 2) = 3: matrix(5, 3) = 4
 cityp(2) = 1: cityp(3) = 2: cityp(4) = 1
-CALL cutoff(1, 5, a): AssertEqualInt 2, a, "the Union holds two neighbors"
-CALL cutoff(2, 5, a): AssertEqualInt 1, a, "the Rebels hold one"
+CALL city_is_connected(1, 5, a): AssertEqualInt 2, a, "the Union holds two neighbors"
+CALL city_is_connected(2, 5, a): AssertEqualInt 1, a, "the Rebels hold one"
 cityp(3) = 0
-CALL cutoff(2, 5, a): AssertEqualInt 0, a, "cut off"
+CALL city_is_connected(2, 5, a): AssertEqualInt 0, a, "cut off"
 END SUB
 
 ' ------------------------------------------------------------ traincapacity
@@ -102,24 +102,24 @@ END SUB
 
 SUB TestTraincapacityWithoutRealism
 train(1) = 600: train(2) = 300: realism = 0
-CALL traincapacity(1, limit): AssertEqualInt 600, limit, "the Union"
-CALL traincapacity(2, limit): AssertEqualInt 300, limit, "the Rebels"
+CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "the Union"
+CALL railroad_capacity(2, limit): AssertEqualInt 300, limit, "the Rebels"
 END SUB
 
 SUB TestTraincapacityWithRealism
 train(1) = 600: realism = 1: side = 1
-control(1) = 14: CALL traincapacity(1, limit): AssertEqualInt 615, limit, "14 cities"
-control(1) = 11: CALL traincapacity(1, limit): AssertEqualInt 600, limit, "11 cities"
-control(1) = 5: CALL traincapacity(1, limit): AssertEqualInt 570, limit, "5 cities"
+control(1) = 14: CALL railroad_capacity(1, limit): AssertEqualInt 615, limit, "14 cities"
+control(1) = 11: CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "11 cities"
+control(1) = 5: CALL railroad_capacity(1, limit): AssertEqualInt 570, limit, "5 cities"
 train(1) = 20
-control(1) = 0: CALL traincapacity(1, limit): AssertEqualInt 10, limit, "never less than half"
-control(1) = 40: CALL traincapacity(1, limit): AssertEqualInt 40, limit, "never more than twice"
+control(1) = 0: CALL railroad_capacity(1, limit): AssertEqualInt 10, limit, "never less than half"
+control(1) = 40: CALL railroad_capacity(1, limit): AssertEqualInt 40, limit, "never more than twice"
 END SUB
 
 SUB TestTraincapacityCountsByPlayersSide
 train(1) = 600: realism = 1: control(1) = 23
 side = 2
-CALL traincapacity(1, limit): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
+CALL railroad_capacity(1, limit): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
 END SUB
 
 ' --------------------------------------------------------------------- void
@@ -131,14 +131,14 @@ side = 1
 matrix(1, 1) = 2: cityp(2) = 1: occupied(2) = 4: armysize(4) = 50
 matrix(2, 1) = 3: cityp(3) = 1: occupied(3) = 6: armysize(6) = 40
 matrix(2, 2) = 1
-CALL void(1, y)
+CALL city_nearby_enemy_strength(1, y)
 AssertEqualInt 54, y, "50 beside and a tenth of 40 further"
 END SUB
 
 SUB TestVoidIsZeroWithNoArmyNear
 side = 1
 matrix(1, 1) = 2: cityp(2) = 2: occupied(2) = 24: armysize(24) = 50
-CALL void(1, y)
+CALL city_nearby_enemy_strength(1, y)
 AssertEqualInt 0, y, "the enemy's army does not count"
 END SUB
 
@@ -147,7 +147,7 @@ END SUB
 
 SUB TestBarnacleRemovesTheLastShip
 navysize(1) = 3: fleet$(1) = "WIW": navyloc(1) = 30
-CALL barnacle(1)
+CALL navy_remove_ship(1)
 AssertEqualInt 2, navysize(1), "two ships left"
 AssertEqualStr "WI", fleet$(1), "the last one gone"
 AssertEqualInt 30, navyloc(1), "still there"
@@ -155,7 +155,7 @@ END SUB
 
 SUB TestBarnacleEndsAFleetOfOne
 navysize(2) = 1: fleet$(2) = "I": navyloc(2) = 27
-CALL barnacle(2)
+CALL navy_remove_ship(2)
 AssertEqualInt 0, navysize(2), "no ships"
 AssertEqualStr "", fleet$(2), "no fleet"
 AssertEqualInt 0, navyloc(2), "nowhere"
@@ -169,7 +169,7 @@ SUB TestNormalDrawsHigh
 RANDOMIZE 1
 total& = 0
 FOR i = 1 TO 2000
-	CALL normal(100, 100, r)
+	CALL normal_random_number(100, 100, r)
 	total& = total& + r
 NEXT i
 avg! = total& / 2000
@@ -177,7 +177,7 @@ AssertTrue avg! > 103 AND avg! < 107, "the average of 2000 draws is near 105, no
 END SUB
 
 SUB TestNormalWithNoVarianceIsTheMean
-CALL normal(70, 0, r)
+CALL normal_random_number(70, 0, r)
 AssertEqualInt 70, r, "variance 0"
 END SUB
 
@@ -189,13 +189,13 @@ SUB TestCommanderTakesTheFirstFreeName
 lname$(1) = "Grant": armyloc(1) = 5
 lname$(2) = "Pope"
 lname$(3) = "Meade"
-CALL commander(1, empty)
+CALL army_get_commander(1, empty)
 AssertEqualInt 2, empty, "Grant has an army; Pope is next"
 END SUB
 
 SUB TestCommanderMakesUpANameAfterTheList
 RANDOMIZE 1
-CALL commander(2, empty)
+CALL army_get_commander(2, empty)
 AssertEqualInt 21, empty, "the Rebels' first army"
 AssertEqualStr "Rebel I", lname$(21), "its made-up name"
 AssertTrue rating(21) >= 1 AND rating(21) <= 9, "a rating from 1 to 9:" + STR$(rating(21))
@@ -206,10 +206,10 @@ END SUB
 
 SUB TestMxwIsTheLongestEntry
 mtx$(0) = "Main": mtx$(1) = "Troops": mtx$(2) = "Railroad": mtx$(3) = "END TURN": size = 3
-CALL mxw(wide)
+CALL menu_measure_width(wide)
 AssertEqualInt 8, wide, "Railroad"
 mtx$(0) = "VGA CIVILWAR STRATEGY"
-CALL mxw(wide)
+CALL menu_measure_width(wide)
 AssertEqualInt 22, wide, "the title and one more"
 END SUB
 
@@ -225,9 +225,9 @@ AssertEqualStr "", DIR$(d$ + "cws4.sav"), "another name"
 END SUB
 
 SUB TestScriptdateIsFixedUnderAScript
-AssertEqualStr DATE$, scriptdate$, "not scripted: today"
+AssertEqualStr DATE$, script_date$, "not scripted: today"
 scripted = 1
-AssertEqualStr "01-01-2000", scriptdate$, "scripted"
+AssertEqualStr "01-01-2000", script_date$, "scripted"
 END SUB
 
 ' Under a script, scriptshell copies in BASIC instead of SHELL, whose
@@ -238,7 +238,7 @@ scripted = 1
 d$ = TestTempDir$ + "/"
 f = FREEFILE: OPEN d$ + "cws.his" FOR OUTPUT AS #f: PRINT #f, "history": CLOSE #f
 f = FREEFILE: OPEN d$ + "oldhist.ory" FOR OUTPUT AS #f: PRINT #f, "an older and longer one": CLOSE #f
-CALL scriptshell("copy " + d$ + "cws.his " + d$ + "oldhist.ory")
+CALL script_shell("copy " + d$ + "cws.his " + d$ + "oldhist.ory")
 f = FREEFILE: OPEN d$ + "oldhist.ory" FOR INPUT AS #f: LINE INPUT #f, a$: CLOSE #f
 AssertEqualStr "history", a$, "the copy replaces the old file"
 END SUB

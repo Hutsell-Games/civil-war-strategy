@@ -17,7 +17,7 @@
 ' ===========================================================================
 
 ' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER.
-SUB scriptstart
+SUB script_start
 seed$ = ENVIRON$("CWS_SEED")
 IF seed$ = "" THEN RANDOMIZE TIMER: EXIT SUB
 scripted = 1
@@ -27,20 +27,20 @@ END SUB
 
 ' The date the history file starts with: today, or a fixed one when the
 ' program is scripted, so that the file is the same in every run.
-FUNCTION scriptdate$
-IF scripted THEN scriptdate$ = "01-01-2000" ELSE scriptdate$ = DATE$
+FUNCTION script_date$
+IF scripted THEN script_date$ = "01-01-2000" ELSE script_date$ = DATE$
 END FUNCTION
 
 ' TICK's pause when the program is scripted. Gives 0 when it is not, and
 ' TICK then pauses as before. A pause of 99 seconds or more is how the game
 ' says "press a key" (the map's links, "There are still defenders"), so a
 ' script waits there for a key; a shorter one returns at once.
-FUNCTION scripttick% (sec!)
-scripttick% = 0
+FUNCTION script_tick% (sec!)
+script_tick% = 0
 IF scripted = 0 THEN EXIT FUNCTION
-scripttick% = -1
+script_tick% = -1
 IF sec! < 99 THEN EXIT FUNCTION
-CALL announce(1, "L")
+CALL script_mark_key_wait(1, "L")
 DO WHILE INKEY$ = "": LOOP
 END FUNCTION
 
@@ -49,7 +49,7 @@ END FUNCTION
 ' cmd.exe, whose console window shows on the user's desktop even when the
 ' program runs on a hidden one, so the scripts must not run it. Copy
 ' replaces <to>, as copy does.
-SUB scriptshell (cmd$)
+SUB script_shell (cmd$)
 IF scripted = 0 THEN SHELL cmd$: EXIT SUB
 c$ = LTRIM$(RTRIM$(cmd$))
 sp = INSTR(c$, " "): verb$ = LCASE$(LEFT$(c$, sp - 1)): args$ = LTRIM$(MID$(c$, sp + 1))
@@ -81,7 +81,7 @@ END SUB
 '   2  a menu; letter$ is the first letter of the menu's title
 '   4  a line of text: the name of the commander for the Hall of Fame
 ' Byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits.
-SUB announce (place, letter$)
+SUB script_mark_key_wait (place, letter$)
 IF scripted = 0 THEN EXIT SUB
 code = 0
 IF letter$ <> "" THEN code = ASC(UCASE$(letter$))
