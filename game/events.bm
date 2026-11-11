@@ -36,7 +36,7 @@ SELECT CASE who
 		NEXT i
 	IF empty = 0 GOTO mercen
 float1:
-	CALL scribe_message("England has given ships to the South", 2)
+	CALL scribe_message("England has given ships to the South", SHOW_BOX)
 	fleet_size(SIDE_REBEL) = fleet_size(SIDE_REBEL) + 2 * plus
 	IF fleet_size(SIDE_REBEL) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_REBEL) = MAX_FLEET_SHIPS
 	x = fleet_size(SIDE_REBEL) - LEN(fleet_ships$(SIDE_REBEL))
@@ -46,17 +46,17 @@ float1:
 mercen:
 	IF RND > .1 OR side_city_count(SIDE_REBEL) < 30 GOTO money
 	a$ = "French": IF RND > .5 THEN a$ = "British"
-	CALL scribe_message(a$ + " mercenaries join " + army_name$(index) + "'s army", 2)
+	CALL scribe_message(a$ + " mercenaries join " + army_name$(index) + "'s army", SHOW_BOX)
 	army_size(index) = army_size(index) + 100 * plus
 	army_experience(index) = MAX_EXPERIENCE: army_supply(index) = MAX_SUPPLY
 	GOTO dull1
 money:
 	IF RND > .3 OR side_city_count(SIDE_REBEL) < 12 GOTO cotton
-		CALL scribe_message("The South has obtained a loan from Europe", 2)
+		CALL scribe_message("The South has obtained a loan from Europe", SHOW_BOX)
 		GOTO purse
 cotton:
 	IF RND > .5 OR side_city_count(SIDE_REBEL) < 12 GOTO uprising
-	CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", 2)
+	CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", SHOW_BOX)
 purse:
 	side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 * plus
 	GOTO dull1
@@ -65,7 +65,7 @@ uprising:
 	a$ = "Union troops diverted to fight Western Indian uprisings"
 	IF RND > .5 THEN a$ = "Union 90-day enlistees return home"
 	IF turn_year = 1864 AND turn_month > 5 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
-	CALL scribe_message(a$, 2)
+	CALL scribe_message(a$, SHOW_BOX)
 	FOR k = 1 TO ARMIES_PER_SIDE
 	army_size(k) = pct! * army_size(k)
 	NEXT k
@@ -95,7 +95,7 @@ riot:
 	CASE 2
 	IF RND > .1 OR fleet_city(SIDE_UNION) = 0 OR fleet_size(SIDE_UNION) >= MAX_FLEET_SHIPS GOTO event2
 	IF RND > .95 THEN GOSUB riot: EXIT SUB
-	CALL scribe_message("Union shipworks have produced extra ships", 2)
+	CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
 	fleet_size(SIDE_UNION) = fleet_size(SIDE_UNION) + plus
 	IF fleet_size(SIDE_UNION) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_UNION) = MAX_FLEET_SHIPS
 	x = fleet_size(SIDE_UNION) - LEN(fleet_ships$(SIDE_UNION))
@@ -103,7 +103,7 @@ riot:
 	GOTO dull2
 event2:
 	IF RND < .7 GOTO abe
-	CALL scribe_message("Volunteer troops swell the Union ranks", 2)
+	CALL scribe_message("Volunteer troops swell the Union ranks", SHOW_BOX)
 	x = 0: FOR i = 1 TO ARMIES_PER_SIDE: x = x + 1: IF x > 5 GOTO dull2
 	IF army_size(i) > 0 AND RND > .5 THEN army_size(i) = army_size(i) * 1.1 + plus
 	NEXT i: GOTO dull2
@@ -111,33 +111,33 @@ abe:
 	IF emancipation_done = 0 AND turn_year > 1862 THEN
 
 		emancipation_done = 1
-		CALL scribe_message("Abraham Lincoln announces the Emancipation Proclamation", 2)
+		CALL scribe_message("Abraham Lincoln announces the Emancipation Proclamation", SHOW_BOX)
 		side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100: side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) - 100
 		' SHELL "abelinco.exe" (a DOS program with no source; cannot run on 64-bit Windows)
 		CALL draw_map
 		GOTO dull2
 	END IF
 	IF turn_year = 1864 AND turn_month = 11 THEN
-		CALL scribe_message("Lincoln has been reelected", 2)
+		CALL scribe_message("Lincoln has been reelected", SHOW_BOX)
 		side_victory_points(SIDE_REBEL) = .5 * side_victory_points(SIDE_REBEL)
 		GOTO dull2
 	END IF
 	IF RND > .5 THEN
-		CALL scribe_message("Wealthy Unionists give generously to the Federal Cause", 2)
+		CALL scribe_message("Wealthy Unionists give generously to the Federal Cause", SHOW_BOX)
 		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * plus
 		GOTO dull2
 	END IF
 	IF RND > .5 AND turn_year > 1861 THEN
-		CALL scribe_message("Rebel deserters leave the battlefield to go home", 2)
+		CALL scribe_message("Rebel deserters leave the battlefield to go home", SHOW_BOX)
 		FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: army_size(i) = .92 * army_size(i): NEXT i: GOTO dull2
 	END IF
 	IF RND > .5 AND turn_year > 1861 THEN
-		CALL scribe_message("Union soldiers now have repeating rifles", 2)
+		CALL scribe_message("Union soldiers now have repeating rifles", SHOW_BOX)
 		FOR i = 1 TO ARMIES_PER_SIDE
 			IF army_experience(i) < 9 THEN army_experience(i) = army_experience(i) + 2
 		NEXT i
 	END IF
-		CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", 2)
+		CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
 		side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 10: GOTO dull2
 	CASE ELSE
 END SELECT

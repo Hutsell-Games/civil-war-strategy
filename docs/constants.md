@@ -97,7 +97,7 @@ The mode says what `menu` shows beside the options while the player moves throug
 | `scribe (a$, flag)` | 0, 1, 2 | Write to the history only; also show on the bottom line; also show in a box. | `SHOW_NOT`, `SHOW_LINE`, `SHOW_BOX` | |
 | `filer (switch)` | 1, 2, 3 | New game, load, save. | None: phase 7 splits `filer` into three SUBs. | |
 | `report (who)` | -1, 100 + side | Go straight to the force summary; to the battle summary. | None: phase 7 gives each report a SUB. | |
-| `tinytrain`, `snapshot`, `animate` | 0, 1 | Erase or draw; save or restore; march or retreat. | `DRAW_ERASE = 0`, `DRAW_SHOW = 1`; `SNAP_SAVE = 0`, `SNAP_RESTORE = 1`; `MARCH_ADVANCE`, `MARCH_RETREAT` | |
+| `tinytrain`, `snapshot`, `animate` | 0, 1 | Erase or draw; save or restore; for `animate`, take the army's picture from its city first, or use the one taken already (not march or retreat: both pass 0). | `DRAW_ERASE = 0`, `DRAW_SHOW = 1`; `SNAP_SAVE = 0`, `SNAP_RESTORE = 1`; `ANIMATE_TAKE_PICTURE = 0`, `ANIMATE_PICTURE_TAKEN = 1` (user, 2026-11-11) | |
 | `flags (who, w, a)` | `w` | An offset in pixels, or below 0 for a small flag at `-w`. | None in phase 3: the SUB is reworked in phase 8. | |
 
 ## 6. Settings and victory rules

@@ -1,6 +1,6 @@
 SUB screen_snapshot (x, y, put_back)
-IF put_back = 0 THEN GET (x - 10, y - 10)-(x + 10, y + 10), saved_under_marker
-IF put_back = 1 THEN PUT (x - 10, y - 10), saved_under_marker, PSET
+IF put_back = SNAP_SAVE THEN GET (x - 10, y - 10)-(x + 10, y + 10), saved_under_marker
+IF put_back = SNAP_RESTORE THEN PUT (x - 10, y - 10), saved_under_marker, PSET
 END SUB
 
 SUB print_centered (y, text$)

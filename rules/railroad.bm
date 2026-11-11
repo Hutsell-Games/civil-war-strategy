@@ -57,7 +57,7 @@ haul:
 	from = army_city(index)
 	train_from_city(side) = from
 	train_army(side) = index: army_city(index) = 0: army_order(index) = x1
-	CALL draw_train(side, 1)
+	CALL draw_train(side, DRAW_SHOW)
 	IF opt_sound > 0 THEN SOUND 2222, 1
 	CALL draw_train_box
 
@@ -66,13 +66,13 @@ haul:
 	GOTO toot
 
 	CASE IS > 0
-	CALL draw_train(side, 0)
+	CALL draw_train(side, DRAW_ERASE)
 	CALL city_update_occupier(train_from_city(side))
 	IF city_army(train_from_city(side)) > 0 THEN CALL draw_army_flag(city_army(train_from_city(side)))
 
 	index = train_army(side)
 	train_city(side) = army_order(index)
-	CALL draw_train(side, 1)
+	CALL draw_train(side, DRAW_SHOW)
 
 	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = ORDER_BUSY
 	COLOR 11: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound > 0 THEN SOUND 1200, 2

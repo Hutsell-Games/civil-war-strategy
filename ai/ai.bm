@@ -47,7 +47,7 @@ capital:
 '                       Recruit New Armies
 '==========================================================================
 signup:
-IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > 100 THEN CALL navy_commands(SIDE_UNION, 1): IF side_cash(who) < 100 GOTO isok
+IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > 100 THEN CALL navy_commands(SIDE_UNION, NAVY_BUILD): IF side_cash(who) < 100 GOTO isok
 GOSUB enufarmies
 IF x > 2 + 3 * current_side + 3 * RND GOTO isok
 IF fleet_size(who) < 5 AND side_cash(who) > 100 AND fleet_city(who) <> FLEET_AT_SEA THEN IF city_owner(fleet_city(who)) = who THEN slush = slush + 100: side_cash(who) = side_cash(who) - 100: IF side_cash(who) < 100 GOTO isok
@@ -58,13 +58,13 @@ CALL menu_army_recruit(who)
 isok:
 	side_cash(who) = side_cash(who) + slush
 dock:
-	IF current_side = SIDE_REBEL AND fleet_city(SIDE_UNION) = 0 AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > 100 THEN fleet_city(SIDE_UNION) = 30: CALL navy_commands(SIDE_UNION, 1): GOTO movenavy
+	IF current_side = SIDE_REBEL AND fleet_city(SIDE_UNION) = 0 AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > 100 THEN fleet_city(SIDE_UNION) = 30: CALL navy_commands(SIDE_UNION, NAVY_BUILD): GOTO movenavy
 	IF fleet_city(who) = FLEET_AT_SEA THEN
-		IF RND < .9 THEN CALL navy_commands(who, 3)
+		IF RND < .9 THEN CALL navy_commands(who, NAVY_SAIL)
 		GOTO movearmy
 	END IF
 	IF side_cash(who) < 100 OR fleet_size(who) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(who)) <> who GOTO movenavy
-	CALL navy_commands(who, 1)
+	CALL navy_commands(who, NAVY_BUILD)
 '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 movenavy:
 	IF fleet_size(who) = 0 THEN fleet_city(who) = 0
@@ -73,18 +73,18 @@ movenavy:
 '                     move ships & prohibit further action this turn
 '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	IF fleet_city(who) <> FLEET_AT_SEA THEN
-		IF city_owner(fleet_city(who)) = who THEN CALL navy_commands(who, 3): GOTO movearmy   'move ships & prohibit further action this turn
-		IF city_owner(fleet_city(who)) = SIDE_NONE THEN CALL navy_commands(who, 3): GOTO movearmy
+		IF city_owner(fleet_city(who)) = who THEN CALL navy_commands(who, NAVY_SAIL): GOTO movearmy   'move ships & prohibit further action this turn
+		IF city_owner(fleet_city(who)) = SIDE_NONE THEN CALL navy_commands(who, NAVY_SAIL): GOTO movearmy
 	ELSE
-		IF RND < .5 THEN CALL navy_commands(who, 3)
+		IF RND < .5 THEN CALL navy_commands(who, NAVY_SAIL)
 		GOTO movearmy
 	END IF
 
 	IF city_owner(fleet_city(who)) <> who THEN
 		IF city_army(fleet_city(who)) = 0 OR RND > .3 THEN
-			CALL navy_commands(who, 2) 'attack
+			CALL navy_commands(who, NAVY_ATTACK) 'attack
 		ELSE
-			CALL navy_commands(who, 3) 'move
+			CALL navy_commands(who, NAVY_SAIL) 'move
 		END IF
 	END IF
 '==========================================================================

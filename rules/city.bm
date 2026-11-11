@@ -20,7 +20,7 @@ DIM a$: DIM x AS INTEGER: DIM y AS INTEGER
 		side_victory_points(side) = side_victory_points(side) + 100
 		side_victory_points(other_side(side)) = side_victory_points(other_side(side)) - 100
 		a$ = side_name$(other_side(side)) + " CAPITAL captured !"
-		CALL scribe_message(a$, 1)
+		CALL scribe_message(a$, SHOW_LINE)
 		CALL show_message_box(city_name$(side_capital(other_side(side))) + " has fallen!", 4)
 		side_capital(other_side(side)) = 0
 		CALL animate_city(c)

@@ -53,6 +53,25 @@ CONST MENU_FACES = 8
 CONST MENU_CITY_POINTER = 9
 ' menu_box_type: a double line round the menu (0, no line, and 1, a single line, have no caller).
 CONST BOX_DOUBLE = 2
+' navy_commands' action: the player's Ships menu, or what the computer does (the menu's rows 1 to 5).
+CONST NAVY_ASK = 0
+CONST NAVY_BUILD = 1
+CONST NAVY_ATTACK = 2
+CONST NAVY_SAIL = 3
+CONST NAVY_RAID = 4
+CONST NAVY_INVADE = 5
+' scribe_message's display: write to the history only, or also on the bottom line, or in a box.
+CONST SHOW_NOT = 0
+CONST SHOW_LINE = 1
+CONST SHOW_BOX = 2
+' draw_train's show, and screen_snapshot's put_back.
+CONST DRAW_ERASE = 0
+CONST DRAW_SHOW = 1
+CONST SNAP_SAVE = 0
+CONST SNAP_RESTORE = 1
+' animate_army's flag: take the picture of the army from its city first, or use the one taken already.
+CONST ANIMATE_TAKE_PICTURE = 0
+CONST ANIMATE_PICTURE_TAKEN = 1
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

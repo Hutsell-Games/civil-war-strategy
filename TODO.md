@@ -76,5 +76,8 @@ Left alone by group 2 (the special values):
 - **The Utility menu calls `menu_select(-1)`** (`CWSTRAT.BAS` line 431). No mode has that number, so it is a
   plain menu without the F3, F4 and F7 keys. `docs\constants.md` has no row for it, so it keeps the -1
   (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
+- **`animate_army`'s parameter `background_saved` is misnamed** (`draw\icons.bm`). The `GET` it skips takes
+  the army's flag picture from its city, not the background; `ANIMATE_PICTURE_TAKEN` says so (group 5).
+  The parameter wants the name `picture_taken`.
 - **Tests of `army_order()` and `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
   `docs\constants.md`, section 2.

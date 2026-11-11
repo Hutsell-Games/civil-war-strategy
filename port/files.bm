@@ -79,7 +79,7 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	SCREEN 12: CLS
 	CLOSE #1: CALL draw_map: CALL clear_bottom_line
 	FOR k = SIDE_UNION TO SIDE_REBEL
-	IF train_army(k) > 0 THEN CALL draw_train(k, 1)
+	IF train_army(k) > 0 THEN CALL draw_train(k, DRAW_SHOW)
 	NEXT k
 	current_side = a
 

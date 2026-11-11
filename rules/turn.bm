@@ -96,7 +96,7 @@ army_supply(active) = army_supply(active) - 1: IF army_supply(active) < 0 THEN a
 CALL draw_army_flag(active)
 CALL draw_map_marker(army_city(active), army_order(active), MARK_ERASE_LINE)
 
-CALL animate_army(active, 0)
+CALL animate_army(active, ANIMATE_TAKE_PICTURE)
 '==========================================================================
 target = army_order(active)
 IF city_army(target) = 0 GOTO easy
@@ -123,7 +123,7 @@ IF army_experience(win) < MAX_EXPERIENCE THEN army_experience(win) = army_experi
 IF army_size(lose) < 2 THEN
 	CALL clear_bottom_line
 	a$ = army_name$(lose) + "'s army is crushed in " + city_name$(army_city(defend))
-	CALL scribe_message(a$, 2)
+	CALL scribe_message(a$, SHOW_BOX)
 	index = lose: GOTO crushed
 END IF
 
@@ -137,7 +137,7 @@ army_city(active) = target
 COLOR 11: CALL clear_bottom_line: PRINT army_name$(active); " withdrew to "; city_name$(army_order(active));
 
 CALL draw_army_flag(army_city(active))
-CALL animate_army(active, 1)
+CALL animate_army(active, ANIMATE_PICTURE_TAKEN)
 
 army_city(active) = army_order(active)
 CALL draw_army_flag(army_city(active))
@@ -174,7 +174,7 @@ outta:
 	CALL draw_army_flag(defend)                  ' in old city
 
 	army_order(defend) = move2
-	CALL animate_army(defend, 0)                 ' animate retreat
+	CALL animate_army(defend, ANIMATE_TAKE_PICTURE)                 ' animate retreat
        
 	army_city(defend) = move2
 	city_army(move2) = defend
@@ -190,7 +190,7 @@ outta:
 deadmeat:
 	index = defend
 	a$ = army_name$(index) + " surrenders to " + army_name$(active) + " in " + city_name$(army_city(index))
-	CALL scribe_message(a$, 2)
+	CALL scribe_message(a$, SHOW_BOX)
 crushed:
 	IF opt_graphics > 2 THEN CALL draw_surrender(index): COLOR 14: LOCATE 3, 68: PRINT army_name$(index): LOCATE 4, 68: PRINT "surrenders !"
 	x = army_side(index)

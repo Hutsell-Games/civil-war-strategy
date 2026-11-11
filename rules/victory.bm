@@ -168,8 +168,8 @@ play4ever:
 death:
 	COLOR 14: LOCATE 4, 40 - .5 * LEN(a$)
 	IF opt_history > 0 THEN
-		CALL scribe_message(t$, 0)
-		CALL scribe_message(a$, 0)
+		CALL scribe_message(t$, SHOW_NOT)
+		CALL scribe_message(a$, SHOW_NOT)
 	END IF
 	PRINT a$: CALL hall_of_fame
 	EXIT SUB

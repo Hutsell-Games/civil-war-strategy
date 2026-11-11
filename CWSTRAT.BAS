@@ -147,7 +147,7 @@ GOTO menu0
 newmonth:
 IF current_side > 2 THEN current_side = SIDE_UNION
 a$ = "--------> EVENTS FOR " + month_name$(turn_month) + " " + STR$(turn_year) + " --------"
-CALL scribe_message(a$, 0)
+CALL scribe_message(a$, SHOW_NOT)
 CALL turn_resolve
 side_city_count(SIDE_UNION) = 0: side_city_count(SIDE_REBEL) = 0
 
@@ -219,7 +219,7 @@ SELECT CASE menu_choice
 	GOTO menu0
 '==========================================================================
 	CASE 3
-	IF turn_navy_done = 0 THEN CALL navy_commands((current_side), 0)
+	IF turn_navy_done = 0 THEN CALL navy_commands((current_side), NAVY_ASK)
 	chosit = 25
 	CASE 4
 IF train_army(current_side) = 0 THEN
