@@ -9,46 +9,39 @@ NEXT j
 city_is_connected = a
 END FUNCTION
 
-SUB city_capture (active, c, side, weaken_fort)
-DIM a$
-	city_owner(c) = side: CALL clear_bottom_line
-	a$ = army_name$(active) + " has captured " + city_name$(c)
-	COLOR COLOR_LIGHT_CYAN: PRINT army_name$(active) + " has captured " + city_name$(c);
-	IF army_side(active) = SIDE_UNION AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-	IF army_side(active) = SIDE_REBEL AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-	IF c <> side_capital(other_side(side)) THEN CALL animate_city(c)
+' A side takes city c: the city's value in victory points, and 100 more taken from the other
+' side when it is that side's capital, which the other side then no longer has. A fort loses a
+' level when weaken_fort is above 0. city_capture (ui/city.bm) shows it.
+SUB city_take (c, side, weaken_fort)
+	city_owner(c) = side
 	side_victory_points(side) = side_victory_points(side) + city_value(c)
 	IF c = side_capital(other_side(side)) THEN
 		side_victory_points(side) = side_victory_points(side) + 100
 		side_victory_points(other_side(side)) = side_victory_points(other_side(side)) - 100
-		a$ = side_name$(other_side(side)) + " CAPITAL captured !"
-		CALL scribe_message(a$, SHOW_LINE)
-		CALL show_message_box(city_name$(side_capital(other_side(side))) + " has fallen!", 4)
 		side_capital(other_side(side)) = 0
-		CALL animate_city(c)
 	END IF
-	IF city_fort(c) > 0 AND weaken_fort > 0 THEN city_fort(c) = city_fort(c) - 1: CALL city_redraw_fort(c)
+	IF city_fort(c) > 0 AND weaken_fort > 0 THEN city_fort(c) = city_fort(c) - 1
 END SUB
 
-SUB check_map_links
-DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM index AS INTEGER
-CLS : COLOR COLOR_WHITE
-x = 0: y = 0
+' Gives every road a way back: when city i has a road to a city that has no road to i, the
+' road back is added in that city's first free slot. Each road without a way back is listed
+' in from_city() and to_city(), with added() 1 when the road back was added and 0 when the
+' city had no free slot. count is the length of the list. check_map_links (ui/city.bm) shows it.
+SUB city_fix_return_routes (count, added(), from_city(), to_city())
+DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM index AS INTEGER
+count = 0
 FOR i = 1 TO MAX_CITIES
 FOR j = 1 TO MAX_ROADS: IF city_road(i, j) = 0 GOTO done
 	index = city_road(i, j)
 	FOR k = 1 TO MAX_ROADS
 	IF city_road(index, k) = i GOTO ret
-	IF city_road(index, k) = 0 THEN city_road(index, k) = i: PRINT "+ Adding return route from "; city_name$(index); " to "; city_name$(i): y = y + 1: GOTO ret
+	IF city_road(index, k) = 0 THEN city_road(index, k) = i: count = count + 1: added(count) = 1: from_city(count) = index: to_city(count) = i: GOTO ret
 	NEXT k
-	x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; i; city_name$(index); ": no return route to "; city_name$(i): wait_seconds 1
+	count = count + 1: added(count) = 0: from_city(count) = index: to_city(count) = i
 ret:
 NEXT j
 done:
 NEXT i
-IF x + y = 0 THEN PRINT "ALL MAP LINKS ARE OK": EXIT SUB
-IF y > 0 THEN PRINT "* "; y; " fixes made to provide RETURN ROUTES"
-IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB
 
 SUB city_update_occupier (x)

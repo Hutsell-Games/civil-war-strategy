@@ -82,6 +82,49 @@ city_army(8) = 4
 CALL city_update_occupier(8): AssertEqualInt 0, city_army(8), "no army: set back to 0"
 END SUB
 
+' ---------------------------------------------------------------- city_take
+' A side takes a city: its value in victory points, more for a capital.
+
+SUB TestCityTakeCountsTheCitysValue
+city_value(7) = 15: city_fort(7) = 2: side_capital(2) = 25
+CALL city_take(7, 1, 0)
+AssertEqualInt 1, city_owner(7), "the Union holds it"
+AssertEqualInt 15, side_victory_points(1), "its value"
+AssertEqualInt 2, city_fort(7), "weaken_fort 0: the fort stands"
+CALL city_take(7, 2, 1)
+AssertEqualInt 1, city_fort(7), "weaken_fort 1: a level less"
+AssertEqualInt 25, side_capital(2), "not a capital"
+END SUB
+
+SUB TestCityTakeOfTheCapital
+city_value(25) = 20: side_capital(2) = 25: side_victory_points(2) = 300
+CALL city_take(25, 1, 0)
+AssertEqualInt 120, side_victory_points(1), "its value and 100"
+AssertEqualInt 200, side_victory_points(2), "100 from the Rebels"
+AssertEqualInt 0, side_capital(2), "the Rebels have no capital"
+END SUB
+
+' --------------------------------------------------- city_fix_return_routes
+' City 1 has roads to 2 and 3. City 2 has a road back; city 3 has none but a
+' free slot; city 4 has a road to 5, whose six slots are full.
+
+SUB TestCityFixReturnRoutesListsEach
+DIM added(240) AS INTEGER: DIM from_city(240) AS INTEGER: DIM to_city(240) AS INTEGER
+city_road(1, 1) = 2: city_road(1, 2) = 3
+city_road(2, 1) = 1: city_road(3, 1) = 6: city_road(6, 1) = 3
+city_road(4, 1) = 5
+FOR k = 1 TO 6: city_road(5, k) = 10 + k: city_road(10 + k, 1) = 5: NEXT k
+CALL city_fix_return_routes(count, added(), from_city(), to_city())
+AssertEqualInt 2, count, "two roads without a way back"
+AssertEqualInt 1, added(1), "the first is added"
+AssertEqualInt 3, from_city(1), "from city 3"
+AssertEqualInt 1, to_city(1), "to city 1"
+AssertEqualInt 1, city_road(3, 2), "in city 3's second slot"
+AssertEqualInt 0, added(2), "the second has no free slot"
+AssertEqualInt 5, from_city(2), "city 5"
+AssertEqualInt 4, to_city(2), "has no road to city 4"
+END SUB
+
 ' ------------------------------------------------------------------- cutoff
 ' a counts the cities linked to target that who holds; 0 means cut off.
 
@@ -500,6 +543,7 @@ END SUB
 '$INCLUDE: '../ui/messages.bm'
 '$INCLUDE: '../ui/battle.bm'
 '$INCLUDE: '../ui/railroad.bm'
+'$INCLUDE: '../ui/city.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'

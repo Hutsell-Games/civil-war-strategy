@@ -255,7 +255,7 @@ a table per SUB, the least covered first (`tests\out\coverage\subs.txt`).
 Not covered:
 
 - **21 lines that no test runs**, most of them code that cannot be reached. They are listed with their
-  reasons in `docs\modernize-plan.md`, "Phase 0 after phase 7 began".
+  reasons in `docs\modernize-plan.md`, "Lines that no test runs".
 - **What the tunes sound like.** The sound scripts run the `PLAY` and `SOUND` statements; nothing checks the
   notes.
 - **The real `SHELL "copy ..."`**, which `scriptshell` replaces under a script.

@@ -16,7 +16,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | File | SUBs |
 |------|------|
 | `army.bm` | `army_combine`, `army_detach`, `army_drill`, `army_recruit` (mixed), `army_recruit_bonus`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` |
-| `city.bm` | `city_capture` (mixed), `city_is_connected`, `city_update_occupier`, `check_map_links` |
+| `city.bm` | `city_take`, `city_is_connected`, `city_fix_return_routes`, `city_update_occupier` (`city_capture` and `check_map_links` until phase 8 moved them to `ui\city.bm`) |
 | `battle.bm` | `battle_strengths`, `battle_fight`, `battle_losses`, `battle_apply_losses`, `normal_random_number` (`calculate_battle` until phase 8 split it) |
 | `navy.bm` | `navy_remove_ship`, `navy_commands`, `navy_action`, `navy_build_ship` (mixed), `navy_bombard` (mixed), `navy_sail_to_port` (mixed), `navy_raid_commerce` (mixed), `navy_land_army`, `navy_finish_move` (mixed), `navy_commerce_raid` (mixed), `navy_combat` (mixed), `navy_show_hits` (mixed) |
 | `railroad.bm` | `railroad_board`, `railroad_unload`, `railroad_route_count`, `railroad_capacity` (`railroad_move`, `railroad_start` and `railroad_arrive` until phase 8 moved them to `ui\railroad.bm`) |
@@ -41,6 +41,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `messages.bm` | `show_message_box`, `scribe_message` |
 | `battle.bm` | `calculate_battle` (new in phase 8: the battle's screen) |
 | `railroad.bm` | `railroad_move`, `railroad_start`, `railroad_arrive` (new in phase 8: the train's screen) |
+| `city.bm` | `city_capture`, `check_map_links` (new in phase 8: a capture and the map check) |
 
 ## draw\
 
