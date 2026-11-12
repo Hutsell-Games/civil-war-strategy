@@ -425,3 +425,34 @@ The rule for lines that no test runs is in `modernize-plan.md`, "Lines that no t
    - Unit tests: 3 new ones, so 45 in all. Lines moved without a test: none. One line of `ui\city.bm`
      is run in part, as it was in `rules\city.bm`: line 11, the Rebels' tune. 20 lines of the game are
      not run.
+
+   **Done, second part: `rules\army.bm`.** `army_combine`, `army_new`, `army_get_commander`,
+   `army_resupply` and `army_recruit` moved to `ui\army.bm`. Their rules are nine SUBs in
+   `rules\army.bm`:
+   - Combining: `army_combine_start (target)` clears army 0, which gathers the armies.
+     `army_combine_add (j, target, best, status)` adds one army's leader, men and experience, or says
+     why it does not join. `army_combine_absorb (j)` takes its supplies and empties its slot.
+     `army_combine_finish (target, best, joined)` puts the result in the best leader's slot.
+   - `army_combine` keeps the menu and the loop over the side's armies, and prints each army's line
+     between `army_combine_add` and `army_combine_absorb`, while the army still has its name and men.
+     The old local `x`, the best rating so far, was always equal to `army_leader_rating(0)`, which
+     `army_combine_add` now reads. `spin` is now `joined`. The computer's random pick of a city stays in
+     `army_combine` until phase 9 reworks the menus.
+   - The merged army takes its city in `army_combine_finish`, before the map is drawn, and no longer
+     after it. `draw_cities`, the army's flag and the flashing frame do not read `city_army`;
+     `draw_stack_markers`, which does, still comes after.
+   - `army_raise (side, slot, city)`: a new army's supplies, experience, leader, size, city and price.
+     `army_new` prints and draws after it.
+   - `army_pick_commander (side, slot)`: the next commander. `army_get_commander` prints "No more ...
+     commanders available" when it finds none.
+   - `army_buy_supply (army, result)`: the supplies bought, with `result` 1, 0 for too little cash, or
+     -1 for an army cut off. `army_resupply` prints by `result`.
+   - `army_place_new (slot, city)` and `army_add_recruits (side, army, isolated)`: the two kinds of
+     recruiting. `army_add_recruits` passes 0 to `army_recruit_bonus`, as `army_recruit` passed `empty`
+     when it was 0 (`TODO.md`).
+   - Callers in `ai\ai.bm` and `rules\navy.bm` now call screen parts. Steps 4 and 6 split them.
+   - Unit tests: 7 new ones, so 52 in all. The two tests of the commander now call
+     `army_pick_commander`. Lines moved without a test: none. 212 lines of the game are run in part and
+     20 are not run, as before. Each line run in part in `ui\army.bm` and `rules\army.bm` is a branch
+     that the old code did not reach either: a menu left with Esc, an army cut off, too little cash, an
+     isolated city, the sound off.

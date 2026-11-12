@@ -1,103 +1,72 @@
-SUB army_combine (side)
-DIM fin AS INTEGER
-DIM target AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM best AS INTEGER: DIM x AS INTEGER: DIM spin AS INTEGER: DIM pct!
-	menu_color = COLOR_CYAN: target = 0: menu_highlight = COLOR_CYAN
-	menu_col = PANEL_COL: menu_row = 2
-	star = side_first_army(side): fin = side_last_army(side)
-	menu_item_count = 0
-	FOR i = 1 TO MAX_CITIES
-		IF city_owner(i) = side AND city_army(i) > 0 THEN
-			FOR j = star TO fin
-			IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
-			NEXT j
-		END IF
-	NEXT i
-	
-	IF menu_item_count = 0 THEN side = -1: EXIT SUB
-	CALL menu_bubble_sort(menu_item_count)
+' The rules of the armies. They draw nothing. The screens of raising, supplying and combining
+' armies are in ui/army.bm, and call these.
 
-	IF side <> current_side THEN menu_choice = 1 + INT(menu_item_count * RND): GOTO join
-	menu_text$(0) = "Join"
-		menu_choice = MENU_START + 10: menu_highlight = COLOR_LIGHT_CYAN
-		CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
-join:
-		IF menu_choice < 1 GOTO nocity2
-		target = menu_value(menu_choice)
-		CALL clear_bottom_line: PRINT "Combining "; side_name$(side); " armies in "; city_name$(target); :  CALL wait_seconds(opt_pause!)
-
+' Combining armies. Army 0 gathers the armies of a city, and the army of the best leader among
+' them takes them over. army_combine (ui/army.bm) calls army_combine_start, then
+' army_combine_add for each army of the side, army_combine_absorb for each that joins, and
+' army_combine_finish.
+SUB army_combine_start (target)
 		army_size(0) = 0: army_leader_rating(0) = 0: army_experience(0) = 0: army_city(0) = target
 		army_name$(0) = "": army_supply(0) = 0: army_order(0) = ORDER_NONE
-'...........................................................................
-		best = 0: x = 0: spin = 0
-		FOR j = star TO fin
-		IF army_order(j) <> ORDER_NONE OR army_city(j) <> target OR army_size(j) = 0 GOTO dork1
-		IF army_size(0) + army_size(j) > 1250 THEN CALL clear_bottom_line: PRINT "Cannot combine "; army_name$(j); "... TOO LARGE"; : CALL wait_seconds(opt_pause!): GOTO dork1
+END SUB
 
-		IF army_leader_rating(j) > x THEN
-			x = army_leader_rating(j)
+' Army j joins army 0 when it is in the city, has no order and has men: status 2. Army 0 takes
+' its leader when he is better than any before (best is then j), its men and their share of
+' experience. status is 1 when army 0 would have more than 125,000 men, and 0 when j does not join.
+SUB army_combine_add (j, target, best, status)
+DIM pct!
+	status = 0
+		IF army_order(j) <> ORDER_NONE OR army_city(j) <> target OR army_size(j) = 0 THEN EXIT SUB
+		IF army_size(0) + army_size(j) > 1250 THEN status = 1: EXIT SUB
+
+		IF army_leader_rating(j) > army_leader_rating(0) THEN
 			army_name$(0) = army_name$(j)
 			army_leader_rating(0) = army_leader_rating(j)
 			best = j
 		END IF
 
 		army_size(0) = army_size(0) + army_size(j)
-		IF army_size(0) < 1 GOTO dork1
+		IF army_size(0) < 1 THEN EXIT SUB
 		pct! = (army_size(j) / army_size(0))
-		spin = spin + 1
 		army_experience(0) = (1 - pct!) * army_experience(0) + pct! * army_experience(j)
-		CALL clear_bottom_line: PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces"; : CALL wait_seconds(opt_pause!)
+		status = 2
+END SUB
+
+' Army j's supplies go to army 0, and its slot is emptied. Its leader goes back to the list.
+SUB army_combine_absorb (j)
 		army_supply(0) = army_supply(0) + army_supply(j)
 		IF army_supply(0) > MAX_SUPPLY THEN army_supply(0) = MAX_SUPPLY
 		army_size(j) = 0: army_city(j) = 0: army_experience(j) = 0: army_order(j) = ORDER_NONE
 		leader_name$(j) = army_name$(j)
 		army_leader_rating(j) = 0: army_supply(j) = 0: army_name$(j) = ""
-dork1:
-		NEXT j
+END SUB
 
-		CALL clear_bottom_line
-		IF side <> current_side AND spin = 0 THEN EXIT SUB
-		IF spin = 0 THEN
-				PRINT "No valid armies to combine at this time in "; city_name$(target);
-				wait_seconds opt_pause!
-				EXIT SUB
-		END IF
+' The combined army takes the slot of the best leader's army, in the city. When more than one
+' army joined, it can take no order this turn.
+SUB army_combine_finish (target, best, joined)
 		army_size(best) = army_size(0): army_leader_rating(best) = army_leader_rating(0)
 		army_experience(best) = army_experience(0): army_supply(best) = army_supply(0)
 		army_city(best) = target
 		army_name$(best) = army_name$(0)
 		leader_name$(best) = ""
-		IF spin > 1 THEN
-		PRINT "New army "; best; " of "; : CALL print_army_size(best): PRINT " is commanded by "; army_name$(best);
-		army_order(best) = ORDER_BUSY
-		ELSE
-		PRINT "Only 1 eligible army -- cannot combine at this time";
-		END IF
-		IF side = current_side THEN CALL wait_seconds(opt_pause!)
-		IF opt_sound >= SOUND_EFFECTS THEN SOUND 4000, .7
-	       
-		CALL draw_cities
-		CALL draw_army_flag(best)
-		CALL draw_map_marker(target, 0, MARK_FLASH_FRAME)
+		IF joined > 1 THEN army_order(best) = ORDER_BUSY
 		city_army(target) = best
-		CALL draw_stack_markers(side)
-nocity2:
 END SUB
 
-SUB army_new (side, slot, city)
+' A new army in a city: its supplies, experience, leader and size, and the price of 100 taken
+' from the side. army_new (ui/army.bm) shows it.
+SUB army_raise (side, slot, city)
 DIM x AS INTEGER: DIM a AS INTEGER
 	army_supply(slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(slot) = army_supply(slot) + 2
 	army_experience(slot) = 1: IF side = SIDE_REBEL THEN army_experience(slot) = 2
 	army_leader_rating(slot) = leader_rating(slot)
 	army_name$(slot) = leader_name$(slot): leader_name$(slot) = ""
-	COLOR COLOR_LIGHT_RED: CALL clear_bottom_line: PRINT "Placing NEW army "; slot; army_name$(slot); " in "; city_name$(city);
 
 	x = 70: IF opt_realism >= REALISM_ON THEN x = 3 * city_value(city) + 33
 	a = city_is_connected(side, city): IF a < 1 THEN x = x \ 3
 	city_army(city) = slot: army_size(slot) = x
-	PRINT " Size = "; : CALL print_army_size(slot)
-	side_cash(side) = side_cash(side) - COST_RECRUIT: IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, .5
-	army_city(slot) = city: CALL draw_army_flag(slot)
-	CALL wait_seconds(opt_pause! - .5)
+	side_cash(side) = side_cash(side) - COST_RECRUIT
+	army_city(slot) = city
 	army_order(slot) = ORDER_BUSY
 END SUB
 
@@ -114,7 +83,10 @@ DO
 LOOP WHILE swaps%
 END SUB
 
-SUB army_get_commander (side, slot)
+' The next commander of a side, in slot: the first army without a city that has a name on the
+' list, or a name made up for the first army without a city. slot is 0 when every army has a
+' city. army_get_commander (ui/army.bm) says so.
+SUB army_pick_commander (side, slot)
 DIM fin AS INTEGER: DIM a$
 DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
 	slot = 0
@@ -134,23 +106,27 @@ DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
 		EXIT SUB
 	END IF
 	NEXT i
-	CALL clear_bottom_line: PRINT "No more "; side_name$(side); " commanders available"; : CALL wait_seconds(opt_pause!)
 END SUB
 
-SUB army_resupply (army)
+' Buys supplies for an army, up to the resupply level, as far as the side's cash goes. result is
+' 1 when it bought some, 0 when the cash was not enough, and -1 when the army is cut off under
+' the Realism setting. army_resupply (ui/army.bm) shows it.
+SUB army_buy_supply (army, result)
 DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+		result = -1
 		who = army_side(army)
 		IF opt_realism >= REALISM_ON THEN
 			a = city_is_connected(who, army_city(army))
 			IF a < 1 THEN EXIT SUB
 		END IF
+		result = 0
 		IF army_size(army) > 0 THEN x = side_cash(who) / army_size(army) * 10
 		y = x + army_supply(army): IF y > RESUPPLY_LEVEL THEN x = RESUPPLY_LEVEL - army_supply(army)
-		IF x < 1 THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army); : GOTO nocash
-		army_supply(army) = army_supply(army) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(army)
-		CALL clear_bottom_line: PRINT army_name$(army); " has received supplies "; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 4500, .5
-nocash:
-		CALL wait_seconds(opt_pause!): IF side_cash(who) < 0 THEN side_cash(who) = 0
+		IF x >= 1 THEN
+			army_supply(army) = army_supply(army) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(army)
+			result = 1
+		END IF
+		IF side_cash(who) < 0 THEN side_cash(who) = 0
 END SUB
 
 SUB army_generate_name (army, name$)
@@ -215,42 +191,27 @@ SUB army_drill (army)
 	army_order(army) = ORDER_BUSY
 END SUB
 
-' Raises men in a city for 100: a new army under the next commander, or more men for the
-' army already there. raised is 0 when a new army was needed and no commander is left.
-SUB army_recruit (side, city, raised)
-DIM empty AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM a$
-DIM a AS INTEGER: DIM from AS INTEGER: DIM y AS INTEGER
-	raised = 1
-	empty = 0
-	CALL city_update_occupier(city)
-	IF city_army(city) > 0 THEN i = city_army(city): GOTO add2
-	CALL army_get_commander((side), empty)
-       
-	IF empty = 0 THEN raised = 0: EXIT SUB
-	army_city(empty) = city
-	CALL army_recruit_bonus(empty)
-	CALL army_new(side, empty, city)
-	EXIT SUB
-add2:
-	target = city
-	x = 45: a$ = ""
-	IF opt_realism >= REALISM_ON THEN
-		x = 2 * city_value(army_city(i)) + 20
-		a = city_is_connected(side, target)
-		IF a < 1 THEN x = x \ 3: a$ = " ISOLATED !"
-	END IF
-	army_size(i) = army_size(i) + x
+' The first step of a new army raised by recruiting: it is placed in the city, with the Balance
+' setting's extra men, which army_new then overwrites (TODO.md).
+SUB army_place_new (slot, city)
+	army_city(slot) = city
+	CALL army_recruit_bonus(slot)
+END SUB
 
-	CALL army_recruit_bonus(empty)
+' More men for the army in a city: 4,500, or under the Realism setting a number from the
+' city's value, a third of it when the city is cut off (isolated is then 1). The side pays
+' 100. The Balance setting's extra men go to army 0, as before (TODO.md).
+SUB army_add_recruits (side, army, isolated)
+DIM x AS INTEGER: DIM a AS INTEGER
+	x = 45: isolated = 0
+	IF opt_realism >= REALISM_ON THEN
+		x = 2 * city_value(army_city(army)) + 20
+		a = city_is_connected(side, army_city(army))
+		IF a < 1 THEN x = x \ 3: isolated = 1
+	END IF
+	army_size(army) = army_size(army) + x
+	CALL army_recruit_bonus(0)
 	side_cash(side) = side_cash(side) - COST_RECRUIT
-	from = army_city(i): x = city_x(from) - 12: y = city_y(from) - 11
-	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
-	CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
-	IF a$ <> "" THEN PRINT a$;
-	PUT (x - 9, y - 7), saved_under_army, PSET
-	CALL wait_seconds(opt_pause! - .5)
 END SUB
 
 ' The Balance setting's extra men for a recruited army. The caller passes slot 0 when men

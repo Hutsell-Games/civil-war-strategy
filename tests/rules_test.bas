@@ -313,16 +313,107 @@ SUB TestCommanderTakesTheFirstFreeName
 leader_name$(1) = "Grant": army_city(1) = 5
 leader_name$(2) = "Pope"
 leader_name$(3) = "Meade"
-CALL army_get_commander(1, empty)
+CALL army_pick_commander(1, empty)
 AssertEqualInt 2, empty, "Grant has an army; Pope is next"
 END SUB
 
 SUB TestCommanderMakesUpANameAfterTheList
 RANDOMIZE 1
-CALL army_get_commander(2, empty)
+CALL army_pick_commander(2, empty)
 AssertEqualInt 21, empty, "the Rebels' first army"
 AssertEqualStr "Rebel I", leader_name$(21), "its made-up name"
 AssertTrue leader_rating(21) >= 1 AND leader_rating(21) <= 9, "a rating from 1 to 9:" + STR$(leader_rating(21))
+END SUB
+
+SUB TestCommanderNoneLeft
+FOR i = 1 TO 20: army_city(i) = 5: NEXT i
+CALL army_pick_commander(1, empty)
+AssertEqualInt 0, empty, "every Union army has a city"
+END SUB
+
+' -------------------------------------------------------- combining armies
+' Army 0 gathers the armies of a city; the best leader's army takes them over.
+
+SUB TestArmyCombineTakesTheBestLeader
+army_city(1) = 5: army_size(1) = 100: army_leader_rating(1) = 4: army_experience(1) = 2: army_supply(1) = 3: army_name$(1) = "Grant"
+army_city(2) = 5: army_size(2) = 50: army_leader_rating(2) = 7: army_experience(2) = 5: army_supply(2) = 9: army_name$(2) = "Sherman"
+army_city(3) = 5: army_size(3) = 40: army_order(3) = 12
+CALL army_combine_start(5)
+best = 0
+CALL army_combine_add(1, 5, best, status)
+AssertEqualInt 2, status, "army 1 joins"
+CALL army_combine_absorb(1)
+AssertEqualStr "Grant", leader_name$(1), "Grant goes back to the list"
+AssertEqualInt 0, army_city(1), "army 1's slot is empty"
+CALL army_combine_add(2, 5, best, status)
+AssertEqualInt 2, status, "army 2 joins"
+AssertEqualInt 2, best, "Sherman is the better leader"
+CALL army_combine_absorb(2)
+CALL army_combine_add(3, 5, best, status)
+AssertEqualInt 0, status, "army 3 has an order: it does not join"
+CALL army_combine_finish(5, 2, 2)
+AssertEqualInt 150, army_size(2), "the men of both"
+AssertEqualInt 3, army_experience(2), "experience by share of men: 2/3 of 2 and 1/3 of 5"
+AssertEqualInt 10, army_supply(2), "3 + 9, at most 10"
+AssertEqualStr "Sherman", army_name$(2), "under Sherman"
+AssertEqualInt ORDER_BUSY, army_order(2), "two joined: no order this turn"
+AssertEqualInt 2, city_army(5), "it holds the city"
+END SUB
+
+SUB TestArmyCombineRefusesTooLarge
+army_city(1) = 5: army_size(1) = 1200
+army_city(2) = 5: army_size(2) = 100
+CALL army_combine_start(5)
+CALL army_combine_add(1, 5, best, status)
+CALL army_combine_add(2, 5, best, status)
+AssertEqualInt 1, status, "130,000 men: too large"
+AssertEqualInt 1200, army_size(0), "army 0 has army 1's men only"
+END SUB
+
+' ------------------------------------------------- raising and supplying
+SUB TestArmyRaiseSetsUpANewArmy
+RANDOMIZE 1
+leader_name$(3) = "Pope": leader_rating(3) = 5: side_cash(1) = 500
+CALL army_raise(1, 3, 7)
+AssertEqualStr "Pope", army_name$(3), "the leader on the list"
+AssertEqualStr "", leader_name$(3), "is off the list"
+AssertEqualInt 5, army_leader_rating(3), "with his rating"
+AssertEqualInt 1, army_experience(3), "a Union army starts at 1"
+AssertEqualInt 23, army_size(3), "7,000 men, a third of it in a city cut off"
+AssertTrue army_supply(3) >= 5 AND army_supply(3) <= 10, "supplies from 5 to 10:" + STR$(army_supply(3))
+AssertEqualInt 7, army_city(3), "in city 7"
+AssertEqualInt 3, city_army(7), "which it holds"
+AssertEqualInt 400, side_cash(1), "for 100"
+AssertEqualInt ORDER_BUSY, army_order(3), "no order this turn"
+END SUB
+
+SUB TestArmyBuySupplyUpToTheLevel
+army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 1000
+CALL army_buy_supply(1, result)
+AssertEqualInt 1, result, "bought"
+AssertEqualInt 5, army_supply(1), "up to the resupply level"
+AssertEqualInt 960, side_cash(1), "4 days for 10,000 men cost 40"
+side_cash(1) = 2: army_supply(1) = 1
+CALL army_buy_supply(1, result)
+AssertEqualInt 0, result, "not enough cash"
+AssertEqualInt 1, army_supply(1), "nothing bought"
+END SUB
+
+SUB TestArmyBuySupplyCutOff
+opt_realism = REALISM_ON
+army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 1000
+CALL army_buy_supply(1, result)
+AssertEqualInt -1, result, "city 5 has no road to a Union city"
+AssertEqualInt 1000, side_cash(1), "nothing paid"
+END SUB
+
+SUB TestArmyAddRecruits
+opt_difficulty = 3: current_side = 1
+army_city(4) = 7: army_size(4) = 100: side_cash(1) = 300
+CALL army_add_recruits(1, 4, isolated)
+AssertEqualInt 145, army_size(4), "4,500 more men"
+AssertEqualInt 200, side_cash(1), "for 100"
+AssertEqualInt 0, isolated, "not isolated without the Realism setting"
 END SUB
 
 ' ---------------------------------------------------------------------- mxw
@@ -544,6 +635,7 @@ END SUB
 '$INCLUDE: '../ui/battle.bm'
 '$INCLUDE: '../ui/railroad.bm'
 '$INCLUDE: '../ui/city.bm'
+'$INCLUDE: '../ui/army.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'

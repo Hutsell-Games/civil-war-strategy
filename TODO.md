@@ -44,8 +44,9 @@ game plays changes the recorded screens.
   (`rules\battle.bm`) has `FOR i = 1 TO 2: IF army_supply(i) > 0 THEN army_supply(i) = army_supply(i) - 1`
   (`TestBattleFightTakesSupplyFromOneAndTwo`). It was most likely meant for the attacker and the defender.
 - **The Balance setting's extra recruits are never added.** `army_recruit_bonus` (`rules\army.bm`) adds
-  men to a new army just before `army_new` sets its size, and to army 0 when men join an army
-  (`army_recruit` passes `empty`, which is 0 there). It was most likely meant for the army recruited.
+  men to a new army just before `army_raise` sets its size, and to army 0 when men join an army
+  (`army_add_recruits` passes 0, as `army_recruit` passed `empty`, which was 0 there). It was most likely
+  meant for the army recruited.
 - **The computer checks the wrong city's track before a train to its capital.** `ai_railroad` (`ai\ai.bm`)
   calls `railroad_route_count(side, target)` with `target` left from the loop before, not the capital.
 - **The winner of a battle gets none of the loser's supplies.** `turn_army_surrenders` (`rules\turn.bm`)

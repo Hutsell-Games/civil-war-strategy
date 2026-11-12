@@ -15,7 +15,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `army.bm` | `army_combine`, `army_detach`, `army_drill`, `army_recruit` (mixed), `army_recruit_bonus`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` |
+| `army.bm` | `army_combine_start`, `army_combine_add`, `army_combine_absorb`, `army_combine_finish`, `army_raise`, `army_pick_commander`, `army_buy_supply`, `army_place_new`, `army_add_recruits`, `army_detach`, `army_drill`, `army_recruit_bonus`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` (`army_combine`, `army_new`, `army_get_commander`, `army_resupply` and `army_recruit` until phase 8 moved them to `ui\army.bm`) |
 | `city.bm` | `city_take`, `city_is_connected`, `city_fix_return_routes`, `city_update_occupier` (`city_capture` and `check_map_links` until phase 8 moved them to `ui\city.bm`) |
 | `battle.bm` | `battle_strengths`, `battle_fight`, `battle_losses`, `battle_apply_losses`, `normal_random_number` (`calculate_battle` until phase 8 split it) |
 | `navy.bm` | `navy_remove_ship`, `navy_commands`, `navy_action`, `navy_build_ship` (mixed), `navy_bombard` (mixed), `navy_sail_to_port` (mixed), `navy_raid_commerce` (mixed), `navy_land_army`, `navy_finish_move` (mixed), `navy_commerce_raid` (mixed), `navy_combat` (mixed), `navy_show_hits` (mixed) |
@@ -42,6 +42,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `battle.bm` | `calculate_battle` (new in phase 8: the battle's screen) |
 | `railroad.bm` | `railroad_move`, `railroad_start`, `railroad_arrive` (new in phase 8: the train's screen) |
 | `city.bm` | `city_capture`, `check_map_links` (new in phase 8: a capture and the map check) |
+| `army.bm` | `army_combine`, `army_new`, `army_get_commander`, `army_resupply`, `army_recruit` (new in phase 8: raising, supplying and combining armies) |
 
 ## draw\
 

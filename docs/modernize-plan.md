@@ -135,9 +135,9 @@ output of `play.py check` and `play.py compare` (decision 15).
 Updated 2026-11-11. Phases 0 to 7 are done and committed. Phase 8's steps 1 and 2 are committed
 (`6eda547`, `013b8d0`). What each step did is in `modernize-completed.md`.
 
-Step 3's first part, `rules\city.bm`, is done in the working tree.
+Step 3 is done in the working tree, in two parts: `rules\city.bm` and `rules\army.bm`.
 
-**Next:** step 3's second part, the five of `rules\army.bm`.
+**Next:** step 4, `rules\navy.bm`.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -270,9 +270,9 @@ The order takes the SUBs that others call first, so that a caller's split finds 
 
 1. **Done: `calculate_battle`.** See `modernize-completed.md`.
 2. **Done: the railroad.** See `modernize-completed.md`.
-3. `city_capture` and `check_map_links` (**done**, see `modernize-completed.md`); then the five of
-   `rules\army.bm`.
-4. The nine of `rules\navy.bm`.
+3. **Done: `rules\city.bm` and `rules\army.bm`.** See `modernize-completed.md`.
+4. The nine of `rules\navy.bm`. `navy_land_army` joins them: it calls `army_get_commander` and
+   `army_new`, which are screen parts since step 3.
 5. The eight of `rules\turn.bm`. `turn_resolve` and its parts are the turn as the player sees it, so most
    of them go to `ui\turn.bm`, with rule parts left in `rules\turn.bm`.
 6. The six of `ai\ai.bm`, and the rule in `menu_recruit_cities` moved to `rules\`.
