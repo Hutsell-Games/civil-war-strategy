@@ -687,3 +687,21 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    - Unit tests: 3 new ones, so 112 in all. One saves a game and loads it again in a folder of
      its own. Lines moved without a test: none. 196 lines of the game are run in part and 20 are
      not run.
+4. **Done: the main menu and its own entries.** They left the main module for the new
+   `ui\main_menu.bm`. What stays under `menu0:` is `CALL menu_main(chosit)` and a `SELECT CASE`
+   with one to four lines for each entry.
+   - `menu_main (start)` draws the top bar, fills the menu and shows it. `start` is the main
+     module's `chosit`, passed by reference: an entry shown as "-" still moves it, as before.
+   - `menu_main_railroad` is the Railroad entry: the train's picture, the capacity line and
+     `railroad_move`, or "Railroad is already carrying". `menu_main_end_turn (ended)` is the Yes or
+     NOT YET menu. `menu_main_inform` is the reports and the armies' move lines drawn again.
+   - Troops, Moves and Ships keep their lines in the main module. Each calls a menu SUB that
+     was there already (`menu_army_recruit`, `menu_army_move`, `navy_commands`).
+   - Two rule SUBs in `rules\turn.bm` hold the state the main menu changed:
+     `turn_check_commands` (the Union plays when a two-player game has no side; Ships closes
+     without a fleet or the price of a ship) and `turn_close_recruiting`. `endrnd:` calls
+     `turn_reset_commands`, which step 3 added.
+   - The main module no longer declares `fin`, `x`, `y`, `z`, `limit` and `star`. It is 268 lines,
+     of which 113 have a statement.
+   - Unit tests: 1 new one, so 113 in all. Lines moved without a test: none. 195 lines of the
+     game are run in part and 20 are not run.

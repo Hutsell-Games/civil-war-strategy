@@ -15,8 +15,7 @@ DECLARE SUB draw_train (who%, flag%)
 DECLARE FUNCTION railroad_capacity% (who%)
 DECLARE SUB draw_top_bar ()
 ' $INCLUDE: 'cws14.bi'
-DIM fin AS INTEGER
-DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER: DIM action AS INTEGER
+DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM chosit AS INTEGER: DIM action AS INTEGER: DIM ended AS INTEGER
 
 CALL script_mute
 replay = 0
@@ -122,33 +121,13 @@ END IF
 '                              Main Menu
 '±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 menu0:
-CALL draw_top_bar
-IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
-IF side_cash(current_side) < COST_SHIP AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
-
-menu_highlight = COLOR_LIGHT_CYAN
-menu_color = COLOR_RED
-menu_col = PANEL_COL: menu_row = 13
-menu_text$(0) = "Main"
-menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN menu_text$(1) = "-": chosit = 23
-menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF chosit = 23 THEN chosit = 24
-menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN menu_text$(3) = "-": IF chosit = 24 THEN chosit = 25
-menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN menu_text$(4) = "-": IF chosit = 25 THEN chosit = 26
-menu_text$(5) = "END TURN"
-menu_text$(6) = "Inform"
-menu_text$(7) = "COMMANDS"
-menu_text$(8) = "UTILITY"
-menu_text$(9) = "Files"
-
-menu_item_count = 9
-menu_choice = chosit
-CALL menu_select(MENU_PLAIN): CALL clear_right_panel
+CALL menu_main(chosit)
 '==========================================================================
 '                            Main Menu
 '==========================================================================
 SELECT CASE menu_choice
 	CASE 1
-	IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN turn_recruit_state = -1: GOTO menu0
+	IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting: GOTO menu0
 	CALL menu_army_recruit((current_side))
 	chosit = 23
 	GOTO menu0
@@ -162,39 +141,17 @@ SELECT CASE menu_choice
 	IF turn_navy_done = 0 THEN CALL navy_commands((current_side), NAVY_ASK)
 	chosit = 25
 	CASE 4
-IF train_army(current_side) = 0 THEN
-	COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
-	PSET (550, 20), 0
-	DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
-	z = 9: IF current_side = SIDE_REBEL THEN z = 7
-	x = POINT(0): y = POINT(1)
-	PAINT (x, y), z, 15
-	COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN COLOR COLOR_LIGHT_CYAN
-	limit = railroad_capacity(current_side)
-	CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
-	CALL railroad_move(current_side)
-ELSE
-	CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Railroad is already carrying "; army_name$(train_army(current_side)); " to "; city_name$(army_order(train_army(current_side))); : GOTO menu0
-END IF
+	CALL menu_main_railroad
 '==========================================================================
 	CASE 5
-	menu_col = PANEL_COL: menu_row = 15
-	menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN: menu_choice = MENU_START + 2
-	menu_text$(0) = "End Turn"
-	menu_text$(1) = "Yes"
-	menu_text$(2) = "NOT YET"
-	menu_item_count = 2: CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice <> 1 THEN chosit = 24: GOTO menu0
+	CALL menu_main_end_turn(ended): IF ended = 0 THEN chosit = 24: GOTO menu0
 endrnd:
-	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
+	CALL turn_reset_commands
 	IF opt_players = PLAYERS_TWO THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN CALL draw_player_turn: CALL draw_map: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
-	CALL menu_report((current_side)): chosit = 27
-	star = side_first_army(current_side): fin = side_last_army(current_side)
-	FOR i = star TO fin
-	IF army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
-	NEXT i
+	CALL menu_main_inform: chosit = 27
 '==========================================================================
 '                            Commands
 '==========================================================================
@@ -241,6 +198,7 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'rules/victory.bm'
 ' $INCLUDE: 'ai/ai.bm'
 ' $INCLUDE: 'ui/menu.bm'
+' $INCLUDE: 'ui/main_menu.bm'
 ' $INCLUDE: 'ui/orders.bm'
 ' $INCLUDE: 'ui/files.bm'
 ' $INCLUDE: 'ui/options.bm'

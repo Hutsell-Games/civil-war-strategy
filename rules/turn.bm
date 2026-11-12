@@ -12,6 +12,18 @@ SUB turn_reset_commands
 	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
 END SUB
 
+' Before each main menu. In a two-player game with no side set, the Union plays. Ships is
+' closed for the month when the side has no fleet and not the price of a ship.
+SUB turn_check_commands
+	IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
+	IF side_cash(current_side) < COST_SHIP AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
+END SUB
+
+' Troops is closed for the month.
+SUB turn_close_recruiting
+	turn_recruit_state = -1
+END SUB
+
 ' Two months pass.
 SUB turn_advance_month
 turn_month = turn_month + 2

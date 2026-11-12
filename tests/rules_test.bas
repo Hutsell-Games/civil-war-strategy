@@ -1210,6 +1210,26 @@ AssertEqualInt 0, turn_moves_done, "Moves open"
 AssertEqualInt 0, turn_navy_done, "Ships open"
 END SUB
 
+' Before each main menu: Ships is closed when the side has no fleet and under 100 in cash.
+' In a two-player game with no side set, the Union plays.
+SUB TestTurnCheckCommands
+current_side = SIDE_UNION: opt_players = PLAYERS_ONE
+side_cash(SIDE_UNION) = COST_SHIP - 1: fleet_city(SIDE_UNION) = 30
+CALL turn_check_commands
+AssertEqualInt 0, turn_navy_done, "a fleet: Ships stays open"
+fleet_city(SIDE_UNION) = 0: side_cash(SIDE_UNION) = COST_SHIP
+CALL turn_check_commands
+AssertEqualInt 0, turn_navy_done, "no fleet, the price of a ship: open"
+side_cash(SIDE_UNION) = COST_SHIP - 1
+CALL turn_check_commands
+AssertEqualInt 1, turn_navy_done, "no fleet and too little cash: closed"
+current_side = SIDE_NONE: opt_players = PLAYERS_TWO
+CALL turn_check_commands
+AssertEqualInt SIDE_UNION, current_side, "two players and no side: the Union"
+CALL turn_close_recruiting
+AssertEqualInt -1, turn_recruit_state, "Troops closed"
+END SUB
+
 ' A game saved in a slot and loaded again, in a folder of the test's own. save_game also
 ' writes the settings (cws.cfg), and load_game reads them.
 SUB TestSaveGameAndLoadItAgain
@@ -1314,6 +1334,7 @@ END SUB
 '$INCLUDE: '../rules/victory.bm'
 '$INCLUDE: '../ai/ai.bm'
 '$INCLUDE: '../ui/menu.bm'
+'$INCLUDE: '../ui/main_menu.bm'
 '$INCLUDE: '../ui/orders.bm'
 '$INCLUDE: '../ui/files.bm'
 '$INCLUDE: '../ui/options.bm'
