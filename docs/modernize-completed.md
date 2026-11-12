@@ -705,3 +705,34 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
      of which 113 have a statement.
    - Unit tests: 1 new one, so 113 in all. Lines moved without a test: none. 195 lines of the
      game are run in part and 20 are not run.
+5. **Done: the main module is a loop.** `CWSTRAT.BAS` has no label, `GOTO` or `GOSUB` left. It is
+   128 lines: the declarations, two nested `DO` loops, the `DATA` of the map's letters and the
+   `$INCLUDE` lines. It was 745 lines when the plan began.
+   - **The outer loop is a game**: `game_new`, `show_title`, `script_start`, `menu_title`, then a
+     saved game or `show_new_game`. **The inner loop is one main menu and its command.** A flag
+     `ended` says the turn ended (End Turn's Yes, or F7), and `new_game` leaves the inner loop
+     (New Game in the Files menu, or the game is over).
+   - **After a turn ends**: `turn_reset_commands`, then `turn_next_player (month_over)`
+     (`rules\turn.bm`). In a two-player game the Rebels' turn follows the Union's and no month is
+     played. Otherwise the month is played: the history line, `turn_resolve`,
+     `turn_collect_income` and `check_victory_conditions`, in the lines they had.
+   - `game_new` (`rules\setup.bm`) is the start of a game: `game_reset`, `load_scenario`,
+     `game_apply_settings`, `set_union_advantage` and `load_cities`. The two random draws for the
+     sides' cash are still the first of a game and still come before `script_start`.
+   - `show_title`, `menu_title` and `show_new_game` are in `ui\main_menu.bm`, and
+     `history_start` in `port\files.bm`. `show_title` reads the map's letters from the main
+     module's `DATA` with `RESTORE` and `READ`; both compilers accept that in a SUB.
+   - **Three calls changed places.** `set_union_advantage` and `load_cities` now come before the
+     title screen, and `clear_bottom_line` after `script_start`. The mountain picture and the
+     map's letters are loaded after the settings are applied. None of these draws a random
+     number or reads what the other changes.
+   - **Dropped, each without effect:** `a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2`
+     (both ways led to the next line); `menu_choice = 0` and the test of it in the title tune's
+     line; `ON ERROR GOTO 0` (nothing sets a handler); and the loop that cleared `army_city()`
+     when a game is over, just before `game_reset` clears it.
+   - **Kept:** `chosit`, the row the main menu starts on, is not reset for a new game. After New
+     Game in the Files menu, the new game's first main menu starts on Files.
+   - Troops keeps a one-line `IF ... ELSE`: its refusal, Troops chosen while it shows "-", is
+     run by no script, and as a line of its own it would be a 21st line not run.
+   - Unit tests: 4 new ones, so 117 in all. Lines moved without a test: none. 194 lines of the
+     game are run in part and 20 are not run.

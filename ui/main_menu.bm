@@ -1,5 +1,6 @@
 ' The main menu and its own entries: Railroad, End Turn and Inform. The menus of the other
-' entries are in ui/orders.bm, ui/options.bm and ui/files.bm.
+' entries are in ui/orders.bm, ui/options.bm and ui/files.bm. At the end: the title screen,
+' the title menu and the start of a new game.
 
 ' Shows the main menu and leaves the choice in menu_choice. start is the row it starts on, as
 ' MENU_START + row. An entry that cannot be chosen shows as "-". Troops as "-" sets the start
@@ -64,4 +65,47 @@ DIM i AS INTEGER: DIM star AS INTEGER: DIM fin AS INTEGER
 	FOR i = star TO fin
 	IF army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
 	NEXT i
+END SUB
+
+' The title screen. First it loads the mountain picture and the map's letters, which are DATA
+' in the main module. The title tune plays before the first game only (replay is 0).
+SUB show_title (replay)
+DIM k AS INTEGER
+	IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
+		CALL load_picture(GFXDIR + "mtn.vga", pic_mountain())
+	ELSE
+		COLOR COLOR_WHITE: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": wait_seconds PAUSE_LONG
+	END IF
+	RESTORE
+	FOR k = 1 TO 26: READ map_font$(k): NEXT k
+	CALL draw_title
+	IF replay = 0 AND opt_sound = SOUND_MUSIC THEN CALL play_title_music
+END SUB
+
+' The title menu: Resume Saved Game, Start NEW Game or Quit to DOS. The choice is left in
+' menu_choice. In a two-player game the first player's turn screen comes before it.
+SUB menu_title
+	CALL clear_bottom_line
+	wait_seconds .3
+	menu_box_type = BOX_DOUBLE
+	menu_highlight = COLOR_WHITE
+	IF opt_players = PLAYERS_TWO THEN CALL draw_player_turn
+	menu_text$(0) = "VGA CIVILWAR STRATEGY"
+	menu_text$(1) = "Resume Saved Game"
+	menu_text$(2) = "Start NEW Game"
+	menu_text$(3) = "Quit to DOS"
+	menu_col = 33: menu_row = 20: menu_color = COLOR_MAGENTA: menu_item_count = 3
+	menu_choice = MENU_START + 2
+	CALL menu_select(MENU_PLAIN)
+END SUB
+
+' A new game begins: the history file is started when History is on, and the map is drawn.
+SUB show_new_game
+	IF opt_history = 1 THEN
+	CLS
+	CALL history_start
+	ELSE
+	SCREEN 12: CLS
+	END IF
+	CALL draw_map
 END SUB

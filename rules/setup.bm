@@ -120,3 +120,48 @@ END SUB
 SUB option_next_aggression
 	opt_ai_aggression = opt_ai_aggression + 1: IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
 END SUB
+
+' A new game: the scenario and the settings are read, and the map's cities.
+SUB game_new
+	CALL game_reset
+	CALL load_scenario
+	CALL game_apply_settings
+	CALL set_union_advantage
+	CALL load_cities
+END SUB
+
+' Clears the armies, the fleets, the trains and the victory points for a new game.
+SUB game_reset
+DIM k AS INTEGER
+	game_over = 0: turn_recruit_state = 0
+	FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = ORDER_NONE: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
+	union_income_bonus = 0: emancipation_done = 0
+	FOR k = SIDE_UNION TO SIDE_REBEL
+	fleet_size(k) = 0: fleet_city(k) = 0
+	train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
+	NEXT k
+	saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
+END SUB
+
+' After the scenario and the settings are read. Under the Realism setting a game that starts
+' before 1862 has no ironclads. The number of players and the display speed get a valid
+' value, and the special events favor the side left to the computer. The Balance setting
+' gives the computer's side cash. Each side's cash becomes its income, and it gets up to 50
+' more.
+SUB game_apply_settings
+DIM i AS INTEGER: DIM a$
+	IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
+		FOR i = SIDE_UNION TO SIDE_REBEL
+			a$ = STRING$(LEN(fleet_ships$(i)), "W")
+			fleet_ships$(i) = a$
+		NEXT i
+	END IF
+	IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN opt_players = PLAYERS_ONE
+	IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
+	IF current_side = SIDE_UNION THEN opt_event_balance = 7
+	IF current_side = SIDE_REBEL THEN opt_event_balance = 3
+	IF opt_pause! < 1 THEN opt_pause! = 2
+	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
+	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
+	FOR i = SIDE_UNION TO SIDE_REBEL: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
+END SUB

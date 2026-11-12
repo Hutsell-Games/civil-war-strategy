@@ -147,3 +147,12 @@ DIM s AS INTEGER: DIM i AS INTEGER
 	WRITE #1, names$(s, i), scores(s, i)
 	NEXT i: NEXT s: CLOSE #1
 END SUB
+
+' Starts the history file cws.his with the date. The history of the game before is kept as
+' oldhist.ory.
+SUB history_start
+	IF LEN(DIR$("cws.his")) > 0 THEN CALL script_shell("copy cws.his oldhist.ory")
+	OPEN "O", 2, "cws.his"
+	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
+	CLOSE #2
+END SUB

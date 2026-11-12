@@ -1230,6 +1230,76 @@ CALL turn_close_recruiting
 AssertEqualInt -1, turn_recruit_state, "Troops closed"
 END SUB
 
+' After a turn ends: with one player the month is played. With two, the Rebels' turn follows
+' the Union's, and the month is played after the Rebels'.
+SUB TestTurnNextPlayer
+opt_players = PLAYERS_ONE: current_side = SIDE_REBEL
+CALL turn_next_player(over)
+AssertEqualInt 1, over, "one player: the month is played"
+AssertEqualInt SIDE_REBEL, current_side, "and the player keeps the side"
+opt_players = PLAYERS_TWO: current_side = SIDE_UNION
+CALL turn_next_player(over)
+AssertEqualInt 0, over, "two players, after the Union: no month yet"
+AssertEqualInt SIDE_REBEL, current_side, "the Rebels' turn"
+CALL turn_next_player(over)
+AssertEqualInt 1, over, "after the Rebels: the month is played"
+AssertEqualInt SIDE_UNION, current_side, "then the Union again"
+END SUB
+
+SUB TestGameReset
+game_over = 1: turn_recruit_state = -1: saves_exist = 0: emancipation_done = 1: union_income_bonus = 252
+army_size(7) = 90: army_city(7) = 12: army_order(7) = 5: army_leader_rating(7) = 4: army_name$(7) = "Banks"
+fleet_size(SIDE_REBEL) = 3: fleet_city(SIDE_REBEL) = 27: train_army(SIDE_UNION) = 7: train_city(SIDE_UNION) = 30
+side_victory_points(SIDE_UNION) = 400: victory_rule(VICTORY_MONTH) = 3
+CALL game_reset
+AssertEqualInt 0, game_over, "the game is on"
+AssertEqualInt 0, turn_recruit_state, "Troops open"
+AssertEqualInt 1, saves_exist, "Load open"
+AssertEqualInt 0, emancipation_done, "no Emancipation Proclamation yet"
+AssertEqualInt 0, union_income_bonus, "no extra income yet"
+AssertEqualInt 0, army_size(7) + army_city(7) + army_order(7) + army_leader_rating(7), "no army"
+AssertEqualStr "", army_name$(7), "nor its name"
+AssertEqualInt 0, fleet_size(SIDE_REBEL) + fleet_city(SIDE_REBEL), "no fleet"
+AssertEqualInt 0, train_army(SIDE_UNION) + train_city(SIDE_UNION), "no train"
+AssertEqualInt 0, side_victory_points(SIDE_UNION), "no points"
+AssertEqualInt 1, victory_rule(VICTORY_MONTH), "the time limit's month is January until the scenario sets it"
+END SUB
+
+' The settings as a new game takes them. The Union player on Rebel ++ (1) gives the Rebels
+' 500; cash becomes income, and up to 50 comes on top.
+SUB TestGameApplySettingsUnion
+RANDOMIZE 1
+opt_realism = REALISM_ON: turn_year = 1861: fleet_ships$(SIDE_UNION) = "WIIW"
+opt_players = 0: current_side = SIDE_NONE: opt_pause! = 0: opt_difficulty = 1
+side_cash(SIDE_UNION) = 300: side_cash(SIDE_REBEL) = 50
+CALL game_apply_settings
+AssertEqualStr "WWWW", fleet_ships$(SIDE_UNION), "no ironclads before 1862 under realism"
+AssertEqualInt PLAYERS_ONE, opt_players, "one player when the setting is not 1 or 2"
+AssertEqualInt SIDE_UNION, current_side, "the Union when no side is set"
+AssertEqualInt 7, opt_event_balance, "events favor the Rebels"
+AssertTrue opt_pause! = 2, "the display speed is Normal when not set"
+AssertEqualInt 300, side_income(SIDE_UNION), "the Union's income is its cash"
+AssertEqualInt 550, side_income(SIDE_REBEL), "the Rebels' cash and income with 500 for Rebel ++"
+AssertTrue side_cash(SIDE_UNION) >= 300 AND side_cash(SIDE_UNION) <= 350, "up to 50 more:" + STR$(side_cash(SIDE_UNION))
+END SUB
+
+' The Rebel player on Union ++ (5) gives the Union 500. Ironclads stay without realism.
+SUB TestGameApplySettingsRebel
+RANDOMIZE 1
+opt_realism = REALISM_OFF: turn_year = 1861: fleet_ships$(SIDE_UNION) = "WI"
+opt_players = PLAYERS_ONE: current_side = SIDE_REBEL: opt_pause! = 8: opt_difficulty = 5
+side_cash(SIDE_UNION) = 300: side_cash(SIDE_REBEL) = 50
+CALL game_apply_settings
+AssertEqualStr "WI", fleet_ships$(SIDE_UNION), "ironclads stay"
+AssertEqualInt 3, opt_event_balance, "events favor the Union"
+AssertTrue opt_pause! = 8, "a display speed that is set stays"
+AssertEqualInt 800, side_income(SIDE_UNION), "the Union's cash and income with 500 for Union ++"
+AssertEqualInt 50, side_income(SIDE_REBEL), "the Rebels' income"
+opt_players = PLAYERS_TWO
+CALL game_apply_settings
+AssertEqualInt SIDE_UNION, current_side, "two players: the Union starts"
+END SUB
+
 ' A game saved in a slot and loaded again, in a folder of the test's own. save_game also
 ' writes the settings (cws.cfg), and load_game reads them.
 SUB TestSaveGameAndLoadItAgain

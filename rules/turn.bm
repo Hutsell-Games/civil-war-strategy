@@ -24,6 +24,14 @@ SUB turn_close_recruiting
 	turn_recruit_state = -1
 END SUB
 
+' After a turn ends. In a two-player game the Rebels' turn follows the Union's, and
+' month_over is 0. Otherwise the month is played, month_over is 1, and the Union is next.
+SUB turn_next_player (month_over)
+	month_over = 1
+	IF opt_players = PLAYERS_TWO THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN month_over = 0: EXIT SUB
+	IF current_side > 2 THEN current_side = SIDE_UNION
+END SUB
+
 ' Two months pass.
 SUB turn_advance_month
 turn_month = turn_month + 2

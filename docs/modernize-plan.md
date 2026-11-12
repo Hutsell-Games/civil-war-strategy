@@ -141,10 +141,10 @@ the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is committ
 and step 8, victory, as `f5ee0f0`. That ends phase 8.
 
 Phase 9, the menus, has its plan below ("Phase 9: the menus"). Its step 1, the Utility menu, is
-committed as `693c078`, and step 2, the Commands menu, as `10056a5`, and step 3, the Files menu, as `f831801`. Step 4, the
-main menu, is done in the working tree (2026-11-12).
+committed as `693c078`, and step 2, the Commands menu, as `10056a5`, step 3, the Files menu, as `f831801`, and step 4, the main menu, as `653e218`. Step 5, the main
+module as a loop, is done in the working tree (2026-11-12).
 
-**Next:** phase 9 step 5, the main module becomes a loop.
+**Next:** phase 9 step 6, the navy's commands.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -343,9 +343,7 @@ their random numbers must stay in order.
 2. **Done: the Commands menu.** See `modernize-completed.md`.
 3. **Done: the Files menu.** See `modernize-completed.md`.
 4. **Done: the main menu and its own entries.** See `modernize-completed.md`.
-5. **The main module becomes a loop.** The start of a game (`newgame:`, `iron:`) becomes rule SUBs in
-   `rules\setup.bm` and a `menu_title`. `newmonth:`, `menu0:` and `endrnd:` become nested `DO`
-   loops: a game, its months, the commands of a month. No label is left in the main module.
+5. **Done: the main module is a loop.** See `modernize-completed.md`.
 6. **The navy's commands.** `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`,
    `navy_raid_commerce` and `navy_land_army` each serve the player and the computer through
    `action`. Each becomes three parts: the player's menu, the computer's choice (`ai\`), and the
