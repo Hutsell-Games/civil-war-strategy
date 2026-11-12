@@ -270,6 +270,25 @@ AssertEqualInt 130, total_income, "both incomes"
 AssertEqualInt 0, army_order(3), "orders cleared"
 END SUB
 
+' ------------------------- turn_set_move_order and turn_update_victory_points
+
+SUB TestMoveOrderPutsNoSuppliesLast
+army_city(5) = 3: army_order(5) = 4: army_size(5) = 100
+army_order(7) = ORDER_BUSY
+CALL turn_set_move_order
+AssertEqualInt 905, move_order_key(1), "army 5, out of supplies, is the only one that moves"
+AssertEqualInt MOVE_KEY_NONE, move_order_key(2), "the others do not move"
+AssertEqualInt ORDER_NONE, army_order(7), "a busy army is free again"
+END SUB
+
+SUB TestVictoryPointsKeepEightTenths
+side_victory_points(1) = 100: side_income(1) = 50: side_city_count(1) = 30
+side_victory_points(2) = 10: side_income(2) = 0: side_city_count(2) = 40
+CALL turn_update_victory_points
+AssertEqualInt 154, side_victory_points(1), "80, 24 for income and cities, 50 for 30 cities"
+AssertEqualInt 254, side_victory_points(2), "over 34 cities the Rebels get the Union's points and 100"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern

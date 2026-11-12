@@ -38,7 +38,7 @@ IF current_side = SIDE_UNION AND y > 0 THEN ai_strength_ratio! = x / y ELSE IF c
 END SUB
 
 SUB turn_resolve
-DIM index AS INTEGER: DIM flee AS INTEGER: DIM best AS INTEGER: DIM move2 AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER: DIM k AS INTEGER
+DIM index AS INTEGER: DIM flee AS INTEGER: DIM best AS INTEGER: DIM move2 AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER
 DIM flag AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM s AS INTEGER: DIM active AS INTEGER: DIM target AS INTEGER: DIM defend AS INTEGER: DIM win AS INTEGER: DIM lose AS INTEGER: DIM a$
 flag = 0
 IF opt_players = PLAYERS_ONE THEN
@@ -52,35 +52,14 @@ COLOR COLOR_YELLOW: LOCATE 1, 1: PRINT SPACE$(80);
 LOCATE 1, 20: PRINT "Update for "; month_name$(turn_month); ","; turn_year
 CALL clear_bottom_line: PRINT "press any key for "; month_name$(turn_month); ","; turn_year; " events";
 CALL wait_key("U")
-GOSUB upbox
+CALL draw_update_box
 '==========================================================================
 '                       Assign Time of Action
 '==========================================================================
 FOR i = SIDE_UNION TO SIDE_REBEL: IF train_army(i) > 0 THEN CALL railroad_move(i): LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B: CALL draw_train_box
 NEXT i
 
-FOR i = 1 TO MAX_ARMIES
-move_order_key(i) = MOVE_KEY_NONE
-IF army_order(i) < 0 THEN army_order(i) = ORDER_NONE
-IF army_city(i) > 0 AND army_order(i) > 0 THEN move_order_key(i) = INT(4 + 4 * RND) * 100 + i
-IF army_supply(i) < 1 AND army_order(i) > 0 THEN move_order_key(i) = 900 + i
-SELECT CASE army_size(i)         'bigger armies move slower
-	CASE IS > 400
-		IF move_order_key(i) < 900 THEN move_order_key(i) = move_order_key(i) + 100: x = 2
-	CASE IS > 800
-		IF move_order_key(i) < 800 THEN move_order_key(i) = move_order_key(i) + 200: x = 3
-	CASE IS > 1000
-		IF move_order_key(i) < 700 THEN move_order_key(i) = move_order_key(i) + 300: x = 4
-	CASE ELSE
-		x = 1
-END SELECT
-IF move_order_key(i) <> MOVE_KEY_NONE AND army_leader_rating(i) > 10 * RND THEN
-		move_order_key(i) = move_order_key(i) - 100 * (army_leader_rating(i) \ 2)
-		IF move_order_key(i) < 100 THEN move_order_key(i) = 100 + i
-END IF
-NEXT i
-
-CALL sort_move_order(MAX_ARMIES)
+CALL turn_set_move_order
 '==========================================================================
 '                       Begin Main Loop
 '==========================================================================
@@ -117,7 +96,7 @@ CALL draw_map_marker(target, 0, MARK_EXPLOSION)
 defend = city_army(target)
 
 COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " attacks "; army_name$(defend); " in "; city_name$(army_city(defend)); : CALL wait_seconds(opt_pause! - 1)
-IF army_size(defend) > 0 THEN CALL calculate_battle(active, defend, win, lose): flag = 1: IF opt_graphics >= GRAPHICS_BASIC THEN GOSUB upbox
+IF army_size(defend) > 0 THEN CALL calculate_battle(active, defend, win, lose): flag = 1: IF opt_graphics >= GRAPHICS_BASIC THEN CALL draw_update_box
 IF army_experience(win) < MAX_EXPERIENCE THEN army_experience(win) = army_experience(win) + 1
 
 IF army_size(lose) < 2 THEN
@@ -250,61 +229,16 @@ horde:
 IF army_supply(active) < MAX_SUPPLY THEN army_supply(active) = army_supply(active) + 1: IF RND > .8 GOTO horde
 digin:
 NEXT j
-GOTO allthru
-
-upbox:
-LINE (450, 318)-(526, 420), 1, BF
-LINE (527, 315)-(527, 439), 10
-COLOR COLOR_YELLOW: LOCATE 23, 50: PRINT "ษอออออออออออออป"
-LOCATE 24, 50: PRINT "บ U P D A T E บ"
-LOCATE 25, 50: PRINT "ศอออออออออออออผ"
-RETURN
 
 allthru:
-IF fleet_size(raiding_side) < 1 THEN raiding_side = SIDE_NONE
-IF raiding_side > 0 THEN
-	CALL clear_bottom_line
-	IF RND < .8 + .02 * fleet_size(raiding_side) THEN
-		raid_loss = .05 * fleet_size(raiding_side) * (1 + RND) * (side_income(other_side(raiding_side)))
-		IF raid_loss < 1 THEN raid_loss = 1
-		IF raid_loss / side_income(other_side(raiding_side)) > .3 THEN raid_loss = .3 * side_income(other_side(raiding_side))
-		COLOR COLOR_WHITE: PRINT side_name$(raiding_side); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raiding_side)); " commerce";
-		a = 1: IF LEFT$(fleet_ships$(raiding_side), 1) = "I" THEN a = 2
-		PSET (500, 465), 0: CALL draw_ship_icon(raiding_side, a)
-		IF opt_sound >= SOUND_EFFECTS THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
-		IF raiding_side = current_side THEN fleet_pursuit = 1
-		wait_seconds PAUSE_LONG
-	ELSE
-		raid_loss = 0
-		CALL navy_remove_ship(raiding_side)
-		COLOR COLOR_WHITE: PRINT side_name$(raiding_side); " raiders have lost a ship ("; fleet_size(raiding_side); " remain)";
-		IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
-		IF fleet_city(raiding_side) > 0 THEN
-			wait_seconds PAUSE_LONG
-			GOTO allthru
-		ELSE
-			raiding_side = SIDE_NONE
-			LINE (447, 291)-(525, 335), 1, BF
-			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
-			wait_seconds PAUSE_LONG
-			LINE (447, 291)-(525, 335), 1, BF
-		END IF
-	END IF
-END IF
+CALL navy_commerce_raid
 
 CALL draw_map_touchup: CALL draw_fleets: CALL turn_date_and_supply
 
 CALL clear_bottom_line
 LINE (390, 350)-(520, 400), 1, BF
 COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
-side_victory_points(SIDE_UNION) = .8 * side_victory_points(SIDE_UNION) + .3 * (side_income(SIDE_UNION) + side_city_count(SIDE_UNION))
-IF side_city_count(SIDE_UNION) > 29 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 50: IF side_city_count(SIDE_UNION) > 34 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100
-IF current_side = SIDE_REBEL AND side_city_count(SIDE_UNION) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
-
-IF side_victory_points(SIDE_UNION) < 1 THEN side_victory_points(SIDE_UNION) = 0
-side_victory_points(SIDE_REBEL) = .8 * side_victory_points(SIDE_REBEL) + .3 * (side_income(SIDE_REBEL) + side_city_count(SIDE_REBEL))
-IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50: IF side_city_count(SIDE_REBEL) > 34 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_UNION) + 100
-IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
+CALL turn_update_victory_points
 IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL wait_key("K")
 END SUB
 
@@ -331,4 +265,45 @@ side_cash(i) = side_cash(i) + side_income(i)
 IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
 NEXT i
 total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
+END SUB
+
+' Gives each army with an order its place in the month's moves and sorts them. An army
+' out of supplies moves last; a large one moves later; a good leader may move sooner.
+SUB turn_set_move_order
+DIM i AS INTEGER: DIM x AS INTEGER
+FOR i = 1 TO MAX_ARMIES
+move_order_key(i) = MOVE_KEY_NONE
+IF army_order(i) < 0 THEN army_order(i) = ORDER_NONE
+IF army_city(i) > 0 AND army_order(i) > 0 THEN move_order_key(i) = INT(4 + 4 * RND) * 100 + i
+IF army_supply(i) < 1 AND army_order(i) > 0 THEN move_order_key(i) = 900 + i
+SELECT CASE army_size(i)         'bigger armies move slower
+	CASE IS > 400
+		IF move_order_key(i) < 900 THEN move_order_key(i) = move_order_key(i) + 100: x = 2
+	CASE IS > 800
+		IF move_order_key(i) < 800 THEN move_order_key(i) = move_order_key(i) + 200: x = 3
+	CASE IS > 1000
+		IF move_order_key(i) < 700 THEN move_order_key(i) = move_order_key(i) + 300: x = 4
+	CASE ELSE
+		x = 1
+END SELECT
+IF move_order_key(i) <> MOVE_KEY_NONE AND army_leader_rating(i) > 10 * RND THEN
+		move_order_key(i) = move_order_key(i) - 100 * (army_leader_rating(i) \ 2)
+		IF move_order_key(i) < 100 THEN move_order_key(i) = 100 + i
+END IF
+NEXT i
+
+CALL sort_move_order(MAX_ARMIES)
+END SUB
+
+' The month's victory points: each side keeps eight tenths and gains by its income and
+' cities. A computer that holds few cities gets a higher strength ratio.
+SUB turn_update_victory_points
+side_victory_points(SIDE_UNION) = .8 * side_victory_points(SIDE_UNION) + .3 * (side_income(SIDE_UNION) + side_city_count(SIDE_UNION))
+IF side_city_count(SIDE_UNION) > 29 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 50: IF side_city_count(SIDE_UNION) > 34 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100
+IF current_side = SIDE_REBEL AND side_city_count(SIDE_UNION) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
+
+IF side_victory_points(SIDE_UNION) < 1 THEN side_victory_points(SIDE_UNION) = 0
+side_victory_points(SIDE_REBEL) = .8 * side_victory_points(SIDE_REBEL) + .3 * (side_income(SIDE_REBEL) + side_city_count(SIDE_REBEL))
+IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50: IF side_city_count(SIDE_REBEL) > 34 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_UNION) + 100
+IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
 END SUB

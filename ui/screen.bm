@@ -96,3 +96,12 @@ DIM c AS INTEGER
 		COLOR COLOR_LIGHT_CYAN: LOCATE 17, 30: PRINT side_name$(current_side); " PLAYER TURN"
 		CALL wait_key("T")
 END SUB
+
+' The UPDATE box beside the map, shown while the month's moves are played.
+SUB draw_update_box
+LINE (450, 318)-(526, 420), 1, BF
+LINE (527, 315)-(527, 439), 10
+COLOR COLOR_YELLOW: LOCATE 23, 50: PRINT "ษอออออออออออออป"
+LOCATE 24, 50: PRINT "บ U P D A T E บ"
+LOCATE 25, 50: PRINT "ศอออออออออออออผ"
+END SUB

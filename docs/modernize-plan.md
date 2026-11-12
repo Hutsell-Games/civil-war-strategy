@@ -162,7 +162,8 @@ Step 4, the small shared pieces, is done in the working tree.
 Phase 0 went first (user, 2026-11-11) and is done: see "Phase 0 after phase 7 began" below. 33 scripts,
 21 lines not run, each with its reason.
 Phase 7 step 5 is done in the working tree: eleven pieces of the main module are SUBs.
-**Next:** phase 7 step 6, `turn_resolve`'s outer parts.
+Step 6 is done in the working tree: `turn_resolve`'s outer parts are SUBs, and 20 lines are not run.
+**Next:** phase 7 step 7, `special_events` and `ai_turn`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -314,7 +315,7 @@ Steps 2 to 10 were taken up on 2026-11-11, after phase 7's step 4. Line numbers 
 - **Steps 9 and 10, done.** Measured on 2026-11-11 with 33 scripts and the unit tests: 3,552 of 3,787
   lines run in full, 214 in part, 21 not run (99.4%). All 33 scripts pass with both compilers.
 
-The 21 lines that no test runs:
+The 20 lines that no test runs (21 before phase 7 step 6):
 
 | File | Lines | Why |
 |------|-------|-----|
@@ -327,8 +328,7 @@ The 21 lines that no test runs:
 | `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
 | `rules\navy.bm` | 103 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
 | `rules\navy.bm` | 341, 393 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
-| `rules\turn.bm` | 71, 73 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
-| `rules\turn.bm` | 253 | `GOTO allthru` after the loop over 40 armies; the loop always leaves early, at the first army that does not move |
+| `rules\turn.bm` | 283, 285 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
 | `ui\orders.bm` | 118 | The picker found no city of the player's among 39; the player always holds the city it started on |
 | `ui\orders.bm` | 133 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | 95 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
@@ -420,8 +420,16 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
    - Lines moved without a test: Vary Start's loop that never runs (now `rules\setup.bm` 22 to 24).
      Moved half-run: the six `EXIT SUB` of the Union's title tune (a key during the tune), the two
      caps on cash in `turn_collect_income`, and the supply below zero in `army_detach`.
-6. **`turn_resolve`'s outer parts**: `turn_set_move_order`, `navy_commerce_raid`,
-   `turn_update_victory_points`, `draw_update_box`.
+6. **Done: `turn_resolve`'s outer parts.** `turn_resolve` went from 270 lines to 204 and has no
+   `GOSUB` left.
+   - `turn_set_move_order` and `turn_update_victory_points` (`rules\turn.bm`) draw nothing. Each has a
+     unit test. The second test records that a Rebel side with more than 34 cities gets the Union's
+     points and 100 (a bug of the original, kept).
+   - `navy_commerce_raid` (`rules\navy.bm`, mixed): the raiding fleet's month, with its messages.
+   - `draw_update_box` (`ui\screen.bm`): the `GOSUB` routine `upbox`.
+   - The `GOTO allthru` after the loop over the armies is gone. It only jumped over `upbox`, and no
+     test ran it, because the loop always leaves early. That makes 20 lines not run, not 21.
+   - Lines moved without a test: the two shadowed `CASE` lines, now `rules\turn.bm` 283 and 285.
 7. **`special_events` and `ai_turn`**: `event_riot`; one `ai_` SUB for each headed section of `ai_turn`,
    and `ai_count_armies`.
 8. **`menu_army_recruit` and `railroad_move`**, each split into the human's menu, the computer's choice
