@@ -70,7 +70,7 @@ SUB menu_option_side
 	IF opt_players = PLAYERS_TWO THEN EXIT SUB
 	CALL option_swap_side
 	COLOR COLOR_LIGHT_BLUE: IF current_side = SIDE_REBEL THEN COLOR COLOR_GRAY
-	CALL clear_bottom_line: PRINT "Now playing "; side_name$(current_side); " side"; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
+	CALL clear_bottom_line: PRINT "Now playing "; sides(current_side).name; " side"; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
 	CALL draw_top_bar
 END SUB
 

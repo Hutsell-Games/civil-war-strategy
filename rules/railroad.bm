@@ -44,7 +44,7 @@ FUNCTION railroad_capacity (side)
 DIM x AS INTEGER: DIM limit AS INTEGER
 IF opt_realism = REALISM_OFF THEN railroad_capacity = train_capacity(side): EXIT FUNCTION
 x = 11: IF current_side = SIDE_REBEL THEN x = 23
-limit = train_capacity(side) + 5 * (side_city_count(side) - x)
+limit = train_capacity(side) + 5 * (sides(side).city_count - x)
 x = 2 * train_capacity(side)
 IF limit > x THEN limit = x
 IF limit < x \ 4 THEN limit = x \ 4

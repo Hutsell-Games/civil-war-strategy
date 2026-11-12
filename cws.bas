@@ -35,7 +35,7 @@ DO
 		ended = 0
 		SELECT CASE menu_choice
 			CASE 1
-				IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting ELSE CALL menu_army_recruit((current_side)): chosit = 23
+				IF sides(current_side).cash < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting ELSE CALL menu_army_recruit((current_side)): chosit = 23
 			CASE 2
 				CALL menu_army_move
 				chosit = 23

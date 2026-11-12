@@ -31,7 +31,7 @@ SUB menu_navy_build (side, again)
 DIM cost AS INTEGER: DIM ship$
 	again = 1
 	cost = COST_SHIP
-	IF side_cash(side) < cost OR fleet_city(side) = FLEET_AT_SEA THEN EXIT SUB
+	IF sides(side).cash < cost OR fleet_city(side) = FLEET_AT_SEA THEN EXIT SUB
 	IF fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
 
 	IF fleet_city(side) > 0 THEN
@@ -42,7 +42,7 @@ DIM cost AS INTEGER: DIM ship$
 	CALL random_discard
 	ship$ = "W"
 
-	IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * cost THEN
+	IF navy_has_ironclads = 1 AND sides(side).cash >= 2 * cost THEN
 		menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_LIGHT_BLUE
 		menu_text$(0) = "Type"
 		menu_text$(1) = "Wooden"

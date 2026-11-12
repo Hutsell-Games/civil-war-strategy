@@ -9,8 +9,8 @@ END SUB
 SUB vary_start_conditions
 DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM a$
 		CALL load_scenario
-		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
-		side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
+		sides(SIDE_UNION).cash = sides(SIDE_UNION).cash - 100 + 200 * RND
+		sides(SIDE_REBEL).cash = sides(SIDE_REBEL).cash + 100 + 200 * RND
 		opt_ai_aggression = 5 * RND
 		FOR k = 1 TO 6
 			IF RND > .6 THEN
@@ -34,7 +34,7 @@ DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM a$
 			fleet_ships$(i) = fleet_ships$(i) + a$
 		NEXT j
 		NEXT i
-		IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
+		IF RND > .7 THEN sides(SIDE_REBEL).capital = 25
 
 		FOR k = 1 TO 40
 		IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
@@ -138,7 +138,7 @@ DIM k AS INTEGER
 	union_income_bonus = 0: emancipation_done = 0
 	FOR k = SIDE_UNION TO SIDE_REBEL
 	fleet_size(k) = 0: fleet_city(k) = 0
-	train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
+	train_army(k) = 0: sides(k).victory_points = 0: train_city(k) = 0
 	NEXT k
 	saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
 END SUB
@@ -161,7 +161,7 @@ DIM i AS INTEGER: DIM a$
 	IF current_side = SIDE_UNION THEN opt_event_balance = 7
 	IF current_side = SIDE_REBEL THEN opt_event_balance = 3
 	IF opt_pause! < 1 THEN opt_pause! = 2
-	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
-	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
-	FOR i = SIDE_UNION TO SIDE_REBEL: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
+	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN sides(SIDE_REBEL).cash = sides(SIDE_REBEL).cash + 600 - 100 * opt_difficulty
+	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN sides(SIDE_UNION).cash = sides(SIDE_UNION).cash + 100 * opt_difficulty
+	FOR i = SIDE_UNION TO SIDE_REBEL: sides(i).income = sides(i).cash: sides(i).cash = sides(i).cash + 50 * RND: NEXT i
 END SUB

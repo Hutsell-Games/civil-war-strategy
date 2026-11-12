@@ -47,7 +47,7 @@ Indexed by city, 1 to 40.
 | `cityo()` | Its owner when the game began. | 3 | `city_first_owner()` | `cities(c).first_owner` | |
 | `fort()` | Its fort level, 0 to 2. | 44 | `city_fort()` | `cities(c).fort` | |
 | `occupied()` | The first army found in the city, or 0. Set by `occupy`. | 59 | `city_army()` | `cities(c).army` | |
-| `matrix()` | `matrix(c, 1 TO 6)`: the cities joined to city `c` by road, 0 for none. `matrix(c, 7)`: 99 when the city is a port. | 43 | `city_road()` and `city_port_type()` (see note 1) | `cities(c).road(1 TO 6)`, `.is_port` | |
+| `matrix()` | `matrix(c, 1 TO 6)`: the cities joined to city `c` by road, 0 for none. `matrix(c, 7)`: 99 when the city is a port. | 43 | `city_road()` and `city_port_type()` (see note 1) | `cities(c).road(0 TO MAX_ROADS)`, `.port_type` | |
 | `capcity()` | By side: the side's capital city, 0 when it has fallen. | 37 | `side_capital()` | `sides(s).capital` | |
 
 ## Sides

@@ -64,13 +64,13 @@ SUB navy_add_ship (side, ship$, cost)
 	ELSE
 		fleet_ships$(side) = ship$ + fleet_ships$(side)
 	END IF
-	IF fleet_size(side) > 1 THEN side_cash(side) = side_cash(side) - cost
+	IF fleet_size(side) > 1 THEN sides(side).cash = sides(side).cash - cost
 END SUB
 
 ' A new fleet of one ship in port city, for cost.
 SUB navy_found_fleet (side, city, cost)
 	fleet_city(side) = city
-	side_cash(side) = side_cash(side) - cost: fleet_size(side) = 1
+	sides(side).cash = sides(side).cash - cost: fleet_size(side) = 1
 END SUB
 
 ' A new fleet has no port to start in: the ship is not built.
@@ -99,7 +99,7 @@ END SUB
 ' The shore battery sank the fleet's last ship. The other side gets 5 victory points.
 SUB navy_fleet_lost (side)
 	fleet_city(side) = 0: fleet_ships$(side) = ""
-	side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 5
+	sides(other_side(side)).victory_points = sides(other_side(side)).victory_points + 5
 	IF side = current_side THEN fleet_pursuit = 0
 END SUB
 
@@ -110,10 +110,10 @@ SUB navy_blast (side, city, result)
 	result = BLAST_FIRM
 	IF RND > .25 + .07 * fleet_size(side) THEN EXIT SUB
 	result = BLAST_LOYAL
-	IF fleet_city(side) = side_capital(other_side(side)) THEN EXIT SUB
+	IF fleet_city(side) = sides(other_side(side)).capital THEN EXIT SUB
 	result = BLAST_NEUTRAL
 	city_owner(fleet_city(side)) = SIDE_NONE
-	side_victory_points(side) = side_victory_points(side) + city_value(fleet_city(side))
+	sides(side).victory_points = sides(side).victory_points + city_value(fleet_city(side))
 END SUB
 
 ' Sail: the fleet is now off city.
@@ -129,7 +129,7 @@ END SUB
 ' Invasion: the new army that the ship landed is 3,500 men, and its side gets back the 100
 ' that army_new took for it.
 SUB navy_landed (side, army)
-	side_cash(side) = side_cash(side) + COST_RECRUIT     'compensate for cost of recruiting new army
+	sides(side).cash = sides(side).cash + COST_RECRUIT     'compensate for cost of recruiting new army
 	army_size(army) = 35
 END SUB
 
@@ -151,9 +151,9 @@ raider = raiding_side: sank = 0
 IF raider <= 0 THEN EXIT SUB
 	IF RND < .8 + .02 * fleet_size(raider) THEN
 		sank = 1
-		raid_loss = .05 * fleet_size(raider) * (1 + RND) * (side_income(other_side(raider)))
+		raid_loss = .05 * fleet_size(raider) * (1 + RND) * (sides(other_side(raider)).income)
 		IF raid_loss < 1 THEN raid_loss = 1
-		IF raid_loss / side_income(other_side(raider)) > .3 THEN raid_loss = .3 * side_income(other_side(raider))
+		IF raid_loss / sides(other_side(raider)).income > .3 THEN raid_loss = .3 * sides(other_side(raider)).income
 		IF raider = current_side THEN fleet_pursuit = 1
 	ELSE
 		raid_loss = 0
@@ -183,7 +183,7 @@ END FUNCTION
 ' The winner pursues when it is the side whose turn it is.
 SUB navy_fleet_defeated (loser)
 	fleet_city(loser) = 0: fleet_ships$(loser) = ""
-	side_victory_points(loser) = side_victory_points(loser) + 10
+	sides(loser).victory_points = sides(loser).victory_points + 10
 	IF other_side(loser) = current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
 END SUB
 

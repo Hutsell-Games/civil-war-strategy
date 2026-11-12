@@ -57,23 +57,23 @@ SUB draw_top_bar
 DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER: DIM a$
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR COLOR_LIGHT_CYAN
-	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR COLOR_YELLOW: PRINT month_name$(turn_month); ","; turn_year; "  "
+	LOCATE 1, 10: PRINT "Input your decisions now for "; sides(current_side).name; " side "; : COLOR COLOR_YELLOW: PRINT month_name$(turn_month); ","; turn_year; "  "
 
 	CALL draw_flag((current_side), 0, 0)
 	COLOR COLOR_RED: IF opt_alt_colors > 0 THEN COLOR COLOR_GRAY
 	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
-	LOCATE 7, 68: PRINT "Funds:"; side_cash(current_side);
+	LOCATE 7, 68: PRINT "Funds:"; sides(current_side).cash;
 
-	FOR i = SIDE_UNION TO SIDE_REBEL: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
+	FOR i = SIDE_UNION TO SIDE_REBEL: IF sides(i).victory_points < 0 THEN sides(i).victory_points = 0
 	NEXT i
-	x = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL): y = 0
+	x = sides(SIDE_UNION).victory_points + sides(SIDE_REBEL).victory_points: y = 0
 	c = 9: IF current_side = SIDE_REBEL THEN c = 7
 	LINE (580, 15)-(580, 35), 15
 	LINE (530, 20)-(630, 30), 8 - c, BF
-	IF x > 0 THEN y = 100 * (side_victory_points(current_side) / x)
+	IF x > 0 THEN y = 100 * (sides(current_side).victory_points / x)
 
 	LINE (530, 20)-(530 + y, 30), c, BF
-	COLOR c: LOCATE 4, 68: PRINT "VP :"; side_victory_points(current_side)
+	COLOR c: LOCATE 4, 68: PRINT "VP :"; sides(current_side).victory_points
 
 	LOCATE 5, 68: PRINT "("; y; "%)"
 
@@ -93,7 +93,7 @@ DIM c AS INTEGER
 		CLS : LINE (100, 200)-(500, 300), c, BF
 		LINE (100, 200)-(500, 300), 8 - c, B
 		COLOR COLOR_GRAY: LOCATE 14, 31: PRINT " "; month_name$(turn_month); turn_year
-		COLOR COLOR_LIGHT_CYAN: LOCATE 17, 30: PRINT side_name$(current_side); " PLAYER TURN"
+		COLOR COLOR_LIGHT_CYAN: LOCATE 17, 30: PRINT sides(current_side).name; " PLAYER TURN"
 		CALL wait_key("T")
 END SUB
 

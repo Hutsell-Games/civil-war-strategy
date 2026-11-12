@@ -835,3 +835,21 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
      `tools\refactor\` keep the old names.
    - Unit tests: 123, none new. 38 scripts. Lines moved without a test: none. 185 lines of the
      game are run in part and 18 are not run. That ends phase 9.
+
+## Phase 10: records, the steps done
+
+1. **Done: the script, and `sides`.** The eight arrays of a side are one record:
+   `sides(s).name`, `.capital`, `.cash`, `.income`, `.city_count`, `.victory_points`,
+   `.battles_won` and `.casualties` (a LONG). `cws.bi` has the `TYPE side_type` block and
+   `DIM SHARED sides(2) AS side_type`, and the eight arrays are gone from its `COMMON SHARED`
+   and `DIM SHARED` lines.
+   - **The script,** `tools\refactor\make_records.py`, rewrote 437 uses in 26 files. It reads the
+     record and field names from `variable-names.md`. `report` shows what it would do; `apply`
+     refuses when a use is shadowed, has no index, or a record name is taken.
+   - **`ai_fortify`'s local `side_cash`.** The SUB declares a scalar `side_cash`, always 0, and
+     reads it once (`side_cash < 222`), beside the shared `side_cash(who)`. In BASIC they are two
+     variables. The script rewrites the indexed uses and leaves the scalar as it is.
+   - **Lines that no test runs:** none of the 18 has a field of a side, so none changed.
+   - **A first unit test run timed out 15 tests,** right after the change, when each test's
+     program was new. The next two runs passed all 123 in about 23 seconds.
+   - Unit tests: 123, none new. 38 scripts, unchanged recordings, both compilers.

@@ -31,7 +31,7 @@ END SUB
 ' Before the computer picks a city to recruit in: its funds, when the player may see them, and
 ' the menu's place. The cursor is left where the pick's loop over the list used to leave it.
 SUB draw_ai_funds (side)
-	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
+	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT sides(side).name; " funds available "; sides(side).cash;
 	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
 	IF menu_item_count > 0 THEN LOCATE 14 + menu_item_count, 69
 END SUB

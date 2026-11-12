@@ -148,8 +148,10 @@ it also holds the three `git mv` renames of step 7, without step 7's `$INCLUDE` 
 the other commands, is committed as `77e3024` and puts that right. Step 8, `menu_select` and the
 file renames, is done in the working tree (2026-11-12). That ends phase 9.
 
-**Next:** phase 10, records. Its plan comes first: which arrays become which `TYPE`, and in what
-steps.
+Phase 9 step 8 is committed as `4fa959d`. Phase 10, records, has its plan below ("Phase 10:
+records"). Its step 1, the script and `sides`, is done in the working tree (2026-11-12).
+
+**Next:** phase 10 step 2, `fleets` and `trains`.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -352,3 +354,89 @@ their random numbers must stay in order.
 6. **Done: the navy's commands.** See `modernize-completed.md`.
 7. **Done: the other commands.** See `modernize-completed.md`.
 8. **Done: `menu_select` and the file renames.** See `modernize-completed.md`. That ends phase 9.
+
+## Phase 10: records
+
+Drafted 2026-11-12; the user answered its questions the same day. Each step is one commit (decision 15), and
+each ends with `play.py check`, `play.py compare` and the unit tests passing on unchanged
+recordings.
+
+### What becomes a record
+
+Six records, from the "Record field" column of `variable-names.md`. Each array of a field keeps its
+bounds, so index 0 stays where the code uses it: army 0 is the scratch army of Join, and city 0 is
+"NONE".
+
+| Record | Index | Fields, from the arrays | Uses |
+|--------|-------|-------------------------|-----:|
+| `armies(0 TO MAX_ARMIES)` | army | `name`, `size`, `leader_rating`, `experience`, `supply`, `city`, `order` | 858 |
+| `leaders(0 TO 40)` | army slot | `name`, `rating` | 64 |
+| `cities(0 TO MAX_CITIES)` | city | `name`, `x`, `y`, `value`, `owner`, `first_owner`, `fort`, `army`, `port_type`, `road(0 TO MAX_ROADS)` | 539 |
+| `sides(0 TO 2)` | side | `name`, `capital`, `cash`, `income`, `city_count`, `victory_points`, `battles_won`, `casualties` (LONG) | 456 |
+| `fleets(0 TO 2)` | side | `ships`, `size`, `city` | 315 |
+| `trains(0 TO 2)` | side | `army`, `from_city`, `city`, `capacity` | 71 |
+
+"Uses" counts the names in the game and `rules_test.bas` today. Every field is an INTEGER, as the
+arrays are under `DEFINT A-Z`, except `casualties`. The names and `fleets(s).ships` are
+variable-length `STRING` fields.
+
+These stay as they are: the menu's variables, the settings (`opt_*`), `victory_rule()`, the turn's
+flags and `turn_recruit_city()`, `move_order_key()`, `month_name$()`, `map_font$()`, the flag's stars
+and the pictures. They are not records of a thing in the game, or they are one value.
+
+### What both compilers do with records
+
+Measured on 2026-11-12 with two small programs, built by QB64Rust and by QB64pe (the reference
+clone). Both printed the same for every line:
+
+- a variable-length `STRING` field starts empty, and `LEN` and `= ""` work on it;
+- a field, and an element of a field array, is passed by reference: a SUB that changes its
+  parameter changes the field;
+- `SWAP` of two fields and of two whole records, and a whole record copied with `=`;
+- `WRITE #` and `INPUT #` into fields, with a name that holds a comma;
+- an INTEGER field that overflows wraps with no error, as an INTEGER array does;
+- a field array with a `CONST` bound (`road(0 TO MAX_ROADS)`), and a `TYPE` in an included `.bi`.
+
+So no line needs more than the new name. The saved game keeps its format (decision 6): `load_game`
+and `save_game` read and write the same values in the same order.
+
+### How a step works
+
+- **A script does the renames**: `tools\refactor\make_records.py`, kept with the others (decision
+  16). It reads the "Record field" column of `variable-names.md`, and turns `army_size(expr)` into
+  `armies(expr).size` and `city_road(c, j)` into `cities(c).road(j)`. It uses the tokens of
+  `rename_vars.py`, so strings and comments stay as they are, and it skips an array that a SUB
+  declares for itself. A SUB's own scalar of the same name is another variable: `ai_fortify` has
+  a local `side_cash`, always 0, beside the shared `side_cash()`. The declarations in `cws.bi`
+  are written by hand: a `TYPE` block and a `DIM SHARED` line for each record, and the old names
+  out of `COMMON SHARED` and `DIM SHARED`.
+- **The compiler finds what the script missed.** The old arrays are gone and `OPTION _EXPLICIT` is
+  on, so a use the script did not rewrite is a compile error.
+- **Lines that no test runs.** The script rewrites some of the 18 lines that no test runs (in
+  `vary_start_conditions`, for example). Phase 7's rule allows such a line only when it moves whole.
+  This phase makes an exception: a line that only the script changed, and that compiles, may
+  change without a test. The hand-over lists those lines.
+
+### Steps
+
+From the smallest record to the largest, so that the script is proved on a small step first.
+
+1. **Done: the script, and `sides`.** See `modernize-completed.md`.
+2. **`fleets` and `trains`** (7 arrays, 386 uses).
+3. **`cities` and `leaders`** (12 arrays, 603 uses). `city_road` and `city_port_type` go inside
+   the city record, and the line that reads `CITIES.GRD` reads into the fields.
+4. **`armies`** (7 arrays, 858 uses).
+5. **Whole records, where the screens stay the same.** `army_clear` waits for this (phase 7, step 4
+   of `modernize-completed.md`). The five places that clear an army do not clear the same fields.
+   A whole-record clear (`armies(i) = no_army`) is only used where every field was cleared before,
+   or where a test shows that what is left in the slot is never read. The same goes for the places
+   that copy an army field by field. This step lists the places first, for the user.
+
+### Answered (user, 2026-11-12)
+
+1. **Fleets and trains are records of their own**, `fleets(s)` and `trains(s)`, not fields of
+   `sides(s)`.
+2. **The exception for lines that no test runs is allowed** (above, "How a step works"). The
+   hand-over lists each such line.
+3. **Type names:** `army_type`, `leader_type`, `city_type`, `side_type`, `fleet_type` and
+   `train_type`.

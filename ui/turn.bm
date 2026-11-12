@@ -238,7 +238,7 @@ CALL special_events
 who = other_side(current_side)
 c = 9: IF current_side = SIDE_UNION THEN c = 15
 LOCATE 1, 1: PRINT SPACE$(80);
-COLOR c: LOCATE 1, 10: PRINT side_name$(who); " Side is making decisions";
+COLOR c: LOCATE 1, 10: PRINT sides(who).name; " Side is making decisions";
 CALL ai_resupply(who)
 CALL ai_fortify(who)
 CALL ai_raise_forces(who)

@@ -30,8 +30,8 @@ SELECT CASE who
 '                               good for South
 '----------------------------------------------------------------------------
 	CASE 1
-	IF turn_year = 1864 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50
-	IF turn_year = 1865 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 100
+	IF turn_year = 1864 AND turn_month = 1 THEN sides(SIDE_REBEL).victory_points = sides(SIDE_REBEL).victory_points + 50
+	IF turn_year = 1865 AND turn_month = 1 THEN sides(SIDE_REBEL).victory_points = sides(SIDE_REBEL).victory_points + 100
 	IF script_rnd! > .9 THEN event = EVENT_RIOTS: EXIT SUB
 
 	IF script_rnd! > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
@@ -50,21 +50,21 @@ float1:
 	fleet_city(SIDE_REBEL) = empty
 	GOTO dull1
 mercen:
-	IF script_rnd! > .1 OR side_city_count(SIDE_REBEL) < 30 GOTO money
+	IF script_rnd! > .1 OR sides(SIDE_REBEL).city_count < 30 GOTO money
 	variant = 0: IF script_rnd! > .5 THEN variant = 1
 	event = EVENT_MERCENARIES
 	army_size(index) = army_size(index) + 100 * plus
 	army_experience(index) = MAX_EXPERIENCE: army_supply(index) = MAX_SUPPLY
 	GOTO dull1
 money:
-	IF script_rnd! > .3 OR side_city_count(SIDE_REBEL) < 12 GOTO cotton
+	IF script_rnd! > .3 OR sides(SIDE_REBEL).city_count < 12 GOTO cotton
 		event = EVENT_LOAN
 		GOTO purse
 cotton:
-	IF script_rnd! > .5 OR side_city_count(SIDE_REBEL) < 12 GOTO uprising
+	IF script_rnd! > .5 OR sides(SIDE_REBEL).city_count < 12 GOTO uprising
 	event = EVENT_COTTON
 purse:
-	side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 * plus
+	sides(SIDE_REBEL).cash = sides(SIDE_REBEL).cash + 100 * plus
 	GOTO dull1
 uprising:
 	pct! = .9
@@ -99,18 +99,18 @@ abe:
 
 		emancipation_done = 1
 		event = EVENT_EMANCIPATION
-		side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100: side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) - 100
+		sides(SIDE_UNION).victory_points = sides(SIDE_UNION).victory_points + 100: sides(SIDE_REBEL).victory_points = sides(SIDE_REBEL).victory_points - 100
 		' SHELL "abelinco.exe" (a DOS program with no source; cannot run on 64-bit Windows)
 		GOTO dull2
 	END IF
 	IF turn_year = 1864 AND turn_month = 11 THEN
 		event = EVENT_REELECTION
-		side_victory_points(SIDE_REBEL) = .5 * side_victory_points(SIDE_REBEL)
+		sides(SIDE_REBEL).victory_points = .5 * sides(SIDE_REBEL).victory_points
 		GOTO dull2
 	END IF
 	IF script_rnd! > .5 THEN
 		event = EVENT_DONATIONS
-		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * plus
+		sides(SIDE_UNION).cash = sides(SIDE_UNION).cash + 100 * plus
 		GOTO dull2
 	END IF
 	IF script_rnd! > .5 AND turn_year > FIRST_YEAR THEN
@@ -124,7 +124,7 @@ abe:
 		NEXT i
 	END IF
 		IF event = EVENT_NONE THEN event = EVENT_STANTON
-		side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 10: GOTO dull2
+		sides(SIDE_UNION).victory_points = sides(SIDE_UNION).victory_points + 10: GOTO dull2
 	CASE ELSE
 END SELECT
 
@@ -138,7 +138,7 @@ SUB event_riot_city (who, city)
 DIM k AS INTEGER: DIM x AS INTEGER
 city = 0
 	IF opt_realism = REALISM_OFF THEN EXIT SUB
-	IF side_city_count(who) = 1 THEN EXIT SUB
+	IF sides(who).city_count = 1 THEN EXIT SUB
 	FOR k = 1 TO 99
 	x = 1 + INT(MAX_CITIES * script_rnd!)
 		IF city_first_owner(x) <> who AND city_owner(x) = who AND city_army(x) = 0 THEN

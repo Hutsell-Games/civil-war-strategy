@@ -135,12 +135,12 @@ army_size(defender) = army_size(defender) - defender_losses
 IF army_size(defender) < 1 THEN army_size(defender) = 1
 '---------------------------------------------------------------------------
 s = 1: IF attacker > 2 THEN s = 2
-side_casualties&(s) = side_casualties&(s) + attacker_losses
-side_casualties&(other_side(s)) = side_casualties&(other_side(s)) + defender_losses
+sides(s).casualties = sides(s).casualties + attacker_losses
+sides(other_side(s)).casualties = sides(other_side(s)).casualties + defender_losses
 '---------------------------------------------------------------------------
 s = army_side(winner)
-side_battles_won(s) = side_battles_won(s) + 1
-side_victory_points(s) = side_victory_points(s) + 1
+sides(s).battles_won = sides(s).battles_won + 1
+sides(s).victory_points = sides(s).victory_points + 1
 END SUB
 
 SUB normal_random_number (xbar, vary, result)

@@ -12,7 +12,7 @@ SUB menu_main (start)
 	menu_color = COLOR_RED
 	menu_col = PANEL_COL: menu_row = 13
 	menu_text$(0) = "Main"
-	menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN menu_text$(1) = "-": start = 23
+	menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR sides(current_side).cash < COST_RECRUIT THEN menu_text$(1) = "-": start = 23
 	menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF start = 23 THEN start = 24
 	menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN menu_text$(3) = "-": IF start = 24 THEN start = 25
 	menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN menu_text$(4) = "-": IF start = 25 THEN start = 26

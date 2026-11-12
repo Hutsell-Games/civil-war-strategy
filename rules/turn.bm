@@ -21,7 +21,7 @@ END SUB
 ' closed for the month when the side has no fleet and not the price of a ship.
 SUB turn_check_commands
 	IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
-	IF side_cash(current_side) < COST_SHIP AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
+	IF sides(current_side).cash < COST_SHIP AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
 END SUB
 
 ' Troops is closed for the month.
@@ -50,11 +50,11 @@ END SUB
 SUB turn_army_supply (army, blockaded, starved)
 DIM s AS INTEGER: DIM a AS INTEGER
 s = army_side(army)
-IF side_cash(s) >= .2 * army_size(army) THEN
+IF sides(s).cash >= .2 * army_size(army) THEN
 	a = 1: IF opt_realism >= REALISM_ON THEN a = city_is_connected(s, army_city(army))
 	IF a > 0 THEN
 		army_supply(army) = army_supply(army) + 1
-		side_cash(s) = side_cash(s) - .2 * army_size(army)
+		sides(s).cash = sides(s).cash - .2 * army_size(army)
 	END IF
 END IF
 IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(army)) < PORT_SEA THEN army_supply(army) = army_supply(army) - 1
@@ -132,7 +132,7 @@ END SUB
 SUB turn_army_lost (army, winner)
 DIM s AS INTEGER
 	s = army_side(winner)
-	side_victory_points(other_side(s)) = side_victory_points(other_side(s)) + 25
+	sides(other_side(s)).victory_points = sides(other_side(s)).victory_points + 25
 	army_city(army) = 0: leader_name$(army) = "": army_name$(army) = ""
 	army_size(army) = 0: army_leader_rating(army) = 0
 	army_experience(army) = 0: army_order(army) = ORDER_NONE: army_supply(army) = 0
@@ -161,25 +161,25 @@ END SUB
 ' what the other side's raiders took. Counts each side's cities and clears the orders.
 SUB turn_collect_income
 DIM i AS INTEGER: DIM x AS INTEGER
-side_city_count(SIDE_UNION) = 0: side_city_count(SIDE_REBEL) = 0
+sides(SIDE_UNION).city_count = 0: sides(SIDE_REBEL).city_count = 0
 
 FOR i = SIDE_UNION TO SIDE_REBEL
-side_income(i) = 0
-IF side_cash(i) > MAX_CASH THEN side_cash(i) = MAX_CASH
-IF side_cash(i) < 0 THEN side_cash(i) = 0
+sides(i).income = 0
+IF sides(i).cash > MAX_CASH THEN sides(i).cash = MAX_CASH
+IF sides(i).cash < 0 THEN sides(i).cash = 0
 NEXT i
-IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
+IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN sides(SIDE_UNION).income = sides(SIDE_UNION).income + union_income_bonus
 
 FOR i = 1 TO MAX_CITIES
-IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_income(x) = side_income(x) + city_value(i)
+IF city_owner(i) > 0 THEN x = city_owner(i): sides(x).city_count = sides(x).city_count + 1: sides(x).income = sides(x).income + city_value(i)
 army_order(i) = ORDER_NONE
 NEXT i
 
-FOR i = SIDE_UNION TO SIDE_REBEL: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + CAPITAL_INCOME
-side_cash(i) = side_cash(i) + side_income(i)
-IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
+FOR i = SIDE_UNION TO SIDE_REBEL: IF sides(i).capital > 0 THEN sides(i).income = sides(i).income + CAPITAL_INCOME
+sides(i).cash = sides(i).cash + sides(i).income
+IF raiding_side > 0 AND i <> raiding_side THEN sides(i).cash = sides(i).cash - raid_loss
 NEXT i
-total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
+total_income = sides(SIDE_UNION).income + sides(SIDE_REBEL).income
 END SUB
 
 ' Gives each army with an order its place in the month's moves and sorts them. An army
@@ -213,12 +213,12 @@ END SUB
 ' The month's victory points: each side keeps eight tenths and gains by its income and
 ' cities. A computer that holds few cities gets a higher strength ratio.
 SUB turn_update_victory_points
-side_victory_points(SIDE_UNION) = .8 * side_victory_points(SIDE_UNION) + .3 * (side_income(SIDE_UNION) + side_city_count(SIDE_UNION))
-IF side_city_count(SIDE_UNION) > 29 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 50: IF side_city_count(SIDE_UNION) > 34 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100
-IF current_side = SIDE_REBEL AND side_city_count(SIDE_UNION) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
+sides(SIDE_UNION).victory_points = .8 * sides(SIDE_UNION).victory_points + .3 * (sides(SIDE_UNION).income + sides(SIDE_UNION).city_count)
+IF sides(SIDE_UNION).city_count > 29 THEN sides(SIDE_UNION).victory_points = sides(SIDE_UNION).victory_points + 50: IF sides(SIDE_UNION).city_count > 34 THEN sides(SIDE_UNION).victory_points = sides(SIDE_UNION).victory_points + 100
+IF current_side = SIDE_REBEL AND sides(SIDE_UNION).city_count < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
 
-IF side_victory_points(SIDE_UNION) < 1 THEN side_victory_points(SIDE_UNION) = 0
-side_victory_points(SIDE_REBEL) = .8 * side_victory_points(SIDE_REBEL) + .3 * (side_income(SIDE_REBEL) + side_city_count(SIDE_REBEL))
-IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50: IF side_city_count(SIDE_REBEL) > 34 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_UNION) + 100
-IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
+IF sides(SIDE_UNION).victory_points < 1 THEN sides(SIDE_UNION).victory_points = 0
+sides(SIDE_REBEL).victory_points = .8 * sides(SIDE_REBEL).victory_points + .3 * (sides(SIDE_REBEL).income + sides(SIDE_REBEL).city_count)
+IF sides(SIDE_REBEL).city_count > 29 THEN sides(SIDE_REBEL).victory_points = sides(SIDE_REBEL).victory_points + 50: IF sides(SIDE_REBEL).city_count > 34 THEN sides(SIDE_REBEL).victory_points = sides(SIDE_UNION).victory_points + 100
+IF current_side = SIDE_UNION AND sides(SIDE_REBEL).city_count < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
 END SUB

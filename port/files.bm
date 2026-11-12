@@ -4,7 +4,7 @@ DIM k AS INTEGER: DIM i AS INTEGER: DIM a AS INTEGER
 	FOR i = 1 TO 40: INPUT #1, leader_name$(i), leader_rating(i): NEXT i
 	CLOSE #1
 	OPEN "I", 1, SCNDIR + "cws.ini"
-	FOR i = 0 TO 2: INPUT #1, side_name$(i): NEXT i
+	FOR i = 0 TO 2: INPUT #1, sides(i).name: NEXT i
 	FOR i = 1 TO 12: INPUT #1, month_name$(i): NEXT i
 	INPUT #1, turn_month, turn_year
 '               set end game conditions
@@ -19,11 +19,11 @@ FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + a
 	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
 	city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
 NEXT i
-FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i): NEXT i
+FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, sides(i).cash: NEXT i
 	INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
 	INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
 	FOR k = SIDE_UNION TO SIDE_REBEL: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
-	INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
+	INPUT #1, sides(SIDE_UNION).capital, sides(SIDE_REBEL).capital
 
 FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
 	CLOSE #1
@@ -41,8 +41,8 @@ FOR i = 1 TO MAX_CITIES: INPUT #1, a, city_x(i), city_y(i), city_name$(i), city_
 city_first_owner(i) = city_owner(i)
 CALL city_update_occupier(i)
 FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
-IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_victory_points(x) = side_victory_points(x) + city_value(i)
-IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
+IF city_owner(i) > 0 THEN x = city_owner(i): sides(x).city_count = sides(x).city_count + 1: sides(x).victory_points = sides(x).victory_points + city_value(i)
+IF city_owner(i) > 0 THEN sides(city_owner(i)).cash = sides(city_owner(i)).cash + city_value(i)
 total_income = total_income + city_value(i)
 NEXT i
 CLOSE #1
@@ -71,7 +71,7 @@ DIM i AS INTEGER: DIM a AS INTEGER: DIM unused AS INTEGER
 	END IF
 	NEXT i
 	FOR i = 1 TO MAX_CITIES: INPUT #1, city_army(i), city_owner(i), city_fort(i): NEXT i
-	FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+	FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, sides(i).cash, sides(i).city_count, sides(i).income, sides(i).victory_points, sides(i).capital
 	INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
 	fleet_size(i) = LEN(fleet_ships$(i))
 	NEXT i
@@ -90,7 +90,7 @@ DIM i AS INTEGER: DIM myside AS INTEGER
 	FOR i = 1 TO MAX_ARMIES: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
 	NEXT i
 	FOR i = 1 TO MAX_CITIES: WRITE #1, city_army(i), city_owner(i), city_fort(i): NEXT i
-	FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+	FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, sides(i).cash, sides(i).city_count, sides(i).income, sides(i).victory_points, sides(i).capital
 	WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
 	NEXT i
 	CLOSE #1
@@ -108,13 +108,13 @@ END SUB
 
 SUB config_read (side)
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+	INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, sides(SIDE_UNION).battles_won, sides(SIDE_REBEL).battles_won, sides(SIDE_UNION).casualties, sides(SIDE_REBEL).casualties, opt_history, opt_ai_aggression
 	CLOSE #1
 END SUB
 
 SUB config_write (side)
 	OPEN "O", 1, "cws.cfg"
-	WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+	WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, sides(SIDE_UNION).battles_won, sides(SIDE_REBEL).battles_won, sides(SIDE_UNION).casualties, sides(SIDE_REBEL).casualties, opt_history, opt_ai_aggression
 	CLOSE #1
 END SUB
 
@@ -125,7 +125,7 @@ IF opt_history > 0 THEN
 	PRINT #1, " SIDE      BATTLES WON       LOSSES"
 	FOR k = SIDE_UNION TO SIDE_REBEL
 	a$ = " ": IF victory_reason = k THEN a$ = "*"
-	PRINT #1, a$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
+	PRINT #1, a$; sides(k).name, sides(k).battles_won, 100 * sides(k).casualties
 	NEXT k
 	CLOSE #1
 END IF

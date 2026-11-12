@@ -80,7 +80,7 @@ FOR i = 1 TO MAX_CITIES
 c = 9: IF city_owner(i) = SIDE_REBEL THEN c = 7
 IF city_owner(i) = SIDE_NONE THEN c = 12
 x = city_x(i): y = city_y(i)
-IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
+IF i = sides(SIDE_UNION).capital OR i = sides(SIDE_REBEL).capital THEN
 	PUT (x - 6, y - 6), pic_capital, PSET
 	LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
 	LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
