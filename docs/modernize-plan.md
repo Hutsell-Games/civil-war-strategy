@@ -172,7 +172,8 @@ Its third part is done too: one SUB for each action. That ends step 10.
 Step 11 is done in the working tree: the knot of `turn_resolve` is six SUBs.
 Step 12 is done in the working tree: `menu_mark_row` and `menu_unmark_row`. That ends phase 7.
 Phase 8 step 1 is done in the working tree: `calculate_battle` is four rule SUBs and its screen, see
-"Phase 8" below. **Next:** step 2, the railroad, after the user has checked "How a SUB is split".
+"Phase 8" below. Step 2 is done in the working tree: the railroad.
+**Next:** step 3, `city_capture`, `check_map_links` and the five of `rules\army.bm`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -637,7 +638,18 @@ The order takes the SUBs that others call first, so that a caller's split finds 
    - Unit tests: 7 new ones, so 40 in all. Lines moved without a test: the three dead `CASE` arms, now
      `rules\battle.bm` lines 54, 102 and 113, moved whole. All 81 lines of `ui\battle.bm` run, one of them
      in part (line 46, the odds' floor of 1%). 20 lines of the game are not run, as before.
-2. `railroad_move`, `railroad_start`, `railroad_arrive`.
+2. **Done: the railroad.** `railroad_move`, `railroad_start` and `railroad_arrive` moved to
+   `ui\railroad.bm`. Their state changes are two rule SUBs in `rules\railroad.bm`:
+   - `railroad_board (side, army, city)`: the train takes the army, which leaves its city, and the next
+     army there holds the city. `railroad_start` prints its message first, as before, and draws after.
+   - `railroad_unload (side)`: the city the train left passes to the next army there, and the army gets
+     off in the city it was sent to. `railroad_arrive` erases the train before it and draws after.
+   - In each, the state changes keep their order. Only drawing moved past them: `draw_train` reads only
+     `train_city`, and the old city's flag reads only that army's city and supply.
+   - `railroad_move` holds no rule; it moved whole.
+   - Unit tests: 2 new ones, so 42 in all. Lines moved without a test: none. Three lines of
+     `ui\railroad.bm` are run in part, as they were in `rules\railroad.bm`: 38 (no army left in the old
+     city), 45 (no capture on arrival) and 47 (the stack markers). 20 lines of the game are not run.
 3. `city_capture` and `check_map_links`; then the five of `rules\army.bm`.
 4. The nine of `rules\navy.bm`.
 5. The eight of `rules\turn.bm`. `turn_resolve` and its parts are the turn as the player sees it, so most

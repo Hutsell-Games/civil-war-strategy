@@ -1,56 +1,25 @@
-' A side's train. With an army aboard, the train arrives. With none, the player or the
-' computer may send one.
-SUB railroad_move (side)
-DIM army AS INTEGER: DIM city AS INTEGER
-SELECT CASE train_army(side)
-	CASE 0
-	IF side = current_side THEN CALL menu_railroad(side, army, city) ELSE CALL ai_railroad(side, army, city)
-	IF army > 0 THEN CALL railroad_start(side, army, city)
-	CASE IS > 0
-	CALL railroad_arrive(side)
-END SELECT
-	IF side = current_side THEN CALL wait_seconds(PAUSE_LONG)
-	CALL clear_right_panel
-	clear_bottom_line
-END SUB
+' The rules of a side's train. They draw nothing. railroad_start and railroad_arrive
+' (ui/railroad.bm) show the train and call them.
 
-' Puts an army on the train for a city. It arrives at the start of next month's moves.
-SUB railroad_start (side, army, city)
+' Puts an army on the train for a city. The army leaves its city, which passes to the next army
+' there, if any.
+SUB railroad_board (side, army, city)
 DIM from AS INTEGER
 	from = army_city(army)
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(army); " is taking the train from "; city_name$(from); " to "; city_name$(city);
-	train_city(side) = army_city(army)
-	from = army_city(army)
+	train_city(side) = from
 	train_from_city(side) = from
 	train_army(side) = army: army_city(army) = 0: army_order(army) = city
-	CALL draw_train(side, DRAW_SHOW)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
-	CALL draw_train_box
-
 	CALL city_update_occupier(from)
-       IF city_army(from) > 0 THEN CALL draw_army_flag(city_army(from))
 END SUB
 
-' The train arrives: its army gets off, and takes the city if it is not the side's.
-SUB railroad_arrive (side)
-DIM index AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-	CALL draw_train(side, DRAW_ERASE)
+' The train arrives: the city it left passes to the next army there, and its army gets off in
+' the city it was sent to, where army_order becomes ORDER_BUSY.
+SUB railroad_unload (side)
+DIM index AS INTEGER
 	CALL city_update_occupier(train_from_city(side))
-	IF city_army(train_from_city(side)) > 0 THEN CALL draw_army_flag(city_army(train_from_city(side)))
-
 	index = train_army(side)
 	train_city(side) = army_order(index)
-	CALL draw_train(side, DRAW_SHOW)
-
 	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = ORDER_BUSY
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2
-	CALL wait_seconds(opt_pause!)
-	x = city_x(army_city(index)) - 12: y = city_y(army_city(index)) - 11
-	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-	IF city_owner(army_city(index)) <> side THEN CALL city_capture(index, army_city(index), side, 0)
-	CALL draw_army_flag(index)
-	IF city_army(army_city(index)) > 0 THEN CALL draw_stack_markers(side): EXIT SUB
-	CALL city_update_occupier(army_city(index)): CALL draw_army_flag(index)
 END SUB
 
 ' Counts the side's track out of a city: each road to a city of the side, and each road on

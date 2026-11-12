@@ -397,6 +397,31 @@ city_owner(4) = 2
 AssertEqualInt 1, railroad_route_count(1, 1), "city 2 only: the track is blocked"
 END SUB
 
+' ---------------------------------------------- railroad_board and _unload
+' An army takes the train from city 7 to city 12; army 5 stays in city 7.
+
+SUB TestRailroadBoardPutsTheArmyOnTheTrain
+army_city(3) = 7: army_city(5) = 7: city_army(7) = 3
+CALL railroad_board(1, 3, 12)
+AssertEqualInt 3, train_army(1), "the army aboard"
+AssertEqualInt 7, train_city(1), "the train is in city 7"
+AssertEqualInt 7, train_from_city(1), "and sets out from there"
+AssertEqualInt 0, army_city(3), "the army is in no city"
+AssertEqualInt 12, army_order(3), "it is bound for city 12"
+AssertEqualInt 5, city_army(7), "army 5 now holds city 7"
+END SUB
+
+SUB TestRailroadUnloadPutsTheArmyInItsCity
+army_city(5) = 7: city_army(7) = 3
+train_army(1) = 3: train_city(1) = 7: train_from_city(1) = 7: army_order(3) = 12
+CALL railroad_unload(1)
+AssertEqualInt 0, train_army(1), "the train is empty"
+AssertEqualInt 12, train_city(1), "in city 12"
+AssertEqualInt 12, army_city(3), "the army is in city 12"
+AssertEqualInt ORDER_BUSY, army_order(3), "and can take no order this turn"
+AssertEqualInt 5, city_army(7), "army 5 holds city 7"
+END SUB
+
 ' ------------------------------------------- ai_navy and menu_navy_items
 
 SUB TestAiNavyChangesItsOrder
@@ -474,6 +499,7 @@ END SUB
 '$INCLUDE: '../ui/screen.bm'
 '$INCLUDE: '../ui/messages.bm'
 '$INCLUDE: '../ui/battle.bm'
+'$INCLUDE: '../ui/railroad.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'
