@@ -138,10 +138,12 @@ Updated 2026-11-11. Phases 0 to 7 are done and committed. Phase 8's steps 1 and 
 Step 3 is committed in two parts (`70692b3`, `77ee9a6`), step 4 as `9e038a4` and step 5 as
 `b67f89e`. Step 6, the computer's turn, is committed as `ae48902`, and the cleanup after it, from
 the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is committed as `c298f3a`,
-and step 8, victory, is done in the working tree. That ends phase 8.
+and step 8, victory, as `f5ee0f0`. That ends phase 8.
 
-**Next:** phase 9, the menus. It starts with the plan of its steps: one menu SUB for each command,
-and the layer for the commands that phase 8 left in `ui\` ("How a SUB is split").
+Phase 9, the menus, has its plan below ("Phase 9: the menus"). Its step 1, the Utility menu, is done
+in the working tree (2026-11-12).
+
+**Next:** phase 9 step 2, the Commands menu.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -154,19 +156,25 @@ cws.bi               types, constants, shared variables
 rules\               army.bm city.bm battle.bm navy.bm railroad.bm setup.bm turn.bm victory.bm
 ai\                  ai.bm
 ui\                  menu.bm orders.bm reports.bm screen.bm messages.bm
+commands\            the orders that the player's menus and the computer both give
 draw\                map.bm icons.bm ships.bm pictures.bm
 game\                the Civil War's map, flags, victory screens, tunes, event texts, side names
 port\                qb64.bm script.bm
 ```
 
-The folder states the rule its files keep: nothing in `rules\` or `ai\` draws, prints or reads a key, and
-`game\` is what another war replaces. The file names inside each folder are settled in phase 6.
+The folder states the rule its files keep: nothing in `rules\` or `ai\` draws, prints or reads a key,
+nothing in `commands\` opens a menu or reads a key, and `game\` is what another war replaces. The file names inside each folder are settled in phase 6.
 
 ## Open questions
 
 Asked as the plan goes down a level:
 
 None at present.
+
+Answered: the commands get a folder of their own, `commands\` (user, 2026-11-12). A command carries
+out one order for either side: it calls rules and shows what happened. Examples are
+`navy_build_ship`, `army_combine`, `army_recruit` and `railroad_move`, which phase 8 filed in `ui\`.
+Nothing in `commands\` opens a menu or reads a key. Phase 9 steps 6 and 7 move them.
 
 ## Lines that no test runs
 
@@ -297,3 +305,64 @@ The order takes the SUBs that others call first, so that a caller's split finds 
 6. **Done: `ai\ai.bm`.** See `modernize-completed.md`.
 7. **Done: `special_events` and `event_riot`.** See `modernize-completed.md`.
 8. **Done: `rules\victory.bm`.** See `modernize-completed.md`. That ends phase 8.
+
+## Phase 9: the menus
+
+Started 2026-11-12. Each step is one commit (decision 15), and each ends with `play.py check`,
+`play.py compare` and the unit tests passing on unchanged recordings. Phase 7's rule for lines that no
+test runs still holds.
+
+### How a menu is split
+
+Claude's choice on 2026-11-12, made while carrying out step 1. Check it before step 2.
+
+- **One menu SUB for each menu and each entry.** A menu SUB fills the menu's texts, calls
+  `menu_select` and shows the result. Its name starts with `menu_`. It is in `ui\`.
+- **A menu SUB changes no game state.** What the player chose goes to a rule SUB, however short
+  (`option_toggle_history` is one line). This is phase 8's rule for a screen part, now without the
+  exception for "the lines tangled with the menus".
+- **A menu that shows again is a loop.** `GOTO utile` became a `DO` loop in `menu_utility`. An entry
+  that ends the menu is an `EXIT SUB`.
+- **The row a menu starts on is set where the menu is filled.** A menu that shows again starts on
+  the row just chosen (`menu_choice = MENU_START + row`).
+- **The statements stay in their order** inside each entry, except that a setting is changed first
+  and shown after. No message reads a setting before it is changed.
+- **A variable of the main module that a menu used between calls** becomes `STATIC` in the menu's
+  SUB. The only one so far is `t$` in `menu_option_events`.
+- **Known oddities are kept**, each with a unit test where a rule SUB holds it, or a row in
+  `TODO.md`.
+
+### Steps
+
+The menus come first, from the simplest. The main module's loop follows, when no menu is left in
+it. The commands that both the player and the computer give come last. They are the hardest:
+their random numbers must stay in order.
+
+1. **Done: the Utility menu.** See `modernize-completed.md`.
+2. **The Commands menu** (`optmen:` in the main module) becomes `menu_commands`, a loop. Detach and
+   Drill get menu SUBs (`menu_army_detach`, `menu_army_drill`). The state that the menus of
+   `ui\orders.bm` change moves to rule SUBs: the fort and its cost in `menu_city_fortify`, the new
+   leader in `menu_army_relieve`, the capital and its cost in `menu_move_capital`, the order in
+   `menu_army_move` and `menu_army_cancel`.
+3. **The Files menu** (`filex:`, `loader:`, `rusure:`) becomes `menu_files`. `load_game` and
+   `save_game` (`port\files.bm`) are split: the menu of saved games goes to `ui\`, and the file work
+   stays, with the slot as a parameter. The title menu's Resume Saved Game uses the same SUBs.
+4. **The main menu's own entries**: Troops, Moves, Ships, the Railroad's picture and capacity line,
+   End Turn's question and Inform's move lines each get a menu SUB. `menu_main` fills and shows the
+   main menu and keeps the row it starts on.
+5. **The main module becomes a loop.** The start of a game (`newgame:`, `iron:`) becomes rule SUBs in
+   `rules\setup.bm` and a `menu_title`. `newmonth:`, `menu0:` and `endrnd:` become nested `DO`
+   loops: a game, its months, the commands of a month. No label is left in the main module.
+6. **The navy's commands.** `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`,
+   `navy_raid_commerce` and `navy_land_army` each serve the player and the computer through
+   `action`. Each becomes three parts: the player's menu, the computer's choice (`ai\`), and the
+   command that carries out the order. That removes the lines phase 8 left: `turn_navy_done = 1`
+   (four times), `fleet_size(side) = LEN(fleet_ships$(side))` in Sail and Raid, and
+   `city_owner(0) = side` in `navy_commands`.
+7. **The other commands with a branch for the computer**: `army_combine`
+   (`IF side <> current_side`), `menu_army_recruit` and `ai_recruit`, `railroad_move`,
+   `menu_army_retreat`, and the computer's one-line choices in the screens. The commands then move
+   to `commands\`.
+8. **`menu_select`**: its key loop without the `GOSUB` routines `crsr`, `limits` and `noadjust`.
+   Then `CWSTRAT.BAS` and `CWS14.BI` are renamed `cws.bas` and `cws.bi` with `git mv`, as the layout
+   says. The rename touches `play.py` and the README.

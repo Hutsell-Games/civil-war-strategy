@@ -613,3 +613,31 @@ itself (`tests\out\scratch\p8_mixed.py`). What it left for phase 9: the commands
 lines tangled with the menus ("How a SUB is split" in `modernize-plan.md`), `load_game` and `save_game`
 in `port\`, and the computer's one-line choices in the screens. The scripts pass on the recordings of
 phase 7, with both compilers, and the unit tests went from 33 to 95.
+
+## Phase 9: the menus, the steps done
+
+The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
+
+1. **Done: the Utility menu.** The 229 lines from `utile:` to its `END SELECT` left the main module
+   for the new `ui\options.bm`. The main module's `CASE 8` is now `chosit = 29` and
+   `CALL menu_utility`.
+   - `menu_utility` fills and shows the menu in a `DO` loop. `GOTO utile` is the loop's next turn, on
+     the row just chosen. `GOTO menu0` is `EXIT SUB`: after Side, after Chk Links, on Esc, and on Esc
+     in the SOUNDS or the Balance menu.
+   - Eleven entries have a menu SUB each: `menu_option_side`, `menu_option_players`,
+     `menu_option_graphics`, `menu_option_sound`, `menu_option_display`, `menu_option_balance`,
+     `menu_option_events`, `menu_option_january`, `menu_option_realism`, `menu_option_history` and
+     `menu_option_aggression`. End Cond, Vary Start and Chk Links call the SUBs they called before.
+   - Twelve rule SUBs in `rules\setup.bm` change the settings (`option_swap_side` to
+     `option_next_aggression`; the list is in `file-layout.md`). `victory_toggle_rule`
+     (`rules\victory.bm`) turns a victory rule on or off for `menu_victory_conditions`.
+   - Each setting is now changed before its message, not in the middle of it. No message reads a
+     setting that changes after it.
+   - `t$`, the text of the last Random Events choice, was a variable of the main module. It is
+     `STATIC` in `menu_option_events`, so an Esc there still shows the choice before (`TODO.md`).
+   - The line `IF opt_players = PLAYERS_TWO THEN menu_text$(2) = ""` is kept, though the next line
+     sets `menu_text$(2)` again.
+   - Found while reading, not tried: F7 in the SOUNDS menu prints `menu_text$(99)` (`TODO.md`).
+   - Unit tests: 9 new ones, so 104 in all. Lines moved without a test: none. All 161 lines of
+     `ui\options.bm` run, 6 of them in part. 204 lines of the game are run in part and 20 are not
+     run, as before.

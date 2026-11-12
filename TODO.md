@@ -62,6 +62,12 @@ game plays changes the recorded screens.
   (`rules\navy.bm`) adds them to the loser, as both of the original's two blocks did
   (`TestNavyFleetDefeated`). A fleet sunk by a shore battery gives 5 to the other side
   (`navy_fleet_lost`), so the 10 were most likely meant for the winner.
+- **F7 in the SOUNDS menu most likely stops the game with an error.** Read from the code, not tried.
+  The menu takes F7 as "end the turn" and returns 99 (`MENU_END_TURN_KEY`). `menu_option_sound`
+  (`ui\options.bm`) then prints `menu_text$(99)`, and the array has 21 entries. No other menu of the
+  Utility menu uses the number it gets back as an index.
+- **Rndom Evt left with Esc shows the text of the choice before.** `menu_option_events`
+  (`ui\options.bm`) keeps the last choice's text and prints it again, though nothing was chosen.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
@@ -94,7 +100,7 @@ Left alone by group 2 (the special values):
 - **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
   `MENU_START`, so it stays.
-- **The Utility menu calls `menu_select(-1)`** (`CWSTRAT.BAS` line 331). No mode has that number, so it is a
+- **The Utility menu calls `menu_select(-1)`** (`menu_utility`, `ui\options.bm` line 31). No mode has that number, so it is a
   plain menu without the F3, F4 and F7 keys. `docs\constants.md` has no row for it, so it keeps the -1
   (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
 - **`animate_army`'s parameter `background_saved` is misnamed** (`draw\icons.bm`). The `GET` it skips takes
@@ -105,7 +111,7 @@ Left alone by group 2 (the special values):
 
 Left alone by group 6 (the settings and victory rules):
 
-- **The Realism switch is `opt_realism = 1 - opt_realism`** (`CWSTRAT.BAS` line 492). It toggles between
+- **The Realism switch is `opt_realism = 1 - opt_realism`** (`option_toggle_realism`, `rules\setup.bm`). It toggles between
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
 - **The rule that ended the game has no constants**: `j = 2: GOTO finis` to `j = 6` in
@@ -133,7 +139,7 @@ Left alone by group 8 (the colors):
   only, so these stay. A `side_color(side)` FUNCTION would be the next step.
 - **`COLOR 16 - c` shows the other side's color** (`ui\battle.bm` lines 27, 35 and 81): 16 - 9 is 7 and
   16 - 7 is 9. It stays as written; it would go with `side_color`.
-- **`CALL wait_seconds(99)`, "press a key", stays a number** (`CWSTRAT.BAS` line 507, Chk Links;
+- **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 56, Chk Links;
   `ui\turn.bm` line 131, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.

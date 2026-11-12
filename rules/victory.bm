@@ -10,6 +10,12 @@ DIM j AS INTEGER
 	NEXT j
 END SUB
 
+' Turns a victory rule on or off (the Utility menu's End Cond). A rule that is off keeps
+' its number as a negative.
+SUB victory_toggle_rule (rule)
+	victory_rule(rule) = -victory_rule(rule)
+END SUB
+
 ' 1 when the time limit's year has come and its month is still ahead.
 FUNCTION victory_time_near
 victory_time_near = 0

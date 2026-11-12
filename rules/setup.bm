@@ -41,3 +41,82 @@ DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM a$
 		IF leader_rating(k) < 1 THEN leader_rating(k) = 1
 		NEXT k
 END SUB
+
+' The settings of the Utility menu. Its menus are in ui/options.bm.
+
+' Side: the player takes the other side, and the special events favor the side left to
+' the computer.
+SUB option_swap_side
+	current_side = other_side(current_side)
+	IF current_side = SIDE_UNION THEN opt_event_balance = 7
+	IF current_side = SIDE_REBEL THEN opt_event_balance = 3
+END SUB
+
+' One player or two.
+SUB option_toggle_players
+	opt_players = PLAYERS_ONE + PLAYERS_TWO - opt_players
+END SUB
+
+' Graphics: the next level of the map's detail, and after the last the first again.
+SUB option_next_graphics
+	opt_graphics = opt_graphics + 1
+	IF opt_graphics > GRAPHICS_FULL THEN opt_graphics = GRAPHICS_OFF
+END SUB
+
+SUB option_set_sound (level)
+	opt_sound = level
+END SUB
+
+' Display: choice is the menu's row, 1 (Fast) to 4 (Very Slow). Very Slow is 8 seconds.
+SUB option_set_display_speed (choice)
+	opt_pause! = choice
+	IF opt_pause! = 4 THEN opt_pause! = 8
+END SUB
+
+SUB option_toggle_alt_colors
+	opt_alt_colors = 1 - opt_alt_colors
+END SUB
+
+' Balance: level is 1 (Rebel ++) to 5 (Union ++).
+SUB option_set_balance (level)
+	opt_difficulty = level
+	CALL set_union_advantage
+END SUB
+
+' Rndom Evt: choice is the menu's row: off, favor the Union, neutral, favor the Rebels.
+' Any other choice changes nothing.
+SUB option_set_event_balance (choice)
+	SELECT CASE choice
+	CASE 1
+	opt_event_balance = 0
+	CASE 2
+	opt_event_balance = 3
+	CASE 3
+	opt_event_balance = 5
+	CASE 4
+	opt_event_balance = 7
+	CASE ELSE
+	END SELECT
+END SUB
+
+SUB option_toggle_winter_campaigns
+	opt_winter_campaigns = 1 - opt_winter_campaigns
+END SUB
+
+' Realism: off or on. When it goes on, the Union's extra income is worked out again.
+SUB option_toggle_realism
+	opt_realism = 1 - opt_realism
+	IF opt_realism <> REALISM_OFF THEN
+		IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
+		CALL set_union_advantage
+	END IF
+END SUB
+
+SUB option_toggle_history
+	opt_history = 1 - opt_history
+END SUB
+
+' Aggress: the next level of the computer's boldness, 0 to 5, and after 5 again 0.
+SUB option_next_aggression
+	opt_ai_aggression = opt_ai_aggression + 1: IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
+END SUB

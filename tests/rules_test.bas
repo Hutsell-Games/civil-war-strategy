@@ -1057,6 +1057,98 @@ CALL turn_army_forages(2)
 AssertEqualInt MAX_SUPPLY, army_supply(2), "not past the top"
 END SUB
 
+' ------------------------------------------ the Utility menu's settings
+' The option_ SUBs of rules/setup.bm, and victory_toggle_rule.
+
+SUB TestOptionSwapSide
+current_side = SIDE_UNION
+CALL option_swap_side
+AssertEqualInt SIDE_REBEL, current_side, "the Rebels"
+AssertEqualInt 3, opt_event_balance, "events favor the Union"
+CALL option_swap_side
+AssertEqualInt SIDE_UNION, current_side, "the Union again"
+AssertEqualInt 7, opt_event_balance, "events favor the Rebels"
+END SUB
+
+SUB TestOptionSwitches
+opt_players = PLAYERS_ONE
+CALL option_toggle_players: AssertEqualInt PLAYERS_TWO, opt_players, "two players"
+CALL option_toggle_players: AssertEqualInt PLAYERS_ONE, opt_players, "one again"
+CALL option_toggle_alt_colors: AssertEqualInt 1, opt_alt_colors, "the other colors"
+CALL option_toggle_alt_colors: AssertEqualInt 0, opt_alt_colors, "the usual colors"
+CALL option_toggle_winter_campaigns: AssertEqualInt 1, opt_winter_campaigns, "January campaigns on"
+CALL option_toggle_winter_campaigns: AssertEqualInt 0, opt_winter_campaigns, "and off"
+CALL option_toggle_history: AssertEqualInt 1, opt_history, "history on"
+CALL option_toggle_history: AssertEqualInt 0, opt_history, "and off"
+CALL option_set_sound(SOUND_MUSIC): AssertEqualInt SOUND_MUSIC, opt_sound, "music"
+CALL option_set_sound(SOUND_OFF): AssertEqualInt SOUND_OFF, opt_sound, "quiet"
+END SUB
+
+SUB TestOptionCyclesStartAgain
+opt_graphics = GRAPHICS_NAMES
+CALL option_next_graphics: AssertEqualInt GRAPHICS_FULL, opt_graphics, "the next level"
+CALL option_next_graphics: AssertEqualInt GRAPHICS_OFF, opt_graphics, "after the last, the first"
+opt_ai_aggression = 4
+CALL option_next_aggression: AssertEqualInt 5, opt_ai_aggression, "the next level"
+CALL option_next_aggression: AssertEqualInt 0, opt_ai_aggression, "after 5, 0"
+END SUB
+
+SUB TestOptionDisplaySpeed
+CALL option_set_display_speed(2)
+AssertTrue opt_pause! = 2, "Normal is 2 seconds:" + STR$(opt_pause!)
+CALL option_set_display_speed(4)
+AssertTrue opt_pause! = 8, "Very Slow is 8 seconds:" + STR$(opt_pause!)
+END SUB
+
+SUB TestOptionSetBalance
+opt_players = PLAYERS_ONE
+CALL option_set_balance(4)
+AssertEqualInt 4, opt_difficulty, "the level"
+AssertEqualInt 480, union_income_bonus, "the Union's extra income follows it"
+END SUB
+
+SUB TestOptionSetEventBalance
+CALL option_set_event_balance(2): AssertEqualInt 3, opt_event_balance, "favor the Union"
+CALL option_set_event_balance(3): AssertEqualInt 5, opt_event_balance, "neutral"
+CALL option_set_event_balance(4): AssertEqualInt 7, opt_event_balance, "favor the Rebels"
+CALL option_set_event_balance(MENU_ESCAPED): AssertEqualInt 7, opt_event_balance, "Esc changes nothing"
+CALL option_set_event_balance(1): AssertEqualInt 0, opt_event_balance, "off"
+END SUB
+
+' Realism on works the Union's extra income out again; realism off does not. From high
+' realism (2) the switch gives -1, which counts as on (as in the original).
+SUB TestOptionToggleRealism
+opt_players = PLAYERS_ONE: opt_difficulty = 3
+CALL option_toggle_realism
+AssertEqualInt REALISM_ON, opt_realism, "on"
+AssertEqualInt 252, union_income_bonus, "seven tenths of 360"
+CALL option_toggle_realism
+AssertEqualInt REALISM_OFF, opt_realism, "off"
+AssertEqualInt 252, union_income_bonus, "not worked out again (as in the original)"
+opt_realism = REALISM_HIGH: union_income_bonus = 0
+CALL option_toggle_realism
+AssertEqualInt -1, opt_realism, "from high realism: -1 (as in the original)"
+AssertEqualInt 360, union_income_bonus, "worked out, without the seven tenths"
+END SUB
+
+' With realism going on, a Rebel player's event balance of 1 becomes 3. No menu sets 1.
+SUB TestOptionToggleRealismEventBalance
+current_side = SIDE_REBEL: opt_event_balance = 1
+CALL option_toggle_realism
+AssertEqualInt 3, opt_event_balance, "1 becomes 3"
+opt_realism = REALISM_OFF: opt_event_balance = 5
+CALL option_toggle_realism
+AssertEqualInt 5, opt_event_balance, "any other value stays"
+END SUB
+
+SUB TestVictoryToggleRule
+victory_rule(VICTORY_CITIES) = 16
+CALL victory_toggle_rule(VICTORY_CITIES)
+AssertEqualInt -16, victory_rule(VICTORY_CITIES), "off: the number as a negative"
+CALL victory_toggle_rule(VICTORY_CITIES)
+AssertEqualInt 16, victory_rule(VICTORY_CITIES), "on again"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern
@@ -1098,6 +1190,7 @@ END SUB
 '$INCLUDE: '../ai/ai.bm'
 '$INCLUDE: '../ui/menu.bm'
 '$INCLUDE: '../ui/orders.bm'
+'$INCLUDE: '../ui/options.bm'
 '$INCLUDE: '../ui/reports.bm'
 '$INCLUDE: '../ui/screen.bm'
 '$INCLUDE: '../ui/messages.bm'

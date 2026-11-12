@@ -40,9 +40,9 @@ what4:
 	chosit = 21 + menu_choice
 SELECT CASE menu_choice
 	CASE 1
-	victory_rule(VICTORY_YEAR) = -victory_rule(VICTORY_YEAR)
+	CALL victory_toggle_rule(VICTORY_YEAR)
 	CASE 2 TO 5
-	victory_rule(menu_choice + 1) = -victory_rule(menu_choice + 1)
+	CALL victory_toggle_rule(menu_choice + 1)
 	CASE ELSE
 	GOTO cheer
 END SELECT

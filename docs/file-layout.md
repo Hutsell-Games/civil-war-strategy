@@ -20,8 +20,8 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `navy.bm` | `navy_remove_ship`, `navy_add_ship`, `navy_found_fleet`, `navy_cancel_new_fleet`, `navy_bombard_army`, `navy_shore_battery`, `navy_fleet_lost`, `navy_blast`, `navy_move_fleet`, `navy_go_raiding`, `navy_landed`, `navy_note_raiding_side`, `navy_raid_round`, `navy_ship_hits`, `navy_shot_hits`, `navy_fleet_defeated`, `navy_retreat_port` (the rest until phase 8 moved them to `ui\navy.bm`) |
 | `railroad.bm` | `railroad_board`, `railroad_unload`, `railroad_route_count`, `railroad_capacity` (`railroad_move`, `railroad_start` and `railroad_arrive` until phase 8 moved them to `ui\railroad.bm`) |
 | `turn.bm` | `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
-| `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7) |
-| `victory.bm` | `victory_forces`, `victory_time_near`, `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_play_on`, `victory_won`, `victory_technical_points`, `hall_of_fame_place`, `hall_of_fame_insert` (`check_victory_conditions`, `victory_warnings`, `end_game` and `hall_of_fame` until phase 8 moved them to `ui\victory.bm`) |
+| `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7); the Utility menu's settings (new in phase 9): `option_swap_side`, `option_toggle_players`, `option_next_graphics`, `option_set_sound`, `option_set_display_speed`, `option_toggle_alt_colors`, `option_set_balance`, `option_set_event_balance`, `option_toggle_winter_campaigns`, `option_toggle_realism`, `option_toggle_history`, `option_next_aggression` |
+| `victory.bm` | `victory_toggle_rule` (new in phase 9), `victory_forces`, `victory_time_near`, `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_play_on`, `victory_won`, `victory_technical_points`, `hall_of_fame_place`, `hall_of_fame_insert` (`check_victory_conditions`, `victory_warnings`, `end_game` and `hall_of_fame` until phase 8 moved them to `ui\victory.bm`) |
 
 ## ai\
 
@@ -35,6 +35,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 |------|------|
 | `menu.bm` | `menu_select`, `menu_mark_row`, `menu_unmark_row`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
 | `orders.bm` | `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital`, `menu_recruit_cities`, `menu_railroad`, `menu_navy`, `menu_navy_items` |
+| `options.bm` | `menu_utility`, `menu_option_side`, `menu_option_players`, `menu_option_graphics`, `menu_option_sound`, `menu_option_display`, `menu_option_balance`, `menu_option_events`, `menu_option_january`, `menu_option_realism`, `menu_option_history`, `menu_option_aggression` (new in phase 9: the Utility menu, out of the main module) |
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size` |
 | `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn`, `draw_update_box` |
 | `messages.bm` | `show_message_box`, `scribe_message` |
