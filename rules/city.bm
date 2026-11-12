@@ -23,6 +23,24 @@ SUB city_take (city, side, weaken_fort)
 	IF city_fort(city) > 0 AND weaken_fort > 0 THEN city_fort(city) = city_fort(city) - 1
 END SUB
 
+' Fortify: the city's fort grows a level, and the side pays for it.
+SUB city_build_fort (side, city)
+	city_fort(city) = city_fort(city) + 1
+	side_cash(side) = side_cash(side) - COST_FORT
+END SUB
+
+' Capital, first half: the side pays to move its capital, and the other side gets 50 victory
+' points. This comes before the new capital is picked, so a player who then gives up has paid.
+SUB capital_move_pay (side)
+	side_cash(side) = side_cash(side) - COST_MOVE_CAPITAL
+	side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 50
+END SUB
+
+' Capital, second half: the city is the side's capital.
+SUB capital_move_to (side, city)
+	side_capital(side) = city
+END SUB
+
 ' Gives every road a way back: when city i has a road to a city that has no road to i, the
 ' road back is added in that city's first free slot. Each road without a way back is listed
 ' in from_city() and to_city(), with added() 1 when the road back was added and 0 when the

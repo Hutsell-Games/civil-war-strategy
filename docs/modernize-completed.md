@@ -641,3 +641,28 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    - Unit tests: 9 new ones, so 104 in all. Lines moved without a test: none. All 161 lines of
      `ui\options.bm` run, 6 of them in part. 204 lines of the game are run in part and 20 are not
      run, as before.
+2. **Done: the Commands menu.** The 102 lines from `optmen:` to its last `GOTO optmen` left the main
+   module for `ui\orders.bm`. The main module's `CASE 7` is now `chosit = 28` and
+   `CALL menu_commands`.
+   - **A script first.** `refusals-rebel` plays the refusals that no test ran, from a prepared save
+     with the Rebels short of cash: "Not enough money for fort", "Cannot move capital", "Too small
+     to detach", an army that "has reached maximum improvement through drilling", and "No armies
+     remain eligible for drills". It was recorded on `693c078`, before the menu changed.
+   - `menu_commands` is a `DO` loop. `GOTO optmen` is its next turn and `GOTO menu0` is `EXIT SUB`.
+     Detach and Army Drill are `menu_army_detach (again)` and `menu_army_drill (again, drilled)`.
+   - **The row the menu comes back on** was set three ways, and each is kept. Most commands set
+     their own row. Capital came back on row 2, Fortify: the row was what `menu_city_select` left
+     in `menu_choice`, and its Enter is row 2. An army that cannot drill further came back on row
+     1, and so did Cancel, whose row was added to `MENU_START` twice.
+   - The menus of `ui\orders.bm` change no state now. Seven rule SUBs do it:
+     `army_set_order`, `army_free_leader` and `army_take_leader` (`rules\army.bm`),
+     `city_build_fort`, `capital_move_pay` and `capital_move_to` (`rules\city.bm`), and
+     `turn_set_moves_done` (`rules\turn.bm`).
+   - `menu_army_relieve` printed the new leader's name between the changes. It now reads the name
+     first, calls `army_take_leader`, and prints.
+   - `ai_fortify` (`ai\ai.bm`) still builds its fort in its own lines. It marks the army busy
+     between the fort and the payment, so it does not call `city_build_fort`.
+   - The main module no longer declares `index`, `empty` and `target`.
+   - Unit tests: 5 new ones, so 109 in all. 34 scripts. One line moved without a test: Detach when
+     no commander is left (`IF empty = 0 THEN EXIT SUB` in `menu_army_detach`, `GOTO menu0`
+     before). 198 lines of the game are run in part (204 before) and 20 are not run.

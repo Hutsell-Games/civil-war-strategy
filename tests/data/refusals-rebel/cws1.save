@@ -1,0 +1,11 @@
+# For the script refusals-rebel: entries of the Commands menu that the game refuses.
+# May 1862, the Rebels play. They have too little cash for a fort (200) or to move the capital
+# (500).
+date 5 1862
+side 2
+cash 300 150
+# Two Rebel armies. J.E. Johnston in Richmond is too small to detach from (under 6,500) and too
+# experienced to drill (above 5). Jackson in Front Royal can drill.
+army 21 size=40 exp=6
+army 22 exp=1
+noarmy 23 24

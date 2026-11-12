@@ -1,6 +1,12 @@
 ' The rules of the month's moves. They draw nothing. The moves as the player sees them are in
 ' ui/turn.bm, and call these.
 
+' The main menu's Moves entry: done is 1 when no army is left to give an order to, and 0 when
+' an order may have been cancelled.
+SUB turn_set_moves_done (done)
+	turn_moves_done = done
+END SUB
+
 ' Two months pass.
 SUB turn_advance_month
 turn_month = turn_month + 2

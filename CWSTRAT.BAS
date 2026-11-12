@@ -15,8 +15,8 @@ DECLARE SUB draw_train (who%, flag%)
 DECLARE FUNCTION railroad_capacity% (who%)
 DECLARE SUB draw_top_bar ()
 ' $INCLUDE: 'cws14.bi'
-DIM fin AS INTEGER: DIM index AS INTEGER: DIM empty AS INTEGER
-DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER: DIM target AS INTEGER
+DIM fin AS INTEGER
+DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER
 
 CALL script_mute
 replay = 0
@@ -198,108 +198,8 @@ endrnd:
 '                            Commands
 '==========================================================================
 	CASE 7
-optmen:
-	menu_col = PANEL_COL: menu_row = 13
-	COLOR COLOR_LIGHT_CYAN: LOCATE menu_row - 2, menu_col: PRINT "esc=Main Menu"
-	menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN: chosit = 24
-	menu_text$(0) = "Commands"
-	menu_text$(1) = "Cancel"
-	menu_text$(2) = "Fortify": IF side_cash(current_side) < COST_FORT THEN menu_text$(2) = "-"
-	menu_text$(3) = "Join"
-	menu_text$(4) = "Supply"
-	menu_text$(5) = "Capital": IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN menu_text$(5) = "-"
-	menu_text$(6) = "Detach": IF current_side = SIDE_UNION THEN menu_text$(6) = "-"
-	menu_text$(7) = "Army Drill"
-	menu_text$(8) = "Relieve"
-	menu_text$(9) = "MAIN MENU"
-	menu_item_count = 9
-	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 	chosit = 28
-     SELECT CASE menu_choice
-'---------------------------------------------------------------------------
-'                               Cancel
-'---------------------------------------------------------------------------
-		CASE 1
-	CALL menu_army_cancel(current_side): turn_moves_done = 0
-	menu_choice = MENU_START + 1
-'---------------------------------------------------------------------------
-'                               Fortify
-'---------------------------------------------------------------------------
-		CASE 2
-	IF side_cash(current_side) < COST_FORT THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Not enough money for fort"; : GOTO menu0
-	CALL menu_city_fortify(target)
-	IF side_cash(current_side) < COST_FORT GOTO menu0
-	menu_choice = MENU_START + 2
-	GOTO optmen
-'---------------------------------------------------------------------------
-'                               Combine
-'---------------------------------------------------------------------------
-		CASE 3
-	x = current_side
-	CALL army_combine(x)
-	IF x < 0 THEN
-		CALL clear_bottom_line
-		COLOR COLOR_LIGHT_CYAN
-		PRINT "No eligible armies in same city to combine";
-		CALL draw_stack_markers(current_side)
-		GOTO menu0
-	END IF
-	menu_choice = MENU_START + 3
-	GOTO optmen
-'---------------------------------------------------------------------------
-'                               Supply
-'---------------------------------------------------------------------------
-		CASE 4
-		CALL menu_supply(index)
-		IF index = 0 GOTO menu0
-		menu_choice = MENU_START + 4
-		GOTO optmen
-'-------------------------------------------------------------------------
-'                               Move Capital
-'-------------------------------------------------------------------------
-		CASE 5
-	CALL menu_move_capital(index)
-	IF index = 0 GOTO menu0
-'-------------------------------------------------------------------------
-'                               Detach
-'-------------------------------------------------------------------------
-		CASE 6
-	IF current_side = SIDE_UNION THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Option not available to Union"; : GOTO menu0
-	COLOR COLOR_YELLOW: LOCATE 4, 68: PRINT "DETACH UNIT"
-	CALL menu_army_select(index, target): IF target < 1 OR index < 1 GOTO menu0
-	IF army_size(index) < MIN_DETACH_SIZE THEN CALL clear_bottom_line: PRINT "Too small to detach"; : CALL wait_seconds(opt_pause!): GOTO menu0
-	CALL army_get_commander(2, empty): IF empty = 0 GOTO menu0
-	CALL army_detach(index, target, empty)
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Unit #"; empty; " with "; : CALL print_army_size(empty): PRINT " men detached under "; army_name$(empty); : CALL wait_seconds(opt_pause!): IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
-	CALL draw_stack_markers(current_side)
-	menu_choice = MENU_START + 6
-	GOTO optmen
-'-------------------------------------------------------------------------
-'                               Drill
-'-------------------------------------------------------------------------
-		CASE 7
-	COLOR COLOR_YELLOW: LOCATE 4, 68: PRINT "DRILL ARMY"
-	CALL menu_army_select(index, target)
-	IF target < 1 OR index < 1 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "No armies remain eligible for drills in "; month_name$(turn_month); : GOTO menu0
-	IF army_experience(index) > 5 OR army_experience(index) >= army_leader_rating(index) THEN COLOR COLOR_LIGHT_RED: CALL clear_bottom_line: PRINT army_name$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
-	CALL army_drill(index)
-	CALL clear_bottom_line: PRINT army_name$(index); " has drilled to reach experience level "; army_experience(index); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
-	CALL wait_seconds(opt_pause!): clear_bottom_line
-	menu_choice = MENU_START + 7
-	GOTO optmen
-'-------------------------------------------------------------------------
-'                               Relieve
-'-------------------------------------------------------------------------
-		CASE 8
-		CALL menu_army_relieve(current_side)
-		menu_choice = MENU_START + 8
-		GOTO optmen
-'-------------------------------------------------------------------------
-		CASE ELSE
-		chosit = 28
-		GOTO menu0
-      END SELECT
-	menu_choice = MENU_START + menu_choice: GOTO optmen
+	CALL menu_commands
 '==========================================================================
 '                               Utility Menu
 '==========================================================================

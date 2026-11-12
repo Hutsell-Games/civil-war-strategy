@@ -140,10 +140,10 @@ Step 3 is committed in two parts (`70692b3`, `77ee9a6`), step 4 as `9e038a4` and
 the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is committed as `c298f3a`,
 and step 8, victory, as `f5ee0f0`. That ends phase 8.
 
-Phase 9, the menus, has its plan below ("Phase 9: the menus"). Its step 1, the Utility menu, is done
-in the working tree (2026-11-12).
+Phase 9, the menus, has its plan below ("Phase 9: the menus"). Its step 1, the Utility menu, is
+committed as `693c078`. Step 2, the Commands menu, is done in the working tree (2026-11-12).
 
-**Next:** phase 9 step 2, the Commands menu.
+**Next:** phase 9 step 3, the Files menu.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -339,11 +339,7 @@ it. The commands that both the player and the computer give come last. They are 
 their random numbers must stay in order.
 
 1. **Done: the Utility menu.** See `modernize-completed.md`.
-2. **The Commands menu** (`optmen:` in the main module) becomes `menu_commands`, a loop. Detach and
-   Drill get menu SUBs (`menu_army_detach`, `menu_army_drill`). The state that the menus of
-   `ui\orders.bm` change moves to rule SUBs: the fort and its cost in `menu_city_fortify`, the new
-   leader in `menu_army_relieve`, the capital and its cost in `menu_move_capital`, the order in
-   `menu_army_move` and `menu_army_cancel`.
+2. **Done: the Commands menu.** See `modernize-completed.md`.
 3. **The Files menu** (`filex:`, `loader:`, `rusure:`) becomes `menu_files`. `load_game` and
    `save_game` (`port\files.bm`) are split: the menu of saved games goes to `ui\`, and the file work
    stays, with the slot as a parameter. The title menu's Resume Saved Game uses the same SUBs.

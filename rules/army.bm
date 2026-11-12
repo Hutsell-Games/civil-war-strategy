@@ -192,6 +192,27 @@ SUB army_drill (army)
 	army_order(army) = ORDER_BUSY
 END SUB
 
+' Gives an army its order: a city to march to, or ORDER_NONE, ORDER_BUSY or ORDER_DONE.
+SUB army_set_order (army, order)
+	army_order(army) = order
+END SUB
+
+' Relieve, first half: the army's leader goes back among the free leaders, in the army's slot.
+SUB army_free_leader (army)
+	leader_name$(army) = army_name$(army)
+END SUB
+
+' Relieve, second half: the army takes the free leader of a slot, with a point less than his
+' rating. It loses a level of experience and is busy for the month.
+SUB army_take_leader (army, leader)
+	army_order(army) = ORDER_BUSY
+	army_leader_rating(army) = leader_rating(leader)
+	IF army_leader_rating(army) > 0 THEN army_leader_rating(army) = army_leader_rating(army) - 1
+	IF army_experience(army) > 0 THEN army_experience(army) = army_experience(army) - 1
+	army_name$(army) = leader_name$(leader)
+	leader_name$(leader) = ""
+END SUB
+
 ' The first step of a new army raised by recruiting: it is placed in the city, with the Balance
 ' setting's extra men, which army_new then overwrites (TODO.md).
 SUB army_place_new (slot, city)

@@ -1,0 +1,108 @@
+# Civil War Strategy: entries of the Commands menu that the game refuses. The game is loaded
+# from a prepared save (tests/data/refusals-rebel/cws1.save): May 1862, the Rebels play, with
+# 150 in cash and two armies. The computer is passive.
+# A refusal shows as a message on the bottom line under the next menu.
+#! seed 6
+#! cfg side=2 bold=0
+#! data refusals-rebel
+
+rule 1 key space
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:V
+text r
+play until 2:L
+key enter
+play until 2:M
+digest
+
+# COMMANDS: Fortify and Capital are "-". The "-" key takes the first, Fortify: "Not enough
+# money for fort", and the main menu.
+text c
+prompt
+digest
+text -
+prompt
+digest
+
+# COMMANDS, four rows down to Capital: "Cannot move capital", and the main menu.
+text c
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key down
+prompt
+digest
+key enter
+prompt
+digest
+
+# COMMANDS, Detach, the army in Richmond: "Too small to detach", and the main menu.
+text c
+prompt
+text d
+prompt
+digest
+text r
+prompt
+digest
+
+# COMMANDS, Army Drill, the army in Richmond: "... has reached maximum improvement through
+# drilling", and the Commands menu again on its first row.
+text c
+prompt
+text a
+prompt
+digest
+text r
+prompt
+digest
+
+# Army Drill, the army in Front Royal: it drills, and the Commands menu comes back on Army
+# Drill.
+text a
+prompt
+text f
+prompt
+digest
+
+# Army Drill, the army in Richmond, the only one still free: refused again. Esc to the main
+# menu. Moves: the army in Richmond, to the first city offered.
+text a
+prompt
+digest
+key esc
+prompt
+text m
+prompt
+key enter
+prompt
+key enter
+prompt
+digest
+
+# COMMANDS, Army Drill: "No armies remain eligible for drills in May", and the main menu.
+text c
+prompt
+text a
+prompt
+digest
+
+# COMMANDS, Detach: no army is free, and the main menu comes back with no message.
+text c
+prompt
+text d
+prompt
+digest
+
+# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

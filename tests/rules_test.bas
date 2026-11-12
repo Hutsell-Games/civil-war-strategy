@@ -1149,6 +1149,57 @@ CALL victory_toggle_rule(VICTORY_CITIES)
 AssertEqualInt 16, victory_rule(VICTORY_CITIES), "on again"
 END SUB
 
+' ------------------------------------------- the Commands menu's rules
+
+SUB TestArmySetOrder
+CALL army_set_order(3, 17)
+AssertEqualInt 17, army_order(3), "a city to march to"
+CALL army_set_order(3, ORDER_NONE)
+AssertEqualInt ORDER_NONE, army_order(3), "cancelled"
+CALL turn_set_moves_done(1): AssertEqualInt 1, turn_moves_done, "no army left to move"
+CALL turn_set_moves_done(0): AssertEqualInt 0, turn_moves_done, "open again"
+END SUB
+
+SUB TestCityBuildFort
+side_cash(SIDE_REBEL) = 450: city_fort(25) = 1
+CALL city_build_fort(SIDE_REBEL, 25)
+AssertEqualInt 2, city_fort(25), "a level more"
+AssertEqualInt 450 - COST_FORT, side_cash(SIDE_REBEL), "paid for"
+END SUB
+
+SUB TestCapitalMove
+side_cash(SIDE_REBEL) = 700: side_capital(SIDE_REBEL) = 33: side_victory_points(SIDE_UNION) = 10
+CALL capital_move_pay(SIDE_REBEL)
+AssertEqualInt 700 - COST_MOVE_CAPITAL, side_cash(SIDE_REBEL), "paid"
+AssertEqualInt 60, side_victory_points(SIDE_UNION), "50 points to the other side"
+AssertEqualInt 33, side_capital(SIDE_REBEL), "the capital has not moved yet"
+CALL capital_move_to(SIDE_REBEL, 25)
+AssertEqualInt 25, side_capital(SIDE_REBEL), "moved"
+END SUB
+
+' Relieve: the old leader goes back to his army's slot among the free leaders. The army
+' takes the new leader with a point less than his rating and loses a level of experience.
+SUB TestArmyRelieveLeader
+army_name$(3) = "Fremont": army_leader_rating(3) = 2: army_experience(3) = 4
+leader_name$(7) = "Grant": leader_rating(7) = 9
+CALL army_free_leader(3)
+AssertEqualStr "Fremont", leader_name$(3), "free again, in the army's slot"
+CALL army_take_leader(3, 7)
+AssertEqualStr "Grant", army_name$(3), "the new leader"
+AssertEqualStr "", leader_name$(7), "no longer free"
+AssertEqualInt 8, army_leader_rating(3), "a point less than his rating"
+AssertEqualInt 3, army_experience(3), "a level of experience lost"
+AssertEqualInt ORDER_BUSY, army_order(3), "busy for the month"
+END SUB
+
+' The rating comes from the new leader's slot, and neither number goes below 0.
+SUB TestArmyTakeLeaderAtZero
+army_name$(3) = "Fremont": leader_name$(7) = "Banks"
+CALL army_take_leader(3, 7)
+AssertEqualInt 0, army_leader_rating(3), "a rating of 0 stays 0"
+AssertEqualInt 0, army_experience(3), "no experience stays none"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern
