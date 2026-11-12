@@ -171,8 +171,8 @@ Its second part is done too: `navy_commands` is a loop over `menu_navy` or `ai_n
 Its third part is done too: one SUB for each action. That ends step 10.
 Step 11 is done in the working tree: the knot of `turn_resolve` is six SUBs.
 Step 12 is done in the working tree: `menu_mark_row` and `menu_unmark_row`. That ends phase 7.
-**Next:** phase 8, split rules from screen. It starts with a list of the SUBs marked "mixed" in
-`file-layout.md` and the order to take them in.
+Phase 8 step 1 is done in the working tree: `calculate_battle` is four rule SUBs and its screen, see
+"Phase 8" below. **Next:** step 2, the railroad, after the user has checked "How a SUB is split".
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -561,3 +561,87 @@ What phase 7 left for later phases:
 - **`army_clear`** (step 4): it waits for phase 10.
 
 The splits of `calculate_battle` (losses, strengths) are phase 8's: they part a rule from its screen.
+
+## Phase 8: split rules from screen
+
+Started 2026-11-11. Each step is one commit (decision 15), and each ends with `play.py check`,
+`play.py compare` and the unit tests passing on unchanged recordings. Phase 7's rule for lines that no
+test runs still holds.
+
+### How a SUB is split
+
+Claude's choice on 2026-11-11, made while carrying out step 1. Check it before step 2.
+
+- **The rule part** goes in `rules\` or `ai\`. It has no `PRINT`, `LOCATE`, `COLOR`, `CLS`, drawing,
+  `SOUND`, `PLAY` or key, and calls no SUB that has one. What the screen needs from it comes back through
+  its parameters.
+- **The show part keeps the old SUB's name**, its parameters and every screen statement in the same order.
+  It calls the rule parts where the rules were. Its callers do not change.
+- **The show part goes to `ui\`**, in a file named after the rules file it came from: `calculate_battle`
+  is now in `ui\battle.bm`. The layout of decision 10 had no such files.
+- **Random numbers.** Two pieces of drawing code draw random numbers: the explosion marker
+  (`draw_map_marker` with `MARK_EXPLOSION`, one draw for each circle when the sound is on) and
+  `draw_schooner` (four). Where a show part calls them, it must stay between the same draws of the rule
+  parts. `menu_recruit_cities` (`ui\orders.bm`) is the other way round: a rule that draws random numbers
+  and picks the recruiting cities. It moves to `rules\` in step 6.
+- **The cursor and the color.** A `LOCATE` or `COLOR` in a rule SUB decides where and how the next `PRINT`
+  shows. Examples are `LOCATE 14 + i, 69` in `ai_recruit_pick` and the `COLOR` at the top of
+  `menu_recruit_cities`. It moves to the show part at the same point.
+- **A pause inside a rule's loop** becomes a count that the rule returns. The fight played a sound for
+  each roll; now `battle_fight` returns `rounds`, and `calculate_battle` plays the sound that many times.
+- **The factors inside the formulas** (`.3 * army_leader_rating`, `IF RND > .9`) stay numbers, as phase 3
+  left them (`constants.md`, the end of section 7). Each is used once, and its line says what it does.
+
+### The list
+
+Measured on 2026-11-11, before step 1, with `tests\out\scratch\p8_mixed.py` (not committed). 41 SUBs in
+`rules\`, `ai\` and `game\events.bm` print, draw, play a sound, read a key, or call a SUB of `ui\` or
+`draw\` that does. `file-layout.md` marked 11 of them. One more, `ai_navy_adjust`, only calls
+`menu_navy_items`, which fills the menu's texts and draws nothing. That leaves 40 to split.
+
+| File | SUBs |
+|------|------|
+| `rules\battle.bm` | `calculate_battle` (step 1, done) |
+| `rules\railroad.bm` | `railroad_move`, `railroad_start`, `railroad_arrive` |
+| `rules\city.bm` | `city_capture`, `check_map_links` (the Utility menu's Chk Links, a printed report) |
+| `rules\army.bm` | `army_new`, `army_get_commander`, `army_resupply`, `army_recruit`, `army_combine` (asks for a city with `menu_select`) |
+| `rules\navy.bm` | `navy_commands` (one `COLOR`), `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`, `navy_raid_commerce`, `navy_finish_move`, `navy_commerce_raid`, `navy_combat`, `navy_show_hits` |
+| `rules\turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city` |
+| `ai\ai.bm` | `ai_turn`, `ai_fortify`, `ai_army_orders`, `ai_drill`, `ai_recruit`, `ai_recruit_pick` (one `LOCATE`) |
+| `game\events.bm` | `special_events`, `event_riot` |
+| `rules\victory.bm` | `check_victory_conditions`, `victory_warnings`, `end_game`, `hall_of_fame` (reads the commander's name) |
+
+Not in phase 8: `load_game` and `save_game` (`port\files.bm`). The folder rule does not cover `port\`, and
+their screen is the menu of saved games, which phase 9 reworks.
+
+### Steps
+
+The order takes the SUBs that others call first, so that a caller's split finds its callees split.
+
+1. **Done: `calculate_battle`.** `rules\battle.bm` holds four rule SUBs, called in this order:
+   - `battle_strengths (attacker, defender, attack_steps(), defend_steps())`: each value the right panel
+     prints, 7 for the attack and 8 for the defense. It also counts an army of 0 men as 100, as before.
+   - `battle_fight (attack, defend, attacker, defender, winner, loser, rounds)`: the rolls until one side
+     hits and the other does not, and the day of supply taken from armies 1 and 2.
+   - `battle_losses (attacker, defender, winner, killa, killd)`: both armies' losses.
+   - `battle_apply_losses (attacker, defender, winner, killa, killd)`: takes them, and counts the
+     casualties, the battle won and the victory point.
+
+   `calculate_battle` (`ui\battle.bm`) is the screen. More details:
+   - The fight's `GOTO grapple` is a `DO` loop that ends when exactly one side hits. The sound of each roll
+     plays after the fight. No sound draws a random number, so the draws are the same.
+   - Two pieces read nowhere are deleted: `spin = 0`, and a second working-out of the odds' text just
+     before the losses are printed, whose `a$` was set again before use.
+   - Bugs kept: the supply taken from armies 1 and 2 (new in `TODO.md`), `attacker > 2` in
+     `battle_apply_losses`, and the `CASE IS > 800` arms that `CASE IS > 300` hides.
+   - Unit tests: 7 new ones, so 40 in all. Lines moved without a test: the three dead `CASE` arms, now
+     `rules\battle.bm` lines 54, 102 and 113, moved whole. All 81 lines of `ui\battle.bm` run, one of them
+     in part (line 46, the odds' floor of 1%). 20 lines of the game are not run, as before.
+2. `railroad_move`, `railroad_start`, `railroad_arrive`.
+3. `city_capture` and `check_map_links`; then the five of `rules\army.bm`.
+4. The nine of `rules\navy.bm`.
+5. The eight of `rules\turn.bm`. `turn_resolve` and its parts are the turn as the player sees it, so most
+   of them go to `ui\turn.bm`, with rule parts left in `rules\turn.bm`.
+6. The six of `ai\ai.bm`, and the rule in `menu_recruit_cities` moved to `rules\`.
+7. `special_events` and `event_riot`. The texts stay in the show part, which phase 11 moves to data.
+8. The four of `rules\victory.bm`.

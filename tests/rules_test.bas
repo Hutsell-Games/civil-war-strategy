@@ -181,6 +181,87 @@ CALL normal_random_number(70, 0, r)
 AssertEqualInt 70, r, "variance 0"
 END SUB
 
+' ------------------------------------------------------------------- battle
+' The rules of a land battle, which calculate_battle shows. The numbers are
+' those of the scenario: attack loss 11, defend loss 9, strength cap 20.
+' Sizes are in hundreds of men.
+
+SUB TestBattleStrengthsStepByStep
+DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
+rule_strength_cap = 20: current_side = 1: opt_difficulty = 3
+army_size(1) = 120: army_leader_rating(1) = 5: army_experience(1) = 3: army_supply(1) = 2
+army_size(21) = 80: army_leader_rating(21) = 6: army_experience(21) = 8: army_supply(21) = 0
+army_city(21) = 5: city_fort(5) = 1
+CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+AssertEqualInt 1, attack_steps(1), "attack base: 1.2 rounds to 1"
+AssertEqualInt 3, attack_steps(2), "with leader and experience: 1 + 1.5 + .9"
+AssertEqualInt 3, attack_steps(4), "outmanned: 120 against 80 changes nothing"
+AssertEqualInt 3, attack_steps(7), "the attack"
+AssertEqualInt 2, defend_steps(1), "defense: .013 * 80 + 1"
+AssertEqualInt 6, defend_steps(2), "with leader and experience: 2 + 1.8 + 2.4"
+AssertEqualInt 3, defend_steps(5), "no supply halves it"
+AssertEqualInt 6, defend_steps(7), "a fort doubles it"
+AssertEqualInt 6, defend_steps(8), "the defense"
+END SUB
+
+SUB TestBattleCountsAnEmptyArmyAsOne
+DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
+rule_strength_cap = 20: opt_difficulty = 3: army_size(21) = 50
+CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+AssertEqualInt 1, army_size(1), "an attacker of 0 men becomes 100"
+AssertEqualInt 1, attack_steps(4), "outmanned 1 to 50: 1"
+AssertEqualInt 20, defend_steps(4), "50 to 1: the cap"
+END SUB
+
+SUB TestBattleFightTakesSupplyFromOneAndTwo
+RANDOMIZE 1
+army_supply(1) = 2: army_supply(2) = 1: army_supply(21) = 3: army_supply(22) = 3
+CALL battle_fight(3, 6, 21, 22, winner, loser, rounds)
+AssertEqualInt 1, army_supply(1), "army 1 loses a day"
+AssertEqualInt 0, army_supply(2), "and army 2"
+AssertEqualInt 3, army_supply(21), "not the attacker"
+AssertEqualInt 3, army_supply(22), "nor the defender"
+AssertTrue winner = 21 OR winner = 22, "a winner of the two:" + STR$(winner)
+AssertEqualInt 21 + 22 - winner, loser, "the other one loses"
+AssertTrue rounds >= 1, "at least one round:" + STR$(rounds)
+END SUB
+
+SUB TestBattleFightWithSeedOne
+RANDOMIZE 1
+CALL battle_fight(3, 6, 1, 21, winner, loser, rounds)
+AssertEqualInt 21, winner, "the winner with seed 1: the defender"
+AssertEqualInt 1, loser, "the attacker loses"
+AssertEqualInt 1, rounds, "one round with seed 1"
+END SUB
+
+SUB TestBattleLossesWithSeedOne
+RANDOMIZE 1
+rule_attack_loss = 11: rule_defend_loss = 9
+army_size(1) = 120: army_size(21) = 80: army_city(21) = 5: city_fort(5) = 1
+CALL battle_losses(1, 21, 1, killa, killd)
+AssertEqualInt 8, killa, "the attacker's losses"
+AssertEqualInt 9, killd, "the defender's losses"
+AssertEqualInt 120, army_size(1), "not taken yet"
+END SUB
+
+SUB TestBattleCasualtiesByArmyNumber
+army_size(3) = 120: army_size(21) = 80
+CALL battle_apply_losses(3, 21, 3, 10, 20)
+AssertEqualInt 110, army_size(3), "the attacker loses 10"
+AssertEqualInt 60, army_size(21), "the defender loses 20"
+AssertEqualInt 10, side_casualties&(2), "Union army 3's losses count for the Rebels (attacker > 2)"
+AssertEqualInt 20, side_casualties&(1), "and the Rebels' for the Union"
+AssertEqualInt 1, side_battles_won(1), "a battle won for the Union"
+AssertEqualInt 1, side_victory_points(1), "and a victory point"
+END SUB
+
+SUB TestBattleLeavesTheDefenderOne
+army_size(1) = 120: army_size(21) = 15
+CALL battle_apply_losses(1, 21, 1, 5, 20)
+AssertEqualInt 1, army_size(21), "not below 100 men"
+AssertEqualInt 5, side_casualties&(1), "army 1's losses count for the Union"
+END SUB
+
 ' ---------------------------------------------------------------- commander
 ' The next general of a side that has no army: one from the list of names,
 ' or a made-up one when the list is used up.
@@ -392,6 +473,7 @@ END SUB
 '$INCLUDE: '../ui/reports.bm'
 '$INCLUDE: '../ui/screen.bm'
 '$INCLUDE: '../ui/messages.bm'
+'$INCLUDE: '../ui/battle.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'

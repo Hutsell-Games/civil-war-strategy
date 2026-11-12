@@ -1,50 +1,46 @@
-SUB calculate_battle (attacker, defender, winner, loser)
-DIM vary AS INTEGER: DIM killd AS INTEGER: DIM s AS INTEGER
-DIM x1 AS INTEGER: DIM R!: DIM a$: DIM spin AS INTEGER: DIM scale AS INTEGER: DIM odds!: DIM a AS INTEGER: DIM k AS INTEGER: DIM t$: DIM i AS INTEGER: DIM hit AS INTEGER: DIM hit1 AS INTEGER: DIM star AS INTEGER: DIM fin AS INTEGER: DIM pct!: DIM xbar AS INTEGER: DIM killa AS INTEGER
-DIM y AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER
+' The rules of a land battle. They draw nothing. calculate_battle (ui/battle.bm) shows the battle
+' and calls them in this order: battle_strengths, battle_fight, battle_losses, battle_apply_losses.
+
+' Both armies' strengths, step by step, as the right panel shows them. An army of fewer than 100
+' men fights as one of 100.
+' attack_steps(): 1 base, 2 leader and experience, 3 small army, 4 outmanned, 5 supply,
+'   6 difficulty, 7 the attack.
+' defend_steps(): 1 defense, 2 leader and experience, 3 small army, 4 outmanned, 5 supply,
+'   6 difficulty, 7 fort, 8 the defense.
+SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
+DIM x AS INTEGER: DIM x1 AS INTEGER: DIM R!
 IF army_size(defender) < 1 THEN army_size(defender) = 1
 IF army_size(attacker) < 1 THEN army_size(attacker) = 1
 
-CALL draw_map_marker(army_city(defender), 0, MARK_POINTER)
-LOCATE 1, 1: PRINT SPACE$(80)
-CALL clear_right_panel: y = 68: COLOR COLOR_LIGHT_CYAN: LOCATE 1, y: PRINT "Attacker"
-c = 9: IF army_side(attacker) = SIDE_REBEL THEN c = 7
-COLOR c: LOCATE 2, y: PRINT army_name$(attacker)
-LOCATE 3, y: CALL print_army_size(attacker)
 x = .01 * army_size(attacker): IF x > rule_strength_cap THEN x = rule_strength_cap
-LOCATE 4, y: PRINT "Base    "; x
+attack_steps(1) = x
 IF army_size(attacker) / army_size(defender) > .2 THEN x = x + .3 * army_leader_rating(attacker) + .3 * army_experience(attacker): IF x > rule_strength_cap THEN x = rule_strength_cap
 IF army_experience(attacker) > 8 THEN x = x + 1: IF x > rule_strength_cap THEN x = rule_strength_cap
-LOCATE 5, y: PRINT "Ldr/Exp "; x
+attack_steps(2) = x
 IF army_size(attacker) < 15 THEN x = .5 * x: IF x > rule_strength_cap THEN x = rule_strength_cap
-LOCATE 6, y: PRINT "Small   "; x
+attack_steps(3) = x
 IF army_size(attacker) / army_size(defender) <= .5 THEN x = x - 2: IF x < 1 THEN x = 1
 IF army_size(attacker) / army_size(defender) > 3 THEN x = x + 2: IF x > rule_strength_cap THEN x = rule_strength_cap
 IF army_size(attacker) / army_size(defender) > 10 THEN x = rule_strength_cap
 IF army_size(attacker) / army_size(defender) <= .2 THEN x = 1
-LOCATE 7, y: PRINT "Outman  "; x
-IF army_supply(attacker) < 1 THEN x = .5 * x: COLOR COLOR_LIGHT_MAGENTA
-LOCATE 8, y: PRINT "Supply  "; x: COLOR c
+attack_steps(4) = x
+IF army_supply(attacker) < 1 THEN x = .5 * x
+attack_steps(5) = x
 IF x < 1 THEN x = 1
 '                       Adjust attack advantage
 IF army_side(attacker) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN x = x + 2 * opt_difficulty - 6
 IF army_side(attacker) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN x = x + 6 - 2 * opt_difficulty
-LOCATE 9, y: PRINT "Difclt  "; x
+attack_steps(6) = x
 IF x > rule_strength_cap THEN x = rule_strength_cap
-COLOR COLOR_LIGHT_CYAN: LOCATE 11, y: PRINT "Attack  "; x
-LINE (530, 155)-(635, 175), 11, B
+attack_steps(7) = x
 
 x1 = .013 * army_size(defender) + 1: IF opt_realism = REALISM_ON THEN x1 = .02 * army_size(defender) + 2: IF x1 > 20 THEN x1 = 20
-LOCATE 13, y: PRINT "Defender"
-COLOR 16 - c: LOCATE 14, y: PRINT army_name$(defender)
-LOCATE 15, y: CALL print_army_size(defender)
-LOCATE 16, y: PRINT "Base    "; INT(.01 * army_size(defender))
-LOCATE 17, y: PRINT "Defense "; x1
+defend_steps(1) = x1
 IF army_size(defender) / army_size(attacker) > .2 THEN x1 = x1 + .3 * army_leader_rating(defender) + .3 * army_experience(defender): IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
 IF army_experience(defender) > 8 THEN x1 = x1 + 1: IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
-LOCATE 18, y: PRINT "Ldr/Exp "; x1
+defend_steps(2) = x1
 IF army_size(defender) < 15 THEN x1 = .5 * x1
-LOCATE 19, y: PRINT "Small   "; x1
+defend_steps(3) = x1
 
 R! = army_size(defender) / army_size(attacker)
 SELECT CASE R!
@@ -60,69 +56,44 @@ END SELECT
 	IF x1 < 1 THEN x1 = 1
 	IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
 
-LOCATE 20, y: PRINT "Outman  "; x1
-IF army_supply(defender) < 1 THEN x1 = .5 * x1: COLOR COLOR_LIGHT_MAGENTA
-LOCATE 21, y: PRINT "Supply  "; x1: COLOR 16 - c
+defend_steps(4) = x1
+IF army_supply(defender) < 1 THEN x1 = .5 * x1
+defend_steps(5) = x1
 IF x1 < 1 THEN x1 = 1
 '                       Adjust defend advantage
 IF army_side(defender) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN x1 = x1 + 2 * opt_difficulty - 6
 IF army_side(defender) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN x1 = x1 + 6 - 2 * opt_difficulty
-LOCATE 22, y: PRINT "Difclt  "; x1
+defend_steps(6) = x1
 
-a$ = "Fort": IF army_order(defender) = ORDER_NONE THEN x1 = x1 * (1 + city_fort(army_city(defender)))
+IF army_order(defender) = ORDER_NONE THEN x1 = x1 * (1 + city_fort(army_city(defender)))
 IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
-IF city_fort(army_city(defender)) > 0 AND army_order(defender) = ORDER_NONE THEN
-	COLOR COLOR_LIGHT_MAGENTA: a$ = "Fort+"
-	IF city_fort(army_city(defender)) = MAX_FORT THEN a$ = "Fort++"
-END IF
-LOCATE 23, y: PRINT a$; TAB(76); x1
+defend_steps(7) = x1
 IF x1 > rule_strength_cap THEN x1 = rule_strength_cap
-COLOR COLOR_LIGHT_CYAN: LOCATE 25, y: PRINT "Defend  "; x1
-LINE (530, 380)-(635, 400), 11, B
+defend_steps(8) = x1
+END SUB
 
-spin = 0
-scale = x: IF x1 > scale THEN scale = x1
+' The fight: each army rolls against its strength until one hits and the other does not. It also
+' takes a day of supply from armies 1 and 2, whoever fights. rounds is how many rolls it took.
+SUB battle_fight (attack, defend, attacker, defender, winner, loser, rounds)
+DIM i AS INTEGER: DIM scale AS INTEGER: DIM hit AS INTEGER: DIM hit1 AS INTEGER: DIM star AS INTEGER: DIM fin AS INTEGER
+scale = attack: IF defend > scale THEN scale = defend
 scale = scale + 1
-
-odds! = x / (x + x1): a = INT(100 * odds!): IF a < 1 THEN a = 1
-a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
-COLOR COLOR_YELLOW: LOCATE 27, y: PRINT "Odds:  "; a$;
-LINE (530, 412)-(635, 435), 14, B
-LINE (528, 410)-(637, 437), 14, B
-CALL wait_key("P")
-IF opt_graphics >= GRAPHICS_FULL THEN
-	CALL draw_cannon
-	k = city_fort(army_city(defender))
-	t$ = GFXDIR + "fort" + LTRIM$(STR$(k)) + ".vga"
-	IF LEN(DIR$(t$)) > 0 THEN
-		CALL load_picture(t$, pic_loaded())
-		PUT (550, 270), pic_loaded, PSET
-	END IF
-ELSE
-	CALL clear_right_panel
-END IF
 FOR i = 1 TO 2: IF army_supply(i) > 0 THEN army_supply(i) = army_supply(i) - 1
 NEXT i
-'---------------------------------------------------------------------------
-grapple:
-hit = 0: hit1 = 0
-star = scale * RND: fin = scale * RND
-IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
-IF star <= x THEN hit = 1
-IF fin <= x1 THEN hit1 = 1
-
-IF hit = 0 AND hit1 = 0 GOTO grapple
-IF hit = 1 AND hit1 = 1 GOTO grapple
+rounds = 0
+DO
+	hit = 0: hit1 = 0
+	star = scale * RND: fin = scale * RND
+	rounds = rounds + 1
+	IF star <= attack THEN hit = 1
+	IF fin <= defend THEN hit1 = 1
+LOOP WHILE hit = hit1
 winner = defender: loser = attacker: IF hit = 1 THEN winner = attacker: loser = defender
-'---------------------------------------------------------------------------
-a$ = "UNION": IF army_side(winner) = SIDE_REBEL THEN a$ = "REBEL"
-COLOR COLOR_YELLOW: LOCATE 3, 68: PRINT a$; " VICTORY"
-LOCATE 4, 71: PRINT "in"
-LOCATE 5, 69: PRINT city_name$(army_city(defender))
-a = army_side(winner)
-CALL draw_flag(a, 0, 0)
-CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(PAUSE_LONG)
-'===========================================================================
+END SUB
+
+' The losses of both armies, in hundreds of men. battle_apply_losses takes them later.
+SUB battle_losses (attacker, defender, winner, killa, killd)
+DIM pct!: DIM xbar AS INTEGER: DIM vary AS INTEGER
 pct! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender)): IF winner = attacker THEN pct! = 1.3 * pct!
 SELECT CASE army_size(defender)
 	CASE IS > 300
@@ -153,32 +124,12 @@ IF killd > 5 * killa THEN killd = 5 * killa
 
 IF killa >= army_size(attacker) THEN killa = army_size(attacker) - 1
 IF killd >= army_size(defender) THEN killd = army_size(defender) - 1
-'---------------------------------------------------------------------------
-x = INT(100 * odds!): IF x < 1 THEN x = 1
-a$ = LTRIM$(RTRIM$(STR$(x))) + "%"
+END SUB
 
-COLOR c
-LOCATE 1, 1: PRINT "Attack Loss: ";
-PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
-CALL print_army_size(attacker)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / army_size(attacker)))))); "%) ²";
-COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
-CALL print_army_size(defender)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / army_size(defender)))))); "%)"
-'---------------------------------------------------------------------------
-menu_text$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
-t$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
-menu_text$(2) = t$
-IF winner = defender THEN menu_text$(2) = menu_text$(1): menu_text$(1) = t$
-menu_text$(3) = "*" + army_name$(winner): menu_text$(4) = army_name$(loser)
-IF winner = defender THEN menu_text$(3) = army_name$(winner): menu_text$(4) = "*" + army_name$(loser)
-a$ = city_name$(army_city(defender)) + ": " + menu_text$(3) + menu_text$(1) + " defeats " + menu_text$(4) + menu_text$(2)
-CALL scribe_message(a$, SHOW_NOT)
-
-IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
-COLOR COLOR_YELLOW: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL wait_key("B")
-END IF
-
+' Takes the losses from both armies and records the battle: each side's casualties, and a battle won
+' and a victory point for the winner's side.
+SUB battle_apply_losses (attacker, defender, winner, killa, killd)
+DIM s AS INTEGER
 army_size(attacker) = army_size(attacker) - killa
 army_size(defender) = army_size(defender) - killd
 IF army_size(defender) < 1 THEN army_size(defender) = 1
@@ -190,7 +141,6 @@ side_casualties&(other_side(s)) = side_casualties&(other_side(s)) + killd
 s = army_side(winner)
 side_battles_won(s) = side_battles_won(s) + 1
 side_victory_points(s) = side_victory_points(s) + 1
-CALL draw_map_marker(army_city(defender), 0, MARK_RESTORE)
 END SUB
 
 SUB normal_random_number (xbar, vary, result)

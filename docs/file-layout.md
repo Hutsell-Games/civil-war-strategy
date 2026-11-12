@@ -4,8 +4,9 @@ Phase 6 of `modernize-plan.md` moves every SUB whole into the file below. No lin
 the draft for the user to check before anything moves. Names are the settled names.
 
 "Mixed" means the SUB both works out a rule and draws, prints or reads a key. It goes to the file of its topic
-now and is split in phase 7, so for now `rules\` and `ai\` hold a few SUBs that still draw. The folder rule
-(nothing there draws) holds once phase 7 is done.
+now and is split in phase 8, so for now `rules\` and `ai\` hold SUBs that still draw. The folder rule
+(nothing there draws) holds once phase 8 is done. The marks below are incomplete: the full list is in
+`modernize-plan.md`, "Phase 8".
 
 The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `CWS14.BI` becomes `cws.bi`.
 `QB64.BM` and `SCRIPT.BM` move to `port\`. `FOLDERS.BI` moves to `port\` too.
@@ -16,7 +17,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 |------|------|
 | `army.bm` | `army_combine`, `army_detach`, `army_drill`, `army_recruit` (mixed), `army_recruit_bonus`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` |
 | `city.bm` | `city_capture` (mixed), `city_is_connected`, `city_update_occupier`, `check_map_links` |
-| `battle.bm` | `calculate_battle` (mixed), `normal_random_number` |
+| `battle.bm` | `battle_strengths`, `battle_fight`, `battle_losses`, `battle_apply_losses`, `normal_random_number` (`calculate_battle` until phase 8 split it) |
 | `navy.bm` | `navy_remove_ship`, `navy_commands`, `navy_action`, `navy_build_ship` (mixed), `navy_bombard` (mixed), `navy_sail_to_port` (mixed), `navy_raid_commerce` (mixed), `navy_land_army`, `navy_finish_move` (mixed), `navy_commerce_raid` (mixed), `navy_combat` (mixed), `navy_show_hits` (mixed) |
 | `railroad.bm` | `railroad_move` (mixed), `railroad_start` (mixed), `railroad_arrive` (mixed), `railroad_route_count`, `railroad_capacity` |
 | `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed), `turn_move_army` (mixed), `turn_attack` (mixed), `turn_attacker_withdraws` (mixed), `turn_defender_retreats` (mixed), `turn_army_surrenders` (mixed), `turn_enter_city` (mixed), `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` |
@@ -38,6 +39,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size` |
 | `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn`, `draw_update_box` |
 | `messages.bm` | `show_message_box`, `scribe_message` |
+| `battle.bm` | `calculate_battle` (new in phase 8: the battle's screen) |
 
 ## draw\
 

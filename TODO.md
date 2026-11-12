@@ -36,10 +36,13 @@ game plays changes the recorded screens.
   (`TestTraincapacityCountsByPlayersSide`): it uses `side` where the rest of the SUB uses `who`.
 - **Vary Start has a loop that never runs**: `FOR k = 21 TO 6` (`vary_start_conditions`, `rules\setup.bm`). The loop before
   it clears some of the Union's first six armies; this one was probably meant for the Rebels' (21 to 26).
-- **Casualties are counted for the wrong side when Union armies 3 to 20 attack.** `calculate_battle`
+- **Casualties are counted for the wrong side when Union armies 3 to 20 attack.** `battle_apply_losses`
   (`rules\battle.bm`) has `s = 1: IF attacker > 2 THEN s = 2`, most likely meant as `attacker > 20`. Phase 3
   of `docs\modernize-plan.md` left this line as it is, without `army_side`: the FUNCTION would fix the bug,
-  which changes the game.
+  which changes the game (`TestBattleCasualtiesByArmyNumber` in `tests\rules_test.bas`).
+- **A battle takes a day of supply from armies 1 and 2, not from the armies that fight.** `battle_fight`
+  (`rules\battle.bm`) has `FOR i = 1 TO 2: IF army_supply(i) > 0 THEN army_supply(i) = army_supply(i) - 1`
+  (`TestBattleFightTakesSupplyFromOneAndTwo`). It was most likely meant for the attacker and the defender.
 - **The Balance setting's extra recruits are never added.** `army_recruit_bonus` (`rules\army.bm`) adds
   men to a new army just before `army_new` sets its size, and to army 0 when men join an army
   (`army_recruit` passes `empty`, which is 0 there). It was most likely meant for the army recruited.
