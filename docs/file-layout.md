@@ -21,7 +21,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `railroad.bm` | `railroad_move` (mixed), `railroad_start` (mixed), `railroad_arrive` (mixed), `railroad_route_count`, `railroad_capacity` |
 | `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed), `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7) |
-| `victory.bm` | `check_victory_conditions` (mixed), `hall_of_fame` (mixed) |
+| `victory.bm` | `check_victory_conditions` (mixed), `victory_warnings` (mixed), `end_game` (mixed), `hall_of_fame` (mixed) |
 
 ## ai\
 
@@ -60,7 +60,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `files.bm` | `load_scenario`, `load_cities`, `load_game` (mixed), `save_game` (mixed), `config_read`, `config_write` (`file_management` until phase 7 split it) |
+| `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_cities`, `load_game` (mixed), `save_game` (mixed), `config_read`, `config_write` (`file_management` until phase 7 split it) |
 | `qb64.bm` | `DIR$` (from `QB64.BM`) |
 | `script.bm` | `script_start`, `script_date$`, `script_tick%`, `script_shell`, `script_mark_key_wait` (from `SCRIPT.BM`) |
 

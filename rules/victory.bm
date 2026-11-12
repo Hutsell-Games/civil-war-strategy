@@ -1,6 +1,6 @@
 SUB hall_of_fame
 DIM i AS INTEGER: DIM s AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM a$
-DIM hall_score(2, 5)
+DIM hall_name$(2, 5): DIM hall_score(2, 5)
 COLOR COLOR_YELLOW: LOCATE 28, 1: PRINT "press a key"; : CALL wait_key("H")
 SCREEN 0: COLOR COLOR_YELLOW, COLOR_MAGENTA: CLS : COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
 
@@ -8,19 +8,18 @@ LOCATE 2, 7: PRINT STRING$(57, "²")
 LOCATE 9, 7: PRINT STRING$(57, "²")
 FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 
-		OPEN "I", 1, "hiscore.cws"
+		CALL hall_of_fame_load(hall_name$(), hall_score())
 		FOR s = SIDE_UNION TO SIDE_REBEL
 		COLOR COLOR_YELLOW, COLOR_RED: LOCATE 3, 30 * (s - 1) + 10: PRINT side_name$(s); " HALL of FAME"
 		COLOR COLOR_WHITE, COLOR_BLACK: FOR i = 1 TO 5
-		INPUT #1, city_name$(5 * (s - 1) + i), hall_score(s, i)
-		LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, city_name$(5 * (s - 1) + i), hall_score(s, i)
-		NEXT i: NEXT s: CLOSE #1
+		LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, hall_name$(s, i), hall_score(s, i)
+		NEXT i: NEXT s
 		      
 			FOR s = SIDE_UNION TO SIDE_REBEL: FOR i = 1 TO 5
 			IF side_victory_points(s) < hall_score(s, i) GOTO oldskor
 				FOR j = 5 TO i + 1 STEP -1
 				hall_score(s, j) = hall_score(s, j - 1)
-				city_name$(5 * (s - 1) + j) = city_name$(5 * (s - 1) + j - 1)
+				hall_name$(s, j) = hall_name$(s, j - 1)
 				NEXT j
 
 			COLOR COLOR_WHITE, COLOR_BLUE: IF s = SIDE_REBEL THEN COLOR COLOR_RED, COLOR_GRAY
@@ -31,24 +30,19 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 who4:
 			PRINT "What is name of "; side_name$(s); " commander"; : CALL script_mark_key_wait(4, ""): INPUT a$: IF a$ = "" GOTO who4
 automate:
-			city_name$(5 * (s - 1) + i) = a$
+			hall_name$(s, i) = a$
 			hall_score(s, i) = side_victory_points(s): GOTO foun
 oldskor:
 			NEXT i
 foun:
 			NEXT s
 	       
-		OPEN "O", 1, "hiscore.cws"
-		FOR s = SIDE_UNION TO SIDE_REBEL
-			FOR i = 1 TO 5
-			WRITE #1, city_name$(5 * (s - 1) + i), hall_score(s, i)
-			NEXT i
-		NEXT s: CLOSE #1: PRINT "Game Over": CALL wait_key("G"): game_over = 1
+		CALL hall_of_fame_save(hall_name$(), hall_score())
+		PRINT "Game Over": CALL wait_key("G"): game_over = 1
 END SUB
 
 SUB check_victory_conditions
-DIM t$: DIM k AS INTEGER
-DIM x AS INTEGER: DIM j AS INTEGER: DIM y AS INTEGER: DIM a$: DIM i AS INTEGER: DIM c AS INTEGER
+DIM x AS INTEGER: DIM j AS INTEGER: DIM y AS INTEGER: DIM a$: DIM i AS INTEGER
 	x = 0: FOR j = 1 TO ARMIES_PER_SIDE: IF army_city(j) > 0 THEN x = x + army_size(j)
 	NEXT j
 	y = 0: FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: IF army_city(j) > 0 THEN y = y + army_size(j)
@@ -78,6 +72,20 @@ DIM x AS INTEGER: DIM j AS INTEGER: DIM y AS INTEGER: DIM a$: DIM i AS INTEGER: 
 		END IF
 	END IF
 
+	CALL victory_warnings(i, x, y)
+	GOTO stale
+
+finis:
+	CALL end_game(i, j)
+	EXIT SUB
+stale:
+    NEXT i
+END SUB
+
+' Warns when a side is close to a victory rule: cities, income or army strength. x is the
+' Union's men and y the Rebels'.
+SUB victory_warnings (i, x, y)
+DIM a$
 	CALL clear_bottom_line: COLOR COLOR_YELLOW
 	IF victory_rule(VICTORY_CITIES) > 0 AND side_city_count(i) >= .9 * victory_rule(VICTORY_CITIES) THEN
 		a$ = side_name$(i) + " side almost controls" + STR$(victory_rule(VICTORY_CITIES)) + " cities"
@@ -95,9 +103,13 @@ DIM x AS INTEGER: DIM j AS INTEGER: DIM y AS INTEGER: DIM a$: DIM i AS INTEGER: 
 		CALL show_message_box(a$, 4)
 		END IF
 	END IF
-	GOTO stale
+END SUB
 
-finis:
+' A side has met victory rule j (2 to 6), or wiped out the enemy (7). The player may play
+' on, which raises the rule's number or turns the capital rule off. Otherwise the game ends:
+' the battle summary, the victory screen and the Hall of Fame.
+SUB end_game (i, j)
+DIM a$: DIM t$: DIM c AS INTEGER: DIM k AS INTEGER
 	SELECT CASE j
 		CASE IS < 3
 		a$ = "TIME EXPIRED"
@@ -172,7 +184,4 @@ death:
 		CALL scribe_message(a$, SHOW_NOT)
 	END IF
 	PRINT a$: CALL hall_of_fame
-	EXIT SUB
-stale:
-    NEXT i
 END SUB

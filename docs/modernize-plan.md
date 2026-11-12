@@ -165,7 +165,8 @@ Phase 7 step 5 is done in the working tree: eleven pieces of the main module are
 Step 6 is done in the working tree: `turn_resolve`'s outer parts are SUBs, and 20 lines are not run.
 Step 7 is done in the working tree: `event_riot`, and `ai_turn` is six `ai_` SUBs and a FUNCTION.
 Step 8 is done in the working tree: recruiting and the railroad are split into menu, computer and rule.
-**Next:** phase 7 step 9, `check_victory_conditions`.
+Step 9 is done in the working tree: `victory_warnings`, `end_game`, and the Hall of Fame's own arrays.
+**Next:** phase 7 step 10, `navy_commands`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -465,8 +466,15 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
      of the last city it looked at, not the capital's (`target` is not set again).
    - New names: `menu_recruit_cities`, `ai_recruit_pick`, `army_recruit_bonus`. The others are the
      names of `sub-names.md`. Lines moved without a test: none.
-9. **`check_victory_conditions`**: `victory_warnings` and `end_game`. The Hall of Fame gets its own
-   arrays in place of `city_name$()`.
+9. **Done: `check_victory_conditions`.** It keeps the tests of the rules, 40 lines.
+   - `victory_warnings (i, x, y)` and `end_game (i, j)` (`rules\victory.bm`, both mixed). `x` and
+     `y` are the Union's and the Rebels' men; `j` is the rule that was met.
+   - `hall_of_fame` keeps its names in a local `hall_name$(2, 5)`. It used `city_name$(1)` to
+     `city_name$(10)`, which stayed overwritten until the next game read `cities.grd` again; no
+     screen showed them in between.
+   - `hall_of_fame_load` and `hall_of_fame_save` (`port\files.bm`) read and write `hiscore.cws`. The
+     file is now read whole before the table is printed, not line by line with it.
+   - No unit tests: every piece draws or reads a key. Lines moved without a test: none.
 10. **`navy_commands`**: `navy_combat`, `ai_pick_port` and `draw_fleet_sailing` first. Then `ai_navy`,
     `menu_navy` and `navy_action`, and last one SUB for each action.
 11. **The attack, retreat and surrender knot in the middle of `turn_resolve`.**
