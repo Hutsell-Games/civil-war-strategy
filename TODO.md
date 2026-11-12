@@ -40,6 +40,11 @@ game plays changes the recorded screens.
   (`rules\battle.bm`) has `s = 1: IF attacker > 2 THEN s = 2`, most likely meant as `attacker > 20`. Phase 3
   of `docs\modernize-plan.md` left this line as it is, without `army_side`: the FUNCTION would fix the bug,
   which changes the game.
+- **The Balance setting's extra recruits are never added.** `army_recruit_bonus` (`rules\army.bm`) adds
+  men to a new army just before `army_new` sets its size, and to army 0 when men join an army
+  (`army_recruit` passes `empty`, which is 0 there). It was most likely meant for the army recruited.
+- **The computer checks the wrong city's track before a train to its capital.** `ai_railroad` (`ai\ai.bm`)
+  calls `railroad_route_count(side, target)` with `target` left from the loop before, not the capital.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.

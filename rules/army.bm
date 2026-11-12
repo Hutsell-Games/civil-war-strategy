@@ -214,3 +214,48 @@ SUB army_drill (army)
 	army_experience(army) = army_experience(army) + 1
 	army_order(army) = ORDER_BUSY
 END SUB
+
+' Raises men in a city for 100: a new army under the next commander, or more men for the
+' army already there. raised is 0 when a new army was needed and no commander is left.
+SUB army_recruit (side, city, raised)
+DIM empty AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM a$
+DIM a AS INTEGER: DIM from AS INTEGER: DIM y AS INTEGER
+	raised = 1
+	empty = 0
+	CALL city_update_occupier(city)
+	IF city_army(city) > 0 THEN i = city_army(city): GOTO add2
+	CALL army_get_commander((side), empty)
+       
+	IF empty = 0 THEN raised = 0: EXIT SUB
+	army_city(empty) = city
+	CALL army_recruit_bonus(empty)
+	CALL army_new(side, empty, city)
+	EXIT SUB
+add2:
+	target = city
+	x = 45: a$ = ""
+	IF opt_realism >= REALISM_ON THEN
+		x = 2 * city_value(army_city(i)) + 20
+		a = city_is_connected(side, target)
+		IF a < 1 THEN x = x \ 3: a$ = " ISOLATED !"
+	END IF
+	army_size(i) = army_size(i) + x
+
+	CALL army_recruit_bonus(empty)
+	side_cash(side) = side_cash(side) - COST_RECRUIT
+	from = army_city(i): x = city_x(from) - 12: y = city_y(from) - 11
+	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
+	CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
+	IF a$ <> "" THEN PRINT a$;
+	PUT (x - 9, y - 7), saved_under_army, PSET
+	CALL wait_seconds(opt_pause! - .5)
+END SUB
+
+' The Balance setting's extra men for a recruited army. The caller passes slot 0 when men
+' join an army, and army_new sets a new army's size after it, as in the original.
+SUB army_recruit_bonus (slot)
+	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(slot) = army_size(slot) + 15 - 5 * opt_difficulty
+	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN army_size(slot) = army_size(slot) + 5 * opt_difficulty - 15
+END SUB

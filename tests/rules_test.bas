@@ -304,6 +304,18 @@ army_size(22) = 250
 AssertEqualInt 0, ai_count_armies(2), "500 against 350: two fewer"
 END SUB
 
+' ----------------------------------------------------- railroad_route_count
+
+SUB TestRouteCountsTwoStepsOfTrack
+city_road(1, 1) = 2: city_road(1, 2) = 3
+city_road(2, 1) = 1: city_road(2, 2) = 4
+city_owner(2) = 1: city_owner(3) = 2: city_owner(4) = 1
+AssertEqualInt 2, railroad_route_count(1, 1), "city 2, and city 4 beyond it; not the way back"
+AssertEqualInt 0, railroad_route_count(2, 4), "a city with no road"
+city_owner(4) = 2
+AssertEqualInt 1, railroad_route_count(1, 1), "city 2 only: the track is blocked"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern

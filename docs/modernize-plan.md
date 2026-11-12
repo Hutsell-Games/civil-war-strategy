@@ -164,7 +164,8 @@ Phase 0 went first (user, 2026-11-11) and is done: see "Phase 0 after phase 7 be
 Phase 7 step 5 is done in the working tree: eleven pieces of the main module are SUBs.
 Step 6 is done in the working tree: `turn_resolve`'s outer parts are SUBs, and 20 lines are not run.
 Step 7 is done in the working tree: `event_riot`, and `ai_turn` is six `ai_` SUBs and a FUNCTION.
-**Next:** phase 7 step 8, `menu_army_recruit` and `railroad_move`.
+Step 8 is done in the working tree: recruiting and the railroad are split into menu, computer and rule.
+**Next:** phase 7 step 9, `check_victory_conditions`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -445,8 +446,25 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
      (`TODO.md`, "The code").
    - A jump to the next section's label became `EXIT SUB`. Lines moved without a test: the four of
      `ai\ai.bm` in the table above, now 39, 113, 114 and 222.
-8. **`menu_army_recruit` and `railroad_move`**, each split into the human's menu, the computer's choice
-   and the rule (`sub-names.md`, "Other SUBs that serve both the human and the computer").
+8. **Done: `menu_army_recruit` and `railroad_move`**, each split into the human's menu, the computer's
+   choice and the rule. Neither file has a `GOSUB` left for them.
+   - Recruiting: `menu_army_recruit (side)` is the player's loop and `ai_recruit (side)` the
+     computer's (`ai_raise_forces` calls it). Both call `menu_recruit_cities (side)`, which fills the
+     menu with the month's cities, and `army_recruit (side, city, raised)`, which raises a new army
+     or adds men. `ai_recruit_pick (side)` is the `GOSUB` routine `randsel`.
+   - `army_recruit_bonus (slot)` is the `GOSUB` routine `playb`, the Balance setting's extra men. It
+     never has an effect on an army, and the split keeps that: `army_new` sets a new army's size
+     after it, and when men join an army it is called with slot 0, so it changes `army_size(0)`
+     (which `ai_recruit_pick` reads for a city with no army). A fix would change the game.
+   - The railroad: `railroad_move (side)` now only picks among `menu_railroad (side, army, city)`,
+     `ai_railroad (side, army, city)`, `railroad_start (side, army, city)` and
+     `railroad_arrive (side)`, and ends with the pause and the two clears as before.
+     `railroad_route_count (side, city)` is a FUNCTION (the `GOSUB` routine `route`), with a unit
+     test.
+   - `ai_railroad` keeps one oddity: when it checks the track to the capital, it counts the track
+     of the last city it looked at, not the capital's (`target` is not set again).
+   - New names: `menu_recruit_cities`, `ai_recruit_pick`, `army_recruit_bonus`. The others are the
+     names of `sub-names.md`. Lines moved without a test: none.
 9. **`check_victory_conditions`**: `victory_warnings` and `end_game`. The Hall of Fame gets its own
    arrays in place of `city_name$()`.
 10. **`navy_commands`**: `navy_combat`, `ai_pick_port` and `draw_fleet_sailing` first. Then `ai_navy`,

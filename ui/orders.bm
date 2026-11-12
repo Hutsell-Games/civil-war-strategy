@@ -135,9 +135,29 @@ plus1:
 fnew:
 END SUB
 
+' The Troops command: the player picks a city from the month's list and raises men there,
+' again and again while the money lasts.
 SUB menu_army_recruit (side)
-DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM index AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER: DIM a$: DIM a AS INTEGER: DIM from AS INTEGER: DIM y AS INTEGER
-	IF side_cash(side) < COST_RECRUIT GOTO menu1
+DIM city AS INTEGER: DIM raised AS INTEGER
+	IF side_cash(side) < COST_RECRUIT THEN EXIT SUB
+	CALL menu_recruit_cities(side)
+	IF menu_item_count = 0 THEN EXIT SUB
+	DO
+	IF side_cash(side) < COST_RECRUIT THEN EXIT SUB
+	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
+	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
+	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
+	CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
+	IF menu_choice < 1 THEN EXIT SUB
+	city = menu_value(menu_choice)
+	CALL army_recruit(side, city, raised)
+	LOOP
+END SUB
+
+' Fills the menu with the cities where a side may recruit this month. They are drawn at
+' random; the player's list is kept for the month. menu_item_count is 0 when there is none.
+SUB menu_recruit_cities (side)
+DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM x AS INTEGER
 	menu_item_count = 0: COLOR COLOR_LIGHT_RED
 	menu_text$(0) = "Recruit"
 	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: x = turn_recruit_city(i): menu_text$(i) = city_name$(x): menu_value(i) = x: NEXT i: menu_item_count = turn_recruit_state: GOTO alldone
@@ -160,87 +180,9 @@ DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM index 
 foe:
 	NEXT i
 alldone:
-	IF menu_item_count = 0 GOTO menu1
+	IF menu_item_count = 0 THEN EXIT SUB
 	IF side = current_side AND turn_recruit_state = 0 THEN FOR i = 1 TO menu_item_count: turn_recruit_city(i) = menu_value(i): NEXT i: turn_recruit_state = menu_item_count
 	CALL menu_bubble_sort(menu_item_count)
-'............................................................................
-levy:
-	IF side_cash(side) < COST_RECRUIT GOTO menu1
-	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
-	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
-	IF side <> current_side THEN GOSUB randsel: GOTO auto1
-      
-	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
-	CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
-	IF menu_choice < 1 GOTO menu1
-auto1:
-	empty = 0
-	index = menu_value(menu_choice)
-	CALL city_update_occupier(index)
-	IF city_army(index) > 0 THEN i = city_army(index): GOTO add2
-	CALL army_get_commander((side), empty)
-       
-	IF side <> current_side AND empty = 0 GOTO menu1
-	IF empty = 0 GOTO levy
-	army_city(empty) = index
-	GOSUB playb
-	CALL army_new(side, empty, index)
-	GOTO levy
-'............................................................................
-add2:
-	target = menu_value(menu_choice)
-	x = 45: a$ = ""
-	IF opt_realism >= REALISM_ON THEN
-		x = 2 * city_value(army_city(i)) + 20
-		a = city_is_connected(side, target)
-		IF a < 1 THEN x = x \ 3: a$ = " ISOLATED !"
-	END IF
-	army_size(i) = army_size(i) + x
-
-	GOSUB playb
-	side_cash(side) = side_cash(side) - COST_RECRUIT
-	from = army_city(i): x = city_x(from) - 12: y = city_y(from) - 11
-	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
-	CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
-	IF a$ <> "" THEN PRINT a$;
-	PUT (x - 9, y - 7), saved_under_army, PSET
-	CALL wait_seconds(opt_pause! - .5)
-	GOTO levy
-randsel:
-		menu_choice = 0: x = 0
-		FOR i = 1 TO menu_item_count
-		target = menu_value(i)
-		LOCATE 14 + i, 69
-		x = city_army(target)
-		IF x = 0 XOR army_size(x) < 155 THEN menu_choice = i
-		NEXT i
-
-	IF menu_choice = 0 THEN menu_choice = 1 + INT(RND * menu_item_count)
-	IF opt_realism >= REALISM_ON THEN
-		x = 0
-		FOR i = 1 TO menu_item_count
-		target = menu_value(i)
-		IF city_army(target) = 0 THEN
-			y = 3 * city_value(target) + 33
-			a = city_is_connected(side, target)
-			IF a < 1 THEN y = y \ 3
-		ELSE
-			y = 2 * city_value(target) + 20
-			a = city_is_connected(side, target)
-			IF a < 1 THEN y = y \ 3
-		END IF
-		IF y > x AND RND > .5 THEN x = y: menu_choice = i
-		NEXT i
-	END IF
-	IF side_cash(side) < COST_RECRUIT THEN menu_choice = menu_item_count
-	RETURN
-playb:
-	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(empty) = army_size(empty) + 15 - 5 * opt_difficulty
-	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN army_size(empty) = army_size(empty) + 5 * opt_difficulty - 15
-	RETURN
-menu1:
 END SUB
 
 SUB menu_army_cancel (side)
@@ -406,4 +348,27 @@ DIM a$
 	CALL clear_right_panel
 	CALL draw_cities
 	CALL wait_seconds(PAUSE_LONG): CALL clear_bottom_line
+END SUB
+
+' The Railroad command: the player picks an army and the city its train goes to. army and
+' city are 0 when the move is refused or given up.
+SUB menu_railroad (side, army, city)
+DIM index AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM limit AS INTEGER
+DIM target AS INTEGER: DIM from AS INTEGER: DIM x1 AS INTEGER
+	army = 0: city = 0
+	CALL menu_army_select(index, a): IF a < 1 OR index < 1 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Railroad move not allowed"; : EXIT SUB
+	x = army_side(index)
+	limit = railroad_capacity(side)
+	IF army_size(index) > limit THEN CALL clear_bottom_line: PRINT "Too many troops for railroad capacity"; : EXIT SUB
+	
+	target = army_city(index): x = railroad_route_count(side, target): IF x > 1 GOTO aboard
+	CALL clear_bottom_line: PRINT "Track from "; city_name$(target); " is blocked"; : EXIT SUB
+aboard:
+	CALL clear_bottom_line: PRINT "Select destination for "; army_name$(index); " from "; city_name$(target);
+	menu_text$(0) = "To": from = target: x1 = from: IF from = 0 THEN EXIT SUB
+	CALL menu_city_select(x1): IF x1 = from OR x1 = 0 THEN EXIT SUB
+
+	target = x1: x = railroad_route_count(side, target): IF x > 1 THEN army = index: city = x1: EXIT SUB
+	CALL clear_bottom_line: PRINT army_name$(index); "'s train cannot go to "; city_name$(x1); " - select another city"; : CALL wait_seconds(PAUSE_LONG)
+	GOTO aboard
 END SUB

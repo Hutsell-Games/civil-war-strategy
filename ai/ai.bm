@@ -68,7 +68,7 @@ IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > C
 x = ai_count_armies(who)
 IF x > 2 + 3 * current_side + 3 * RND GOTO isok
 IF fleet_size(who) < 5 AND side_cash(who) > COST_SHIP AND fleet_city(who) <> FLEET_AT_SEA THEN IF city_owner(fleet_city(who)) = who THEN slush = slush + COST_SHIP: side_cash(who) = side_cash(who) - COST_SHIP: IF side_cash(who) < COST_RECRUIT GOTO isok
-CALL menu_army_recruit(who)
+CALL ai_recruit(who)
 isok:
 	side_cash(who) = side_cash(who) + slush
 END SUB
@@ -289,3 +289,91 @@ NEXT j
 tally5:
 city_nearby_enemy_strength = y
 END FUNCTION
+
+' The computer recruits: it picks a city from its list and raises men there, while the money
+' lasts and it has a commander for a new army.
+SUB ai_recruit (side)
+DIM city AS INTEGER: DIM raised AS INTEGER
+	IF side_cash(side) < COST_RECRUIT THEN EXIT SUB
+	CALL menu_recruit_cities(side)
+	IF menu_item_count = 0 THEN EXIT SUB
+	DO
+	IF side_cash(side) < COST_RECRUIT THEN EXIT SUB
+	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
+	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
+	CALL ai_recruit_pick(side)
+	city = menu_value(menu_choice)
+	CALL army_recruit(side, city, raised)
+	IF raised = 0 THEN EXIT SUB
+	LOOP
+END SUB
+
+' The computer's pick from the recruiting list, left in menu_choice.
+SUB ai_recruit_pick (side)
+DIM x AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
+		menu_choice = 0: x = 0
+		FOR i = 1 TO menu_item_count
+		target = menu_value(i)
+		LOCATE 14 + i, 69
+		x = city_army(target)
+		IF x = 0 XOR army_size(x) < 155 THEN menu_choice = i
+		NEXT i
+
+	IF menu_choice = 0 THEN menu_choice = 1 + INT(RND * menu_item_count)
+	IF opt_realism >= REALISM_ON THEN
+		x = 0
+		FOR i = 1 TO menu_item_count
+		target = menu_value(i)
+		IF city_army(target) = 0 THEN
+			y = 3 * city_value(target) + 33
+			a = city_is_connected(side, target)
+			IF a < 1 THEN y = y \ 3
+		ELSE
+			y = 2 * city_value(target) + 20
+			a = city_is_connected(side, target)
+			IF a < 1 THEN y = y \ 3
+		END IF
+		IF y > x AND RND > .5 THEN x = y: menu_choice = i
+		NEXT i
+	END IF
+	IF side_cash(side) < COST_RECRUIT THEN menu_choice = menu_item_count
+END SUB
+
+' The computer's train: an army that is far from the enemy, and a city of its own that the
+' enemy threatens. army and city are 0 when it sends no train.
+SUB ai_railroad (side, army, city)
+DIM max AS INTEGER: DIM index AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER
+DIM from AS INTEGER: DIM defend AS INTEGER: DIM limit AS INTEGER: DIM x1 AS INTEGER: DIM target AS INTEGER
+	army = 0: city = 0
+	max = 32767
+	index = 0
+	FOR i = side_first_army(side) TO side_last_army(side): IF army_city(i) = 0 OR army_order(i) <> ORDER_NONE GOTO puter
+	x = 0: FOR j = 1 TO MAX_ROADS: from = city_road(army_city(i), j): IF from > 0 AND city_owner(from) <> side THEN x = x + 1
+	NEXT j
+	IF city_army(side_capital(side)) > 0 AND x > 1 GOTO puter
+	defend = city_nearby_enemy_strength(army_city(i))
+	IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN IF defend > max THEN defend = max - 1
+	IF defend < max THEN target = army_city(i): x = railroad_route_count(side, target): IF x > 1 THEN max = defend: index = i
+puter:  NEXT i
+	IF index = 0 OR max > .3 * army_size(index) THEN EXIT SUB
+	limit = railroad_capacity(side)
+	IF army_size(index) > limit THEN EXIT SUB
+	from = army_city(index)
+	x1 = 0: FOR i = 1 TO MAX_CITIES: IF city_owner(i) <> side GOTO puted
+	defend = city_nearby_enemy_strength(i): IF defend = 0 OR defend > 3 * army_size(index) GOTO puted
+	IF city_army(i) > 0 GOTO puted
+	target = i
+	x = railroad_route_count(side, target): IF x = 0 GOTO puted
+	IF current_side = SIDE_UNION AND city_y(i) < city_y(from) THEN x1 = i
+	IF current_side = SIDE_REBEL AND city_y(i) > city_y(from) THEN x1 = i
+	IF city_fort(i) > 0 AND city_army(i) = 0 THEN x1 = i: EXIT FOR
+puted:  NEXT i
+	IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN
+		x = railroad_route_count(side, target)
+		IF x > 0 THEN
+			defend = city_nearby_enemy_strength(side_capital(side))
+			IF defend > 0 THEN x1 = side_capital(side)
+		END IF
+	END IF
+	IF x1 > 0 THEN army = index: city = x1
+END SUB
