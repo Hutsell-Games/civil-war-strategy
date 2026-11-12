@@ -65,7 +65,14 @@ game plays changes the recorded screens.
 - **F7 in the SOUNDS menu most likely stops the game with an error.** Read from the code, not tried.
   The menu takes F7 as "end the turn" and returns 99 (`MENU_END_TURN_KEY`). `menu_option_sound`
   (`ui\options.bm`) then prints `menu_text$(99)`, and the array has 21 entries. No other menu of the
-  Utility menu uses the number it gets back as an index.
+  Utility menu uses the number it gets back as an index. In the Files menu, F7 in the Load menu
+  reads `menu_value(99)` of 40 entries, and F7 in the Save menu saves the game as `cws99.sav`
+  (`menu_load_game` and `menu_save_game`, `ui\files.bm`).
+- **Saving in the first slot opens Troops, Moves and Ships again for the month, and loading does
+  so only for the Load menu's first game.** The main module tested `menu_choice = 1`, "Load was
+  chosen", after the menu of saved games had put its own row there. `menu_load_game` and
+  `menu_save_game` (`ui\files.bm`) keep it. A game loaded from another row keeps the "-" entries
+  of the game played before it.
 - **Rndom Evt left with Esc shows the text of the choice before.** `menu_option_events`
   (`ui\options.bm`) keeps the last choice's text and prints it again, though nothing was chosen.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and

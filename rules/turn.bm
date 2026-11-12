@@ -7,6 +7,11 @@ SUB turn_set_moves_done (done)
 	turn_moves_done = done
 END SUB
 
+' Opens the main menu's Troops, Moves and Ships again for the month.
+SUB turn_reset_commands
+	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
+END SUB
+
 ' Two months pass.
 SUB turn_advance_month
 turn_month = turn_month + 2

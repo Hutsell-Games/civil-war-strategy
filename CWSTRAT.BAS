@@ -16,7 +16,7 @@ DECLARE FUNCTION railroad_capacity% (who%)
 DECLARE SUB draw_top_bar ()
 ' $INCLUDE: 'cws14.bi'
 DIM fin AS INTEGER
-DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER
+DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER: DIM action AS INTEGER
 
 CALL script_mute
 replay = 0
@@ -84,7 +84,8 @@ menu_choice = MENU_START + 2
 CALL menu_select(MENU_PLAIN)
 IF menu_choice = 1 THEN
 	CLS
-	GOTO loader
+	CALL menu_load_game
+	GOTO menu0
 END IF
 IF menu_choice = 3 THEN CLS : END
 IF opt_history = 1 THEN
@@ -210,30 +211,10 @@ endrnd:
 '                               Files
 '==========================================================================
 	CASE 9
-	IF LEN(DIR$("*.sav")) = 0 THEN saves_exist = 0
-filex:
-	menu_choice = MENU_START + 2: chosit = 30: IF turn_year = FIRST_YEAR THEN menu_choice = MENU_START + 1
-	menu_text$(0) = "Options"
-	menu_text$(1) = "Load": IF saves_exist = 0 THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
-	menu_text$(2) = "Save"
-	menu_text$(3) = "New Game"
-	menu_text$(4) = "Quit to DOS"
-	menu_item_count = 4: menu_col = PANEL_COL: menu_row = 15
-	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
-	SELECT CASE menu_choice
-		CASE IS < 1: GOTO menu0
-		CASE 1, 2
-loader:
-			IF menu_choice = 1 AND saves_exist = 0 GOTO filex
-			IF menu_choice = 1 THEN CALL load_game ELSE CALL save_game
-			IF menu_choice = 1 THEN turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
-			GOTO menu0
-		CASE 3
-			CALL config_write(current_side)
-			CLS
-			GOTO newgame
-		CASE 4: GOTO rusure
-	END SELECT
+	chosit = 30
+	CALL menu_files(action)
+	IF action = FILES_NEW_GAME GOTO newgame
+	IF action = FILES_QUIT THEN END
 '==========================================================================
 	CASE MENU_END_TURN_KEY
 	GOTO endrnd
@@ -242,17 +223,6 @@ CASE ELSE
 	GOTO menu0
 END SELECT
 GOTO menu0
-'............................................................................
-'                               Subs
-'............................................................................
-rusure:
-menu_choice = MENU_START + 2
-menu_text$(0) = "Quit"
-menu_text$(1) = "Yes"
-menu_text$(2) = "No"
-menu_item_count = 2: menu_color = COLOR_MAGENTA
-menu_col = PANEL_COL: menu_row = 15
-CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice = 1 THEN END ELSE GOTO menu0
 '............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
@@ -272,6 +242,7 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'ai/ai.bm'
 ' $INCLUDE: 'ui/menu.bm'
 ' $INCLUDE: 'ui/orders.bm'
+' $INCLUDE: 'ui/files.bm'
 ' $INCLUDE: 'ui/options.bm'
 ' $INCLUDE: 'ui/reports.bm'
 ' $INCLUDE: 'ui/screen.bm'

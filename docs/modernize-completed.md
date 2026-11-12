@@ -666,3 +666,24 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    - Unit tests: 5 new ones, so 109 in all. 34 scripts. One line moved without a test: Detach when
      no commander is left (`IF empty = 0 THEN EXIT SUB` in `menu_army_detach`, `GOTO menu0`
      before). 198 lines of the game are run in part (204 before) and 20 are not run.
+3. **Done: the Files menu.** The Files menu (`filex:`, `loader:`) and the Quit menu (`rusure:`) left
+   the main module for the new `ui\files.bm`. The main module's `CASE 9` is now `chosit = 30`,
+   `CALL menu_files(action)` and two tests of `action`.
+   - `menu_files (action)` shows the menu and tells the main module what follows: `FILES_BACK`,
+     `FILES_NEW_GAME` (`GOTO newgame`) or `FILES_QUIT` (`END`). It shows again only for Load with
+     no saved game, as `GOTO filex` did. `menu_quit (action)` is the Yes or No menu.
+   - `load_game` and `save_game` (`port\files.bm`) are split. `menu_load_game` and
+     `menu_save_game` (`ui\files.bm`) hold the menus of saved games, "Loading" and "Saving", and
+     the map drawn after. `load_game (slot)` and `save_game (slot)` read and write the files and
+     show nothing, so the unit tests call them.
+   - The title menu's Resume Saved Game calls `menu_load_game`, where it jumped to `loader:`.
+   - The 40 dots after "Loading" and "Saving" were printed one for each city read or written. They
+     are printed together after the file work. The screen is cleared right after in both cases.
+   - `saved_games_check` (`port\files.bm`) sets `saves_exist` to 0 when no saved game is found, and
+     `turn_reset_commands` (`rules\turn.bm`) opens Troops, Moves and Ships again.
+   - A bug found and kept: the main module tested `menu_choice = 1` after the menu of saved games
+     had changed it, so the month's commands open again after a save in slot 1, and after a load
+     only of the Load menu's first game (`TODO.md`).
+   - Unit tests: 3 new ones, so 112 in all. One saves a game and loads it again in a folder of
+     its own. Lines moved without a test: none. 196 lines of the game are run in part and 20 are
+     not run.

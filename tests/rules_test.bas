@@ -1200,6 +1200,80 @@ AssertEqualInt 0, army_leader_rating(3), "a rating of 0 stays 0"
 AssertEqualInt 0, army_experience(3), "no experience stays none"
 END SUB
 
+' ------------------------------------------------- saved games (port/files.bm)
+
+SUB TestTurnResetCommands
+turn_recruit_state = -1: turn_moves_done = 1: turn_navy_done = 1
+CALL turn_reset_commands
+AssertEqualInt 0, turn_recruit_state, "Troops open"
+AssertEqualInt 0, turn_moves_done, "Moves open"
+AssertEqualInt 0, turn_navy_done, "Ships open"
+END SUB
+
+' A game saved in a slot and loaded again, in a folder of the test's own. save_game also
+' writes the settings (cws.cfg), and load_game reads them.
+SUB TestSaveGameAndLoadItAgain
+CHDIR TestTempDir$
+turn_month = 7: turn_year = 1863: union_income_bonus = 252: current_side = SIDE_REBEL
+army_name$(22) = "Jackson": army_size(22) = 180: army_leader_rating(22) = 9: army_city(22) = 12
+army_experience(22) = 3: army_supply(22) = 4: army_order(22) = 11
+leader_name$(22) = "Jackson": leader_name$(23) = "Pemberton"
+city_army(12) = 22: city_owner(12) = SIDE_REBEL: city_fort(12) = 1
+side_cash(SIDE_REBEL) = 345: side_capital(SIDE_REBEL) = 33: side_victory_points(SIDE_UNION) = 77
+fleet_ships$(SIDE_UNION) = "WWI": fleet_city(SIDE_UNION) = 30
+train_army(SIDE_REBEL) = 22: train_city(SIDE_REBEL) = 25
+opt_difficulty = 4: opt_history = 1
+CALL save_game(3)
+AssertEqualStr "CWS3.SAV", DIR$("cws3.sav"), "the slot's file"
+
+turn_month = 0: turn_year = 0: union_income_bonus = 0: current_side = SIDE_UNION
+army_name$(22) = "": army_size(22) = 0: army_leader_rating(22) = 0: army_city(22) = 0
+army_experience(22) = 0: army_supply(22) = 0: army_order(22) = 0
+city_army(12) = 0: city_owner(12) = 0: city_fort(12) = 0
+side_cash(SIDE_REBEL) = 0: side_capital(SIDE_REBEL) = 0: side_victory_points(SIDE_UNION) = 0
+fleet_ships$(SIDE_UNION) = "": fleet_city(SIDE_UNION) = 0: fleet_size(SIDE_UNION) = 0
+train_army(SIDE_REBEL) = 0: train_city(SIDE_REBEL) = 0
+opt_difficulty = 0: opt_history = 0
+CALL load_game(3)
+AssertEqualInt 7, turn_month, "the month"
+AssertEqualInt 1863, turn_year, "the year"
+AssertEqualInt 252, union_income_bonus, "the Union's extra income"
+AssertEqualInt SIDE_REBEL, current_side, "the side that plays"
+AssertEqualStr "Jackson", army_name$(22), "an army's name"
+AssertEqualInt 180, army_size(22), "its size"
+AssertEqualInt 9, army_leader_rating(22), "its leader's rating"
+AssertEqualInt 12, army_city(22), "its city"
+AssertEqualInt 3, army_experience(22), "its experience"
+AssertEqualInt 4, army_supply(22), "its supplies"
+AssertEqualInt 11, army_order(22), "its order"
+AssertEqualStr "", leader_name$(22), "its leader is no longer free"
+AssertEqualStr "Pemberton", leader_name$(23), "a leader without an army stays free"
+AssertEqualInt 22, city_army(12), "a city's army"
+AssertEqualInt SIDE_REBEL, city_owner(12), "its owner"
+AssertEqualInt 1, city_fort(12), "its fort"
+AssertEqualInt 345, side_cash(SIDE_REBEL), "a side's cash"
+AssertEqualInt 33, side_capital(SIDE_REBEL), "its capital"
+AssertEqualInt 77, side_victory_points(SIDE_UNION), "victory points"
+AssertEqualStr "WWI", fleet_ships$(SIDE_UNION), "a fleet's ships"
+AssertEqualInt 3, fleet_size(SIDE_UNION), "their count, from the ships"
+AssertEqualInt 30, fleet_city(SIDE_UNION), "its port"
+AssertEqualInt 22, train_army(SIDE_REBEL), "the army on the train"
+AssertEqualInt 25, train_city(SIDE_REBEL), "where it goes"
+AssertEqualInt 4, opt_difficulty, "a setting, from cws.cfg"
+AssertEqualInt 1, opt_history, "another"
+END SUB
+
+' saves_exist goes to 0 when no saved game is on the disk, and nothing here sets it back.
+SUB TestSavedGamesCheck
+CHDIR TestTempDir$
+saves_exist = 1
+CALL saved_games_check
+AssertEqualInt 0, saves_exist, "no saved game"
+CALL save_game(1)
+CALL saved_games_check
+AssertEqualInt 0, saves_exist, "still 0 after a save (as in the original)"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern
@@ -1241,6 +1315,7 @@ END SUB
 '$INCLUDE: '../ai/ai.bm'
 '$INCLUDE: '../ui/menu.bm'
 '$INCLUDE: '../ui/orders.bm'
+'$INCLUDE: '../ui/files.bm'
 '$INCLUDE: '../ui/options.bm'
 '$INCLUDE: '../ui/reports.bm'
 '$INCLUDE: '../ui/screen.bm'

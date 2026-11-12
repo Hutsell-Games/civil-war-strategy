@@ -1,0 +1,95 @@
+' The Files menu and the menus of saved games. The file work is in port/files.bm.
+
+' The Files menu: Load, Save, New Game and Quit to DOS. action tells the main module what
+' follows: the main menu (FILES_BACK), a new game or the program's end. Load with no saved
+' game, the "-" row, shows the menu again.
+SUB menu_files (action)
+DIM again AS INTEGER
+	action = FILES_BACK
+	CALL saved_games_check
+	DO
+	menu_choice = MENU_START + 2: IF turn_year = FIRST_YEAR THEN menu_choice = MENU_START + 1
+	menu_text$(0) = "Options"
+	menu_text$(1) = "Load": IF saves_exist = 0 THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
+	menu_text$(2) = "Save"
+	menu_text$(3) = "New Game"
+	menu_text$(4) = "Quit to DOS"
+	menu_item_count = 4: menu_col = PANEL_COL: menu_row = 15
+	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
+	again = 0
+	SELECT CASE menu_choice
+		CASE 1
+			IF saves_exist > 0 THEN CALL menu_load_game ELSE again = 1
+		CASE 2
+			CALL menu_save_game
+		CASE 3
+			CALL config_write(current_side)
+			CLS
+			action = FILES_NEW_GAME
+		CASE 4
+			CALL menu_quit(action)
+	END SELECT
+	LOOP WHILE again > 0
+END SUB
+
+' Load, and the title menu's Resume Saved Game: the player picks a saved game, and the map is
+' drawn with it. With no saved game it does nothing. The month's Troops, Moves and Ships open
+' again only when the game picked is the menu's first (TODO.md).
+SUB menu_load_game
+DIM k AS INTEGER: DIM t$: DIM row AS INTEGER
+	IF LEN(DIR$("*.sav")) = 0 THEN menu_choice = MENU_ESCAPED: EXIT SUB
+	menu_text$(0) = "Load"
+	menu_item_count = 0
+	FOR k = 1 TO 9
+		t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
+		IF LEN(DIR$(t$)) > 0 THEN
+			menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = t$: menu_value(menu_item_count) = k
+		END IF
+	NEXT k
+	CALL menu_bubble_sort((menu_item_count))
+	menu_col = PANEL_COL: menu_row = 14 - .5 * menu_item_count
+	CALL menu_select(MENU_PLAIN)
+	CALL clear_right_panel
+	IF menu_choice < 1 THEN EXIT SUB
+	row = menu_choice
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Loading";
+	CALL load_game(menu_value(menu_choice))
+	PRINT STRING$(MAX_CITIES, ".");
+	SCREEN 12: CLS
+	CALL draw_map: CALL clear_bottom_line
+	FOR k = SIDE_UNION TO SIDE_REBEL
+	IF train_army(k) > 0 THEN CALL draw_train(k, DRAW_SHOW)
+	NEXT k
+	IF row = 1 THEN CALL turn_reset_commands
+END SUB
+
+' Save: the player picks one of nine slots; a slot with a saved game has a mark. The month's
+' Troops, Moves and Ships open again when the slot is the first (TODO.md).
+SUB menu_save_game
+DIM k AS INTEGER: DIM slot AS INTEGER
+	menu_text$(0) = "Save Game"
+	FOR k = 1 TO 9
+	menu_text$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
+	IF LEN(DIR$(menu_text$(k))) > 0 THEN menu_text$(k) = menu_text$(k) + " û"
+	NEXT k
+	menu_col = PANEL_COL: menu_item_count = 9
+	CALL menu_select(MENU_PLAIN)
+	IF menu_choice < 1 THEN clear_right_panel: EXIT SUB
+	slot = menu_choice
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Saving";
+	CALL save_game(slot)
+	PRINT STRING$(MAX_CITIES, ".");
+	CLS : CALL draw_map
+	IF slot = 1 THEN CALL turn_reset_commands
+END SUB
+
+' Quit to DOS: Yes or No. action becomes FILES_QUIT on Yes.
+SUB menu_quit (action)
+	menu_choice = MENU_START + 2
+	menu_text$(0) = "Quit"
+	menu_text$(1) = "Yes"
+	menu_text$(2) = "No"
+	menu_item_count = 2: menu_color = COLOR_MAGENTA
+	menu_col = PANEL_COL: menu_row = 15
+	CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice = 1 THEN action = FILES_QUIT
+END SUB

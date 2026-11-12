@@ -84,6 +84,10 @@ CONST SUPPLY_BOUGHT = 1
 CONST BLAST_FIRM = 0
 CONST BLAST_LOYAL = 1
 CONST BLAST_NEUTRAL = 2
+' menu_files' action: what the main module does after the Files menu.
+CONST FILES_BACK = 0
+CONST FILES_NEW_GAME = 1
+CONST FILES_QUIT = 2
 ' event_roll's event: the special event of the month (game/events.bm).
 CONST EVENT_NONE = 0
 CONST EVENT_IRONCLADS = 1

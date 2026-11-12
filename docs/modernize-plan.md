@@ -141,9 +141,10 @@ the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is committ
 and step 8, victory, as `f5ee0f0`. That ends phase 8.
 
 Phase 9, the menus, has its plan below ("Phase 9: the menus"). Its step 1, the Utility menu, is
-committed as `693c078`. Step 2, the Commands menu, is done in the working tree (2026-11-12).
+committed as `693c078`, and step 2, the Commands menu, as `10056a5`. Step 3, the Files menu, is done
+in the working tree (2026-11-12).
 
-**Next:** phase 9 step 3, the Files menu.
+**Next:** phase 9 step 4, the main menu's own entries.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -340,9 +341,7 @@ their random numbers must stay in order.
 
 1. **Done: the Utility menu.** See `modernize-completed.md`.
 2. **Done: the Commands menu.** See `modernize-completed.md`.
-3. **The Files menu** (`filex:`, `loader:`, `rusure:`) becomes `menu_files`. `load_game` and
-   `save_game` (`port\files.bm`) are split: the menu of saved games goes to `ui\`, and the file work
-   stays, with the slot as a parameter. The title menu's Resume Saved Game uses the same SUBs.
+3. **Done: the Files menu.** See `modernize-completed.md`.
 4. **The main menu's own entries**: Troops, Moves, Ships, the Railroad's picture and capacity line,
    End Turn's question and Inform's move lines each get a menu SUB. `menu_main` fills and shows the
    main menu and keeps the row it starts on.

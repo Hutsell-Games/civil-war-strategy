@@ -5,7 +5,7 @@ the draft for the user to check before anything moves. Names are the settled nam
 
 "Mixed" means the SUB both works out a rule and draws, prints or reads a key. It goes to the file of its topic
 now and is split in phase 8. Since phase 8 the folder rule holds: nothing in `rules\` or `ai\` draws.
-The only SUBs still marked are `load_game` and `save_game` in `port\`, which phase 9 reworks.
+The last two marked, `load_game` and `save_game` in `port\`, lost their menus in phase 9.
 
 The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `CWS14.BI` becomes `cws.bi`.
 `QB64.BM` and `SCRIPT.BM` move to `port\`. `FOLDERS.BI` moves to `port\` too.
@@ -19,7 +19,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `battle.bm` | `battle_strengths`, `battle_fight`, `battle_losses`, `battle_apply_losses`, `normal_random_number` (`calculate_battle` until phase 8 split it) |
 | `navy.bm` | `navy_remove_ship`, `navy_add_ship`, `navy_found_fleet`, `navy_cancel_new_fleet`, `navy_bombard_army`, `navy_shore_battery`, `navy_fleet_lost`, `navy_blast`, `navy_move_fleet`, `navy_go_raiding`, `navy_landed`, `navy_note_raiding_side`, `navy_raid_round`, `navy_ship_hits`, `navy_shot_hits`, `navy_fleet_defeated`, `navy_retreat_port` (the rest until phase 8 moved them to `ui\navy.bm`) |
 | `railroad.bm` | `railroad_board`, `railroad_unload`, `railroad_route_count`, `railroad_capacity` (`railroad_move`, `railroad_start` and `railroad_arrive` until phase 8 moved them to `ui\railroad.bm`) |
-| `turn.bm` | `turn_set_moves_done` (new in phase 9), `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
+| `turn.bm` | `turn_set_moves_done`, `turn_reset_commands` (new in phase 9), `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7); the Utility menu's settings (new in phase 9): `option_swap_side`, `option_toggle_players`, `option_next_graphics`, `option_set_sound`, `option_set_display_speed`, `option_toggle_alt_colors`, `option_set_balance`, `option_set_event_balance`, `option_toggle_winter_campaigns`, `option_toggle_realism`, `option_toggle_history`, `option_next_aggression` |
 | `victory.bm` | `victory_toggle_rule` (new in phase 9), `victory_forces`, `victory_time_near`, `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_play_on`, `victory_won`, `victory_technical_points`, `hall_of_fame_place`, `hall_of_fame_insert` (`check_victory_conditions`, `victory_warnings`, `end_game` and `hall_of_fame` until phase 8 moved them to `ui\victory.bm`) |
 
@@ -36,6 +36,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `menu.bm` | `menu_select`, `menu_mark_row`, `menu_unmark_row`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
 | `orders.bm` | `menu_commands`, `menu_army_detach`, `menu_army_drill` (new in phase 9: the Commands menu, out of the main module), `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital`, `menu_recruit_cities`, `menu_railroad`, `menu_navy`, `menu_navy_items` |
 | `options.bm` | `menu_utility`, `menu_option_side`, `menu_option_players`, `menu_option_graphics`, `menu_option_sound`, `menu_option_display`, `menu_option_balance`, `menu_option_events`, `menu_option_january`, `menu_option_realism`, `menu_option_history`, `menu_option_aggression` (new in phase 9: the Utility menu, out of the main module) |
+| `files.bm` | `menu_files`, `menu_load_game`, `menu_save_game`, `menu_quit` (new in phase 9: the Files menu, out of the main module and `port\files.bm`) |
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size` |
 | `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn`, `draw_update_box` |
 | `messages.bm` | `show_message_box`, `scribe_message` |
@@ -70,7 +71,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_cities`, `load_game` (mixed), `save_game` (mixed), `config_read`, `config_write` (`file_management` until phase 7 split it) |
+| `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_cities`, `load_game`, `save_game`, `saved_games_check`, `config_read`, `config_write`, `save_battle_summary` (`file_management` until phase 7 split it; the menus of `load_game` and `save_game` until phase 9 moved them to `ui\files.bm`) |
 | `qb64.bm` | `DIR$` (from `QB64.BM`) |
 | `script.bm` | `script_start`, `script_date$`, `script_tick%`, `script_shell`, `script_mark_key_wait` (from `SCRIPT.BM`) |
 
