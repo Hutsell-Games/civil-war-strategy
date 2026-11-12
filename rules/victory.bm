@@ -1,7 +1,7 @@
 SUB hall_of_fame
 DIM i AS INTEGER: DIM s AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM a$
 DIM hall_score(2, 5)
-COLOR COLOR_YELLOW: LOCATE 28, 1: PRINT "press a key"; : CALL script_mark_key_wait(1, "H"): DO WHILE INKEY$ = "": LOOP
+COLOR COLOR_YELLOW: LOCATE 28, 1: PRINT "press a key"; : CALL wait_key("H")
 SCREEN 0: COLOR COLOR_YELLOW, COLOR_MAGENTA: CLS : COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
 
 LOCATE 2, 7: PRINT STRING$(57, "²")
@@ -43,7 +43,7 @@ foun:
 			FOR i = 1 TO 5
 			WRITE #1, city_name$(5 * (s - 1) + i), hall_score(s, i)
 			NEXT i
-		NEXT s: CLOSE #1: PRINT "Game Over": CALL script_mark_key_wait(1, "G"): DO WHILE INKEY$ = "": LOOP: game_over = 1
+		NEXT s: CLOSE #1: PRINT "Game Over": CALL wait_key("G"): game_over = 1
 END SUB
 
 SUB check_victory_conditions

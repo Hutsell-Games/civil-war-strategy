@@ -562,7 +562,7 @@ utile:
 		 a$ = "": IF opt_event_balance = 0 THEN a$ = "OFF"
 		 COLOR COLOR_LIGHT_CYAN: PRINT "Random Events : "; a$; " "; t$;
 		 COLOR COLOR_YELLOW: PRINT "			press a key";
-		 CALL script_mark_key_wait(1, "R"): DO WHILE INKEY$ = "": LOOP
+		 CALL wait_key("R")
 		 CLS
 		 CALL draw_map
 		 menu_choice = MENU_START + 8
@@ -721,7 +721,7 @@ blanken:        c = 1: IF current_side = SIDE_REBEL THEN c = 7
 		LINE (100, 200)-(500, 300), 8 - c, B
 		COLOR COLOR_GRAY: LOCATE 14, 31: PRINT " "; month_name$(turn_month); turn_year
 		COLOR COLOR_LIGHT_CYAN: LOCATE 17, 30: PRINT side_name$(current_side); " PLAYER TURN"
-		CALL script_mark_key_wait(1, "T"): DO WHILE INKEY$ = "": LOOP
+		CALL wait_key("T")
 		RETURN
 '............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"

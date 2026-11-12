@@ -86,7 +86,7 @@ The places a script can name (`play until <place>[:<letter>]`, `rule <place>[:<l
 
 | Place | Wait | Where |
 |---|---|---|
-| 1 | A pause that any key ends. The letter says which (below) | `DO WHILE INKEY$ = "": LOOP`, and `TICK` |
+| 1 | A pause that any key ends. The letter says which (below) | `wait_key` (`ui\screen.bm`), and `TICK` |
 | 2 | A menu. The letter is the first letter of the menu's title | `menu`, `ui\menu.bm` |
 | 4 | A line of text: the commander's name for the Hall of Fame | `maxx`, `rules\victory.bm` |
 

@@ -265,5 +265,5 @@ END SUB
 
 SUB report_wait_key
 COLOR COLOR_YELLOW: LOCATE 29, 29: PRINT "press a key";
-CALL script_mark_key_wait(1, "F"): DO WHILE INKEY$ = "": LOOP
+CALL wait_key("F")
 END SUB

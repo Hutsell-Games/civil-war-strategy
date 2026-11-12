@@ -7,7 +7,7 @@ IF opt_realism >= REALISM_ON AND turn_year = IRONCLAD_YEAR AND turn_month < IRON
 	COLOR COLOR_YELLOW: CALL clear_bottom_line
 	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
 	IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
-	CALL script_mark_key_wait(1, "I"): DO WHILE INKEY$ = "": LOOP
+	CALL wait_key("I")
 	EXIT SUB
 END IF
 IF opt_event_balance = 0 THEN EXIT SUB
@@ -144,8 +144,8 @@ END SELECT
 
 dull2:
 	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-	CALL script_mark_key_wait(1, "N"): DO WHILE INKEY$ = "": LOOP: EXIT SUB
+	CALL wait_key("N"): EXIT SUB
 dull1:
 	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-	CALL script_mark_key_wait(1, "S"): DO WHILE INKEY$ = "": LOOP
+	CALL wait_key("S")
 END SUB

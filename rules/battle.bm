@@ -89,7 +89,7 @@ a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
 COLOR COLOR_YELLOW: LOCATE 27, y: PRINT "Odds:  "; a$;
 LINE (530, 412)-(635, 435), 14, B
 LINE (528, 410)-(637, 437), 14, B
-CALL script_mark_key_wait(1, "P"): DO WHILE INKEY$ = "": LOOP
+CALL wait_key("P")
 IF opt_graphics >= GRAPHICS_FULL THEN
 	CALL draw_cannon
 	k = city_fort(army_city(defender))
@@ -178,7 +178,7 @@ a$ = city_name$(army_city(defender)) + ": " + menu_text$(3) + menu_text$(1) + " 
 CALL scribe_message(a$, SHOW_NOT)
 
 IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
-COLOR COLOR_YELLOW: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL script_mark_key_wait(1, "B"): DO WHILE INKEY$ = "": LOOP
+COLOR COLOR_YELLOW: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL wait_key("B")
 END IF
 
 army_size(attacker) = army_size(attacker) - killa

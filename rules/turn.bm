@@ -51,7 +51,7 @@ END IF
 COLOR COLOR_YELLOW: LOCATE 1, 1: PRINT SPACE$(80);
 LOCATE 1, 20: PRINT "Update for "; month_name$(turn_month); ","; turn_year
 CALL clear_bottom_line: PRINT "press any key for "; month_name$(turn_month); ","; turn_year; " events";
-CALL script_mark_key_wait(1, "U"): DO WHILE INKEY$ = "": LOOP
+CALL wait_key("U")
 GOSUB upbox
 '==========================================================================
 '                       Assign Time of Action
@@ -308,5 +308,5 @@ IF side_victory_points(SIDE_UNION) < 1 THEN side_victory_points(SIDE_UNION) = 0
 side_victory_points(SIDE_REBEL) = .8 * side_victory_points(SIDE_REBEL) + .3 * (side_income(SIDE_REBEL) + side_city_count(SIDE_REBEL))
 IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50: IF side_city_count(SIDE_REBEL) > 34 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_UNION) + 100
 IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
-IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL script_mark_key_wait(1, "K"): DO WHILE INKEY$ = "": LOOP
+IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL wait_key("K")
 END SUB

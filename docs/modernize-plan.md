@@ -157,8 +157,8 @@ the working tree: `side_army_range` became `side_first_army` and `side_last_army
 `army_get_commander` stays a SUB, because it also makes up a leader, draws a random number and prints
 (user, 2026-11-11). That ends phase 5.
 Phase 7 step 1 is done in the working tree (2026-11-11): `file_management` is split, see "Phase 7" below.
-Step 2 is done in the working tree too: `menu_report` is split.
-**Next:** phase 7 step 3, `wait_key`.
+Steps 2 and 3 are done in the working tree too: `menu_report` is split, and `wait_key` is in.
+**Next:** phase 7 step 4, the small shared pieces.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -322,9 +322,12 @@ Until the user decides otherwise, each step of this phase works like this:
    by `save_battle_summary` (`port\files.bm`), called just before the report is drawn and not just after.
    Two tests after the menu that could never be true are gone (`menu_choice < 0`, `menu_choice = 4`).
    Lines moved without a test: the `PRINT` for a side with no victory points, in `report_armies`.
-3. **`wait_key (letter$)`** for the 12 loops `CALL script_mark_key_wait(1, "X"): DO WHILE INKEY$ = "":
-   LOOP`. The two `wait_seconds(99)` stay as they are until the user decides whether they may wait
-   forever (`TODO.md`, "The code").
+3. **Done: `wait_key (letter$)`** (`ui\screen.bm`) for the 12 loops `CALL script_mark_key_wait(1, "X"):
+   DO WHILE INKEY$ = "": LOOP`, each replaced by `CALL wait_key("X")` (2 in `CWSTRAT.BAS`, 3 in
+   `game\events.bm`, 2 each in `rules\battle.bm`, `rules\turn.bm` and `rules\victory.bm`, 1 in
+   `ui\reports.bm`). The menu's wait, the commander's name and the wait inside `script_tick%` are other
+   kinds and stay. The two `wait_seconds(99)` stay as they are until the user decides whether they may
+   wait forever (`TODO.md`, "The code").
 4. **Small shared pieces**: `army_clear`, `draw_city_dot`, `city_redraw_fort`, the train's `DRAW` string,
    `load_picture`.
 5. **The main module's pieces that stand alone**: `load_cities`, `draw_title`, `play_title_music`,

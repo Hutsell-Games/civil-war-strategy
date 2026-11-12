@@ -47,6 +47,12 @@ start! = TIMER
 DO WHILE TIMER - start! < seconds! AND INKEY$ = "": LOOP
 END SUB
 
+' Waits until a key is pressed. The letter tells a script which wait this is (port/script.bm).
+SUB wait_key (letter$)
+CALL script_mark_key_wait(1, letter$)
+DO WHILE INKEY$ = "": LOOP
+END SUB
+
 SUB draw_top_bar
 DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER: DIM a$
 	LOCATE 1, 1: PRINT SPACE$(80);
