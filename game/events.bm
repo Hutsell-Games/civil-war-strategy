@@ -26,7 +26,7 @@ SELECT CASE who
 	CASE 1
 	IF turn_year = 1864 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50
 	IF turn_year = 1865 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 100
-	IF script_rnd! > .9 THEN GOSUB riot: EXIT SUB
+	IF script_rnd! > .9 THEN CALL event_riot(who): EXIT SUB
 
 	CALL clear_bottom_line
 	IF script_rnd! > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
@@ -72,30 +72,11 @@ uprising:
 	NEXT k
 	GOTO dull1
 '----------------------------------------------------------------------------
-riot:
-	IF opt_realism = REALISM_OFF THEN RETURN
-	IF side_city_count(who) = 1 THEN RETURN
-	FOR k = 1 TO 99
-	x = 1 + INT(MAX_CITIES * script_rnd!)
-		IF city_first_owner(x) <> who AND city_owner(x) = who AND city_army(x) = 0 THEN
-			CALL clear_bottom_line: COLOR COLOR_WHITE
-			PRINT " Riots have broken out in "; city_name$(x);
-			city_owner(x) = SIDE_NONE
-			CALL draw_cities
-			wait_seconds opt_pause!
-			CALL clear_bottom_line
-			CALL show_message_box(city_name$(x) + " is now NEUTRAL !", 4)
-			wait_seconds opt_pause!
-			RETURN
-		END IF
-	NEXT k
-	RETURN
-'----------------------------------------------------------------------------
 '                               good for Union
 '----------------------------------------------------------------------------
 	CASE 2
 	IF script_rnd! > .1 OR fleet_city(SIDE_UNION) = 0 OR fleet_size(SIDE_UNION) >= MAX_FLEET_SHIPS GOTO event2
-	IF script_rnd! > .95 THEN GOSUB riot: EXIT SUB
+	IF script_rnd! > .95 THEN CALL event_riot(who): EXIT SUB
 	CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
 	fleet_size(SIDE_UNION) = fleet_size(SIDE_UNION) + plus
 	IF fleet_size(SIDE_UNION) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_UNION) = MAX_FLEET_SHIPS
@@ -149,4 +130,25 @@ dull2:
 dull1:
 	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	CALL wait_key("S")
+END SUB
+
+' A riot: a city that the side took from the other side, with no army in it, turns neutral.
+SUB event_riot (who)
+DIM k AS INTEGER: DIM x AS INTEGER
+	IF opt_realism = REALISM_OFF THEN EXIT SUB
+	IF side_city_count(who) = 1 THEN EXIT SUB
+	FOR k = 1 TO 99
+	x = 1 + INT(MAX_CITIES * script_rnd!)
+		IF city_first_owner(x) <> who AND city_owner(x) = who AND city_army(x) = 0 THEN
+			CALL clear_bottom_line: COLOR COLOR_WHITE
+			PRINT " Riots have broken out in "; city_name$(x);
+			city_owner(x) = SIDE_NONE
+			CALL draw_cities
+			wait_seconds opt_pause!
+			CALL clear_bottom_line
+			CALL show_message_box(city_name$(x) + " is now NEUTRAL !", 4)
+			wait_seconds opt_pause!
+			EXIT SUB
+		END IF
+	NEXT k
 END SUB

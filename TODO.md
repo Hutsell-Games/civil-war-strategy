@@ -95,9 +95,9 @@ Left alone by group 7 (the rule numbers):
 - **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 39), where the cities are read. The 200
   may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
-- **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 111). That is
+- **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 93). That is
   the date of an event, not `IRONCLAD_YEAR`, so it stays; phase 11 moves the events' dates to data.
-- **`ai_turn` compares `side_cash` with no index**: `side_cash < 222` (`ai\ai.bm` line 44). Every other use
+- **`ai_turn` compares `side_cash` with no index**: `side_cash < 222` (`ai_fortify`, `ai\ai.bm` line 59). Every other use
   is `side_cash(who)`. Check what the two compilers make of it before the line is touched.
 
 Left alone by group 8 (the colors):

@@ -163,7 +163,8 @@ Phase 0 went first (user, 2026-11-11) and is done: see "Phase 0 after phase 7 be
 21 lines not run, each with its reason.
 Phase 7 step 5 is done in the working tree: eleven pieces of the main module are SUBs.
 Step 6 is done in the working tree: `turn_resolve`'s outer parts are SUBs, and 20 lines are not run.
-**Next:** phase 7 step 7, `special_events` and `ai_turn`.
+Step 7 is done in the working tree: `event_riot`, and `ai_turn` is six `ai_` SUBs and a FUNCTION.
+**Next:** phase 7 step 8, `menu_army_recruit` and `railroad_move`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -320,9 +321,9 @@ The 20 lines that no test runs (21 before phase 7 step 6):
 | File | Lines | Why |
 |------|-------|-----|
 | `rules\setup.bm` | 22-24 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
-| `ai\ai.bm` | 24 | Follows `IF ... GOTO capital ELSE GOTO city2`; nothing reaches it |
-| `ai\ai.bm` | 79-80 | The `ELSE` for a fleet at sea; a fleet at sea already left at line 64 |
-| `ai\ai.bm` | 201 | An army of size 0 that still holds a city; no game makes one |
+| `ai\ai.bm` | 39 | Follows `IF ... GOTO capital ELSE GOTO city2`; nothing reaches it |
+| `ai\ai.bm` | 113-114 | The `ELSE` for a fleet at sea; a fleet at sea already left at line 98 |
+| `ai\ai.bm` | 222 | An army of size 0 that still holds a city; no game makes one |
 | `port\qb64.bm` | 15-16 | `DIR$("")` for the next match; the game never calls it that way |
 | `rules\battle.bm` | 58 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
 | `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
@@ -430,8 +431,20 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
    - The `GOTO allthru` after the loop over the armies is gone. It only jumped over `upbox`, and no
      test ran it, because the loop always leaves early. That makes 20 lines not run, not 21.
    - Lines moved without a test: the two shadowed `CASE` lines, now `rules\turn.bm` 283 and 285.
-7. **`special_events` and `ai_turn`**: `event_riot`; one `ai_` SUB for each headed section of `ai_turn`,
-   and `ai_count_armies`.
+7. **Done: `special_events` and `ai_turn`.**
+   - `event_riot (who)` (`game\events.bm`): the `GOSUB` routine `riot`.
+   - `ai_turn` is now 17 lines that call one SUB for each of its headed sections, all in `ai\ai.bm`:
+     `ai_resupply`, `ai_fortify`, `ai_raise_forces` (the Union's first ship and the recruiting),
+     `ai_fleet_orders`, `ai_army_orders (who, c)` and `ai_drill`. Each takes the computer's side.
+     Combining armies, the train and `draw_fleets` are single calls and stay in `ai_turn`.
+   - `ai_count_armies (who)` is a FUNCTION (the `GOSUB` routine `enufarmies`), with a unit test.
+   - The names `ai_raise_forces`, `ai_fleet_orders` and `ai_army_orders` are new. `ai_recruit` and
+     `ai_navy` are kept for the computer's parts of `menu_army_recruit` (step 8) and `navy_commands`
+     (step 10).
+   - `ai_fortify` keeps the original's `side_cash < 222` with a local `side_cash` that is always 0
+     (`TODO.md`, "The code").
+   - A jump to the next section's label became `EXIT SUB`. Lines moved without a test: the four of
+     `ai\ai.bm` in the table above, now 39, 113, 114 and 222.
 8. **`menu_army_recruit` and `railroad_move`**, each split into the human's menu, the computer's choice
    and the rule (`sub-names.md`, "Other SUBs that serve both the human and the computer").
 9. **`check_victory_conditions`**: `victory_warnings` and `end_game`. The Hall of Fame gets its own

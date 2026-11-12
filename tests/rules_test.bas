@@ -289,6 +289,21 @@ AssertEqualInt 154, side_victory_points(1), "80, 24 for income and cities, 50 fo
 AssertEqualInt 254, side_victory_points(2), "over 34 cities the Rebels get the Union's points and 100"
 END SUB
 
+' ---------------------------------------------------------- ai_count_armies
+
+SUB TestAiCountsItsArmies
+army_city(1) = 5: army_size(1) = 100
+army_city(21) = 25: army_size(21) = 100
+army_city(22) = 26: army_size(22) = 100
+AssertEqualInt 2, ai_count_armies(2), "two armies, and more men than the Union"
+army_size(1) = 300
+AssertEqualInt 0, ai_count_armies(2), "the Union has more men: two fewer"
+army_size(1) = 500
+AssertEqualInt 0, ai_count_armies(2), "the Union has more than twice the men: none"
+army_size(22) = 250
+AssertEqualInt 0, ai_count_armies(2), "500 against 350: two fewer"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern

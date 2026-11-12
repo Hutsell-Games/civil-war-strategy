@@ -27,7 +27,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `ai.bm` | `ai_turn` (mixed), `ai_evaluate_move`, `city_nearby_enemy_strength` |
+| `ai.bm` | `ai_turn` (mixed), `ai_resupply`, `ai_fortify` (mixed), `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders` (mixed), `ai_drill` (mixed), `ai_evaluate_move`, `city_nearby_enemy_strength` |
 
 ## ui\
 
@@ -54,7 +54,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 |------|------|
 | `victory_screens.bm` | `draw_union_victory`, `draw_rebel_victory`, `draw_surrender` |
 | `tunes.bm` | `play_shenandoah`, `play_title_music` |
-| `events.bm` | `special_events` (mixed) |
+| `events.bm` | `special_events` (mixed), `event_riot` (mixed) |
 
 ## port\
 
