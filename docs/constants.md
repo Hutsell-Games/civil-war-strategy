@@ -102,6 +102,7 @@ The mode says what `menu` shows beside the options while the player moves throug
 | `army_combine_add`'s `status` (phase 8) | 0, 1, 2 | The army does not join; it would make army 0 more than 125,000 men; it joins. | `COMBINE_SKIPPED`, `COMBINE_TOO_LARGE`, `COMBINE_JOINED` | |
 | `army_buy_supply`'s `result` (phase 8) | -1, 0, 1 | The army is cut off under the Realism setting; the cash is not enough; supplies were bought. | `SUPPLY_CUT_OFF`, `SUPPLY_NO_CASH`, `SUPPLY_BOUGHT` | |
 | `navy_blast`'s `result` (phase 8) | 0, 1, 2 | The city stands firm; it is the other side's capital and stays loyal; it turns neutral. | `BLAST_FIRM`, `BLAST_LOYAL`, `BLAST_NEUTRAL` | |
+| `event_roll`'s `event` (phase 8) | 0 to 15 | No event; ironclads available; riots; English ships; mercenaries; a loan; cotton sales; the uprising; Union shipworks; volunteers; the Emancipation Proclamation; Lincoln reelected; donations; Rebel deserters; repeating rifles; Stanton's prediction. | `EVENT_NONE`, `EVENT_IRONCLADS`, `EVENT_RIOTS`, `EVENT_ENGLISH_SHIPS`, `EVENT_MERCENARIES`, `EVENT_LOAN`, `EVENT_COTTON`, `EVENT_UPRISING`, `EVENT_SHIPWORKS`, `EVENT_VOLUNTEERS`, `EVENT_EMANCIPATION`, `EVENT_REELECTION`, `EVENT_DONATIONS`, `EVENT_DESERTERS`, `EVENT_RIFLES`, `EVENT_STANTON` | |
 
 ## 6. Settings and victory rules
 

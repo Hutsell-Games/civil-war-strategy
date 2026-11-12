@@ -801,6 +801,64 @@ CALL ai_recruit_pick(2)
 AssertEqualInt 2, menu_choice, "the city with an army under 15,500 men"
 END SUB
 
+' ------------------------------------------------------ the special events
+' script_dice$ gives event_roll its draws, as CWS_DICE does under a script.
+' The Balance setting 5, difficulty 3 and 1863 give a chance of .135; a draw
+' of 0 passes it.
+
+SUB TestEventIroncladsComeFirst
+opt_realism = REALISM_ON: turn_year = IRONCLAD_YEAR: turn_month = 1
+CALL event_roll(event, variant, who)
+AssertEqualInt EVENT_IRONCLADS, event, "January 1862 with the Realism setting"
+END SUB
+
+SUB TestEventNoneWithoutBalance
+opt_event_balance = 0: turn_year = 1863
+CALL event_roll(event, variant, who)
+AssertEqualInt EVENT_NONE, event, "the Balance setting 0: no events"
+END SUB
+
+SUB TestEventLoanForTheSouth
+opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+side_city_count(2) = 15
+script_dice$ = "0,0,0,.5,.5,0"
+CALL event_roll(event, variant, who)
+AssertEqualInt EVENT_LOAN, event, "no riot, no ships, no mercenaries: a loan"
+AssertEqualInt SIDE_UNION, who, "an event rolled for the Union is good for the South"
+AssertEqualInt 300, side_cash(2), "100 for each point of plus"
+END SUB
+
+SUB TestEventMercenariesJoinArmyZero
+opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+side_city_count(2) = 30
+script_dice$ = "0,0,0,.5,0,.9"
+CALL event_roll(event, variant, who)
+AssertEqualInt EVENT_MERCENARIES, event, "30 cities: mercenaries"
+AssertEqualInt 1, variant, "British"
+AssertEqualInt 300, army_size(0), "they join army 0, as in the original (TODO.md)"
+AssertEqualInt MAX_EXPERIENCE, army_experience(0), "with the best experience"
+END SUB
+
+SUB TestEventEmancipation
+opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+side_victory_points(1) = 200: side_victory_points(2) = 200
+script_dice$ = "0,.9,.5,0"
+CALL event_roll(event, variant, who)
+AssertEqualInt EVENT_EMANCIPATION, event, "the Proclamation, once, after 1862"
+AssertEqualInt 300, side_victory_points(1), "100 points for the Union"
+AssertEqualInt 100, side_victory_points(2), "100 from the Rebels"
+AssertEqualInt 1, emancipation_done, "not again"
+END SUB
+
+SUB TestEventRiotCity
+opt_realism = REALISM_ON: side_city_count(1) = 5
+city_first_owner(7) = 2: city_owner(7) = 1
+script_dice_now$ = ".15"
+CALL event_riot_city(1, city)
+AssertEqualInt 7, city, "the draw .15 picks city 7, which the Union took"
+AssertEqualInt SIDE_NONE, city_owner(7), "it turns neutral"
+END SUB
+
 ' ------------------------------------------------------- the month's moves
 
 SUB TestTurnAdvanceMonth
@@ -972,6 +1030,7 @@ END SUB
 '$INCLUDE: '../ui/navy.bm'
 '$INCLUDE: '../ui/turn.bm'
 '$INCLUDE: '../ui/ai.bm'
+'$INCLUDE: '../ui/events.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'

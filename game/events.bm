@@ -1,14 +1,21 @@
-SUB special_events
-DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM who AS INTEGER: DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM a$: DIM index AS INTEGER
+' The special events of the war: which one happens and what it does. They draw nothing; the
+' messages are special_events and event_riot (ui/events.bm).
+
+' Rolls the month's special event and carries out what it does. event is EVENT_NONE when
+' nothing happens. variant picks the message of EVENT_MERCENARIES (0 French, 1 British) and
+' of EVENT_UPRISING (0 the Indian uprisings, 1 the 90-day enlistees, 2 the 1864 furloughs).
+' who is the side the event is rolled for: SIDE_UNION's events are good for the South.
+' EVENT_RIOTS is rolled here and carried out by event_riot. EVENT_RIFLES is followed by
+' Stanton's prediction, as EVENT_STANTON is.
+SUB event_roll (event, variant, who)
+DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM index AS INTEGER
+event = EVENT_NONE: variant = 0: who = 0
 CALL script_dice_next
 '==========================================================================
 '                              Special Events
 '==========================================================================
 IF opt_realism >= REALISM_ON AND turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH THEN
-	COLOR COLOR_YELLOW: CALL clear_bottom_line
-	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
-	IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
-	CALL wait_key("I")
+	event = EVENT_IRONCLADS
 	EXIT SUB
 END IF
 IF opt_event_balance = 0 THEN EXIT SUB
@@ -16,7 +23,6 @@ plus = opt_difficulty: IF current_side = SIDE_UNION THEN plus = 6 - opt_difficul
 pct! = .005 * (turn_year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
 IF script_rnd! > pct! THEN EXIT SUB
 
-CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "SPECIAL EVENT...";
 who = SIDE_UNION: IF script_rnd! > .1 * opt_event_balance THEN who = SIDE_REBEL
 
 SELECT CASE who
@@ -26,9 +32,8 @@ SELECT CASE who
 	CASE 1
 	IF turn_year = 1864 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50
 	IF turn_year = 1865 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 100
-	IF script_rnd! > .9 THEN CALL event_riot(who): EXIT SUB
+	IF script_rnd! > .9 THEN event = EVENT_RIOTS: EXIT SUB
 
-	CALL clear_bottom_line
 	IF script_rnd! > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
 	IF fleet_size(SIDE_REBEL) > 0 AND fleet_city(SIDE_REBEL) <> FLEET_AT_SEA THEN empty = fleet_city(SIDE_REBEL): GOTO float1
 		empty = 0
@@ -37,36 +42,36 @@ SELECT CASE who
 		NEXT i
 	IF empty = 0 GOTO mercen
 float1:
-	CALL scribe_message("England has given ships to the South", SHOW_BOX)
+	event = EVENT_ENGLISH_SHIPS
 	fleet_size(SIDE_REBEL) = fleet_size(SIDE_REBEL) + 2 * plus
 	IF fleet_size(SIDE_REBEL) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_REBEL) = MAX_FLEET_SHIPS
 	x = fleet_size(SIDE_REBEL) - LEN(fleet_ships$(SIDE_REBEL))
 	fleet_ships$(SIDE_REBEL) = fleet_ships$(SIDE_REBEL) + STRING$(x, "W")
-	fleet_city(SIDE_REBEL) = empty: CALL draw_fleets
+	fleet_city(SIDE_REBEL) = empty
 	GOTO dull1
 mercen:
 	IF script_rnd! > .1 OR side_city_count(SIDE_REBEL) < 30 GOTO money
-	a$ = "French": IF script_rnd! > .5 THEN a$ = "British"
-	CALL scribe_message(a$ + " mercenaries join " + army_name$(index) + "'s army", SHOW_BOX)
+	variant = 0: IF script_rnd! > .5 THEN variant = 1
+	event = EVENT_MERCENARIES
 	army_size(index) = army_size(index) + 100 * plus
 	army_experience(index) = MAX_EXPERIENCE: army_supply(index) = MAX_SUPPLY
 	GOTO dull1
 money:
 	IF script_rnd! > .3 OR side_city_count(SIDE_REBEL) < 12 GOTO cotton
-		CALL scribe_message("The South has obtained a loan from Europe", SHOW_BOX)
+		event = EVENT_LOAN
 		GOTO purse
 cotton:
 	IF script_rnd! > .5 OR side_city_count(SIDE_REBEL) < 12 GOTO uprising
-	CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", SHOW_BOX)
+	event = EVENT_COTTON
 purse:
 	side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 * plus
 	GOTO dull1
 uprising:
 	pct! = .9
-	a$ = "Union troops diverted to fight Western Indian uprisings"
-	IF script_rnd! > .5 THEN a$ = "Union 90-day enlistees return home"
-	IF turn_year = 1864 AND turn_month > 5 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
-	CALL scribe_message(a$, SHOW_BOX)
+	variant = 0
+	IF script_rnd! > .5 THEN variant = 1
+	IF turn_year = 1864 AND turn_month > 5 THEN variant = 2: pct! = .8
+	event = EVENT_UPRISING
 	FOR k = 1 TO ARMIES_PER_SIDE
 	army_size(k) = pct! * army_size(k)
 	NEXT k
@@ -76,8 +81,8 @@ uprising:
 '----------------------------------------------------------------------------
 	CASE 2
 	IF script_rnd! > .1 OR fleet_city(SIDE_UNION) = 0 OR fleet_size(SIDE_UNION) >= MAX_FLEET_SHIPS GOTO event2
-	IF script_rnd! > .95 THEN CALL event_riot(who): EXIT SUB
-	CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
+	IF script_rnd! > .95 THEN event = EVENT_RIOTS: EXIT SUB
+	event = EVENT_SHIPWORKS
 	fleet_size(SIDE_UNION) = fleet_size(SIDE_UNION) + plus
 	IF fleet_size(SIDE_UNION) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_UNION) = MAX_FLEET_SHIPS
 	x = fleet_size(SIDE_UNION) - LEN(fleet_ships$(SIDE_UNION))
@@ -85,7 +90,7 @@ uprising:
 	GOTO dull2
 event2:
 	IF script_rnd! < .7 GOTO abe
-	CALL scribe_message("Volunteer troops swell the Union ranks", SHOW_BOX)
+	event = EVENT_VOLUNTEERS
 	x = 0: FOR i = 1 TO ARMIES_PER_SIDE: x = x + 1: IF x > 5 GOTO dull2
 	IF army_size(i) > 0 AND script_rnd! > .5 THEN army_size(i) = army_size(i) * 1.1 + plus
 	NEXT i: GOTO dull2
@@ -93,62 +98,51 @@ abe:
 	IF emancipation_done = 0 AND turn_year > 1862 THEN
 
 		emancipation_done = 1
-		CALL scribe_message("Abraham Lincoln announces the Emancipation Proclamation", SHOW_BOX)
+		event = EVENT_EMANCIPATION
 		side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100: side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) - 100
 		' SHELL "abelinco.exe" (a DOS program with no source; cannot run on 64-bit Windows)
-		CALL draw_map
 		GOTO dull2
 	END IF
 	IF turn_year = 1864 AND turn_month = 11 THEN
-		CALL scribe_message("Lincoln has been reelected", SHOW_BOX)
+		event = EVENT_REELECTION
 		side_victory_points(SIDE_REBEL) = .5 * side_victory_points(SIDE_REBEL)
 		GOTO dull2
 	END IF
 	IF script_rnd! > .5 THEN
-		CALL scribe_message("Wealthy Unionists give generously to the Federal Cause", SHOW_BOX)
+		event = EVENT_DONATIONS
 		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * plus
 		GOTO dull2
 	END IF
 	IF script_rnd! > .5 AND turn_year > FIRST_YEAR THEN
-		CALL scribe_message("Rebel deserters leave the battlefield to go home", SHOW_BOX)
+		event = EVENT_DESERTERS
 		FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: army_size(i) = .92 * army_size(i): NEXT i: GOTO dull2
 	END IF
 	IF script_rnd! > .5 AND turn_year > FIRST_YEAR THEN
-		CALL scribe_message("Union soldiers now have repeating rifles", SHOW_BOX)
+		event = EVENT_RIFLES
 		FOR i = 1 TO ARMIES_PER_SIDE
 			IF army_experience(i) < 9 THEN army_experience(i) = army_experience(i) + 2
 		NEXT i
 	END IF
-		CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
+		IF event = EVENT_NONE THEN event = EVENT_STANTON
 		side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 10: GOTO dull2
 	CASE ELSE
 END SELECT
 
 dull2:
-	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-	CALL wait_key("N"): EXIT SUB
 dull1:
-	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-	CALL wait_key("S")
 END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.
-SUB event_riot (who)
+' city is 0 when no such city is found.
+SUB event_riot_city (who, city)
 DIM k AS INTEGER: DIM x AS INTEGER
+city = 0
 	IF opt_realism = REALISM_OFF THEN EXIT SUB
 	IF side_city_count(who) = 1 THEN EXIT SUB
 	FOR k = 1 TO 99
 	x = 1 + INT(MAX_CITIES * script_rnd!)
 		IF city_first_owner(x) <> who AND city_owner(x) = who AND city_army(x) = 0 THEN
-			CALL clear_bottom_line: COLOR COLOR_WHITE
-			PRINT " Riots have broken out in "; city_name$(x);
-			city_owner(x) = SIDE_NONE
-			CALL draw_cities
-			wait_seconds opt_pause!
-			CALL clear_bottom_line
-			CALL show_message_box(city_name$(x) + " is now NEUTRAL !", 4)
-			wait_seconds opt_pause!
-			EXIT SUB
+			city = x: city_owner(x) = SIDE_NONE: EXIT SUB
 		END IF
 	NEXT k
 END SUB

@@ -46,6 +46,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `navy.bm` | `navy_commands`, `navy_action`, `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`, `navy_raid_commerce`, `navy_land_army`, `navy_finish_move`, `navy_commerce_raid`, `navy_combat`, `navy_show_hits` (new in phase 8: the navy's menus and screens) |
 | `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city`, `ai_turn` (new in phase 8: the month's moves) |
 | `ai.bm` | `draw_ai_fort`, `draw_ai_plan`, `draw_ai_drill`, `draw_ai_funds` (new in phase 8: the computer's messages) |
+| `events.bm` | `special_events`, `event_riot` (new in phase 8: the special events' messages and tunes) |
 
 ## draw\
 
@@ -62,7 +63,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 |------|------|
 | `victory_screens.bm` | `draw_union_victory`, `draw_rebel_victory`, `draw_surrender` |
 | `tunes.bm` | `play_shenandoah`, `play_title_music` |
-| `events.bm` | `special_events` (mixed), `event_riot` (mixed) |
+| `events.bm` | `event_roll`, `event_riot_city` (`special_events` and `event_riot` until phase 8 moved them to `ui\events.bm`) |
 
 ## port\
 

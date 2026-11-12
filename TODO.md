@@ -54,6 +54,10 @@ game plays changes the recorded screens.
 - **An army that surrenders or is crushed gives 25 victory points to its own side.** `turn_army_lost`
   adds them to `other_side` of the winner's side (`TestTurnArmyLost`). A battle's winner gets a point in
   `battle_apply_losses`, so the 25 were most likely meant for the winner too.
+- **The French or British mercenaries join army 0.** `event_roll` (`game\events.bm`) adds them to
+  `army_size(index)`, and `index` is never set, so the 10,000 men and the best experience go to army 0,
+  the slot that `army_combine` gathers armies in. The message names `army_name$(0)`
+  (`TestEventMercenariesJoinArmyZero`). It was most likely meant for one of the Rebels' armies.
 - **A fleet sunk in naval combat gives 10 victory points to its own side.** `navy_fleet_defeated`
   (`rules\navy.bm`) adds them to the loser, as both of the original's two blocks did
   (`TestNavyFleetDefeated`). A fleet sunk by a shore battery gives 5 to the other side

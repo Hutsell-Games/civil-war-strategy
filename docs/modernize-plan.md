@@ -136,10 +136,10 @@ Updated 2026-11-11. Phases 0 to 7 are done and committed. Phase 8's steps 1 and 
 (`6eda547`, `013b8d0`). What each step did is in `modernize-completed.md`.
 
 Step 3 is committed in two parts (`70692b3`, `77ee9a6`), step 4 as `9e038a4` and step 5 as
-`b67f89e`. Step 6, the computer's turn, is committed as `ae48902`. The cleanup after step 6, from
-the review of steps 1 to 6, is done in the working tree.
+`b67f89e`. Step 6, the computer's turn, is committed as `ae48902`, and the cleanup after it, from
+the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is done in the working tree.
 
-**Next:** step 7, `special_events` and `event_riot`.
+**Next:** step 8, the four of `rules\victory.bm`.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -293,5 +293,5 @@ The order takes the SUBs that others call first, so that a caller's split finds 
 4. **Done: `rules\navy.bm`.** See `modernize-completed.md`.
 5. **Done: `rules\turn.bm`.** See `modernize-completed.md`.
 6. **Done: `ai\ai.bm`.** See `modernize-completed.md`.
-7. `special_events` and `event_riot`. The texts stay in the show part, which phase 11 moves to data.
+7. **Done: `special_events` and `event_riot`.** See `modernize-completed.md`.
 8. The four of `rules\victory.bm`.

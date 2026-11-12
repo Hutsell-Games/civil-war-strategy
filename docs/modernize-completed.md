@@ -564,3 +564,26 @@ but four things to make even. The user took the pragmatic engineer's plan: one c
   ironclad's shots with a wooden ship's. Each test of a branch tries seeds until the draw goes its way,
   then checks that branch exactly.
 - Unit tests: 81. 205 lines of the game are run in part and 20 are not run.
+
+7. **Done: `special_events` and `event_riot`.** Both moved to the new `ui\events.bm` under their names;
+   their rules stay in `game\events.bm`, the war's own file:
+   - `event_roll (event, variant, who)` rolls the month's event and carries out what it does. Its lines
+     are those of `special_events` without the messages: each `CALL scribe_message(...)` became
+     `event = EVENT_...`, and `GOTO dull1` and `GOTO dull2` now go to two labels at its end. `event` is
+     one of 16 constants, `EVENT_NONE` to `EVENT_STANTON` (`CWS14.BI`, proposed in `constants.md`).
+     `variant` picks the text of the mercenaries (French or British) and of the uprising (three).
+   - `special_events` calls it, then shows the event: the "SPECIAL EVENT..." line, the message from a
+     `SELECT CASE` on `event`, and the tune of the side. Phase 11 can put the texts in a data file
+     keyed by `event`.
+   - `event_riot_city (who, city)` picks the city that riots and makes it neutral. `event_riot` prints
+     the riot and the box after it.
+   - Nothing that the events draw reads what they change before the message, and no drawing draws a
+     random number, so all the draws now come before the messages, in the same order.
+   - The riot's constant is `EVENT_RIOTS`, not `EVENT_RIOT`: BASIC ignores case, and `event_riot` is
+     the SUB's name.
+   - Rifles were always followed by Stanton's prediction, which falls through after them. That is now
+     `EVENT_RIFLES`, which shows both messages.
+   - A new bug, kept: the mercenaries join army 0 (`TODO.md`).
+   - Unit tests: 6 new ones, so 87 in all. They give `event_roll` its draws through `script_dice$`, as
+     `CWS_DICE` does under a script. Lines moved without a test: none. All 58 lines of `ui\events.bm`
+     run. 204 lines of the game are run in part and 20 are not run.
