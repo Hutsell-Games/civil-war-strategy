@@ -51,6 +51,10 @@ game plays changes the recorded screens.
   calls `railroad_route_count(side, target)` with `target` left from the loop before, not the capital.
 - **The winner of a battle gets none of the loser's supplies.** `turn_army_surrenders` (`rules\turn.bm`)
   sets the loser's supplies to 0 and then adds them to the winner's.
+- **A fleet sunk in naval combat gives 10 victory points to its own side.** `navy_fleet_defeated`
+  (`rules\navy.bm`) adds them to the loser, as both of the original's two blocks did
+  (`TestNavyFleetDefeated`). A fleet sunk by a shore battery gives 5 to the other side
+  (`navy_fleet_lost`), so the 10 were most likely meant for the winner.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.

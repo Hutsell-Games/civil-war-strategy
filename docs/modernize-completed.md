@@ -456,3 +456,33 @@ The rule for lines that no test runs is in `modernize-plan.md`, "Lines that no t
      20 are not run, as before. Each line run in part in `ui\army.bm` and `rules\army.bm` is a branch
      that the old code did not reach either: a menu left with Esc, an army cut off, too little cash, an
      isolated city, the sound off.
+4. **Done: `rules\navy.bm`.** Every SUB of the file but `navy_remove_ship` moved to `ui\navy.bm`:
+   `navy_commands`, `navy_action`, the five actions, `navy_finish_move`, `navy_commerce_raid`,
+   `navy_combat` and `navy_show_hits`. `navy_action` and `navy_land_army` draw nothing themselves,
+   but they call screen parts. The rules are 16 SUBs and FUNCTIONs in `rules\navy.bm`:
+   - Build: `navy_add_ship (side, ship$, cost)`, `navy_found_fleet (side, city, cost)` and
+     `navy_cancel_new_fleet (side)`. A fleet that had ships pays in `navy_add_ship`, as before at the
+     label `add2ship`.
+   - Attack: `navy_bombard_army (side, index, killd)`, `navy_shore_battery (side, target, damaged)`,
+     `navy_fleet_lost (side)` and `navy_blast (side, target, result)`. `navy_bombard` calls them after
+     the explosion marker, which draws random numbers when the sound is on, as before.
+   - Sail, Raid and Invasion: `navy_move_fleet (side, city)`, `navy_go_raiding (side)` and
+     `navy_landed (side, empty)`. `navy_landed` gives back the 100 and sets the 3,500 men after
+     `city_capture`, not before it; the capture reads neither.
+   - `navy_note_raiding_side`: the first part of `navy_finish_move`.
+   - `navy_raid_round (raider, sank)`: one round of the commerce raid. `navy_commerce_raid` keeps the
+     raiding side in `raider` for its messages, since the rule may set `raiding_side` to 0 first.
+   - Naval combat: `navy_ship_hits (side)` and `navy_shot_hits (side)` (FUNCTIONs),
+     `navy_fleet_defeated (loser)` and `navy_retreat_port (side, target)`. The two blocks for a
+     defeated fleet were the same with the sides swapped. One SUB does both, with the pursuit written
+     as "the winner is the side whose turn it is", which gives the same value in each.
+   - Left in the screen part for phase 9 and step 6: the flag `turn_navy_done`, the line
+     `fleet_size(side) = LEN(fleet_ships$(side))` in Sail and Raid, the menus' values, and the
+     computer's choices by random number (Build line 51, its port at line 83, and Attack's change to
+     Sail at line 117 of the old file).
+   - A new bug, kept: a fleet sunk in naval combat gives its own side 10 victory points (`TODO.md`).
+   - Unit tests: 12 new ones, so 64 in all. Lines moved without a test: none. Two rewritten lines were
+     not run in full by a script: the capital that stays loyal, and one of the pursuit branches. The
+     tests `TestNavyBlastCapitalAndNeutral` and `TestNavyFleetDefeated` run them. The three lines not
+     run are the same three as before, now `ui\navy.bm` 76, 309 and 350. 209 lines of the game are run
+     in part (212 before) and 20 are not run.

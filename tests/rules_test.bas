@@ -588,6 +588,128 @@ AssertEqualInt 5, menu_item_count, "off a neutral city with two ships: five entr
 AssertEqualStr "Invasion", menu_text$(5), "the fifth"
 END SUB
 
+' ------------------------------------------------------- the navy's rules
+
+SUB TestNavyAddShipPutsIroncladsFirst
+fleet_ships$(1) = "WW": fleet_size(1) = 2: side_cash(1) = 500
+CALL navy_add_ship(1, "I", 100)
+AssertEqualStr "IWW", fleet_ships$(1), "an ironclad goes first"
+AssertEqualInt 3, fleet_size(1), "three ships"
+AssertEqualInt 400, side_cash(1), "paid now"
+CALL navy_add_ship(1, "W", 100)
+AssertEqualStr "IWWW", fleet_ships$(1), "a wooden ship goes last"
+side_cash(2) = 500
+CALL navy_add_ship(2, "W", 100)
+AssertEqualInt 500, side_cash(2), "a new fleet pays later"
+END SUB
+
+SUB TestNavyFoundAndCancelANewFleet
+side_cash(2) = 500: fleet_ships$(2) = "W": fleet_size(2) = 1
+CALL navy_found_fleet(2, 9, 100)
+AssertEqualInt 9, fleet_city(2), "in port 9"
+AssertEqualInt 400, side_cash(2), "paid"
+CALL navy_cancel_new_fleet(1)
+AssertEqualInt 0, fleet_size(1), "no ship"
+AssertEqualStr "", fleet_ships$(1), "none"
+END SUB
+
+SUB TestNavyBombardArmy
+RANDOMIZE 1
+fleet_size(1) = 4: army_size(21) = 100: army_supply(21) = 5
+CALL navy_bombard_army(1, 21, killd)
+AssertTrue killd >= 2 AND killd <= 4, "2% to 4% of the men:" + STR$(killd)
+AssertEqualInt 100 - killd, army_size(21), "taken from the army"
+AssertEqualInt 2, army_supply(21), "3 days of supply lost"
+END SUB
+
+SUB TestNavyShoreBatteryFortOrShip
+RANDOMIZE 1
+fleet_ships$(1) = "W": fleet_size(1) = 1: fleet_city(1) = 5: city_fort(5) = 2
+CALL navy_shore_battery(1, 5, damaged)
+IF damaged = 1 THEN
+	AssertEqualInt 1, city_fort(5), "the fort loses a level"
+	AssertEqualInt 1, fleet_size(1), "the ship is safe"
+ELSE
+	AssertEqualInt 2, city_fort(5), "the fort stands"
+	AssertEqualInt 0, fleet_size(1), "the ship is sunk"
+END IF
+END SUB
+
+SUB TestNavyFleetLostToTheBattery
+current_side = 1: fleet_pursuit = 1: fleet_city(1) = 5
+CALL navy_fleet_lost(1)
+AssertEqualInt 0, fleet_city(1), "no fleet"
+AssertEqualInt 5, side_victory_points(2), "5 points for the Rebels"
+AssertEqualInt 0, fleet_pursuit, "no pursuit"
+END SUB
+
+SUB TestNavyBlastCapitalAndNeutral
+fleet_size(1) = 20: side_capital(2) = 25: fleet_city(1) = 25: city_owner(25) = 2
+CALL navy_blast(1, 25, result)
+AssertEqualInt 1, result, "the capital stays loyal"
+AssertEqualInt 2, city_owner(25), "still the Rebels'"
+fleet_city(1) = 7: city_owner(7) = 2: city_value(7) = 10
+CALL navy_blast(1, 7, result)
+AssertEqualInt 2, result, "20 ships: the city always gives in"
+AssertEqualInt 0, city_owner(7), "neutral"
+AssertEqualInt 10, side_victory_points(1), "its value for the Union"
+END SUB
+
+SUB TestNavyLandedArmy
+side_cash(1) = 200: army_size(5) = 70
+CALL navy_landed(1, 5)
+AssertEqualInt 35, army_size(5), "3,500 men"
+AssertEqualInt 300, side_cash(1), "the 100 given back"
+END SUB
+
+SUB TestNavyRaidingSide
+fleet_city(2) = FLEET_AT_SEA: fleet_city(1) = 5: raiding_side = 1
+CALL navy_note_raiding_side
+AssertEqualInt 2, raiding_side, "the Rebels' fleet is at sea"
+CALL navy_go_raiding(1)
+AssertEqualInt FLEET_AT_SEA, fleet_city(1), "the Union's fleet goes to sea"
+AssertEqualInt 1, raiding_side, "and raids"
+END SUB
+
+SUB TestNavyRaidRound
+raiding_side = 1: fleet_size(1) = 0
+CALL navy_raid_round(raider, sank)
+AssertEqualInt 0, raider, "no ships: no raid"
+AssertEqualInt 0, raiding_side, "nobody raids"
+raiding_side = 1: fleet_size(1) = 10: side_income(2) = 100: current_side = 1
+CALL navy_raid_round(raider, sank)
+AssertEqualInt 1, sank, "10 ships always sink commerce"
+AssertEqualInt 30, raid_loss, "at most 30% of the income"
+AssertEqualInt 1, fleet_pursuit, "the other fleet will pursue"
+END SUB
+
+SUB TestNavyShipHits
+fleet_ships$(1) = "WI": fleet_ships$(2) = "IW"
+AssertEqualInt 20, navy_ship_hits(1), "the last ship is an ironclad"
+AssertEqualInt 10, navy_ship_hits(2), "the last ship is wooden"
+END SUB
+
+SUB TestNavyFleetDefeated
+current_side = 1: fleet_city(2) = 5: fleet_ships$(2) = "W"
+CALL navy_fleet_defeated(2)
+AssertEqualInt 0, fleet_city(2), "the Rebels' fleet is gone"
+AssertEqualInt 10, side_victory_points(2), "10 points for the loser (as in the original)"
+AssertEqualInt 1, fleet_pursuit, "the Union, whose turn it is, won: pursuit"
+CALL navy_fleet_defeated(1)
+AssertEqualInt 0, fleet_pursuit, "the Union lost: no pursuit"
+END SUB
+
+SUB TestNavyRetreatPort
+city_owner(3) = 1: city_port_type(3) = PORT_SEA: fleet_city(1) = 3
+city_owner(8) = 1: city_port_type(8) = PORT_SEA
+CALL navy_retreat_port(1, target)
+AssertEqualInt 8, target, "the one other sea port"
+AssertEqualInt 8, fleet_city(1), "the fleet is there"
+city_owner(8) = 2: fleet_city(1) = 3
+CALL navy_retreat_port(1, target)
+AssertEqualInt 0, target, "none left"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern
@@ -636,6 +758,7 @@ END SUB
 '$INCLUDE: '../ui/railroad.bm'
 '$INCLUDE: '../ui/city.bm'
 '$INCLUDE: '../ui/army.bm'
+'$INCLUDE: '../ui/navy.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'
