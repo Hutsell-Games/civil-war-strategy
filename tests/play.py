@@ -22,6 +22,12 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
                              places of the game's map, setup and leaders, as ALTMAP.BAT does
     #! files <name> ...      files of the run's folder to check after the run: each becomes a
                              last entry "file <name> <hash>" (or "file <name> missing")
+    #! data <folder>         the files of tests/data/<folder> go into the run's folder, over those
+                             of the same name; a <name>.save there is a description that
+                             make_save.py turns into the saved game <name>.sav
+    #! without <name> ...    files the run starts without, as graphics/MTN.VGA
+    #! dice <groups>         forced random numbers for the special events (CWS_DICE, port/script.bm):
+                             a group for each month, as 0,.05,.95;0,.9
 
 Exit code: 0 when every script passed, 1 when one failed, 2 when a build or the set-up failed.
 """
@@ -38,7 +44,10 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-GAME = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import make_save  # noqa: E402
+
+GAME =Path(__file__).resolve().parent.parent
 SCRIPTS = GAME / "tests" / "scripts"
 OUT = GAME / "tests" / "out"
 
@@ -197,6 +206,9 @@ class Script:
     program: str = DEFAULT_PROGRAM
     files: list[str] = field(default_factory=list)
     altmap: bool = False
+    data: list[str] = field(default_factory=list)
+    without: list[str] = field(default_factory=list)
+    dice: str = ""
 
     @property
     def recorded(self) -> Path:
@@ -231,6 +243,14 @@ def load_script(keys: Path) -> Script:
             script.altmap = True
         elif words[0] == "files" and len(words) > 1:
             script.files += words[1:]
+        elif words[0] == "data" and len(words) == 2:
+            if not (TEST_DATA / words[1]).is_dir():
+                raise SetupError(f"{where}: no folder {rel(TEST_DATA / words[1])}")
+            script.data.append(words[1])
+        elif words[0] == "without" and len(words) > 1:
+            script.without += words[1:]
+        elif words[0] == "dice" and len(words) == 2 and not words[1].strip("0123456789.,;r"):
+            script.dice = words[1]
         else:
             raise SetupError(f"{where}: not a set-up line: {line}")
     return script
@@ -391,6 +411,50 @@ def copy_data(work: Path, game: Path = GAME, test_data: Path = TEST_DATA) -> Non
                 shutil.copy2(path, work / path.name)
 
 
+def find_in(folder: Path, name: str) -> Path | None:
+    """A file or folder of `folder` by its name, whatever its case. The name may start with folders,
+    parted by "/"."""
+    path: Path | None = folder
+    for part in name.split("/"):
+        if path is None or not path.is_dir():
+            return None
+        path = next((p for p in path.iterdir() if p.name.lower() == part.lower()), None)
+    return path
+
+
+def copy_test_folder(work: Path, source: Path) -> None:
+    """Puts the files of a script's `#! data` folder into the run's folder, each over the file of the
+    same name whatever its case. A `<name>.save` is a description: make_save.py writes the saved game
+    `<name>.sav` from it and the run's scenario."""
+    for path in sorted(source.rglob("*")):
+        if not path.is_file():
+            continue
+        folder = work
+        for part in path.relative_to(source).parts[:-1]:
+            folder = find_in(folder, part) or folder / part
+            folder.mkdir(exist_ok=True)
+        name = path.with_suffix(".sav").name if path.suffix == ".save" else path.name
+        old = find_in(folder, name)
+        if old is not None:
+            old.unlink()
+        if path.suffix == ".save":
+            try:
+                make_save.write_save(path, work / "scenarios", folder / name)
+            except make_save.SaveError as e:
+                raise SetupError(str(e)) from None
+        else:
+            shutil.copy2(path, folder / name)
+
+
+def remove_files(work: Path, names: list[str]) -> None:
+    """Takes the files of a script's `#! without` out of the run's folder."""
+    for name in names:
+        path = find_in(work, name)
+        if path is None or not path.is_file():
+            raise SetupError(f"#! without {name}: no such file in the run's folder")
+        path.unlink()
+
+
 # The files ALTMAP.BAT switches: the alternate map, setup and leaders, and the game's own.
 ALTMAP_PAIRS = (("ALTMAP.GRD", "CITIES.GRD"), ("ALTMAP.INI", "CWS.INI"), ("ALTLEAD.DAT", "CWSLEAD.DAT"))
 
@@ -434,11 +498,17 @@ def run_script(tools: Tools, exe: Path, script: Script, compiler: str, tag: str 
     write_cfg(work, script.cfg)
     if script.altmap:
         swap_altmap(work, "scenarios")
+    for name in script.data:
+        copy_test_folder(work, TEST_DATA / name)
+    remove_files(work, script.without)
     game = work / exe.name
     shutil.copy2(exe, game)
     state = folder / "screen.txt"
     env = dict(os.environ)
     env["CWS_SEED"] = script.seed
+    env.pop("CWS_DICE", None)
+    if script.dice:
+        env["CWS_DICE"] = script.dice
     # A runtime error ends the program instead of asking "Continue?" on a desktop nobody sees.
     env["QB64PE_NOPROMPT"] = "y"
     env["QB64_SCREEN_KEYS"] = str((keys or script.keys).resolve())
@@ -486,12 +556,7 @@ def file_entries(work: Path, names: list[str]) -> bytes:
     its case, as on Windows."""
     out = b""
     for name in names:
-        path: Path | None = work
-        for part in name.split("/"):
-            if path is None or not path.is_dir():
-                path = None
-                break
-            path = next((p for p in path.iterdir() if p.name.lower() == part.lower()), None)
+        path = find_in(work, name)
         if path is None or not path.is_file():
             out += f"file {name} missing\n".encode()
         else:
@@ -759,7 +824,7 @@ def unit_test_counts(tools: Tools, folder: Path, jobs: int) -> Path | None:
 
 def rebase_records(text: str) -> str:
     """Coverage records of the unit tests, made from tests/, as records of the game's folder. A file
-    named `../<name>` becomes `<name>`; the test entry point, the test library and the test file are
+    named `../<name>` becomes `<name>` (as `../rules/army.bm`); the test entry point, the test library and the test file are
     left out with their counts, as they are not files of the game."""
     out: list[str] = []
     keep: set[str] = set()
@@ -767,7 +832,7 @@ def rebase_records(text: str) -> str:
         parts = line.split("\t")
         if parts[0] == "file" and len(parts) == 4:
             name = parts[3]
-            if name.startswith("../") and "/" not in name[3:]:
+            if name.startswith("../"):
                 keep.add(parts[1])
                 out.append("\t".join([*parts[:3], name[3:]]))
         elif len(parts) >= 4 and parts[0].isdigit():
@@ -809,9 +874,9 @@ def sub_table(count_files: list[Path], main: str = PROGRAMS[DEFAULT_PROGRAM].low
     # Each file's lines, mapped to the procedure they are in.
     starts: dict[str, list[tuple[int, str]]] = {}
     for name in {k[0] for k in counts}:
-        source = next((p for p in GAME.iterdir() if p.name.lower() == name), None)
+        source = find_in(GAME, name)
         found: list[tuple[int, str]] = []
-        if source:
+        if source and source.is_file():
             for n, text in enumerate(source.read_text(encoding="latin-1").splitlines(), 1):
                 words = text.split()
                 if len(words) >= 2 and words[0].upper() in ("SUB", "FUNCTION"):

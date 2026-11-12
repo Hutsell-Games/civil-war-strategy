@@ -11,6 +11,7 @@
 '   - a timed pause (TICK of less than 99 seconds) returns at once, and a
 '     longer one, which the game uses as "press a key", waits for a key;
 '   - PLAY and SOUND are silent (PLAY "V0"): they take their time, unheard;
+'   - the random numbers of special_events can be given (CWS_DICE);
 '   - the history file holds the date 01-01-2000 instead of today's;
 '   - the history file is copied in BASIC, not by SHELL "copy ...".
 ' A program started without it plays as before: announce does nothing.
@@ -23,8 +24,42 @@ seed$ = ENVIRON$("CWS_SEED")
 IF seed$ = "" THEN RANDOMIZE TIMER: EXIT SUB
 scripted = 1
 RANDOMIZE VAL(seed$)
-PLAY "V0"
+script_dice$ = ENVIRON$("CWS_DICE")
 END SUB
+
+' Makes PLAY and SOUND silent when the program is scripted. Called once, before the title
+' tune, which plays before script_start seeds the random numbers.
+SUB script_mute
+IF ENVIRON$("CWS_SEED") <> "" THEN PLAY "V0"
+END SUB
+
+' Forced dice for special_events. CWS_DICE holds groups of numbers, as in
+' "0,.05,.95;0,.9": the groups are parted by ";" and the numbers by ",".
+' Each call of special_events takes the next group (script_dice_next), and
+' each of its random draws takes the group's next number (script_rnd!). An
+' "r" in place of a number, and every draw after the group's last number,
+' is a real RND. Without CWS_DICE every draw is RND, in the same order as
+' before, so a normal game and a script without dice play as they did.
+SUB script_dice_next
+DIM cut AS INTEGER
+script_dice_now$ = ""
+IF script_dice$ = "" THEN EXIT SUB
+cut = INSTR(script_dice$, ";")
+IF cut = 0 THEN script_dice_now$ = script_dice$: script_dice$ = "": EXIT SUB
+script_dice_now$ = LEFT$(script_dice$, cut - 1): script_dice$ = MID$(script_dice$, cut + 1)
+END SUB
+
+FUNCTION script_rnd!
+DIM cut AS INTEGER: DIM item$
+IF script_dice_now$ = "" THEN script_rnd! = RND: EXIT FUNCTION
+cut = INSTR(script_dice_now$, ",")
+IF cut = 0 THEN
+	item$ = script_dice_now$: script_dice_now$ = ""
+ELSE
+	item$ = LEFT$(script_dice_now$, cut - 1): script_dice_now$ = MID$(script_dice_now$, cut + 1)
+END IF
+IF item$ = "r" THEN script_rnd! = RND ELSE script_rnd! = VAL(item$)
+END FUNCTION
 
 ' The date the history file starts with: today, or a fixed one when the
 ' program is scripted, so that the file is the same in every run.

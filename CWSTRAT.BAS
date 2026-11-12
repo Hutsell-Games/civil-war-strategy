@@ -18,6 +18,7 @@ DECLARE SUB draw_top_bar ()
 DIM fin AS INTEGER: DIM max AS INTEGER: DIM index AS INTEGER: DIM empty AS INTEGER: DIM t$: DIM c AS INTEGER
 DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM a AS INTEGER: DIM j AS INTEGER: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER: DIM target AS INTEGER
 
+CALL script_mute
 replay = 0
 newgame:
 game_over = 0: turn_recruit_state = 0

@@ -26,6 +26,7 @@ python tests\play.py record [script ...]         # both builds, twice each; writ
 python tests\play.py coverage                    # the lines and the SUBs the scripts and unit tests reach
 python tests\play.py explore <keys file>         # one run, a PNG of every screen; for writing a script
 python tests\make_scripts.py                     # writes the generated scripts again (below)
+python tests\make_save.py <description> <out>    # writes a saved game from a description (below)
 python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and make_scripts.py
 ```
 
@@ -75,8 +76,8 @@ environment variable `CWS_SEED` set, as `play.py` does:
    game says "read this, then press a key" (Chk Links, "There are still defenders"): under a script it waits
    for a key, as place `1:L`.
 4. **No sound.** `PLAY "V0"` sets QB64's volume to 0. A script that turns the sound on in the Utility menu runs
-   the `SOUND` and `PLAY` statements, which take their time, and nothing is heard. A script must not start with
-   `noise=2`: the title music plays before the hooks start.
+   the `SOUND` and `PLAY` statements, which take their time, and nothing is heard. `script_mute` does this
+   at the program's start, before the title music.
 5. **A fixed date.** The history file starts with 01-01-2000 instead of today's date.
 6. **No `SHELL`.** The game keeps the history of the game before with `SHELL "copy cws.his oldhist.ory"`. Under
    a script `scriptshell` copies the file in BASIC. A `SHELL` starts a `cmd.exe`, and its console window shows
@@ -119,6 +120,9 @@ Each script is a keys file with lines that set up its run, which `play.py` reads
 #! timeout 600               the longest the run may take, in seconds (default 300)
 #! altmap                    the run starts on the alternate map
 #! files cws.his cws1.sav    files to check after the run, by their hashes
+#! data events-south         the files of tests\data\events-south go into the run's folder
+#! without graphics/MTN.VGA  files the run starts without
+#! dice 0,.05,.95;1          forced random numbers for the special events, a group for each month
 ```
 
 Each file a `#! files` line names becomes a last checkpoint, `file <name> <hash>`, or `file <name> missing`.
@@ -131,6 +135,42 @@ January campaigns and realism on, history off, aggression 3. The fields are `CFG
 
 `#! altmap` switches the three files of the alternate map (`ALTMAP.GRD`, `ALTMAP.INI`, `ALTLEAD.DAT`) with the
 game's own in the run's `scenarios` folder, as `scenarios\ALTMAP.BAT` does by renaming.
+
+### Prepared saved games
+
+`#! data <folder>` copies the files of `tests\data\<folder>\` into the run's folder, each over the file of the
+same name whatever its case. A folder inside it (`scenarios`, `graphics`) goes into the folder of that name. So
+a script can start with a broken `CITIES.GRD`. `#! without` takes a file away.
+
+A file `<name>.save` there is a description of a saved game. `play.py` writes `<name>.sav` from it into the
+run's folder (`make_save.py`), and the script loads it with Resume Saved Game. The save starts as the
+scenario's opening position, and each line of the description changes one thing:
+
+```
+date 11 1863           the turn
+owner 2 2 18-21 29     the Rebels hold these cities
+fleet 1 WWWWWWWWW 30   the Union's fleet: nine wooden ships at Philadelphia
+army 22 city=4 size=50 an army slot's fields
+```
+
+The lines are listed at the top of `make_save.py`. `python tests\make_save.py <description> <out.sav>` writes
+the save for a look.
+
+What a save does not hold: whether the Emancipation Proclamation was made (it starts as not made), the
+settings (`#! cfg`), and the leaders' names of the scenario, which the game reads at its start.
+
+### Forced dice
+
+`#! dice` gives the random numbers of the special events (`special_events`, `game\events.bm`), so that a
+script can make an event happen. The events draw their numbers through `script_rnd!` (`port\script.bm`).
+Without `#! dice` it returns `RND`, so every other script plays as before.
+
+The line holds one group for each month, parted by `;`. A group holds the numbers the month's draws take, in
+order, parted by `,`. An `r` in place of a number is a real `RND`, and so is every draw after the group's last
+number. The first draw decides whether there is an event (0 for yes, 1 for no). The second decides whom it
+favors: with random events set to favor the Rebels, below .7 for the South and above for the Union. The rest
+follow the code of `special_events`, branch by branch. A month whose events are skipped (the ironclads'
+month) still takes its group.
 
 A script ends the program the way a player does: Quit to DOS at the title menu or Quit and Yes in the Files
 menu, then `repeat space` for END's "Press any key to continue". A run that ends any other way (a `prompt` that
@@ -153,6 +193,8 @@ on a desktop nobody sees.
 | `union-events` | A whole game as the Union with many random events, a capital moved, commerce raided, and recruits each month until the named leaders run out |
 | `union-time` | A whole game as the Union to the time limit in March 1865, with the keys F3, F4 and F7 |
 | `endings` | Three games in one run, each to another ending: income, a captured capital, and an army annihilated |
+| `events-south` | From a prepared save of November 1863, the events that favor the South, by forced dice: riots in a city the Union took, England's ships, mercenaries, furloughs for the 1864 election, a loan, and the victory points of January 1864 and 1865 |
+| `events-union` | From a prepared save of May 1864, the events that favor the Union: riots in a city the Rebels took, extra ships up to the fleet's limit, the Emancipation Proclamation, and Lincoln reelected |
 
 All but `title` and `files` are the scripts that QB64Rust's test corpus plays on its copy of this repo's
 `main` (`tests\corpus\screen\g12_game.*.keys` there), with this port's places. `files` was written again for

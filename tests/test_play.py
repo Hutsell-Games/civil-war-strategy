@@ -216,6 +216,10 @@ class CoverageTest(unittest.TestCase):
             ("coverage 2\nfile\t2\tcccc\tcwstrat2.bm\n2\t10\t1\t1\tLEN\n2\t11\t1\t0\t\nend\n") * 2,
         )
 
+    def test_rebase_keeps_a_file_in_a_folder_of_the_game(self):
+        text = "coverage 2\nfile\t5\tcccc\t../rules/army.bm\n5\t10\t1\t1\t\nend\n"
+        self.assertEqual(play.rebase_records(text), "coverage 2\nfile\t5\tcccc\trules/army.bm\n5\t10\t1\t1\t\nend\n")
+
     def test_reached_only_by_the_unit_tests(self):
         with tempfile.TemporaryDirectory() as d:
             unit, script = Path(d) / "unit.txt", Path(d) / "script.txt"
@@ -273,6 +277,103 @@ class MakeScriptsTest(unittest.TestCase):
         self.assertNotIn("rule 1:G key space", probe)
         self.assertIn("rule 1:B key space", probe)
         self.assertIn("rule 1 key space", make_scripts.header(game, ""))
+
+
+class TestDataTest(unittest.TestCase):
+    def load(self, text):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "s.keys"
+            path.write_text(text)
+            return play.load_script(path)
+
+    def test_without_and_dice_lines(self):
+        s = self.load("#! without graphics/MTN.VGA\n#! dice 0,.05,r;0,.9\n")
+        self.assertEqual(s.without, ["graphics/MTN.VGA"])
+        self.assertEqual(s.dice, "0,.05,r;0,.9")
+        self.assertEqual(self.load("key space\n").dice, "")
+
+    def test_bad_dice_and_unknown_data_folder(self):
+        with self.assertRaises(play.SetupError):
+            self.load("#! dice 0.5 0.6\n")
+        with self.assertRaises(play.SetupError):
+            self.load("#! dice high\n")
+        with self.assertRaises(play.SetupError):
+            self.load("#! data no-such-folder-of-test-data\n")
+
+    def test_a_data_folder_replaces_files_whatever_their_case(self):
+        with tempfile.TemporaryDirectory() as d:
+            work, source = Path(d) / "work", Path(d) / "source"
+            (work / "scenarios").mkdir(parents=True)
+            (work / "scenarios" / "CITIES.GRD").write_text("the game's")
+            (source / "Scenarios").mkdir(parents=True)
+            (source / "Scenarios" / "cities.grd").write_text("broken")
+            (source / "cws1.sav").write_text("a save")
+            play.copy_test_folder(work, source)
+            self.assertEqual([p.name for p in (work / "scenarios").iterdir()], ["cities.grd"])
+            self.assertEqual((work / "scenarios" / "cities.grd").read_text(), "broken")
+            self.assertEqual((work / "cws1.sav").read_text(), "a save")
+
+    def test_without_removes_a_file_or_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            work = Path(d)
+            (work / "graphics").mkdir()
+            (work / "graphics" / "MTN.VGA").write_text("x")
+            play.remove_files(work, ["GRAPHICS/mtn.vga"])
+            self.assertEqual(list((work / "graphics").iterdir()), [])
+            with self.assertRaises(play.SetupError):
+                play.remove_files(work, ["graphics/mtn.vga"])
+
+
+class MakeSaveTest(unittest.TestCase):
+    SCENARIOS = play.GAME / "scenarios"
+
+    def game(self, description=""):
+        import make_save
+        game = make_save.opening(self.SCENARIOS)
+        make_save.apply(game, description, "test")
+        return game
+
+    def test_the_opening_position(self):
+        import make_save
+        game = self.game()
+        self.assertEqual((game["month"], game["year"]), (3, 1861))
+        self.assertEqual(game["cash"], [300, 50])
+        self.assertEqual(game["capital"], [39, 33])
+        self.assertEqual(game["fleet"], [["WWWW", 30], ["W", 24]])
+        self.assertEqual(game["armies"][1]["name"], "McDowell")
+        self.assertEqual(game["armies"][1]["city"], 39)
+        self.assertEqual(sum(1 for a in game["armies"].values() if a), 9)
+        lines = make_save.save_text(game).splitlines()
+        self.assertEqual(len(lines), 85)
+        self.assertEqual(lines[0], "3,1861,252,1")
+        self.assertEqual(lines[1], '"McDowell",400,4,39,1,9,0')
+        # City 39 holds army 1; city 1 is the Rebels' and holds no army.
+        self.assertEqual(lines[41 + 38].split(",")[0], "1")
+        self.assertEqual(lines[41], "0,2,0")
+        self.assertEqual(lines[82], '"WWWW",30,0,0,0')
+
+    def test_a_description_changes_the_position(self):
+        import make_save
+        game = self.game("# late in the war\ndate 11 1864\nside 2\ncash 5 9000\nowner 1 1-40\nowner 2 1-30\nfort 2 5 6\n"
+                         "fleet 1 - 0\nfleet 2 wwi 99\narmy 22 city=4 size=50 name=Old_Jack\nnoarmy 2-5\n"
+                         "capital 39 0\ntrain 1 1 2\n")
+        lines = make_save.save_text(game).splitlines()
+        self.assertEqual(lines[0], "11,1864,252,2")
+        self.assertEqual(lines[2], '"",0,0,0,0,0,0')
+        self.assertEqual(lines[22].split(",")[:2], ['"Old Jack"', "50"])
+        self.assertEqual(sum(1 for line in lines[41:81] if line.split(",")[1] == "2"), 30)
+        self.assertEqual(lines[41 + 4], lines[41 + 4].split(",")[0] + ",2,2")
+        self.assertEqual(lines[81].split(",")[0], "5")
+        self.assertEqual(lines[82], '"",0,0,1,2')
+        self.assertEqual(lines[83].split(",")[1], "30")
+        self.assertEqual(lines[83].split(",")[4], "0")
+        self.assertEqual(lines[84], '"WWI",99,0,0,0')
+
+    def test_bad_lines(self):
+        import make_save
+        for bad in ("owner 2 41", "army 1 colour=3", "date eleven 1864", "fleet 1 XX 3", "speed 3"):
+            with self.assertRaises(make_save.SaveError):
+                self.game(bad)
 
 
 if __name__ == "__main__":

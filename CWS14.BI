@@ -164,3 +164,6 @@ DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
 DIM SHARED pic_face(1 TO 1564)
 ' Set by scriptstart (SCRIPT.BM) when tests\play.py runs the program.
 DIM SHARED scripted
+' The forced dice of special_events under a script: the groups still to come, and what is
+' left of this call's group (script_dice_next and script_rnd!, port/script.bm).
+DIM SHARED script_dice$, script_dice_now$

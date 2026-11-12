@@ -1,0 +1,7 @@
+# For the script events-union: the special events that favor the Union.
+# May 1864, the Union plays. The Rebels hold Paducah (29), which was neutral at the start and
+# has no army, so a riot can break out there. The Union's fleet has 9 ships, so that extra
+# ships fill it to its limit of 10.
+date 5 1864
+owner 2 29
+fleet 1 WWWWWWWWW 30

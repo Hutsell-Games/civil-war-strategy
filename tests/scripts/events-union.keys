@@ -1,0 +1,76 @@
+# Civil War Strategy: the special events that favor the Union, each forced by the dice
+# (tests/README.md, "Forced dice"). The game is loaded from a prepared save: May 1864. The Union
+# only ends each turn, and the computer is passive.
+#   May 1864        riots in Paducah, a city the Rebels took
+#   July 1864       the shipworks make extra ships: the fleet of 9 is filled to 10
+#   September 1864  the Emancipation Proclamation
+#   November 1864   Lincoln is reelected
+#   January 1865    no event
+# A digest at each main menu, and the history file, which names each event.
+#! seed 1864
+#! cfg history=1 bold=0
+#! data events-union
+#! dice 0,.9,.05,.99,.71;0,.9,.05,.5;0,.9,.5,.1;0,.9,.5,.1;1
+#! files cws.his
+
+# Pauses that any key ends; End Turn and End Game: Yes; a Retreat: the first city; the
+# Options at the game's end: Quit this Game.
+rule 1 key space
+rule 2:E text y
+rule 2:R key enter
+rule 2:O text q
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:V
+text r
+play until 2:L
+key enter
+
+# The main menu: UTILITY, End Cond. Victory Conditions starts on Time: down and Enter turn
+# off each of the four others. Esc there, and Esc at the Utility menu.
+play until 2:M
+digest
+text u
+prompt
+text e
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key esc
+prompt
+key esc
+
+# Each month's main menu: a digest, then END TURN.
+repeat 5
+play until 2:M
+digest
+text e
+end
+
+# March 1865: the time is up and the game ends. The Hall of Fame asks for the commander's name.
+play until 4
+text Tester
+key enter
+play until 1:G
+digest
+key space
+
+# The title menu: Quit to DOS, and a key for END's "Press any key to continue".
+play until 2:V
+digest
+text q
+repeat space

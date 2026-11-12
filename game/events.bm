@@ -1,5 +1,6 @@
 SUB special_events
 DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM who AS INTEGER: DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM a$: DIM index AS INTEGER
+CALL script_dice_next
 '==========================================================================
 '                              Special Events
 '==========================================================================
@@ -13,10 +14,10 @@ END IF
 IF opt_event_balance = 0 THEN EXIT SUB
 plus = opt_difficulty: IF current_side = SIDE_UNION THEN plus = 6 - opt_difficulty
 pct! = .005 * (turn_year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
-IF RND > pct! THEN EXIT SUB
+IF script_rnd! > pct! THEN EXIT SUB
 
 CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "SPECIAL EVENT...";
-who = SIDE_UNION: IF RND > .1 * opt_event_balance THEN who = SIDE_REBEL
+who = SIDE_UNION: IF script_rnd! > .1 * opt_event_balance THEN who = SIDE_REBEL
 
 SELECT CASE who
 '----------------------------------------------------------------------------
@@ -25,10 +26,10 @@ SELECT CASE who
 	CASE 1
 	IF turn_year = 1864 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50
 	IF turn_year = 1865 AND turn_month = 1 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 100
-	IF RND > .9 THEN GOSUB riot: EXIT SUB
+	IF script_rnd! > .9 THEN GOSUB riot: EXIT SUB
 
 	CALL clear_bottom_line
-	IF RND > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
+	IF script_rnd! > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
 	IF fleet_size(SIDE_REBEL) > 0 AND fleet_city(SIDE_REBEL) <> FLEET_AT_SEA THEN empty = fleet_city(SIDE_REBEL): GOTO float1
 		empty = 0
 		FOR i = 1 TO MAX_CITIES
@@ -44,18 +45,18 @@ float1:
 	fleet_city(SIDE_REBEL) = empty: CALL draw_fleets
 	GOTO dull1
 mercen:
-	IF RND > .1 OR side_city_count(SIDE_REBEL) < 30 GOTO money
-	a$ = "French": IF RND > .5 THEN a$ = "British"
+	IF script_rnd! > .1 OR side_city_count(SIDE_REBEL) < 30 GOTO money
+	a$ = "French": IF script_rnd! > .5 THEN a$ = "British"
 	CALL scribe_message(a$ + " mercenaries join " + army_name$(index) + "'s army", SHOW_BOX)
 	army_size(index) = army_size(index) + 100 * plus
 	army_experience(index) = MAX_EXPERIENCE: army_supply(index) = MAX_SUPPLY
 	GOTO dull1
 money:
-	IF RND > .3 OR side_city_count(SIDE_REBEL) < 12 GOTO cotton
+	IF script_rnd! > .3 OR side_city_count(SIDE_REBEL) < 12 GOTO cotton
 		CALL scribe_message("The South has obtained a loan from Europe", SHOW_BOX)
 		GOTO purse
 cotton:
-	IF RND > .5 OR side_city_count(SIDE_REBEL) < 12 GOTO uprising
+	IF script_rnd! > .5 OR side_city_count(SIDE_REBEL) < 12 GOTO uprising
 	CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", SHOW_BOX)
 purse:
 	side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 * plus
@@ -63,7 +64,7 @@ purse:
 uprising:
 	pct! = .9
 	a$ = "Union troops diverted to fight Western Indian uprisings"
-	IF RND > .5 THEN a$ = "Union 90-day enlistees return home"
+	IF script_rnd! > .5 THEN a$ = "Union 90-day enlistees return home"
 	IF turn_year = 1864 AND turn_month > 5 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections": pct! = .8
 	CALL scribe_message(a$, SHOW_BOX)
 	FOR k = 1 TO ARMIES_PER_SIDE
@@ -75,7 +76,7 @@ riot:
 	IF opt_realism = REALISM_OFF THEN RETURN
 	IF side_city_count(who) = 1 THEN RETURN
 	FOR k = 1 TO 99
-	x = 1 + INT(MAX_CITIES * RND)
+	x = 1 + INT(MAX_CITIES * script_rnd!)
 		IF city_first_owner(x) <> who AND city_owner(x) = who AND city_army(x) = 0 THEN
 			CALL clear_bottom_line: COLOR COLOR_WHITE
 			PRINT " Riots have broken out in "; city_name$(x);
@@ -93,8 +94,8 @@ riot:
 '                               good for Union
 '----------------------------------------------------------------------------
 	CASE 2
-	IF RND > .1 OR fleet_city(SIDE_UNION) = 0 OR fleet_size(SIDE_UNION) >= MAX_FLEET_SHIPS GOTO event2
-	IF RND > .95 THEN GOSUB riot: EXIT SUB
+	IF script_rnd! > .1 OR fleet_city(SIDE_UNION) = 0 OR fleet_size(SIDE_UNION) >= MAX_FLEET_SHIPS GOTO event2
+	IF script_rnd! > .95 THEN GOSUB riot: EXIT SUB
 	CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
 	fleet_size(SIDE_UNION) = fleet_size(SIDE_UNION) + plus
 	IF fleet_size(SIDE_UNION) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_UNION) = MAX_FLEET_SHIPS
@@ -102,10 +103,10 @@ riot:
 	fleet_ships$(SIDE_UNION) = fleet_ships$(SIDE_UNION) + STRING$(x, "W")
 	GOTO dull2
 event2:
-	IF RND < .7 GOTO abe
+	IF script_rnd! < .7 GOTO abe
 	CALL scribe_message("Volunteer troops swell the Union ranks", SHOW_BOX)
 	x = 0: FOR i = 1 TO ARMIES_PER_SIDE: x = x + 1: IF x > 5 GOTO dull2
-	IF army_size(i) > 0 AND RND > .5 THEN army_size(i) = army_size(i) * 1.1 + plus
+	IF army_size(i) > 0 AND script_rnd! > .5 THEN army_size(i) = army_size(i) * 1.1 + plus
 	NEXT i: GOTO dull2
 abe:
 	IF emancipation_done = 0 AND turn_year > 1862 THEN
@@ -122,16 +123,16 @@ abe:
 		side_victory_points(SIDE_REBEL) = .5 * side_victory_points(SIDE_REBEL)
 		GOTO dull2
 	END IF
-	IF RND > .5 THEN
+	IF script_rnd! > .5 THEN
 		CALL scribe_message("Wealthy Unionists give generously to the Federal Cause", SHOW_BOX)
 		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * plus
 		GOTO dull2
 	END IF
-	IF RND > .5 AND turn_year > FIRST_YEAR THEN
+	IF script_rnd! > .5 AND turn_year > FIRST_YEAR THEN
 		CALL scribe_message("Rebel deserters leave the battlefield to go home", SHOW_BOX)
 		FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: army_size(i) = .92 * army_size(i): NEXT i: GOTO dull2
 	END IF
-	IF RND > .5 AND turn_year > FIRST_YEAR THEN
+	IF script_rnd! > .5 AND turn_year > FIRST_YEAR THEN
 		CALL scribe_message("Union soldiers now have repeating rifles", SHOW_BOX)
 		FOR i = 1 TO ARMIES_PER_SIDE
 			IF army_experience(i) < 9 THEN army_experience(i) = army_experience(i) + 2

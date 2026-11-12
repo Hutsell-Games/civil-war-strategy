@@ -159,7 +159,9 @@ the working tree: `side_army_range` became `side_first_army` and `side_last_army
 Phase 7 step 1 is done in the working tree (2026-11-11): `file_management` is split, see "Phase 7" below.
 Steps 2 and 3 are done in the working tree too: `menu_report` is split, and `wait_key` is in.
 Step 4, the small shared pieces, is done in the working tree.
-**Next:** the user's decision on phase 0's tests, which step 5 needs.
+Phase 0 goes first (user, 2026-11-11); phase 7 step 5 waits for it. Phase 0's steps 2 to 5 are done in the
+working tree: see "Phase 0 after phase 7 began" below.
+**Next:** phase 0 step 6, the command and refusal scripts.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -282,6 +284,41 @@ Each step is one commit (decision 15). The 25 scripts that exist keep their reco
 9. Run `play.py coverage`. For each SUB of decision 13, each line still not run is reached or listed above
    with its reason.
 10. Record the new scripts with both compilers (`play.py record`), then `play.py compare`.
+
+### Phase 0 after phase 7 began
+
+Steps 2 to 10 were taken up on 2026-11-11, after phase 7's step 4. Line numbers below are those of that day.
+
+- **Steps 2 and 4, done.** `play.py` reads `#! data <folder>`, `#! without <file>` and `#! dice <groups>`.
+  `tests\make_save.py` writes a saved game from a description: a `<name>.save` in a data folder becomes
+  `<name>.sav` in the run. It is written at each run, so no made save is kept in the repo.
+- **Step 3, done.** `special_events` draws its 17 random numbers through `script_rnd!`. The dice are
+  groups, one for each call of `special_events`, so a script can force an event in each of several
+  months. `script_mute` runs `PLAY "V0"` at the program's start.
+- **Step 5, done.** Two scripts, `events-south` and `events-union`, each force several events from one
+  prepared save. Not one script for each event: a group of dice for each month made that unnecessary.
+- **Two faults of `play.py coverage` fixed.** Since phase 6 it left the unit tests' counts out, because
+  their files are now in folders, and its table per SUB put every SUB of a folder under "(outside
+  procedures)".
+- **Measured after step 5** (27 scripts and the unit tests): 3,421 of 3,787 lines run in full, 223 in
+  part, 143 not run. Before: 200 not run.
+
+Still not run, for steps 6 to 9:
+
+| File | Lines not run | What they are |
+|------|---------------|---------------|
+| `CWSTRAT.BAS` | 37, 79-93, 234, 305-336, 582-584 | `MTN.VGA` missing; the title tune; "Railroad is already carrying"; Join's refusal and the Supply menu; Vary Start's dead loop |
+| `rules\navy.bm` | 74-81, 101-103, 154-159, 195, 212, 261, 267, 330, 341, 381-393 | the ship type menu; refusals; a fleet eliminated; a fleet retreats |
+| `rules\turn.bm` | 71, 73, 164-172, 228-236, 253 | the unreachable `CASE`s; a beaten army's flight; the Raze menu |
+| `ui\orders.bm` | 4-5, 87-91, 106, 118, 121, 133, 275 | refusals; the Which menu |
+| `game\tunes.bm` | 3-13 | `play_shenandoah` |
+| `rules\army.bm` | 20-22, 60-62, 137 | the Join menu; "No more commanders" |
+| `ai\ai.bm` | 24, 63-64, 79-80, 202 | the computer's fleet moves |
+| others | `battle.bm` 58, 131, 142; `city.bm` 44, 50-51; `railroad.bm` 45, 52-53; `menu.bm` 123-124, 152, 195; `reports.bm` 67-69, 95; `files.bm` 57; `qb64.bm` 15-16; `screen.bm` 46-47 | rule branches; `check_map_links`' errors; menu details; the real pause |
+
+In `special_events` four half-run lines are left. The cap `pct! > .9` needs the year 1868, which no game
+reaches. The two early returns of the riot (realism off; a side with one city) and the event tunes wait
+for the sound script and a script with realism off.
 
 ## Phase 7: break up the big pieces
 

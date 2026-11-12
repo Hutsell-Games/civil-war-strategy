@@ -1,0 +1,8 @@
+# For the script events-south: the special events that favor the South.
+# November 1863, the Union plays. The Rebels hold 30 cities (the mercenaries need 30):
+# their own but Tullahoma, the six neutral ones, and the Union's Charleston WV and Harrisburg.
+# The Union holds Tullahoma (37), which was not its own at the start and has no army, so a
+# riot can break out there.
+date 11 1863
+owner 2 2 18-21 29 6 14
+owner 1 37
