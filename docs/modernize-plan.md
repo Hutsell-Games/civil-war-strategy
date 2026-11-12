@@ -169,7 +169,8 @@ Step 9 is done in the working tree: `victory_warnings`, `end_game`, and the Hall
 Step 10's first part is done in the working tree: `navy_combat`, `ai_pick_port`, `draw_fleet_sailing`.
 Its second part is done too: `navy_commands` is a loop over `menu_navy` or `ai_navy_adjust` and `navy_action`.
 Its third part is done too: one SUB for each action. That ends step 10.
-**Next:** phase 7 step 11, the attack, retreat and surrender knot of `turn_resolve`.
+Step 11 is done in the working tree: the knot of `turn_resolve` is six SUBs.
+**Next:** phase 7 step 12, `menu_select`'s highlight. It is the last step of phase 7.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -334,7 +335,7 @@ The 20 lines that no test runs (21 before phase 7 step 6):
 | `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
 | `rules\navy.bm` | 87 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
 | `rules\navy.bm` | 346, 398 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
-| `rules\turn.bm` | 283, 285 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
+| `rules\turn.bm` | 307, 309 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
 | `ui\orders.bm` | 118 | The picker found no city of the player's among 39; the player always holds the city it started on |
 | `ui\orders.bm` | 133 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | 95 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
@@ -521,7 +522,25 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
         the jump.
       - The unrun lines of `rules\navy.bm` are now 87, 346 and 398. Moved half-run: Raid's fight
         when the other fleet is at sea too, and the computer's invasion with no commander left.
-11. **The attack, retreat and surrender knot in the middle of `turn_resolve`.**
+11. **Done: the attack, retreat and surrender knot in the middle of `turn_resolve`.** `turn_resolve` is
+    40 lines and has no label. Its loop calls `turn_move_army (active)` for each army that moves. All
+    six SUBs are in `rules\turn.bm` and all draw.
+    - `turn_move_army (active)`: the army sets out, then enters an empty city, joins a friend or
+      attacks.
+    - `turn_attack (active, target, fought, took)`: the battles against one defender after another.
+      `took` is 1 when the city is left without a defender. `fought` is the old `flag`: a battle was
+      fought, so no fort is razed.
+    - `turn_attacker_withdraws`, `turn_defender_retreats (active, target, defend, gone)` and
+      `turn_army_surrenders (index, active)`: the three ways a battle ends.
+    - `turn_enter_city (active, target, fought)`: the move into the city, the Raze menu and the
+      capture.
+    - One difference that no game reaches: the winner and loser of the last battle were locals of
+      `turn_resolve`, kept from one army's move to the next. They were read without a battle only
+      when the defender had 0 men, and no army with 0 men holds a city (the table above, `ai\ai.bm`
+      222). They now start at 0 for each attack.
+    - `turn_army_surrenders` keeps the original's order: it clears the loser's supplies and then
+      adds them to the winner's, so the winner gains nothing.
+    - No unit tests: every piece draws. Lines moved without a test: none.
 12. **`menu_select`'s highlight**: `menu_highlight` and `menu_unhighlight`.
 
 The splits of `calculate_battle` (losses, strengths) are phase 8's: they part a rule from its screen.

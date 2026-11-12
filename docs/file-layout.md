@@ -19,7 +19,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `battle.bm` | `calculate_battle` (mixed), `normal_random_number` |
 | `navy.bm` | `navy_remove_ship`, `navy_commands`, `navy_action`, `navy_build_ship` (mixed), `navy_bombard` (mixed), `navy_sail_to_port` (mixed), `navy_raid_commerce` (mixed), `navy_land_army`, `navy_finish_move` (mixed), `navy_commerce_raid` (mixed), `navy_combat` (mixed), `navy_show_hits` (mixed) |
 | `railroad.bm` | `railroad_move` (mixed), `railroad_start` (mixed), `railroad_arrive` (mixed), `railroad_route_count`, `railroad_capacity` |
-| `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed), `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` |
+| `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed), `turn_move_army` (mixed), `turn_attack` (mixed), `turn_attacker_withdraws` (mixed), `turn_defender_retreats` (mixed), `turn_army_surrenders` (mixed), `turn_enter_city` (mixed), `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7) |
 | `victory.bm` | `check_victory_conditions` (mixed), `victory_warnings` (mixed), `end_game` (mixed), `hall_of_fame` (mixed) |
 

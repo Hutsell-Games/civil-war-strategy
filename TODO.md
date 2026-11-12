@@ -45,6 +45,8 @@ game plays changes the recorded screens.
   (`army_recruit` passes `empty`, which is 0 there). It was most likely meant for the army recruited.
 - **The computer checks the wrong city's track before a train to its capital.** `ai_railroad` (`ai\ai.bm`)
   calls `railroad_route_count(side, target)` with `target` left from the loop before, not the capital.
+- **The winner of a battle gets none of the loser's supplies.** `turn_army_surrenders` (`rules\turn.bm`)
+  sets the loser's supplies to 0 and then adds them to the winner's.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
@@ -69,7 +71,7 @@ Left alone by group 2 (the special values):
 
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** It appears in 18 tests and assignments.
   `docs\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
-- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 278). The 900
+- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 302). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
 - **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
@@ -113,7 +115,7 @@ Left alone by group 8 (the colors):
 - **`COLOR 16 - c` shows the other side's color** (`rules\battle.bm` lines 39, 65 and 167): 16 - 9 is 7 and
   16 - 7 is 9. It stays as written; it would go with `side_color`.
 - **`CALL wait_seconds(99)`, "press a key", stays a number** (`CWSTRAT.BAS` line 507, Chk Links;
-  `rules\turn.bm` line 191, "There are still defenders"; left alone by group 9). It goes with phase 7's
+  `rules\turn.bm` line 143, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
 - **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 56): 0 there means "no color set",

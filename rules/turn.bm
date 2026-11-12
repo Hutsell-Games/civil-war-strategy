@@ -38,9 +38,7 @@ IF current_side = SIDE_UNION AND y > 0 THEN ai_strength_ratio! = x / y ELSE IF c
 END SUB
 
 SUB turn_resolve
-DIM index AS INTEGER: DIM flee AS INTEGER: DIM best AS INTEGER: DIM move2 AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER
-DIM flag AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM j AS INTEGER: DIM s AS INTEGER: DIM active AS INTEGER: DIM target AS INTEGER: DIM defend AS INTEGER: DIM win AS INTEGER: DIM lose AS INTEGER: DIM a$
-flag = 0
+DIM i AS INTEGER: DIM j AS INTEGER: DIM active AS INTEGER
 IF opt_players = PLAYERS_ONE THEN
 	CALL ai_turn
 ELSE
@@ -64,10 +62,28 @@ CALL turn_set_move_order
 '                       Begin Main Loop
 '==========================================================================
 FOR j = 1 TO MAX_ARMIES
-flag = 0
-IF move_order_key(j) = MOVE_KEY_NONE GOTO allthru
-active = INT(move_order_key(j) / 100): active = move_order_key(j) - 100 * active: s = army_side(active)
-IF army_order(active) < 1 GOTO digin
+IF move_order_key(j) = MOVE_KEY_NONE THEN EXIT FOR
+active = INT(move_order_key(j) / 100): active = move_order_key(j) - 100 * active
+CALL turn_move_army(active)
+NEXT j
+
+CALL navy_commerce_raid
+
+CALL draw_map_touchup: CALL draw_fleets: CALL turn_date_and_supply
+
+CALL clear_bottom_line
+LINE (390, 350)-(520, 400), 1, BF
+COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+CALL turn_update_victory_points
+IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL wait_key("K")
+END SUB
+
+' One army's move for the month. It goes to the city of its order: into an empty city, to
+' join a friend there, or to attack an enemy there.
+SUB turn_move_army (active)
+DIM s AS INTEGER: DIM target AS INTEGER: DIM fought AS INTEGER: DIM took AS INTEGER
+s = army_side(active)
+IF army_order(active) < 1 THEN EXIT SUB
 COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " is moving to "; city_name$(army_order(active));
 
 army_supply(active) = army_supply(active) - 1: IF army_supply(active) < 0 THEN army_supply(active) = 0: CALL wait_seconds(opt_pause!): CALL clear_bottom_line: PRINT army_name$(active); " is out of supplies !";
@@ -76,41 +92,61 @@ CALL draw_army_flag(active)
 CALL draw_map_marker(army_city(active), army_order(active), MARK_ERASE_LINE)
 
 CALL animate_army(active, ANIMATE_TAKE_PICTURE)
-'==========================================================================
 target = army_order(active)
-IF city_army(target) = 0 GOTO easy
-IF army_side(city_army(target)) = s GOTO friend ELSE GOTO enemy
-'==========================================================================
-'                         Join Forces
-'==========================================================================
-friend:
-COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " and "; army_name$(city_army(target)); " meet in "; city_name$(target); : CALL wait_seconds(opt_pause!)
-CALL draw_map_marker(army_order(active), 0, MARK_FLASH_FRAME)
-CALL clear_bottom_line
-GOTO easy
-'==========================================================================
-'                       Attack
-'==========================================================================
+IF city_army(target) > 0 THEN
+	IF army_side(city_army(target)) = s THEN
+		COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " and "; army_name$(city_army(target)); " meet in "; city_name$(target); : CALL wait_seconds(opt_pause!)
+		CALL draw_map_marker(army_order(active), 0, MARK_FLASH_FRAME)
+		CALL clear_bottom_line
+	ELSE
+		CALL turn_attack(active, target, fought, took)
+		IF took = 0 THEN EXIT SUB
+	END IF
+END IF
+CALL turn_enter_city(active, target, fought)
+END SUB
+
+' An army attacks the enemy in a city, one defender after another. fought is 1 once a battle
+' was fought. took is 1 when the last defender has fled or surrendered. It is 0 when the
+' attacker withdrew or was crushed.
+SUB turn_attack (active, target, fought, took)
+DIM defend AS INTEGER: DIM win AS INTEGER: DIM lose AS INTEGER: DIM gone AS INTEGER: DIM a$
+took = 0
 enemy:
 CALL draw_map_marker(target, 0, MARK_EXPLOSION)
 defend = city_army(target)
 
 COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " attacks "; army_name$(defend); " in "; city_name$(army_city(defend)); : CALL wait_seconds(opt_pause! - 1)
-IF army_size(defend) > 0 THEN CALL calculate_battle(active, defend, win, lose): flag = 1: IF opt_graphics >= GRAPHICS_BASIC THEN CALL draw_update_box
+IF army_size(defend) > 0 THEN CALL calculate_battle(active, defend, win, lose): fought = 1: IF opt_graphics >= GRAPHICS_BASIC THEN CALL draw_update_box
 IF army_experience(win) < MAX_EXPERIENCE THEN army_experience(win) = army_experience(win) + 1
 
 IF army_size(lose) < 2 THEN
 	CALL clear_bottom_line
 	a$ = army_name$(lose) + "'s army is crushed in " + city_name$(army_city(defend))
 	CALL scribe_message(a$, SHOW_BOX)
-	index = lose: GOTO crushed
+	CALL turn_army_surrenders(lose, active)
+	IF army_city(active) = 0 THEN EXIT SUB
+	GOTO holdon
 END IF
 
 CALL clear_right_panel
-'==========================================================================
-'                       Attacker Loses
-'==========================================================================
-IF win = active GOTO kickbutt
+IF win <> active THEN CALL turn_attacker_withdraws(active, target, defend): EXIT SUB
+CALL turn_defender_retreats(active, target, defend, gone)
+IF gone = 0 THEN
+	a$ = army_name$(defend) + " surrenders to " + army_name$(active) + " in " + city_name$(army_city(defend))
+	CALL scribe_message(a$, SHOW_BOX)
+	CALL turn_army_surrenders(defend, active)
+	IF army_city(active) = 0 THEN EXIT SUB
+END IF
+holdon:
+	CALL city_update_occupier(target): IF city_army(target) = 0 THEN took = 1: EXIT SUB
+	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "There are still defenders in "; city_name$(target); : CALL wait_seconds(99)
+	GOTO enemy
+END SUB
+
+' The attacker lost the battle: it goes back to the city it came from. The defender may lose
+' its own order for the month.
+SUB turn_attacker_withdraws (active, target, defend)
 army_order(active) = army_city(active)
 army_city(active) = target
 COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(active); " withdrew to "; city_name$(army_order(active));
@@ -126,11 +162,16 @@ army_order(active) = ORDER_DONE
 	      
 IF 11 * RND > army_leader_rating(defend) THEN CALL draw_map_marker(army_city(defend), army_order(defend), MARK_ERASE_ARMY): IF army_order(defend) > 0 THEN army_order(defend) = ORDER_DONE
 
-CALL wait_seconds(opt_pause!): GOTO digin
-'==========================================================================
-'                       Defender Retreats
-'==========================================================================
-kickbutt:
+CALL wait_seconds(opt_pause!)
+END SUB
+
+' The defender lost the battle: it retreats to a city of its side next to this one. The
+' player picks the city for an army of the player's; otherwise the richest is taken. gone is
+' 0 when there is no such city.
+SUB turn_defender_retreats (active, target, defend, gone)
+DIM s AS INTEGER: DIM flee AS INTEGER: DIM move2 AS INTEGER: DIM best AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
+gone = 0
+s = army_side(active)
 	CALL draw_map_marker(army_city(active), target, MARK_ERASE_ARMY)
 	IF army_order(defend) > 0 THEN CALL draw_map_marker(target, army_order(defend), MARK_ERASE_ARMY)
 
@@ -147,7 +188,7 @@ kickbutt:
 		END IF
 	END IF
 	NEXT i
-	IF flee = 0 GOTO deadmeat
+	IF flee = 0 THEN EXIT SUB
 	move2 = city_road(target, flee)
 outta:
 	CALL draw_army_flag(defend)                  ' in old city
@@ -164,13 +205,14 @@ outta:
        
 	CALL draw_map_marker(target, 0, MARK_FLASH_FRAME)
 	army_order(defend) = ORDER_DONE
-	GOTO holdon
+	gone = 1
+END SUB
 
-deadmeat:
-	index = defend
-	a$ = army_name$(index) + " surrenders to " + army_name$(active) + " in " + city_name$(army_city(index))
-	CALL scribe_message(a$, SHOW_BOX)
-crushed:
+' An army is crushed or surrenders to the army active: its slot is cleared and the other
+' side of active gets 25 victory points.
+SUB turn_army_surrenders (index, active)
+DIM s AS INTEGER: DIM x AS INTEGER
+	s = army_side(active)
 	IF opt_graphics >= GRAPHICS_FULL THEN CALL draw_surrender(index): COLOR COLOR_YELLOW: LOCATE 3, 68: PRINT army_name$(index): LOCATE 4, 68: PRINT "surrenders !"
 	x = army_side(index)
 	IF opt_sound >= SOUND_MUSIC AND x <> current_side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
@@ -182,18 +224,13 @@ crushed:
 	army_supply(active) = army_supply(active) + army_supply(index): army_supply(index) = 0
 	IF army_supply(active) > MAX_SUPPLY THEN army_supply(active) = MAX_SUPPLY
 	CALL wait_seconds(PAUSE_LONG): CALL clear_right_panel
-	IF army_city(active) = 0 GOTO digin
-'---------------------------------------------------------------------------
-'                       check for more defenders !
-'---------------------------------------------------------------------------
-holdon:
-	CALL city_update_occupier(target): IF city_army(target) = 0 GOTO easy
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "There are still defenders in "; city_name$(target); : CALL wait_seconds(99)
-	GOTO enemy
-'==========================================================================
-'                       Move Into New City
-'==========================================================================
-easy:
+END SUB
+
+' An army moves into the city, which is now free of the enemy, and takes it if it is not
+' its side's. Without a battle, the player may raze a fort there, and the computer does.
+SUB turn_enter_city (active, target, fought)
+DIM s AS INTEGER: DIM c AS INTEGER
+s = army_side(active)
 CALL draw_map_marker(army_city(active), target, MARK_ERASE_ARMY)
 army_city(active) = target: army_order(active) = ORDER_DONE
 CALL city_update_occupier(army_city(active))
@@ -203,7 +240,7 @@ CALL draw_army_flag(active)
 '---------------------------------------------------------------------------
 	IF city_owner(army_city(active)) = s GOTO horde
 	c = army_city(active)
-	IF opt_players = PLAYERS_ONE AND s = current_side AND city_fort(c) > 0 AND flag = 0 THEN
+	IF opt_players = PLAYERS_ONE AND s = current_side AND city_fort(c) > 0 AND fought = 0 THEN
 		menu_col = PANEL_COL: menu_row = 15
 		menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN
 		menu_text$(0) = "Raze ?"
@@ -214,7 +251,7 @@ CALL draw_army_flag(active)
 		CALL clear_right_panel
 		IF menu_choice = 2 GOTO smoke
 	END IF
-	IF opt_players = PLAYERS_ONE AND s <> current_side AND city_fort(c) > 0 AND flag = 0 THEN
+	IF opt_players = PLAYERS_ONE AND s <> current_side AND city_fort(c) > 0 AND fought = 0 THEN
 		IF opt_realism >= REALISM_ON AND city_y(c) > 150 THEN
 smoke:
 			city_fort(c) = 0
@@ -224,22 +261,9 @@ smoke:
 			wait_seconds 3
 		END IF
 	END IF
-	CALL city_capture(active, c, s, flag)
+	CALL city_capture(active, c, s, fought)
 horde:
 IF army_supply(active) < MAX_SUPPLY THEN army_supply(active) = army_supply(active) + 1: IF RND > .8 GOTO horde
-digin:
-NEXT j
-
-allthru:
-CALL navy_commerce_raid
-
-CALL draw_map_touchup: CALL draw_fleets: CALL turn_date_and_supply
-
-CALL clear_bottom_line
-LINE (390, 350)-(520, 400), 1, BF
-COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
-CALL turn_update_victory_points
-IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL wait_key("K")
 END SUB
 
 ' The month's income: each side gets its cities' values and its capital's income, and loses
