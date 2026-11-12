@@ -109,7 +109,7 @@ Left alone by group 6 (the settings and victory rules):
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
 - **The rule that ended the game has no constants**: `j = 2: GOTO finis` to `j = 6` in
-  `check_victory_conditions` (`rules\victory.bm`), and 7 for the other ending. The numbers follow
+  `victory_rule_met` (`rules\victory.bm`), and 7 for the other ending. The numbers follow
   `VICTORY_YEAR` to `VICTORY_FORCE_RATIO`, but `j` is a code of its own; `docs\constants.md` has no row for it.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
   (`port\files.bm` line 11) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which

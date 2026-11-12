@@ -610,6 +610,7 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'ui/turn.bm'
 ' $INCLUDE: 'ui/ai.bm'
 ' $INCLUDE: 'ui/events.bm'
+' $INCLUDE: 'ui/victory.bm'
 ' $INCLUDE: 'draw/map.bm'
 ' $INCLUDE: 'draw/icons.bm'
 ' $INCLUDE: 'draw/ships.bm'

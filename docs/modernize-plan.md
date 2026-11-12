@@ -137,9 +137,11 @@ Updated 2026-11-11. Phases 0 to 7 are done and committed. Phase 8's steps 1 and 
 
 Step 3 is committed in two parts (`70692b3`, `77ee9a6`), step 4 as `9e038a4` and step 5 as
 `b67f89e`. Step 6, the computer's turn, is committed as `ae48902`, and the cleanup after it, from
-the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is done in the working tree.
+the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is committed as `c298f3a`,
+and step 8, victory, is done in the working tree. That ends phase 8.
 
-**Next:** step 8, the four of `rules\victory.bm`.
+**Next:** phase 9, the menus. It starts with the plan of its steps: one menu SUB for each command,
+and the layer for the commands that phase 8 left in `ui\` ("How a SUB is split").
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -294,4 +296,4 @@ The order takes the SUBs that others call first, so that a caller's split finds 
 5. **Done: `rules\turn.bm`.** See `modernize-completed.md`.
 6. **Done: `ai\ai.bm`.** See `modernize-completed.md`.
 7. **Done: `special_events` and `event_riot`.** See `modernize-completed.md`.
-8. The four of `rules\victory.bm`.
+8. **Done: `rules\victory.bm`.** See `modernize-completed.md`. That ends phase 8.

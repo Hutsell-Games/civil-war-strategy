@@ -4,9 +4,8 @@ Phase 6 of `modernize-plan.md` moves every SUB whole into the file below. No lin
 the draft for the user to check before anything moves. Names are the settled names.
 
 "Mixed" means the SUB both works out a rule and draws, prints or reads a key. It goes to the file of its topic
-now and is split in phase 8, so for now `rules\` and `ai\` hold SUBs that still draw. The folder rule
-(nothing there draws) holds once phase 8 is done. The marks below are incomplete: the full list is in
-`modernize-plan.md`, "Phase 8".
+now and is split in phase 8. Since phase 8 the folder rule holds: nothing in `rules\` or `ai\` draws.
+The only SUBs still marked are `load_game` and `save_game` in `port\`, which phase 9 reworks.
 
 The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `CWS14.BI` becomes `cws.bi`.
 `QB64.BM` and `SCRIPT.BM` move to `port\`. `FOLDERS.BI` moves to `port\` too.
@@ -22,7 +21,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `railroad.bm` | `railroad_board`, `railroad_unload`, `railroad_route_count`, `railroad_capacity` (`railroad_move`, `railroad_start` and `railroad_arrive` until phase 8 moved them to `ui\railroad.bm`) |
 | `turn.bm` | `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7) |
-| `victory.bm` | `check_victory_conditions` (mixed), `victory_warnings` (mixed), `end_game` (mixed), `hall_of_fame` (mixed) |
+| `victory.bm` | `victory_forces`, `victory_time_near`, `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_play_on`, `victory_won`, `victory_technical_points`, `hall_of_fame_place`, `hall_of_fame_insert` (`check_victory_conditions`, `victory_warnings`, `end_game` and `hall_of_fame` until phase 8 moved them to `ui\victory.bm`) |
 
 ## ai\
 
@@ -47,6 +46,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city`, `ai_turn` (new in phase 8: the month's moves) |
 | `ai.bm` | `draw_ai_fort`, `draw_ai_plan`, `draw_ai_drill`, `draw_ai_funds` (new in phase 8: the computer's messages) |
 | `events.bm` | `special_events`, `event_riot` (new in phase 8: the special events' messages and tunes) |
+| `victory.bm` | `check_victory_conditions`, `victory_warnings`, `end_game`, `hall_of_fame` (new in phase 8: the warnings, the victory screens and the Hall of Fame) |
 
 ## draw\
 

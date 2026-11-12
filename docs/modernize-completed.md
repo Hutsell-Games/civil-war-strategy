@@ -587,3 +587,29 @@ but four things to make even. The user took the pragmatic engineer's plan: one c
    - Unit tests: 6 new ones, so 87 in all. They give `event_roll` its draws through `script_dice$`, as
      `CWS_DICE` does under a script. Lines moved without a test: none. All 58 lines of `ui\events.bm`
      run. 204 lines of the game are run in part and 20 are not run.
+8. **Done: `rules\victory.bm`.** `check_victory_conditions`, `victory_warnings`, `end_game` and
+   `hall_of_fame` moved to the new `ui\victory.bm`. Their rules are 11 SUBs and FUNCTIONs in
+   `rules\victory.bm`:
+   - `victory_forces (x, y)`, the men in the field, `victory_time_near`, and
+     `victory_rule_met (i, x, y, j)`, the rule a side has met. `victory_rule_met` keeps its lines
+     unchanged; `GOTO finis` goes to a label at its end, and `j` is 0 there when no rule was met.
+     `check_victory_conditions` keeps the loop over the two sides and the messages.
+   - `victory_near_cities (i)`, `victory_near_income (i)` and `victory_near_force (i, x, y)`: the three
+     warnings of `victory_warnings`.
+   - `victory_play_on (j)`, `victory_won (i, j)` and `victory_technical_points`: the state that `end_game`
+     changed between its menus and screens. `victory_won` also sets `game_over`, which `hall_of_fame` set
+     after its last key. Only the main module reads `game_over`, after `check_victory_conditions` returns.
+   - `hall_of_fame_place (s, hall_score())` and `hall_of_fame_insert (s, i, name$, hall_name$(),
+     hall_score())`: the place a score earns, and the entry put in it. The entries now move down after
+     the commander's name is read, not before; nothing shows them in between.
+   - One new line run in part: `IF i = 0 GOTO foun` in `hall_of_fame`, for a side that earns no place.
+     The scripts start from an empty Hall of Fame, where every score earns one.
+     `TestHallOfFamePlaceAndInsert` tests the rule.
+   - Unit tests: 8 new ones, so 95 in all. Lines moved without a test: none. 204 lines of the game are
+     run in part and 20 are not run.
+
+**Phase 8 is done.** Nothing in `rules\`, `ai\` or `game\events.bm` draws, prints, plays or reads a key
+itself (`tests\out\scratch\p8_mixed.py`). What it left for phase 9: the commands that sit in `ui\`, the
+lines tangled with the menus ("How a SUB is split" in `modernize-plan.md`), `load_game` and `save_game`
+in `port\`, and the computer's one-line choices in the screens. The scripts pass on the recordings of
+phase 7, with both compilers, and the unit tests went from 33 to 95.

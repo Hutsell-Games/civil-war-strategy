@@ -859,6 +859,84 @@ AssertEqualInt 7, city, "the draw .15 picks city 7, which the Union took"
 AssertEqualInt SIDE_NONE, city_owner(7), "it turns neutral"
 END SUB
 
+' ------------------------------------------------------------------ victory
+
+SUB TestVictoryForcesCountArmiesInTheField
+army_city(1) = 5: army_size(1) = 100: army_size(2) = 70
+army_city(21) = 9: army_size(21) = 60
+CALL victory_forces(x, y)
+AssertEqualInt 100, x, "the Union's army in a city; not army 2, which has none"
+AssertEqualInt 60, y, "the Rebels'"
+END SUB
+
+SUB TestVictoryRuleMetByCities
+victory_rule(VICTORY_CITIES) = 24: side_city_count(1) = 24
+CALL victory_rule_met(1, 100, 60, j)
+AssertEqualInt 3, j, "24 cities: the cities rule"
+CALL victory_rule_met(2, 100, 60, j)
+AssertEqualInt 0, j, "the Rebels have met none"
+END SUB
+
+SUB TestVictoryEnemyWipedOut
+side_victory_points(1) = 50
+CALL victory_rule_met(1, 100, 0, j)
+AssertEqualInt 7, j, "the Rebels have no men in the field"
+AssertEqualInt 350, side_victory_points(1), "300 more points"
+END SUB
+
+SUB TestVictoryTimeNear
+victory_rule(VICTORY_YEAR) = 1865: victory_rule(VICTORY_MONTH) = 3
+turn_year = 1865: turn_month = 1
+AssertEqualInt 1, victory_time_near, "January 1865, the limit March 1865"
+turn_month = 3
+AssertEqualInt 0, victory_time_near, "March: the time is up, not near"
+END SUB
+
+SUB TestVictoryNearRules
+victory_rule(VICTORY_CITIES) = 20: side_city_count(1) = 18
+AssertEqualInt 1, victory_near_cities(1), "18 of 20 cities: nine tenths"
+side_city_count(1) = 17
+AssertEqualInt 0, victory_near_cities(1), "17: not yet"
+victory_rule(VICTORY_FORCE_RATIO) = 3
+AssertEqualInt 1, victory_near_force(1, 280, 100), "2.8 to 1 against 3"
+AssertEqualInt 0, victory_near_force(2, 280, 100), "the Rebels are outnumbered"
+AssertEqualInt 0, victory_near_force(1, 280, 0), "no Rebel men: no ratio"
+END SUB
+
+SUB TestVictoryPlayOn
+victory_rule(VICTORY_CITIES) = 24: victory_rule(VICTORY_CAPITAL) = 1
+CALL victory_play_on(VICTORY_CITIES)
+AssertEqualInt 25, victory_rule(VICTORY_CITIES), "one city more"
+CALL victory_play_on(VICTORY_CAPITAL)
+AssertEqualInt 0, victory_rule(VICTORY_CAPITAL), "the capital rule is off"
+END SUB
+
+SUB TestVictoryWonAndTechnical
+side_victory_points(2) = 100
+CALL victory_won(2, 7)
+AssertEqualInt 200, side_victory_points(2), "100 more for wiping out the enemy"
+AssertEqualInt 2, victory_reason, "marked for the battle summary"
+AssertEqualInt 1, game_over, "the game is over"
+side_victory_points(1) = 100
+CALL victory_technical_points
+AssertEqualInt 70, side_victory_points(1), "seven tenths"
+AssertEqualInt 140, side_victory_points(2), "for both sides"
+END SUB
+
+SUB TestHallOfFamePlaceAndInsert
+DIM hall_name$(2, 5): DIM hall_score(2, 5)
+FOR i = 1 TO 5: hall_name$(1, i) = "N" + LTRIM$(STR$(i)): hall_score(1, i) = 600 - 100 * i: NEXT i
+side_victory_points(1) = 350
+AssertEqualInt 3, hall_of_fame_place(1, hall_score()), "350 reaches the third, 300"
+CALL hall_of_fame_insert(1, 3, "Grant", hall_name$(), hall_score())
+AssertEqualStr "Grant", hall_name$(1, 3), "in third place"
+AssertEqualInt 350, hall_score(1, 3), "with the score"
+AssertEqualStr "N3", hall_name$(1, 4), "the old third moves down"
+AssertEqualStr "N4", hall_name$(1, 5), "and the old fourth; the fifth drops out"
+side_victory_points(1) = 50
+AssertEqualInt 0, hall_of_fame_place(1, hall_score()), "50 reaches none"
+END SUB
+
 ' ------------------------------------------------------- the month's moves
 
 SUB TestTurnAdvanceMonth
@@ -1031,6 +1109,7 @@ END SUB
 '$INCLUDE: '../ui/turn.bm'
 '$INCLUDE: '../ui/ai.bm'
 '$INCLUDE: '../ui/events.bm'
+'$INCLUDE: '../ui/victory.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'
