@@ -13,7 +13,7 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 
 		CALL hall_of_fame_load(hall_name$(), hall_score())
 		FOR s = SIDE_UNION TO SIDE_REBEL
-		COLOR COLOR_YELLOW, COLOR_RED: LOCATE 3, 30 * (s - 1) + 10: PRINT sides(s).name; " HALL of FAME"
+		COLOR COLOR_YELLOW, COLOR_RED: LOCATE 3, 30 * (s - 1) + 10: PRINT side_name$(s); " HALL of FAME"
 		COLOR COLOR_WHITE, COLOR_BLACK: FOR i = 1 TO 5
 		LOCATE 3 + i, 30 * (s - 1) + 8: PRINT i, hall_name$(s, i), hall_score(s, i)
 		NEXT i: NEXT s
@@ -23,11 +23,11 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 			IF i = 0 GOTO foun
 			COLOR COLOR_WHITE, COLOR_BLUE: IF s = SIDE_REBEL THEN COLOR COLOR_RED, COLOR_GRAY
 			FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
-			LOCATE 12, 1: PRINT "Congratulations ! Score of"; sides(s).victory_points
-			PRINT "New Entry into "; sides(s).name; " HALL of FAME in place "; i
-			IF opt_players = PLAYERS_ONE AND s <> current_side THEN a$ = "COMPUTER": PRINT a$; " was "; sides(s).name; " commander": GOTO automate
+			LOCATE 12, 1: PRINT "Congratulations ! Score of"; side_victory_points(s)
+			PRINT "New Entry into "; side_name$(s); " HALL of FAME in place "; i
+			IF opt_players = PLAYERS_ONE AND s <> current_side THEN a$ = "COMPUTER": PRINT a$; " was "; side_name$(s); " commander": GOTO automate
 who4:
-			PRINT "What is name of "; sides(s).name; " commander"; : CALL script_mark_key_wait(4, ""): INPUT a$: IF a$ = "" GOTO who4
+			PRINT "What is name of "; side_name$(s); " commander"; : CALL script_mark_key_wait(4, ""): INPUT a$: IF a$ = "" GOTO who4
 automate:
 			CALL hall_of_fame_insert(s, i, a$, hall_name$(), hall_score())
 foun:
@@ -59,17 +59,17 @@ SUB victory_warnings (i, x, y)
 DIM a$
 	CALL clear_bottom_line: COLOR COLOR_YELLOW
 	IF victory_near_cities(i) = 1 THEN
-		a$ = sides(i).name + " side almost controls" + STR$(victory_rule(VICTORY_CITIES)) + " cities"
+		a$ = side_name$(i) + " side almost controls" + STR$(victory_rule(VICTORY_CITIES)) + " cities"
 		CALL show_message_box(a$, 4)
 	END IF
 
 	IF victory_near_income(i) = 1 THEN
-		a$ = sides(i).name + " side close to" + STR$(victory_rule(VICTORY_INCOME)) + " % of total income"
+		a$ = side_name$(i) + " side close to" + STR$(victory_rule(VICTORY_INCOME)) + " % of total income"
 		CALL show_message_box(a$, 4)
 	END IF
 
 	IF victory_near_force(i, x, y) = 1 THEN
-		a$ = sides(i).name + "side close to" + STR$(victory_rule(VICTORY_FORCE_RATIO)) + ":1 strength ratio"
+		a$ = side_name$(i) + "side close to" + STR$(victory_rule(VICTORY_FORCE_RATIO)) + ":1 strength ratio"
 		CALL show_message_box(a$, 4)
 	END IF
 END SUB
@@ -102,7 +102,7 @@ END SELECT
 	LINE (50, 120)-(465, 250), c, BF
 	LINE (50, 120)-(465, 250), 4, B
 	COLOR COLOR_YELLOW
-	t$ = sides(i).name + " SIDE IS WINNING"
+	t$ = side_name$(i) + " SIDE IS WINNING"
 	IF j = 2 THEN CALL print_centered(10, "Confederates will win a technical victory") ELSE CALL print_centered(10, t$)
 
 	COLOR COLOR_WHITE
@@ -129,7 +129,7 @@ play4ever:
 	menu_text$(0) = "Options"
 	menu_text$(1) = "Quit this Game"
 	menu_text$(2) = "Play More"
-	IF opt_players = PLAYERS_ONE THEN menu_text$(2) = "No - Press Onward to " + city_name$(sides(other_side(current_side)).capital)
+	IF opt_players = PLAYERS_ONE THEN menu_text$(2) = "No - Press Onward to " + city_name$(side_capital(other_side(current_side)))
 	menu_item_count = 2: menu_color = COLOR_DARK_GRAY
 	menu_col = 27: menu_row = 18
 	IF j <> 7 THEN
@@ -141,8 +141,8 @@ play4ever:
 	CALL draw_map: CALL save_battle_summary: CALL report_battle_summary
 	IF j = 2 THEN CALL victory_technical_points: CALL draw_rebel_victory: GOTO death
 
-	IF i = SIDE_UNION THEN CALL draw_union_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(sides(SIDE_UNION).victory_points): PRINT t$: GOTO death
-	IF i = SIDE_REBEL THEN CALL draw_rebel_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(sides(SIDE_REBEL).victory_points): PRINT t$
+	IF i = SIDE_UNION THEN CALL draw_union_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(SIDE_UNION)): PRINT t$: GOTO death
+	IF i = SIDE_REBEL THEN CALL draw_rebel_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL)): PRINT t$
 death:
 	COLOR COLOR_YELLOW: LOCATE 4, 40 - .5 * LEN(a$)
 	IF opt_history > 0 THEN

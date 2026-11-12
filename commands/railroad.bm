@@ -27,9 +27,9 @@ END SUB
 SUB railroad_arrive (side)
 DIM index AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 	CALL draw_train(side, DRAW_ERASE)
-	index = trains(side).army
+	index = train_army(side)
 	CALL railroad_unload(side)
-	IF city_army(trains(side).from_city) > 0 THEN CALL draw_army_flag(city_army(trains(side).from_city))
+	IF city_army(train_from_city(side)) > 0 THEN CALL draw_army_flag(city_army(train_from_city(side)))
 	CALL draw_train(side, DRAW_SHOW)
 
 	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Train with "; army_name$(index); " has arrived in "; city_name$(army_city(index)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2

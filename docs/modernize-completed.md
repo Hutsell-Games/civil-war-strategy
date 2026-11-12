@@ -861,3 +861,12 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    - **Lines that no test runs:** none of the 18 is in the diff, so none changed.
    - Unit tests: 123, none new, all passed on the first run. 38 scripts, unchanged recordings,
      both compilers.
+3. **Taken back: `sides`, `fleets` and `trains`** (user, 2026-11-12). `cities` and `leaders` were
+   also built (578 uses, all tests passing) and never committed. The records did not make the
+   code better: nothing copies or clears a whole city, side, fleet or train, so a record only
+   changed the spelling and made lines longer. Only armies become a record ("Only armies" in
+   `modernize-plan.md`).
+   - The source files are again what they were at `4fa959d`, the commit before step 1.
+   - Kept: `tools\refactor\make_records.py`, for the armies.
+   - `variable-names.md`: the "Record field" column names a record for the armies only.
+   - Unit tests: 123. 38 scripts, unchanged recordings, both compilers.

@@ -6,7 +6,8 @@ proposed name. This is the table that phase 4 of `modernize-plan.md` renames fro
 
 The shared variables are declared in `CWS14.BI`. "Uses" counts where the name appears in `CWSTRAT.BAS`,
 `CWSTRAT1.BM`, `CWSTRAT2.BM` and `CWSMENU.BM`. "Record field" is the name the variable gets in phase 10,
-when the arrays become records; it is here to show that each proposed name maps onto one.
+when the armies' arrays become a record. The other arrays stay arrays (user, 2026-11-12; "Only
+armies" in `modernize-plan.md`).
 
 Rules the proposals follow (decisions 17 and 18 of the plan):
 
@@ -30,8 +31,8 @@ Indexed by army, 1 to 40. Armies 1 to 20 are Union, 21 to 40 Rebel. Index 0 is a
 | `supply()` | Its supply level, 0 to 10. | 72 | `army_supply()` | `armies(i).supply` | |
 | `armyloc()` | The city it is in. 0 when the slot is free. | 143 | `army_city()` | `armies(i).city` | |
 | `armymove()` | Its order: the city it marches to, 0 for none, or below 0 when it cannot move this turn (it drilled, fortified, was just raised, or came by train). | 88 | `army_order()` | `armies(i).order` | |
-| `lname$()` | The leaders not yet used, by army slot. A slot's entry is emptied when its leader takes an army. | 24 | `leader_name$()` | `leaders(i).name` | |
-| `rating()` | The rating of the leader in `lname$()`. | 13 | `leader_rating()` | `leaders(i).rating` | |
+| `lname$()` | The leaders not yet used, by army slot. A slot's entry is emptied when its leader takes an army. | 24 | `leader_name$()` | (stays an array) | |
+| `rating()` | The rating of the leader in `lname$()`. | 13 | `leader_rating()` | (stays an array) | |
 | `brray()` | The order of movement for this turn: one sort key for each army, sorted by `bub2`. | 24 | `move_order_key()` | (stays an array) | |
 
 ## Cities
@@ -40,15 +41,15 @@ Indexed by city, 1 to 40.
 
 | Current | What it holds | Uses | Proposed | Record field | Your name |
 |---------|---------------|-----:|----------|--------------|-----------|
-| `city$()` | The city's name. `city$(0)` is "NONE". | 86 | `city_name$()` | `cities(c).name` | |
-| `cityx()`, `cityy()` | Its place on the screen, in pixels. | 37, 46 | `city_x()`, `city_y()` | `cities(c).x`, `.y` | |
-| `cityv()` | Its value: income each turn and victory points. | 21 | `city_value()` | `cities(c).value` | |
-| `cityp()` | Its owner now: 0 neutral, 1 Union, 2 Rebel. | 73 | `city_owner()` | `cities(c).owner` | |
-| `cityo()` | Its owner when the game began. | 3 | `city_first_owner()` | `cities(c).first_owner` | |
-| `fort()` | Its fort level, 0 to 2. | 44 | `city_fort()` | `cities(c).fort` | |
-| `occupied()` | The first army found in the city, or 0. Set by `occupy`. | 59 | `city_army()` | `cities(c).army` | |
-| `matrix()` | `matrix(c, 1 TO 6)`: the cities joined to city `c` by road, 0 for none. `matrix(c, 7)`: 99 when the city is a port. | 43 | `city_road()` and `city_port_type()` (see note 1) | `cities(c).road(0 TO MAX_ROADS)`, `.port_type` | |
-| `capcity()` | By side: the side's capital city, 0 when it has fallen. | 37 | `side_capital()` | `sides(s).capital` | |
+| `city$()` | The city's name. `city$(0)` is "NONE". | 86 | `city_name$()` | (stays an array) | |
+| `cityx()`, `cityy()` | Its place on the screen, in pixels. | 37, 46 | `city_x()`, `city_y()` | (stays an array) | |
+| `cityv()` | Its value: income each turn and victory points. | 21 | `city_value()` | (stays an array) | |
+| `cityp()` | Its owner now: 0 neutral, 1 Union, 2 Rebel. | 73 | `city_owner()` | (stays an array) | |
+| `cityo()` | Its owner when the game began. | 3 | `city_first_owner()` | (stays an array) | |
+| `fort()` | Its fort level, 0 to 2. | 44 | `city_fort()` | (stays an array) | |
+| `occupied()` | The first army found in the city, or 0. Set by `occupy`. | 59 | `city_army()` | (stays an array) | |
+| `matrix()` | `matrix(c, 1 TO 6)`: the cities joined to city `c` by road, 0 for none. `matrix(c, 7)`: 99 when the city is a port. | 43 | `city_road()` and `city_port_type()` (see note 1) | (stays an array) | |
+| `capcity()` | By side: the side's capital city, 0 when it has fallen. | 37 | `side_capital()` | (stays an array) | |
 
 ## Sides
 
@@ -56,13 +57,13 @@ Indexed by side: 1 Union, 2 Rebel.
 
 | Current | What it holds | Uses | Proposed | Record field | Your name |
 |---------|---------------|-----:|----------|--------------|-----------|
-| `force$()` | The side's name: "Union", "Rebel". | 45 | `side_name$()` | `sides(s).name` | |
-| `cash()` | Its money. | 89 | `side_cash()` | `sides(s).cash` | |
-| `income()` | Its income this turn. | 28 | `side_income()` | `sides(s).income` | |
-| `control()` | The number of cities it holds. | 31 | `side_city_count()` | `sides(s).city_count` | |
-| `victory()` | Its victory points. | 72 | `side_victory_points()` | `sides(s).victory_points` | |
-| `batwon()` | Battles it has won. | 13 | `side_battles_won()` | `sides(s).battles_won` | |
-| `casualty&()` | Men it has lost. | 15 | `side_casualties&()` | `sides(s).casualties` | |
+| `force$()` | The side's name: "Union", "Rebel". | 45 | `side_name$()` | (stays an array) | |
+| `cash()` | Its money. | 89 | `side_cash()` | (stays an array) | |
+| `income()` | Its income this turn. | 28 | `side_income()` | (stays an array) | |
+| `control()` | The number of cities it holds. | 31 | `side_city_count()` | (stays an array) | |
+| `victory()` | Its victory points. | 72 | `side_victory_points()` | (stays an array) | |
+| `batwon()` | Battles it has won. | 13 | `side_battles_won()` | (stays an array) | |
+| `casualty&()` | Men it has lost. | 15 | `side_casualties&()` | (stays an array) | |
 | `vptotal` | The two sides' incomes added, used for percentages in the reports. | 6 | `total_income` | (stays a scalar) | |
 | `usadv` | The Union's income bonus, set from the difficulty. | 9 | `union_income_bonus` | `game\` (phase 11) | |
 | `emancipate` | 1 once the Emancipation Proclamation event has happened. | 3 | `emancipation_done` | `game\` (phase 11) | |
@@ -71,9 +72,9 @@ Indexed by side: 1 Union, 2 Rebel.
 
 | Current | What it holds | Uses | Proposed | Record field | Your name |
 |---------|---------------|-----:|----------|--------------|-----------|
-| `fleet$()` | By side: one letter for each ship, "W" wooden or "I" ironclad. | 41 | `fleet_ships$()` | `fleets(s).ships` | |
-| `navysize()` | By side: the number of ships. Kept equal to `LEN(fleet$())`. | 82 | `fleet_size()` | `fleets(s).size` | |
-| `navyloc()` | By side: the port city the fleet is in, 0 for no fleet, 99 for at sea raiding commerce. | 96 | `fleet_city()` | `fleets(s).city` | |
+| `fleet$()` | By side: one letter for each ship, "W" wooden or "I" ironclad. | 41 | `fleet_ships$()` | (stays an array) | |
+| `navysize()` | By side: the number of ships. Kept equal to `LEN(fleet$())`. | 82 | `fleet_size()` | (stays an array) | |
+| `navyloc()` | By side: the port city the fleet is in, 0 for no fleet, 99 for at sea raiding commerce. | 96 | `fleet_city()` | (stays an array) | |
 | `navymove()` | By side: set to 0 and saved, never read. | 4 | `fleet_unused()` (see note 2) | none | |
 | `commerce` | The side whose fleet is raiding commerce, or 0. | 27 | `raiding_side` | (stays a scalar) | |
 | `raider` | The money the raiders sank this turn. | 9 | `raid_loss` | (stays a scalar) | |
@@ -85,10 +86,10 @@ Indexed by side.
 
 | Current | What it holds | Uses | Proposed | Record field | Your name |
 |---------|---------------|-----:|----------|--------------|-----------|
-| `rr()` | The army on the side's train, or 0. | 21 | `train_army()` | `trains(s).army` | |
-| `rrfrom()` | The city the train left. | 4 | `train_from_city()` | `trains(s).from_city` | |
-| `tracks()` | The city where the train icon is drawn. | 7 | `train_city()` | `trains(s).city` | |
-| `train()` | The largest army the side's train can carry (from `CWS.CFG`). | 11 | `train_capacity()` | `trains(s).capacity` | |
+| `rr()` | The army on the side's train, or 0. | 21 | `train_army()` | (stays an array) | |
+| `rrfrom()` | The city the train left. | 4 | `train_from_city()` | (stays an array) | |
+| `tracks()` | The city where the train icon is drawn. | 7 | `train_city()` | (stays an array) | |
+| `train()` | The largest army the side's train can carry (from `CWS.CFG`). | 11 | `train_capacity()` | (stays an array) | |
 
 ## The turn and the game
 

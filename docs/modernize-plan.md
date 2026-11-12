@@ -96,7 +96,7 @@ Every phase ends with all scripts passing on unchanged recordings, with both com
 | 7 | Break up the big pieces | `filer`, `report`, the main module, `navy`, `tupdate`, `smarts`, `events`. `GOSUB` routines become SUBs. The list is "Worth breaking out" in `sub-names.md`. |
 | 8 | Split rules from screen | Each mixed SUB becomes a rule part and a show part. `rules_test.bas` grows with each rule SUB. |
 | 9 | Menus | One menu SUB for each command. It asks the player, then calls a rule SUB. The main module becomes a loop. |
-| 10 | Records | `TYPE` records for armies, cities, sides and fleets. |
+| 10 | Records | A `TYPE` record for armies. The cities, sides and fleets stay arrays. |
 | 11 | The war's own content | Move what another war would replace into `game\`: flags, victory screens, tunes. Move texts, names, limits and the map's line work into data files (decision 19). |
 
 After the plan, each as its own decision: the known bugs, and the engine split.
@@ -149,10 +149,11 @@ the other commands, is committed as `77e3024` and puts that right. Step 8, `menu
 file renames, is done in the working tree (2026-11-12). That ends phase 9.
 
 Phase 9 step 8 is committed as `4fa959d`. Phase 10, records, has its plan below ("Phase 10:
-records"). Its step 1, the script and `sides`, is committed as `3043c01`. Step 2, `fleets` and
-`trains`, is done in the working tree (2026-11-12).
+records"). Its step 1, the script and `sides`, was committed as `3043c01`, and step 2, `fleets` and
+`trains`, as `ae6da81`. Both are taken back in the working tree (2026-11-12): only armies become a
+record (see "Only armies", below).
 
-**Next:** phase 10 step 3, `cities` and `leaders`.
+**Next:** phase 10 step 2, `armies`.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -362,28 +363,39 @@ Drafted 2026-11-12; the user answered its questions the same day. Each step is o
 each ends with `play.py check`, `play.py compare` and the unit tests passing on unchanged
 recordings.
 
+### Only armies (user, 2026-11-12)
+
+The first plan made six records: armies, leaders, cities, sides, fleets and trains. `sides`
+(`3043c01`) and `fleets` and `trains` (`ae6da81`) were built and committed, and `cities` and
+`leaders` were built. The user then asked whether the code was better for it. It was not, so all
+of them were taken back:
+
+- **A record pays where the code handles a whole thing at once.** Armies are cleared, copied and
+  moved between slots. Five places clear an army slot, and they do not clear the same fields.
+- **The others are never copied or cleared whole.** For them a record only changed the spelling,
+  and made lines longer: `side_cash(city_owner(i))` became `sides(cities(i).owner).cash`.
+- **`leaders(i)` misled.** It is the pool of leaders not yet used, by army slot, not "the leader
+  of army i".
+
+So the rule is: a record where the code handles the whole thing, an array for each field
+elsewhere.
+
 ### What becomes a record
 
-Six records, from the "Record field" column of `variable-names.md`. Each array of a field keeps its
-bounds, so index 0 stays where the code uses it: army 0 is the scratch army of Join, and city 0 is
-"NONE".
+One record, from the "Record field" column of `variable-names.md`. Each array of a field keeps its
+bounds, so index 0 stays where the code uses it: army 0 is the scratch army of Join.
 
 | Record | Index | Fields, from the arrays | Uses |
 |--------|-------|-------------------------|-----:|
 | `armies(0 TO MAX_ARMIES)` | army | `name`, `size`, `leader_rating`, `experience`, `supply`, `city`, `order` | 858 |
-| `leaders(0 TO 40)` | army slot | `name`, `rating` | 64 |
-| `cities(0 TO MAX_CITIES)` | city | `name`, `x`, `y`, `value`, `owner`, `first_owner`, `fort`, `army`, `port_type`, `road(0 TO MAX_ROADS)` | 539 |
-| `sides(0 TO 2)` | side | `name`, `capital`, `cash`, `income`, `city_count`, `victory_points`, `battles_won`, `casualties` (LONG) | 456 |
-| `fleets(0 TO 2)` | side | `ships`, `size`, `city` | 315 |
-| `trains(0 TO 2)` | side | `army`, `from_city`, `city`, `capacity` | 71 |
 
 "Uses" counts the names in the game and `rules_test.bas` today. Every field is an INTEGER, as the
-arrays are under `DEFINT A-Z`, except `casualties`. The names and `fleets(s).ships` are
-variable-length `STRING` fields.
+arrays are under `DEFINT A-Z`. The name is a variable-length `STRING` field.
 
-These stay as they are: the menu's variables, the settings (`opt_*`), `victory_rule()`, the turn's
-flags and `turn_recruit_city()`, `move_order_key()`, `month_name$()`, `map_font$()`, the flag's stars
-and the pictures. They are not records of a thing in the game, or they are one value.
+Everything else stays as it is: the arrays of the cities, sides, fleets, trains and leaders, the
+menu's variables, the settings (`opt_*`), `victory_rule()`, the turn's flags and
+`turn_recruit_city()`, `move_order_key()`, `month_name$()`, `map_font$()`, the flag's stars and the
+pictures.
 
 ### What both compilers do with records
 
@@ -405,11 +417,11 @@ and `save_game` read and write the same values in the same order.
 
 - **A script does the renames**: `tools\refactor\make_records.py`, kept with the others (decision
   16). It reads the "Record field" column of `variable-names.md`, and turns `army_size(expr)` into
-  `armies(expr).size` and `city_road(c, j)` into `cities(c).road(j)`. It uses the tokens of
+  `armies(expr).size`. It uses the tokens of
   `rename_vars.py`, so strings and comments stay as they are, and it skips an array that a SUB
   declares for itself. A SUB's own scalar of the same name is another variable: `ai_fortify` has
   a local `side_cash`, always 0, beside the shared `side_cash()`. The declarations in `cws.bi`
-  are written by hand: a `TYPE` block and a `DIM SHARED` line for each record, and the old names
+  are written by hand: a `TYPE` block and a `DIM SHARED` line for the record, and the old names
   out of `COMMON SHARED` and `DIM SHARED`.
 - **The compiler finds what the script missed.** The old arrays are gone and `OPTION _EXPLICIT` is
   on, so a use the script did not rewrite is a compile error.
@@ -420,14 +432,10 @@ and `save_game` read and write the same values in the same order.
 
 ### Steps
 
-From the smallest record to the largest, so that the script is proved on a small step first.
-
-1. **Done: the script, and `sides`.** See `modernize-completed.md`.
-2. **Done: `fleets` and `trains`.** See `modernize-completed.md`.
-3. **`cities` and `leaders`** (12 arrays, 603 uses). `city_road` and `city_port_type` go inside
-   the city record, and the line that reads `CITIES.GRD` reads into the fields.
-4. **`armies`** (7 arrays, 858 uses).
-5. **Whole records, where the screens stay the same.** `army_clear` waits for this (phase 7, step 4
+1. **Done: the script.** `sides`, `fleets` and `trains` were made records with it and then taken
+   back. See `modernize-completed.md`.
+2. **`armies`** (7 arrays, 858 uses).
+3. **Whole records, where the screens stay the same.** `army_clear` waits for this (phase 7, step 4
    of `modernize-completed.md`). The five places that clear an army do not clear the same fields.
    A whole-record clear (`armies(i) = no_army`) is only used where every field was cleared before,
    or where a test shows that what is left in the slot is never read. The same goes for the places
@@ -436,8 +444,7 @@ From the smallest record to the largest, so that the script is proved on a small
 ### Answered (user, 2026-11-12)
 
 1. **Fleets and trains are records of their own**, `fleets(s)` and `trains(s)`, not fields of
-   `sides(s)`.
+   `sides(s)`. Overtaken the same day: they stay arrays ("Only armies", above).
 2. **The exception for lines that no test runs is allowed** (above, "How a step works"). The
    hand-over lists each such line.
-3. **Type names:** `army_type`, `leader_type`, `city_type`, `side_type`, `fleet_type` and
-   `train_type`.
+3. **Type name:** `army_type`.

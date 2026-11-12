@@ -27,12 +27,12 @@ END FUNCTION
 ' when it has met none. x and y are the sides' men (victory_forces).
 SUB victory_rule_met (i, x, y, j)
 j = 0
-	IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: sides(i).victory_points = sides(i).victory_points + 300: GOTO finis
+	IF (i = 1 AND y = 0) OR (i = 2 AND x = 0) THEN j = 7: side_victory_points(i) = side_victory_points(i) + 300: GOTO finis
 
 	IF turn_year >= victory_rule(VICTORY_YEAR) AND turn_month >= victory_rule(VICTORY_MONTH) AND victory_rule(VICTORY_YEAR) > 0 THEN j = 2: GOTO finis
-	IF sides(i).city_count >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN j = 3: GOTO finis
-	IF sides(i).income / (sides(SIDE_UNION).income + sides(SIDE_REBEL).income) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN j = 4: GOTO finis
-	IF victory_rule(VICTORY_CAPITAL) > 0 AND sides(other_side(i)).capital = 0 AND sides(i).capital > 0 THEN j = 5: GOTO finis
+	IF side_city_count(i) >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN j = 3: GOTO finis
+	IF side_income(i) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN j = 4: GOTO finis
+	IF victory_rule(VICTORY_CAPITAL) > 0 AND side_capital(other_side(i)) = 0 AND side_capital(i) > 0 THEN j = 5: GOTO finis
 
 	IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
 		IF i = 1 THEN
@@ -50,13 +50,13 @@ END SUB
 ' 1 when side i holds nine tenths of the cities the cities rule asks for.
 FUNCTION victory_near_cities (i)
 victory_near_cities = 0
-IF victory_rule(VICTORY_CITIES) > 0 AND sides(i).city_count >= .9 * victory_rule(VICTORY_CITIES) THEN victory_near_cities = 1
+IF victory_rule(VICTORY_CITIES) > 0 AND side_city_count(i) >= .9 * victory_rule(VICTORY_CITIES) THEN victory_near_cities = 1
 END FUNCTION
 
 ' 1 when side i has nine tenths of the share of the income the income rule asks for.
 FUNCTION victory_near_income (i)
 victory_near_income = 0
-IF victory_rule(VICTORY_INCOME) > 0 AND sides(i).income / (sides(SIDE_UNION).income + sides(SIDE_REBEL).income) >= .009 * victory_rule(VICTORY_INCOME) THEN victory_near_income = 1
+IF victory_rule(VICTORY_INCOME) > 0 AND side_income(i) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .009 * victory_rule(VICTORY_INCOME) THEN victory_near_income = 1
 END FUNCTION
 
 ' 1 when side i has nine tenths of the strength ratio the ratio rule asks for. x and y are the
@@ -78,7 +78,7 @@ END SUB
 ' The game ends with side i's victory by rule j: 100 more victory points when the enemy was
 ' wiped out (7), the side marked for the battle summary, and the game over.
 SUB victory_won (i, j)
-IF j = 7 THEN sides(i).victory_points = sides(i).victory_points + 100
+IF j = 7 THEN side_victory_points(i) = side_victory_points(i) + 100
 victory_reason = i
 game_over = 1
 END SUB
@@ -86,7 +86,7 @@ END SUB
 ' A technical victory when the time ran out: both sides keep seven tenths of their points.
 SUB victory_technical_points
 DIM k AS INTEGER
-FOR k = SIDE_UNION TO SIDE_REBEL: sides(k).victory_points = .7 * sides(k).victory_points: NEXT k
+FOR k = SIDE_UNION TO SIDE_REBEL: side_victory_points(k) = .7 * side_victory_points(k): NEXT k
 END SUB
 
 ' The place in side s's Hall of Fame that its score earns: the first whose score it reaches, or
@@ -95,7 +95,7 @@ FUNCTION hall_of_fame_place (s, hall_score())
 DIM i AS INTEGER
 hall_of_fame_place = 0
 FOR i = 1 TO 5
-IF sides(s).victory_points >= hall_score(s, i) THEN hall_of_fame_place = i: EXIT FUNCTION
+IF side_victory_points(s) >= hall_score(s, i) THEN hall_of_fame_place = i: EXIT FUNCTION
 NEXT i
 END FUNCTION
 
@@ -108,5 +108,5 @@ DIM j AS INTEGER
 	hall_name$(s, j) = hall_name$(s, j - 1)
 	NEXT j
 	hall_name$(s, i) = name$
-	hall_score(s, i) = sides(s).victory_points
+	hall_score(s, i) = side_victory_points(s)
 END SUB

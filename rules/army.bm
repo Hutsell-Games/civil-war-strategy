@@ -66,7 +66,7 @@ DIM x AS INTEGER: DIM a AS INTEGER
 	x = 70: IF opt_realism >= REALISM_ON THEN x = 3 * city_value(city) + 33
 	a = city_is_connected(side, city): IF a < 1 THEN x = x \ 3
 	city_army(city) = slot: army_size(slot) = x
-	sides(side).cash = sides(side).cash - COST_RECRUIT
+	side_cash(side) = side_cash(side) - COST_RECRUIT
 	army_city(slot) = city
 	army_order(slot) = ORDER_BUSY
 END SUB
@@ -121,13 +121,13 @@ DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 			IF a < 1 THEN EXIT SUB
 		END IF
 		result = SUPPLY_NO_CASH
-		IF army_size(army) > 0 THEN x = sides(who).cash / army_size(army) * 10
+		IF army_size(army) > 0 THEN x = side_cash(who) / army_size(army) * 10
 		y = x + army_supply(army): IF y > RESUPPLY_LEVEL THEN x = RESUPPLY_LEVEL - army_supply(army)
 		IF x >= 1 THEN
-			army_supply(army) = army_supply(army) + x: sides(who).cash = sides(who).cash - .1 * x * army_size(army)
+			army_supply(army) = army_supply(army) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(army)
 			result = SUPPLY_BOUGHT
 		END IF
-		IF sides(who).cash < 0 THEN sides(who).cash = 0
+		IF side_cash(who) < 0 THEN side_cash(who) = 0
 END SUB
 
 SUB army_generate_name (army, name$)
@@ -253,7 +253,7 @@ DIM x AS INTEGER: DIM a AS INTEGER
 	END IF
 	army_size(army) = army_size(army) + x
 	CALL army_recruit_bonus(0)
-	sides(side).cash = sides(side).cash - COST_RECRUIT
+	side_cash(side) = side_cash(side) - COST_RECRUIT
 END SUB
 
 ' The Balance setting's extra men for a recruited army. The caller passes slot 0 when men
@@ -274,7 +274,7 @@ DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM x AS INTEGER
 	IF opt_difficulty < 3 THEN max = max + 1
 
 	FOR i = 1 TO MAX_CITIES
-	IF sides(side).city_count > 0 THEN pct! = .6 * max / sides(side).city_count ELSE pct! = .3
+	IF side_city_count(side) > 0 THEN pct! = .6 * max / side_city_count(side) ELSE pct! = .3
 	IF menu_item_count = 0 AND i > 20 THEN pct! = .3
 	IF menu_item_count < 2 AND i > 30 THEN pct! = .3
 	menu_value(i) = 0

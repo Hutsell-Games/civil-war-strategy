@@ -4,9 +4,9 @@
     python -I tools/refactor/make_records.py report <record> ...   # counts and problems; changes nothing
     python -I tools/refactor/make_records.py apply <record> ...    # rewrite the sources
 
-<record> is a record of the "Record field" column of docs/variable-names.md: sides, fleets,
-trains, cities, leaders or armies. `side_cash(expr)` becomes `sides(expr).cash`, and an array of
-two indexes, `city_road(c, j)`, becomes `cities(c).road(j)`.
+<record> is a record of the "Record field" column of docs/variable-names.md; today that is only
+armies. `army_size(expr)` becomes `armies(expr).size`, and an array of two indexes, `a(c, j)` with
+the field `recs(c).f(...)`, becomes `recs(c).f(j)`.
 
 Uses the tokens of rename_vars.py, so strings, comments, REM and DATA are left alone. A name that a
 SUB declares for itself (a parameter, DIM, REDIM or STATIC) is left alone and reported. The

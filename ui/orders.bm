@@ -48,7 +48,7 @@ DIM who AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM cost AS INTEGER
 		city = menu_value(menu_choice): CALL city_update_occupier(city): x = city_army(city): IF x < 0 GOTO nocity
 		IF city_fort(city) >= MAX_FORT THEN CALL clear_bottom_line: PRINT city_name$(city); " at MAXIMUM fortification level of 2"; : CALL wait_seconds(4): GOTO nocity
 		cost = COST_FORT
-		IF sides(current_side).cash < cost THEN CALL clear_bottom_line: PRINT "Fortifications for "; city_name$(city); " cost "; cost; " and you only have "; sides(current_side).cash; : CALL wait_seconds(4): GOTO nocity
+		IF side_cash(current_side) < cost THEN CALL clear_bottom_line: PRINT "Fortifications for "; city_name$(city); " cost "; cost; " and you only have "; side_cash(current_side); : CALL wait_seconds(4): GOTO nocity
 		COLOR COLOR_CYAN
 		CALL city_build_fort(current_side, city)
 		CALL clear_bottom_line: PRINT city_name$(city); " fortifications increased to "; city_fort(city);
@@ -138,12 +138,12 @@ END SUB
 ' again and again while the money lasts.
 SUB menu_army_recruit (side)
 DIM city AS INTEGER: DIM raised AS INTEGER
-	IF sides(side).cash < COST_RECRUIT THEN EXIT SUB
+	IF side_cash(side) < COST_RECRUIT THEN EXIT SUB
 	CALL menu_recruit_cities(side)
 	IF menu_item_count = 0 THEN EXIT SUB
 	DO
-	IF sides(side).cash < COST_RECRUIT THEN EXIT SUB
-	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT sides(side).name; " funds available "; sides(side).cash;
+	IF side_cash(side) < COST_RECRUIT THEN EXIT SUB
+	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
 	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
 	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
 	CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
@@ -282,7 +282,7 @@ DIM star AS INTEGER: DIM fin AS INTEGER: DIM i AS INTEGER: DIM a AS INTEGER: DIM
 		IF army_city(i) = 0 OR army_supply(i) > 1 GOTO alone
 		IF opt_realism >= REALISM_ON THEN
 			a = city_is_connected(current_side, army_city(i))
-			IF a < 1 THEN CALL clear_bottom_line: COLOR COLOR_WHITE: PRINT sides(current_side).name; " army in "; city_name$(army_city(i)); " is CUT OFF !"; : wait_seconds opt_pause!: GOTO alone
+			IF a < 1 THEN CALL clear_bottom_line: COLOR COLOR_WHITE: PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !"; : wait_seconds opt_pause!: GOTO alone
 		END IF
 		menu_item_count = menu_item_count + 1
 		max = 11: IF LEN(army_name$(i)) < 11 THEN max = LEN(army_name$(i))
@@ -290,7 +290,7 @@ DIM star AS INTEGER: DIM fin AS INTEGER: DIM i AS INTEGER: DIM a AS INTEGER: DIM
 		menu_value(menu_item_count) = i
 alone:
 		NEXT i
-		IF menu_item_count = 0 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "All eligible "; sides(current_side).name; " armies have supplies"; : EXIT SUB
+		IF menu_item_count = 0 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "All eligible "; side_name$(current_side); " armies have supplies"; : EXIT SUB
 		CALL menu_select(MENU_ARMY_POINTER): CALL clear_right_panel
 		IF menu_choice < 0 THEN EXIT SUB
 		picked = menu_value(menu_choice)
@@ -305,15 +305,15 @@ END SUB
 SUB menu_move_capital (city)
 DIM a$
 	city = 0
-	IF sides(current_side).capital = 0 OR sides(current_side).cash < COST_MOVE_CAPITAL THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Cannot move capital"; : EXIT SUB
+	IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Cannot move capital"; : EXIT SUB
 	CALL capital_move_pay(current_side)
 	CALL clear_right_panel
 	menu_text$(0) = "Capital"
-	a$ = city_name$(sides(current_side).capital)
-	city = sides(current_side).capital: CALL menu_city_select(city)
+	a$ = city_name$(side_capital(current_side))
+	city = side_capital(current_side): CALL menu_city_select(city)
 	IF city = 0 THEN EXIT SUB
 	CALL capital_move_to(current_side, city)
-	CALL clear_bottom_line: PRINT sides(current_side).name; " capital moved from "; a$; " to "; city_name$(sides(current_side).capital);
+	CALL clear_bottom_line: PRINT side_name$(current_side); " capital moved from "; a$; " to "; city_name$(side_capital(current_side));
 	CALL clear_right_panel
 	CALL draw_cities
 	CALL wait_seconds(PAUSE_LONG): CALL clear_bottom_line
@@ -345,7 +345,7 @@ END SUB
 ' The Ships menu for the player. quit is 1 when the fleet has acted this month and the menu
 ' has nothing left to offer.
 SUB menu_navy (side, quit)
-	CALL clear_bottom_line: PRINT "Funds available "; sides(side).cash;
+	CALL clear_bottom_line: PRINT "Funds available "; side_cash(side);
 	CALL menu_navy_items(side)
 	IF turn_navy_done > 0 AND menu_choice <> 1 THEN quit = 1: EXIT SUB
 	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
@@ -356,21 +356,21 @@ END SUB
 SUB menu_navy_items (side)
 menu_text$(0) = "Ships"
 menu_text$(1) = "Build"
-IF fleets(side).city <> FLEET_AT_SEA THEN
-IF sides(side).cash < COST_SHIP OR fleets(side).size >= MAX_FLEET_SHIPS OR city_owner(fleets(side).city) <> side THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
+IF fleet_city(side) <> FLEET_AT_SEA THEN
+IF side_cash(side) < COST_SHIP OR fleet_size(side) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(side)) <> side THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
 END IF
 menu_text$(2) = "Attack"
-IF fleets(side).city <> FLEET_AT_SEA THEN
-IF city_owner(fleets(side).city) <> other_side(side) THEN menu_text$(2) = "-": menu_choice = MENU_START + 1
+IF fleet_city(side) <> FLEET_AT_SEA THEN
+IF city_owner(fleet_city(side)) <> other_side(side) THEN menu_text$(2) = "-": menu_choice = MENU_START + 1
 ELSE
 menu_text$(1) = "-": menu_text$(2) = "-": menu_choice = MENU_START + 3
 END IF
-menu_text$(3) = "Sail": IF fleets(side).city < 1 THEN menu_text$(3) = "-"
-menu_text$(4) = "Raid": IF fleets(side).size < 1 OR raiding_side = side THEN menu_text$(4) = "-"
+menu_text$(3) = "Sail": IF fleet_city(side) < 1 THEN menu_text$(3) = "-"
+menu_text$(4) = "Raid": IF fleet_size(side) < 1 OR raiding_side = side THEN menu_text$(4) = "-"
 menu_col = PANEL_COL: menu_row = 12: menu_item_count = 4
-IF fleets(side).city <> FLEET_AT_SEA THEN
-IF side = SIDE_UNION AND fleets(side).size > 1 AND city_owner(fleets(side).city) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
-IF opt_realism = REALISM_OFF AND side = SIDE_REBEL AND fleets(side).size > 1 AND city_owner(fleets(side).city) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
+IF fleet_city(side) <> FLEET_AT_SEA THEN
+IF side = SIDE_UNION AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
+IF opt_realism = REALISM_OFF AND side = SIDE_REBEL AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
 END IF
 END SUB
 
@@ -385,10 +385,10 @@ DIM row AS INTEGER: DIM again AS INTEGER: DIM picked AS INTEGER: DIM found AS IN
 	menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN
 	menu_text$(0) = "Commands"
 	menu_text$(1) = "Cancel"
-	menu_text$(2) = "Fortify": IF sides(current_side).cash < COST_FORT THEN menu_text$(2) = "-"
+	menu_text$(2) = "Fortify": IF side_cash(current_side) < COST_FORT THEN menu_text$(2) = "-"
 	menu_text$(3) = "Join"
 	menu_text$(4) = "Supply"
-	menu_text$(5) = "Capital": IF sides(current_side).capital = 0 OR sides(current_side).cash < COST_MOVE_CAPITAL THEN menu_text$(5) = "-"
+	menu_text$(5) = "Capital": IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN menu_text$(5) = "-"
 	menu_text$(6) = "Detach": IF current_side = SIDE_UNION THEN menu_text$(6) = "-"
 	menu_text$(7) = "Army Drill"
 	menu_text$(8) = "Relieve"
@@ -401,9 +401,9 @@ DIM row AS INTEGER: DIM again AS INTEGER: DIM picked AS INTEGER: DIM found AS IN
 	CASE 1
 	CALL menu_army_cancel(current_side): CALL turn_set_moves_done(0)
 	CASE 2
-	IF sides(current_side).cash < COST_FORT THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Not enough money for fort"; : EXIT SUB
+	IF side_cash(current_side) < COST_FORT THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Not enough money for fort"; : EXIT SUB
 	CALL menu_city_fortify(picked)
-	IF sides(current_side).cash < COST_FORT THEN EXIT SUB
+	IF side_cash(current_side) < COST_FORT THEN EXIT SUB
 	CASE 3
 	CALL menu_army_combine(current_side, found)
 	IF found = 0 THEN
