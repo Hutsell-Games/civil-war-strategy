@@ -1,0 +1,33 @@
+# Civil War Strategy: files that are missing or wrong. The run starts without MTN.VGA, with a
+# CWS.CFG that names no player count and no display speed, and with a map that has two one-way
+# roads (tests/data/bad-map: Chattanooga to Baltimore, which has room for the road back, and
+# Baton Rouge to Chattanooga, which has none).
+#! seed 1861
+#! cfg player=0 turbo=0
+#! without graphics/MTN.VGA
+#! data bad-map
+
+# The title menu, after "ERROR: Missing File 'MTN.VGA'": Start NEW Game.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+
+# UTILITY, Chk Links: the report of the map's roads, and a key.
+text u
+prompt
+text c
+play until 1:L
+digest
+key space
+play until 2:M
+digest
+
+# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

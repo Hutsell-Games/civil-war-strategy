@@ -5,3 +5,5 @@
 date 5 1864
 owner 2 29
 fleet 1 WWWWWWWWW 30
+# The Rebel fleet is at sea, raiding commerce, so the computer decides whether to sail it home.
+fleet 2 WW 99

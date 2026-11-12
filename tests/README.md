@@ -194,7 +194,13 @@ on a desktop nobody sees.
 | `union-time` | A whole game as the Union to the time limit in March 1865, with the keys F3, F4 and F7 |
 | `endings` | Three games in one run, each to another ending: income, a captured capital, and an army annihilated |
 | `events-south` | From a prepared save of November 1863, the events that favor the South, by forced dice: riots in a city the Union took, England's ships, mercenaries, furloughs for the 1864 election, a loan, and the victory points of January 1864 and 1865 |
-| `events-union` | From a prepared save of May 1864, the events that favor the Union: riots in a city the Rebels took, extra ships up to the fleet's limit, the Emancipation Proclamation, and Lincoln reelected |
+| `events-union` | From a prepared save of May 1864, the events that favor the Union: riots in a city the Rebels took, extra ships up to the fleet's limit, the Emancipation Proclamation, and Lincoln reelected. The Rebel fleet starts at sea, so the computer sails it home |
+| `refusals` | From a prepared save, one month of commands that the game refuses or that need a certain state: no commander left for a new army, a blocked track, an army too large for the train, the Which menu, a train's destination with no track, "Railroad is already carrying", the Supply menu with an army cut off, armies too large to combine, the Cancel menu, and an ironclad from the Type menu |
+| `navy-fights` | From a prepared save: the Options menu of a sea fight and a retreat, a raid on commerce without and with the lead ship's picture, a fleet that sails home from raiding, and a Union army that beats the army in Richmond, which flees |
+| `navy-losses` | From a prepared save, as the Rebels: a shore battery sinks their only ship, no army is left free to move, the Balance menu's faces, the Raze menu, and "NO SHIPYARDS AVAILABLE" |
+| `bad-files` | A run without `MTN.VGA`, with a `CWS.CFG` that names no player count and no display speed, and with a map that has two one-way roads, which Chk Links reports |
+| `sound-union` | The game starts with music on as the Union: the title tune, the ironclads' announcement and an event's tune run, unheard |
+| `sound-rebel` | The same as the Rebels: "Shenandoah" at the title, and the tune of an event that favors the South |
 
 All but `title` and `files` are the scripts that QB64Rust's test corpus plays on its copy of this repo's
 `main` (`tests\corpus\screen\g12_game.*.keys` there), with this port's places. `files` was written again for
@@ -248,10 +254,10 @@ a table per SUB, the least covered first (`tests\out\coverage\subs.txt`).
 
 Not covered:
 
-- **The boss screen** (`scrnsavr`). Ctrl+B at a menu starts it, and only Ctrl+B ends it. A keys file cannot
-  give Ctrl+B.
-- **The title music** (the tune in `CWSTRAT.BAS` and `shen`), which plays only when the game starts with
-  `noise` 2.
+- **21 lines that no test runs**, most of them code that cannot be reached. They are listed with their
+  reasons in `docs\modernize-plan.md`, "Phase 0 after phase 7 began".
+- **What the tunes sound like.** The sound scripts run the `PLAY` and `SOUND` statements; nothing checks the
+  notes.
 - **The real `SHELL "copy ..."`**, which `scriptshell` replaces under a script.
 - **Linux.** The game opens lower-case names of upper-case files, and copies its history with a Windows
   command.

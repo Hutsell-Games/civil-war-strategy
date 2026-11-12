@@ -1,0 +1,122 @@
+# Civil War Strategy: the Union's fleet meets the Rebel fleet, retreats, raids and sails back,
+# and a Union army beats the army in Richmond. The game is loaded from a prepared save
+# (tests/data/navy-fights/cws1.save): May 1862, the Union plays, its fleet led by an ironclad;
+# the Rebel fleet lies in Mobile. The computer is passive. The map starts with city names but
+# not the full pictures (graf=2).
+#! seed 1862
+#! cfg bold=0 graf=2 history=1
+#! data navy-fights
+#! files cws.his
+
+rule 1 key space
+rule 2:E text y
+rule 2:R key enter
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:V
+text r
+play until 2:L
+key enter
+play until 2:M
+digest
+
+# UTILITY, End Cond. Victory Conditions starts on Time: down and Enter turn off each of the
+# four others. Esc there, and Esc at the Utility menu.
+text u
+prompt
+text e
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key down
+prompt
+key enter
+prompt
+key esc
+prompt
+key esc
+prompt
+
+# May 1862. Ships, Sail, to Mobile, where the Rebel fleet lies: the Options menu of a sea
+# fight. Esc there shows it again. Retreat: the fleet goes back to Philadelphia.
+text s
+prompt
+text s
+prompt
+digest
+text m
+prompt
+digest
+key esc
+prompt
+text r
+prompt
+digest
+
+# Moves: Fremont, from Fredericksburg to Richmond, where a Rebel army stands. In the turn's
+# update he wins and takes the capital, and the beaten army flees to a Rebel city.
+text m
+prompt
+text f
+prompt
+text r
+prompt
+digest
+text e
+
+# July 1862. Ships, Raid: the fleet sails to raid commerce, without the picture of its ship.
+play until 2:M
+digest
+text s
+prompt
+text r
+prompt
+digest
+text e
+
+# September 1862. Ships, Sail, from raiding to the first port. UTILITY, Graphics: the full map.
+play until 2:M
+digest
+text s
+prompt
+text s
+prompt
+digest
+key enter
+prompt
+digest
+text u
+prompt
+text g
+prompt
+key esc
+prompt
+digest
+text e
+
+# November 1862. Ships, Raid: the fleet sails with the picture of the ironclad that leads it.
+play until 2:M
+digest
+text s
+prompt
+text r
+prompt
+digest
+
+# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

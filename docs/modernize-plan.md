@@ -159,9 +159,9 @@ the working tree: `side_army_range` became `side_first_army` and `side_last_army
 Phase 7 step 1 is done in the working tree (2026-11-11): `file_management` is split, see "Phase 7" below.
 Steps 2 and 3 are done in the working tree too: `menu_report` is split, and `wait_key` is in.
 Step 4, the small shared pieces, is done in the working tree.
-Phase 0 goes first (user, 2026-11-11); phase 7 step 5 waits for it. Phase 0's steps 2 to 5 are done in the
-working tree: see "Phase 0 after phase 7 began" below.
-**Next:** phase 0 step 6, the command and refusal scripts.
+Phase 0 went first (user, 2026-11-11) and is done: see "Phase 0 after phase 7 began" below. 33 scripts,
+21 lines not run, each with its reason.
+**Next:** phase 7 step 5, the main module's pieces that stand alone.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -303,22 +303,42 @@ Steps 2 to 10 were taken up on 2026-11-11, after phase 7's step 4. Line numbers 
 - **Measured after step 5** (27 scripts and the unit tests): 3,421 of 3,787 lines run in full, 223 in
   part, 143 not run. Before: 200 not run.
 
-Still not run, for steps 6 to 9:
+- **Steps 6 to 8, done.** Six more scripts, four of them from prepared saves: `refusals`, `navy-fights`,
+  `navy-losses`, `bad-files`, `sound-union` and `sound-rebel` (`tests\README.md` says what each plays).
+  Two need a seed found by trial, because the game draws a real random number there: the shore
+  battery that sinks a ship (`navy-losses`, seed 6) and the Recruit menu that offers Indianapolis
+  (`refusals`, seed 6). `tests\out\scratch\try_seeds.py` did the search; it is not kept in the repo.
+- **Step 7's unit tests of the rule branches were not written.** The three lines they were for
+  (`rules\battle.bm` 58, 131 and 142) cannot be reached: see the table.
+- **Steps 9 and 10, done.** Measured on 2026-11-11 with 33 scripts and the unit tests: 3,552 of 3,787
+  lines run in full, 214 in part, 21 not run (99.4%). All 33 scripts pass with both compilers.
 
-| File | Lines not run | What they are |
-|------|---------------|---------------|
-| `CWSTRAT.BAS` | 37, 79-93, 234, 305-336, 582-584 | `MTN.VGA` missing; the title tune; "Railroad is already carrying"; Join's refusal and the Supply menu; Vary Start's dead loop |
-| `rules\navy.bm` | 74-81, 101-103, 154-159, 195, 212, 261, 267, 330, 341, 381-393 | the ship type menu; refusals; a fleet eliminated; a fleet retreats |
-| `rules\turn.bm` | 71, 73, 164-172, 228-236, 253 | the unreachable `CASE`s; a beaten army's flight; the Raze menu |
-| `ui\orders.bm` | 4-5, 87-91, 106, 118, 121, 133, 275 | refusals; the Which menu |
-| `game\tunes.bm` | 3-13 | `play_shenandoah` |
-| `rules\army.bm` | 20-22, 60-62, 137 | the Join menu; "No more commanders" |
-| `ai\ai.bm` | 24, 63-64, 79-80, 202 | the computer's fleet moves |
-| others | `battle.bm` 58, 131, 142; `city.bm` 44, 50-51; `railroad.bm` 45, 52-53; `menu.bm` 123-124, 152, 195; `reports.bm` 67-69, 95; `files.bm` 57; `qb64.bm` 15-16; `screen.bm` 46-47 | rule branches; `check_map_links`' errors; menu details; the real pause |
+The 21 lines that no test runs:
 
-In `special_events` four half-run lines are left. The cap `pct! > .9` needs the year 1868, which no game
-reaches. The two early returns of the riot (realism off; a side with one city) and the event tunes wait
-for the sound script and a script with realism off.
+| File | Lines | Why |
+|------|-------|-----|
+| `CWSTRAT.BAS` | 582-584 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
+| `ai\ai.bm` | 24 | Follows `IF ... GOTO capital ELSE GOTO city2`; nothing reaches it |
+| `ai\ai.bm` | 79-80 | The `ELSE` for a fleet at sea; a fleet at sea already left at line 64 |
+| `ai\ai.bm` | 202 | An army of size 0 that still holds a city; no game makes one |
+| `port\qb64.bm` | 15-16 | `DIR$("")` for the next match; the game never calls it that way |
+| `rules\battle.bm` | 58 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
+| `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
+| `rules\navy.bm` | 103 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
+| `rules\navy.bm` | 341, 393 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
+| `rules\turn.bm` | 71, 73 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
+| `rules\turn.bm` | 253 | `GOTO allthru` after the loop over 40 armies; the loop always leaves early, at the first army that does not move |
+| `ui\orders.bm` | 118 | The picker found no city of the player's among 39; the player always holds the city it started on |
+| `ui\orders.bm` | 133 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
+| `ui\reports.bm` | 95 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
+
+Of the 214 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
+only with the sound on. In `special_events` eight are left: the exit when random events are off, the cap
+`pct! > .9` (it needs the year 1868), England's ships when the Rebel fleet is in port, the cap of the
+Rebel fleet at 10 ships, and the riot's two early returns (realism off; a side with one city).
+
+A step of phases 7 to 9 that rewrites a line still looks that line up in `tests\out\coverage\report.txt`
+first (`play.py coverage`).
 
 ## Phase 7: break up the big pieces
 
@@ -334,7 +354,8 @@ prepared save and no new script. So decision 13's bar is not met. Measured on 20
 statements not run: the main module 116, `rules\navy.bm` 104, `ui\orders.bm` 74, `game\events.bm` 59,
 `rules\army.bm` 59, `rules\turn.bm` 39, `ai\ai.bm` 32, `rules\railroad.bm` 24.
 
-Until the user decides otherwise, each step of this phase works like this:
+The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finished ("Phase 0 after phase
+7 began"). Steps 1 to 4 were done under this rule, which still holds for the 21 lines left:
 
 - Before the step, read `tests\out\coverage\report.txt` for the lines the step moves or rewrites.
 - A line that no test runs is either reached first by a new script or unit test, or moved whole with no
@@ -383,19 +404,17 @@ Until the user decides otherwise, each step of this phase works like this:
 5. **The main module's pieces that stand alone**: `load_cities`, `draw_title`, `play_title_music`,
    `turn_collect_income`, `draw_player_turn` (the `GOSUB` routine `blanken`), `set_union_advantage`
    (`unionplus`), `army_detach`, `army_drill`, `menu_supply`, `menu_move_capital`,
-   `vary_start_conditions`. The Supply menu (lines 314 to 339) and the title tune (82 to 96) are not run
-   by any script; they need a script first. The menus' `GOTO menu0` web stays for phase 9.
+   `vary_start_conditions`. The menus' `GOTO menu0` web stays for phase 9.
 6. **`turn_resolve`'s outer parts**: `turn_set_move_order`, `navy_commerce_raid`,
    `turn_update_victory_points`, `draw_update_box`.
 7. **`special_events` and `ai_turn`**: `event_riot`; one `ai_` SUB for each headed section of `ai_turn`,
-   and `ai_count_armies`. The events need phase 0's forced dice first (59 statements not run).
+   and `ai_count_armies`.
 8. **`menu_army_recruit` and `railroad_move`**, each split into the human's menu, the computer's choice
    and the rule (`sub-names.md`, "Other SUBs that serve both the human and the computer").
 9. **`check_victory_conditions`**: `victory_warnings` and `end_game`. The Hall of Fame gets its own
    arrays in place of `city_name$()`.
 10. **`navy_commands`**: `navy_combat`, `ai_pick_port` and `draw_fleet_sailing` first. Then `ai_navy`,
-    `menu_navy` and `navy_action`, and last one SUB for each action. It has 104 statements not run, so
-    its scripts come first.
+    `menu_navy` and `navy_action`, and last one SUB for each action.
 11. **The attack, retreat and surrender knot in the middle of `turn_resolve`.**
 12. **`menu_select`'s highlight**: `menu_highlight` and `menu_unhighlight`.
 

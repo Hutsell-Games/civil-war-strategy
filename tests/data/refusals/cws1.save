@@ -1,0 +1,31 @@
+# For the script refusals: commands that the game refuses, and menus that need a certain state.
+# May 1862, the Union plays, with cash for an ironclad.
+date 5 1862
+cash 1000 50
+# Two armies in Washington: the Which menu. Grant has the name of his slot's leader, as an army
+# has that was recruited in the game.
+army 6 city=39 size=100 lead=8 exp=2 supply=5 name=Grant
+# McClellan in Cincinnati and Buell in St. Louis are low on supplies: the Supply menu.
+army 2 supply=1
+army 4 supply=1
+# An army in Tullahoma, which the Union holds alone among Rebel cities: cut off, and no track out.
+owner 1 37
+army 7 city=37 size=50 lead=4 exp=1 supply=0 name=Banks
+# Fremont in Harper's Ferry is too large for the railroad.
+army 3 size=1250
+# Two armies in Pittsburgh, each too large to combine with anything.
+army 8 city=31 size=1300 lead=1 exp=1 supply=5 name=Burnside
+army 9 city=31 size=1300 lead=8 exp=1 supply=5 name=Sherman
+# Every other army slot of the Union is taken, all in Springfield, so a new army in a city
+# with no army finds no commander.
+army 10 city=35 size=30 lead=7 exp=1 supply=5 name=Rosecrans
+army 11 city=35 size=30 lead=6 exp=1 supply=5 name=Hooker
+army 12 city=35 size=30 lead=5 exp=1 supply=5 name=Meade
+army 13 city=35 size=30 lead=7 exp=1 supply=5 name=Thomas
+army 14 city=35 size=30 lead=7 exp=1 supply=5 name=Grierson
+army 15 city=35 size=30 lead=5 exp=1 supply=5 name=Custer
+army 16 city=35 size=30 lead=9 exp=1 supply=5 name=Sheridan
+army 17 city=35 size=30 lead=5 exp=1 supply=5 name=Halleck
+army 18 city=35 size=30 lead=1 exp=1 supply=5 name=Banks
+army 19 city=35 size=30 lead=3 exp=1 supply=5 name=Butler
+army 20 city=35 size=30 lead=7 exp=1 supply=5 name=McPherson

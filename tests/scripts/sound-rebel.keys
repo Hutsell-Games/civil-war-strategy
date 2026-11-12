@@ -1,0 +1,35 @@
+# Civil War Strategy: the game starts with music and sound on, as the Rebels. Nothing is heard
+# (script_mute, port/script.bm), but the tunes run and take their time: "Shenandoah" at the
+# title, then, in the saved game of events-south, the tune of an event that favors the South (a
+# loan from Europe, by forced dice). The notes are not checked.
+#! seed 1863
+#! cfg side=2 noise=2 bold=0
+#! data events-south
+#! dice 0,.05,.5,.9,.9,.1
+#! timeout 600
+
+rule 1 key space
+rule 2:E text y
+rule 2:R key enter
+
+# The title menu, after "Shenandoah": Resume Saved Game; the Load menu: the one save.
+play until 2:V
+digest
+text r
+play until 2:L
+key enter
+
+# November 1863: END TURN.
+play until 2:M
+digest
+text e
+
+# January 1864. Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+play until 2:M
+digest
+text f
+prompt
+text q
+prompt
+text y
+repeat space

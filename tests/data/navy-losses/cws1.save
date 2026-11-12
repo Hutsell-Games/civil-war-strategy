@@ -1,0 +1,15 @@
+# For the script navy-losses: the Rebels lose their fleet and cannot build another.
+# May 1862, the Rebels play. Their one ship lies off Philadelphia, which has a strong fort. The
+# Union holds every sea port, so the Rebels have no shipyard. The Union has no fleet.
+date 5 1862
+side 2
+cash 300 500
+owner 1 5 16 24 27 28 34 40
+fort 2 30
+fleet 1 - 0
+fleet 2 W 30
+# One Rebel army only, in Richmond: once it has an order, no army is free to move.
+noarmy 22-24
+# The Union holds Raleigh, beside Richmond, with a fort and no army: the Raze menu.
+owner 1 32
+fort 1 32

@@ -1,0 +1,175 @@
+# Civil War Strategy: commands that the game refuses, and menus that need a certain state. The
+# game is loaded from a prepared save (tests/data/refusals/cws1.save): May 1862, the Union plays.
+# A refusal shows as a message on the bottom line under the next menu.
+#! seed 6
+#! data refusals
+
+rule 1 key space
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:V
+text r
+play until 2:L
+key enter
+play until 2:M
+digest
+
+# The Left key means nothing to a menu.
+key left
+prompt
+
+# Troops: the Recruit menu. Indianapolis, which has no army: every army slot is taken, "No more
+# Union commanders available". (The seed is one with which the menu offers Indianapolis.)
+text t
+prompt
+digest
+text i
+prompt
+digest
+key esc
+prompt
+digest
+
+# Railroad, from Tullahoma: "Track from Tullahoma is blocked".
+text r
+prompt
+digest
+text t
+prompt
+digest
+
+# Railroad, from Harper's Ferry: "Too many troops for railroad capacity".
+text r
+prompt
+text h
+prompt
+digest
+
+# Railroad, from Washington, where two armies stand: the Which menu. Esc there: "Railroad move
+# not allowed".
+text r
+prompt
+text w
+prompt
+digest
+key esc
+prompt
+digest
+
+# Railroad, from Washington, the first army. The To menu: R goes to the next Union city after
+# Raleigh; Esc gives the move up.
+text r
+prompt
+text w
+prompt
+key enter
+prompt
+digest
+text r
+prompt
+digest
+key esc
+prompt
+digest
+
+# The same. Z is no city's letter. Tullahoma and Enter: "... train cannot go to Tullahoma", and
+# the To menu again. Then Philadelphia (P, the next Union city after Paducah) and Enter: the
+# train leaves.
+text r
+prompt
+text w
+prompt
+key enter
+prompt
+text z
+prompt
+text t
+prompt
+digest
+key enter
+prompt
+digest
+text p
+prompt
+digest
+key enter
+prompt
+digest
+
+# Railroad is now "-": "Railroad is already carrying ...".
+text -
+prompt
+digest
+
+# COMMANDS, Supply: the army in Tullahoma is cut off; the Supply menu offers two armies. Down
+# and Enter: the second gets supplies.
+text c
+prompt
+text s
+prompt
+digest
+key down
+prompt
+digest
+key enter
+prompt
+digest
+
+# Join, Pittsburgh: both armies are too large, "No valid armies to combine". Esc to the main menu.
+text j
+prompt
+digest
+key enter
+prompt
+digest
+key esc
+prompt
+
+# Moves: the army in Cincinnati, to the first city offered. COMMANDS, Cancel: the menu of the
+# armies with an order. Esc there, and Esc at the Commands menu.
+text m
+prompt
+text c
+prompt
+key enter
+prompt
+digest
+text c
+prompt
+text c
+prompt
+digest
+key esc
+prompt
+digest
+key esc
+prompt
+
+# Inform: Esc at the Information menu.
+text i
+prompt
+key esc
+prompt
+digest
+
+# Ships, Build: the Type menu, Ironclad.
+text s
+prompt
+digest
+text b
+prompt
+digest
+text i
+prompt
+digest
+
+# The Ships menu again: Esc. Files, Quit to DOS, Yes, and a key for END's "Press any key to
+# continue".
+key esc
+prompt
+text f
+prompt
+text q
+prompt
+text y
+repeat space

@@ -1,0 +1,12 @@
+# For the script navy-fights: the Union's fleet raids, sails and meets the Rebel fleet.
+# May 1862, the Union plays. Its fleet is led by an ironclad. The Rebel fleet lies in Mobile.
+date 5 1862
+cash 1000 50
+fleet 1 IWWW 30
+fleet 2 W 24
+# Fremont stands in Fredericksburg, beside Richmond, strong enough to beat the army there. That
+# army is small and green and has no fort, and it can flee to a Rebel city.
+owner 1 11
+army 3 city=11 size=900 lead=9 exp=9
+army 21 size=100 lead=1 exp=0
+fort 0 33
