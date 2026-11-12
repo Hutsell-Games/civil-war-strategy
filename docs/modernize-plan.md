@@ -135,10 +135,10 @@ output of `play.py check` and `play.py compare` (decision 15).
 Updated 2026-11-11. Phases 0 to 7 are done and committed. Phase 8's steps 1 and 2 are committed
 (`6eda547`, `013b8d0`). What each step did is in `modernize-completed.md`.
 
-Step 3 is committed in two parts (`70692b3`, `77ee9a6`), and step 4 as `9e038a4`. Step 5, the
-month's moves, is done in the working tree.
+Step 3 is committed in two parts (`70692b3`, `77ee9a6`), step 4 as `9e038a4` and step 5 as
+`b67f89e`. Step 6, the computer's turn, is done in the working tree.
 
-**Next:** step 6, `ai\ai.bm`.
+**Next:** step 7, `special_events` and `event_riot`.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -230,6 +230,12 @@ Claude's choice on 2026-11-11, made while carrying out step 1. Check it before s
   It calls the rule parts where the rules were. Its callers do not change.
 - **The show part goes to `ui\`**, in a file named after the rules file it came from: `calculate_battle`
   is now in `ui\battle.bm`. The layout of decision 10 had no such files.
+- **Commands are filed in `ui\` for now.** Many show parts carry out one order, calling rules and
+  drawing: `navy_commands`, `army_combine`, `army_recruit`, `railroad_move`, `turn_resolve`. Both the
+  player's menus and the computer give these orders. They are a layer of their own, between rules and
+  screens, which phase 9 names when each command gets its SUB.
+- **The computer's code stays in `ai\`** (user, 2026-11-12). It decides and draws nothing itself; its
+  messages are SUBs of `ui\ai.bm`. It may call the commands above to carry out an order.
 - **Random numbers.** Two pieces of drawing code draw random numbers: the explosion marker
   (`draw_map_marker` with `MARK_EXPLOSION`, one draw for each circle when the sound is on) and
   `draw_schooner` (four). Where a show part calls them, it must stay between the same draws of the rule
@@ -274,6 +280,6 @@ The order takes the SUBs that others call first, so that a caller's split finds 
 3. **Done: `rules\city.bm` and `rules\army.bm`.** See `modernize-completed.md`.
 4. **Done: `rules\navy.bm`.** See `modernize-completed.md`.
 5. **Done: `rules\turn.bm`.** See `modernize-completed.md`.
-6. The six of `ai\ai.bm`, and the rule in `menu_recruit_cities` moved to `rules\`.
+6. **Done: `ai\ai.bm`.** See `modernize-completed.md`.
 7. `special_events` and `event_riot`. The texts stay in the show part, which phase 11 moves to data.
 8. The four of `rules\victory.bm`.

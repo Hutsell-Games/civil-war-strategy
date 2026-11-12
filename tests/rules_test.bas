@@ -710,6 +710,54 @@ CALL navy_retreat_port(1, target)
 AssertEqualInt 0, target, "none left"
 END SUB
 
+' ------------------------------------------------------ the computer's choices
+' The player is the Union (current_side 1), the computer the Rebels.
+
+SUB TestAiFortifyPickOutnumbered
+current_side = 1: opt_ai_aggression = 0: ai_strength_ratio! = 0
+army_city(21) = 5: army_size(21) = 50: city_army(5) = 21
+city_road(5, 1) = 6: city_owner(6) = 1: city_army(6) = 1: army_size(1) = 100
+CALL ai_fortify_pick(2, target)
+AssertEqualInt 5, target, "10,000 of the player's men next to 5,000"
+opt_ai_aggression = 3
+CALL ai_fortify_pick(2, target)
+AssertEqualInt 0, target, "an aggressive computer does not fortify"
+END SUB
+
+SUB TestAiArmyOrderAndWinter
+RANDOMIZE 1
+current_side = 1: turn_month = 3
+army_city(21) = 5: army_size(21) = 100: army_supply(21) = 5: city_army(5) = 21
+city_road(5, 1) = 6: city_value(6) = 10
+CALL ai_army_order(2, 21, ordered)
+AssertEqualInt 1, ordered, "an order"
+AssertEqualInt 6, army_order(21), "to the neutral city next to it"
+army_order(21) = ORDER_NONE: turn_month = 1
+CALL ai_army_order(2, 21, ordered)
+AssertEqualInt 0, ordered, "no winter campaigns: none in January"
+AssertEqualInt ORDER_NONE, army_order(21), "left where it is"
+army_city(22) = 0
+CALL ai_army_order(2, 22, ordered)
+AssertEqualInt 0, ordered, "an army without a city has none"
+END SUB
+
+SUB TestArmyRecruitCitiesKeptForTheMonth
+current_side = 1: turn_recruit_state = 2
+turn_recruit_city(1) = 7: turn_recruit_city(2) = 3
+city_name$(7) = "Boston": city_name$(3) = "Albany"
+CALL army_recruit_cities(1)
+AssertEqualInt 2, menu_item_count, "the month's two cities"
+AssertEqualStr "Albany", menu_text$(1), "sorted"
+AssertEqualInt 3, menu_value(1), "city 3"
+END SUB
+
+SUB TestAiRecruitPickSmallArmy
+menu_item_count = 2: menu_value(1) = 7: menu_value(2) = 3
+city_army(3) = 4: army_size(4) = 100: side_cash(2) = 500
+CALL ai_recruit_pick(2)
+AssertEqualInt 2, menu_choice, "the city with an army under 15,500 men"
+END SUB
+
 ' ------------------------------------------------------- the month's moves
 
 SUB TestTurnAdvanceMonth
@@ -880,6 +928,7 @@ END SUB
 '$INCLUDE: '../ui/army.bm'
 '$INCLUDE: '../ui/navy.bm'
 '$INCLUDE: '../ui/turn.bm'
+'$INCLUDE: '../ui/ai.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'

@@ -15,7 +15,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `army.bm` | `army_combine_start`, `army_combine_add`, `army_combine_absorb`, `army_combine_finish`, `army_raise`, `army_pick_commander`, `army_buy_supply`, `army_place_new`, `army_add_recruits`, `army_detach`, `army_drill`, `army_recruit_bonus`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` (`army_combine`, `army_new`, `army_get_commander`, `army_resupply` and `army_recruit` until phase 8 moved them to `ui\army.bm`) |
+| `army.bm` | `army_combine_start`, `army_combine_add`, `army_combine_absorb`, `army_combine_finish`, `army_raise`, `army_pick_commander`, `army_buy_supply`, `army_place_new`, `army_add_recruits`, `army_recruit_cities`, `army_detach`, `army_drill`, `army_recruit_bonus`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` (`army_combine`, `army_new`, `army_get_commander`, `army_resupply` and `army_recruit` until phase 8 moved them to `ui\army.bm`) |
 | `city.bm` | `city_take`, `city_is_connected`, `city_fix_return_routes`, `city_update_occupier` (`city_capture` and `check_map_links` until phase 8 moved them to `ui\city.bm`) |
 | `battle.bm` | `battle_strengths`, `battle_fight`, `battle_losses`, `battle_apply_losses`, `normal_random_number` (`calculate_battle` until phase 8 split it) |
 | `navy.bm` | `navy_remove_ship`, `navy_add_ship`, `navy_found_fleet`, `navy_cancel_new_fleet`, `navy_bombard_army`, `navy_shore_battery`, `navy_fleet_lost`, `navy_blast`, `navy_move_fleet`, `navy_go_raiding`, `navy_landed`, `navy_note_raiding_side`, `navy_raid_round`, `navy_ship_hits`, `navy_shot_hits`, `navy_fleet_defeated`, `navy_retreat_port` (the rest until phase 8 moved them to `ui\navy.bm`) |
@@ -28,7 +28,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `ai.bm` | `ai_turn` (mixed), `ai_resupply`, `ai_fortify` (mixed), `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders` (mixed), `ai_drill` (mixed), `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_navy`, `ai_navy_adjust`, `ai_evaluate_move`, `city_nearby_enemy_strength` |
+| `ai.bm` | `ai_resupply`, `ai_fortify`, `ai_fortify_pick`, `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders`, `ai_army_order`, `ai_drill`, `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_navy`, `ai_navy_adjust`, `ai_evaluate_move`, `city_nearby_enemy_strength` (`ai_turn` until phase 8 moved it to `ui\turn.bm`) |
 
 ## ui\
 
@@ -44,7 +44,8 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `city.bm` | `city_capture`, `check_map_links` (new in phase 8: a capture and the map check) |
 | `army.bm` | `army_combine`, `army_new`, `army_get_commander`, `army_resupply`, `army_recruit` (new in phase 8: raising, supplying and combining armies) |
 | `navy.bm` | `navy_commands`, `navy_action`, `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`, `navy_raid_commerce`, `navy_land_army`, `navy_finish_move`, `navy_commerce_raid`, `navy_combat`, `navy_show_hits` (new in phase 8: the navy's menus and screens) |
-| `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city` (new in phase 8: the month's moves) |
+| `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city`, `ai_turn` (new in phase 8: the month's moves) |
+| `ai.bm` | `draw_ai_fort`, `draw_ai_plan`, `draw_ai_drill`, `draw_ai_funds` (new in phase 8: the computer's messages) |
 
 ## draw\
 

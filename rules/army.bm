@@ -220,3 +220,34 @@ SUB army_recruit_bonus (slot)
 	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(slot) = army_size(slot) + 15 - 5 * opt_difficulty
 	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN army_size(slot) = army_size(slot) + 5 * opt_difficulty - 15
 END SUB
+
+' Fills the menu with the cities where a side may recruit this month. They are drawn at
+' random; the player's list is kept for the month. menu_item_count is 0 when there is none.
+SUB army_recruit_cities (side)
+DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM x AS INTEGER
+	menu_item_count = 0
+	menu_text$(0) = "Recruit"
+	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: x = turn_recruit_city(i): menu_text$(i) = city_name$(x): menu_value(i) = x: NEXT i: menu_item_count = turn_recruit_state: GOTO alldone
+	max = 4: IF RND > .8 THEN max = max - 1
+	IF opt_difficulty < 3 THEN max = max + 1
+
+	FOR i = 1 TO MAX_CITIES
+	IF side_city_count(side) > 0 THEN pct! = .6 * max / side_city_count(side) ELSE pct! = .3
+	IF menu_item_count = 0 AND i > 20 THEN pct! = .3
+	IF menu_item_count < 2 AND i > 30 THEN pct! = .3
+	menu_value(i) = 0
+	IF city_army(i) > 0 AND city_owner(i) = side THEN pct! = .4
+	IF RND < pct! AND city_owner(i) = side THEN
+		IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) GOTO foe
+		menu_item_count = menu_item_count + 1
+		menu_text$(menu_item_count) = city_name$(i)
+		menu_value(menu_item_count) = i
+		IF menu_item_count > max - 1 GOTO alldone
+	END IF
+foe:
+	NEXT i
+alldone:
+	IF menu_item_count = 0 THEN EXIT SUB
+	IF side = current_side AND turn_recruit_state = 0 THEN FOR i = 1 TO menu_item_count: turn_recruit_city(i) = menu_value(i): NEXT i: turn_recruit_state = menu_item_count
+	CALL menu_bubble_sort(menu_item_count)
+END SUB

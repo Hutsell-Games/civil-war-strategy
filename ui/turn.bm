@@ -233,3 +233,23 @@ smoke:
 horde:
 CALL turn_army_forages(active)
 END SUB
+
+' The computer's half of the month: special events, then each of its decisions in turn, which
+' carry out their orders on screen.
+SUB ai_turn
+DIM who AS INTEGER: DIM c AS INTEGER: DIM a AS INTEGER
+CALL special_events
+who = other_side(current_side)
+c = 9: IF current_side = SIDE_UNION THEN c = 15
+LOCATE 1, 1: PRINT SPACE$(80);
+COLOR c: LOCATE 1, 10: PRINT side_name$(who); " Side is making decisions";
+CALL ai_resupply(who)
+CALL ai_fortify(who)
+CALL ai_raise_forces(who)
+CALL ai_fleet_orders(who)
+	CALL draw_fleets
+a = who: CALL army_combine(a)
+CALL railroad_move(who)
+CALL ai_army_orders(who, c)
+CALL ai_drill(who)
+END SUB

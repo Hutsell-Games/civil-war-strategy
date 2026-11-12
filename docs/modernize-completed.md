@@ -512,3 +512,34 @@ The rule for lines that no test runs is in `modernize-plan.md`, "Lines that no t
      after the attacker withdrew was not run in full by a script; `TestTurnWithdrawAndHalt` runs it.
      The two lines not run are the dead `CASE` arms of `turn_set_move_order`, now `rules\turn.bm` 163
      and 165. 208 lines of the game are run in part and 20 are not run.
+6. **Done: `ai\ai.bm`.** The computer's decisions stay in `ai\ai.bm`. Only their own screen lines moved
+   out, each block into a SUB of `ui\ai.bm` called at the same point: `draw_ai_fort (target)` from
+   `ai_fortify`, `draw_ai_plan (i, c)` from `ai_army_orders`, `draw_ai_drill (i)` from `ai_drill` and
+   `draw_ai_funds (side)` from `ai_recruit`.
+   - The rule for `ai\` (user, 2026-11-12): it decides and draws nothing itself. It carries out an order
+     through the same SUBs as the player's commands: `navy_commands`, `army_combine`, `army_recruit`,
+     `army_resupply`, `railroad_move`, and `menu_recruit_cities` for the list of cities. Those SUBs are in
+     `ui\` until phase 9 gives the commands a layer of their own. The computer cannot decide its whole
+     turn first and show it after: some drawing draws random numbers, so its choices must come at the
+     same moments as before.
+   - `ai_turn` moved to `ui\turn.bm`, beside `turn_resolve`, which calls it. It decides nothing itself:
+     it is the computer's half of the month, special events, the header line, each decision area in
+     turn, and a redraw of the fleets.
+   - Two choices became pure SUBs in `ai\ai.bm`, so that unit tests can run them (the review's finding
+     1, 2026-11-12). `ai_fortify_pick (who, target)` is the city to fortify, the loop after the label
+     `city2:`. It sets `target` to 0 before its first random draw, so that its early exit fortifies
+     nothing, as the old `EXIT SUB` did; its `GOTO capital` is now `GOTO picked`, a label at its end.
+     `ai_army_order (who, i, ordered)` is one army's move order, the old loop's body, with its lines
+     unchanged. Each `GOTO deadman` goes to a label at its end, where `ordered` is still 0.
+   - `ai_recruit_pick` lost its `LOCATE 14 + i, 69`. The loop left the cursor at row 14 plus the length
+     of the list, so `draw_ai_funds` does that one `LOCATE`, just before the pick.
+   - One rule: `army_recruit_cities (side)` in `rules\army.bm`, the list of recruiting cities, which
+     draws random numbers. That list was `menu_recruit_cities` (`ui\orders.bm`), which keeps its name and
+     now sets the menu's color and calls the rule. The rule calls `menu_bubble_sort`, which draws
+     nothing.
+   - A first version moved all eight SUBs to `ui\ai.bm`, because they call SUBs that draw. The user
+     asked whether that was really screen code; it was not, and this version replaced it before commit.
+   - Unit tests: 4 new ones, so 78 in all. Lines moved without a test: none. The lines not run are the
+     same as before, now `ai\ai.bm` 23 (a dead `GOTO capital`), 105 and 106 (a fleet at sea in
+     `ai_fleet_orders`) and 212 (in `ai_evaluate_move`). 206 lines of the game are run in part and 20
+     are not run.

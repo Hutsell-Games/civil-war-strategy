@@ -115,7 +115,7 @@ Left alone by group 7 (the rule numbers):
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 93). That is
   the date of an event, not `IRONCLAD_YEAR`, so it stays; phase 11 moves the events' dates to data.
-- **`ai_turn` compares `side_cash` with no index**: `side_cash < 222` (`ai_fortify`, `ai\ai.bm` line 59). Every other use
+- **`ai_turn` compares `side_cash` with no index**: `side_cash < 222` (`ai_fortify`, `ai\ai.bm` line 35). Every other use
   is `side_cash(who)`. Check what the two compilers make of it before the line is touched.
 
 Left alone by group 8 (the colors):
