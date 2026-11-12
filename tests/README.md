@@ -202,6 +202,7 @@ on a desktop nobody sees.
 | `navy-build` | From a prepared save with no Union fleet: the Ships menu's entries that need a fleet, the Type menu, a new fleet through the Port menu, a sea fight in which the player attacks and wins, and the entries refused to a fleet at sea |
 | `navy-raid-back` | From a prepared save: the player raids commerce, the computer's fleet pursues and sinks the raider, the player builds a new fleet and raids again, and the computer's fleet goes raiding in answer and fights at sea |
 | `navy-losses` | From a prepared save, as the Rebels: a shore battery sinks their only ship, no army is left free to move, the Balance menu's faces, the Raze menu, and "NO SHIPYARDS AVAILABLE" |
+| `menu-keys` | At the main menu, PgDn, Down from the last row round to the first, PgDn and PgUp |
 | `bad-files` | A run without `MTN.VGA`, with a `CWS.CFG` that names no player count and no display speed, and with a map that has two one-way roads, which Chk Links reports |
 | `sound-union` | The game starts with music on as the Union: the title tune, the ironclads' announcement and an event's tune run, unheard |
 | `sound-rebel` | The same as the Rebels: "Shenandoah" at the title, and the tune of an event that favors the South |

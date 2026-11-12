@@ -6,11 +6,11 @@ W.R. Hutsell wrote the game in Microsoft BASIC PDS 7.1 for DOS and gave the sour
 original source is kept unchanged on the branch `canonical-source`.
 
 This branch, `qb64rust`, changes that source as little as possible so that the game builds with QB64Rust
-and QB64pe, and so that its SUBs can be tested. It builds one program, `CWSTRAT.BAS`, which includes the other
-source files (`CWS14.BI` and the `.BM` files in `rules\`, `ai\`, `commands\`, `ui\`, `draw\`, `game\` and `port\`; `docs\file-layout.md` lists them):
+and QB64pe, and so that its SUBs can be tested. It builds one program, `cws.bas`, which includes the other
+source files (`cws.bi` and the `.BM` files in `rules\`, `ai\`, `commands\`, `ui\`, `draw\`, `game\` and `port\`; `docs\file-layout.md` lists them):
 
 ```
-qb64rust -x CWSTRAT.BAS -o cws.exe
+qb64rust -x cws.bas -o cws.exe
 ```
 
 The build is not committed (`.gitignore`). It takes the name of the DOS program, `CWS.EXE`. A GitHub Actions

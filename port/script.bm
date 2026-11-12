@@ -1,6 +1,6 @@
 ' ===========================================================================
 ' port\script.bm - hooks for the whole-game scripts of tests\play.py.
-' Included at the end of CWSTRAT.BAS. See tests\README.md.
+' Included at the end of cws.bas. See tests\README.md.
 '
 ' A program started with the environment variable CWS_SEED set is
 ' "scripted":
@@ -103,7 +103,7 @@ END SUB
 ' Says that the program is about to wait for a key. place names the kind of
 ' wait (1 to 255) and letter$ narrows it (its first character, or ""):
 '   1  a pause that any key ends; letter$ says which:
-'        R  the Random Events menu's "press a key" (CWSTRAT.BAS)
+'        R  the Random Events menu's "press a key" (menu_option_events)
 '        T  a player's turn begins, in a two-player game (draw_player_turn)
 '        P  a battle: the odds are shown, before the picture (calculate_battle)
 '        B  a battle: "hit any key to continue" (calculate_battle)

@@ -814,3 +814,24 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
      run with four jobs the scripts passed. The game's code at that prompt did not change.
    - Unit tests: 2 new ones, so 123 in all. 37 scripts. Lines moved without a test: none. 188
      lines of the game are run in part and 18 are not run.
+8. **Done: `menu_select` and the file renames.** The last `GOSUB` routines of the menus are gone,
+   and the main program has the name of the layout.
+   - **The key loop.** `menu_select` was a web of `GOTO sel1`, `GOTO called` and `GOSUB crsr`.
+     It is now a `DO` loop for each highlighted row, with a `DO` loop inside that waits for a
+     key that does something. `crsr` is that inner loop. `noadjust` is one line in its place.
+     `limits` is two lines at the end of `menu_arrow_key`, a new SUB that moves the row for
+     Up, Down, PgUp and PgDn and handles F3, F4 and F7 at a main menu. The unused label
+     `remenu:` is gone.
+   - **One `GOSUB limits` dropped:** the one after a letter that chooses a row. It did not
+     change the row, which is always inside the menu there.
+   - **A script first**, recorded on the code before this step: `menu-keys`. No script pressed
+     PgUp or PgDn, or Down on a menu's last row. At the main menu it presses PgDn, Down, PgDn
+     and PgUp.
+   - **The renames,** with `git mv`: `CWSTRAT.BAS` to `cws.bas` and `CWS14.BI` to `cws.bi`. The
+     build (`.github\workflows\build.yml`), the README, the build line of `devnotes.md`,
+     `play.py`, the include of `rules_test.bas`, and the comments in `port\` that name them
+     follow. The documents that describe the code as it was (`devnotes.md` past its build
+     line, `port-study.md`, `sub-names.md`, `constants.md`) and the tools of phases 4 to 6 in
+     `tools\refactor\` keep the old names.
+   - Unit tests: 123, none new. 38 scripts. Lines moved without a test: none. 185 lines of the
+     game are run in part and 18 are not run. That ends phase 9.

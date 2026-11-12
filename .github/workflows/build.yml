@@ -1,4 +1,4 @@
-# Builds the game (CWSTRAT.BAS) with QB64Rust on Windows.
+# Builds the game (cws.bas) with QB64Rust on Windows.
 # The result is an artifact named civil-war-strategy: cws.exe with the data files it reads,
 # ready to unzip and play.
 name: Build
@@ -60,7 +60,7 @@ jobs:
         working-directory: game
         run: |
           New-Item -ItemType Directory ..\dist | Out-Null
-          ..\qb64rust\target\release\qb64rust.exe -x CWSTRAT.BAS -o ..\dist\cws.exe
+          ..\qb64rust\target\release\qb64rust.exe -x cws.bas -o ..\dist\cws.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       # The program, the two files it needs beside it (its settings and its Hall of Fame), the

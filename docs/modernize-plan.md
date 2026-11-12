@@ -145,9 +145,11 @@ committed as `693c078`, step 2, the Commands menu, as `10056a5`, step 3, the Fil
 `f831801`, step 4, the main menu, as `653e218`, and step 5, the main module as a loop, as
 `83c34c8`. Step 6, the navy's commands, is committed as `aa2f80b`. That commit does not build:
 it also holds the three `git mv` renames of step 7, without step 7's `$INCLUDE` lines. Step 7,
-the other commands, is done in the working tree (2026-11-12) and puts that right.
+the other commands, is committed as `77e3024` and puts that right. Step 8, `menu_select` and the
+file renames, is done in the working tree (2026-11-12). That ends phase 9.
 
-**Next:** phase 9 step 8, `menu_select` without `GOSUB`, and the file renames.
+**Next:** phase 10, records. Its plan comes first: which arrays become which `TYPE`, and in what
+steps.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -209,7 +211,7 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `ui\orders.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 
-Of the 214 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
+Of the 185 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
 only with the sound on. In `special_events` eight are left: the exit when random events are off, the cap
 `pct! > .9` (it needs the year 1868), England's ships when the Rebel fleet is in port, the cap of the
 Rebel fleet at 10 ships, and the riot's two early returns (realism off; a side with one city).
@@ -221,7 +223,8 @@ first (`play.py coverage`).
 
 - **Six `GOSUB` routines** that only their own SUB uses: `crsr`, `limits` and `noadjust` in
   `menu_select` (the key loop, which phase 9 reworks), `add1s` in `army_generate_name`, `jack` in
-  `draw\ships.bm` and `stars` in `game\victory_screens.bm`.
+  `draw\ships.bm` and `stars` in `game\victory_screens.bm`. Phase 9 step 8 removed the three of
+  `menu_select`.
 - **The main module's menus**, a web of `GOTO menu0`, `GOTO optmen` and `GOTO utile` (phase 9).
 - **`calculate_battle`**, whose split parts a rule from its screen (phase 8).
 - **`army_clear`** (step 4): it waits for phase 10.
@@ -348,6 +351,4 @@ their random numbers must stay in order.
 5. **Done: the main module is a loop.** See `modernize-completed.md`.
 6. **Done: the navy's commands.** See `modernize-completed.md`.
 7. **Done: the other commands.** See `modernize-completed.md`.
-8. **`menu_select`**: its key loop without the `GOSUB` routines `crsr`, `limits` and `noadjust`.
-   Then `CWSTRAT.BAS` and `CWS14.BI` are renamed `cws.bas` and `cws.bi` with `git mv`, as the layout
-   says. The rename touches `play.py` and the README.
+8. **Done: `menu_select` and the file renames.** See `modernize-completed.md`. That ends phase 9.

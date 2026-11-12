@@ -15,7 +15,7 @@ This file holds what was changed from `canonical-source` and why, and what each 
 ## Build
 
 ```
-qb64rust -x CWSTRAT.BAS -o cws.exe
+qb64rust -x cws.bas -o cws.exe
 ```
 
 `cws.exe` is the name of the DOS program, which is on `canonical-source` only ("Files removed", below). The

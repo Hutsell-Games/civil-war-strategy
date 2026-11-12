@@ -6,7 +6,7 @@
 ' the code gives today. These tests record behavior; they do not judge it.
 ' The Union's armies are 1 to 20, the Rebels' 21 to 40. Side 1 is the Union.
 
-'$INCLUDE: '../cws14.bi'
+'$INCLUDE: '../cws.bi'
 
 ' ------------------------------------------------------------------ starfin
 ' The first and last army of a side.

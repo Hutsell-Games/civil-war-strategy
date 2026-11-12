@@ -14,7 +14,7 @@ DECLARE SUB draw_stack_markers (who%)
 DECLARE SUB draw_train (who%, flag%)
 DECLARE FUNCTION railroad_capacity% (who%)
 DECLARE SUB draw_top_bar ()
-' $INCLUDE: 'cws14.bi'
+' $INCLUDE: 'cws.bi'
 DIM replay AS INTEGER: DIM a$: DIM chosit AS INTEGER: DIM action AS INTEGER: DIM ended AS INTEGER
 DIM new_game AS INTEGER: DIM month_over AS INTEGER
 

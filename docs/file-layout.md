@@ -7,7 +7,7 @@ the draft for the user to check before anything moves. Names are the settled nam
 now and is split in phase 8. Since phase 8 the folder rule holds: nothing in `rules\` or `ai\` draws.
 The last two marked, `load_game` and `save_game` in `port\`, lost their menus in phase 9.
 
-The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `CWS14.BI` becomes `cws.bi`.
+The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) became `cws.bas` in phase 9. `CWS14.BI` became `cws.bi`.
 `QB64.BM` and `SCRIPT.BM` move to `port\`. `FOLDERS.BI` moves to `port\` too.
 
 ## rules\
@@ -45,7 +45,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 
 | File | SUBs |
 |------|------|
-| `menu.bm` | `menu_select`, `menu_mark_row`, `menu_unmark_row`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
+| `menu.bm` | `menu_select`, `menu_arrow_key` (new in phase 9), `menu_mark_row`, `menu_unmark_row`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
 | `main_menu.bm` | `menu_main`, `menu_main_railroad`, `menu_main_end_turn`, `menu_main_inform`, `show_title`, `menu_title`, `show_new_game` (new in phase 9: the main menu and the title, out of the main module) |
 | `orders.bm` | `menu_commands`, `menu_army_detach`, `menu_army_drill` (new in phase 9: the Commands menu, out of the main module), `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital`, `menu_recruit_cities`, `menu_railroad`, `menu_navy`, `menu_navy_items` |
 | `options.bm` | `menu_utility`, `menu_option_side`, `menu_option_players`, `menu_option_graphics`, `menu_option_sound`, `menu_option_display`, `menu_option_balance`, `menu_option_events`, `menu_option_january`, `menu_option_realism`, `menu_option_history`, `menu_option_aggression` (new in phase 9: the Utility menu, out of the main module) |

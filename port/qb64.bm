@@ -1,6 +1,6 @@
 ' ===========================================================================
 ' QB64.BM - what the game needs from BASIC PDS 7.1 that QB64 does not have:
-' DIR$. Included at the end of CWSTRAT.BAS.
+' DIR$. Included at the end of cws.bas.
 ' DIR$ is that of the World War 2 port (Hutsell-Games/world-war-2).
 ' ===========================================================================
 

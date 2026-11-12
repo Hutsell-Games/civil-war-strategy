@@ -1,0 +1,33 @@
+# Civil War Strategy: the keys that move a menu's highlight. At the main menu of March 1861, PgDn
+# goes to the last row, Down from there wraps to the first, PgDn and PgUp go to the last and the
+# first again. Then Files, Quit to DOS, Yes.
+#! seed 1861
+
+# The title menu: Start NEW Game.
+play until 2:V
+digest
+text s
+play until 2:M
+digest
+
+# PgDn, Down, PgDn, PgUp: the screen after each.
+key pagedown
+prompt
+digest
+key down
+prompt
+digest
+key pagedown
+prompt
+digest
+key pageup
+prompt
+digest
+
+# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

@@ -13,7 +13,7 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
 - **A game that reaches March 1865 with the computer active.** The generated games end sooner, because a
   player who only ends turns is beaten in 1 to 21 turns. `union-time` and `two-player` reach the time limit
   with a passive computer or none.
-- **Linux.** The game opens lower-case names of upper-case files (`'cws14.bi'`, `"cities.grd"`, `"cws.cfg"`),
+- **Linux.** The game opens lower-case names of upper-case files (`"cities.grd"`, `"cws.cfg"`),
   and copies its history with `SHELL "copy ..."`, a Windows command. Then `play.py` would need its Linux
   branches checked, as for World War 2.
 

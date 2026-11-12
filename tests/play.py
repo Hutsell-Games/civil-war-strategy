@@ -16,7 +16,7 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
     #! seed <n>              the random seed (CWS_SEED; default 1)
     #! cfg <field>=<value>   a field of the CWS.CFG the run starts with (CFG_FIELDS below)
     #! timeout <seconds>     the longest the run may take (default 300)
-    #! program <name>        the program the script plays: cws (CWSTRAT.BAS, the game), the
+    #! program <name>        the program the script plays: cws (cws.bas, the game), the
                              only one and the default
     #! altmap                the run starts on the alternate map: the three ALTMAP files take the
                              places of the game's map, setup and leaders, as ALTMAP.BAT does
@@ -66,8 +66,8 @@ TEST_DATA = GAME / "tests" / "data"
 # The name of the configuration file the run starts with; play.py writes it.
 CFG_NAME = "CWS.CFG"
 
-# The fields of CWS.CFG in the order the game reads and writes them (filer, CWSTRAT1.BM; Files,
-# New Game, CWSTRAT.BAS), with the values a run starts with. They are those of the CWS.CFG that
+# The fields of CWS.CFG in the order the game reads and writes them (config_read and
+# config_write, port/files.bm), with the values a run starts with. They are those of the CWS.CFG that
 # came with the game, but noise: 0 (no sound, and no title music, which waits for its notes)
 # where the file has 2.
 CFG_FIELDS = {
@@ -94,7 +94,7 @@ COMPILERS = ("pe", "rust")
 DEFAULT_TIMEOUT = 300
 # The programs a script can play: the source each is built from. The build keeps the name of
 # the DOS program, cws.exe.
-PROGRAMS = {"cws": "CWSTRAT.BAS"}
+PROGRAMS = {"cws": "cws.bas"}
 DEFAULT_PROGRAM = "cws"
 
 
