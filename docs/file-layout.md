@@ -17,7 +17,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `army.bm` | `army_combine`, `army_detach`, `army_drill`, `army_recruit` (mixed), `army_recruit_bonus`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` |
 | `city.bm` | `city_capture` (mixed), `city_is_connected`, `city_update_occupier`, `check_map_links` |
 | `battle.bm` | `calculate_battle` (mixed), `normal_random_number` |
-| `navy.bm` | `navy_remove_ship`, `navy_commands` (mixed), `navy_commerce_raid` (mixed), `navy_combat` (mixed), `navy_show_hits` (mixed) |
+| `navy.bm` | `navy_remove_ship`, `navy_commands`, `navy_action` (mixed), `navy_commerce_raid` (mixed), `navy_combat` (mixed), `navy_show_hits` (mixed) |
 | `railroad.bm` | `railroad_move` (mixed), `railroad_start` (mixed), `railroad_arrive` (mixed), `railroad_route_count`, `railroad_capacity` |
 | `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed), `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7) |
@@ -27,14 +27,14 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `ai.bm` | `ai_turn` (mixed), `ai_resupply`, `ai_fortify` (mixed), `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders` (mixed), `ai_drill` (mixed), `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_evaluate_move`, `city_nearby_enemy_strength` |
+| `ai.bm` | `ai_turn` (mixed), `ai_resupply`, `ai_fortify` (mixed), `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders` (mixed), `ai_drill` (mixed), `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_navy`, `ai_navy_adjust`, `ai_evaluate_move`, `city_nearby_enemy_strength` |
 
 ## ui\
 
 | File | SUBs |
 |------|------|
 | `menu.bm` | `menu_select`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
-| `orders.bm` | `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital`, `menu_recruit_cities`, `menu_railroad` |
+| `orders.bm` | `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital`, `menu_recruit_cities`, `menu_railroad`, `menu_navy`, `menu_navy_items` |
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size` |
 | `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn`, `draw_update_box` |
 | `messages.bm` | `show_message_box`, `scribe_message` |

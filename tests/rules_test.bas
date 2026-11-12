@@ -316,6 +316,38 @@ city_owner(4) = 2
 AssertEqualInt 1, railroad_route_count(1, 1), "city 2 only: the track is blocked"
 END SUB
 
+' ------------------------------------------- ai_navy and menu_navy_items
+
+SUB TestAiNavyChangesItsOrder
+action = NAVY_ATTACK
+CALL ai_navy(1, action)
+AssertEqualInt NAVY_BUILD, action, "no fleet: build"
+fleet_city(1) = 5: action = NAVY_ATTACK
+CALL ai_navy(1, action)
+AssertEqualInt NAVY_ATTACK, action, "a fleet in port: the order stands"
+raiding_side = 2: raid_loss = 3
+CALL ai_navy(1, action)
+AssertEqualInt NAVY_RAID, action, "the Rebels' raiders sank commerce: raid back"
+fleet_pursuit = 1
+CALL ai_navy(1, action)
+AssertEqualInt NAVY_SAIL, action, "the enemy's fleet is to be pursued: sail"
+END SUB
+
+SUB TestNavyMenuOffersWhatTheFleetCanDo
+CALL menu_navy_items(1)
+AssertEqualStr "-", menu_text$(1), "no money: no Build"
+AssertEqualStr "-", menu_text$(3), "no fleet: no Sail"
+AssertEqualStr "-", menu_text$(4), "no fleet: no Raid"
+AssertEqualInt 4, menu_item_count, "four entries"
+fleet_city(1) = 5: fleet_size(1) = 2
+CALL menu_navy_items(1)
+AssertEqualStr "Sail", menu_text$(3), "a fleet may sail"
+AssertEqualStr "Raid", menu_text$(4), "and raid"
+AssertEqualStr "-", menu_text$(2), "off a neutral city: no Attack"
+AssertEqualInt 5, menu_item_count, "off a neutral city with two ships: five entries"
+AssertEqualStr "Invasion", menu_text$(5), "the fifth"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern

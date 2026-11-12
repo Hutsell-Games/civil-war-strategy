@@ -402,3 +402,30 @@ neutral:
 
 	IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = 30 THEN IF RND > .5 THEN menu_choice = 30: EXIT SUB
 END SUB
+
+' The computer's order for its fleet, changed to what the fleet's state calls for: build
+' with no fleet, raid back when the enemy's raiders sank commerce, sail after the enemy's fleet.
+SUB ai_navy (side, action)
+IF fleet_city(side) < 1 THEN
+	action = NAVY_BUILD
+ELSE
+	IF raiding_side = other_side(side) AND raid_loss > 0 THEN action = NAVY_RAID
+	IF fleet_pursuit > 0 THEN action = NAVY_SAIL
+END IF
+END SUB
+
+' The computer's order, looked at again before each action. It stops building when the
+' money or the fleet's limit is reached (quit is 1). A fleet that is gone builds, not sails.
+' It invades when the menu offers Invasion and the enemy near the Union's fleet is weak.
+SUB ai_navy_adjust (side, action, quit)
+	IF action = NAVY_BUILD THEN
+		IF side_cash(side) < COST_SHIP THEN quit = 1: EXIT SUB
+		IF fleet_size(side) >= MAX_FLEET_SHIPS THEN quit = 1: EXIT SUB
+	END IF
+	CALL menu_navy_items(side)
+	IF fleet_city(side) < 1 AND action = NAVY_SAIL THEN action = NAVY_BUILD
+	IF menu_item_count = 5 THEN
+		IF city_nearby_enemy_strength(fleet_city(SIDE_UNION)) < 100 THEN action = NAVY_INVADE
+	END IF
+	menu_choice = action
+END SUB

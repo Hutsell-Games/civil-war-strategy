@@ -167,7 +167,8 @@ Step 7 is done in the working tree: `event_riot`, and `ai_turn` is six `ai_` SUB
 Step 8 is done in the working tree: recruiting and the railroad are split into menu, computer and rule.
 Step 9 is done in the working tree: `victory_warnings`, `end_game`, and the Hall of Fame's own arrays.
 Step 10's first part is done in the working tree: `navy_combat`, `ai_pick_port`, `draw_fleet_sailing`.
-**Next:** phase 7 step 10, second part: `ai_navy`, `menu_navy` and `navy_action`.
+Its second part is done too: `navy_commands` is a loop over `menu_navy` or `ai_navy_adjust` and `navy_action`.
+**Next:** phase 7 step 10, third part: one SUB for each action of `navy_action`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -330,8 +331,8 @@ The 20 lines that no test runs (21 before phase 7 step 6):
 | `port\qb64.bm` | 15-16 | `DIR$("")` for the next match; the game never calls it that way |
 | `rules\battle.bm` | 58 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
 | `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
-| `rules\navy.bm` | 102 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
-| `rules\navy.bm` | 362, 414 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
+| `rules\navy.bm` | 83 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
+| `rules\navy.bm` | 343, 395 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
 | `rules\turn.bm` | 283, 285 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
 | `ui\orders.bm` | 118 | The picker found no city of the player's among 39; the player always holds the city it started on |
 | `ui\orders.bm` | 133 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
@@ -489,6 +490,22 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
         `draw_navy_box` and `draw_ship_sunk (x, y)` there are the routines `box2` and `xout`.
       - New names: `navy_show_hits`, `draw_navy_box`, `draw_ship_sunk`. Lines moved without a test:
         the two dead `GOTO` lines of `navy_combat`, now `rules\navy.bm` 362 and 414.
+    - **Done: the second part.** `navy_commands` is 12 lines: a loop that asks for the action
+      (`menu_navy` for the player, `ai_navy_adjust` for the computer) and calls `navy_action`.
+      - `navy_action (side, action, again)` (`rules\navy.bm`) is the old `SELECT` and the label
+        `sail3:`. Each `GOTO ahoy` became `again = 1: EXIT SUB`, and the loop then asks again. The
+        jumps `GOTO anchor` and `GOTO ships` stay inside it for the third part.
+      - `ai_navy (side, action)` (`ai\ai.bm`) is the computer's first change of its order, done once.
+        `ai_navy_adjust (side, action, quit)` holds the three decisions that were made while the
+        menu was built: stop building, build when the fleet is gone, and invade when the menu
+        offers Invasion.
+      - `menu_navy (side, quit)` and `menu_navy_items (side)` (`ui\orders.bm`): the player's menu, and
+        the menu's entries, which the computer's path fills too, as before.
+      - The player's path no longer calls `city_nearby_enemy_strength` when Invasion is offered. It
+        did, and threw the result away; the FUNCTION changes nothing.
+      - `navy_action`'s locals now start at 0 on each pass. None is read before it is set.
+      - Unit tests: `ai_navy` and `menu_navy_items`. New names: `ai_navy_adjust`, `menu_navy_items`.
+      - The two dead `GOTO` lines of `navy_combat` are now `rules\navy.bm` 343 and 395.
 11. **The attack, retreat and surrender knot in the middle of `turn_resolve`.**
 12. **`menu_select`'s highlight**: `menu_highlight` and `menu_unhighlight`.
 
