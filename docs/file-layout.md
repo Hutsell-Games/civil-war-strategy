@@ -17,7 +17,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `army.bm` | `army_combine`, `army_detach`, `army_drill`, `army_recruit` (mixed), `army_recruit_bonus`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` |
 | `city.bm` | `city_capture` (mixed), `city_is_connected`, `city_update_occupier`, `check_map_links` |
 | `battle.bm` | `calculate_battle` (mixed), `normal_random_number` |
-| `navy.bm` | `navy_remove_ship`, `navy_commands` (mixed), `navy_commerce_raid` (mixed) |
+| `navy.bm` | `navy_remove_ship`, `navy_commands` (mixed), `navy_commerce_raid` (mixed), `navy_combat` (mixed), `navy_show_hits` (mixed) |
 | `railroad.bm` | `railroad_move` (mixed), `railroad_start` (mixed), `railroad_arrive` (mixed), `railroad_route_count`, `railroad_capacity` |
 | `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed), `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7) |
@@ -27,7 +27,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `ai.bm` | `ai_turn` (mixed), `ai_resupply`, `ai_fortify` (mixed), `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders` (mixed), `ai_drill` (mixed), `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_evaluate_move`, `city_nearby_enemy_strength` |
+| `ai.bm` | `ai_turn` (mixed), `ai_resupply`, `ai_fortify` (mixed), `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders` (mixed), `ai_drill` (mixed), `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_evaluate_move`, `city_nearby_enemy_strength` |
 
 ## ui\
 
@@ -45,7 +45,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 |------|------|
 | `map.bm` | `draw_map`, `draw_map_touchup`, `draw_cities`, `draw_city_names`, `draw_map_marker`, `draw_stack_markers`, `draw_fleets` |
 | `icons.bm` | `draw_flag_icon`, `draw_flag`, `draw_army_flag`, `draw_train`, `animate_army`, `animate_city` |
-| `ships.bm` | `draw_fleet_ship`, `draw_ship_icon`, `draw_ironclad`, `draw_schooner` |
+| `ships.bm` | `draw_fleet_ship`, `draw_ship_icon`, `draw_ironclad`, `draw_schooner`, `draw_fleet_sailing`, `draw_navy_box`, `draw_ship_sunk` |
 | `pictures.bm` | `draw_cannon`, `draw_chesapeake`, `draw_title` |
 
 ## game\ (what another war replaces)

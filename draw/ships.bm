@@ -296,3 +296,39 @@ x = 185 + 200 * RND
 LINE (x, 390)-(x + 2, 392), 12, BF: LINE (x - 2, 392)-(x + 4, 394), 8, BF
 NEXT k
 END SUB
+
+' A fleet puts to sea: the row of its ships and, with full graphics, the picture of the
+' lead ship. Then a pause.
+SUB draw_fleet_sailing (side)
+DIM i AS INTEGER: DIM a AS INTEGER
+	FOR i = 1 TO fleet_size(side)
+		PSET (120 + 41 * i, 210), 0
+		CALL draw_fleet_ship(side, i)
+	NEXT i
+	IF opt_graphics >= GRAPHICS_FULL THEN
+		a = ASC(LEFT$(fleet_ships$(side), 1))
+		SELECT CASE a
+			CASE 73
+				CALL draw_ironclad
+			CASE 87
+				CALL draw_schooner
+		END SELECT
+		wait_seconds 2 * opt_pause!
+	ELSE
+		wait_seconds opt_pause!
+	END IF
+END SUB
+
+' Clears the screen and draws the box for a fleet's message.
+SUB draw_navy_box
+	CLS
+	LINE (100, 110)-(550, 240), 1, B
+	LINE (95, 115)-(555, 235), 7, B
+END SUB
+
+' The cross over a ship that was sunk.
+SUB draw_ship_sunk (x, y)
+		PSET (x, y)
+		DRAW "S5C15G5F5G3H5G5H3E5H5E3F5E5F3"
+		PAINT (x - 3, y + 1), 12, 15
+END SUB

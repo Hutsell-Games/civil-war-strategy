@@ -8,9 +8,8 @@ END IF
 END SUB
 
 SUB navy_commands (side, action)
-DIM empty AS INTEGER: DIM c AS INTEGER: DIM k AS INTEGER: DIM best AS INTEGER
+DIM empty AS INTEGER: DIM c AS INTEGER: DIM k AS INTEGER
 DIM cost AS INTEGER: DIM defend AS INTEGER: DIM a$: DIM a AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM target AS INTEGER: DIM index AS INTEGER: DIM pct!: DIM killd AS INTEGER
-DIM hit(SIDE_REBEL)
 IF action > 0 THEN
 	IF fleet_city(side) < 1 THEN
 		action = NAVY_BUILD
@@ -151,7 +150,7 @@ deserted:
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5
 	CALL wait_seconds(opt_pause!)
 	IF fleet_size(side) < 1 THEN
-		fleet_city(side) = 0: fleet_ships$(side) = "": GOSUB box2
+		fleet_city(side) = 0: fleet_ships$(side) = "": CALL draw_navy_box
 		LOCATE 12, 27: PRINT side_name$(side); " fleet eliminated"
 		CALL wait_seconds(PAUSE_LONG)
 		side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 5
@@ -186,7 +185,7 @@ blast:
 	IF action = NAVY_SAIL THEN
 		IF menu_item_count = 0 THEN EXIT SUB
 		IF fleet_pursuit > 0 THEN menu_choice = 1: menu_value(1) = fleet_city(other_side(side)): GOTO admiral
-		GOSUB nest: IF menu_choice > 0 GOTO admiral ELSE EXIT SUB
+		CALL ai_pick_port(side): IF menu_choice > 0 GOTO admiral ELSE EXIT SUB
 	END IF
 	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68
 	IF fleet_city(side) < 41 THEN
@@ -203,7 +202,7 @@ admiral:
 	IF menu_value(menu_choice) < 1 THEN EXIT SUB
 	IF fleet_size(side) < 1 GOTO ships
 	IF side = current_side THEN turn_navy_done = 1
-	GOSUB box2
+	CALL draw_navy_box
 	LOCATE 10, 25: PRINT side_name$(side); " fleet of"; fleet_size(side); "ship(s) is sailing"
 	LOCATE 11, 25: PRINT "From ";
 	IF fleet_city(side) < 41 THEN
@@ -218,22 +217,7 @@ admiral:
 		PRINT "Raid Commerce";
 	END IF
 
-	FOR i = 1 TO fleet_size(side)
-		PSET (120 + 41 * i, 210), 0
-		CALL draw_fleet_ship(side, i)
-	NEXT i
-	IF opt_graphics >= GRAPHICS_FULL THEN
-		a = ASC(LEFT$(fleet_ships$(side), 1))
-		SELECT CASE a
-			CASE 73
-				CALL draw_ironclad
-			CASE 87
-				CALL draw_schooner
-		END SELECT
-		wait_seconds 2 * opt_pause!
-	ELSE
-		wait_seconds opt_pause!
-	END IF
+	CALL draw_fleet_sailing(side)
 	fleet_city(side) = menu_value(menu_choice)
 	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) GOTO pirate
 	GOTO sail3
@@ -246,26 +230,11 @@ admiral:
 	IF fleet_size(side) < 1 OR raiding_side = side GOTO ahoy
 
 	IF side = current_side THEN turn_navy_done = 1
-	GOSUB box2
+	CALL draw_navy_box
 	LOCATE 10, 25: PRINT side_name$(side); " fleet of"; fleet_size(side); "ship(s) is sailing"
 	LOCATE 11, 25: PRINT "to RAID "; side_name$(other_side(side)); " COMMERCE !"
 
-	FOR i = 1 TO fleet_size(side)
-		PSET (120 + 41 * i, 210), 0
-		CALL draw_fleet_ship(side, i)
-	NEXT i
-	IF opt_graphics >= GRAPHICS_FULL THEN
-		a = ASC(LEFT$(fleet_ships$(side), 1))
-		SELECT CASE a
-			CASE 73
-				CALL draw_ironclad
-			CASE 87
-				CALL draw_schooner
-		END SELECT
-		wait_seconds 2 * opt_pause!
-	ELSE
-		wait_seconds opt_pause!
-	END IF
+	CALL draw_fleet_sailing(side)
 	fleet_city(side) = FLEET_AT_SEA: raiding_side = side
 	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) GOTO pirate
 	CLS : CALL draw_map
@@ -295,147 +264,7 @@ GOTO ahoy
 '                               Ship vs. Ship
 '---------------------------------------------------------------------------
 pirate:
-	CLS : LOCATE 1, 30: COLOR COLOR_LIGHT_CYAN: PRINT "NAVAL COMBAT"
-	FOR k = SIDE_UNION TO SIDE_REBEL
-	hit(k) = 10
-	IF RIGHT$(fleet_ships$(k), 1) = "I" THEN hit(k) = 20
-	NEXT k
-cannon:
-	LOCATE 9, 1: PRINT SPACE$(79)
-	LOCATE 15, 1: PRINT SPACE$(79)
-	x = 10: y = 100
-	COLOR COLOR_LIGHT_BLUE: LOCATE 5, 25: PRINT "UNION"; fleet_size(SIDE_UNION); "ship(s)"
-	GOSUB boxes
-	COLOR COLOR_BLUE
-	FOR i = 1 TO fleet_size(SIDE_UNION)
-	x = x + 50: PSET (x, y)
-	CALL draw_fleet_ship(SIDE_UNION, i)
-	NEXT i
-	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 22: PRINT "CONFEDERATES "; fleet_size(SIDE_REBEL); "ship(s)"
-	LINE (10, 180)-(530, 210), 1, BF
-	LINE (10, 180)-(530, 210), 11, B
-	x = 10: y = 200
-	COLOR COLOR_BLUE
-	FOR i = 1 TO fleet_size(SIDE_REBEL)
-	x = x + 50: PSET (x, y)
-	CALL draw_fleet_ship(SIDE_REBEL, i)
-	NEXT i
-	COLOR COLOR_LIGHT_CYAN
-wave:
-	menu_text$(0) = "Options"
-	menu_text$(1) = "Attack"
-	menu_text$(2) = "Retreat"
-	IF action > 0 THEN menu_choice = 1: GOTO powder
-      
-	menu_item_count = 2: menu_color = COLOR_CYAN: menu_highlight = COLOR_YELLOW: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
-powder:
-	SELECT CASE menu_choice
-	 CASE 1
-firemore:
-	 IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
-	 pct! = 0: a$ = RIGHT$(fleet_ships$(side), 1)
-	 IF a$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
-		IF a$ = "I" THEN pct! = .1 ELSE pct! = -.1
-	 END IF
-	 IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
-	 GOTO firemore
-hitem:
-	 hit(other_side(side)) = hit(other_side(side)) - 1: GOSUB showhit: IF hit(other_side(side)) > 0 GOTO firemore
-	 x = 10 + 50 * fleet_size(other_side(side))
-	 y = 90: IF side = SIDE_UNION THEN y = 190
-	 GOSUB xout
-	 LOCATE 17, 5: PRINT side_name$(other_side(side)); " ship SUNK!": CALL wait_seconds(opt_pause! + 1): GOSUB clr1
-	 CALL navy_remove_ship(other_side(side))
-	 IF fleet_size(other_side(side)) < 1 THEN
-		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
-		PRINT side_name$(other_side(side)); " fleet DEFEATED"
-		CALL wait_seconds(opt_pause!)
-		fleet_city(other_side(side)) = 0: fleet_ships$(other_side(side)) = ""
-		side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 10
-		IF side = current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
-		GOTO sail3
-	 END IF
-	 hit(other_side(side)) = 10
-	 IF RIGHT$(fleet_ships$(other_side(side)), 1) = "I" THEN hit(other_side(side)) = 20
-	 GOTO cannon
-hitme1:
-	 hit(side) = hit(side) - 1: GOSUB showhit: IF hit(side) > 0 GOTO firemore
-	 x = 10 + 50 * fleet_size(side)
-	 y = 190: IF side = SIDE_UNION THEN y = 90
-	 GOSUB xout
-	 LOCATE 17, 5: PRINT "One of the "; side_name$(side); " ships was SUNK!": CALL wait_seconds(opt_pause!): GOSUB clr1
-	 CALL navy_remove_ship(side)
-	 IF fleet_size(side) < 1 THEN
-		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
-		PRINT "Attacking "; side_name$(side); " fleet has been ELIMINATED !"
-		CALL wait_seconds(opt_pause!)
-		fleet_city(side) = 0: fleet_ships$(side) = ""
-		side_victory_points(side) = side_victory_points(side) + 10
-		IF side <> current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
-		GOTO sail3
-	 END IF
-	 hit(side) = 10
-	 IF RIGHT$(fleet_ships$(side), 1) = "I" THEN hit(side) = 20
-	 GOTO cannon
-
-	 CASE 2
-	 target = 0
-	 FOR i = 1 TO MAX_CITIES
-	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN target = i: IF RND > .3 GOTO found1
-	 NEXT i
-found1:
-	 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
-	 fleet_city(side) = target
-	 GOTO sail3
-	 CASE ELSE
-	 GOTO wave
-	 END SELECT
-	 GOTO pirate
-'---------------------------------------------------------------------------
-'                               Subs
-'---------------------------------------------------------------------------
-showhit:
-	 LOCATE 9, 6 * fleet_size(SIDE_UNION): PRINT hit(SIDE_UNION); " ";
-	 LOCATE 15, 6 * fleet_size(SIDE_REBEL): PRINT hit(SIDE_REBEL); " ";
-	 IF opt_sound = SOUND_OFF THEN wait_seconds .1 * opt_pause!
-	 RETURN
-clr1:
-	LOCATE 17, 1: PRINT SPACE$(60): RETURN
-nest:
-	best = 0: x = 0
-	FOR i = 1 TO menu_item_count
-	target = menu_value(i)
-	IF city_owner(target) = SIDE_NONE GOTO neutral
-
-	IF target = fleet_city(other_side(side)) THEN IF fleet_size(side) >= fleet_size(other_side(side)) AND RND > .1 THEN menu_choice = i: RETURN
-	IF city_owner(target) <> side THEN
-		best = i: x = x + 1
-		IF RND > .8 THEN menu_choice = best: RETURN
-	END IF
-neutral:
-	NEXT i
-	IF best = 0 THEN
-		menu_choice = 1 + INT(RND * menu_item_count)
-	ELSE
-		menu_choice = best
-	END IF
-
-	IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = 30 THEN IF RND > .5 THEN menu_choice = 30: RETURN
-	RETURN
-boxes:
-	LINE (10, 80)-(530, 110), 1, BF
-	LINE (10, 80)-(530, 110), 11, B
-	RETURN
-box2:
-	CLS
-	LINE (100, 110)-(550, 240), 1, B
-	LINE (95, 115)-(555, 235), 7, B
-	RETURN
-xout:
-		PSET (x, y)
-		DRAW "S5C15G5F5G3H5G5H3E5H5E3F5E5F3"
-		PAINT (x - 3, y + 1), 12, 15
-	RETURN
+	CALL navy_combat(side, action)
 sail3:
 	raiding_side = SIDE_NONE
 	FOR k = SIDE_UNION TO SIDE_REBEL
@@ -479,4 +308,115 @@ IF raiding_side > 0 THEN
 		END IF
 	END IF
 END IF
+END SUB
+' Ship against ship: the two fleets are in the same place. They fire until a fleet is sunk,
+' or the player's fleet retreats to a port.
+SUB navy_combat (side, action)
+DIM k AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM pct!: DIM a$: DIM target AS INTEGER
+DIM hit(SIDE_REBEL)
+pirate:
+	CLS : LOCATE 1, 30: COLOR COLOR_LIGHT_CYAN: PRINT "NAVAL COMBAT"
+	FOR k = SIDE_UNION TO SIDE_REBEL
+	hit(k) = 10
+	IF RIGHT$(fleet_ships$(k), 1) = "I" THEN hit(k) = 20
+	NEXT k
+cannon:
+	LOCATE 9, 1: PRINT SPACE$(79)
+	LOCATE 15, 1: PRINT SPACE$(79)
+	x = 10: y = 100
+	COLOR COLOR_LIGHT_BLUE: LOCATE 5, 25: PRINT "UNION"; fleet_size(SIDE_UNION); "ship(s)"
+	LINE (10, 80)-(530, 110), 1, BF
+	LINE (10, 80)-(530, 110), 11, B
+	COLOR COLOR_BLUE
+	FOR i = 1 TO fleet_size(SIDE_UNION)
+	x = x + 50: PSET (x, y)
+	CALL draw_fleet_ship(SIDE_UNION, i)
+	NEXT i
+	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 22: PRINT "CONFEDERATES "; fleet_size(SIDE_REBEL); "ship(s)"
+	LINE (10, 180)-(530, 210), 1, BF
+	LINE (10, 180)-(530, 210), 11, B
+	x = 10: y = 200
+	COLOR COLOR_BLUE
+	FOR i = 1 TO fleet_size(SIDE_REBEL)
+	x = x + 50: PSET (x, y)
+	CALL draw_fleet_ship(SIDE_REBEL, i)
+	NEXT i
+	COLOR COLOR_LIGHT_CYAN
+wave:
+	menu_text$(0) = "Options"
+	menu_text$(1) = "Attack"
+	menu_text$(2) = "Retreat"
+	IF action > 0 THEN menu_choice = 1: GOTO powder
+      
+	menu_item_count = 2: menu_color = COLOR_CYAN: menu_highlight = COLOR_YELLOW: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
+powder:
+	SELECT CASE menu_choice
+	 CASE 1
+firemore:
+	 IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
+	 pct! = 0: a$ = RIGHT$(fleet_ships$(side), 1)
+	 IF a$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
+		IF a$ = "I" THEN pct! = .1 ELSE pct! = -.1
+	 END IF
+	 IF RND <= .5 + pct! GOTO hitem ELSE GOTO hitme1
+	 GOTO firemore
+hitem:
+	 hit(other_side(side)) = hit(other_side(side)) - 1: CALL navy_show_hits(hit()): IF hit(other_side(side)) > 0 GOTO firemore
+	 x = 10 + 50 * fleet_size(other_side(side))
+	 y = 90: IF side = SIDE_UNION THEN y = 190
+	 CALL draw_ship_sunk(x, y)
+	 LOCATE 17, 5: PRINT side_name$(other_side(side)); " ship SUNK!": CALL wait_seconds(opt_pause! + 1): LOCATE 17, 1: PRINT SPACE$(60)
+	 CALL navy_remove_ship(other_side(side))
+	 IF fleet_size(other_side(side)) < 1 THEN
+		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
+		PRINT side_name$(other_side(side)); " fleet DEFEATED"
+		CALL wait_seconds(opt_pause!)
+		fleet_city(other_side(side)) = 0: fleet_ships$(other_side(side)) = ""
+		side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 10
+		IF side = current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
+		EXIT SUB
+	 END IF
+	 hit(other_side(side)) = 10
+	 IF RIGHT$(fleet_ships$(other_side(side)), 1) = "I" THEN hit(other_side(side)) = 20
+	 GOTO cannon
+hitme1:
+	 hit(side) = hit(side) - 1: CALL navy_show_hits(hit()): IF hit(side) > 0 GOTO firemore
+	 x = 10 + 50 * fleet_size(side)
+	 y = 190: IF side = SIDE_UNION THEN y = 90
+	 CALL draw_ship_sunk(x, y)
+	 LOCATE 17, 5: PRINT "One of the "; side_name$(side); " ships was SUNK!": CALL wait_seconds(opt_pause!): LOCATE 17, 1: PRINT SPACE$(60)
+	 CALL navy_remove_ship(side)
+	 IF fleet_size(side) < 1 THEN
+		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
+		PRINT "Attacking "; side_name$(side); " fleet has been ELIMINATED !"
+		CALL wait_seconds(opt_pause!)
+		fleet_city(side) = 0: fleet_ships$(side) = ""
+		side_victory_points(side) = side_victory_points(side) + 10
+		IF side <> current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
+		EXIT SUB
+	 END IF
+	 hit(side) = 10
+	 IF RIGHT$(fleet_ships$(side), 1) = "I" THEN hit(side) = 20
+	 GOTO cannon
+
+	 CASE 2
+	 target = 0
+	 FOR i = 1 TO MAX_CITIES
+	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN target = i: IF RND > .3 GOTO found1
+	 NEXT i
+found1:
+	 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
+	 fleet_city(side) = target
+	 EXIT SUB
+	 CASE ELSE
+	 GOTO wave
+	 END SELECT
+	 GOTO pirate
+END SUB
+
+' Shows how many hits each side's last ship can still take.
+SUB navy_show_hits (hit())
+	 LOCATE 9, 6 * fleet_size(SIDE_UNION): PRINT hit(SIDE_UNION); " ";
+	 LOCATE 15, 6 * fleet_size(SIDE_REBEL): PRINT hit(SIDE_REBEL); " ";
+	 IF opt_sound = SOUND_OFF THEN wait_seconds .1 * opt_pause!
 END SUB

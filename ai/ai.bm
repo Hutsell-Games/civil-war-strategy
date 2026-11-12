@@ -377,3 +377,28 @@ puted:  NEXT i
 	END IF
 	IF x1 > 0 THEN army = index: city = x1
 END SUB
+
+' The computer's choice of a port to sail to, from the menu's list. It is left in
+' menu_choice.
+SUB ai_pick_port (side)
+DIM best AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER
+	best = 0: x = 0
+	FOR i = 1 TO menu_item_count
+	target = menu_value(i)
+	IF city_owner(target) = SIDE_NONE GOTO neutral
+
+	IF target = fleet_city(other_side(side)) THEN IF fleet_size(side) >= fleet_size(other_side(side)) AND RND > .1 THEN menu_choice = i: EXIT SUB
+	IF city_owner(target) <> side THEN
+		best = i: x = x + 1
+		IF RND > .8 THEN menu_choice = best: EXIT SUB
+	END IF
+neutral:
+	NEXT i
+	IF best = 0 THEN
+		menu_choice = 1 + INT(RND * menu_item_count)
+	ELSE
+		menu_choice = best
+	END IF
+
+	IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = 30 THEN IF RND > .5 THEN menu_choice = 30: EXIT SUB
+END SUB

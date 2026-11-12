@@ -166,7 +166,8 @@ Step 6 is done in the working tree: `turn_resolve`'s outer parts are SUBs, and 2
 Step 7 is done in the working tree: `event_riot`, and `ai_turn` is six `ai_` SUBs and a FUNCTION.
 Step 8 is done in the working tree: recruiting and the railroad are split into menu, computer and rule.
 Step 9 is done in the working tree: `victory_warnings`, `end_game`, and the Hall of Fame's own arrays.
-**Next:** phase 7 step 10, `navy_commands`.
+Step 10's first part is done in the working tree: `navy_combat`, `ai_pick_port`, `draw_fleet_sailing`.
+**Next:** phase 7 step 10, second part: `ai_navy`, `menu_navy` and `navy_action`.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -329,8 +330,8 @@ The 20 lines that no test runs (21 before phase 7 step 6):
 | `port\qb64.bm` | 15-16 | `DIR$("")` for the next match; the game never calls it that way |
 | `rules\battle.bm` | 58 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
 | `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
-| `rules\navy.bm` | 103 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
-| `rules\navy.bm` | 341, 393 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
+| `rules\navy.bm` | 102 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
+| `rules\navy.bm` | 362, 414 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
 | `rules\turn.bm` | 283, 285 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
 | `ui\orders.bm` | 118 | The picker found no city of the player's among 39; the player always holds the city it started on |
 | `ui\orders.bm` | 133 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
@@ -475,8 +476,19 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
    - `hall_of_fame_load` and `hall_of_fame_save` (`port\files.bm`) read and write `hiscore.cws`. The
      file is now read whole before the table is printed, not line by line with it.
    - No unit tests: every piece draws or reads a key. Lines moved without a test: none.
-10. **`navy_commands`**: `navy_combat`, `ai_pick_port` and `draw_fleet_sailing` first. Then `ai_navy`,
-    `menu_navy` and `navy_action`, and last one SUB for each action.
+10. **`navy_commands`**, in three parts. `navy_combat`, `ai_pick_port` and `draw_fleet_sailing` first. Then
+    `ai_navy`, `menu_navy` and `navy_action`, and last one SUB for each action.
+    - **Done: the first part.** `navy_commands` went from 436 lines to 265 and has no `GOSUB` left
+      (lines 10 to 274 of `rules\navy.bm`).
+      - `navy_combat (side, action)` (`rules\navy.bm`, mixed): ship against ship, the label `pirate:` to
+        the end of its `SELECT`. `navy_commands` calls it from that label and goes on to `sail3:`.
+        `navy_show_hits (hit())` is the `GOSUB` routine `showhit`. The routines `clr1` and `boxes`
+        were one and two lines; they are written out where they were called.
+      - `ai_pick_port (side)` (`ai\ai.bm`): the `GOSUB` routine `nest`.
+      - `draw_fleet_sailing (side)` (`draw\ships.bm`): the 16 lines that Sail and Raid both held.
+        `draw_navy_box` and `draw_ship_sunk (x, y)` there are the routines `box2` and `xout`.
+      - New names: `navy_show_hits`, `draw_navy_box`, `draw_ship_sunk`. Lines moved without a test:
+        the two dead `GOTO` lines of `navy_combat`, now `rules\navy.bm` 362 and 414.
 11. **The attack, retreat and surrender knot in the middle of `turn_resolve`.**
 12. **`menu_select`'s highlight**: `menu_highlight` and `menu_unhighlight`.
 
