@@ -736,3 +736,47 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
      run by no script, and as a line of its own it would be a 21st line not run.
    - Unit tests: 4 new ones, so 117 in all. Lines moved without a test: none. 194 lines of the
      game are run in part and 20 are not run.
+6. **Done: the navy's commands.** `navy_commands` and its five actions served the player and the
+   computer through one parameter, `action`. Each is now three parts, in three folders.
+   - **The player** (`ui\navy.bm`, new): `menu_navy_commands` shows the Ships menu and calls
+     `menu_navy_build`, `menu_navy_attack`, `menu_navy_sail`, `menu_navy_raid` or
+     `menu_navy_invade`. `menu_navy_combat` is the sea fight that asks before each volley.
+   - **The computer** (`ai\ai.bm`): `ai_navy_orders` takes an order and calls `ai_navy_build`,
+     `ai_navy_attack`, `ai_navy_sail`, `ai_navy_raid` or `ai_navy_invade`.
+   - **The commands** (`commands\navy.bm`, the first file of the new folder, moved there from
+     `ui\navy.bm` with `git mv`): `navy_ship_joins`, `navy_fleet_founded`, `navy_bombard`,
+     `navy_sail_to`, `navy_start_raid`, `navy_land_army` and `navy_combat_auto`, the fight that
+     does not ask. Nothing in the folder opens a menu or reads a key. The sea fight is four
+     parts that both fights use: `navy_combat_begin`, `navy_combat_draw`, `navy_combat_volley`
+     and `navy_combat_retreat`.
+   - **How each action was split.** The old SUB was read twice, once with `action` as the
+     player's 0 and once as the computer's order. The computer's side is never `current_side`
+     (`ai_turn` takes the other side), so each test of `side = current_side` went to one half.
+   - **Two random numbers that the player uses up.** `IF action = NAVY_BUILD AND RND < ...` in
+     Build and `IF action = NAVY_ATTACK AND ... AND RND > .5` in Attack drew a number for the
+     player too: BASIC works out both sides of an `AND`. `menu_navy_build` and
+     `menu_navy_attack` call `random_discard` (`rules\navy.bm`) there, so a game's numbers stay
+     in order. The computer's Attack draws a second number when it thinks of sailing instead.
+   - **Of the three lines phase 8 left, one could go.** `turn_navy_done = 1` is now
+     `turn_set_navy_done`, called by the player's menus only. `city_owner(0) = side` stays, as
+     `navy_mark_side`: `ai_fleet_orders` reads city 0's owner in a later month, as the last
+     order left it. `fleet_size(side) = LEN(fleet_ships$(side))` stays, as `navy_count_ships`:
+     it was not shown that the count and the list always agree (Vary Start draws the count and
+     then builds the list; `navy_fleet_lost` clears the list only).
+   - Other rules: `navy_has_ironclads`, and `navy_list_shipyards` and `navy_list_ports`, which
+     fill the Port and To menus for the player and the computer.
+   - **Names.** `navy_sail` and `navy_raid` cannot be SUBs: BASIC ignores case, and `NAVY_SAIL`
+     and `NAVY_RAID` are constants. `NAVY_ASK` is gone.
+   - **Two scripts first**, recorded on `83c34c8` in a copy of that commit. The split showed
+     what the coverage had hidden: lines that only one of the two had run. `navy-build` is the
+     player's Ships menu without a fleet, a new fleet through the Port menu, a sea fight that
+     the player attacks in, and the refusals of a fleet at sea. `navy-raid-back` is the
+     computer's fleet pursuing the player's raiders, then raiding in answer.
+   - Kept, and now in `TODO.md`: the computer's ironclad at a wooden ship's price, Attack on a
+     city that is not the enemy's closing Ships for the month, and Invasion with no commander
+     left.
+   - `play.py` hashes the folder `commands` with the other sources.
+   - Unit tests: 4 new ones, so 121 in all. 36 scripts. Lines moved without a test: none. 193
+     lines of the game are run in part and 18 are not run: the two unreachable `GOTO`s of
+     `navy_combat` are gone, the computer's "no port for a first ship" is part of a line now,
+     and `ai_navy_raid` has one new line that nothing can reach.

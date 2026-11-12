@@ -17,9 +17,9 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `army.bm` | `army_set_order`, `army_free_leader`, `army_take_leader` (new in phase 9), `army_combine_start`, `army_combine_add`, `army_combine_absorb`, `army_combine_finish`, `army_raise`, `army_pick_commander`, `army_buy_supply`, `army_place_new`, `army_add_recruits`, `army_recruit_cities`, `army_detach`, `army_drill`, `army_recruit_bonus`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` (`army_combine`, `army_new`, `army_get_commander`, `army_resupply` and `army_recruit` until phase 8 moved them to `ui\army.bm`) |
 | `city.bm` | `city_build_fort`, `capital_move_pay`, `capital_move_to` (new in phase 9), `city_take`, `city_is_connected`, `city_fix_return_routes`, `city_update_occupier` (`city_capture` and `check_map_links` until phase 8 moved them to `ui\city.bm`) |
 | `battle.bm` | `battle_strengths`, `battle_fight`, `battle_losses`, `battle_apply_losses`, `normal_random_number` (`calculate_battle` until phase 8 split it) |
-| `navy.bm` | `navy_remove_ship`, `navy_add_ship`, `navy_found_fleet`, `navy_cancel_new_fleet`, `navy_bombard_army`, `navy_shore_battery`, `navy_fleet_lost`, `navy_blast`, `navy_move_fleet`, `navy_go_raiding`, `navy_landed`, `navy_note_raiding_side`, `navy_raid_round`, `navy_ship_hits`, `navy_shot_hits`, `navy_fleet_defeated`, `navy_retreat_port` (the rest until phase 8 moved them to `ui\navy.bm`) |
+| `navy.bm` | `navy_mark_side`, `navy_count_ships`, `navy_has_ironclads`, `navy_list_shipyards`, `navy_list_ports`, `random_discard` (new in phase 9), `navy_remove_ship`, `navy_add_ship`, `navy_found_fleet`, `navy_cancel_new_fleet`, `navy_bombard_army`, `navy_shore_battery`, `navy_fleet_lost`, `navy_blast`, `navy_move_fleet`, `navy_go_raiding`, `navy_landed`, `navy_note_raiding_side`, `navy_raid_round`, `navy_ship_hits`, `navy_shot_hits`, `navy_fleet_defeated`, `navy_retreat_port` (the rest until phase 8 moved them to `ui\navy.bm`) |
 | `railroad.bm` | `railroad_board`, `railroad_unload`, `railroad_route_count`, `railroad_capacity` (`railroad_move`, `railroad_start` and `railroad_arrive` until phase 8 moved them to `ui\railroad.bm`) |
-| `turn.bm` | `turn_set_moves_done`, `turn_reset_commands`, `turn_check_commands`, `turn_close_recruiting`, `turn_next_player` (new in phase 9), `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
+| `turn.bm` | `turn_set_moves_done`, `turn_set_navy_done`, `turn_reset_commands`, `turn_check_commands`, `turn_close_recruiting`, `turn_next_player` (new in phase 9), `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7); the Utility menu's settings (new in phase 9): `option_swap_side`, `option_toggle_players`, `option_next_graphics`, `option_set_sound`, `option_set_display_speed`, `option_toggle_alt_colors`, `option_set_balance`, `option_set_event_balance`, `option_toggle_winter_campaigns`, `option_toggle_realism`, `option_toggle_history`, `option_next_aggression`; the start of a game (new in phase 9, out of the main module): `game_new`, `game_reset`, `game_apply_settings` |
 | `victory.bm` | `victory_toggle_rule` (new in phase 9), `victory_forces`, `victory_time_near`, `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_play_on`, `victory_won`, `victory_technical_points`, `hall_of_fame_place`, `hall_of_fame_insert` (`check_victory_conditions`, `victory_warnings`, `end_game` and `hall_of_fame` until phase 8 moved them to `ui\victory.bm`) |
 
@@ -27,7 +27,16 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `ai.bm` | `ai_resupply`, `ai_fortify`, `ai_fortify_pick`, `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders`, `ai_army_order`, `ai_drill`, `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_navy`, `ai_navy_adjust`, `ai_evaluate_move`, `city_nearby_enemy_strength` (`ai_turn` until phase 8 moved it to `ui\turn.bm`) |
+| `ai.bm` | `ai_navy_orders`, `ai_navy_build`, `ai_navy_attack`, `ai_navy_sail`, `ai_navy_raid`, `ai_navy_invade` (new in phase 9: the computer's half of the navy's commands), `ai_resupply`, `ai_fortify`, `ai_fortify_pick`, `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders`, `ai_army_order`, `ai_drill`, `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_navy`, `ai_navy_adjust`, `ai_evaluate_move`, `city_nearby_enemy_strength` (`ai_turn` until phase 8 moved it to `ui\turn.bm`) |
+
+## commands\
+
+The orders that the player's menus and the computer both give (new in phase 9). A command calls rules
+and shows what happened. Nothing here opens a menu or reads a key.
+
+| File | SUBs |
+|------|------|
+| `navy.bm` | `navy_ship_joins`, `navy_fleet_founded`, `navy_bombard`, `navy_say_no_ships`, `navy_sail_to`, `navy_start_raid`, `navy_land_army`, `navy_finish_move`, `navy_redraw_map`, `navy_commerce_raid`, `navy_combat_begin`, `navy_combat_draw`, `navy_combat_volley`, `navy_combat_retreat`, `navy_combat_auto`, `navy_show_hits` (from `ui\navy.bm`) |
 
 ## ui\
 
@@ -45,9 +54,9 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `railroad.bm` | `railroad_move`, `railroad_start`, `railroad_arrive` (new in phase 8: the train's screen) |
 | `city.bm` | `city_capture`, `check_map_links` (new in phase 8: a capture and the map check) |
 | `army.bm` | `army_combine`, `army_new`, `army_get_commander`, `army_resupply`, `army_recruit` (new in phase 8: raising, supplying and combining armies) |
-| `navy.bm` | `navy_commands`, `navy_action`, `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`, `navy_raid_commerce`, `navy_land_army`, `navy_finish_move`, `navy_commerce_raid`, `navy_combat`, `navy_show_hits` (new in phase 8: the navy's menus and screens) |
+| `navy.bm` | `menu_navy_commands`, `menu_navy_build`, `menu_navy_attack`, `menu_navy_sail`, `menu_navy_raid`, `menu_navy_invade`, `menu_navy_combat` (new in phase 9: the player's half of the navy's commands; the file of phase 8 moved to `commands\navy.bm`) |
 | `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city`, `ai_turn` (new in phase 8: the month's moves) |
-| `ai.bm` | `draw_ai_fort`, `draw_ai_plan`, `draw_ai_drill`, `draw_ai_funds` (new in phase 8: the computer's messages) |
+| `ai.bm` | `draw_ai_fort`, `draw_ai_plan`, `draw_ai_drill`, `draw_ai_funds`, `draw_ai_navy_color` (new in phase 8: the computer's messages) |
 | `events.bm` | `special_events`, `event_riot` (new in phase 8: the special events' messages and tunes) |
 | `victory.bm` | `check_victory_conditions`, `victory_warnings`, `end_game`, `hall_of_fame` (new in phase 8: the warnings, the victory screens and the Hall of Fame) |
 

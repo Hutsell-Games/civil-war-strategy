@@ -1,164 +1,94 @@
-' The navy's menus and screens. The rules are in rules/navy.bm.
+' The player's Ships command: the Ships menu and a menu SUB for each of its actions. Each
+' asks the player what the action needs, then gives the order (commands/navy.bm). The
+' computer's fleet is ai_navy_orders (ai/ai.bm). The Ships menu itself is menu_navy
+' (ui/orders.bm).
 
-' A side's fleet: the player's Ships menu (action is NAVY_ASK) or the computer's order. An
-' action may ask for the menu or the order again, for example after a ship is built.
-SUB navy_commands (side, action)
+' The Ships command. The menu shows again while an action asks for it, for example after a
+' ship is built.
+SUB menu_navy_commands (side)
 DIM again AS INTEGER: DIM quit AS INTEGER
-IF action > 0 THEN CALL ai_navy(side, action)
 COLOR COLOR_LIGHT_CYAN
 DO
-	city_owner(0) = side
+	CALL navy_mark_side(side)
 	quit = 0
-	IF action = NAVY_ASK THEN CALL menu_navy(side, quit) ELSE CALL ai_navy_adjust(side, action, quit)
+	CALL menu_navy(side, quit)
 	IF quit > 0 THEN EXIT SUB
-	CALL navy_action(side, action, again)
+	again = 0
+	SELECT CASE menu_choice
+		CASE 1: CALL menu_navy_build(side, again)
+		CASE 2: CALL menu_navy_attack(side, again)
+		CASE 3: CALL menu_navy_sail(side, again)
+		CASE 4: CALL menu_navy_raid(side, again)
+		CASE 5: CALL menu_navy_invade(side)
+	END SELECT
 LOOP WHILE again > 0
 END SUB
 
-' Carries out the action in menu_choice. again is 1 when the menu or the computer's order is
-' wanted again.
-SUB navy_action (side, action, again)
-again = 0
-SELECT CASE menu_choice
-	CASE 1: CALL navy_build_ship(side, action, again)
-	CASE 2: CALL navy_bombard(side, action, again)
-	CASE 3: CALL navy_sail_to_port(side, action, again)
-	CASE 4: CALL navy_raid_commerce(side, action, again)
-	CASE 5: CALL navy_land_army(side, action)
-END SELECT
-END SUB
-
-' Build: a ship is added to the fleet, or a new fleet is started in a sea port of the side.
-' With the money for it, the player chooses wood or iron and the computer takes iron.
-SUB navy_build_ship (side, action, again)
-DIM cost AS INTEGER: DIM a$: DIM a AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-	cost = COST_SHIP
-	IF side_cash(side) < cost OR fleet_city(side) = FLEET_AT_SEA THEN again = 1: EXIT SUB
-	IF action = NAVY_BUILD AND fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
-	IF action = NAVY_ASK AND fleet_size(side) >= MAX_FLEET_SHIPS THEN again = 1: EXIT SUB
-
-	IF action = NAVY_ASK AND fleet_city(side) > 0 THEN
-		IF city_owner(fleet_city(side)) <> side THEN again = 1: EXIT SUB
-		IF city_port_type(fleet_city(side)) < PORT_SEA THEN again = 1: EXIT SUB
-	END IF
-	IF action = NAVY_BUILD AND RND < .07 * fleet_size(side) THEN EXIT SUB
-	a$ = "W"
-
-	IF opt_realism >= REALISM_ON AND ((turn_year < IRONCLAD_YEAR) OR (turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH)) GOTO noiron
-	IF side_cash(side) >= 2 * cost THEN
-		menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_LIGHT_BLUE
-		IF side = current_side THEN
-			menu_text$(0) = "Type"
-			menu_text$(1) = "Wooden"
-			menu_text$(2) = "Ironclad"
-			menu_item_count = 2
-			CALL menu_select(MENU_PLAIN)
-			CALL clear_right_panel
-			IF menu_choice < 1 THEN again = 1: EXIT SUB
-			IF menu_choice = 2 THEN a$ = "I": cost = 2 * cost
-		ELSE
-			a$ = "I"
-		END IF
-	END IF
-
-noiron:
-	CALL navy_add_ship(side, a$, cost)
-	a = 1: IF a$ <> "W" THEN a = 2
-	IF fleet_size(side) > 1 GOTO add2ship
-ships:
-	menu_text$(0) = "Port": menu_item_count = 0: menu_col = PANEL_COL: menu_row = 12
-	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) = PORT_SEA AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
-	NEXT i
-	IF action = NAVY_BUILD THEN menu_choice = 1 + INT(menu_item_count * RND)
-	IF menu_item_count < 1 THEN
-		CALL navy_cancel_new_fleet(side)
-		IF action = NAVY_ASK THEN CALL clear_bottom_line: PRINT "NO SHIPYARDS AVAILABLE !"; : EXIT SUB
-		IF action = NAVY_BUILD THEN EXIT SUB
-	END IF
-	IF action = NAVY_ASK THEN CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
-
-	IF menu_choice < 1 GOTO ships
-	CALL navy_found_fleet(side, menu_value(menu_choice), cost)
-	x = city_x(menu_value(menu_choice)) + 25: y = city_y(menu_value(menu_choice)) + 25: CALL draw_fleets
-	CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is building NEW fleet in "; city_name$(menu_value(menu_choice));
-	PSET (400, 465), 0: CALL draw_ship_icon(side, a)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 3000, 1
-	CALL wait_seconds(opt_pause!)
-	again = 1: EXIT SUB
-add2ship:
-	CALL clear_bottom_line: PRINT side_name$(side); " navy increased to "; fleet_size(side);
-	PSET (400, 465), 0: CALL draw_ship_icon(side, a)
-	CALL draw_fleets
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 3000, 1
-	CALL wait_seconds(opt_pause!)
+' Build: a ship is added to the fleet, or a new fleet is started in a sea port that the
+' player picks. With the money for it, the player chooses wood or iron. again is 0 only when
+' there is no port for a new fleet.
+SUB menu_navy_build (side, again)
+DIM cost AS INTEGER: DIM ship$
 	again = 1
+	cost = COST_SHIP
+	IF side_cash(side) < cost OR fleet_city(side) = FLEET_AT_SEA THEN EXIT SUB
+	IF fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
+
+	IF fleet_city(side) > 0 THEN
+		IF city_owner(fleet_city(side)) <> side THEN EXIT SUB
+		IF city_port_type(fleet_city(side)) < PORT_SEA THEN EXIT SUB
+	END IF
+	' The computer's test of whether to build drew a random number here for the player too.
+	CALL random_discard
+	ship$ = "W"
+
+	IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * cost THEN
+		menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_LIGHT_BLUE
+		menu_text$(0) = "Type"
+		menu_text$(1) = "Wooden"
+		menu_text$(2) = "Ironclad"
+		menu_item_count = 2
+		CALL menu_select(MENU_PLAIN)
+		CALL clear_right_panel
+		IF menu_choice < 1 THEN EXIT SUB
+		IF menu_choice = 2 THEN ship$ = "I": cost = 2 * cost
+	END IF
+
+	CALL navy_add_ship(side, ship$, cost)
+	IF fleet_size(side) > 1 THEN CALL navy_ship_joins(side, ship$): EXIT SUB
+	DO
+		CALL navy_list_shipyards(side)
+		IF menu_item_count < 1 THEN
+			CALL navy_cancel_new_fleet(side)
+			CALL clear_bottom_line: PRINT "NO SHIPYARDS AVAILABLE !"; : again = 0: EXIT SUB
+		END IF
+		CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
+	LOOP WHILE menu_choice < 1
+	CALL navy_fleet_founded(side, menu_value(menu_choice), ship$, cost)
 END SUB
 
-' Attack: the fleet bombards the enemy city it lies off. It hurts the army there, or a fort
-' fires back, or the city without either may turn neutral.
-SUB navy_bombard (side, action, again)
-DIM target AS INTEGER: DIM index AS INTEGER: DIM killd AS INTEGER: DIM damaged AS INTEGER: DIM result AS INTEGER
-anchor:
+' Attack: the fleet bombards the city it lies off, if that is the enemy's. The fleet has then
+' acted this month, even when the city is not the enemy's and nothing is bombarded.
+SUB menu_navy_attack (side, again)
+	again = 0
 	IF fleet_city(side) = FLEET_AT_SEA THEN again = 1: EXIT SUB
-	IF action = NAVY_ATTACK AND city_owner(fleet_city(side)) = side THEN EXIT SUB
-	IF action = NAVY_ATTACK AND city_army(fleet_city(side)) > 0 AND RND > .5 THEN action = NAVY_SAIL: GOTO anchor
-	IF action = NAVY_ATTACK AND city_owner(fleet_city(side)) = SIDE_NONE THEN action = NAVY_SAIL: again = 1: EXIT SUB
+	' The computer's test of whether to sail instead drew a random number here for the player too.
+	CALL random_discard
 	IF fleet_city(side) < 1 THEN EXIT SUB
-	IF side = current_side THEN turn_navy_done = 1
+	CALL turn_set_navy_done(1)
 	IF city_owner(fleet_city(side)) <> other_side(side) THEN again = 1: EXIT SUB
-	CALL clear_bottom_line: COLOR COLOR_LIGHT_RED: PRINT side_name$(side); " fleet bombards "; city_name$(fleet_city(side));
-	CALL draw_map_marker(fleet_city(side), 0, MARK_EXPLOSION)
-	      
-	target = fleet_city(side): index = city_army(target): IF index = 0 GOTO deserted
-	CALL navy_bombard_army(side, index, killd)
-	CALL clear_bottom_line: PRINT army_name$(index); " suffered "; 100 * killd; " casualties";
-	CALL wait_seconds(opt_pause!)
-	EXIT SUB
-deserted:
-	IF city_fort(target) = 0 GOTO blast
-	CALL navy_shore_battery(side, target, damaged)
-	IF damaged = 1 GOTO hurt1
-	CALL clear_bottom_line
-	PRINT side_name$(city_owner(target)); " shore battery sunk an attacking ship!"; fleet_size(side); "ship(s) left! ";
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5
-	CALL wait_seconds(opt_pause!)
-	IF fleet_size(side) < 1 THEN
-		CALL navy_fleet_lost(side): CALL draw_navy_box
-		LOCATE 12, 27: PRINT side_name$(side); " fleet eliminated"
-		CALL wait_seconds(PAUSE_LONG)
-		CALL navy_finish_move: EXIT SUB
-	END IF
-	GOTO deserted
-hurt1:
-	CALL clear_bottom_line: PRINT city_name$(target); " fortifications damaged";
-	CALL city_redraw_fort(target)
-	CALL wait_seconds(opt_pause!)
-	EXIT SUB
-blast:
-	CALL navy_blast(side, target, result)
-	IF result = BLAST_FIRM THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(target); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
-	IF result = BLAST_LOYAL THEN CALL clear_bottom_line: PRINT "The CAPITAL steadfastly stands loyal"; : CALL wait_seconds(opt_pause!): EXIT SUB
-	CALL clear_bottom_line: PRINT city_name$(fleet_city(side)); " is now  NEUTRAL";
-	CALL draw_cities
-	EXIT SUB
+	CALL navy_bombard(side)
 END SUB
 
-' Sail: the fleet goes to another port, picked by the player or the computer. It fights the
-' enemy's fleet if that is there.
-SUB navy_sail_to_port (side, action, again)
-DIM i AS INTEGER
-	fleet_size(side) = LEN(fleet_ships$(side))
-	IF fleet_size(side) < 1 AND action > 0 THEN EXIT SUB
-	IF fleet_city(side) < 1 OR fleet_size(side) < 1 THEN CALL clear_bottom_line: PRINT "No ships remain"; : wait_seconds 1: again = 1: EXIT SUB
+' Sail: the player picks a port, and the fleet goes there. It fights the enemy's fleet if
+' that is there.
+SUB menu_navy_sail (side, again)
+DIM sailed AS INTEGER
+	again = 0
+	CALL navy_count_ships(side)
+	IF fleet_city(side) < 1 OR fleet_size(side) < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
 
-	menu_item_count = 0
-	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) > PORT_RIVER AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
-	NEXT i
-	IF action = NAVY_SAIL THEN
-		IF menu_item_count = 0 THEN EXIT SUB
-		IF fleet_pursuit > 0 THEN menu_choice = 1: menu_value(1) = fleet_city(other_side(side)): GOTO admiral
-		CALL ai_pick_port(side): IF menu_choice > 0 GOTO admiral ELSE EXIT SUB
-	END IF
+	CALL navy_list_ports(side)
 	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68
 	IF fleet_city(side) < 41 THEN
 		PRINT city_name$(fleet_city(side))
@@ -167,192 +97,51 @@ DIM i AS INTEGER
 	END IF
 	menu_text$(0) = "To"
 	menu_color = COLOR_CYAN: menu_col = PANEL_COL: menu_row = 12
-      
-	CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel: IF menu_choice < 1 THEN EXIT SUB
-admiral:
-	IF menu_value(menu_choice) = fleet_city(side) THEN EXIT SUB
-	IF menu_value(menu_choice) < 1 THEN EXIT SUB
-	IF side = current_side THEN turn_navy_done = 1
-	CALL draw_navy_box
-	LOCATE 10, 25: PRINT side_name$(side); " fleet of"; fleet_size(side); "ship(s) is sailing"
-	LOCATE 11, 25: PRINT "From ";
-	IF fleet_city(side) < 41 THEN
-		PRINT city_name$(fleet_city(side));
-	ELSE
-		PRINT "Raiding";
-	END IF
-	PRINT " to ";
-	IF menu_value(menu_choice) <> 99 THEN
-		PRINT city_name$(menu_value(menu_choice));
-	ELSE
-		PRINT "Raid Commerce";
-	END IF
 
-	CALL draw_fleet_sailing(side)
-	CALL navy_move_fleet(side, menu_value(menu_choice))
-	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL navy_combat(side, action)
+	CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel: IF menu_choice < 1 THEN EXIT SUB
+	CALL navy_sail_to(side, menu_value(menu_choice), sailed)
+	IF sailed = 0 THEN EXIT SUB
+	CALL turn_set_navy_done(1)
+	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL menu_navy_combat(side)
 	CALL navy_finish_move
 END SUB
 
 ' Raid: the fleet goes to sea to raid the other side's commerce. It fights the enemy's fleet
 ' if that is at sea too.
-SUB navy_raid_commerce (side, action, again)
-	fleet_size(side) = LEN(fleet_ships$(side))
-	IF fleet_size(side) < 1 AND action > 0 THEN EXIT SUB
+SUB menu_navy_raid (side, again)
+	again = 0
+	CALL navy_count_ships(side)
 	IF fleet_size(side) < 1 OR raiding_side = side THEN again = 1: EXIT SUB
 
-	IF side = current_side THEN turn_navy_done = 1
-	CALL draw_navy_box
-	LOCATE 10, 25: PRINT side_name$(side); " fleet of"; fleet_size(side); "ship(s) is sailing"
-	LOCATE 11, 25: PRINT "to RAID "; side_name$(other_side(side)); " COMMERCE !"
-
-	CALL draw_fleet_sailing(side)
-	CALL navy_go_raiding(side)
-	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL navy_combat(side, action): CALL navy_finish_move: EXIT SUB
-	CLS : CALL draw_map
+	CALL turn_set_navy_done(1)
+	CALL navy_start_raid(side)
+	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL menu_navy_combat(side): CALL navy_finish_move: EXIT SUB
+	CALL navy_redraw_map
 END SUB
 
-' Invasion: a ship lands a new army of 3,500 in the neutral city the fleet lies off, and the
-' ship is lost.
-SUB navy_land_army (side, action)
-DIM empty AS INTEGER: DIM c AS INTEGER
-anchor:
-	CALL army_get_commander((side), empty)
-	IF action > 0 AND empty = 0 THEN action = NAVY_SAIL: GOTO anchor
-	CALL navy_remove_ship(side)
-	c = fleet_city(side): CALL army_new((side), empty, c)
-	CALL city_capture(empty, c, side, 0)
-	CALL navy_landed(side, empty)
-	IF side = current_side THEN turn_navy_done = 1
+' Invasion: a ship lands a new army in the neutral city the fleet lies off.
+SUB menu_navy_invade (side)
+DIM slot AS INTEGER
+	CALL army_get_commander((side), slot)
+	CALL navy_land_army(side, slot)
+	CALL turn_set_navy_done(1)
 END SUB
 
-' After a fleet has moved or fought: notes which side raids commerce, and draws the map again.
-SUB navy_finish_move
-	CALL navy_note_raiding_side
-	CLS : CALL draw_map
-END SUB
-
-' The fleet that raids commerce: it sinks part of the other side's income, or loses a ship
-' and tries again while it has one.
-SUB navy_commerce_raid
-DIM a AS INTEGER: DIM k AS INTEGER: DIM raider AS INTEGER: DIM sank AS INTEGER
-raid:
-CALL navy_raid_round(raider, sank)
-IF raider > 0 THEN
-	CALL clear_bottom_line
-	IF sank = 1 THEN
-		COLOR COLOR_WHITE: PRINT side_name$(raider); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raider)); " commerce";
-		a = 1: IF LEFT$(fleet_ships$(raider), 1) = "I" THEN a = 2
-		PSET (500, 465), 0: CALL draw_ship_icon(raider, a)
-		IF opt_sound >= SOUND_EFFECTS THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
-		wait_seconds PAUSE_LONG
-	ELSE
-		COLOR COLOR_WHITE: PRINT side_name$(raider); " raiders have lost a ship ("; fleet_size(raider); " remain)";
-		IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
-		IF fleet_city(raider) > 0 THEN
-			wait_seconds PAUSE_LONG
-			GOTO raid
-		ELSE
-			LINE (447, 291)-(525, 335), 1, BF
-			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
-			wait_seconds PAUSE_LONG
-			LINE (447, 291)-(525, 335), 1, BF
-		END IF
-	END IF
-END IF
-END SUB
-' Ship against ship: the two fleets are in the same place. They fire until a fleet is sunk,
-' or the player's fleet retreats to a port.
-SUB navy_combat (side, action)
-DIM k AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER
+' Ship against ship, for the player's fleet: before each volley the player chooses to attack
+' or to retreat to a port.
+SUB menu_navy_combat (side)
+DIM over AS INTEGER
 DIM hit(SIDE_REBEL)
-pirate:
-	CLS : LOCATE 1, 30: COLOR COLOR_LIGHT_CYAN: PRINT "NAVAL COMBAT"
-	FOR k = SIDE_UNION TO SIDE_REBEL
-	hit(k) = navy_ship_hits(k)
-	NEXT k
-cannon:
-	LOCATE 9, 1: PRINT SPACE$(79)
-	LOCATE 15, 1: PRINT SPACE$(79)
-	x = 10: y = 100
-	COLOR COLOR_LIGHT_BLUE: LOCATE 5, 25: PRINT "UNION"; fleet_size(SIDE_UNION); "ship(s)"
-	LINE (10, 80)-(530, 110), 1, BF
-	LINE (10, 80)-(530, 110), 11, B
-	COLOR COLOR_BLUE
-	FOR i = 1 TO fleet_size(SIDE_UNION)
-	x = x + 50: PSET (x, y)
-	CALL draw_fleet_ship(SIDE_UNION, i)
-	NEXT i
-	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 22: PRINT "CONFEDERATES "; fleet_size(SIDE_REBEL); "ship(s)"
-	LINE (10, 180)-(530, 210), 1, BF
-	LINE (10, 180)-(530, 210), 11, B
-	x = 10: y = 200
-	COLOR COLOR_BLUE
-	FOR i = 1 TO fleet_size(SIDE_REBEL)
-	x = x + 50: PSET (x, y)
-	CALL draw_fleet_ship(SIDE_REBEL, i)
-	NEXT i
-	COLOR COLOR_LIGHT_CYAN
-wave:
-	menu_text$(0) = "Options"
-	menu_text$(1) = "Attack"
-	menu_text$(2) = "Retreat"
-	IF action > 0 THEN menu_choice = 1: GOTO powder
-      
-	menu_item_count = 2: menu_color = COLOR_CYAN: menu_highlight = COLOR_YELLOW: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
-powder:
-	SELECT CASE menu_choice
-	 CASE 1
-firemore:
-	 IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
-	 IF navy_shot_hits(side) = 1 GOTO hitem ELSE GOTO hitme1
-	 GOTO firemore
-hitem:
-	 hit(other_side(side)) = hit(other_side(side)) - 1: CALL navy_show_hits(hit()): IF hit(other_side(side)) > 0 GOTO firemore
-	 x = 10 + 50 * fleet_size(other_side(side))
-	 y = 90: IF side = SIDE_UNION THEN y = 190
-	 CALL draw_ship_sunk(x, y)
-	 LOCATE 17, 5: PRINT side_name$(other_side(side)); " ship SUNK!": CALL wait_seconds(opt_pause! + 1): LOCATE 17, 1: PRINT SPACE$(60)
-	 CALL navy_remove_ship(other_side(side))
-	 IF fleet_size(other_side(side)) < 1 THEN
-		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
-		PRINT side_name$(other_side(side)); " fleet DEFEATED"
-		CALL wait_seconds(opt_pause!)
-		CALL navy_fleet_defeated(other_side(side))
-		EXIT SUB
-	 END IF
-	 hit(other_side(side)) = navy_ship_hits(other_side(side))
-	 GOTO cannon
-hitme1:
-	 hit(side) = hit(side) - 1: CALL navy_show_hits(hit()): IF hit(side) > 0 GOTO firemore
-	 x = 10 + 50 * fleet_size(side)
-	 y = 190: IF side = SIDE_UNION THEN y = 90
-	 CALL draw_ship_sunk(x, y)
-	 LOCATE 17, 5: PRINT "One of the "; side_name$(side); " ships was SUNK!": CALL wait_seconds(opt_pause!): LOCATE 17, 1: PRINT SPACE$(60)
-	 CALL navy_remove_ship(side)
-	 IF fleet_size(side) < 1 THEN
-		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
-		PRINT "Attacking "; side_name$(side); " fleet has been ELIMINATED !"
-		CALL wait_seconds(opt_pause!)
-		CALL navy_fleet_defeated(side)
-		EXIT SUB
-	 END IF
-	 hit(side) = navy_ship_hits(side)
-	 GOTO cannon
-
-	 CASE 2
-	 CALL navy_retreat_port(side, target)
-	 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
-	 EXIT SUB
-	 CASE ELSE
-	 GOTO wave
-	 END SELECT
-	 GOTO pirate
-END SUB
-
-' Shows how many hits each side's last ship can still take.
-SUB navy_show_hits (hit())
-	 LOCATE 9, 6 * fleet_size(SIDE_UNION): PRINT hit(SIDE_UNION); " ";
-	 LOCATE 15, 6 * fleet_size(SIDE_REBEL): PRINT hit(SIDE_REBEL); " ";
-	 IF opt_sound = SOUND_OFF THEN wait_seconds .1 * opt_pause!
+	CALL navy_combat_begin(hit())
+	DO
+		CALL navy_combat_draw
+		DO
+			menu_text$(0) = "Options"
+			menu_text$(1) = "Attack"
+			menu_text$(2) = "Retreat"
+			menu_item_count = 2: menu_color = COLOR_CYAN: menu_highlight = COLOR_YELLOW: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
+		LOOP UNTIL menu_choice = 1 OR menu_choice = 2
+		IF menu_choice = 2 THEN CALL navy_combat_retreat(side): EXIT SUB
+		CALL navy_combat_volley(side, hit(), over)
+	LOOP UNTIL over = 1
 END SUB

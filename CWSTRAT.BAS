@@ -40,7 +40,7 @@ DO
 				CALL menu_army_move
 				chosit = 23
 			CASE 3
-				IF turn_navy_done = 0 THEN CALL navy_commands((current_side), NAVY_ASK)
+				IF turn_navy_done = 0 THEN CALL menu_navy_commands((current_side))
 				chosit = 25
 			CASE 4
 				CALL menu_main_railroad
@@ -99,6 +99,7 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'rules/turn.bm'
 ' $INCLUDE: 'rules/victory.bm'
 ' $INCLUDE: 'ai/ai.bm'
+' $INCLUDE: 'commands/navy.bm'
 ' $INCLUDE: 'ui/menu.bm'
 ' $INCLUDE: 'ui/main_menu.bm'
 ' $INCLUDE: 'ui/orders.bm'

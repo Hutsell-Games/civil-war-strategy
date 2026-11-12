@@ -35,3 +35,9 @@ SUB draw_ai_funds (side)
 	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
 	IF menu_item_count > 0 THEN LOCATE 14 + menu_item_count, 69
 END SUB
+
+' The color of the fleet's messages on the bottom line, set before the computer's fleet
+' carries out an order.
+SUB draw_ai_navy_color
+	COLOR COLOR_LIGHT_CYAN
+END SUB

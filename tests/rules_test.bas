@@ -1200,6 +1200,59 @@ AssertEqualInt 0, army_leader_rating(3), "a rating of 0 stays 0"
 AssertEqualInt 0, army_experience(3), "no experience stays none"
 END SUB
 
+' --------------------------------------- the fleets' small rules (phase 9)
+
+SUB TestNavyMarkSideAndCountShips
+CALL navy_mark_side(SIDE_REBEL)
+AssertEqualInt SIDE_REBEL, city_owner(0), "city 0, no port, is the side's"
+fleet_ships$(SIDE_UNION) = "IWW": fleet_size(SIDE_UNION) = 7
+CALL navy_count_ships(SIDE_UNION)
+AssertEqualInt 3, fleet_size(SIDE_UNION), "counted from the list of ships"
+CALL turn_set_navy_done(1)
+AssertEqualInt 1, turn_navy_done, "the fleet has acted"
+END SUB
+
+SUB TestNavyHasIronclads
+opt_realism = REALISM_OFF: turn_year = 1861: turn_month = 5
+AssertEqualInt 1, navy_has_ironclads, "without realism: always"
+opt_realism = REALISM_ON
+AssertEqualInt 0, navy_has_ironclads, "with realism: not in 1861"
+turn_year = IRONCLAD_YEAR: turn_month = 1
+AssertEqualInt 0, navy_has_ironclads, "nor in January 1862"
+turn_month = IRONCLAD_MONTH
+AssertEqualInt 1, navy_has_ironclads, "from March 1862"
+turn_year = 1863: turn_month = 1
+AssertEqualInt 1, navy_has_ironclads, "and in every later year"
+END SUB
+
+' The ports for a new fleet are the side's sea ports without the one the enemy's fleet lies
+' off. The ports to sail to are all sea ports but the fleet's own.
+SUB TestNavyListsOfPorts
+city_name$(5) = "Boston": city_port_type(5) = PORT_SEA: city_owner(5) = SIDE_UNION
+city_name$(8) = "Norfolk": city_port_type(8) = PORT_SEA: city_owner(8) = SIDE_UNION
+city_name$(9) = "Mobile": city_port_type(9) = PORT_SEA: city_owner(9) = SIDE_REBEL
+city_name$(11) = "Memphis": city_port_type(11) = PORT_RIVER: city_owner(11) = SIDE_UNION
+fleet_city(SIDE_REBEL) = 8
+CALL navy_list_shipyards(SIDE_UNION)
+AssertEqualInt 1, menu_item_count, "one shipyard: not the enemy's port, the blockaded port or the river port"
+AssertEqualInt 5, menu_value(1), "Boston"
+AssertEqualStr "Port", menu_text$(0), "the menu's title"
+fleet_city(SIDE_UNION) = 5
+CALL navy_list_ports(SIDE_UNION)
+AssertEqualInt 2, menu_item_count, "two ports to sail to: every sea port but the fleet's own"
+AssertEqualInt 8, menu_value(1), "Norfolk"
+AssertEqualInt 9, menu_value(2), "Mobile, the enemy's"
+END SUB
+
+' random_discard uses up one random number.
+SUB TestRandomDiscard
+RANDOMIZE USING 7
+a! = RND: b! = RND
+RANDOMIZE USING 7
+CALL random_discard
+AssertTrue RND = b!, "the next number is the second"
+END SUB
+
 ' ------------------------------------------------- saved games (port/files.bm)
 
 SUB TestTurnResetCommands
@@ -1403,6 +1456,7 @@ END SUB
 '$INCLUDE: '../rules/turn.bm'
 '$INCLUDE: '../rules/victory.bm'
 '$INCLUDE: '../ai/ai.bm'
+'$INCLUDE: '../commands/navy.bm'
 '$INCLUDE: '../ui/menu.bm'
 '$INCLUDE: '../ui/main_menu.bm'
 '$INCLUDE: '../ui/orders.bm'

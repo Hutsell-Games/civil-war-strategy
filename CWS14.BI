@@ -53,8 +53,7 @@ CONST MENU_FACES = 8
 CONST MENU_CITY_POINTER = 9
 ' menu_box_type: a double line round the menu (0, no line, and 1, a single line, have no caller).
 CONST BOX_DOUBLE = 2
-' navy_commands' action: the player's Ships menu, or what the computer does (the menu's rows 1 to 5).
-CONST NAVY_ASK = 0
+' The computer's order for its fleet (ai_navy_orders): the rows of the Ships menu.
 CONST NAVY_BUILD = 1
 CONST NAVY_ATTACK = 2
 CONST NAVY_SAIL = 3

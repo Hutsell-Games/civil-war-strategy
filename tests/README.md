@@ -198,6 +198,8 @@ on a desktop nobody sees.
 | `refusals` | From a prepared save, one month of commands that the game refuses or that need a certain state: no commander left for a new army, a blocked track, an army too large for the train, the Which menu, a train's destination with no track, "Railroad is already carrying", the Supply menu with an army cut off, armies too large to combine, the Cancel menu, and an ironclad from the Type menu |
 | `refusals-rebel` | From a prepared save, as the Rebels with little cash, entries of the Commands menu that the game refuses: no money for a fort or to move the capital, an army too small to detach from, an army that cannot drill further, and no army left to drill |
 | `navy-fights` | From a prepared save: the Options menu of a sea fight and a retreat, a raid on commerce without and with the lead ship's picture, a fleet that sails home from raiding, and a Union army that beats the army in Richmond, which flees |
+| `navy-build` | From a prepared save with no Union fleet: the Ships menu's entries that need a fleet, the Type menu, a new fleet through the Port menu, a sea fight in which the player attacks and wins, and the entries refused to a fleet at sea |
+| `navy-raid-back` | From a prepared save: the player raids commerce, the computer's fleet pursues and sinks the raider, the player builds a new fleet and raids again, and the computer's fleet goes raiding in answer and fights at sea |
 | `navy-losses` | From a prepared save, as the Rebels: a shore battery sinks their only ship, no army is left free to move, the Balance menu's faces, the Raze menu, and "NO SHIPYARDS AVAILABLE" |
 | `bad-files` | A run without `MTN.VGA`, with a `CWS.CFG` that names no player count and no display speed, and with a map that has two one-way roads, which Chk Links reports |
 | `sound-union` | The game starts with music on as the Union: the title tune, the ironclads' announcement and an event's tune run, unheard |
@@ -255,7 +257,7 @@ a table per SUB, the least covered first (`tests\out\coverage\subs.txt`).
 
 Not covered:
 
-- **21 lines that no test runs**, most of them code that cannot be reached. They are listed with their
+- **18 lines that no test runs**, most of them code that cannot be reached. They are listed with their
   reasons in `docs\modernize-plan.md`, "Lines that no test runs".
 - **What the tunes sound like.** The sound scripts run the `PLAY` and `SOUND` statements; nothing checks the
   notes.

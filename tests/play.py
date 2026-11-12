@@ -53,7 +53,7 @@ OUT = GAME / "tests" / "out"
 
 # The source files of the game; a build is made again when one of them changes.
 SOURCE_SUFFIXES = {".bas", ".bi", ".bm"}
-SOURCE_FOLDERS = ["rules", "ai", "ui", "draw", "game", "port"]
+SOURCE_FOLDERS = ["rules", "ai", "commands", "ui", "draw", "game", "port"]
 # Top-level files that a run does not need: sources, DOS programs and objects, documents.
 NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
     ".exe", ".obj", ".lnk", ".mak", ".zip", ".md", ".qlb", ".com", ".drv", ".bat", ".btm",

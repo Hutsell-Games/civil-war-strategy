@@ -1,0 +1,9 @@
+# For the script navy-build: the player's Ships menu without a fleet, a new fleet, and a sea
+# fight that the player attacks in.
+# May 1862, the Union plays, with no fleet and the cash for ironclads. It holds two sea ports,
+# Philadelphia and Norfolk. The Rebel fleet, one wooden ship, lies in Mobile.
+date 5 1862
+cash 1000 50
+fleet 1 - 0
+fleet 2 W 24
+owner 1 28

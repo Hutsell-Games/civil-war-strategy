@@ -7,6 +7,11 @@ SUB turn_set_moves_done (done)
 	turn_moves_done = done
 END SUB
 
+' The main menu's Ships entry: done is 1 when the player's fleet has acted this month.
+SUB turn_set_navy_done (done)
+	turn_navy_done = done
+END SUB
+
 ' Opens the main menu's Troops, Moves and Ships again for the month.
 SUB turn_reset_commands
 	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0

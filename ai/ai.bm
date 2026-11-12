@@ -1,6 +1,6 @@
 ' The computer's decisions. They draw nothing themselves: their messages are SUBs of ui/ai.bm,
-' and they carry out an order through the same SUBs as the player's commands (navy_commands,
-' army_combine, army_recruit, army_resupply, railroad_move).
+' and they carry out an order through the same SUBs as the player's commands (the fleet's
+' orders of commands/navy.bm, army_combine, army_recruit, army_resupply, railroad_move).
 
 ' The computer supplies each of its armies that has none.
 SUB ai_resupply (who)
@@ -56,7 +56,7 @@ END SUB
 ' keeps the price of a ship back from the recruiting when its fleet is small and in port.
 SUB ai_raise_forces (who)
 DIM slush AS INTEGER: DIM x AS INTEGER
-IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > COST_SHIP THEN CALL navy_commands(SIDE_UNION, NAVY_BUILD): IF side_cash(who) < COST_RECRUIT GOTO isok
+IF who = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > COST_SHIP THEN CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD): IF side_cash(who) < COST_RECRUIT GOTO isok
 x = ai_count_armies(who)
 IF x > 2 + 3 * current_side + 3 * RND GOTO isok
 IF fleet_size(who) < 5 AND side_cash(who) > COST_SHIP AND fleet_city(who) <> FLEET_AT_SEA THEN IF city_owner(fleet_city(who)) = who THEN slush = slush + COST_SHIP: side_cash(who) = side_cash(who) - COST_SHIP: IF side_cash(who) < COST_RECRUIT GOTO isok
@@ -84,13 +84,13 @@ END FUNCTION
 
 ' The computer's fleet: builds a ship, sails, or attacks the port it lies off.
 SUB ai_fleet_orders (who)
-	IF current_side = SIDE_REBEL AND fleet_city(SIDE_UNION) = 0 AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > COST_SHIP THEN fleet_city(SIDE_UNION) = 30: CALL navy_commands(SIDE_UNION, NAVY_BUILD): GOTO movenavy
+	IF current_side = SIDE_REBEL AND fleet_city(SIDE_UNION) = 0 AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > COST_SHIP THEN fleet_city(SIDE_UNION) = 30: CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD): GOTO movenavy
 	IF fleet_city(who) = FLEET_AT_SEA THEN
-		IF RND < .9 THEN CALL navy_commands(who, NAVY_SAIL)
+		IF RND < .9 THEN CALL ai_navy_orders(who, NAVY_SAIL)
 		EXIT SUB
 	END IF
 	IF side_cash(who) < COST_SHIP OR fleet_size(who) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(who)) <> who GOTO movenavy
-	CALL navy_commands(who, NAVY_BUILD)
+	CALL ai_navy_orders(who, NAVY_BUILD)
 '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 movenavy:
 	IF fleet_size(who) = 0 THEN fleet_city(who) = 0
@@ -99,18 +99,18 @@ movenavy:
 '                     move ships & prohibit further action this turn
 '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	IF fleet_city(who) <> FLEET_AT_SEA THEN
-		IF city_owner(fleet_city(who)) = who THEN CALL navy_commands(who, NAVY_SAIL): EXIT SUB   'move ships & prohibit further action this turn
-		IF city_owner(fleet_city(who)) = SIDE_NONE THEN CALL navy_commands(who, NAVY_SAIL): EXIT SUB
+		IF city_owner(fleet_city(who)) = who THEN CALL ai_navy_orders(who, NAVY_SAIL): EXIT SUB   'move ships & prohibit further action this turn
+		IF city_owner(fleet_city(who)) = SIDE_NONE THEN CALL ai_navy_orders(who, NAVY_SAIL): EXIT SUB
 	ELSE
-		IF RND < .5 THEN CALL navy_commands(who, NAVY_SAIL)
+		IF RND < .5 THEN CALL ai_navy_orders(who, NAVY_SAIL)
 		EXIT SUB
 	END IF
 
 	IF city_owner(fleet_city(who)) <> who THEN
 		IF city_army(fleet_city(who)) = 0 OR RND > .3 THEN
-			CALL navy_commands(who, NAVY_ATTACK) 'attack
+			CALL ai_navy_orders(who, NAVY_ATTACK) 'attack
 		ELSE
-			CALL navy_commands(who, NAVY_SAIL) 'move
+			CALL ai_navy_orders(who, NAVY_SAIL) 'move
 		END IF
 	END IF
 END SUB
@@ -389,6 +389,124 @@ neutral:
 	END IF
 
 	IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = 30 THEN IF RND > .5 THEN menu_choice = 30: EXIT SUB
+END SUB
+
+' The computer's fleet carries out an order: NAVY_BUILD, NAVY_ATTACK or NAVY_SAIL. The order
+' is first changed to what the fleet's state calls for (ai_navy), and looked at again before
+' each action (ai_navy_adjust). An action may ask for another, for example after a ship is
+' built.
+SUB ai_navy_orders (side, order)
+DIM action AS INTEGER: DIM quit AS INTEGER: DIM again AS INTEGER
+action = order
+CALL ai_navy(side, action)
+CALL draw_ai_navy_color
+DO
+	CALL navy_mark_side(side)
+	quit = 0
+	CALL ai_navy_adjust(side, action, quit)
+	IF quit > 0 THEN EXIT SUB
+	again = 0
+	SELECT CASE menu_choice
+		CASE 1: CALL ai_navy_build(side, again)
+		CASE 2: CALL ai_navy_attack(side, action, again)
+		CASE 3: CALL ai_navy_sail(side, again)
+		CASE 4: CALL ai_navy_raid(side, again)
+		CASE 5: CALL ai_navy_invade(side, action)
+	END SELECT
+LOOP WHILE again > 0
+END SUB
+
+' Build, for the computer. It may decide against a ship, the more so the larger its fleet.
+' With the money for two ships it builds an ironclad, at a wooden ship's price. A new fleet
+' starts in one of its sea ports, picked at random. again is 1 when a ship was built, or when
+' the cash or a fleet at sea prevented it.
+SUB ai_navy_build (side, again)
+DIM cost AS INTEGER: DIM ship$
+	again = 0
+	cost = COST_SHIP
+	IF side_cash(side) < cost OR fleet_city(side) = FLEET_AT_SEA THEN again = 1: EXIT SUB
+	IF fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
+	IF RND < .07 * fleet_size(side) THEN EXIT SUB
+	ship$ = "W"
+
+	IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * cost THEN
+		' The place and color of the player's Type menu, set here too as before.
+		menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_LIGHT_BLUE
+		ship$ = "I"
+	END IF
+
+	CALL navy_add_ship(side, ship$, cost)
+	IF fleet_size(side) > 1 THEN CALL navy_ship_joins(side, ship$): again = 1: EXIT SUB
+	CALL navy_list_shipyards(side)
+	menu_choice = 1 + INT(menu_item_count * RND)
+	IF menu_item_count < 1 THEN CALL navy_cancel_new_fleet(side): EXIT SUB
+	CALL navy_fleet_founded(side, menu_value(menu_choice), ship$, cost)
+	again = 1
+END SUB
+
+' Attack, for the computer: the fleet bombards the enemy city it lies off. Off a neutral
+' city the order becomes NAVY_SAIL and again is 1.
+SUB ai_navy_attack (side, action, again)
+	again = 0
+	IF fleet_city(side) = FLEET_AT_SEA THEN again = 1: EXIT SUB
+	IF city_owner(fleet_city(side)) = side THEN EXIT SUB
+	IF city_army(fleet_city(side)) > 0 AND RND > .5 THEN
+		' The computer thinks of sailing instead of attacking an army. It attacks all the same
+		' when the city is the enemy's. The second look at the order drew another number.
+		action = NAVY_SAIL
+		CALL random_discard
+	ELSE
+		IF city_owner(fleet_city(side)) = SIDE_NONE THEN action = NAVY_SAIL: again = 1: EXIT SUB
+	END IF
+	IF fleet_city(side) < 1 THEN EXIT SUB
+	IF city_owner(fleet_city(side)) <> other_side(side) THEN again = 1: EXIT SUB
+	CALL navy_bombard(side)
+END SUB
+
+' Sail, for the computer: to the enemy's fleet when it pursues, else to a port it picks
+' (ai_pick_port). The fleets fight if they meet.
+SUB ai_navy_sail (side, again)
+DIM sailed AS INTEGER
+	again = 0
+	CALL navy_count_ships(side)
+	IF fleet_size(side) < 1 THEN EXIT SUB
+	IF fleet_city(side) < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
+
+	CALL navy_list_ports(side)
+	IF menu_item_count = 0 THEN EXIT SUB
+	IF fleet_pursuit > 0 THEN
+		menu_choice = 1: menu_value(1) = fleet_city(other_side(side))
+	ELSE
+		CALL ai_pick_port(side): IF menu_choice <= 0 THEN EXIT SUB
+	END IF
+	CALL navy_sail_to(side, menu_value(menu_choice), sailed)
+	IF sailed = 0 THEN EXIT SUB
+	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL navy_combat_auto(side)
+	CALL navy_finish_move
+END SUB
+
+' Raid, for the computer: the fleet goes to sea to raid commerce. The fleets fight if the
+' enemy's is at sea too.
+SUB ai_navy_raid (side, again)
+	again = 0
+	CALL navy_count_ships(side)
+	IF fleet_size(side) < 1 THEN EXIT SUB
+	IF raiding_side = side THEN again = 1: EXIT SUB
+
+	CALL navy_start_raid(side)
+	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL navy_combat_auto(side): CALL navy_finish_move: EXIT SUB
+	CALL navy_redraw_map
+END SUB
+
+' Invasion, for the computer: a ship lands a new army. With no commander left it asks for
+' one again and again (TODO.md).
+SUB ai_navy_invade (side, action)
+DIM slot AS INTEGER
+	DO
+		CALL army_get_commander((side), slot)
+		IF slot = 0 THEN action = NAVY_SAIL
+	LOOP WHILE slot = 0
+	CALL navy_land_army(side, slot)
 END SUB
 
 ' The computer's order for its fleet, changed to what the fleet's state calls for: build

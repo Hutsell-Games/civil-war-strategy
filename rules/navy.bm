@@ -1,6 +1,50 @@
 ' The rules of the fleets. They draw nothing. The navy's menus and screens are in ui/navy.bm,
 ' and call these.
 
+' City 0 stands for "no port". Before a fleet's order it is given to the fleet's side, so that
+' the owner of the port of a side without a fleet is that side. The computer's fleet orders
+' (ai_fleet_orders) read it later, as the last order left it.
+SUB navy_mark_side (side)
+	city_owner(0) = side
+END SUB
+
+' Counts the fleet's ships again from its list of ships.
+SUB navy_count_ships (side)
+	fleet_size(side) = LEN(fleet_ships$(side))
+END SUB
+
+' 1 when ironclads can be built: always without the Realism setting, and with it from March
+' 1862.
+FUNCTION navy_has_ironclads
+	navy_has_ironclads = 1
+	IF opt_realism >= REALISM_ON AND ((turn_year < IRONCLAD_YEAR) OR (turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH)) THEN navy_has_ironclads = 0
+END FUNCTION
+
+' Fills the menu with the sea ports where the side can start a fleet: its own, without the
+' port the other side's fleet lies off.
+SUB navy_list_shipyards (side)
+DIM i AS INTEGER
+	menu_text$(0) = "Port": menu_item_count = 0: menu_col = PANEL_COL: menu_row = 12
+	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) = PORT_SEA AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+	NEXT i
+END SUB
+
+' Fills the menu with the sea ports the side's fleet can sail to: all but the one it lies off.
+SUB navy_list_ports (side)
+DIM i AS INTEGER
+	menu_item_count = 0
+	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) > PORT_RIVER AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+	NEXT i
+END SUB
+
+' Draws a random number and drops it. The player's Build and Attack call it where the
+' original drew a number for a test that only the computer's fleet uses, so that the random
+' numbers of a game stay in their order (TODO.md).
+SUB random_discard
+DIM unused!
+	unused! = RND
+END SUB
+
 SUB navy_remove_ship (side)
 fleet_size(side) = fleet_size(side) - 1
 IF fleet_size(side) > 0 THEN

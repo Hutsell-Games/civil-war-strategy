@@ -1,0 +1,153 @@
+# Civil War Strategy: the player's Ships menu without a fleet, a new fleet started in a port,
+# and a sea fight in which the player attacks. The game is loaded from a prepared save
+# (tests/data/navy-build/cws1.save): May 1862, the Union plays, with no fleet; the Rebel
+# fleet, one wooden ship, lies in Mobile. The computer is passive.
+#! seed 6
+#! cfg bold=0
+#! data navy-build
+
+rule 1 key space
+rule 2:E text y
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:V
+text r
+play until 2:L
+key enter
+play until 2:M
+digest
+
+# Ships, with no fleet: Attack, Sail and Raid are "-". The "-" key takes the first, Attack:
+# nothing happens, and the main menu comes back.
+text s
+prompt
+digest
+text -
+prompt
+digest
+
+# Ships, two rows down to Sail: "No ships remain" for a moment, and the Ships menu again.
+text s
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+
+# Three rows down to Raid: the Ships menu again.
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+
+# Build: the Type menu. Esc there: the Ships menu again.
+text b
+prompt
+digest
+key esc
+prompt
+digest
+
+# Build, Ironclad: the Port menu, with the Union's two sea ports. Esc there shows it again.
+# Norfolk: the new fleet, and the Ships menu again.
+text b
+prompt
+text i
+prompt
+digest
+key esc
+prompt
+digest
+text n
+prompt
+digest
+
+# Build, Wooden: the fleet has two ships.
+text b
+prompt
+text w
+prompt
+digest
+
+# Sail: the To menu. Esc there: the main menu.
+text s
+prompt
+digest
+key esc
+prompt
+digest
+
+# Ships, Sail, to Mobile, where the Rebel fleet lies: the Options menu of a sea fight. Attack.
+text s
+prompt
+text s
+prompt
+text m
+prompt
+digest
+text a
+prompt
+digest
+text a
+prompt
+digest
+text e
+
+# July 1862. Ships.
+play until 2:M
+digest
+text s
+prompt
+digest
+
+# Build is "-", for Mobile is not the Union's. The "-" key takes it: the Ships menu again.
+# Raid: the fleet goes to sea.
+text -
+prompt
+digest
+text r
+prompt
+digest
+text e
+
+# September 1862. Ships, with the fleet at sea: Build and Attack are "-".
+play until 2:M
+digest
+text s
+prompt
+digest
+
+# The "-" key takes Build: the Ships menu again. Up from Sail to Attack: the menu again. Down
+# from Sail to Raid, for a fleet that raids already: the menu again. Esc.
+text -
+prompt
+digest
+key up
+prompt
+key enter
+prompt
+digest
+key down
+prompt
+key enter
+prompt
+digest
+key esc
+prompt
+digest
+
+# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

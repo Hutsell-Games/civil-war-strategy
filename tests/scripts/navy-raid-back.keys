@@ -1,0 +1,73 @@
+# Civil War Strategy: the computer's fleet answers the player's raids on commerce, first by
+# pursuing the raiders and then by raiding too. The game is loaded from a prepared save
+# (tests/data/navy-raid-back/cws1.save): May 1862, the Union plays, with one wooden ship in
+# Philadelphia; the Rebels have six ironclads in Mobile.
+#! seed 6
+#! data navy-raid-back
+
+rule 1 key space
+rule 2:E text y
+rule 2:R key enter
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:V
+text r
+play until 2:L
+key enter
+play until 2:M
+digest
+
+# May 1862. Ships, Raid: the fleet goes to sea. At the month's end it raids commerce.
+text s
+prompt
+text r
+prompt
+digest
+text e
+
+# July 1862. The player ends the turn. The computer's fleet pursues the raiders, meets them at
+# sea and fights without asking. The Union's ship is sunk, and the Rebels raid in its place.
+play until 2:M
+digest
+text e
+
+# September 1862. The player ends the turn again. The Rebel fleet sails to a port.
+play until 2:M
+digest
+text e
+
+# November 1862. Ships, Build, Ironclad, in the first port: a new fleet. Raid: it goes to sea.
+play until 2:M
+digest
+text s
+prompt
+digest
+text b
+prompt
+text i
+prompt
+digest
+key enter
+prompt
+digest
+text r
+prompt
+digest
+text e
+
+# January 1863. The computer's fleet went raiding too, met the Union's at sea and fought.
+play until 2:M
+digest
+text s
+prompt
+digest
+key esc
+prompt
+
+# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

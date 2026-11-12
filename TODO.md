@@ -75,6 +75,21 @@ game plays changes the recorded screens.
   of the game played before it.
 - **Rndom Evt left with Esc shows the text of the choice before.** `menu_option_events`
   (`ui\options.bm`) keeps the last choice's text and prints it again, though nothing was chosen.
+- **The player's Build and Attack each use up a random number.** The original tested the
+  computer's choice with `IF action = ... AND RND ...`, and BASIC draws the number whoever plays.
+  `menu_navy_build` and `menu_navy_attack` (`ui\navy.bm`) call `random_discard` to keep the game's
+  numbers in order. Taking the calls out changes every game after a Build or an Attack.
+- **Attack on a city that is not the enemy's closes Ships for the month.** `menu_navy_attack`
+  notes that the fleet has acted before it checks the city, so choosing the "-" row costs the
+  month's sail or raid.
+- **The computer's ironclad costs what a wooden ship costs.** `ai_navy_build` (`ai\ai.bm`) builds
+  an ironclad when it has the cash for one, 200, and pays 100. The player pays 200.
+- **Invasion with no commander left.** The player's fleet loses a ship and lands the army in
+  slot 0 (`menu_navy_invade`). The computer asks for a commander again without end
+  (`ai_navy_invade`), so the game would hang; it needs all 20 of the computer's army slots in use.
+- **City 0's owner is the side that last gave its fleet an order** (`navy_mark_side`,
+  `rules\navy.bm`). `ai_fleet_orders` reads it for a side with no fleet, so whether the computer
+  builds a first ship depends on whose fleet acted last.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.

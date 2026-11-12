@@ -141,10 +141,11 @@ the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is committ
 and step 8, victory, as `f5ee0f0`. That ends phase 8.
 
 Phase 9, the menus, has its plan below ("Phase 9: the menus"). Its step 1, the Utility menu, is
-committed as `693c078`, and step 2, the Commands menu, as `10056a5`, step 3, the Files menu, as `f831801`, and step 4, the main menu, as `653e218`. Step 5, the main
-module as a loop, is done in the working tree (2026-11-12).
+committed as `693c078`, step 2, the Commands menu, as `10056a5`, step 3, the Files menu, as
+`f831801`, step 4, the main menu, as `653e218`, and step 5, the main module as a loop, as
+`83c34c8`. Step 6, the navy's commands, is done in the working tree (2026-11-12).
 
-**Next:** phase 9 step 6, the navy's commands.
+**Next:** phase 9 step 7, the other commands with a branch for the computer.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -188,7 +189,7 @@ Phase 7's rule for these lines still holds:
 - A step that must rewrite lines no test runs (the `GOTO` knots of `navy_commands` and `turn_resolve`)
   waits for its tests.
 
-The 20 lines that no test runs (21 before phase 7 step 6). The table names the SUB, not the line
+The 18 lines that no test runs (20 before phase 9 step 6). The table names the SUB, not the line
 numbers, because each step moves the lines; `report.txt` has the numbers of the day.
 
 | File | SUB | Lines | Why |
@@ -200,8 +201,7 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `port\qb64.bm` | `DIR$` | 2 | `DIR$("")` for the next match; the game never calls it that way |
 | `rules\battle.bm` | `battle_strengths` | 1 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
 | `rules\battle.bm` | `battle_losses` | 2 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
-| `ui\navy.bm` | `navy_build_ship` | 1 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
-| `ui\navy.bm` | `navy_combat` | 2 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
+| `ai\ai.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
 | `rules\turn.bm` | `turn_set_move_order` | 2 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
 | `ui\orders.bm` | `menu_city_select` | 1 | The picker found no city of the player's among 39; the player always holds the city it started on |
 | `ui\orders.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
@@ -344,12 +344,7 @@ their random numbers must stay in order.
 3. **Done: the Files menu.** See `modernize-completed.md`.
 4. **Done: the main menu and its own entries.** See `modernize-completed.md`.
 5. **Done: the main module is a loop.** See `modernize-completed.md`.
-6. **The navy's commands.** `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`,
-   `navy_raid_commerce` and `navy_land_army` each serve the player and the computer through
-   `action`. Each becomes three parts: the player's menu, the computer's choice (`ai\`), and the
-   command that carries out the order. That removes the lines phase 8 left: `turn_navy_done = 1`
-   (four times), `fleet_size(side) = LEN(fleet_ships$(side))` in Sail and Raid, and
-   `city_owner(0) = side` in `navy_commands`.
+6. **Done: the navy's commands.** See `modernize-completed.md`.
 7. **The other commands with a branch for the computer**: `army_combine`
    (`IF side <> current_side`), `menu_army_recruit` and `ai_recruit`, `railroad_move`,
    `menu_army_retreat`, and the computer's one-line choices in the screens. The commands then move

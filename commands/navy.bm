@@ -1,0 +1,273 @@
+' The fleets' orders as they are carried out. Each calls the rules (rules/navy.bm) and shows
+' what happened. Nothing here opens a menu or reads a key. The player's menus (ui/navy.bm)
+' and the computer (ai/ai.bm) give these orders.
+
+' Build: a ship has joined a fleet that had ships.
+SUB navy_ship_joins (side, ship$)
+DIM a AS INTEGER
+	a = 1: IF ship$ <> "W" THEN a = 2
+	CALL clear_bottom_line: PRINT side_name$(side); " navy increased to "; fleet_size(side);
+	PSET (400, 465), 0: CALL draw_ship_icon(side, a)
+	CALL draw_fleets
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 3000, 1
+	CALL wait_seconds(opt_pause!)
+END SUB
+
+' Build: the side's first ship starts a new fleet in a port, for cost.
+SUB navy_fleet_founded (side, city, ship$, cost)
+DIM a AS INTEGER
+	a = 1: IF ship$ <> "W" THEN a = 2
+	CALL navy_found_fleet(side, city, cost)
+	CALL draw_fleets
+	CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is building NEW fleet in "; city_name$(city);
+	PSET (400, 465), 0: CALL draw_ship_icon(side, a)
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 3000, 1
+	CALL wait_seconds(opt_pause!)
+END SUB
+
+' Attack: the fleet bombards the enemy city it lies off. It hurts the army there, or a fort
+' fires back, or the city without either may turn neutral.
+SUB navy_bombard (side)
+DIM target AS INTEGER: DIM index AS INTEGER: DIM killd AS INTEGER: DIM damaged AS INTEGER: DIM result AS INTEGER
+	CALL clear_bottom_line: COLOR COLOR_LIGHT_RED: PRINT side_name$(side); " fleet bombards "; city_name$(fleet_city(side));
+	CALL draw_map_marker(fleet_city(side), 0, MARK_EXPLOSION)
+
+	target = fleet_city(side): index = city_army(target): IF index = 0 GOTO deserted
+	CALL navy_bombard_army(side, index, killd)
+	CALL clear_bottom_line: PRINT army_name$(index); " suffered "; 100 * killd; " casualties";
+	CALL wait_seconds(opt_pause!)
+	EXIT SUB
+deserted:
+	IF city_fort(target) = 0 GOTO blast
+	CALL navy_shore_battery(side, target, damaged)
+	IF damaged = 1 GOTO hurt1
+	CALL clear_bottom_line
+	PRINT side_name$(city_owner(target)); " shore battery sunk an attacking ship!"; fleet_size(side); "ship(s) left! ";
+	IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5
+	CALL wait_seconds(opt_pause!)
+	IF fleet_size(side) < 1 THEN
+		CALL navy_fleet_lost(side): CALL draw_navy_box
+		LOCATE 12, 27: PRINT side_name$(side); " fleet eliminated"
+		CALL wait_seconds(PAUSE_LONG)
+		CALL navy_finish_move: EXIT SUB
+	END IF
+	GOTO deserted
+hurt1:
+	CALL clear_bottom_line: PRINT city_name$(target); " fortifications damaged";
+	CALL city_redraw_fort(target)
+	CALL wait_seconds(opt_pause!)
+	EXIT SUB
+blast:
+	CALL navy_blast(side, target, result)
+	IF result = BLAST_FIRM THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(target); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
+	IF result = BLAST_LOYAL THEN CALL clear_bottom_line: PRINT "The CAPITAL steadfastly stands loyal"; : CALL wait_seconds(opt_pause!): EXIT SUB
+	CALL clear_bottom_line: PRINT city_name$(fleet_city(side)); " is now  NEUTRAL";
+	CALL draw_cities
+	EXIT SUB
+END SUB
+
+' Sail and Raid: the fleet has no ship, or no port to sail from.
+SUB navy_say_no_ships
+	CALL clear_bottom_line: PRINT "No ships remain"; : wait_seconds 1
+END SUB
+
+' Sail: the fleet goes to a port. sailed is 0, and nothing happens, when the port is the one
+' it lies off or is no city. After it the caller lets the fleets fight if they meet, and
+' calls navy_finish_move.
+SUB navy_sail_to (side, city, sailed)
+	sailed = 0
+	IF city = fleet_city(side) THEN EXIT SUB
+	IF city < 1 THEN EXIT SUB
+	CALL draw_navy_box
+	LOCATE 10, 25: PRINT side_name$(side); " fleet of"; fleet_size(side); "ship(s) is sailing"
+	LOCATE 11, 25: PRINT "From ";
+	IF fleet_city(side) < 41 THEN
+		PRINT city_name$(fleet_city(side));
+	ELSE
+		PRINT "Raiding";
+	END IF
+	PRINT " to ";
+	IF city <> 99 THEN
+		PRINT city_name$(city);
+	ELSE
+		PRINT "Raid Commerce";
+	END IF
+
+	CALL draw_fleet_sailing(side)
+	CALL navy_move_fleet(side, city)
+	sailed = 1
+END SUB
+
+' Raid: the fleet goes to sea to raid the other side's commerce. After it the caller lets the
+' fleets fight if the enemy's is at sea too.
+SUB navy_start_raid (side)
+	CALL draw_navy_box
+	LOCATE 10, 25: PRINT side_name$(side); " fleet of"; fleet_size(side); "ship(s) is sailing"
+	LOCATE 11, 25: PRINT "to RAID "; side_name$(other_side(side)); " COMMERCE !"
+
+	CALL draw_fleet_sailing(side)
+	CALL navy_go_raiding(side)
+END SUB
+
+' Invasion: a ship lands a new army of 3,500 in the neutral city the fleet lies off, and the
+' ship is lost. slot is the new army's, from army_get_commander.
+SUB navy_land_army (side, slot)
+DIM c AS INTEGER
+	CALL navy_remove_ship(side)
+	c = fleet_city(side): CALL army_new((side), slot, c)
+	CALL city_capture(slot, c, side, 0)
+	CALL navy_landed(side, slot)
+END SUB
+
+' After a fleet has moved or fought: notes which side raids commerce, and draws the map again.
+SUB navy_finish_move
+	CALL navy_note_raiding_side
+	CLS : CALL draw_map
+END SUB
+
+' After a fleet went raiding and met no enemy: draws the map again.
+SUB navy_redraw_map
+	CLS : CALL draw_map
+END SUB
+
+' The fleet that raids commerce: it sinks part of the other side's income, or loses a ship
+' and tries again while it has one.
+SUB navy_commerce_raid
+DIM a AS INTEGER: DIM k AS INTEGER: DIM raider AS INTEGER: DIM sank AS INTEGER
+raid:
+CALL navy_raid_round(raider, sank)
+IF raider > 0 THEN
+	CALL clear_bottom_line
+	IF sank = 1 THEN
+		COLOR COLOR_WHITE: PRINT side_name$(raider); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raider)); " commerce";
+		a = 1: IF LEFT$(fleet_ships$(raider), 1) = "I" THEN a = 2
+		PSET (500, 465), 0: CALL draw_ship_icon(raider, a)
+		IF opt_sound >= SOUND_EFFECTS THEN PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
+		wait_seconds PAUSE_LONG
+	ELSE
+		COLOR COLOR_WHITE: PRINT side_name$(raider); " raiders have lost a ship ("; fleet_size(raider); " remain)";
+		IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
+		IF fleet_city(raider) > 0 THEN
+			wait_seconds PAUSE_LONG
+			GOTO raid
+		ELSE
+			LINE (447, 291)-(525, 335), 1, BF
+			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
+			wait_seconds PAUSE_LONG
+			LINE (447, 291)-(525, 335), 1, BF
+		END IF
+	END IF
+END IF
+END SUB
+
+' Ship against ship: the two fleets are in the same place. The four SUBs below are its parts.
+' The player's fight asks before each volley (menu_navy_combat, ui/navy.bm); the computer's
+' does not (navy_combat_auto).
+
+' The fight's title, and the hits each side's last ship can take.
+SUB navy_combat_begin (hit())
+DIM k AS INTEGER
+	CLS : LOCATE 1, 30: COLOR COLOR_LIGHT_CYAN: PRINT "NAVAL COMBAT"
+	FOR k = SIDE_UNION TO SIDE_REBEL
+	hit(k) = navy_ship_hits(k)
+	NEXT k
+END SUB
+
+' Draws the two fleets, a row of ships each.
+SUB navy_combat_draw
+DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER
+	LOCATE 9, 1: PRINT SPACE$(79)
+	LOCATE 15, 1: PRINT SPACE$(79)
+	x = 10: y = 100
+	COLOR COLOR_LIGHT_BLUE: LOCATE 5, 25: PRINT "UNION"; fleet_size(SIDE_UNION); "ship(s)"
+	LINE (10, 80)-(530, 110), 1, BF
+	LINE (10, 80)-(530, 110), 11, B
+	COLOR COLOR_BLUE
+	FOR i = 1 TO fleet_size(SIDE_UNION)
+	x = x + 50: PSET (x, y)
+	CALL draw_fleet_ship(SIDE_UNION, i)
+	NEXT i
+	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 22: PRINT "CONFEDERATES "; fleet_size(SIDE_REBEL); "ship(s)"
+	LINE (10, 180)-(530, 210), 1, BF
+	LINE (10, 180)-(530, 210), 11, B
+	x = 10: y = 200
+	COLOR COLOR_BLUE
+	FOR i = 1 TO fleet_size(SIDE_REBEL)
+	x = x + 50: PSET (x, y)
+	CALL draw_fleet_ship(SIDE_REBEL, i)
+	NEXT i
+	COLOR COLOR_LIGHT_CYAN
+END SUB
+
+' A volley: the side's fleet and the other fire until a ship is sunk. over is 1 when that
+' ship was its fleet's last, and the fight is over.
+SUB navy_combat_volley (side, hit(), over)
+DIM x AS INTEGER: DIM y AS INTEGER
+	over = 0
+firemore:
+	 IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
+	 IF navy_shot_hits(side) = 1 GOTO hitem ELSE GOTO hitme1
+hitem:
+	 hit(other_side(side)) = hit(other_side(side)) - 1: CALL navy_show_hits(hit()): IF hit(other_side(side)) > 0 GOTO firemore
+	 x = 10 + 50 * fleet_size(other_side(side))
+	 y = 90: IF side = SIDE_UNION THEN y = 190
+	 CALL draw_ship_sunk(x, y)
+	 LOCATE 17, 5: PRINT side_name$(other_side(side)); " ship SUNK!": CALL wait_seconds(opt_pause! + 1): LOCATE 17, 1: PRINT SPACE$(60)
+	 CALL navy_remove_ship(other_side(side))
+	 IF fleet_size(other_side(side)) < 1 THEN
+		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
+		PRINT side_name$(other_side(side)); " fleet DEFEATED"
+		CALL wait_seconds(opt_pause!)
+		CALL navy_fleet_defeated(other_side(side))
+		over = 1
+		EXIT SUB
+	 END IF
+	 hit(other_side(side)) = navy_ship_hits(other_side(side))
+	 EXIT SUB
+hitme1:
+	 hit(side) = hit(side) - 1: CALL navy_show_hits(hit()): IF hit(side) > 0 GOTO firemore
+	 x = 10 + 50 * fleet_size(side)
+	 y = 190: IF side = SIDE_UNION THEN y = 90
+	 CALL draw_ship_sunk(x, y)
+	 LOCATE 17, 5: PRINT "One of the "; side_name$(side); " ships was SUNK!": CALL wait_seconds(opt_pause!): LOCATE 17, 1: PRINT SPACE$(60)
+	 CALL navy_remove_ship(side)
+	 IF fleet_size(side) < 1 THEN
+		LOCATE 19, 5: COLOR COLOR_LIGHT_RED
+		PRINT "Attacking "; side_name$(side); " fleet has been ELIMINATED !"
+		CALL wait_seconds(opt_pause!)
+		CALL navy_fleet_defeated(side)
+		over = 1
+		EXIT SUB
+	 END IF
+	 hit(side) = navy_ship_hits(side)
+END SUB
+
+' The side's fleet leaves the fight for one of its other sea ports.
+SUB navy_combat_retreat (side)
+DIM target AS INTEGER
+	 CALL navy_retreat_port(side, target)
+	 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
+END SUB
+
+' The computer's fleet fights: it fires volley after volley until a fleet is sunk. The menu's
+' texts and choice are set as the player's fight sets them, though no menu shows.
+SUB navy_combat_auto (side)
+DIM over AS INTEGER
+DIM hit(SIDE_REBEL)
+	CALL navy_combat_begin(hit())
+	DO
+		CALL navy_combat_draw
+		menu_text$(0) = "Options"
+		menu_text$(1) = "Attack"
+		menu_text$(2) = "Retreat"
+		menu_choice = 1
+		CALL navy_combat_volley(side, hit(), over)
+	LOOP UNTIL over = 1
+END SUB
+
+' Shows how many hits each side's last ship can still take.
+SUB navy_show_hits (hit())
+	 LOCATE 9, 6 * fleet_size(SIDE_UNION): PRINT hit(SIDE_UNION); " ";
+	 LOCATE 15, 6 * fleet_size(SIDE_REBEL): PRINT hit(SIDE_REBEL); " ";
+	 IF opt_sound = SOUND_OFF THEN wait_seconds .1 * opt_pause!
+END SUB

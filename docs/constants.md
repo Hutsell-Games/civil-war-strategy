@@ -92,7 +92,7 @@ The mode says what `menu` shows beside the options while the player moves throug
 
 | Where | Numbers | Meaning | Proposed | Your name |
 |-------|---------|---------|----------|-----------|
-| `navy (who, chx)` | 0 | The player's Ships menu. | `NAVY_ASK` | |
+| `navy (who, chx)` | 0 | The player's Ships menu. | `NAVY_ASK`, until phase 9 gave the player's menu its own SUB. | |
 | | 1 to 5 | The computer's action: build, attack a port, sail, raid commerce, invade. | `NAVY_BUILD`, `NAVY_ATTACK`, `NAVY_SAIL`, `NAVY_RAID`, `NAVY_INVADE` | |
 | `scribe (a$, flag)` | 0, 1, 2 | Write to the history only; also show on the bottom line; also show in a box. | `SHOW_NOT`, `SHOW_LINE`, `SHOW_BOX` | |
 | `filer (switch)` | 1, 2, 3 | New game, load, save. | None: phase 7 splits `filer` into three SUBs. | |

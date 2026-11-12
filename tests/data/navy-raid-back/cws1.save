@@ -1,0 +1,8 @@
+# For the script navy-raid-back: the computer's fleet answers the player's raids on commerce.
+# May 1862, the Union plays. Its fleet, one wooden ship, lies in Philadelphia; the Rebels' six
+# ironclads lie in Mobile. The Union also holds Norfolk, a second port to build in.
+date 5 1862
+cash 1000 500
+fleet 1 W 30
+fleet 2 IIIIII 24
+owner 1 28
