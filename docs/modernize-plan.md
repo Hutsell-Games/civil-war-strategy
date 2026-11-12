@@ -161,7 +161,8 @@ Steps 2 and 3 are done in the working tree too: `menu_report` is split, and `wai
 Step 4, the small shared pieces, is done in the working tree.
 Phase 0 went first (user, 2026-11-11) and is done: see "Phase 0 after phase 7 began" below. 33 scripts,
 21 lines not run, each with its reason.
-**Next:** phase 7 step 5, the main module's pieces that stand alone.
+Phase 7 step 5 is done in the working tree: eleven pieces of the main module are SUBs.
+**Next:** phase 7 step 6, `turn_resolve`'s outer parts.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -180,7 +181,7 @@ Phase 0 went first (user, 2026-11-11) and is done: see "Phase 0 after phase 7 be
 ```
 cws.bas              the main loop only
 cws.bi               types, constants, shared variables
-rules\               army.bm city.bm battle.bm navy.bm railroad.bm turn.bm victory.bm
+rules\               army.bm city.bm battle.bm navy.bm railroad.bm setup.bm turn.bm victory.bm
 ai\                  ai.bm
 ui\                  menu.bm orders.bm reports.bm screen.bm messages.bm
 draw\                map.bm icons.bm ships.bm pictures.bm
@@ -317,10 +318,10 @@ The 21 lines that no test runs:
 
 | File | Lines | Why |
 |------|-------|-----|
-| `CWSTRAT.BAS` | 582-584 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
+| `rules\setup.bm` | 22-24 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
 | `ai\ai.bm` | 24 | Follows `IF ... GOTO capital ELSE GOTO city2`; nothing reaches it |
 | `ai\ai.bm` | 79-80 | The `ELSE` for a fleet at sea; a fleet at sea already left at line 64 |
-| `ai\ai.bm` | 202 | An army of size 0 that still holds a city; no game makes one |
+| `ai\ai.bm` | 201 | An army of size 0 that still holds a city; no game makes one |
 | `port\qb64.bm` | 15-16 | `DIR$("")` for the next match; the game never calls it that way |
 | `rules\battle.bm` | 58 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
 | `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
@@ -401,10 +402,24 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
      and the surrender in `turn_resolve` clear all of them; the first gives the name back to
      `leader_name$()` and the second clears it there too. Only Vary Start's two blocks are the same. One SUB for all would change what is left in a dead army's slot, which no screen shows at
      once. It waits for phase 10, where an army becomes a record.
-5. **The main module's pieces that stand alone**: `load_cities`, `draw_title`, `play_title_music`,
-   `turn_collect_income`, `draw_player_turn` (the `GOSUB` routine `blanken`), `set_union_advantage`
-   (`unionplus`), `army_detach`, `army_drill`, `menu_supply`, `menu_move_capital`,
-   `vary_start_conditions`. The menus' `GOTO menu0` web stays for phase 9.
+5. **Done: the main module's pieces that stand alone.** `CWSTRAT.BAS` went from 753 lines to 614 and
+   has no `GOSUB` left. The menus' `GOTO menu0` web stays for phase 9.
+   - `draw_title` (`draw\pictures.bm`) and `play_title_music` (`game\tunes.bm`). The test that decides
+     whether the tune plays stays in the main module.
+   - `load_cities` (`port\files.bm`), `turn_collect_income` (`rules\turn.bm`) and `draw_player_turn`
+     (`ui\screen.bm`, the `GOSUB` routine `blanken`).
+   - `set_union_advantage` (the `GOSUB` routine `unionplus`) and `vary_start_conditions`, in a new file
+     `rules\setup.bm`.
+   - `menu_supply (picked)` and `menu_move_capital (city)` (`ui\orders.bm`). Each gives back 0 where
+     the old code went to the main menu, and the main module then does `GOTO menu0`.
+   - `army_detach (army, city, slot)` and `army_drill (army)` (`rules\army.bm`) are the rule only. The
+     menu, the refusals and the messages stay in the main module until phase 9. `ai_turn` calls
+     `army_drill` too. Both drills now mark the army busy before the message and not after it; nothing
+     reads the order in between.
+   - Four unit tests: detach, drill, the Union's advantage and the month's income.
+   - Lines moved without a test: Vary Start's loop that never runs (now `rules\setup.bm` 22 to 24).
+     Moved half-run: the six `EXIT SUB` of the Union's title tune (a key during the tune), the two
+     caps on cash in `turn_collect_income`, and the supply below zero in `army_detach`.
 6. **`turn_resolve`'s outer parts**: `turn_set_move_order`, `navy_commerce_raid`,
    `turn_update_victory_points`, `draw_update_box`.
 7. **`special_events` and `ai_turn`**: `event_riot`; one `ai_` SUB for each headed section of `ai_turn`,

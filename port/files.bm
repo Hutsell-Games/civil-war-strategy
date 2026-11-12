@@ -30,6 +30,24 @@ FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locatio
 	CALL config_read(current_side)
 END SUB
 
+' Reads the map's cities and roads from cities.grd. Adds each city to its owner's count,
+' victory points and cash.
+SUB load_cities
+DIM i AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER
+city_name$(0) = "NONE"
+OPEN "I", 1, SCNDIR + "cities.grd"
+total_income = union_income_bonus + 200
+FOR i = 1 TO MAX_CITIES: INPUT #1, a, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
+city_first_owner(i) = city_owner(i)
+CALL city_update_occupier(i)
+FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
+IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_victory_points(x) = side_victory_points(x) + city_value(i)
+IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
+total_income = total_income + city_value(i)
+NEXT i
+CLOSE #1
+END SUB
+
 SUB load_game
 DIM fin AS INTEGER
 DIM k AS INTEGER: DIM t$: DIM who AS INTEGER: DIM star AS INTEGER: DIM myside AS INTEGER

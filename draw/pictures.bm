@@ -77,3 +77,20 @@ DEF SEG = VARSEG(picture(1))
 BLOAD file$, VARPTR(picture(1))
 DEF SEG
 END SUB
+
+' The title screen. It also takes the capital's star from the icon file, for draw_cities.
+SUB draw_title
+SCREEN 12
+	CALL load_picture(GFXDIR + "cwsicon.vga", pic_loaded())
+
+	PUT (100, 100), pic_loaded, PSET
+	GET (101, 101)-(113, 113), pic_capital
+CLS
+COLOR COLOR_LIGHT_CYAN: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
+COLOR COLOR_RED: LOCATE 15, 32: PRINT "Registered Edition"
+COLOR COLOR_YELLOW: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
+LOCATE 28, 60: PRINT "v1.57"
+LINE (190, 170)-(440, 260), 1, B
+LINE (180, 180)-(450, 250), 7, B
+CALL draw_flag(SIDE_UNION, -440, 0): CALL draw_flag(SIDE_REBEL, -100, 0)
+END SUB

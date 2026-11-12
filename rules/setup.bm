@@ -1,0 +1,43 @@
+' The Union's extra income each month, from the Balance setting.
+SUB set_union_advantage
+	union_income_bonus = 120 * opt_difficulty: IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
+	IF opt_realism >= REALISM_ON THEN union_income_bonus = union_income_bonus * .7
+END SUB
+
+' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
+' and the leaders' ratings at random.
+SUB vary_start_conditions
+DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM a$
+		CALL load_scenario
+		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
+		side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
+		opt_ai_aggression = 5 * RND
+		FOR k = 1 TO 6
+			IF RND > .6 THEN
+			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
+			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
+			END IF
+		NEXT k
+		FOR k = 21 TO 6
+			IF RND > .6 THEN
+			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
+			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
+			END IF
+		NEXT k
+		FOR k = 1 TO MAX_CITIES: CALL city_update_occupier(k): NEXT k
+		fleet_size(SIDE_UNION) = 10 * RND: IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
+		fleet_size(SIDE_REBEL) = 10 * RND: IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
+		FOR i = SIDE_UNION TO SIDE_REBEL
+			fleet_ships$(i) = ""
+			FOR j = 1 TO fleet_size(i)
+			a$ = "W": IF RND > .45 * current_side THEN a$ = "I"
+			fleet_ships$(i) = fleet_ships$(i) + a$
+		NEXT j
+		NEXT i
+		IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
+
+		FOR k = 1 TO 40
+		IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
+		IF leader_rating(k) < 1 THEN leader_rating(k) = 1
+		NEXT k
+END SUB

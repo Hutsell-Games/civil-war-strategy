@@ -213,6 +213,63 @@ wide = menu_measure_width
 AssertEqualInt 22, wide, "the title and one more"
 END SUB
 
+' ------------------------------------------- army_detach and army_drill
+
+SUB TestDetachTakesThreeTenths
+army_size(21) = 100: army_supply(21) = 10: army_experience(21) = 4: army_city(21) = 25
+leader_name$(22) = "Jackson": leader_rating(22) = 9: army_order(22) = 7
+CALL army_detach(21, 25, 22)
+AssertEqualInt 30, army_size(22), "the new army's men"
+AssertEqualInt 70, army_size(21), "the old army's men"
+AssertEqualInt 3, army_supply(22), "the new army's supplies"
+AssertEqualInt 7, army_supply(21), "the old army's supplies"
+AssertEqualInt 25, army_city(22), "in the same city"
+AssertEqualInt 4, army_experience(22), "the old army's experience"
+AssertEqualInt 9, army_leader_rating(22), "the slot's leader"
+AssertEqualStr "Jackson", army_name$(22), "named for the leader"
+AssertEqualStr "", leader_name$(22), "the name is taken from the list"
+AssertEqualInt 0, army_order(22), "no order"
+END SUB
+
+SUB TestDrillAddsALevelAndBusiesTheArmy
+army_experience(3) = 2
+CALL army_drill(3)
+AssertEqualInt 3, army_experience(3), "one more level"
+AssertEqualInt ORDER_BUSY, army_order(3), "busy for the month"
+END SUB
+
+' ------------------------------- set_union_advantage and turn_collect_income
+
+SUB TestUnionAdvantageFollowsTheBalance
+opt_difficulty = 3
+CALL set_union_advantage
+AssertEqualInt 360, union_income_bonus, "one player"
+opt_realism = REALISM_ON
+CALL set_union_advantage
+AssertEqualInt 252, union_income_bonus, "seven tenths with realism on"
+opt_realism = 0: opt_players = PLAYERS_TWO
+CALL set_union_advantage
+AssertEqualInt 150, union_income_bonus, "two players"
+END SUB
+
+SUB TestIncomeIsCitiesCapitalAndRaids
+city_owner(1) = 1: city_value(1) = 10
+city_owner(2) = 2: city_value(2) = 20
+side_capital(1) = 5
+side_cash(2) = MAX_CASH + 1
+raiding_side = 1: raid_loss = 5
+army_order(3) = 7
+CALL turn_collect_income
+AssertEqualInt 110, side_income(1), "a city and the capital"
+AssertEqualInt 110, side_cash(1), "the Union's cash"
+AssertEqualInt 20, side_income(2), "a city and no capital"
+AssertEqualInt MAX_CASH + 20 - 5, side_cash(2), "capped, then income less the raid"
+AssertEqualInt 1, side_city_count(1), "the Union's cities"
+AssertEqualInt 1, side_city_count(2), "the Rebels' cities"
+AssertEqualInt 130, total_income, "both incomes"
+AssertEqualInt 0, army_order(3), "orders cleared"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern
@@ -248,6 +305,7 @@ END SUB
 '$INCLUDE: '../rules/battle.bm'
 '$INCLUDE: '../rules/navy.bm'
 '$INCLUDE: '../rules/railroad.bm'
+'$INCLUDE: '../rules/setup.bm'
 '$INCLUDE: '../rules/turn.bm'
 '$INCLUDE: '../rules/victory.bm'
 '$INCLUDE: '../ai/ai.bm'

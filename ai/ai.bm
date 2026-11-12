@@ -138,13 +138,12 @@ deadman:
 NEXT i
 	FOR i = star TO fin
 	IF army_order(i) = ORDER_NONE AND army_experience(i) < 6 AND army_experience(i) < army_leader_rating(i) THEN
-		army_experience(i) = army_experience(i) + 1
+		CALL army_drill(i)
 
 		IF opt_pause! > 1 THEN
 		CALL clear_bottom_line
 			PRINT army_name$(i); " has drilled to reach experience level "; army_experience(i);
 		END IF
-		army_order(i) = ORDER_BUSY
 		CALL wait_seconds(opt_pause! - 1)
 	END IF
 	NEXT i

@@ -356,3 +356,54 @@ NEXT k
 	IF menu_choice < 0 OR menu_choice > menu_item_count THEN x = 0: EXIT SUB
 	x = menu_value(menu_choice)
 END SUB
+
+' The Supply menu: the player's armies that are short of supplies and not cut off. The one
+' picked gets supplies. picked is that army, or 0 when there is none or the player gave up.
+SUB menu_supply (picked)
+DIM star AS INTEGER: DIM fin AS INTEGER: DIM i AS INTEGER: DIM a AS INTEGER: DIM max AS INTEGER
+		picked = 0
+		star = side_first_army((current_side)): fin = side_last_army((current_side))
+		menu_text$(0) = "Supply"
+		menu_col = PANEL_COL: menu_row = 5: menu_color = COLOR_MAGENTA
+		menu_item_count = 0
+		FOR i = star TO fin
+		IF army_city(i) = 0 OR army_supply(i) > 1 GOTO alone
+		IF opt_realism >= REALISM_ON THEN
+			a = city_is_connected(current_side, army_city(i))
+			IF a < 1 THEN CALL clear_bottom_line: COLOR COLOR_WHITE: PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !"; : wait_seconds opt_pause!: GOTO alone
+		END IF
+		menu_item_count = menu_item_count + 1
+		max = 11: IF LEN(army_name$(i)) < 11 THEN max = LEN(army_name$(i))
+		menu_text$(menu_item_count) = LEFT$(army_name$(i), max)
+		menu_value(menu_item_count) = i
+alone:
+		NEXT i
+		IF menu_item_count = 0 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "All eligible "; side_name$(current_side); " armies have supplies"; : EXIT SUB
+		CALL menu_select(MENU_ARMY_POINTER): CALL clear_right_panel
+		IF menu_choice < 0 THEN EXIT SUB
+		picked = menu_value(menu_choice)
+		IF army_supply(picked) < 2 THEN
+		CALL army_resupply(picked)
+		CALL draw_army_flag(picked)
+		END IF
+END SUB
+
+' Commands, Capital: the player pays, then picks the new capital. city is the city picked,
+' or 0 when the capital cannot move or the player gave up (the money stays paid).
+SUB menu_move_capital (city)
+DIM a$
+	city = 0
+	IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Cannot move capital"; : EXIT SUB
+	side_cash(current_side) = side_cash(current_side) - COST_MOVE_CAPITAL
+	side_victory_points(other_side(current_side)) = side_victory_points(other_side(current_side)) + 50
+	CALL clear_right_panel
+	menu_text$(0) = "Capital"
+	a$ = city_name$(side_capital(current_side))
+	city = side_capital(current_side): CALL menu_city_select(city)
+	IF city = 0 THEN EXIT SUB
+	side_capital(current_side) = city
+	CALL clear_bottom_line: PRINT side_name$(current_side); " capital moved from "; a$; " to "; city_name$(side_capital(current_side));
+	CALL clear_right_panel
+	CALL draw_cities
+	CALL wait_seconds(PAUSE_LONG): CALL clear_bottom_line
+END SUB

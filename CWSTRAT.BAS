@@ -15,8 +15,8 @@ DECLARE SUB draw_train (who%, flag%)
 DECLARE FUNCTION railroad_capacity% (who%)
 DECLARE SUB draw_top_bar ()
 ' $INCLUDE: 'cws14.bi'
-DIM fin AS INTEGER: DIM max AS INTEGER: DIM index AS INTEGER: DIM empty AS INTEGER: DIM t$: DIM c AS INTEGER
-DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM a AS INTEGER: DIM j AS INTEGER: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER: DIM target AS INTEGER
+DIM fin AS INTEGER: DIM index AS INTEGER: DIM empty AS INTEGER: DIM t$
+DIM replay AS INTEGER: DIM k AS INTEGER: DIM i AS INTEGER: DIM a$: DIM x AS INTEGER: DIM chosit AS INTEGER: DIM z AS INTEGER: DIM y AS INTEGER: DIM limit AS INTEGER: DIM star AS INTEGER: DIM target AS INTEGER
 
 CALL script_mute
 replay = 0
@@ -62,59 +62,19 @@ a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 
 band:           ' SHELL "cwstitle.exe" (a DOS program with no source; cannot run on 64-bit Windows)
 notitle2:
-SCREEN 12
-	CALL load_picture(GFXDIR + "cwsicon.vga", pic_loaded())
+CALL draw_title
+IF replay = 0 AND opt_sound = SOUND_MUSIC AND menu_choice = 0 THEN CALL play_title_music
+CALL set_union_advantage
 
-	PUT (100, 100), pic_loaded, PSET
-	GET (101, 101)-(113, 113), pic_capital
-CLS
-COLOR COLOR_LIGHT_CYAN: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
-COLOR COLOR_RED: LOCATE 15, 32: PRINT "Registered Edition"
-COLOR COLOR_YELLOW: LOCATE 28, 1: PRINT TAB(8); "(c) 1998 W. R. Hutsell"
-LOCATE 28, 60: PRINT "v1.57"
-LINE (190, 170)-(440, 260), 1, B
-LINE (180, 180)-(450, 250), 7, B
-CALL draw_flag(SIDE_UNION, -440, 0): CALL draw_flag(SIDE_REBEL, -100, 0)
-IF replay = 0 AND opt_sound = SOUND_MUSIC AND menu_choice = 0 THEN
-IF current_side = SIDE_UNION THEN
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "MST170o1e8o0b8o1e8"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "e8e4f#8g4f#8"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "g4e8d2o0b8o1d2 "
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
-	IF INKEY$ <> "" GOTO notitle
-	PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
-    ELSE
-	CALL play_shenandoah
-    END IF
-END IF
-notitle:
-GOSUB unionplus
-
-city_name$(0) = "NONE"
-OPEN "I", 1, SCNDIR + "cities.grd"
-total_income = union_income_bonus + 200
-FOR i = 1 TO MAX_CITIES: INPUT #1, a, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
-city_first_owner(i) = city_owner(i)
-CALL city_update_occupier(i)
-FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
-IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_victory_points(x) = side_victory_points(x) + city_value(i)
-IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
-total_income = total_income + city_value(i)
-NEXT i
-CLOSE #1: CALL clear_bottom_line
+CALL load_cities
+CALL clear_bottom_line
 
 CALL script_start
 wait_seconds .3
 menu_box_type = BOX_DOUBLE
 menu_highlight = COLOR_WHITE
 replay = 1
-IF opt_players = PLAYERS_TWO THEN GOSUB blanken
+IF opt_players = PLAYERS_TWO THEN CALL draw_player_turn
 menu_text$(0) = "VGA CIVILWAR STRATEGY"
 menu_text$(1) = "Resume Saved Game"
 menu_text$(2) = "Start NEW Game"
@@ -146,28 +106,10 @@ IF current_side > 2 THEN current_side = SIDE_UNION
 a$ = "--------> EVENTS FOR " + month_name$(turn_month) + " " + STR$(turn_year) + " --------"
 CALL scribe_message(a$, SHOW_NOT)
 CALL turn_resolve
-side_city_count(SIDE_UNION) = 0: side_city_count(SIDE_REBEL) = 0
-
-FOR i = SIDE_UNION TO SIDE_REBEL
-side_income(i) = 0
-IF side_cash(i) > MAX_CASH THEN side_cash(i) = MAX_CASH
-IF side_cash(i) < 0 THEN side_cash(i) = 0
-NEXT i
-IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
-
-FOR i = 1 TO MAX_CITIES
-IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_income(x) = side_income(x) + city_value(i)
-army_order(i) = ORDER_NONE
-NEXT i
-
-FOR i = SIDE_UNION TO SIDE_REBEL: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + CAPITAL_INCOME
-side_cash(i) = side_cash(i) + side_income(i)
-IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
-NEXT i
-total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
+CALL turn_collect_income
 
 chosit = 22
-IF opt_players = PLAYERS_TWO THEN GOSUB blanken: CALL draw_map
+IF opt_players = PLAYERS_TWO THEN CALL draw_player_turn: CALL draw_map
 CALL check_victory_conditions
 ON ERROR GOTO 0
 IF game_over > 0 THEN
@@ -243,7 +185,7 @@ END IF
 	menu_item_count = 2: CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice <> 1 THEN chosit = 24: GOTO menu0
 endrnd:
 	turn_recruit_state = 0: turn_moves_done = 0: turn_navy_done = 0
-	IF opt_players = PLAYERS_TWO THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN GOSUB blanken: CALL draw_map: GOTO menu0
+	IF opt_players = PLAYERS_TWO THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN CALL draw_player_turn: CALL draw_map: GOTO menu0
 	GOTO newmonth
 '==========================================================================
 	CASE 6
@@ -308,49 +250,16 @@ optmen:
 '                               Supply
 '---------------------------------------------------------------------------
 		CASE 4
-		star = side_first_army((current_side)): fin = side_last_army((current_side))
-		menu_text$(0) = "Supply"
-		menu_col = PANEL_COL: menu_row = 5: menu_color = COLOR_MAGENTA
-		menu_item_count = 0
-		FOR i = star TO fin
-		IF army_city(i) = 0 OR army_supply(i) > 1 GOTO alone
-		IF opt_realism >= REALISM_ON THEN
-			a = city_is_connected(current_side, army_city(i))
-			IF a < 1 THEN CALL clear_bottom_line: COLOR COLOR_WHITE: PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !"; : wait_seconds opt_pause!: GOTO alone
-		END IF
-		menu_item_count = menu_item_count + 1
-		max = 11: IF LEN(army_name$(i)) < 11 THEN max = LEN(army_name$(i))
-		menu_text$(menu_item_count) = LEFT$(army_name$(i), max)
-		menu_value(menu_item_count) = i
-alone:
-		NEXT i
-		IF menu_item_count = 0 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "All eligible "; side_name$(current_side); " armies have supplies"; : GOTO menu0
-		CALL menu_select(MENU_ARMY_POINTER): CALL clear_right_panel
-		IF menu_choice < 0 GOTO menu0
-		index = menu_value(menu_choice)
-		IF army_supply(index) < 2 THEN
-		CALL army_resupply(index)
-		CALL draw_army_flag(index)
-		END IF
+		CALL menu_supply(index)
+		IF index = 0 GOTO menu0
 		menu_choice = MENU_START + 4
 		GOTO optmen
 '-------------------------------------------------------------------------
 '                               Move Capital
 '-------------------------------------------------------------------------
 		CASE 5
-	IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Cannot move capital"; : GOTO menu0
-	side_cash(current_side) = side_cash(current_side) - COST_MOVE_CAPITAL
-	side_victory_points(other_side(current_side)) = side_victory_points(other_side(current_side)) + 50
-	CALL clear_right_panel
-	menu_text$(0) = "Capital"
-	a$ = city_name$(side_capital(current_side))
-	index = side_capital(current_side): CALL menu_city_select(index)
+	CALL menu_move_capital(index)
 	IF index = 0 GOTO menu0
-	side_capital(current_side) = index
-	CALL clear_bottom_line: PRINT side_name$(current_side); " capital moved from "; a$; " to "; city_name$(side_capital(current_side));
-	CALL clear_right_panel
-	CALL draw_cities
-	CALL wait_seconds(PAUSE_LONG): CALL clear_bottom_line
 '-------------------------------------------------------------------------
 '                               Detach
 '-------------------------------------------------------------------------
@@ -360,12 +269,7 @@ alone:
 	CALL menu_army_select(index, target): IF target < 1 OR index < 1 GOTO menu0
 	IF army_size(index) < MIN_DETACH_SIZE THEN CALL clear_bottom_line: PRINT "Too small to detach"; : CALL wait_seconds(opt_pause!): GOTO menu0
 	CALL army_get_commander(2, empty): IF empty = 0 GOTO menu0
-	army_supply(empty) = .3 * army_supply(index): army_supply(index) = army_supply(index) - army_supply(empty): IF army_supply(index) < 0 THEN army_supply(index) = 0
-	army_size(empty) = .3 * army_size(index): army_size(index) = army_size(index) - army_size(empty)
-	army_city(empty) = target: army_experience(empty) = army_experience(index): army_order(empty) = ORDER_NONE
-	army_leader_rating(empty) = leader_rating(empty)
-	army_name$(empty) = leader_name$(empty): leader_name$(empty) = ""
-	army_experience(empty) = army_experience(index)
+	CALL army_detach(index, target, empty)
 	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Unit #"; empty; " with "; : CALL print_army_size(empty): PRINT " men detached under "; army_name$(empty); : CALL wait_seconds(opt_pause!): IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
 	CALL draw_stack_markers(current_side)
 	menu_choice = MENU_START + 6
@@ -378,10 +282,9 @@ alone:
 	CALL menu_army_select(index, target)
 	IF target < 1 OR index < 1 THEN COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "No armies remain eligible for drills in "; month_name$(turn_month); : GOTO menu0
 	IF army_experience(index) > 5 OR army_experience(index) >= army_leader_rating(index) THEN COLOR COLOR_LIGHT_RED: CALL clear_bottom_line: PRINT army_name$(index); ": Army has reached maximum improvement through drilling"; : GOTO optmen
-	army_experience(index) = army_experience(index) + 1
+	CALL army_drill(index)
 	CALL clear_bottom_line: PRINT army_name$(index); " has drilled to reach experience level "; army_experience(index); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
 	CALL wait_seconds(opt_pause!): clear_bottom_line
-	army_order(index) = ORDER_BUSY
 	menu_choice = MENU_START + 7
 	GOTO optmen
 '-------------------------------------------------------------------------
@@ -521,7 +424,7 @@ utile:
 		CALL clear_bottom_line
 		COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Play Balance : "; menu_text$(menu_choice);
 		opt_difficulty = menu_choice
-		GOSUB unionplus
+		CALL set_union_advantage
 		menu_choice = MENU_START + 6: GOTO utile
 '-------------------------------------------------------------------------
 '                               Ending Conditions
@@ -568,38 +471,7 @@ utile:
 '                              Vary Start Conditions
 '-------------------------------------------------------------------------
 	   CASE 9
-		CALL load_scenario
-		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
-		side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
-		opt_ai_aggression = 5 * RND
-		FOR k = 1 TO 6
-			IF RND > .6 THEN
-			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 21 TO 6
-			IF RND > .6 THEN
-			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 1 TO MAX_CITIES: CALL city_update_occupier(k): NEXT k
-		fleet_size(SIDE_UNION) = 10 * RND: IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
-		fleet_size(SIDE_REBEL) = 10 * RND: IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
-		FOR i = SIDE_UNION TO SIDE_REBEL
-			fleet_ships$(i) = ""
-			FOR j = 1 TO fleet_size(i)
-			a$ = "W": IF RND > .45 * current_side THEN a$ = "I"
-			fleet_ships$(i) = fleet_ships$(i) + a$
-		NEXT j
-		NEXT i
-		IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
-
-		FOR k = 1 TO 40
-		IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
-		IF leader_rating(k) < 1 THEN leader_rating(k) = 1
-		NEXT k
+		CALL vary_start_conditions
 		CLS
 		CALL draw_map
 		menu_choice = MENU_START + 9: GOTO utile
@@ -624,7 +496,7 @@ utile:
 	ELSE
 		PRINT "REALISM ON: Recruiting based on CITY SIZE";
 		IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
-		GOSUB unionplus
+		CALL set_union_advantage
 	END IF
 		menu_choice = MENU_START + 11: GOTO utile
 '-------------------------------------------------------------------------
@@ -709,18 +581,6 @@ menu_item_count = 2: menu_color = COLOR_MAGENTA
 menu_col = PANEL_COL: menu_row = 15
 CALL menu_select(MENU_PLAIN): CALL clear_right_panel: IF menu_choice = 1 THEN END ELSE GOTO menu0
 '............................................................................
-unionplus: union_income_bonus = 120 * opt_difficulty: IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
-	   IF opt_realism >= REALISM_ON THEN union_income_bonus = union_income_bonus * .7
-	   RETURN
-'............................................................................
-blanken:        c = 1: IF current_side = SIDE_REBEL THEN c = 7
-		CLS : LINE (100, 200)-(500, 300), c, BF
-		LINE (100, 200)-(500, 300), 8 - c, B
-		COLOR COLOR_GRAY: LOCATE 14, 31: PRINT " "; month_name$(turn_month); turn_year
-		COLOR COLOR_LIGHT_CYAN: LOCATE 17, 30: PRINT side_name$(current_side); " PLAYER TURN"
-		CALL wait_key("T")
-		RETURN
-'............................................................................
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"
 DATA "U4R3F1D1D1G1L2","U4R3BD2BL1L2D2R3","U4R3BD2BL1L2","H1U2E1R3BD2L2BD2R2U1"
 DATA "U4BD2BR1R3U2BD3D1","R1U4L1R2BL1BD4R1","R1E1U3BG3F1","U4BR3G2F2"
@@ -733,6 +593,7 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'rules/battle.bm'
 ' $INCLUDE: 'rules/navy.bm'
 ' $INCLUDE: 'rules/railroad.bm'
+' $INCLUDE: 'rules/setup.bm'
 ' $INCLUDE: 'rules/turn.bm'
 ' $INCLUDE: 'rules/victory.bm'
 ' $INCLUDE: 'ai/ai.bm'

@@ -34,7 +34,7 @@ game plays changes the recorded screens.
   Battleset. A fix changes the battles, so every script would need `record` again.
 - **`traincapacity` counts cities from the player's side, not from the side it is asked about**
   (`TestTraincapacityCountsByPlayersSide`): it uses `side` where the rest of the SUB uses `who`.
-- **Vary Start has a loop that never runs**: `FOR k = 21 TO 6` (`CWSTRAT.BAS`, Utility menu). The loop before
+- **Vary Start has a loop that never runs**: `FOR k = 21 TO 6` (`vary_start_conditions`, `rules\setup.bm`). The loop before
   it clears some of the Union's first six armies; this one was probably meant for the Rebels' (21 to 26).
 - **Casualties are counted for the wrong side when Union armies 3 to 20 attack.** `calculate_battle`
   (`rules\battle.bm`) has `s = 1: IF attacker > 2 THEN s = 2`, most likely meant as `attacker > 20`. Phase 3
@@ -50,14 +50,14 @@ Left alone by phase 3, group 1, of `docs\modernize-plan.md` (the sides and limit
 how the game plays.
 
 - **The 40 leaders have no constant.** `leader_name$()` and `leader_rating()` hold 40 leaders. Their loops
-  (`port\files.bm` line 8, Vary Start in `CWSTRAT.BAS` line 602) and their `DIM` keep the number 40.
+  (`port\files.bm` line 8, Vary Start in `rules\setup.bm` line 39) and their `DIM` keep the number 40.
   `docs\constants.md` has no row for them; a `MAX_LEADERS` would be a new name to agree.
 - **`draw_surrender (side)` is passed an army, not a side** (`game\victory_screens.bm`, called from
   `turn_resolve`). Its test now reads `army_side(side)`. The parameter wants the name `army`.
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 141 and 146).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
   report needs laying out again.
-- **Vary Start gives each fleet `10 * RND` ships** (`CWSTRAT.BAS` lines 591 and 592). That is a random
+- **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 28 and 29). That is a random
   size, not the fleet limit, so it stays 10 rather than `MAX_FLEET_SHIPS`.
 
 Left alone by group 2 (the special values):
@@ -69,7 +69,7 @@ Left alone by group 2 (the special values):
 - **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
   `MENU_START`, so it stays.
-- **The Utility menu calls `menu_select(-1)`** (`CWSTRAT.BAS` line 431). No mode has that number, so it is a
+- **The Utility menu calls `menu_select(-1)`** (`CWSTRAT.BAS` line 331). No mode has that number, so it is a
   plain menu without the F3, F4 and F7 keys. `docs\constants.md` has no row for it, so it keeps the -1
   (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
 - **`animate_army`'s parameter `background_saved` is misnamed** (`draw\icons.bm`). The `GET` it skips takes
@@ -80,7 +80,7 @@ Left alone by group 2 (the special values):
 
 Left alone by group 6 (the settings and victory rules):
 
-- **The Realism switch is `opt_realism = 1 - opt_realism`** (`CWSTRAT.BAS` line 623). It toggles between
+- **The Realism switch is `opt_realism = 1 - opt_realism`** (`CWSTRAT.BAS` line 492). It toggles between
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
 - **The rule that ended the game has no constants**: `j = 2: GOTO finis` to `j = 6` in
@@ -92,7 +92,7 @@ Left alone by group 6 (the settings and victory rules):
 
 Left alone by group 7 (the rule numbers):
 
-- **`total_income = union_income_bonus + 200`** (`CWSTRAT.BAS` line 104), where the cities are read. The 200
+- **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 39), where the cities are read. The 200
   may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 111). That is
@@ -107,7 +107,7 @@ Left alone by group 8 (the colors):
   only, so these stay. A `side_color(side)` FUNCTION would be the next step.
 - **`COLOR 16 - c` shows the other side's color** (`rules\battle.bm` lines 39, 65 and 167): 16 - 9 is 7 and
   16 - 7 is 9. It stays as written; it would go with `side_color`.
-- **`CALL wait_seconds(99)`, "press a key", stays a number** (`CWSTRAT.BAS` line 638, Chk Links;
+- **`CALL wait_seconds(99)`, "press a key", stays a number** (`CWSTRAT.BAS` line 507, Chk Links;
   `rules\turn.bm` line 212, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.

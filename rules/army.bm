@@ -197,3 +197,20 @@ END FUNCTION
 FUNCTION other_side (side)
 other_side = SIDE_UNION + SIDE_REBEL - side
 END FUNCTION
+
+' Detaches three tenths of an army's men and supplies into the free slot, in the city given.
+' The new army takes the slot's leader and the old army's experience.
+SUB army_detach (army, city, slot)
+	army_supply(slot) = .3 * army_supply(army): army_supply(army) = army_supply(army) - army_supply(slot): IF army_supply(army) < 0 THEN army_supply(army) = 0
+	army_size(slot) = .3 * army_size(army): army_size(army) = army_size(army) - army_size(slot)
+	army_city(slot) = city: army_experience(slot) = army_experience(army): army_order(slot) = ORDER_NONE
+	army_leader_rating(slot) = leader_rating(slot)
+	army_name$(slot) = leader_name$(slot): leader_name$(slot) = ""
+	army_experience(slot) = army_experience(army)
+END SUB
+
+' A month of drill: one more level of experience, and the army is busy for the month.
+SUB army_drill (army)
+	army_experience(army) = army_experience(army) + 1
+	army_order(army) = ORDER_BUSY
+END SUB

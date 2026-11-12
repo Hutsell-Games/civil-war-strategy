@@ -307,3 +307,28 @@ IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_
 IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
 IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL wait_key("K")
 END SUB
+
+' The month's income: each side gets its cities' values and its capital's income, and loses
+' what the other side's raiders took. Counts each side's cities and clears the orders.
+SUB turn_collect_income
+DIM i AS INTEGER: DIM x AS INTEGER
+side_city_count(SIDE_UNION) = 0: side_city_count(SIDE_REBEL) = 0
+
+FOR i = SIDE_UNION TO SIDE_REBEL
+side_income(i) = 0
+IF side_cash(i) > MAX_CASH THEN side_cash(i) = MAX_CASH
+IF side_cash(i) < 0 THEN side_cash(i) = 0
+NEXT i
+IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
+
+FOR i = 1 TO MAX_CITIES
+IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_income(x) = side_income(x) + city_value(i)
+army_order(i) = ORDER_NONE
+NEXT i
+
+FOR i = SIDE_UNION TO SIDE_REBEL: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + CAPITAL_INCOME
+side_cash(i) = side_cash(i) + side_income(i)
+IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
+NEXT i
+total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
+END SUB

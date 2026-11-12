@@ -14,12 +14,13 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `army.bm` | `army_combine`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` |
+| `army.bm` | `army_combine`, `army_detach`, `army_drill`, `army_new`, `army_resupply`, `army_get_commander`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side` |
 | `city.bm` | `city_capture` (mixed), `city_is_connected`, `city_update_occupier`, `check_map_links` |
 | `battle.bm` | `calculate_battle` (mixed), `normal_random_number` |
 | `navy.bm` | `navy_remove_ship`, `navy_commands` (mixed) |
 | `railroad.bm` | `railroad_move` (mixed), `railroad_capacity` |
-| `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed) |
+| `turn.bm` | `turn_date_and_supply` (mixed), `turn_resolve` (mixed), `turn_collect_income` |
+| `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7) |
 | `victory.bm` | `check_victory_conditions` (mixed), `hall_of_fame` (mixed) |
 
 ## ai\
@@ -33,9 +34,9 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | File | SUBs |
 |------|------|
 | `menu.bm` | `menu_select`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
-| `orders.bm` | `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify` |
+| `orders.bm` | `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital` |
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size` |
-| `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box` |
+| `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn` |
 | `messages.bm` | `show_message_box`, `scribe_message` |
 
 ## draw\
@@ -45,21 +46,21 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 | `map.bm` | `draw_map`, `draw_map_touchup`, `draw_cities`, `draw_city_names`, `draw_map_marker`, `draw_stack_markers`, `draw_fleets` |
 | `icons.bm` | `draw_flag_icon`, `draw_flag`, `draw_army_flag`, `draw_train`, `animate_army`, `animate_city` |
 | `ships.bm` | `draw_fleet_ship`, `draw_ship_icon`, `draw_ironclad`, `draw_schooner` |
-| `pictures.bm` | `draw_cannon`, `draw_chesapeake` |
+| `pictures.bm` | `draw_cannon`, `draw_chesapeake`, `draw_title` |
 
 ## game\ (what another war replaces)
 
 | File | SUBs |
 |------|------|
 | `victory_screens.bm` | `draw_union_victory`, `draw_rebel_victory`, `draw_surrender` |
-| `tunes.bm` | `play_shenandoah` |
+| `tunes.bm` | `play_shenandoah`, `play_title_music` |
 | `events.bm` | `special_events` (mixed) |
 
 ## port\
 
 | File | SUBs |
 |------|------|
-| `files.bm` | `load_scenario`, `load_game` (mixed), `save_game` (mixed), `config_read`, `config_write` (`file_management` until phase 7 split it) |
+| `files.bm` | `load_scenario`, `load_cities`, `load_game` (mixed), `save_game` (mixed), `config_read`, `config_write` (`file_management` until phase 7 split it) |
 | `qb64.bm` | `DIR$` (from `QB64.BM`) |
 | `script.bm` | `script_start`, `script_date$`, `script_tick%`, `script_shell`, `script_mark_key_wait` (from `SCRIPT.BM`) |
 
