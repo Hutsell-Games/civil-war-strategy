@@ -144,23 +144,23 @@ END SUB
 ' the player is the Rebels, whichever side who is.
 
 SUB TestTraincapacityWithoutRealism
-train_capacity(1) = 600: train_capacity(2) = 300: opt_realism = 0
+trains(1).capacity = 600: trains(2).capacity = 300: opt_realism = 0
 limit = railroad_capacity(1): AssertEqualInt 600, limit, "the Union"
 limit = railroad_capacity(2): AssertEqualInt 300, limit, "the Rebels"
 END SUB
 
 SUB TestTraincapacityWithRealism
-train_capacity(1) = 600: opt_realism = 1: current_side = 1
+trains(1).capacity = 600: opt_realism = 1: current_side = 1
 sides(1).city_count = 14: limit = railroad_capacity(1): AssertEqualInt 615, limit, "14 cities"
 sides(1).city_count = 11: limit = railroad_capacity(1): AssertEqualInt 600, limit, "11 cities"
 sides(1).city_count = 5: limit = railroad_capacity(1): AssertEqualInt 570, limit, "5 cities"
-train_capacity(1) = 20
+trains(1).capacity = 20
 sides(1).city_count = 0: limit = railroad_capacity(1): AssertEqualInt 10, limit, "never less than half"
 sides(1).city_count = 40: limit = railroad_capacity(1): AssertEqualInt 40, limit, "never more than twice"
 END SUB
 
 SUB TestTraincapacityCountsByPlayersSide
-train_capacity(1) = 600: opt_realism = 1: sides(1).city_count = 23
+trains(1).capacity = 600: opt_realism = 1: sides(1).city_count = 23
 current_side = 2
 limit = railroad_capacity(1): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
 END SUB
@@ -189,19 +189,19 @@ END SUB
 ' A fleet loses its last ship.
 
 SUB TestBarnacleRemovesTheLastShip
-fleet_size(1) = 3: fleet_ships$(1) = "WIW": fleet_city(1) = 30
+fleets(1).size = 3: fleets(1).ships = "WIW": fleets(1).city = 30
 CALL navy_remove_ship(1)
-AssertEqualInt 2, fleet_size(1), "two ships left"
-AssertEqualStr "WI", fleet_ships$(1), "the last one gone"
-AssertEqualInt 30, fleet_city(1), "still there"
+AssertEqualInt 2, fleets(1).size, "two ships left"
+AssertEqualStr "WI", fleets(1).ships, "the last one gone"
+AssertEqualInt 30, fleets(1).city, "still there"
 END SUB
 
 SUB TestBarnacleEndsAFleetOfOne
-fleet_size(2) = 1: fleet_ships$(2) = "I": fleet_city(2) = 27
+fleets(2).size = 1: fleets(2).ships = "I": fleets(2).city = 27
 CALL navy_remove_ship(2)
-AssertEqualInt 0, fleet_size(2), "no ships"
-AssertEqualStr "", fleet_ships$(2), "no fleet"
-AssertEqualInt 0, fleet_city(2), "nowhere"
+AssertEqualInt 0, fleets(2).size, "no ships"
+AssertEqualStr "", fleets(2).ships, "no fleet"
+AssertEqualInt 0, fleets(2).city, "nowhere"
 END SUB
 
 ' ------------------------------------------------------------------- normal
@@ -537,9 +537,9 @@ END SUB
 SUB TestRailroadBoardPutsTheArmyOnTheTrain
 army_city(3) = 7: army_city(5) = 7: city_army(7) = 3
 CALL railroad_board(1, 3, 12)
-AssertEqualInt 3, train_army(1), "the army aboard"
-AssertEqualInt 7, train_city(1), "the train is in city 7"
-AssertEqualInt 7, train_from_city(1), "and sets out from there"
+AssertEqualInt 3, trains(1).army, "the army aboard"
+AssertEqualInt 7, trains(1).city, "the train is in city 7"
+AssertEqualInt 7, trains(1).from_city, "and sets out from there"
 AssertEqualInt 0, army_city(3), "the army is in no city"
 AssertEqualInt 12, army_order(3), "it is bound for city 12"
 AssertEqualInt 5, city_army(7), "army 5 now holds city 7"
@@ -547,10 +547,10 @@ END SUB
 
 SUB TestRailroadUnloadPutsTheArmyInItsCity
 army_city(5) = 7: city_army(7) = 3
-train_army(1) = 3: train_city(1) = 7: train_from_city(1) = 7: army_order(3) = 12
+trains(1).army = 3: trains(1).city = 7: trains(1).from_city = 7: army_order(3) = 12
 CALL railroad_unload(1)
-AssertEqualInt 0, train_army(1), "the train is empty"
-AssertEqualInt 12, train_city(1), "in city 12"
+AssertEqualInt 0, trains(1).army, "the train is empty"
+AssertEqualInt 12, trains(1).city, "in city 12"
 AssertEqualInt 12, army_city(3), "the army is in city 12"
 AssertEqualInt ORDER_BUSY, army_order(3), "and can take no order this turn"
 AssertEqualInt 5, city_army(7), "army 5 holds city 7"
@@ -562,7 +562,7 @@ SUB TestAiNavyChangesItsOrder
 action = NAVY_ATTACK
 CALL ai_navy(1, action)
 AssertEqualInt NAVY_BUILD, action, "no fleet: build"
-fleet_city(1) = 5: action = NAVY_ATTACK
+fleets(1).city = 5: action = NAVY_ATTACK
 CALL ai_navy(1, action)
 AssertEqualInt NAVY_ATTACK, action, "a fleet in port: the order stands"
 raiding_side = 2: raid_loss = 3
@@ -579,7 +579,7 @@ AssertEqualStr "-", menu_text$(1), "no money: no Build"
 AssertEqualStr "-", menu_text$(3), "no fleet: no Sail"
 AssertEqualStr "-", menu_text$(4), "no fleet: no Raid"
 AssertEqualInt 4, menu_item_count, "four entries"
-fleet_city(1) = 5: fleet_size(1) = 2
+fleets(1).city = 5: fleets(1).size = 2
 CALL menu_navy_items(1)
 AssertEqualStr "Sail", menu_text$(3), "a fleet may sail"
 AssertEqualStr "Raid", menu_text$(4), "and raid"
@@ -591,31 +591,31 @@ END SUB
 ' ------------------------------------------------------- the navy's rules
 
 SUB TestNavyAddShipPutsIroncladsFirst
-fleet_ships$(1) = "WW": fleet_size(1) = 2: sides(1).cash = 500
+fleets(1).ships = "WW": fleets(1).size = 2: sides(1).cash = 500
 CALL navy_add_ship(1, "I", 100)
-AssertEqualStr "IWW", fleet_ships$(1), "an ironclad goes first"
-AssertEqualInt 3, fleet_size(1), "three ships"
+AssertEqualStr "IWW", fleets(1).ships, "an ironclad goes first"
+AssertEqualInt 3, fleets(1).size, "three ships"
 AssertEqualInt 400, sides(1).cash, "paid now"
 CALL navy_add_ship(1, "W", 100)
-AssertEqualStr "IWWW", fleet_ships$(1), "a wooden ship goes last"
+AssertEqualStr "IWWW", fleets(1).ships, "a wooden ship goes last"
 sides(2).cash = 500
 CALL navy_add_ship(2, "W", 100)
 AssertEqualInt 500, sides(2).cash, "a new fleet pays later"
 END SUB
 
 SUB TestNavyFoundAndCancelANewFleet
-sides(2).cash = 500: fleet_ships$(2) = "W": fleet_size(2) = 1
+sides(2).cash = 500: fleets(2).ships = "W": fleets(2).size = 1
 CALL navy_found_fleet(2, 9, 100)
-AssertEqualInt 9, fleet_city(2), "in port 9"
+AssertEqualInt 9, fleets(2).city, "in port 9"
 AssertEqualInt 400, sides(2).cash, "paid"
 CALL navy_cancel_new_fleet(1)
-AssertEqualInt 0, fleet_size(1), "no ship"
-AssertEqualStr "", fleet_ships$(1), "none"
+AssertEqualInt 0, fleets(1).size, "no ship"
+AssertEqualStr "", fleets(1).ships, "none"
 END SUB
 
 SUB TestNavyBombardArmy
 RANDOMIZE 1
-fleet_size(1) = 4: army_size(21) = 100: army_supply(21) = 5
+fleets(1).size = 4: army_size(21) = 100: army_supply(21) = 5
 CALL navy_bombard_army(1, 21, killd)
 AssertTrue killd >= 2 AND killd <= 4, "2% to 4% of the men:" + STR$(killd)
 AssertEqualInt 100 - killd, army_size(21), "taken from the army"
@@ -628,37 +628,37 @@ END SUB
 SUB TestNavyShoreBatteryDamagesFort
 FOR s = 1 TO 100
 	RANDOMIZE s
-	fleet_ships$(1) = "W": fleet_size(1) = 1: fleet_city(1) = 5: city_fort(5) = 2
+	fleets(1).ships = "W": fleets(1).size = 1: fleets(1).city = 5: city_fort(5) = 2
 	CALL navy_shore_battery(1, 5, damaged)
 	IF damaged = 1 THEN EXIT FOR
 NEXT s
 AssertEqualInt 1, damaged, "a seed where the fleet hits the fort"
 AssertEqualInt 1, city_fort(5), "the fort loses a level"
-AssertEqualInt 1, fleet_size(1), "the ship is safe"
-AssertEqualInt 5, fleet_city(1), "the fleet stays"
+AssertEqualInt 1, fleets(1).size, "the ship is safe"
+AssertEqualInt 5, fleets(1).city, "the fleet stays"
 END SUB
 
 SUB TestNavyShoreBatterySinksShip
 FOR s = 1 TO 100
 	RANDOMIZE s
-	fleet_ships$(1) = "WI": fleet_size(1) = 2: fleet_city(1) = 5: city_fort(5) = 2
+	fleets(1).ships = "WI": fleets(1).size = 2: fleets(1).city = 5: city_fort(5) = 2
 	CALL navy_shore_battery(1, 5, damaged)
 	IF damaged = 0 THEN EXIT FOR
 NEXT s
 AssertEqualInt 0, damaged, "a seed where the battery hits"
 AssertEqualInt 2, city_fort(5), "the fort stands"
-AssertEqualInt 1, fleet_size(1), "a ship is sunk"
-AssertEqualStr "W", fleet_ships$(1), "the last of the list"
+AssertEqualInt 1, fleets(1).size, "a ship is sunk"
+AssertEqualStr "W", fleets(1).ships, "the last of the list"
 END SUB
 
 SUB TestNavyShotIroncladBeatsWood
-fleet_ships$(1) = "I": fleet_ships$(2) = "W"
+fleets(1).ships = "I": fleets(2).ships = "W"
 RANDOMIZE 1
 iron = 0: FOR k = 1 TO 200: iron = iron + navy_shot_hits(1): NEXT k
 RANDOMIZE 1
 wood = 0: FOR k = 1 TO 200: wood = wood + navy_shot_hits(2): NEXT k
 AssertTrue iron > wood, "the same draws: the ironclad hits more often:" + STR$(iron) + STR$(wood)
-fleet_ships$(2) = "I"
+fleets(2).ships = "I"
 RANDOMIZE 1
 even = 0: FOR k = 1 TO 200: even = even + navy_shot_hits(2): NEXT k
 AssertTrue even > wood AND even < iron, "two ironclads: in between:" + STR$(even)
@@ -667,31 +667,31 @@ END SUB
 SUB TestNavyRaidRoundLosesAShip
 FOR s = 1 TO 100
 	RANDOMIZE s
-	raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA: raid_loss = 7
+	raiding_side = 1: fleets(1).size = 1: fleets(1).ships = "W": fleets(1).city = FLEET_AT_SEA: raid_loss = 7
 	CALL navy_raid_round(raider, sank)
 	IF sank = 0 THEN EXIT FOR
 NEXT s
 AssertEqualInt 0, sank, "a seed where the raiders lose"
 AssertEqualInt 1, raider, "the Union raided"
 AssertEqualInt 0, raid_loss, "they sank nothing"
-AssertEqualInt 0, fleet_size(1), "their last ship is gone"
+AssertEqualInt 0, fleets(1).size, "their last ship is gone"
 AssertEqualInt 0, raiding_side, "nobody raids now"
 END SUB
 
 SUB TestNavyFleetLostToTheBattery
-current_side = 1: fleet_pursuit = 1: fleet_city(1) = 5
+current_side = 1: fleet_pursuit = 1: fleets(1).city = 5
 CALL navy_fleet_lost(1)
-AssertEqualInt 0, fleet_city(1), "no fleet"
+AssertEqualInt 0, fleets(1).city, "no fleet"
 AssertEqualInt 5, sides(2).victory_points, "5 points for the Rebels"
 AssertEqualInt 0, fleet_pursuit, "no pursuit"
 END SUB
 
 SUB TestNavyBlastCapitalAndNeutral
-fleet_size(1) = 20: sides(2).capital = 25: fleet_city(1) = 25: city_owner(25) = 2
+fleets(1).size = 20: sides(2).capital = 25: fleets(1).city = 25: city_owner(25) = 2
 CALL navy_blast(1, 25, result)
 AssertEqualInt BLAST_LOYAL, result, "the capital stays loyal"
 AssertEqualInt 2, city_owner(25), "still the Rebels'"
-fleet_city(1) = 7: city_owner(7) = 2: city_value(7) = 10
+fleets(1).city = 7: city_owner(7) = 2: city_value(7) = 10
 CALL navy_blast(1, 7, result)
 AssertEqualInt BLAST_NEUTRAL, result, "20 ships: the city always gives in"
 AssertEqualInt 0, city_owner(7), "neutral"
@@ -706,20 +706,20 @@ AssertEqualInt 300, sides(1).cash, "the 100 given back"
 END SUB
 
 SUB TestNavyRaidingSide
-fleet_city(2) = FLEET_AT_SEA: fleet_city(1) = 5: raiding_side = 1
+fleets(2).city = FLEET_AT_SEA: fleets(1).city = 5: raiding_side = 1
 CALL navy_note_raiding_side
 AssertEqualInt 2, raiding_side, "the Rebels' fleet is at sea"
 CALL navy_go_raiding(1)
-AssertEqualInt FLEET_AT_SEA, fleet_city(1), "the Union's fleet goes to sea"
+AssertEqualInt FLEET_AT_SEA, fleets(1).city, "the Union's fleet goes to sea"
 AssertEqualInt 1, raiding_side, "and raids"
 END SUB
 
 SUB TestNavyRaidRound
-raiding_side = 1: fleet_size(1) = 0
+raiding_side = 1: fleets(1).size = 0
 CALL navy_raid_round(raider, sank)
 AssertEqualInt 0, raider, "no ships: no raid"
 AssertEqualInt 0, raiding_side, "nobody raids"
-raiding_side = 1: fleet_size(1) = 10: sides(2).income = 100: current_side = 1
+raiding_side = 1: fleets(1).size = 10: sides(2).income = 100: current_side = 1
 CALL navy_raid_round(raider, sank)
 AssertEqualInt 1, sank, "10 ships always sink commerce"
 AssertEqualInt 30, raid_loss, "at most 30% of the income"
@@ -727,15 +727,15 @@ AssertEqualInt 1, fleet_pursuit, "the other fleet will pursue"
 END SUB
 
 SUB TestNavyShipHits
-fleet_ships$(1) = "WI": fleet_ships$(2) = "IW"
+fleets(1).ships = "WI": fleets(2).ships = "IW"
 AssertEqualInt 20, navy_ship_hits(1), "the last ship is an ironclad"
 AssertEqualInt 10, navy_ship_hits(2), "the last ship is wooden"
 END SUB
 
 SUB TestNavyFleetDefeated
-current_side = 1: fleet_city(2) = 5: fleet_ships$(2) = "W"
+current_side = 1: fleets(2).city = 5: fleets(2).ships = "W"
 CALL navy_fleet_defeated(2)
-AssertEqualInt 0, fleet_city(2), "the Rebels' fleet is gone"
+AssertEqualInt 0, fleets(2).city, "the Rebels' fleet is gone"
 AssertEqualInt 10, sides(2).victory_points, "10 points for the loser (as in the original)"
 AssertEqualInt 1, fleet_pursuit, "the Union, whose turn it is, won: pursuit"
 CALL navy_fleet_defeated(1)
@@ -743,12 +743,12 @@ AssertEqualInt 0, fleet_pursuit, "the Union lost: no pursuit"
 END SUB
 
 SUB TestNavyRetreatPort
-city_owner(3) = 1: city_port_type(3) = PORT_SEA: fleet_city(1) = 3
+city_owner(3) = 1: city_port_type(3) = PORT_SEA: fleets(1).city = 3
 city_owner(8) = 1: city_port_type(8) = PORT_SEA
 CALL navy_retreat_port(1, target)
 AssertEqualInt 8, target, "the one other sea port"
-AssertEqualInt 8, fleet_city(1), "the fleet is there"
-city_owner(8) = 2: fleet_city(1) = 3
+AssertEqualInt 8, fleets(1).city, "the fleet is there"
+city_owner(8) = 2: fleets(1).city = 3
 CALL navy_retreat_port(1, target)
 AssertEqualInt 0, target, "none left"
 END SUB
@@ -958,7 +958,7 @@ AssertEqualInt 0, starved, "not starved"
 END SUB
 
 SUB TestTurnArmySupplyBlockaded
-turn_month = 8: army_city(21) = 9: city_port_type(9) = PORT_SEA: fleet_city(1) = 9
+turn_month = 8: army_city(21) = 9: city_port_type(9) = PORT_SEA: fleets(1).city = 9
 army_size(21) = 40: army_supply(21) = 1
 CALL turn_army_supply(21, blockaded, starved)
 AssertEqualInt 1, blockaded, "the Union's fleet is in port 9"
@@ -1230,9 +1230,9 @@ END SUB
 SUB TestNavyMarkSideAndCountShips
 CALL navy_mark_side(SIDE_REBEL)
 AssertEqualInt SIDE_REBEL, city_owner(0), "city 0, no port, is the side's"
-fleet_ships$(SIDE_UNION) = "IWW": fleet_size(SIDE_UNION) = 7
+fleets(SIDE_UNION).ships = "IWW": fleets(SIDE_UNION).size = 7
 CALL navy_count_ships(SIDE_UNION)
-AssertEqualInt 3, fleet_size(SIDE_UNION), "counted from the list of ships"
+AssertEqualInt 3, fleets(SIDE_UNION).size, "counted from the list of ships"
 CALL turn_set_navy_done(1)
 AssertEqualInt 1, turn_navy_done, "the fleet has acted"
 END SUB
@@ -1257,12 +1257,12 @@ city_name$(5) = "Boston": city_port_type(5) = PORT_SEA: city_owner(5) = SIDE_UNI
 city_name$(8) = "Norfolk": city_port_type(8) = PORT_SEA: city_owner(8) = SIDE_UNION
 city_name$(9) = "Mobile": city_port_type(9) = PORT_SEA: city_owner(9) = SIDE_REBEL
 city_name$(11) = "Memphis": city_port_type(11) = PORT_RIVER: city_owner(11) = SIDE_UNION
-fleet_city(SIDE_REBEL) = 8
+fleets(SIDE_REBEL).city = 8
 CALL navy_list_shipyards(SIDE_UNION)
 AssertEqualInt 1, menu_item_count, "one shipyard: not the enemy's port, the blockaded port or the river port"
 AssertEqualInt 5, menu_value(1), "Boston"
 AssertEqualStr "Port", menu_text$(0), "the menu's title"
-fleet_city(SIDE_UNION) = 5
+fleets(SIDE_UNION).city = 5
 CALL navy_list_ports(SIDE_UNION)
 AssertEqualInt 2, menu_item_count, "two ports to sail to: every sea port but the fleet's own"
 AssertEqualInt 8, menu_value(1), "Norfolk"
@@ -1292,10 +1292,10 @@ END SUB
 ' In a two-player game with no side set, the Union plays.
 SUB TestTurnCheckCommands
 current_side = SIDE_UNION: opt_players = PLAYERS_ONE
-sides(SIDE_UNION).cash = COST_SHIP - 1: fleet_city(SIDE_UNION) = 30
+sides(SIDE_UNION).cash = COST_SHIP - 1: fleets(SIDE_UNION).city = 30
 CALL turn_check_commands
 AssertEqualInt 0, turn_navy_done, "a fleet: Ships stays open"
-fleet_city(SIDE_UNION) = 0: sides(SIDE_UNION).cash = COST_SHIP
+fleets(SIDE_UNION).city = 0: sides(SIDE_UNION).cash = COST_SHIP
 CALL turn_check_commands
 AssertEqualInt 0, turn_navy_done, "no fleet, the price of a ship: open"
 sides(SIDE_UNION).cash = COST_SHIP - 1
@@ -1327,7 +1327,7 @@ END SUB
 SUB TestGameReset
 game_over = 1: turn_recruit_state = -1: saves_exist = 0: emancipation_done = 1: union_income_bonus = 252
 army_size(7) = 90: army_city(7) = 12: army_order(7) = 5: army_leader_rating(7) = 4: army_name$(7) = "Banks"
-fleet_size(SIDE_REBEL) = 3: fleet_city(SIDE_REBEL) = 27: train_army(SIDE_UNION) = 7: train_city(SIDE_UNION) = 30
+fleets(SIDE_REBEL).size = 3: fleets(SIDE_REBEL).city = 27: trains(SIDE_UNION).army = 7: trains(SIDE_UNION).city = 30
 sides(SIDE_UNION).victory_points = 400: victory_rule(VICTORY_MONTH) = 3
 CALL game_reset
 AssertEqualInt 0, game_over, "the game is on"
@@ -1337,8 +1337,8 @@ AssertEqualInt 0, emancipation_done, "no Emancipation Proclamation yet"
 AssertEqualInt 0, union_income_bonus, "no extra income yet"
 AssertEqualInt 0, army_size(7) + army_city(7) + army_order(7) + army_leader_rating(7), "no army"
 AssertEqualStr "", army_name$(7), "nor its name"
-AssertEqualInt 0, fleet_size(SIDE_REBEL) + fleet_city(SIDE_REBEL), "no fleet"
-AssertEqualInt 0, train_army(SIDE_UNION) + train_city(SIDE_UNION), "no train"
+AssertEqualInt 0, fleets(SIDE_REBEL).size + fleets(SIDE_REBEL).city, "no fleet"
+AssertEqualInt 0, trains(SIDE_UNION).army + trains(SIDE_UNION).city, "no train"
 AssertEqualInt 0, sides(SIDE_UNION).victory_points, "no points"
 AssertEqualInt 1, victory_rule(VICTORY_MONTH), "the time limit's month is January until the scenario sets it"
 END SUB
@@ -1347,11 +1347,11 @@ END SUB
 ' 500; cash becomes income, and up to 50 comes on top.
 SUB TestGameApplySettingsUnion
 RANDOMIZE 1
-opt_realism = REALISM_ON: turn_year = 1861: fleet_ships$(SIDE_UNION) = "WIIW"
+opt_realism = REALISM_ON: turn_year = 1861: fleets(SIDE_UNION).ships = "WIIW"
 opt_players = 0: current_side = SIDE_NONE: opt_pause! = 0: opt_difficulty = 1
 sides(SIDE_UNION).cash = 300: sides(SIDE_REBEL).cash = 50
 CALL game_apply_settings
-AssertEqualStr "WWWW", fleet_ships$(SIDE_UNION), "no ironclads before 1862 under realism"
+AssertEqualStr "WWWW", fleets(SIDE_UNION).ships, "no ironclads before 1862 under realism"
 AssertEqualInt PLAYERS_ONE, opt_players, "one player when the setting is not 1 or 2"
 AssertEqualInt SIDE_UNION, current_side, "the Union when no side is set"
 AssertEqualInt 7, opt_event_balance, "events favor the Rebels"
@@ -1364,11 +1364,11 @@ END SUB
 ' The Rebel player on Union ++ (5) gives the Union 500. Ironclads stay without realism.
 SUB TestGameApplySettingsRebel
 RANDOMIZE 1
-opt_realism = REALISM_OFF: turn_year = 1861: fleet_ships$(SIDE_UNION) = "WI"
+opt_realism = REALISM_OFF: turn_year = 1861: fleets(SIDE_UNION).ships = "WI"
 opt_players = PLAYERS_ONE: current_side = SIDE_REBEL: opt_pause! = 8: opt_difficulty = 5
 sides(SIDE_UNION).cash = 300: sides(SIDE_REBEL).cash = 50
 CALL game_apply_settings
-AssertEqualStr "WI", fleet_ships$(SIDE_UNION), "ironclads stay"
+AssertEqualStr "WI", fleets(SIDE_UNION).ships, "ironclads stay"
 AssertEqualInt 3, opt_event_balance, "events favor the Union"
 AssertTrue opt_pause! = 8, "a display speed that is set stays"
 AssertEqualInt 800, sides(SIDE_UNION).income, "the Union's cash and income with 500 for Union ++"
@@ -1388,8 +1388,8 @@ army_experience(22) = 3: army_supply(22) = 4: army_order(22) = 11
 leader_name$(22) = "Jackson": leader_name$(23) = "Pemberton"
 city_army(12) = 22: city_owner(12) = SIDE_REBEL: city_fort(12) = 1
 sides(SIDE_REBEL).cash = 345: sides(SIDE_REBEL).capital = 33: sides(SIDE_UNION).victory_points = 77
-fleet_ships$(SIDE_UNION) = "WWI": fleet_city(SIDE_UNION) = 30
-train_army(SIDE_REBEL) = 22: train_city(SIDE_REBEL) = 25
+fleets(SIDE_UNION).ships = "WWI": fleets(SIDE_UNION).city = 30
+trains(SIDE_REBEL).army = 22: trains(SIDE_REBEL).city = 25
 opt_difficulty = 4: opt_history = 1
 CALL save_game(3)
 AssertEqualStr "CWS3.SAV", DIR$("cws3.sav"), "the slot's file"
@@ -1399,8 +1399,8 @@ army_name$(22) = "": army_size(22) = 0: army_leader_rating(22) = 0: army_city(22
 army_experience(22) = 0: army_supply(22) = 0: army_order(22) = 0
 city_army(12) = 0: city_owner(12) = 0: city_fort(12) = 0
 sides(SIDE_REBEL).cash = 0: sides(SIDE_REBEL).capital = 0: sides(SIDE_UNION).victory_points = 0
-fleet_ships$(SIDE_UNION) = "": fleet_city(SIDE_UNION) = 0: fleet_size(SIDE_UNION) = 0
-train_army(SIDE_REBEL) = 0: train_city(SIDE_REBEL) = 0
+fleets(SIDE_UNION).ships = "": fleets(SIDE_UNION).city = 0: fleets(SIDE_UNION).size = 0
+trains(SIDE_REBEL).army = 0: trains(SIDE_REBEL).city = 0
 opt_difficulty = 0: opt_history = 0
 CALL load_game(3)
 AssertEqualInt 7, turn_month, "the month"
@@ -1422,11 +1422,11 @@ AssertEqualInt 1, city_fort(12), "its fort"
 AssertEqualInt 345, sides(SIDE_REBEL).cash, "a side's cash"
 AssertEqualInt 33, sides(SIDE_REBEL).capital, "its capital"
 AssertEqualInt 77, sides(SIDE_UNION).victory_points, "victory points"
-AssertEqualStr "WWI", fleet_ships$(SIDE_UNION), "a fleet's ships"
-AssertEqualInt 3, fleet_size(SIDE_UNION), "their count, from the ships"
-AssertEqualInt 30, fleet_city(SIDE_UNION), "its port"
-AssertEqualInt 22, train_army(SIDE_REBEL), "the army on the train"
-AssertEqualInt 25, train_city(SIDE_REBEL), "where it goes"
+AssertEqualStr "WWI", fleets(SIDE_UNION).ships, "a fleet's ships"
+AssertEqualInt 3, fleets(SIDE_UNION).size, "their count, from the ships"
+AssertEqualInt 30, fleets(SIDE_UNION).city, "its port"
+AssertEqualInt 22, trains(SIDE_REBEL).army, "the army on the train"
+AssertEqualInt 25, trains(SIDE_REBEL).city, "where it goes"
 AssertEqualInt 4, opt_difficulty, "a setting, from cws.cfg"
 AssertEqualInt 1, opt_history, "another"
 END SUB

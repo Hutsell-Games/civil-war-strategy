@@ -1,6 +1,6 @@
 SUB draw_fleet_ship (side, i)
 DIM a AS INTEGER
-a = 1: IF MID$(fleet_ships$(side), i, 1) = "I" THEN a = 2
+a = 1: IF MID$(fleets(side).ships, i, 1) = "I" THEN a = 2
 CALL draw_ship_icon(side, a)
 END SUB
 
@@ -301,12 +301,12 @@ END SUB
 ' lead ship. Then a pause.
 SUB draw_fleet_sailing (side)
 DIM i AS INTEGER: DIM a AS INTEGER
-	FOR i = 1 TO fleet_size(side)
+	FOR i = 1 TO fleets(side).size
 		PSET (120 + 41 * i, 210), 0
 		CALL draw_fleet_ship(side, i)
 	NEXT i
 	IF opt_graphics >= GRAPHICS_FULL THEN
-		a = ASC(LEFT$(fleet_ships$(side), 1))
+		a = ASC(LEFT$(fleets(side).ships, 1))
 		SELECT CASE a
 			CASE 73
 				CALL draw_ironclad

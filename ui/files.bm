@@ -58,7 +58,7 @@ DIM k AS INTEGER: DIM t$: DIM row AS INTEGER
 	SCREEN 12: CLS
 	CALL draw_map: CALL clear_bottom_line
 	FOR k = SIDE_UNION TO SIDE_REBEL
-	IF train_army(k) > 0 THEN CALL draw_train(k, DRAW_SHOW)
+	IF trains(k).army > 0 THEN CALL draw_train(k, DRAW_SHOW)
 	NEXT k
 	IF row = 1 THEN CALL turn_reset_commands
 END SUB

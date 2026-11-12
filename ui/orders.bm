@@ -356,21 +356,21 @@ END SUB
 SUB menu_navy_items (side)
 menu_text$(0) = "Ships"
 menu_text$(1) = "Build"
-IF fleet_city(side) <> FLEET_AT_SEA THEN
-IF sides(side).cash < COST_SHIP OR fleet_size(side) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(side)) <> side THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
+IF fleets(side).city <> FLEET_AT_SEA THEN
+IF sides(side).cash < COST_SHIP OR fleets(side).size >= MAX_FLEET_SHIPS OR city_owner(fleets(side).city) <> side THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
 END IF
 menu_text$(2) = "Attack"
-IF fleet_city(side) <> FLEET_AT_SEA THEN
-IF city_owner(fleet_city(side)) <> other_side(side) THEN menu_text$(2) = "-": menu_choice = MENU_START + 1
+IF fleets(side).city <> FLEET_AT_SEA THEN
+IF city_owner(fleets(side).city) <> other_side(side) THEN menu_text$(2) = "-": menu_choice = MENU_START + 1
 ELSE
 menu_text$(1) = "-": menu_text$(2) = "-": menu_choice = MENU_START + 3
 END IF
-menu_text$(3) = "Sail": IF fleet_city(side) < 1 THEN menu_text$(3) = "-"
-menu_text$(4) = "Raid": IF fleet_size(side) < 1 OR raiding_side = side THEN menu_text$(4) = "-"
+menu_text$(3) = "Sail": IF fleets(side).city < 1 THEN menu_text$(3) = "-"
+menu_text$(4) = "Raid": IF fleets(side).size < 1 OR raiding_side = side THEN menu_text$(4) = "-"
 menu_col = PANEL_COL: menu_row = 12: menu_item_count = 4
-IF fleet_city(side) <> FLEET_AT_SEA THEN
-IF side = SIDE_UNION AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
-IF opt_realism = REALISM_OFF AND side = SIDE_REBEL AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
+IF fleets(side).city <> FLEET_AT_SEA THEN
+IF side = SIDE_UNION AND fleets(side).size > 1 AND city_owner(fleets(side).city) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
+IF opt_realism = REALISM_OFF AND side = SIDE_REBEL AND fleets(side).size > 1 AND city_owner(fleets(side).city) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
 END IF
 END SUB
 

@@ -6,9 +6,9 @@
 SUB railroad_board (side, army, city)
 DIM from AS INTEGER
 	from = army_city(army)
-	train_city(side) = from
-	train_from_city(side) = from
-	train_army(side) = army: army_city(army) = 0: army_order(army) = city
+	trains(side).city = from
+	trains(side).from_city = from
+	trains(side).army = army: army_city(army) = 0: army_order(army) = city
 	CALL city_update_occupier(from)
 END SUB
 
@@ -16,10 +16,10 @@ END SUB
 ' the city it was sent to, where army_order becomes ORDER_BUSY.
 SUB railroad_unload (side)
 DIM index AS INTEGER
-	CALL city_update_occupier(train_from_city(side))
-	index = train_army(side)
-	train_city(side) = army_order(index)
-	train_army(side) = 0: army_city(index) = army_order(index): army_order(index) = ORDER_BUSY
+	CALL city_update_occupier(trains(side).from_city)
+	index = trains(side).army
+	trains(side).city = army_order(index)
+	trains(side).army = 0: army_city(index) = army_order(index): army_order(index) = ORDER_BUSY
 END SUB
 
 ' Counts the side's track out of a city: each road to a city of the side, and each road on
@@ -42,10 +42,10 @@ END FUNCTION
 ' The largest army that side's railroad can carry.
 FUNCTION railroad_capacity (side)
 DIM x AS INTEGER: DIM limit AS INTEGER
-IF opt_realism = REALISM_OFF THEN railroad_capacity = train_capacity(side): EXIT FUNCTION
+IF opt_realism = REALISM_OFF THEN railroad_capacity = trains(side).capacity: EXIT FUNCTION
 x = 11: IF current_side = SIDE_REBEL THEN x = 23
-limit = train_capacity(side) + 5 * (sides(side).city_count - x)
-x = 2 * train_capacity(side)
+limit = trains(side).capacity + 5 * (sides(side).city_count - x)
+x = 2 * trains(side).capacity
 IF limit > x THEN limit = x
 IF limit < x \ 4 THEN limit = x \ 4
 railroad_capacity = limit

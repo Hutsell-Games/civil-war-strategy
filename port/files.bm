@@ -21,8 +21,8 @@ FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + a
 NEXT i
 FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, sides(i).cash: NEXT i
 	INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
-	INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
-	FOR k = SIDE_UNION TO SIDE_REBEL: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
+	INPUT #1, fleets(SIDE_UNION).ships, fleets(SIDE_UNION).city, fleets(SIDE_REBEL).ships, fleets(SIDE_REBEL).city
+	FOR k = SIDE_UNION TO SIDE_REBEL: fleets(k).size = LEN(fleets(k).ships): NEXT k
 	INPUT #1, sides(SIDE_UNION).capital, sides(SIDE_REBEL).capital
 
 FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
@@ -72,8 +72,8 @@ DIM i AS INTEGER: DIM a AS INTEGER: DIM unused AS INTEGER
 	NEXT i
 	FOR i = 1 TO MAX_CITIES: INPUT #1, city_army(i), city_owner(i), city_fort(i): NEXT i
 	FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, sides(i).cash, sides(i).city_count, sides(i).income, sides(i).victory_points, sides(i).capital
-	INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
-	fleet_size(i) = LEN(fleet_ships$(i))
+	INPUT #1, fleets(i).ships, fleets(i).city, unused, trains(i).army, trains(i).city
+	fleets(i).size = LEN(fleets(i).ships)
 	NEXT i
        
 	CLOSE #1
@@ -91,7 +91,7 @@ DIM i AS INTEGER: DIM myside AS INTEGER
 	NEXT i
 	FOR i = 1 TO MAX_CITIES: WRITE #1, city_army(i), city_owner(i), city_fort(i): NEXT i
 	FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, sides(i).cash, sides(i).city_count, sides(i).income, sides(i).victory_points, sides(i).capital
-	WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
+	WRITE #1, fleets(i).ships, fleets(i).city, 0, trains(i).army, trains(i).city
 	NEXT i
 	CLOSE #1
        
@@ -108,13 +108,13 @@ END SUB
 
 SUB config_read (side)
 	OPEN "I", 1, "cws.cfg"
-	INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, sides(SIDE_UNION).battles_won, sides(SIDE_REBEL).battles_won, sides(SIDE_UNION).casualties, sides(SIDE_REBEL).casualties, opt_history, opt_ai_aggression
+	INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, trains(SIDE_UNION).capacity, trains(SIDE_REBEL).capacity, opt_winter_campaigns, opt_realism, sides(SIDE_UNION).battles_won, sides(SIDE_REBEL).battles_won, sides(SIDE_UNION).casualties, sides(SIDE_REBEL).casualties, opt_history, opt_ai_aggression
 	CLOSE #1
 END SUB
 
 SUB config_write (side)
 	OPEN "O", 1, "cws.cfg"
-	WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, sides(SIDE_UNION).battles_won, sides(SIDE_REBEL).battles_won, sides(SIDE_UNION).casualties, sides(SIDE_REBEL).casualties, opt_history, opt_ai_aggression
+	WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, trains(SIDE_UNION).capacity, trains(SIDE_REBEL).capacity, opt_winter_campaigns, opt_realism, sides(SIDE_UNION).battles_won, sides(SIDE_REBEL).battles_won, sides(SIDE_UNION).casualties, sides(SIDE_REBEL).casualties, opt_history, opt_ai_aggression
 	CLOSE #1
 END SUB
 

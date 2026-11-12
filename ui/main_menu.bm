@@ -15,7 +15,7 @@ SUB menu_main (start)
 	menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR sides(current_side).cash < COST_RECRUIT THEN menu_text$(1) = "-": start = 23
 	menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF start = 23 THEN start = 24
 	menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN menu_text$(3) = "-": IF start = 24 THEN start = 25
-	menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN menu_text$(4) = "-": IF start = 25 THEN start = 26
+	menu_text$(4) = "Railroad": IF trains(current_side).army > 0 THEN menu_text$(4) = "-": IF start = 25 THEN start = 26
 	menu_text$(5) = "END TURN"
 	menu_text$(6) = "Inform"
 	menu_text$(7) = "COMMANDS"
@@ -32,7 +32,7 @@ END SUB
 SUB menu_main_railroad
 DIM x AS INTEGER: DIM y AS INTEGER: DIM z AS INTEGER: DIM limit AS INTEGER
 DIM army AS INTEGER: DIM city AS INTEGER
-	IF train_army(current_side) = 0 THEN
+	IF trains(current_side).army = 0 THEN
 		COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 		PSET (550, 20), 0
 		DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
@@ -47,7 +47,7 @@ DIM army AS INTEGER: DIM city AS INTEGER
 		CALL wait_seconds(PAUSE_LONG)
 		CALL railroad_finish
 	ELSE
-		CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Railroad is already carrying "; army_name$(train_army(current_side)); " to "; city_name$(army_order(train_army(current_side)));
+		CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Railroad is already carrying "; army_name$(trains(current_side).army); " to "; city_name$(army_order(trains(current_side).army));
 	END IF
 END SUB
 

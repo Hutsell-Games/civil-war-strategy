@@ -31,12 +31,12 @@ SUB menu_navy_build (side, again)
 DIM cost AS INTEGER: DIM ship$
 	again = 1
 	cost = COST_SHIP
-	IF sides(side).cash < cost OR fleet_city(side) = FLEET_AT_SEA THEN EXIT SUB
-	IF fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
+	IF sides(side).cash < cost OR fleets(side).city = FLEET_AT_SEA THEN EXIT SUB
+	IF fleets(side).size >= MAX_FLEET_SHIPS THEN EXIT SUB
 
-	IF fleet_city(side) > 0 THEN
-		IF city_owner(fleet_city(side)) <> side THEN EXIT SUB
-		IF city_port_type(fleet_city(side)) < PORT_SEA THEN EXIT SUB
+	IF fleets(side).city > 0 THEN
+		IF city_owner(fleets(side).city) <> side THEN EXIT SUB
+		IF city_port_type(fleets(side).city) < PORT_SEA THEN EXIT SUB
 	END IF
 	' The computer's test of whether to build drew a random number here for the player too.
 	CALL random_discard
@@ -55,7 +55,7 @@ DIM cost AS INTEGER: DIM ship$
 	END IF
 
 	CALL navy_add_ship(side, ship$, cost)
-	IF fleet_size(side) > 1 THEN CALL navy_ship_joins(side, ship$): EXIT SUB
+	IF fleets(side).size > 1 THEN CALL navy_ship_joins(side, ship$): EXIT SUB
 	DO
 		CALL navy_list_shipyards(side)
 		IF menu_item_count < 1 THEN
@@ -71,12 +71,12 @@ END SUB
 ' acted this month, even when the city is not the enemy's and nothing is bombarded.
 SUB menu_navy_attack (side, again)
 	again = 0
-	IF fleet_city(side) = FLEET_AT_SEA THEN again = 1: EXIT SUB
+	IF fleets(side).city = FLEET_AT_SEA THEN again = 1: EXIT SUB
 	' The computer's test of whether to sail instead drew a random number here for the player too.
 	CALL random_discard
-	IF fleet_city(side) < 1 THEN EXIT SUB
+	IF fleets(side).city < 1 THEN EXIT SUB
 	CALL turn_set_navy_done(1)
-	IF city_owner(fleet_city(side)) <> other_side(side) THEN again = 1: EXIT SUB
+	IF city_owner(fleets(side).city) <> other_side(side) THEN again = 1: EXIT SUB
 	CALL navy_bombard(side)
 END SUB
 
@@ -86,12 +86,12 @@ SUB menu_navy_sail (side, again)
 DIM sailed AS INTEGER
 	again = 0
 	CALL navy_count_ships(side)
-	IF fleet_city(side) < 1 OR fleet_size(side) < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
+	IF fleets(side).city < 1 OR fleets(side).size < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
 
 	CALL navy_list_ports(side)
 	COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68
-	IF fleet_city(side) < 41 THEN
-		PRINT city_name$(fleet_city(side))
+	IF fleets(side).city < 41 THEN
+		PRINT city_name$(fleets(side).city)
 	ELSE
 		PRINT "Raiding"
 	END IF
@@ -102,7 +102,7 @@ DIM sailed AS INTEGER
 	CALL navy_sail_to(side, menu_value(menu_choice), sailed)
 	IF sailed = 0 THEN EXIT SUB
 	CALL turn_set_navy_done(1)
-	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL menu_navy_combat(side)
+	IF fleets(SIDE_UNION).city = fleets(SIDE_REBEL).city THEN CALL menu_navy_combat(side)
 	CALL navy_finish_move
 END SUB
 
@@ -111,11 +111,11 @@ END SUB
 SUB menu_navy_raid (side, again)
 	again = 0
 	CALL navy_count_ships(side)
-	IF fleet_size(side) < 1 OR raiding_side = side THEN again = 1: EXIT SUB
+	IF fleets(side).size < 1 OR raiding_side = side THEN again = 1: EXIT SUB
 
 	CALL turn_set_navy_done(1)
 	CALL navy_start_raid(side)
-	IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL menu_navy_combat(side): CALL navy_finish_move: EXIT SUB
+	IF fleets(SIDE_UNION).city = fleets(SIDE_REBEL).city THEN CALL menu_navy_combat(side): CALL navy_finish_move: EXIT SUB
 	CALL navy_redraw_map
 END SUB
 

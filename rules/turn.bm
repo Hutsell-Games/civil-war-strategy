@@ -21,7 +21,7 @@ END SUB
 ' closed for the month when the side has no fleet and not the price of a ship.
 SUB turn_check_commands
 	IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
-	IF sides(current_side).cash < COST_SHIP AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
+	IF sides(current_side).cash < COST_SHIP AND fleets(current_side).city = 0 THEN turn_navy_done = 1
 END SUB
 
 ' Troops is closed for the month.
@@ -59,7 +59,7 @@ IF sides(s).cash >= .2 * army_size(army) THEN
 END IF
 IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(army)) < PORT_SEA THEN army_supply(army) = army_supply(army) - 1
 blockaded = 0: starved = 0
-IF city_port_type(army_city(army)) = PORT_SEA AND fleet_city(other_side(s)) = army_city(army) THEN army_supply(army) = army_supply(army) - 1: blockaded = 1
+IF city_port_type(army_city(army)) = PORT_SEA AND fleets(other_side(s)).city = army_city(army) THEN army_supply(army) = army_supply(army) - 1: blockaded = 1
 IF army_supply(army) < 1 THEN
 	army_supply(army) = 0
 	starved = 1

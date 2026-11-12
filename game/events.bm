@@ -34,20 +34,20 @@ SELECT CASE who
 	IF turn_year = 1865 AND turn_month = 1 THEN sides(SIDE_REBEL).victory_points = sides(SIDE_REBEL).victory_points + 100
 	IF script_rnd! > .9 THEN event = EVENT_RIOTS: EXIT SUB
 
-	IF script_rnd! > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
-	IF fleet_size(SIDE_REBEL) > 0 AND fleet_city(SIDE_REBEL) <> FLEET_AT_SEA THEN empty = fleet_city(SIDE_REBEL): GOTO float1
+	IF script_rnd! > .2 OR fleets(SIDE_REBEL).size >= MAX_FLEET_SHIPS GOTO mercen
+	IF fleets(SIDE_REBEL).size > 0 AND fleets(SIDE_REBEL).city <> FLEET_AT_SEA THEN empty = fleets(SIDE_REBEL).city: GOTO float1
 		empty = 0
 		FOR i = 1 TO MAX_CITIES
-		IF city_owner(i) = SIDE_REBEL AND city_port_type(i) = PORT_SEA AND fleet_city(SIDE_UNION) <> i THEN empty = i: EXIT FOR
+		IF city_owner(i) = SIDE_REBEL AND city_port_type(i) = PORT_SEA AND fleets(SIDE_UNION).city <> i THEN empty = i: EXIT FOR
 		NEXT i
 	IF empty = 0 GOTO mercen
 float1:
 	event = EVENT_ENGLISH_SHIPS
-	fleet_size(SIDE_REBEL) = fleet_size(SIDE_REBEL) + 2 * plus
-	IF fleet_size(SIDE_REBEL) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_REBEL) = MAX_FLEET_SHIPS
-	x = fleet_size(SIDE_REBEL) - LEN(fleet_ships$(SIDE_REBEL))
-	fleet_ships$(SIDE_REBEL) = fleet_ships$(SIDE_REBEL) + STRING$(x, "W")
-	fleet_city(SIDE_REBEL) = empty
+	fleets(SIDE_REBEL).size = fleets(SIDE_REBEL).size + 2 * plus
+	IF fleets(SIDE_REBEL).size > MAX_FLEET_SHIPS THEN fleets(SIDE_REBEL).size = MAX_FLEET_SHIPS
+	x = fleets(SIDE_REBEL).size - LEN(fleets(SIDE_REBEL).ships)
+	fleets(SIDE_REBEL).ships = fleets(SIDE_REBEL).ships + STRING$(x, "W")
+	fleets(SIDE_REBEL).city = empty
 	GOTO dull1
 mercen:
 	IF script_rnd! > .1 OR sides(SIDE_REBEL).city_count < 30 GOTO money
@@ -80,13 +80,13 @@ uprising:
 '                               good for Union
 '----------------------------------------------------------------------------
 	CASE 2
-	IF script_rnd! > .1 OR fleet_city(SIDE_UNION) = 0 OR fleet_size(SIDE_UNION) >= MAX_FLEET_SHIPS GOTO event2
+	IF script_rnd! > .1 OR fleets(SIDE_UNION).city = 0 OR fleets(SIDE_UNION).size >= MAX_FLEET_SHIPS GOTO event2
 	IF script_rnd! > .95 THEN event = EVENT_RIOTS: EXIT SUB
 	event = EVENT_SHIPWORKS
-	fleet_size(SIDE_UNION) = fleet_size(SIDE_UNION) + plus
-	IF fleet_size(SIDE_UNION) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_UNION) = MAX_FLEET_SHIPS
-	x = fleet_size(SIDE_UNION) - LEN(fleet_ships$(SIDE_UNION))
-	fleet_ships$(SIDE_UNION) = fleet_ships$(SIDE_UNION) + STRING$(x, "W")
+	fleets(SIDE_UNION).size = fleets(SIDE_UNION).size + plus
+	IF fleets(SIDE_UNION).size > MAX_FLEET_SHIPS THEN fleets(SIDE_UNION).size = MAX_FLEET_SHIPS
+	x = fleets(SIDE_UNION).size - LEN(fleets(SIDE_UNION).ships)
+	fleets(SIDE_UNION).ships = fleets(SIDE_UNION).ships + STRING$(x, "W")
 	GOTO dull2
 event2:
 	IF script_rnd! < .7 GOTO abe

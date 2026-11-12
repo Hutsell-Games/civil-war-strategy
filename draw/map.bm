@@ -137,16 +137,16 @@ END SUB
 SUB draw_fleets
 DIM s AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
 FOR s = SIDE_UNION TO SIDE_REBEL
-IF fleet_size(s) = 0 OR fleet_city(s) = 0 THEN fleet_city(s) = 0: GOTO sink
-IF fleet_city(s) = 30 THEN x = 515: y = 268: GOTO float
-IF fleet_city(s) = 28 THEN x = 517: y = 172: GOTO float
-IF fleet_city(s) = 17 THEN x = 380: y = 425: GOTO float
-IF fleet_city(s) = FLEET_AT_SEA THEN x = 495: y = 310: GOTO float
-x = city_x(fleet_city(s)) + 25: y = city_y(fleet_city(s)) + 25
-IF fleet_city(s) = 24 THEN y = y + 5: x = x - 5
+IF fleets(s).size = 0 OR fleets(s).city = 0 THEN fleets(s).city = 0: GOTO sink
+IF fleets(s).city = 30 THEN x = 515: y = 268: GOTO float
+IF fleets(s).city = 28 THEN x = 517: y = 172: GOTO float
+IF fleets(s).city = 17 THEN x = 380: y = 425: GOTO float
+IF fleets(s).city = FLEET_AT_SEA THEN x = 495: y = 310: GOTO float
+x = city_x(fleets(s).city) + 25: y = city_y(fleets(s).city) + 25
+IF fleets(s).city = 24 THEN y = y + 5: x = x - 5
 float:
 	PSET (x, y), 1
-	a = 1: IF LEFT$(fleet_ships$(s), 1) = "I" THEN a = 2
+	a = 1: IF LEFT$(fleets(s).ships, 1) = "I" THEN a = 2
 	CALL draw_ship_icon(s, a)
 sink:
 NEXT s
@@ -515,7 +515,7 @@ LINE -(380, 120), 1
 
 CALL draw_cities
 PSET (493, 280), 1
-IF fleet_city(SIDE_UNION) = 30 OR fleet_city(SIDE_REBEL) = 30 THEN
+IF fleets(SIDE_UNION).city = 30 OR fleets(SIDE_REBEL).city = 30 THEN
 	DRAW "C11U7R4D3L3BR6BU3D7BU4R3U3D7BR3U7BD4BR4BU4D7R4"
 	LINE (485, 241)-(525, 270), 11, B
 END IF

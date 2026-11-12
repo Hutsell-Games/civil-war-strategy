@@ -149,9 +149,10 @@ the other commands, is committed as `77e3024` and puts that right. Step 8, `menu
 file renames, is done in the working tree (2026-11-12). That ends phase 9.
 
 Phase 9 step 8 is committed as `4fa959d`. Phase 10, records, has its plan below ("Phase 10:
-records"). Its step 1, the script and `sides`, is done in the working tree (2026-11-12).
+records"). Its step 1, the script and `sides`, is committed as `3043c01`. Step 2, `fleets` and
+`trains`, is done in the working tree (2026-11-12).
 
-**Next:** phase 10 step 2, `fleets` and `trains`.
+**Next:** phase 10 step 3, `cities` and `leaders`.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -422,7 +423,7 @@ and `save_game` read and write the same values in the same order.
 From the smallest record to the largest, so that the script is proved on a small step first.
 
 1. **Done: the script, and `sides`.** See `modernize-completed.md`.
-2. **`fleets` and `trains`** (7 arrays, 386 uses).
+2. **Done: `fleets` and `trains`.** See `modernize-completed.md`.
 3. **`cities` and `leaders`** (12 arrays, 603 uses). `city_road` and `city_port_type` go inside
    the city record, and the line that reads `CITIES.GRD` reads into the fields.
 4. **`armies`** (7 arrays, 858 uses).

@@ -184,29 +184,44 @@ TYPE side_type
 	battles_won AS INTEGER
 	casualties AS LONG
 END TYPE
+
+' A side's fleet, by side.
+TYPE fleet_type
+	ships AS STRING
+	size AS INTEGER
+	city AS INTEGER
+END TYPE
+
+' A side's train, by side.
+TYPE train_type
+	army AS INTEGER
+	from_city AS INTEGER
+	city AS INTEGER
+	capacity AS INTEGER
+END TYPE
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
 COMMON SHARED city_road(), city_port_type(), saved_under_army(), leader_rating(), turn_recruit_state
-COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), pic_mountain(), train_from_city()
+COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, flag_star_x(), flag_star_y(), pic_mountain()
 COMMON SHARED saved_under_marker(), army_city(), army_name$(), opt_players, ai_strength_ratio!
 COMMON SHARED army_size(), army_leader_rating(), army_experience(), army_supply(), month_name$()
-COMMON SHARED turn_recruit_city(), victory_rule(), train_city(), city_first_owner()
+COMMON SHARED turn_recruit_city(), victory_rule(), city_first_owner()
 COMMON SHARED army_order(), turn_month, turn_year, menu_value(), turn_moves_done, current_side, rule_attack_loss, rule_defend_loss, rule_strength_cap
-COMMON SHARED fleet_city(), fleet_size(), city_army(), total_income, city_fort()
+COMMON SHARED city_army(), total_income, city_fort()
 COMMON SHARED opt_graphics, opt_sound, opt_difficulty, union_income_bonus, opt_alt_colors
-COMMON SHARED train_capacity(), map_font$(), move_order_key(), opt_winter_campaigns, opt_event_balance, opt_realism
-COMMON SHARED game_over, opt_history, victory_reason, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
+COMMON SHARED map_font$(), move_order_key(), opt_winter_campaigns, opt_event_balance, opt_realism
+COMMON SHARED game_over, opt_history, victory_reason, raiding_side, raid_loss, fleet_pursuit
 '==========================================================================
 DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(40), turn_recruit_city(5)
 DIM SHARED city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), saved_under_army(300), leader_rating(40)
 DIM SHARED menu_text$(21), saved_under_marker(300), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
 DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(12)
-DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)
-DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
-DIM SHARED sides(2) AS side_type
-DIM SHARED emancipation_done, train_city(2), fleet_ships$(2)
-DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), city_first_owner(MAX_CITIES)
+DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564)
+DIM SHARED city_army(MAX_CITIES), city_fort(MAX_CITIES)
+DIM SHARED sides(2) AS side_type, fleets(2) AS fleet_type, trains(2) AS train_type
+DIM SHARED emancipation_done
+DIM SHARED map_font$(26), move_order_key(MAX_ARMIES), city_first_owner(MAX_CITIES)
 ' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
 DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
 DIM SHARED pic_face(1 TO 1564)

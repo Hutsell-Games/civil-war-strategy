@@ -53,8 +53,8 @@ END SUB
 
 SUB draw_train (side, show)
 DIM from AS INTEGER: DIM x AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER
-	IF train_city(side) = 0 THEN EXIT SUB
-	from = train_city(side)
+	IF trains(side).city = 0 THEN EXIT SUB
+	from = trains(side).city
 	x = city_x(from) - 12: y = city_y(from) - 11
 SELECT CASE show
 	CASE IS > 0

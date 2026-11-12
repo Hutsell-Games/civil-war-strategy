@@ -119,14 +119,14 @@ NEXT i
 PRINT " "; STRING$(70, "Ä")
 PRINT " Total Forces "; TAB(25); LTRIM$(STR$(x)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(ai_strength_ratio! * x))); "00 ]"
 PRINT " "; STRING$(70, "Ä")
-PRINT " "; sides(side).name; " NAVY has "; fleet_size(side); " ship(s) ";
+PRINT " "; sides(side).name; " NAVY has "; fleets(side).size; " ship(s) ";
 x = 0
-FOR k = 1 TO fleet_size(side)
-	IF MID$(fleet_ships$(side), k, 1) = "I" THEN x = x + 1
+FOR k = 1 TO fleets(side).size
+	IF MID$(fleets(side).ships, k, 1) = "I" THEN x = x + 1
 NEXT k
 IF x > 0 THEN PRINT "("; x; "Ironclads) ";
-IF fleet_city(side) > 0 AND fleet_city(side) < FLEET_AT_SEA THEN PRINT "in "; city_name$(fleet_city(side)) ELSE PRINT
-IF train_army(side) > 0 THEN COLOR COLOR_YELLOW: PRINT " Army #"; train_army(side); army_name$(train_army(side)); " on train to "; city_name$(army_order(train_army(side)));
+IF fleets(side).city > 0 AND fleets(side).city < FLEET_AT_SEA THEN PRINT "in "; city_name$(fleets(side).city) ELSE PRINT
+IF trains(side).army > 0 THEN COLOR COLOR_YELLOW: PRINT " Army #"; trains(side).army; army_name$(trains(side).army); " on train to "; city_name$(army_order(trains(side).army));
 LINE (0, 0)-(639, 449), 15, B
 LINE (0, 62)-(639, 62), 15
 CALL report_wait_key

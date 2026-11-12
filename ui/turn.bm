@@ -42,7 +42,7 @@ CALL draw_update_box
 '                       Assign Time of Action
 '==========================================================================
 FOR i = SIDE_UNION TO SIDE_REBEL
-	IF train_army(i) > 0 THEN
+	IF trains(i).army > 0 THEN
 		CALL railroad_arrive(i)
 		IF i = current_side THEN CALL wait_seconds(PAUSE_LONG)
 		CALL railroad_finish

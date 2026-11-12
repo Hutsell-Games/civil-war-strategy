@@ -853,3 +853,11 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    - **A first unit test run timed out 15 tests,** right after the change, when each test's
      program was new. The next two runs passed all 123 in about 23 seconds.
    - Unit tests: 123, none new. 38 scripts, unchanged recordings, both compilers.
+2. **Done: `fleets` and `trains`.** A side's fleet is `fleets(s).ships` (a STRING), `.size` and
+   `.city`. Its train is `trains(s).army`, `.from_city`, `.city` and `.capacity`. `cws.bi` has
+   `TYPE fleet_type` and `TYPE train_type`, declared on the line of `sides(2)`. The seven arrays
+   are gone from its `COMMON SHARED` and `DIM SHARED` lines.
+   - **The script** rewrote 370 uses in 20 files, with no shadowed or bare use.
+   - **Lines that no test runs:** none of the 18 is in the diff, so none changed.
+   - Unit tests: 123, none new, all passed on the first run. 38 scripts, unchanged recordings,
+     both compilers.
