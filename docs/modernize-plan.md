@@ -170,7 +170,9 @@ Step 10's first part is done in the working tree: `navy_combat`, `ai_pick_port`,
 Its second part is done too: `navy_commands` is a loop over `menu_navy` or `ai_navy_adjust` and `navy_action`.
 Its third part is done too: one SUB for each action. That ends step 10.
 Step 11 is done in the working tree: the knot of `turn_resolve` is six SUBs.
-**Next:** phase 7 step 12, `menu_select`'s highlight. It is the last step of phase 7.
+Step 12 is done in the working tree: `menu_mark_row` and `menu_unmark_row`. That ends phase 7.
+**Next:** phase 8, split rules from screen. It starts with a list of the SUBs marked "mixed" in
+`file-layout.md` and the order to take them in.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -541,6 +543,21 @@ The user decided on 2026-11-11 to finish phase 0 before step 5, and it is finish
     - `turn_army_surrenders` keeps the original's order: it clears the loser's supplies and then
       adds them to the winner's, so the winner gains nothing.
     - No unit tests: every piece draws. Lines moved without a test: none.
-12. **`menu_select`'s highlight**: `menu_highlight` and `menu_unhighlight`.
+12. **Done: `menu_select`'s highlight.** `menu_mark_row (kind, row, wide, flag)` and
+    `menu_unmark_row (kind, row)` (`ui\menu.bm`) hold what a menu shows beside its highlighted row
+    and what takes it off again. `menu_select` no longer names an army or a city.
+    - The names are not `menu_highlight` and `menu_unhighlight`: `menu_highlight` is the shared
+      variable for the highlight's color.
+    - `menu_unmark_row` replaces two blocks. One of them skipped a row whose text is "EXIT". No
+      menu of the game has such a row, so the test is gone.
+
+What phase 7 left for later phases:
+
+- **Six `GOSUB` routines** that only their own SUB uses: `crsr`, `limits` and `noadjust` in
+  `menu_select` (the key loop, which phase 9 reworks), `add1s` in `army_generate_name`, `jack` in
+  `draw\ships.bm` and `stars` in `game\victory_screens.bm`.
+- **The main module's menus**, a web of `GOTO menu0`, `GOTO optmen` and `GOTO utile` (phase 9).
+- **`calculate_battle`**, whose split parts a rule from its screen (phase 8).
+- **`army_clear`** (step 4): it waits for phase 10.
 
 The splits of `calculate_battle` (losses, strengths) are phase 8's: they part a rule from its screen.

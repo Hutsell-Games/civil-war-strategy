@@ -33,7 +33,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) becomes `cws.bas`. `
 
 | File | SUBs |
 |------|------|
-| `menu.bm` | `menu_select`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
+| `menu.bm` | `menu_select`, `menu_mark_row`, `menu_unmark_row`, `menu_measure_width`, `menu_bubble_sort`, `draw_menu` |
 | `orders.bm` | `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital`, `menu_recruit_cities`, `menu_railroad`, `menu_navy`, `menu_navy_items` |
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size` |
 | `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn`, `draw_update_box` |

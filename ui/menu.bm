@@ -50,8 +50,8 @@ NEXT i
 END SUB
 
 SUB menu_select (menu_item_show_beside%)
-DIM row1 AS INTEGER: DIM brx AS INTEGER: DIM a AS INTEGER: DIM leave AS INTEGER: DIM a$: DIM k AS INTEGER: DIM c1$
-DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER: DIM b1 AS INTEGER: DIM target AS INTEGER: DIM flag AS INTEGER: DIM t$: DIM x AS INTEGER: DIM y AS INTEGER
+DIM row1 AS INTEGER: DIM brx AS INTEGER: DIM leave AS INTEGER: DIM a$: DIM k AS INTEGER: DIM c1$
+DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER: DIM b1 AS INTEGER: DIM flag AS INTEGER
 remenu:
 	IF menu_color = 0 THEN menu_color = COLOR_GRAY
 	LOCATE 1, 1, 0
@@ -91,42 +91,7 @@ remenu:
 
 	CALL draw_menu(b1, wide)
 sel1:
-	SELECT CASE menu_item_show_beside
-		CASE MENU_CITY_BOX: CALL draw_map_marker(menu_value(row), 0, MARK_BOX)
-		CASE MENU_CITY_ARMY: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
-			target = city_army(menu_value(row))
-			IF target > 0 THEN
-			flag = 1
-			t$ = army_name$(target)
-			IF LEN(t$) > wide THEN t$ = LEFT$(t$, wide)
-			COLOR COLOR_LIGHT_RED
-			LOCATE menu_row + 2 + row, menu_col + 2: PRINT SPACE$(wide);
-			LOCATE menu_row + 2 + row, menu_col + 2: PRINT t$;
-			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
-			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT "Size"; army_size(target);
-			x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
-			ELSE
-			flag = 0
-			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
-			END IF
-		CASE MENU_ARMY_STATS: CALL draw_army_stats(menu_value(row))
-		CASE MENU_ARMY_POINTER: CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_POINTER)
-		CASE MENU_FACES
-			IF opt_graphics >= GRAPHICS_FULL AND row > 0 THEN
-				LINE (548, 148)-(592, 216), 15, B
-				a = row: IF current_side = SIDE_UNION THEN a = 6 - row
-				t$ = GFXDIR + "face" + LTRIM$(STR$(a)) + ".vga"
-				IF LEN(DIR$(t$)) > 0 THEN
-					CALL load_picture(t$, pic_face())
-					PUT (550, 150), pic_face, PSET
-					IF current_side = SIDE_REBEL THEN
-						PAINT (560, 160), 8, 0
-						PAINT (570, 155), 7, 0
-					END IF
-				END IF
-			END IF
-		CASE MENU_CITY_POINTER: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
-	END SELECT
+	CALL menu_mark_row(menu_item_show_beside, row, wide, flag)
 	IF flag = 0 THEN
 		COLOR menu_highlight
 		LOCATE menu_row + 2 + row, menu_col + 2
@@ -145,12 +110,7 @@ reglr:
 	COLOR menu_color
 	LOCATE menu_row + 2 + row1, menu_col + 2: PRINT menu_text$(row1)
 
-	SELECT CASE menu_item_show_beside
-		CASE MENU_CITY_BOX, MENU_CITY_ARMY, MENU_CITY_POINTER
-			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(menu_value(row1), 0, MARK_RESTORE)
-		CASE MENU_ARMY_POINTER
-			IF menu_text$(row1) <> "EXIT" THEN CALL draw_map_marker(army_city(menu_value(row1)), 0, MARK_RESTORE)
-	END SELECT
+	CALL menu_unmark_row(menu_item_show_beside, row1)
 
 	menu_choice = row
 	GOTO sel1
@@ -205,13 +165,61 @@ called:
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 700, .5
 	COLOR menu_color
 	menu_col = 0: menu_row = 0
-	SELECT CASE menu_item_show_beside
+	CALL menu_unmark_row(menu_item_show_beside, row)
+	VIEW
+END SUB
+
+' What a menu shows beside its highlighted row, by the menu's kind: a marker on the map at
+' the row's city or army, the army's numbers, or a face. For a city with an army, the row
+' shows the army's name and flag is 1, so that menu_select does not print the row again.
+SUB menu_mark_row (kind, row, wide, flag)
+DIM target AS INTEGER: DIM t$: DIM x AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
+	SELECT CASE kind
+		CASE MENU_CITY_BOX: CALL draw_map_marker(menu_value(row), 0, MARK_BOX)
+		CASE MENU_CITY_ARMY: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
+			target = city_army(menu_value(row))
+			IF target > 0 THEN
+			flag = 1
+			t$ = army_name$(target)
+			IF LEN(t$) > wide THEN t$ = LEFT$(t$, wide)
+			COLOR COLOR_LIGHT_RED
+			LOCATE menu_row + 2 + row, menu_col + 2: PRINT SPACE$(wide);
+			LOCATE menu_row + 2 + row, menu_col + 2: PRINT t$;
+			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
+			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT "Size"; army_size(target);
+			x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
+			ELSE
+			flag = 0
+			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
+			END IF
+		CASE MENU_ARMY_STATS: CALL draw_army_stats(menu_value(row))
+		CASE MENU_ARMY_POINTER: CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_POINTER)
+		CASE MENU_FACES
+			IF opt_graphics >= GRAPHICS_FULL AND row > 0 THEN
+				LINE (548, 148)-(592, 216), 15, B
+				a = row: IF current_side = SIDE_UNION THEN a = 6 - row
+				t$ = GFXDIR + "face" + LTRIM$(STR$(a)) + ".vga"
+				IF LEN(DIR$(t$)) > 0 THEN
+					CALL load_picture(t$, pic_face())
+					PUT (550, 150), pic_face, PSET
+					IF current_side = SIDE_REBEL THEN
+						PAINT (560, 160), 8, 0
+						PAINT (570, 155), 7, 0
+					END IF
+				END IF
+			END IF
+		CASE MENU_CITY_POINTER: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
+	END SELECT
+END SUB
+
+' Takes the marker of menu_mark_row off the map again.
+SUB menu_unmark_row (kind, row)
+	SELECT CASE kind
 	CASE MENU_CITY_BOX, MENU_CITY_ARMY, MENU_CITY_POINTER
 		CALL draw_map_marker(menu_value(row), 0, MARK_RESTORE)
 	CASE MENU_ARMY_POINTER
 		CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_RESTORE)
 	END SELECT
-	VIEW
 END SUB
 
 ' The width a menu needs: its longest option, or its title and a space.
