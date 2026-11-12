@@ -341,16 +341,16 @@ army_city(3) = 5: army_size(3) = 40: army_order(3) = 12
 CALL army_combine_start(5)
 best = 0
 CALL army_combine_add(1, 5, best, status)
-AssertEqualInt 2, status, "army 1 joins"
+AssertEqualInt COMBINE_JOINED, status, "army 1 joins"
 CALL army_combine_absorb(1)
 AssertEqualStr "Grant", leader_name$(1), "Grant goes back to the list"
 AssertEqualInt 0, army_city(1), "army 1's slot is empty"
 CALL army_combine_add(2, 5, best, status)
-AssertEqualInt 2, status, "army 2 joins"
+AssertEqualInt COMBINE_JOINED, status, "army 2 joins"
 AssertEqualInt 2, best, "Sherman is the better leader"
 CALL army_combine_absorb(2)
 CALL army_combine_add(3, 5, best, status)
-AssertEqualInt 0, status, "army 3 has an order: it does not join"
+AssertEqualInt COMBINE_SKIPPED, status, "army 3 has an order: it does not join"
 CALL army_combine_finish(5, 2, 2)
 AssertEqualInt 150, army_size(2), "the men of both"
 AssertEqualInt 3, army_experience(2), "experience by share of men: 2/3 of 2 and 1/3 of 5"
@@ -366,7 +366,7 @@ army_city(2) = 5: army_size(2) = 100
 CALL army_combine_start(5)
 CALL army_combine_add(1, 5, best, status)
 CALL army_combine_add(2, 5, best, status)
-AssertEqualInt 1, status, "130,000 men: too large"
+AssertEqualInt COMBINE_TOO_LARGE, status, "130,000 men: too large"
 AssertEqualInt 1200, army_size(0), "army 0 has army 1's men only"
 END SUB
 
@@ -390,12 +390,12 @@ END SUB
 SUB TestArmyBuySupplyUpToTheLevel
 army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 1000
 CALL army_buy_supply(1, result)
-AssertEqualInt 1, result, "bought"
+AssertEqualInt SUPPLY_BOUGHT, result, "bought"
 AssertEqualInt 5, army_supply(1), "up to the resupply level"
 AssertEqualInt 960, side_cash(1), "4 days for 10,000 men cost 40"
 side_cash(1) = 2: army_supply(1) = 1
 CALL army_buy_supply(1, result)
-AssertEqualInt 0, result, "not enough cash"
+AssertEqualInt SUPPLY_NO_CASH, result, "not enough cash"
 AssertEqualInt 1, army_supply(1), "nothing bought"
 END SUB
 
@@ -403,7 +403,7 @@ SUB TestArmyBuySupplyCutOff
 opt_realism = REALISM_ON
 army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 1000
 CALL army_buy_supply(1, result)
-AssertEqualInt -1, result, "city 5 has no road to a Union city"
+AssertEqualInt SUPPLY_CUT_OFF, result, "city 5 has no road to a Union city"
 AssertEqualInt 1000, side_cash(1), "nothing paid"
 END SUB
 
@@ -622,17 +622,60 @@ AssertEqualInt 100 - killd, army_size(21), "taken from the army"
 AssertEqualInt 2, army_supply(21), "3 days of supply lost"
 END SUB
 
-SUB TestNavyShoreBatteryFortOrShip
+' The branches that hang on a random draw: each test tries seeds until the
+' draw goes its way, then checks that branch exactly.
+
+SUB TestNavyShoreBatteryDamagesFort
+FOR s = 1 TO 100
+	RANDOMIZE s
+	fleet_ships$(1) = "W": fleet_size(1) = 1: fleet_city(1) = 5: city_fort(5) = 2
+	CALL navy_shore_battery(1, 5, damaged)
+	IF damaged = 1 THEN EXIT FOR
+NEXT s
+AssertEqualInt 1, damaged, "a seed where the fleet hits the fort"
+AssertEqualInt 1, city_fort(5), "the fort loses a level"
+AssertEqualInt 1, fleet_size(1), "the ship is safe"
+AssertEqualInt 5, fleet_city(1), "the fleet stays"
+END SUB
+
+SUB TestNavyShoreBatterySinksShip
+FOR s = 1 TO 100
+	RANDOMIZE s
+	fleet_ships$(1) = "WI": fleet_size(1) = 2: fleet_city(1) = 5: city_fort(5) = 2
+	CALL navy_shore_battery(1, 5, damaged)
+	IF damaged = 0 THEN EXIT FOR
+NEXT s
+AssertEqualInt 0, damaged, "a seed where the battery hits"
+AssertEqualInt 2, city_fort(5), "the fort stands"
+AssertEqualInt 1, fleet_size(1), "a ship is sunk"
+AssertEqualStr "W", fleet_ships$(1), "the last of the list"
+END SUB
+
+SUB TestNavyShotIroncladBeatsWood
+fleet_ships$(1) = "I": fleet_ships$(2) = "W"
 RANDOMIZE 1
-fleet_ships$(1) = "W": fleet_size(1) = 1: fleet_city(1) = 5: city_fort(5) = 2
-CALL navy_shore_battery(1, 5, damaged)
-IF damaged = 1 THEN
-	AssertEqualInt 1, city_fort(5), "the fort loses a level"
-	AssertEqualInt 1, fleet_size(1), "the ship is safe"
-ELSE
-	AssertEqualInt 2, city_fort(5), "the fort stands"
-	AssertEqualInt 0, fleet_size(1), "the ship is sunk"
-END IF
+iron = 0: FOR k = 1 TO 200: iron = iron + navy_shot_hits(1): NEXT k
+RANDOMIZE 1
+wood = 0: FOR k = 1 TO 200: wood = wood + navy_shot_hits(2): NEXT k
+AssertTrue iron > wood, "the same draws: the ironclad hits more often:" + STR$(iron) + STR$(wood)
+fleet_ships$(2) = "I"
+RANDOMIZE 1
+even = 0: FOR k = 1 TO 200: even = even + navy_shot_hits(2): NEXT k
+AssertTrue even > wood AND even < iron, "two ironclads: in between:" + STR$(even)
+END SUB
+
+SUB TestNavyRaidRoundLosesAShip
+FOR s = 1 TO 100
+	RANDOMIZE s
+	raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA: raid_loss = 7
+	CALL navy_raid_round(raider, sank)
+	IF sank = 0 THEN EXIT FOR
+NEXT s
+AssertEqualInt 0, sank, "a seed where the raiders lose"
+AssertEqualInt 1, raider, "the Union raided"
+AssertEqualInt 0, raid_loss, "they sank nothing"
+AssertEqualInt 0, fleet_size(1), "their last ship is gone"
+AssertEqualInt 0, raiding_side, "nobody raids now"
 END SUB
 
 SUB TestNavyFleetLostToTheBattery
@@ -646,11 +689,11 @@ END SUB
 SUB TestNavyBlastCapitalAndNeutral
 fleet_size(1) = 20: side_capital(2) = 25: fleet_city(1) = 25: city_owner(25) = 2
 CALL navy_blast(1, 25, result)
-AssertEqualInt 1, result, "the capital stays loyal"
+AssertEqualInt BLAST_LOYAL, result, "the capital stays loyal"
 AssertEqualInt 2, city_owner(25), "still the Rebels'"
 fleet_city(1) = 7: city_owner(7) = 2: city_value(7) = 10
 CALL navy_blast(1, 7, result)
-AssertEqualInt 2, result, "20 ships: the city always gives in"
+AssertEqualInt BLAST_NEUTRAL, result, "20 ships: the city always gives in"
 AssertEqualInt 0, city_owner(7), "neutral"
 AssertEqualInt 10, side_victory_points(1), "its value for the Union"
 END SUB

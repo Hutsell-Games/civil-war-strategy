@@ -72,6 +72,18 @@ CONST SNAP_RESTORE = 1
 ' animate_army's flag: take the picture of the army from its city first, or use the one taken already.
 CONST ANIMATE_TAKE_PICTURE = 0
 CONST ANIMATE_PICTURE_TAKEN = 1
+' army_combine_add's status: the army does not join, would make army 0 too large, or joins.
+CONST COMBINE_SKIPPED = 0
+CONST COMBINE_TOO_LARGE = 1
+CONST COMBINE_JOINED = 2
+' army_buy_supply's result: the army is cut off, the cash is not enough, or supplies were bought.
+CONST SUPPLY_CUT_OFF = -1
+CONST SUPPLY_NO_CASH = 0
+CONST SUPPLY_BOUGHT = 1
+' navy_blast's result: the city stands firm, is the enemy's capital and stays loyal, or turns neutral.
+CONST BLAST_FIRM = 0
+CONST BLAST_LOYAL = 1
+CONST BLAST_NEUTRAL = 2
 ' Settings: opt_graphics, opt_sound, opt_realism, opt_players.
 CONST GRAPHICS_OFF = 0
 CONST GRAPHICS_BASIC = 1
@@ -162,7 +174,7 @@ DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_ca
 ' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
 DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
 DIM SHARED pic_face(1 TO 1564)
-' Set by scriptstart (SCRIPT.BM) when tests\play.py runs the program.
+' Set by script_start (port/script.bm) when tests\play.py runs the program.
 DIM SHARED scripted
 ' The forced dice of special_events under a script: the groups still to come, and what is
 ' left of this call's group (script_dice_next and script_rnd!, port/script.bm).

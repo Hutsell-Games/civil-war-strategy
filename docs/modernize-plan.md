@@ -136,7 +136,8 @@ Updated 2026-11-11. Phases 0 to 7 are done and committed. Phase 8's steps 1 and 
 (`6eda547`, `013b8d0`). What each step did is in `modernize-completed.md`.
 
 Step 3 is committed in two parts (`70692b3`, `77ee9a6`), step 4 as `9e038a4` and step 5 as
-`b67f89e`. Step 6, the computer's turn, is done in the working tree.
+`b67f89e`. Step 6, the computer's turn, is committed as `ae48902`. The cleanup after step 6, from
+the review of steps 1 to 6, is done in the working tree.
 
 **Next:** step 7, `special_events` and `event_riot`.
 
@@ -176,23 +177,24 @@ Phase 7's rule for these lines still holds:
 - A step that must rewrite lines no test runs (the `GOTO` knots of `navy_commands` and `turn_resolve`)
   waits for its tests.
 
-The 20 lines that no test runs (21 before phase 7 step 6):
+The 20 lines that no test runs (21 before phase 7 step 6). The table names the SUB, not the line
+numbers, because each step moves the lines; `report.txt` has the numbers of the day.
 
-| File | Lines | Why |
-|------|-------|-----|
-| `rules\setup.bm` | 22-24 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
-| `ai\ai.bm` | 39 | Follows `IF ... GOTO capital ELSE GOTO city2`; nothing reaches it |
-| `ai\ai.bm` | 113-114 | The `ELSE` for a fleet at sea; a fleet at sea already left at line 98 |
-| `ai\ai.bm` | 222 | An army of size 0 that still holds a city; no game makes one |
-| `port\qb64.bm` | 15-16 | `DIR$("")` for the next match; the game never calls it that way |
-| `rules\battle.bm` | 58 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
-| `rules\battle.bm` | 131, 142 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
-| `rules\navy.bm` | 87 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
-| `rules\navy.bm` | 346, 398 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
-| `rules\turn.bm` | 307, 309 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
-| `ui\orders.bm` | 118 | The picker found no city of the player's among 39; the player always holds the city it started on |
-| `ui\orders.bm` | 133 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
-| `ui\reports.bm` | 95 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
+| File | SUB | Lines | Why |
+|------|-----|-------|-----|
+| `rules\setup.bm` | `vary_start_conditions` | 3 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
+| `ai\ai.bm` | `ai_fortify` | 1 | `IF target > 0 GOTO capital` follows `IF ... GOTO capital ELSE GOTO city2`; nothing reaches it |
+| `ai\ai.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
+| `ai\ai.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
+| `port\qb64.bm` | `DIR$` | 2 | `DIR$("")` for the next match; the game never calls it that way |
+| `rules\battle.bm` | `battle_strengths` | 1 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
+| `rules\battle.bm` | `battle_losses` | 2 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
+| `ui\navy.bm` | `navy_build_ship` | 1 | The computer wants a first ship and holds no sea port. It can be reached: a save where the computer's side has cash, no fleet and no sea port. No script has that state |
+| `ui\navy.bm` | `navy_combat` | 2 | `GOTO firemore` after an `IF ... GOTO ... ELSE GOTO ...`, and `GOTO pirate` after a `SELECT` whose cases all jump |
+| `rules\turn.bm` | `turn_set_move_order` | 2 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
+| `ui\orders.bm` | `menu_city_select` | 1 | The picker found no city of the player's among 39; the player always holds the city it started on |
+| `ui\orders.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
+| `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 
 Of the 214 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
 only with the sound on. In `special_events` eight are left: the exit when random events are off, the cap
@@ -236,6 +238,16 @@ Claude's choice on 2026-11-11, made while carrying out step 1. Check it before s
   screens, which phase 9 names when each command gets its SUB.
 - **The computer's code stays in `ai\`** (user, 2026-11-12). It decides and draws nothing itself; its
   messages are SUBs of `ui\ai.bm`. It may call the commands above to carry out an order.
+- **A screen part changes no game state** (user, 2026-11-12, the review's finding 2). Every
+  assignment to a shared variable is in `rules\` or `ai\`, however short, except two kinds:
+  - the menu's own variables (`menu_*`), and the lines tangled with the menus that phase 9 rewrites:
+    `turn_navy_done = 1` (four times in `ui\navy.bm`), `fleet_size(side) = LEN(fleet_ships$(side))` in
+    Sail and Raid, and `city_owner(0) = side` in `navy_commands`;
+  - the army's city and order that `turn_attacker_withdraws` and `turn_defender_retreats` set just
+    before `animate_army`, which reads them to draw the march.
+- **A code that a rule returns gets constants** when its caller tests it by number (`COMBINE_*`,
+  `SUPPLY_*`, `BLAST_*`; `constants.md`, section 5). A yes-or-no flag (`damaged`, `sank`, `halted`,
+  `added`) stays 0 or 1, and the battle's step indexes stay numbers with a comment.
 - **Random numbers.** Two pieces of drawing code draw random numbers: the explosion marker
   (`draw_map_marker` with `MARK_EXPLOSION`, one draw for each circle when the sound is on) and
   `draw_schooner` (four). Where a show part calls them, it must stay between the same draws of the rule

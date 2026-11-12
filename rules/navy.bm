@@ -34,21 +34,21 @@ SUB navy_cancel_new_fleet (side)
 	fleet_size(side) = 0: fleet_ships$(side) = ""
 END SUB
 
-' Attack on the army in the city the fleet lies off: killd of its men, in hundreds, and some
+' Attack on the army in the city the fleet lies off: losses of its men, in hundreds, and some
 ' of its supplies. The army keeps at least 100 men.
-SUB navy_bombard_army (side, index, killd)
+SUB navy_bombard_army (side, army, losses)
 DIM pct!: DIM x AS INTEGER
-	pct! = .005 * fleet_size(side) + .02 * RND: killd = army_size(index) * pct!: IF killd < 1 THEN killd = 1
-	x = .5 * fleet_size(side) + 1: IF x > army_supply(index) THEN x = army_supply(index)
-	army_supply(index) = army_supply(index) - x
-	army_size(index) = army_size(index) - killd: IF army_size(index) < 1 THEN army_size(index) = 1
+	pct! = .005 * fleet_size(side) + .02 * RND: losses = army_size(army) * pct!: IF losses < 1 THEN losses = 1
+	x = .5 * fleet_size(side) + 1: IF x > army_supply(army) THEN x = army_supply(army)
+	army_supply(army) = army_supply(army) - x
+	army_size(army) = army_size(army) - losses: IF army_size(army) < 1 THEN army_size(army) = 1
 END SUB
 
 ' Attack on a city with a fort and no army: the fleet damages the fort (damaged is 1), or the
 ' shore battery sinks one of its ships.
-SUB navy_shore_battery (side, target, damaged)
+SUB navy_shore_battery (side, city, damaged)
 	damaged = 0
-	IF RND < .7 + .03 * (fleet_size(side) - city_fort(target)) THEN damaged = 1: city_fort(target) = city_fort(target) - 1: EXIT SUB
+	IF RND < .7 + .03 * (fleet_size(side) - city_fort(city)) THEN damaged = 1: city_fort(city) = city_fort(city) - 1: EXIT SUB
 	CALL navy_remove_ship(side)
 END SUB
 
@@ -59,15 +59,15 @@ SUB navy_fleet_lost (side)
 	IF side = current_side THEN fleet_pursuit = 0
 END SUB
 
-' Attack on a city with neither army nor fort. result is 0 when the citizens stand firm, 1 when
-' the city is the other side's capital, which stays loyal, and 2 when the city turns neutral; the
-' side then gets the city's value in victory points.
-SUB navy_blast (side, target, result)
-	result = 0
+' Attack on a city with neither army nor fort. result is BLAST_FIRM when the citizens stand firm,
+' BLAST_LOYAL when the city is the other side's capital, which stays loyal, and BLAST_NEUTRAL when
+' the city turns neutral; the side then gets the city's value in victory points.
+SUB navy_blast (side, city, result)
+	result = BLAST_FIRM
 	IF RND > .25 + .07 * fleet_size(side) THEN EXIT SUB
-	result = 1
+	result = BLAST_LOYAL
 	IF fleet_city(side) = side_capital(other_side(side)) THEN EXIT SUB
-	result = 2
+	result = BLAST_NEUTRAL
 	city_owner(fleet_city(side)) = SIDE_NONE
 	side_victory_points(side) = side_victory_points(side) + city_value(fleet_city(side))
 END SUB
@@ -84,9 +84,9 @@ END SUB
 
 ' Invasion: the new army that the ship landed is 3,500 men, and its side gets back the 100
 ' that army_new took for it.
-SUB navy_landed (side, empty)
+SUB navy_landed (side, army)
 	side_cash(side) = side_cash(side) + COST_RECRUIT     'compensate for cost of recruiting new army
-	army_size(empty) = 35
+	army_size(army) = 35
 END SUB
 
 ' After a fleet has moved or fought: which side's fleet is at sea, raiding commerce.
@@ -144,13 +144,13 @@ SUB navy_fleet_defeated (loser)
 END SUB
 
 ' Naval combat: the side's fleet retreats to one of its other sea ports. Each in turn becomes
-' the target, and the search stops there with a chance of 7 in 10. target is 0 when there is none.
-SUB navy_retreat_port (side, target)
+' the target, and the search stops there with a chance of 7 in 10. port is 0 when there is none.
+SUB navy_retreat_port (side, port)
 DIM i AS INTEGER
-	 target = 0
+	 port = 0
 	 FOR i = 1 TO MAX_CITIES
-	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN target = i: IF RND > .3 GOTO found1
+	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN port = i: IF RND > .3 GOTO found1
 	 NEXT i
 found1:
-	 fleet_city(side) = target
+	 fleet_city(side) = port
 END SUB

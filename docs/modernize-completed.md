@@ -543,3 +543,24 @@ The rule for lines that no test runs is in `modernize-plan.md`, "Lines that no t
      same as before, now `ai\ai.bm` 23 (a dead `GOTO capital`), 105 and 106 (a fleet at sea in
      `ai_fleet_orders`) and 212 (in `ai_evaluate_move`). 206 lines of the game are run in part and 20
      are not run.
+
+**Done: the cleanup after step 6.** A review of steps 1 to 6 (2026-11-12) found no change of behavior,
+but four things to make even. The user took the pragmatic engineer's plan: one commit, before step 7.
+- **Game state in the screen parts.** The rule is now in `modernize-plan.md`, "How a SUB is split": a
+  screen part changes no game state, except the menu's variables, the lines tangled with phase 9's
+  menus, and the inputs of `animate_army`. A scan of the eight `ui\` files that phase 8 made
+  (`tests\out\scratch\p8_state_in_ui.py`) found only those, so no code moved.
+- **Three result codes got constants** in `CWS14.BI`: `COMBINE_SKIPPED`, `COMBINE_TOO_LARGE` and
+  `COMBINE_JOINED` for `army_combine_add`, `SUPPLY_CUT_OFF`, `SUPPLY_NO_CASH` and `SUPPLY_BOUGHT` for
+  `army_buy_supply`, and `BLAST_FIRM`, `BLAST_LOYAL` and `BLAST_NEUTRAL` for `navy_blast`. They are
+  proposed in `constants.md`, section 5, for the user to approve.
+- **Parameters got names of their own** (decision 11), in place of the old locals' names they kept so
+  that lines could move unchanged: for example `killa` and `killd` became `attacker_losses` and
+  `defender_losses`, `turn_army_lost (index, active)` became `(army, winner)`, and `ai_army_order`'s
+  `i` became `army`. 25 SUBs, renamed by `tests\out\scratch\rename_in_sub.py`, which works on whole
+  names outside strings and comments and refuses a name that is already used or shared.
+- **Tests that pin a branch.** The test of the shore battery that accepted either result became two,
+  one for each branch. A new test runs the losing round of a commerce raid, and one compares an
+  ironclad's shots with a wooden ship's. Each test of a branch tries seeds until the draw goes its way,
+  then checks that branch exactly.
+- Unit tests: 81. 205 lines of the game are run in part and 20 are not run.

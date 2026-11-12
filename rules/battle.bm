@@ -92,7 +92,7 @@ winner = defender: loser = attacker: IF hit = 1 THEN winner = attacker: loser = 
 END SUB
 
 ' The losses of both armies, in hundreds of men. battle_apply_losses takes them later.
-SUB battle_losses (attacker, defender, winner, killa, killd)
+SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
 DIM pct!: DIM xbar AS INTEGER: DIM vary AS INTEGER
 pct! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender)): IF winner = attacker THEN pct! = 1.3 * pct!
 SELECT CASE army_size(defender)
@@ -103,7 +103,7 @@ SELECT CASE army_size(defender)
 END SELECT
 xbar = army_size(attacker) * pct!
 vary = xbar * (1 - pct!)
-CALL normal_random_number(xbar, vary, killd)
+CALL normal_random_number(xbar, vary, defender_losses)
 '...........................................................................
 pct! = .01 * rule_attack_loss + .02 * city_fort(army_city(defender)): IF winner = defender THEN pct! = 1.5 * pct!
 SELECT CASE army_size(attacker)
@@ -114,29 +114,29 @@ SELECT CASE army_size(attacker)
 END SELECT
 xbar = army_size(defender) * pct!
 vary = xbar * (1 - pct!)
-CALL normal_random_number(xbar, vary, killa)
+CALL normal_random_number(xbar, vary, attacker_losses)
 '===========================================================================
 
-killa = .8 * killa + .2 * killd: IF killa < 1 THEN killa = 1
-killd = .8 * killd + .2 * killa: IF killd < 1 THEN killd = 1
-IF killa > 9 * killd THEN killa = 9 * killd
-IF killd > 5 * killa THEN killd = 5 * killa
+attacker_losses = .8 * attacker_losses + .2 * defender_losses: IF attacker_losses < 1 THEN attacker_losses = 1
+defender_losses = .8 * defender_losses + .2 * attacker_losses: IF defender_losses < 1 THEN defender_losses = 1
+IF attacker_losses > 9 * defender_losses THEN attacker_losses = 9 * defender_losses
+IF defender_losses > 5 * attacker_losses THEN defender_losses = 5 * attacker_losses
 
-IF killa >= army_size(attacker) THEN killa = army_size(attacker) - 1
-IF killd >= army_size(defender) THEN killd = army_size(defender) - 1
+IF attacker_losses >= army_size(attacker) THEN attacker_losses = army_size(attacker) - 1
+IF defender_losses >= army_size(defender) THEN defender_losses = army_size(defender) - 1
 END SUB
 
 ' Takes the losses from both armies and records the battle: each side's casualties, and a battle won
 ' and a victory point for the winner's side.
-SUB battle_apply_losses (attacker, defender, winner, killa, killd)
+SUB battle_apply_losses (attacker, defender, winner, attacker_losses, defender_losses)
 DIM s AS INTEGER
-army_size(attacker) = army_size(attacker) - killa
-army_size(defender) = army_size(defender) - killd
+army_size(attacker) = army_size(attacker) - attacker_losses
+army_size(defender) = army_size(defender) - defender_losses
 IF army_size(defender) < 1 THEN army_size(defender) = 1
 '---------------------------------------------------------------------------
 s = 1: IF attacker > 2 THEN s = 2
-side_casualties&(s) = side_casualties&(s) + killa
-side_casualties&(other_side(s)) = side_casualties&(other_side(s)) + killd
+side_casualties&(s) = side_casualties&(s) + attacker_losses
+side_casualties&(other_side(s)) = side_casualties&(other_side(s)) + defender_losses
 '---------------------------------------------------------------------------
 s = army_side(winner)
 side_battles_won(s) = side_battles_won(s) + 1

@@ -128,20 +128,20 @@ deadman:
 NEXT i
 END SUB
 
-' The computer's move order for army i, or none (ordered is 0).
-SUB ai_army_order (who, i, ordered)
+' The computer's move order for an army, or none (ordered is 0).
+SUB ai_army_order (who, army, ordered)
 DIM target AS INTEGER: DIM x AS INTEGER
 DIM defend AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM flag AS INTEGER: DIM best AS INTEGER: DIM y AS INTEGER
 ordered = 0
-target = army_city(i)
-IF army_city(i) < 1 OR army_order(i) < 0 GOTO deadman
-x = army_size(i): IF army_supply(i) < 1 AND RND > .1 GOTO deadman
+target = army_city(army)
+IF army_city(army) < 1 OR army_order(army) < 0 GOTO deadman
+x = army_size(army): IF army_supply(army) < 1 AND RND > .1 GOTO deadman
 
 menu_choice = 0
 
 defend = city_nearby_enemy_strength(target)
 
-IF defend > 0 AND target = side_capital(who) AND city_army(target) = i GOTO deadman   'hold capital
+IF defend > 0 AND target = side_capital(who) AND city_army(target) = army GOTO deadman   'hold capital
 IF target <> side_capital(who) GOTO nocap
 IF victory_rule(VICTORY_CAPITAL) = 0 GOTO nocap
 	FOR j = 1 TO MAX_ROADS
@@ -149,14 +149,14 @@ IF victory_rule(VICTORY_CAPITAL) = 0 GOTO nocap
 	flag = city_nearby_enemy_strength(k): IF flag > 0 GOTO deadman
 	NEXT j
 nocap:
-CALL ai_evaluate_move(i, best): IF best = 0 GOTO deadman
+CALL ai_evaluate_move(army, best): IF best = 0 GOTO deadman
 move9:
 	IF best = 0 THEN menu_choice = 1 + INT((j - 1) * RND)
 	IF menu_choice = 0 THEN menu_choice = best
-	army_order(i) = city_road(target, menu_choice)
+	army_order(army) = city_road(target, menu_choice)
 
-	IF city_owner(army_order(i)) = who THEN y = city_army(army_order(i)): IF y > 0 THEN IF army_order(y) = x THEN army_order(i) = ORDER_NONE: GOTO deadman  ' eliminate crossing moves
-	IF turn_month = 1 AND opt_winter_campaigns = 0 AND city_owner(army_order(i)) <> who THEN army_order(i) = ORDER_NONE: GOTO deadman
+	IF city_owner(army_order(army)) = who THEN y = city_army(army_order(army)): IF y > 0 THEN IF army_order(y) = x THEN army_order(army) = ORDER_NONE: GOTO deadman  ' eliminate crossing moves
+	IF turn_month = 1 AND opt_winter_campaigns = 0 AND city_owner(army_order(army)) <> who THEN army_order(army) = ORDER_NONE: GOTO deadman
 ordered = 1
 deadman:
 END SUB

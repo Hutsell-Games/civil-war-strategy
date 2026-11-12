@@ -99,6 +99,9 @@ The mode says what `menu` shows beside the options while the player moves throug
 | `report (who)` | -1, 100 + side | Go straight to the force summary; to the battle summary. | None: phase 7 gives each report a SUB. | |
 | `tinytrain`, `snapshot`, `animate` | 0, 1 | Erase or draw; save or restore; for `animate`, take the army's picture from its city first, or use the one taken already (not march or retreat: both pass 0). | `DRAW_ERASE = 0`, `DRAW_SHOW = 1`; `SNAP_SAVE = 0`, `SNAP_RESTORE = 1`; `ANIMATE_TAKE_PICTURE = 0`, `ANIMATE_PICTURE_TAKEN = 1` (user, 2026-11-11) | |
 | `flags (who, w, a)` | `w` | An offset in pixels, or below 0 for a small flag at `-w`. | None in phase 3: the SUB is reworked in phase 8. | |
+| `army_combine_add`'s `status` (phase 8) | 0, 1, 2 | The army does not join; it would make army 0 more than 125,000 men; it joins. | `COMBINE_SKIPPED`, `COMBINE_TOO_LARGE`, `COMBINE_JOINED` | |
+| `army_buy_supply`'s `result` (phase 8) | -1, 0, 1 | The army is cut off under the Realism setting; the cash is not enough; supplies were bought. | `SUPPLY_CUT_OFF`, `SUPPLY_NO_CASH`, `SUPPLY_BOUGHT` | |
+| `navy_blast`'s `result` (phase 8) | 0, 1, 2 | The city stands firm; it is the other side's capital and stays loyal; it turns neutral. | `BLAST_FIRM`, `BLAST_LOYAL`, `BLAST_NEUTRAL` | |
 
 ## 6. Settings and victory rules
 

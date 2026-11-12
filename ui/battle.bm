@@ -2,7 +2,7 @@
 ' picture of the fort, the winner and the losses. The rules are in rules/battle.bm.
 SUB calculate_battle (attacker, defender, winner, loser)
 DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER: DIM attack AS INTEGER: DIM defend AS INTEGER
-DIM rounds AS INTEGER: DIM killa AS INTEGER: DIM killd AS INTEGER: DIM odds!
+DIM rounds AS INTEGER: DIM attacker_losses AS INTEGER: DIM defender_losses AS INTEGER: DIM odds!
 DIM a$: DIM t$: DIM a AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER
 CALL battle_strengths(attacker, defender, attack_steps(), defend_steps())
 attack = attack_steps(7): defend = defend_steps(8)
@@ -71,19 +71,19 @@ LOCATE 5, 69: PRINT city_name$(army_city(defender))
 a = army_side(winner)
 CALL draw_flag(a, 0, 0)
 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(PAUSE_LONG)
-CALL battle_losses(attacker, defender, winner, killa, killd)
+CALL battle_losses(attacker, defender, winner, attacker_losses, defender_losses)
 '---------------------------------------------------------------------------
 COLOR c
 LOCATE 1, 1: PRINT "Attack Loss: ";
-PRINT LTRIM$(RTRIM$(STR$(killa)) + "00"); "/";
+PRINT LTRIM$(RTRIM$(STR$(attacker_losses)) + "00"); "/";
 CALL print_army_size(attacker)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killa / army_size(attacker)))))); "%) ²";
-COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(killd)) + "00"); "/";
+PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker)))))); "%) ²";
+COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(defender_losses)) + "00"); "/";
 CALL print_army_size(defender)
-PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (killd / army_size(defender)))))); "%)"
+PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defender_losses / army_size(defender)))))); "%)"
 '---------------------------------------------------------------------------
-menu_text$(1) = " (" + LTRIM$(RTRIM$(STR$(killa) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
-t$ = " (" + LTRIM$(RTRIM$(STR$(killd) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
+menu_text$(1) = " (" + LTRIM$(RTRIM$(STR$(attacker_losses) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
+t$ = " (" + LTRIM$(RTRIM$(STR$(defender_losses) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
 menu_text$(2) = t$
 IF winner = defender THEN menu_text$(2) = menu_text$(1): menu_text$(1) = t$
 menu_text$(3) = "*" + army_name$(winner): menu_text$(4) = army_name$(loser)
@@ -95,6 +95,6 @@ IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attack
 COLOR COLOR_YELLOW: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL wait_key("B")
 END IF
 
-CALL battle_apply_losses(attacker, defender, winner, killa, killd)
+CALL battle_apply_losses(attacker, defender, winner, attacker_losses, defender_losses)
 CALL draw_map_marker(army_city(defender), 0, MARK_RESTORE)
 END SUB

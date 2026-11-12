@@ -32,8 +32,8 @@ join:
 		best = 0: joined = 0
 		FOR j = star TO fin
 		CALL army_combine_add(j, target, best, status)
-		IF status = 1 THEN CALL clear_bottom_line: PRINT "Cannot combine "; army_name$(j); "... TOO LARGE"; : CALL wait_seconds(opt_pause!)
-		IF status = 2 THEN
+		IF status = COMBINE_TOO_LARGE THEN CALL clear_bottom_line: PRINT "Cannot combine "; army_name$(j); "... TOO LARGE"; : CALL wait_seconds(opt_pause!)
+		IF status = COMBINE_JOINED THEN
 			joined = joined + 1
 			CALL clear_bottom_line: PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces"; : CALL wait_seconds(opt_pause!)
 			CALL army_combine_absorb(j)
@@ -80,9 +80,9 @@ END SUB
 SUB army_resupply (army)
 DIM result AS INTEGER
 		CALL army_buy_supply(army, result)
-		IF result < 0 THEN EXIT SUB
-		IF result = 0 THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army); 
-		IF result = 1 THEN CALL clear_bottom_line: PRINT army_name$(army); " has received supplies "; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 4500, .5
+		IF result = SUPPLY_CUT_OFF THEN EXIT SUB
+		IF result = SUPPLY_NO_CASH THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army); 
+		IF result = SUPPLY_BOUGHT THEN CALL clear_bottom_line: PRINT army_name$(army); " has received supplies "; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 4500, .5
 		CALL wait_seconds(opt_pause!)
 END SUB
 

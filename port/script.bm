@@ -1,5 +1,5 @@
 ' ===========================================================================
-' SCRIPT.BM - hooks for the whole-game scripts of tests\play.py.
+' port\script.bm - hooks for the whole-game scripts of tests\play.py.
 ' Included at the end of CWSTRAT.BAS. See tests\README.md.
 '
 ' A program started with the environment variable CWS_SEED set is
@@ -8,13 +8,13 @@
 '   - each wait for a key is announced in bytes &H4F0 to &H4F2 of memory,
 '     which QB64 does not use, so that a keys file gives each key only when
 '     the program waits for it (QB64Rust's tools\screen\README.md, "Prompts");
-'   - a timed pause (TICK of less than 99 seconds) returns at once, and a
+'   - a timed pause (wait_seconds of less than 99 seconds) returns at once, and a
 '     longer one, which the game uses as "press a key", waits for a key;
 '   - PLAY and SOUND are silent (PLAY "V0"): they take their time, unheard;
 '   - the random numbers of special_events can be given (CWS_DICE);
 '   - the history file holds the date 01-01-2000 instead of today's;
 '   - the history file is copied in BASIC, not by SHELL "copy ...".
-' A program started without it plays as before: announce does nothing.
+' A program started without it plays as before: script_mark_key_wait does nothing.
 ' ===========================================================================
 
 ' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER.
@@ -67,8 +67,8 @@ FUNCTION script_date$
 IF scripted THEN script_date$ = "01-01-2000" ELSE script_date$ = DATE$
 END FUNCTION
 
-' TICK's pause when the program is scripted. Gives 0 when it is not, and
-' TICK then pauses as before. A pause of 99 seconds or more is how the game
+' wait_seconds's pause when the program is scripted. Gives 0 when it is not, and
+' wait_seconds then pauses as before. A pause of 99 seconds or more is how the game
 ' says "press a key" (the map's links, "There are still defenders"), so a
 ' script waits there for a key; a shorter one returns at once.
 FUNCTION script_tick% (seconds!)
@@ -104,18 +104,18 @@ END SUB
 ' wait (1 to 255) and letter$ narrows it (its first character, or ""):
 '   1  a pause that any key ends; letter$ says which:
 '        R  the Random Events menu's "press a key" (CWSTRAT.BAS)
-'        T  a player's turn begins, in a two-player game (blanken)
-'        P  a battle: the odds are shown, before the picture (battle)
-'        B  a battle: "hit any key to continue" (battle)
-'        U  the month's update: "press any key for ... events" (tupdate)
+'        T  a player's turn begins, in a two-player game (draw_player_turn)
+'        P  a battle: the odds are shown, before the picture (calculate_battle)
+'        B  a battle: "hit any key to continue" (calculate_battle)
+'        U  the month's update: "press any key for ... events" (turn_resolve)
 '        K  the month's update ends, in a two-player game: "press a key"
-'        I  the special development: ironclad ships (events)
-'        N  a special event good for the Union (events)
-'        S  a special event good for the South (events)
-'        H  the game is over: "press a key" before the Hall of Fame (maxx)
-'        G  "Game Over" (maxx)
-'        F  a report: "press a key" (report)
-'        L  TICK of 99 seconds or more
+'        I  the special development: ironclad ships (special_events)
+'        N  a special event good for the Union (special_events)
+'        S  a special event good for the South (special_events)
+'        H  the game is over: "press a key" before the Hall of Fame (hall_of_fame)
+'        G  "Game Over" (hall_of_fame)
+'        F  a report: "press a key" (report_wait_key)
+'        L  wait_seconds of 99 seconds or more
 '   2  a menu; letter$ is the first letter of the menu's title
 '   4  a line of text: the name of the commander for the Hall of Fame
 ' Byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits.

@@ -5,52 +5,53 @@
 ' them takes them over. army_combine (ui/army.bm) calls army_combine_start, then
 ' army_combine_add for each army of the side, army_combine_absorb for each that joins, and
 ' army_combine_finish.
-SUB army_combine_start (target)
-		army_size(0) = 0: army_leader_rating(0) = 0: army_experience(0) = 0: army_city(0) = target
+SUB army_combine_start (city)
+		army_size(0) = 0: army_leader_rating(0) = 0: army_experience(0) = 0: army_city(0) = city
 		army_name$(0) = "": army_supply(0) = 0: army_order(0) = ORDER_NONE
 END SUB
 
-' Army j joins army 0 when it is in the city, has no order and has men: status 2. Army 0 takes
-' its leader when he is better than any before (best is then j), its men and their share of
-' experience. status is 1 when army 0 would have more than 125,000 men, and 0 when j does not join.
-SUB army_combine_add (j, target, best, status)
+' army joins army 0 when it is in the city, has no order and has men (COMBINE_JOINED). Army 0
+' takes its leader when he is better than any before (best is then army), its men and their
+' share of experience. status is COMBINE_TOO_LARGE when army 0 would have more than 125,000 men,
+' and COMBINE_SKIPPED when army does not join.
+SUB army_combine_add (army, city, best, status)
 DIM pct!
-	status = 0
-		IF army_order(j) <> ORDER_NONE OR army_city(j) <> target OR army_size(j) = 0 THEN EXIT SUB
-		IF army_size(0) + army_size(j) > 1250 THEN status = 1: EXIT SUB
+	status = COMBINE_SKIPPED
+		IF army_order(army) <> ORDER_NONE OR army_city(army) <> city OR army_size(army) = 0 THEN EXIT SUB
+		IF army_size(0) + army_size(army) > 1250 THEN status = COMBINE_TOO_LARGE: EXIT SUB
 
-		IF army_leader_rating(j) > army_leader_rating(0) THEN
-			army_name$(0) = army_name$(j)
-			army_leader_rating(0) = army_leader_rating(j)
-			best = j
+		IF army_leader_rating(army) > army_leader_rating(0) THEN
+			army_name$(0) = army_name$(army)
+			army_leader_rating(0) = army_leader_rating(army)
+			best = army
 		END IF
 
-		army_size(0) = army_size(0) + army_size(j)
+		army_size(0) = army_size(0) + army_size(army)
 		IF army_size(0) < 1 THEN EXIT SUB
-		pct! = (army_size(j) / army_size(0))
-		army_experience(0) = (1 - pct!) * army_experience(0) + pct! * army_experience(j)
-		status = 2
+		pct! = (army_size(army) / army_size(0))
+		army_experience(0) = (1 - pct!) * army_experience(0) + pct! * army_experience(army)
+		status = COMBINE_JOINED
 END SUB
 
-' Army j's supplies go to army 0, and its slot is emptied. Its leader goes back to the list.
-SUB army_combine_absorb (j)
-		army_supply(0) = army_supply(0) + army_supply(j)
+' The army's supplies go to army 0, and its slot is emptied. Its leader goes back to the list.
+SUB army_combine_absorb (army)
+		army_supply(0) = army_supply(0) + army_supply(army)
 		IF army_supply(0) > MAX_SUPPLY THEN army_supply(0) = MAX_SUPPLY
-		army_size(j) = 0: army_city(j) = 0: army_experience(j) = 0: army_order(j) = ORDER_NONE
-		leader_name$(j) = army_name$(j)
-		army_leader_rating(j) = 0: army_supply(j) = 0: army_name$(j) = ""
+		army_size(army) = 0: army_city(army) = 0: army_experience(army) = 0: army_order(army) = ORDER_NONE
+		leader_name$(army) = army_name$(army)
+		army_leader_rating(army) = 0: army_supply(army) = 0: army_name$(army) = ""
 END SUB
 
 ' The combined army takes the slot of the best leader's army, in the city. When more than one
 ' army joined, it can take no order this turn.
-SUB army_combine_finish (target, best, joined)
+SUB army_combine_finish (city, best, joined)
 		army_size(best) = army_size(0): army_leader_rating(best) = army_leader_rating(0)
 		army_experience(best) = army_experience(0): army_supply(best) = army_supply(0)
-		army_city(best) = target
+		army_city(best) = city
 		army_name$(best) = army_name$(0)
 		leader_name$(best) = ""
 		IF joined > 1 THEN army_order(best) = ORDER_BUSY
-		city_army(target) = best
+		city_army(city) = best
 END SUB
 
 ' A new army in a city: its supplies, experience, leader and size, and the price of 100 taken
@@ -109,22 +110,22 @@ DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
 END SUB
 
 ' Buys supplies for an army, up to the resupply level, as far as the side's cash goes. result is
-' 1 when it bought some, 0 when the cash was not enough, and -1 when the army is cut off under
-' the Realism setting. army_resupply (ui/army.bm) shows it.
+' SUPPLY_BOUGHT, SUPPLY_NO_CASH when the cash was not enough, or SUPPLY_CUT_OFF when the army is
+' cut off under the Realism setting. army_resupply (ui/army.bm) shows it.
 SUB army_buy_supply (army, result)
 DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-		result = -1
+		result = SUPPLY_CUT_OFF
 		who = army_side(army)
 		IF opt_realism >= REALISM_ON THEN
 			a = city_is_connected(who, army_city(army))
 			IF a < 1 THEN EXIT SUB
 		END IF
-		result = 0
+		result = SUPPLY_NO_CASH
 		IF army_size(army) > 0 THEN x = side_cash(who) / army_size(army) * 10
 		y = x + army_supply(army): IF y > RESUPPLY_LEVEL THEN x = RESUPPLY_LEVEL - army_supply(army)
 		IF x >= 1 THEN
 			army_supply(army) = army_supply(army) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(army)
-			result = 1
+			result = SUPPLY_BOUGHT
 		END IF
 		IF side_cash(who) < 0 THEN side_cash(who) = 0
 END SUB
