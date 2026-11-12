@@ -4,8 +4,9 @@
     python -I tools/refactor/make_records.py report <record> ...   # counts and problems; changes nothing
     python -I tools/refactor/make_records.py apply <record> ...    # rewrite the sources
 
-<record> is a record of the "Record field" column of docs/variable-names.md; today that is only
-armies. `army_size(expr)` becomes `armies(expr).size`, and an array of two indexes, `a(c, j)` with
+<record> is a record of the "Record field" column of docs/variable-names.md. Phase 10 closed with
+no records, so no row names one today; put `armies(i).size` in a row's cell to use the script.
+`army_size(expr)` becomes `armies(expr).size`, and an array of two indexes, `a(c, j)` with
 the field `recs(c).f(...)`, becomes `recs(c).f(j)`.
 
 Uses the tokens of rename_vars.py, so strings, comments, REM and DATA are left alone. A name that a

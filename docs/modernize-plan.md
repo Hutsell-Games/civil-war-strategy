@@ -31,7 +31,8 @@ shared arrays, no `TYPE` and no `CONST`. `CWSTRAT.BAS` (745 lines) has no SUB of
    rename script), but nothing is merged from it. It mixed a bug fix with renames and moves.
 6. **Data: rename first, records later.** The shared arrays and scalars are renamed first
    (`armysize` to `army_size`). A later phase groups them into records (`armies(i).size`,
-   `cities(i).owner`, `sides(s).cash`). The saved-game file keeps its format.
+   `cities(i).owner`, `sides(s).cash`). The saved-game file keeps its format. Overtaken on
+   2026-11-12: phase 10 closed with no records ("Phase 10: records").
 7. **Rule SUBs do no input or output.** At the end a rule SUB draws nothing, prints nothing and reads no
    key, so `tests\rules_test.bas` can call every one. A SUB that mixes rules and screen (`battle`, `navy`,
    `tupdate`) becomes a rule part and a show part, called in the same order as today.
@@ -96,7 +97,7 @@ Every phase ends with all scripts passing on unchanged recordings, with both com
 | 7 | Break up the big pieces | `filer`, `report`, the main module, `navy`, `tupdate`, `smarts`, `events`. `GOSUB` routines become SUBs. The list is "Worth breaking out" in `sub-names.md`. |
 | 8 | Split rules from screen | Each mixed SUB becomes a rule part and a show part. `rules_test.bas` grows with each rule SUB. |
 | 9 | Menus | One menu SUB for each command. It asks the player, then calls a rule SUB. The main module becomes a loop. |
-| 10 | Records | A `TYPE` record for armies. The cities, sides and fleets stay arrays. |
+| 10 | Records | Closed with none: the arrays stay arrays ("Phase 10: records"). |
 | 11 | The war's own content | Move what another war would replace into `game\`: flags, victory screens, tunes. Move texts, names, limits and the map's line work into data files (decision 19). |
 
 After the plan, each as its own decision: the known bugs, and the engine split.
@@ -150,10 +151,11 @@ file renames, is done in the working tree (2026-11-12). That ends phase 9.
 
 Phase 9 step 8 is committed as `4fa959d`. Phase 10, records, has its plan below ("Phase 10:
 records"). Its step 1, the script and `sides`, was committed as `3043c01`, and step 2, `fleets` and
-`trains`, as `ae6da81`. Both are taken back in the working tree (2026-11-12): only armies become a
-record (see "Only armies", below).
+`trains`, as `ae6da81`. Both were taken back in `a04672d`, and phase 10 is closed with no records
+(2026-11-12; "Why no records", below).
 
-**Next:** phase 10 step 2, `armies`.
+**Next:** phase 11, the war's own content. Its plan is drafted below ("Phase 11: the war's own
+content"); the user answers its three open questions before any code changes.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -231,7 +233,7 @@ first (`play.py coverage`).
   `menu_select`.
 - **The main module's menus**, a web of `GOTO menu0`, `GOTO optmen` and `GOTO utile` (phase 9).
 - **`calculate_battle`**, whose split parts a rule from its screen (phase 8).
-- **`army_clear`** (step 4): it waits for phase 10.
+- **`army_clear`** (step 4): it waited for phase 10 and stays undone ("Phase 10: records").
 
 The splits of `calculate_battle` (losses, strengths) are phase 8's: they part a rule from its screen.
 
@@ -359,43 +361,30 @@ their random numbers must stay in order.
 
 ## Phase 10: records
 
-Drafted 2026-11-12; the user answered its questions the same day. Each step is one commit (decision 15), and
-each ends with `play.py check`, `play.py compare` and the unit tests passing on unchanged
-recordings.
+Closed on 2026-11-12 with no records: every shared array stays an array (user, 2026-11-12). This
+overtakes the second half of decision 6.
 
-### Only armies (user, 2026-11-12)
+### Why no records
 
 The first plan made six records: armies, leaders, cities, sides, fleets and trains. `sides`
 (`3043c01`) and `fleets` and `trains` (`ae6da81`) were built and committed, and `cities` and
 `leaders` were built. The user then asked whether the code was better for it. It was not, so all
-of them were taken back:
+of them were taken back (`a04672d`), and the army record was not built:
 
-- **A record pays where the code handles a whole thing at once.** Armies are cleared, copied and
-  moved between slots. Five places clear an army slot, and they do not clear the same fields.
-- **The others are never copied or cleared whole.** For them a record only changed the spelling,
-  and made lines longer: `side_cash(city_owner(i))` became `sides(cities(i).owner).cash`.
+- **A record pays where the code handles a whole thing at once.** Nothing copies or clears a
+  whole city, side, fleet or train. For them a record only changed the spelling, and made lines
+  longer: `side_cash(city_owner(i))` became `sides(cities(i).owner).cash`.
 - **`leaders(i)` misled.** It is the pool of leaders not yet used, by army slot, not "the leader
   of army i".
+- **Armies are not handled whole either.** No line copies a whole army: Join
+  (`rules\army.bm`, lines 48 to 51) copies the size, leader rating, experience, supply and name,
+  and leaves the city and the order. Four places clear a slot, each with other fields; the
+  fullest (`rules\setup.bm`, line 137) leaves the experience and the supply. No `SWAP` of armies
+  exists. A whole-record copy or clear would change fields the original leaves alone, so the
+  screens-identical rule (decision 3) allows it in one or two lines at most, out of 842 uses.
 
-So the rule is: a record where the code handles the whole thing, an array for each field
-elsewhere.
-
-### What becomes a record
-
-One record, from the "Record field" column of `variable-names.md`. Each array of a field keeps its
-bounds, so index 0 stays where the code uses it: army 0 is the scratch army of Join.
-
-| Record | Index | Fields, from the arrays | Uses |
-|--------|-------|-------------------------|-----:|
-| `armies(0 TO MAX_ARMIES)` | army | `name`, `size`, `leader_rating`, `experience`, `supply`, `city`, `order` | 858 |
-
-"Uses" counts the names in the game and `rules_test.bas` today. Every field is an INTEGER, as the
-arrays are under `DEFINT A-Z`. The name is a variable-length `STRING` field.
-
-Everything else stays as it is: the arrays of the cities, sides, fleets, trains and leaders, the
-menu's variables, the settings (`opt_*`), `victory_rule()`, the turn's flags and
-`turn_recruit_city()`, `move_order_key()`, `month_name$()`, `map_font$()`, the flag's stars and the
-pictures.
+Records become worth it when the clears and copies are made the same. That changes behavior, so
+it belongs with the known bugs after the plan, each with its own new recording.
 
 ### What both compilers do with records
 
@@ -410,41 +399,66 @@ clone). Both printed the same for every line:
 - an INTEGER field that overflows wraps with no error, as an INTEGER array does;
 - a field array with a `CONST` bound (`road(0 TO MAX_ROADS)`), and a `TYPE` in an included `.bi`.
 
-So no line needs more than the new name. The saved game keeps its format (decision 6): `load_game`
-and `save_game` read and write the same values in the same order.
+So a record needs no more than the new name on each line, should records be taken up again.
 
-### How a step works
+### The script
 
-- **A script does the renames**: `tools\refactor\make_records.py`, kept with the others (decision
-  16). It reads the "Record field" column of `variable-names.md`, and turns `army_size(expr)` into
-  `armies(expr).size`. It uses the tokens of
-  `rename_vars.py`, so strings and comments stay as they are, and it skips an array that a SUB
-  declares for itself. A SUB's own scalar of the same name is another variable: `ai_fortify` has
-  a local `side_cash`, always 0, beside the shared `side_cash()`. The declarations in `cws.bi`
-  are written by hand: a `TYPE` block and a `DIM SHARED` line for the record, and the old names
-  out of `COMMON SHARED` and `DIM SHARED`.
-- **The compiler finds what the script missed.** The old arrays are gone and `OPTION _EXPLICIT` is
-  on, so a use the script did not rewrite is a compile error.
-- **Lines that no test runs.** The script rewrites some of the 18 lines that no test runs (in
-  `vary_start_conditions`, for example). Phase 7's rule allows such a line only when it moves whole.
-  This phase makes an exception: a line that only the script changed, and that compiles, may
-  change without a test. The hand-over lists those lines.
+`tools\refactor\make_records.py` is kept with the others (decision 16), for a later change or
+another port. It reads the "Record field" column of `variable-names.md`, where every row now says
+"(stays an array)", and turns `army_size(expr)` into `armies(expr).size`. It uses the tokens of
+`rename_vars.py`, so strings and comments stay as they are, and it skips an array that a SUB
+declares for itself. The declarations in `cws.bi` are written by hand. It rewrote 437 uses for
+`sides`, 370 for `fleets` and `trains` and 578 for `cities` and `leaders`, each with all tests
+passing, before they were taken back.
 
-### Steps
+`army_clear` (phase 7, step 4 of `modernize-completed.md`) waited for this phase. It stays
+undone, for the reason above: the places that clear an army do not clear the same fields.
 
-1. **Done: the script.** `sides`, `fleets` and `trains` were made records with it and then taken
-   back. See `modernize-completed.md`.
-2. **`armies`** (7 arrays, 858 uses).
-3. **Whole records, where the screens stay the same.** `army_clear` waits for this (phase 7, step 4
-   of `modernize-completed.md`). The five places that clear an army do not clear the same fields.
-   A whole-record clear (`armies(i) = no_army`) is only used where every field was cleared before,
-   or where a test shows that what is left in the slot is never read. The same goes for the places
-   that copy an army field by field. This step lists the places first, for the user.
+## Phase 11: the war's own content
 
-### Answered (user, 2026-11-12)
+Drafted 2026-11-12. Not started: its questions are open (below).
 
-1. **Fleets and trains are records of their own**, `fleets(s)` and `trains(s)`, not fields of
-   `sides(s)`. Overtaken the same day: they stay arrays ("Only armies", above).
-2. **The exception for lines that no test runs is allowed** (above, "How a step works"). The
-   hand-over lists each such line.
-3. **Type name:** `army_type`.
+### The test of this phase
+
+Phase 10 showed that a change can pass every test and still not make the code better. So this
+phase has one test of its own: **a second war is made by replacing `game\` and `scenarios\`, and
+nothing else.** A step is worth doing when it moves something that fails that test. A step that
+only moves text around is not.
+
+### What knows that it is the Civil War, today
+
+Surveyed on 2026-11-12 at `a04672d`.
+
+| What | Where it is | Lines or count |
+|------|-------------|---------------:|
+| Side names, month names, start date, victory rules, starting armies and cash | `scenarios\CWS.INI` (data already) | |
+| Leaders; cities and roads | `scenarios\CWSLEAD.DAT`, `CITIES.GRD` (data already) | |
+| The events' rules, the tunes, the victory screens | `game\events.bm`, `tunes.bm`, `victory_screens.bm` (in `game\` already) | 431 |
+| The events' texts ("Lincoln has been reelected") and their two tunes | `ui\events.bm` | 15 texts |
+| Other texts that name the war ("Union", "Rebel", "ironclad") | `ui\options.bm` 6, `ui\reports.bm` 5, `ui\victory.bm` 3, `ui\battle.bm` 2, `ui\orders.bm` 2, `commands\navy.bm` 2, `rules\army.bm` 2, `ui\navy.bm` 1, `draw\pictures.bm` 1 | 24 texts |
+| The map's line work | `draw\map.bm` (`draw_map`, `draw_map_touchup`), `draw\pictures.bm` (`draw_chesapeake`) | about 410 |
+| The flags | `draw\icons.bm` (`draw_flag`, `draw_flag_icon`) | about 55 |
+| The title, the cannon, the ironclad and the schooner | `draw\pictures.bm`, `draw\ships.bm` | about 370 |
+| The rule numbers (prices, the ironclads' date, the first year) | `cws.bi`, the block "The Civil War's own rule numbers" | 10 constants |
+| Rules that treat the two sides differently (the Union's two extra supply in `rules\army.bm` line 61, `union_income_bonus`) | `rules\`, `ai\` | not yet counted |
+
+### Steps, as proposed
+
+1. **Move what is the war's and is already a SUB**: the flags, the map's line work, the title,
+   the cannon and the two ship pictures go to `game\`, whole (as phase 6 moved SUBs). The ten
+   rule constants go to a `game\rules.bi`.
+2. **The events' texts** leave `ui\events.bm` for `game\`.
+3. **The other 24 texts**, each looked at: a text that only uses `side_name$()` already passes
+   the test; one that spells "Union" does not.
+4. **List the rules that treat the sides differently**, with a name for each. Whether they move
+   is a question for the engine split, not for this phase.
+5. **A list of what QB64 made awkward**, kept from step 1 on. It is the evidence for whether
+   QB64Rust should gain modules or another feature (user, 2026-11-12).
+
+### Open questions
+
+1. **Texts: code in `game\`, or a data file?** Decision 19 says data files.
+2. **The map's line work: code in `game\`, or a data file read by a small drawer?** Decision 19
+   says a data file.
+3. **Are steps 1 to 4 the right size**, given the test above, or should the phase stop after
+   step 2?

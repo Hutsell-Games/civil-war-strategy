@@ -5,9 +5,9 @@ proposed name. This is the table that phase 4 of `modernize-plan.md` renames fro
 `sub-names.md`: the "Your name" column is empty, and a name written there replaces Claude's.
 
 The shared variables are declared in `CWS14.BI`. "Uses" counts where the name appears in `CWSTRAT.BAS`,
-`CWSTRAT1.BM`, `CWSTRAT2.BM` and `CWSMENU.BM`. "Record field" is the name the variable gets in phase 10,
-when the armies' arrays become a record. The other arrays stay arrays (user, 2026-11-12; "Only
-armies" in `modernize-plan.md`).
+`CWSTRAT1.BM`, `CWSTRAT2.BM` and `CWSMENU.BM`. "Record field" was the name the variable would get in phase 10.
+Phase 10 closed with no records, so every array stays an array (user, 2026-11-12; "Why no records"
+in `modernize-plan.md`).
 
 Rules the proposals follow (decisions 17 and 18 of the plan):
 
@@ -24,13 +24,13 @@ Indexed by army, 1 to 40. Armies 1 to 20 are Union, 21 to 40 Rebel. Index 0 is a
 
 | Current | What it holds | Uses | Proposed | Record field | Your name |
 |---------|---------------|-----:|----------|--------------|-----------|
-| `armyname$()` | The army's name, which is its leader's name. Empty when the slot is free. | 76 | `army_name$()` | `armies(i).name` | |
-| `armysize()` | Its size in hundreds of men. 0 when the slot is free. | 139 | `army_size()` | `armies(i).size` | |
-| `armylead()` | Its leader's rating, 1 to 9. | 35 | `army_leader_rating()` | `armies(i).leader_rating` | settled 2026-11-11 (first proposal `army_leadership()`, your note `armies(i).leader`) |
-| `armyexper()` | Its experience, 0 to 10. | 49 | `army_experience()` | `armies(i).experience` | |
-| `supply()` | Its supply level, 0 to 10. | 72 | `army_supply()` | `armies(i).supply` | |
-| `armyloc()` | The city it is in. 0 when the slot is free. | 143 | `army_city()` | `armies(i).city` | |
-| `armymove()` | Its order: the city it marches to, 0 for none, or below 0 when it cannot move this turn (it drilled, fortified, was just raised, or came by train). | 88 | `army_order()` | `armies(i).order` | |
+| `armyname$()` | The army's name, which is its leader's name. Empty when the slot is free. | 76 | `army_name$()` | (stays an array) | |
+| `armysize()` | Its size in hundreds of men. 0 when the slot is free. | 139 | `army_size()` | (stays an array) | |
+| `armylead()` | Its leader's rating, 1 to 9. | 35 | `army_leader_rating()` | (stays an array) | settled 2026-11-11 (first proposal `army_leadership()`, your note `armies(i).leader`) |
+| `armyexper()` | Its experience, 0 to 10. | 49 | `army_experience()` | (stays an array) | |
+| `supply()` | Its supply level, 0 to 10. | 72 | `army_supply()` | (stays an array) | |
+| `armyloc()` | The city it is in. 0 when the slot is free. | 143 | `army_city()` | (stays an array) | |
+| `armymove()` | Its order: the city it marches to, 0 for none, or below 0 when it cannot move this turn (it drilled, fortified, was just raised, or came by train). | 88 | `army_order()` | (stays an array) | |
 | `lname$()` | The leaders not yet used, by army slot. A slot's entry is emptied when its leader takes an army. | 24 | `leader_name$()` | (stays an array) | |
 | `rating()` | The rating of the leader in `lname$()`. | 13 | `leader_rating()` | (stays an array) | |
 | `brray()` | The order of movement for this turn: one sort key for each army, sorted by `bub2`. | 24 | `move_order_key()` | (stays an array) | |

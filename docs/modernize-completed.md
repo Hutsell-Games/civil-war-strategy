@@ -870,3 +870,8 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    - Kept: `tools\refactor\make_records.py`, for the armies.
    - `variable-names.md`: the "Record field" column names a record for the armies only.
    - Unit tests: 123. 38 scripts, unchanged recordings, both compilers.
+4. **Closed with no records** (user, 2026-11-12). The army record was not built. No line copies
+   or clears a whole army, so it too would only change the spelling of 842 uses ("Why no
+   records" in `modernize-plan.md`). The seven army rows of `variable-names.md` now say
+   "(stays an array)" as well, and `make_records.py` stays for a later change or another port.
+   `army_clear` (phase 7, step 4) stays undone. No code changed.
