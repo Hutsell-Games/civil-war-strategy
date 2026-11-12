@@ -90,15 +90,28 @@ IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
 ELSE
 	IF city_fort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
 	IF city_fort(i) >= MAX_FORT THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-	CIRCLE (city_x(i), city_y(i)), 4, 0
-	CIRCLE (city_x(i), city_y(i)), 3, c
-	PAINT (city_x(i), city_y(i)), c, c
+	CALL draw_city_dot(i, c)
 END IF
 IF opt_graphics = GRAPHICS_OFF GOTO nocon
 	FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
 	NEXT j
 nocon:
 NEXT i
+END SUB
+
+' A city's dot in color c, without its fort mark.
+SUB draw_city_dot (city, c)
+CIRCLE (city_x(city), city_y(city)), 4, 0
+CIRCLE (city_x(city), city_y(city)), 3, c
+PAINT (city_x(city), city_y(city)), c, c
+END SUB
+
+' Erases a city's fort mark and draws the cities again, after its fort level changed.
+SUB city_redraw_fort (city)
+DIM x AS INTEGER: DIM y AS INTEGER
+x = city_x(city): y = city_y(city)
+LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
+CALL draw_cities
 END SUB
 
 SUB draw_city_names

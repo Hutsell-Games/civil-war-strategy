@@ -158,7 +158,8 @@ the working tree: `side_army_range` became `side_first_army` and `side_last_army
 (user, 2026-11-11). That ends phase 5.
 Phase 7 step 1 is done in the working tree (2026-11-11): `file_management` is split, see "Phase 7" below.
 Steps 2 and 3 are done in the working tree too: `menu_report` is split, and `wait_key` is in.
-**Next:** phase 7 step 4, the small shared pieces.
+Step 4, the small shared pieces, is done in the working tree.
+**Next:** the user's decision on phase 0's tests, which step 5 needs.
 
 1. **Done: phase 1, the deletions.** `burn` and its call in `capture`; `scrnsavr`, its Ctrl+B test in
    `menu` and the labels `boss:` and `boss1:`; the label `topbar:` in `CWSTRAT.BAS` (lines 706 to 710) and
@@ -328,8 +329,20 @@ Until the user decides otherwise, each step of this phase works like this:
    `ui\reports.bm`). The menu's wait, the commander's name and the wait inside `script_tick%` are other
    kinds and stay. The two `wait_seconds(99)` stay as they are until the user decides whether they may
    wait forever (`TODO.md`, "The code").
-4. **Small shared pieces**: `army_clear`, `draw_city_dot`, `city_redraw_fort`, the train's `DRAW` string,
-   `load_picture`.
+4. **Done: small shared pieces.**
+   - `draw_city_dot (city, c)` in `draw\map.bm`: the dot's three lines, used by `draw_cities` and twice
+     by `animate_city`.
+   - `city_redraw_fort (city)` in `draw\map.bm`: erases the fort's square and calls `draw_cities`. Used by
+     `city_capture`, `navy_commands` (a fort damaged) and `turn_resolve` (a fort razed). The locals `x`
+     and `y` those three set for it were read nowhere after.
+   - `load_picture (file$, picture())` in `draw\pictures.bm`: `DEF SEG`, `BLOAD`, `DEF SEG`, four times.
+   - `TRAIN_OUTLINE$` in `CWS14.BI`: the 55 characters that the three train pictures share. Each keeps
+     its own color, scale and last strokes, which differ.
+   - **Not done: `army_clear`.** The five places do not clear the same fields. A new game clears the
+     name but not the experience or supply. Vary Start clears those but not the name. `army_combine`
+     and the surrender in `turn_resolve` clear all of them; the first gives the name back to
+     `leader_name$()` and the second clears it there too. Only Vary Start's two blocks are the same. One SUB for all would change what is left in a dead army's slot, which no screen shows at
+     once. It waits for phase 10, where an army becomes a record.
 5. **The main module's pieces that stand alone**: `load_cities`, `draw_title`, `play_title_music`,
    `turn_collect_income`, `draw_player_turn` (the `GOSUB` routine `blanken`), `set_union_advantage`
    (`unionplus`), `army_detach`, `army_drill`, `menu_supply`, `menu_move_capital`,

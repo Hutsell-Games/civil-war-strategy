@@ -31,9 +31,7 @@ NEXT k
 saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
 CALL load_scenario
 IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
-	DEF SEG = VARSEG(pic_mountain(1))
-	BLOAD GFXDIR + "mtn.vga", VARPTR(pic_mountain(1))
-	DEF SEG
+	CALL load_picture(GFXDIR + "mtn.vga", pic_mountain())
 ELSE
 	COLOR COLOR_WHITE: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": wait_seconds PAUSE_LONG
 END IF
@@ -64,9 +62,7 @@ a$ = COMMAND$: IF a$ <> "" OR replay > 0 GOTO notitle2
 band:           ' SHELL "cwstitle.exe" (a DOS program with no source; cannot run on 64-bit Windows)
 notitle2:
 SCREEN 12
-	DEF SEG = VARSEG(pic_loaded(1))
-	BLOAD GFXDIR + "cwsicon.vga", VARPTR(pic_loaded(1))
-	DEF SEG
+	CALL load_picture(GFXDIR + "cwsicon.vga", pic_loaded())
 
 	PUT (100, 100), pic_loaded, PSET
 	GET (101, 101)-(113, 113), pic_capital
@@ -225,7 +221,7 @@ SELECT CASE menu_choice
 IF train_army(current_side) = 0 THEN
 	COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 	PSET (550, 20), 0
-	DRAW "C15S6R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3U9L2U5R1BF4"
+	DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
 	z = 9: IF current_side = SIDE_REBEL THEN z = 7
 	x = POINT(0): y = POINT(1)
 	PAINT (x, y), z, 15

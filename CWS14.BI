@@ -135,6 +135,8 @@ CONST KEY_F7$ = "A"
 CONST PAUSE_LONG = 9
 ' The column of the right panel, where most menus go.
 CONST PANEL_COL = 67
+' The train's outline for DRAW. Each picture adds its own color, scale and last strokes.
+CONST TRAIN_OUTLINE$ = "R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3"
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist

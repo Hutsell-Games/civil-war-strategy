@@ -70,3 +70,10 @@ LINE -(515, 85): LINE -(527, 95)
 PAINT (500, 400), 1, 10
 PAINT (510, 110), 2
 END SUB
+
+' Loads a .vga picture file into an array, for PUT.
+SUB load_picture (file$, picture())
+DEF SEG = VARSEG(picture(1))
+BLOAD file$, VARPTR(picture(1))
+DEF SEG
+END SUB

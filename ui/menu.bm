@@ -117,9 +117,7 @@ sel1:
 				a = row: IF current_side = SIDE_UNION THEN a = 6 - row
 				t$ = GFXDIR + "face" + LTRIM$(STR$(a)) + ".vga"
 				IF LEN(DIR$(t$)) > 0 THEN
-					DEF SEG = VARSEG(pic_face(1))
-					BLOAD t$, VARPTR(pic_face(1))
-					DEF SEG
+					CALL load_picture(t$, pic_face())
 					PUT (550, 150), pic_face, PSET
 					IF current_side = SIDE_REBEL THEN
 						PAINT (560, 160), 8, 0

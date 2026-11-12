@@ -161,8 +161,7 @@ deserted:
 	GOTO deserted
 hurt1:
 	CALL clear_bottom_line: PRINT city_name$(target); " fortifications damaged";
-	city_fort(target) = city_fort(target) - 1: x = city_x(target): y = city_y(target): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-	CALL draw_cities
+	city_fort(target) = city_fort(target) - 1: CALL city_redraw_fort(target)
 	CALL wait_seconds(opt_pause!)
 	EXIT SUB
 blast:

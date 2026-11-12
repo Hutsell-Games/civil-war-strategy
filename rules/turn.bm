@@ -239,10 +239,7 @@ CALL draw_army_flag(active)
 		IF opt_realism >= REALISM_ON AND city_y(c) > 150 THEN
 smoke:
 			city_fort(c) = 0
-			x = city_x(c)
-			y = city_y(c)
-			LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
-			CALL draw_cities
+			CALL city_redraw_fort(c)
 			CALL clear_bottom_line
 			PRINT army_name$(active); " has destroyed the forts at "; city_name$(c);
 			wait_seconds 3

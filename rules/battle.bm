@@ -95,9 +95,7 @@ IF opt_graphics >= GRAPHICS_FULL THEN
 	k = city_fort(army_city(defender))
 	t$ = GFXDIR + "fort" + LTRIM$(STR$(k)) + ".vga"
 	IF LEN(DIR$(t$)) > 0 THEN
-		DEF SEG = VARSEG(pic_loaded(1))
-		BLOAD t$, VARPTR(pic_loaded(1))
-		DEF SEG
+		CALL load_picture(t$, pic_loaded())
 		PUT (550, 270), pic_loaded, PSET
 	END IF
 ELSE

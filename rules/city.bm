@@ -10,7 +10,7 @@ city_is_connected = a
 END FUNCTION
 
 SUB city_capture (active, c, side, weaken_fort)
-DIM a$: DIM x AS INTEGER: DIM y AS INTEGER
+DIM a$
 	city_owner(c) = side: CALL clear_bottom_line
 	a$ = army_name$(active) + " has captured " + city_name$(c)
 	COLOR COLOR_LIGHT_CYAN: PRINT army_name$(active) + " has captured " + city_name$(c);
@@ -27,7 +27,7 @@ DIM a$: DIM x AS INTEGER: DIM y AS INTEGER
 		side_capital(other_side(side)) = 0
 		CALL animate_city(c)
 	END IF
-	IF city_fort(c) > 0 AND weaken_fort > 0 THEN city_fort(c) = city_fort(c) - 1: x = city_x(c): y = city_y(c): LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF: CALL draw_cities
+	IF city_fort(c) > 0 AND weaken_fort > 0 THEN city_fort(c) = city_fort(c) - 1: CALL city_redraw_fort(c)
 END SUB
 
 SUB check_map_links
