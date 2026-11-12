@@ -49,8 +49,11 @@ game plays changes the recorded screens.
   meant for the army recruited.
 - **The computer checks the wrong city's track before a train to its capital.** `ai_railroad` (`ai\ai.bm`)
   calls `railroad_route_count(side, target)` with `target` left from the loop before, not the capital.
-- **The winner of a battle gets none of the loser's supplies.** `turn_army_surrenders` (`rules\turn.bm`)
-  sets the loser's supplies to 0 and then adds them to the winner's.
+- **The winner of a battle gets none of the loser's supplies.** `turn_army_lost` (`rules\turn.bm`)
+  sets the loser's supplies to 0 and then adds them to the winner's (`TestTurnArmyLost`).
+- **An army that surrenders or is crushed gives 25 victory points to its own side.** `turn_army_lost`
+  adds them to `other_side` of the winner's side (`TestTurnArmyLost`). A battle's winner gets a point in
+  `battle_apply_losses`, so the 25 were most likely meant for the winner too.
 - **A fleet sunk in naval combat gives 10 victory points to its own side.** `navy_fleet_defeated`
   (`rules\navy.bm`) adds them to the loser, as both of the original's two blocks did
   (`TestNavyFleetDefeated`). A fleet sunk by a shore battery gives 5 to the other side

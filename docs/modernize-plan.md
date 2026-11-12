@@ -135,9 +135,10 @@ output of `play.py check` and `play.py compare` (decision 15).
 Updated 2026-11-11. Phases 0 to 7 are done and committed. Phase 8's steps 1 and 2 are committed
 (`6eda547`, `013b8d0`). What each step did is in `modernize-completed.md`.
 
-Step 3 is committed in two parts (`70692b3`, `77ee9a6`). Step 4, the navy, is done in the working tree.
+Step 3 is committed in two parts (`70692b3`, `77ee9a6`), and step 4 as `9e038a4`. Step 5, the
+month's moves, is done in the working tree.
 
-**Next:** step 5, `rules\turn.bm`.
+**Next:** step 6, `ai\ai.bm`.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -272,8 +273,7 @@ The order takes the SUBs that others call first, so that a caller's split finds 
 2. **Done: the railroad.** See `modernize-completed.md`.
 3. **Done: `rules\city.bm` and `rules\army.bm`.** See `modernize-completed.md`.
 4. **Done: `rules\navy.bm`.** See `modernize-completed.md`.
-5. The eight of `rules\turn.bm`. `turn_resolve` and its parts are the turn as the player sees it, so most
-   of them go to `ui\turn.bm`, with rule parts left in `rules\turn.bm`.
+5. **Done: `rules\turn.bm`.** See `modernize-completed.md`.
 6. The six of `ai\ai.bm`, and the rule in `menu_recruit_cities` moved to `rules\`.
 7. `special_events` and `event_riot`. The texts stay in the show part, which phase 11 moves to data.
 8. The four of `rules\victory.bm`.

@@ -710,6 +710,126 @@ CALL navy_retreat_port(1, target)
 AssertEqualInt 0, target, "none left"
 END SUB
 
+' ------------------------------------------------------- the month's moves
+
+SUB TestTurnAdvanceMonth
+turn_month = 11: turn_year = 1861
+CALL turn_advance_month
+AssertEqualInt 1, turn_month, "November to January"
+AssertEqualInt 1862, turn_year, "of the next year"
+CALL turn_advance_month
+AssertEqualInt 3, turn_month, "then March"
+END SUB
+
+SUB TestTurnArmySupplyInWinter
+turn_month = 1: army_city(1) = 5: army_size(1) = 100: army_supply(1) = 2: side_cash(1) = 100
+CALL turn_army_supply(1, blockaded, starved)
+AssertEqualInt 80, side_cash(1), "a day of supply for 10,000 men costs 20"
+AssertEqualInt 2, army_supply(1), "bought one, used one away from a sea port in winter"
+AssertEqualInt 0, blockaded, "not blockaded"
+AssertEqualInt 0, starved, "not starved"
+END SUB
+
+SUB TestTurnArmySupplyBlockaded
+turn_month = 8: army_city(21) = 9: city_port_type(9) = PORT_SEA: fleet_city(1) = 9
+army_size(21) = 40: army_supply(21) = 1
+CALL turn_army_supply(21, blockaded, starved)
+AssertEqualInt 1, blockaded, "the Union's fleet is in port 9"
+AssertEqualInt 1, starved, "the day it had is gone"
+AssertEqualInt 0, army_supply(21), "no supplies"
+AssertEqualInt 40, army_size(21), "an army of 50 or fewer keeps its men"
+END SUB
+
+SUB TestTurnStrengthRatio
+current_side = 1: army_size(1) = 100: army_size(21) = 50
+CALL turn_strength_ratio
+AssertTrue ai_strength_ratio! = .5, "the computer's 5,000 against the player's 10,000:" + STR$(ai_strength_ratio!)
+END SUB
+
+SUB TestTurnArmyMarches
+army_supply(1) = 2
+CALL turn_army_marches(1, starved)
+AssertEqualInt 1, army_supply(1), "a day used"
+AssertEqualInt 0, starved, "it had one"
+army_supply(1) = 0
+CALL turn_army_marches(1, starved)
+AssertEqualInt 0, army_supply(1), "not below 0"
+AssertEqualInt 1, starved, "it had none"
+END SUB
+
+SUB TestTurnBattleExperience
+army_experience(3) = 4: army_experience(4) = MAX_EXPERIENCE
+CALL turn_battle_experience(3)
+AssertEqualInt 5, army_experience(3), "a level more"
+CALL turn_battle_experience(4)
+AssertEqualInt MAX_EXPERIENCE, army_experience(4), "not past the top"
+END SUB
+
+SUB TestTurnWithdrawAndHalt
+army_order(2) = 5
+CALL turn_withdraw(2)
+AssertEqualInt 5, army_city(2), "back in the city it came from"
+AssertEqualInt 2, city_army(5), "which it holds"
+AssertEqualInt ORDER_DONE, army_order(2), "done for the month"
+army_leader_rating(21) = 11: army_order(21) = 7
+CALL turn_defender_halts(21, halted, old_order)
+AssertEqualInt 0, halted, "a leader rated 11 always keeps his order"
+AssertEqualInt 7, army_order(21), "kept"
+RANDOMIZE 1
+army_leader_rating(22) = 0: army_order(22) = 8
+CALL turn_defender_halts(22, halted, old_order)
+AssertEqualInt 1, halted, "a leader rated 0 loses it"
+AssertEqualInt 8, old_order, "the order it had"
+AssertEqualInt ORDER_DONE, army_order(22), "lost"
+END SUB
+
+SUB TestTurnRetreatCity
+city_road(1, 1) = 2: city_road(1, 2) = 3: city_road(1, 3) = 4
+city_owner(2) = 2: city_value(2) = 5
+city_owner(3) = 2: city_value(3) = 9: city_army(3) = 30
+city_owner(4) = 1: city_value(4) = 20
+CALL turn_retreat_city(1, 1, move2)
+AssertEqualInt 2, move2, "the richer city 3 has an army"
+city_army(3) = 0
+CALL turn_retreat_city(1, 1, move2)
+AssertEqualInt 3, move2, "now city 3, the richest of the Rebels'"
+CALL turn_retreat_city(1, 2, move2)
+AssertEqualInt 4, move2, "a Union defender goes to the Union's city"
+city_owner(4) = 2
+CALL turn_retreat_city(1, 2, move2)
+AssertEqualInt 0, move2, "no Union city next to it"
+CALL turn_retreat_to(25, 3)
+AssertEqualInt 3, army_city(25), "in city 3"
+AssertEqualInt 25, city_army(3), "which it holds"
+AssertEqualInt ORDER_DONE, army_order(25), "done for the month"
+END SUB
+
+SUB TestTurnArmyLost
+army_city(21) = 5: army_size(21) = 80: army_name$(21) = "Lee": army_supply(21) = 6: army_supply(1) = 4
+CALL turn_army_lost(21, 1)
+AssertEqualInt 0, army_city(21), "the slot is cleared"
+AssertEqualStr "", army_name$(21), "and its name"
+AssertEqualInt 25, side_victory_points(2), "25 points for the other side of the army that won"
+AssertEqualInt 4, army_supply(1), "the winner gains none of its supplies (as in the original)"
+END SUB
+
+SUB TestTurnOccupyAndForage
+CALL turn_occupy(2, 7)
+AssertEqualInt 7, army_city(2), "in city 7"
+AssertEqualInt 2, city_army(7), "which it holds"
+AssertEqualInt ORDER_DONE, army_order(2), "done for the month"
+city_fort(7) = 2
+CALL turn_raze_fort(7)
+AssertEqualInt 0, city_fort(7), "razed"
+RANDOMIZE 1
+army_supply(2) = 1
+CALL turn_army_forages(2)
+AssertTrue army_supply(2) >= 2, "at least a day more:" + STR$(army_supply(2))
+army_supply(2) = MAX_SUPPLY
+CALL turn_army_forages(2)
+AssertEqualInt MAX_SUPPLY, army_supply(2), "not past the top"
+END SUB
+
 ' ------------------------------------------------------- QB64.BM, SCRIPT.BM
 
 SUB TestDirFindsAFileByPattern
@@ -759,6 +879,7 @@ END SUB
 '$INCLUDE: '../ui/city.bm'
 '$INCLUDE: '../ui/army.bm'
 '$INCLUDE: '../ui/navy.bm'
+'$INCLUDE: '../ui/turn.bm'
 '$INCLUDE: '../draw/map.bm'
 '$INCLUDE: '../draw/icons.bm'
 '$INCLUDE: '../draw/ships.bm'

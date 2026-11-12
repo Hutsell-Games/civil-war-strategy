@@ -486,3 +486,29 @@ The rule for lines that no test runs is in `modernize-plan.md`, "Lines that no t
      tests `TestNavyBlastCapitalAndNeutral` and `TestNavyFleetDefeated` run them. The three lines not
      run are the same three as before, now `ui\navy.bm` 76, 309 and 350. 209 lines of the game are run
      in part (212 before) and 20 are not run.
+5. **Done: `rules\turn.bm`.** The eight mixed SUBs moved to `ui\turn.bm`: `turn_date_and_supply`,
+   `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`,
+   `turn_defender_retreats`, `turn_army_surrenders` and `turn_enter_city`. `turn_resolve` holds no rule
+   of its own; it moved whole. The rules are 13 new SUBs in `rules\turn.bm`, beside
+   `turn_collect_income`, `turn_set_move_order` and `turn_update_victory_points`:
+   - Supply: `turn_advance_month`, `turn_army_supply (i, blockaded, starved)` for one army, and
+     `turn_strength_ratio`. `turn_date_and_supply` keeps the loop over the armies, so that each army's
+     messages and the `COLOR` between them come where they did. The old side variable `s` started as
+     the Union and turned to the Rebels at their first army, so it was always `army_side(i)`, which the
+     rule now uses.
+   - Moving and fighting: `turn_army_marches (active, starved)`, `turn_battle_experience (win)`,
+     `turn_withdraw (active)`, `turn_defender_halts (defend, halted, old_order)`,
+     `turn_retreat_city (target, s, move2)`, `turn_retreat_to (defend, move2)`,
+     `turn_army_lost (index, active)`, `turn_occupy (active, target)`, `turn_raze_fort (c)` and
+     `turn_army_forages (active)`.
+   - `turn_defender_halts` returns the defender's old order, so that the screen can erase its line after
+     the rule has cleared it. The marker reads only the cities and `city_army`.
+   - Left in the screen part: the attacker's and the defender's city and order set just before
+     `animate_army`, which reads them to draw the march, and the computer's choice to raze a fort
+     (`opt_realism` and `city_y(c) > 150`, for step 6 or phase 9).
+   - A new bug, kept: an army that surrenders or is crushed gives 25 victory points to its own side
+     (`TODO.md`).
+   - Unit tests: 10 new ones, so 74 in all. Lines moved without a test: none. The defender's lost order
+     after the attacker withdrew was not run in full by a script; `TestTurnWithdrawAndHalt` runs it.
+     The two lines not run are the dead `CASE` arms of `turn_set_move_order`, now `rules\turn.bm` 163
+     and 165. 208 lines of the game are run in part and 20 are not run.
