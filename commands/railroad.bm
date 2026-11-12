@@ -1,17 +1,11 @@
-' A side's train as the player sees it. The rules are in rules/railroad.bm.
+' A side's train as its orders are carried out. Each calls the rules (rules/railroad.bm) and
+' shows what happened. Nothing here opens a menu or reads a key. The player sends a train from
+' the main menu (menu_main_railroad, ui/main_menu.bm) and the computer in ai_railroad_orders
+' (ai/ai.bm); a train with an army aboard arrives at the start of the month's moves
+' (turn_resolve, ui/turn.bm).
 
-' A side's train. With an army aboard, the train arrives. With none, the player or the
-' computer may send one.
-SUB railroad_move (side)
-DIM army AS INTEGER: DIM city AS INTEGER
-SELECT CASE train_army(side)
-	CASE 0
-	IF side = current_side THEN CALL menu_railroad(side, army, city) ELSE CALL ai_railroad(side, army, city)
-	IF army > 0 THEN CALL railroad_start(side, army, city)
-	CASE IS > 0
-	CALL railroad_arrive(side)
-END SELECT
-	IF side = current_side THEN CALL wait_seconds(PAUSE_LONG)
+' After a train was sent, was refused or arrived: clears the right panel and the bottom line.
+SUB railroad_finish
 	CALL clear_right_panel
 	clear_bottom_line
 END SUB

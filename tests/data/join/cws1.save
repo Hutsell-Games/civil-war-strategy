@@ -1,0 +1,7 @@
+# For the script join: the player combines two armies, and the computer's train arrives.
+# May 1862, the Union plays. Grant's army stands in Washington beside McDowell's, which holds
+# the city. Jackson's Rebel army is on the train from Front Royal to Richmond.
+date 5 1862
+army 6 city=39 size=100 lead=8 exp=2 supply=5 name=Grant
+army 22 city=0 order=33
+train 2 22 12

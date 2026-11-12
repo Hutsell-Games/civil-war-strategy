@@ -1,4 +1,5 @@
-' What a captured city and the map check show. The rules are in rules/city.bm.
+' A city is captured: the rule (city_take, rules/city.bm) and what the capture shows. Nothing
+' here opens a menu or reads a key.
 
 SUB city_capture (active, c, side, weaken_fort)
 DIM a$: DIM capital AS INTEGER: DIM razed AS INTEGER
@@ -18,19 +19,4 @@ DIM a$: DIM capital AS INTEGER: DIM razed AS INTEGER
 		CALL animate_city(c)
 	END IF
 	IF razed = 1 THEN CALL city_redraw_fort(c)
-END SUB
-
-SUB check_map_links
-DIM x AS INTEGER: DIM y AS INTEGER: DIM n AS INTEGER: DIM count AS INTEGER
-DIM added(MAX_CITIES * MAX_ROADS) AS INTEGER: DIM from_city(MAX_CITIES * MAX_ROADS) AS INTEGER: DIM to_city(MAX_CITIES * MAX_ROADS) AS INTEGER
-CLS : COLOR COLOR_WHITE
-CALL city_fix_return_routes(count, added(), from_city(), to_city())
-x = 0: y = 0
-FOR n = 1 TO count
-	IF added(n) = 1 THEN PRINT "+ Adding return route from "; city_name$(from_city(n)); " to "; city_name$(to_city(n)): y = y + 1
-	IF added(n) = 0 THEN x = x + 1: PRINT "Error in CITIES.GRD entry for city #"; to_city(n); city_name$(from_city(n)); ": no return route to "; city_name$(to_city(n)): wait_seconds 1
-NEXT n
-IF x + y = 0 THEN PRINT "ALL MAP LINKS ARE OK": EXIT SUB
-IF y > 0 THEN PRINT "* "; y; " fixes made to provide RETURN ROUTES"
-IF x > 0 THEN PRINT "** "; x; " UNRESOLVED RETURN ROUTES"
 END SUB

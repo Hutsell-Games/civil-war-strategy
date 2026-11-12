@@ -1200,6 +1200,31 @@ AssertEqualInt 0, army_leader_rating(3), "a rating of 0 stays 0"
 AssertEqualInt 0, army_experience(3), "no experience stays none"
 END SUB
 
+' The cities where armies can combine: a city of the side with an army that holds it and
+' another army that has no order.
+SUB TestArmyListCombineCities
+city_name$(7) = "Paducah": city_owner(7) = SIDE_UNION: city_army(7) = 1
+army_city(1) = 7: army_city(2) = 7
+city_name$(3) = "Cairo": city_owner(3) = SIDE_UNION: city_army(3) = 4
+army_city(4) = 3: army_city(5) = 3: army_order(5) = 9
+city_name$(9) = "Boston": city_owner(9) = SIDE_UNION: city_army(9) = 6: army_city(6) = 9
+CALL army_list_combine_cities(SIDE_UNION)
+AssertEqualInt 1, menu_item_count, "one city: not the one whose second army has an order, nor the one with one army"
+AssertEqualInt 7, menu_value(1), "Paducah"
+CALL army_list_combine_cities(SIDE_REBEL)
+AssertEqualInt 0, menu_item_count, "none for the other side"
+END SUB
+
+' The computer razes a fort it takes without a battle under realism, in the map's lower part.
+SUB TestAiRazesFort
+city_y(5) = 151: city_y(6) = 150
+opt_realism = REALISM_OFF
+AssertEqualInt 0, ai_razes_fort(5), "not without realism"
+opt_realism = REALISM_ON
+AssertEqualInt 1, ai_razes_fort(5), "with realism, below line 150"
+AssertEqualInt 0, ai_razes_fort(6), "not at line 150 or above"
+END SUB
+
 ' --------------------------------------- the fleets' small rules (phase 9)
 
 SUB TestNavyMarkSideAndCountShips
@@ -1456,7 +1481,10 @@ END SUB
 '$INCLUDE: '../rules/turn.bm'
 '$INCLUDE: '../rules/victory.bm'
 '$INCLUDE: '../ai/ai.bm'
+'$INCLUDE: '../commands/army.bm'
+'$INCLUDE: '../commands/city.bm'
 '$INCLUDE: '../commands/navy.bm'
+'$INCLUDE: '../commands/railroad.bm'
 '$INCLUDE: '../ui/menu.bm'
 '$INCLUDE: '../ui/main_menu.bm'
 '$INCLUDE: '../ui/orders.bm'
@@ -1466,8 +1494,6 @@ END SUB
 '$INCLUDE: '../ui/screen.bm'
 '$INCLUDE: '../ui/messages.bm'
 '$INCLUDE: '../ui/battle.bm'
-'$INCLUDE: '../ui/railroad.bm'
-'$INCLUDE: '../ui/city.bm'
 '$INCLUDE: '../ui/army.bm'
 '$INCLUDE: '../ui/navy.bm'
 '$INCLUDE: '../ui/turn.bm'

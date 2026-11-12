@@ -1,0 +1,45 @@
+# Civil War Strategy: the player combines two armies in a city, and a train of the computer's
+# arrives in the computer's turn. The game is loaded from a prepared save
+# (tests/data/join/cws1.save): May 1862, the Union plays, with two armies in Washington; a
+# Rebel army is on the train to Richmond.
+#! seed 6
+#! data join
+
+rule 1 key space
+rule 2:E text y
+rule 2:R key enter
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:V
+text r
+play until 2:L
+key enter
+play until 2:M
+digest
+
+# COMMANDS, Join: the menu of cities where armies can combine. Washington: the two armies
+# become one, and the Commands menu comes back on Join.
+text c
+prompt
+text j
+prompt
+digest
+key enter
+prompt
+digest
+key esc
+prompt
+digest
+text e
+
+# July 1862. The Rebel train arrived in the computer's turn.
+play until 2:M
+digest
+
+# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

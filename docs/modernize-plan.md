@@ -143,9 +143,11 @@ and step 8, victory, as `f5ee0f0`. That ends phase 8.
 Phase 9, the menus, has its plan below ("Phase 9: the menus"). Its step 1, the Utility menu, is
 committed as `693c078`, step 2, the Commands menu, as `10056a5`, step 3, the Files menu, as
 `f831801`, step 4, the main menu, as `653e218`, and step 5, the main module as a loop, as
-`83c34c8`. Step 6, the navy's commands, is done in the working tree (2026-11-12).
+`83c34c8`. Step 6, the navy's commands, is committed as `aa2f80b`. That commit does not build:
+it also holds the three `git mv` renames of step 7, without step 7's `$INCLUDE` lines. Step 7,
+the other commands, is done in the working tree (2026-11-12) and puts that right.
 
-**Next:** phase 9 step 7, the other commands with a branch for the computer.
+**Next:** phase 9 step 8, `menu_select` without `GOSUB`, and the file renames.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -345,10 +347,7 @@ their random numbers must stay in order.
 4. **Done: the main menu and its own entries.** See `modernize-completed.md`.
 5. **Done: the main module is a loop.** See `modernize-completed.md`.
 6. **Done: the navy's commands.** See `modernize-completed.md`.
-7. **The other commands with a branch for the computer**: `army_combine`
-   (`IF side <> current_side`), `menu_army_recruit` and `ai_recruit`, `railroad_move`,
-   `menu_army_retreat`, and the computer's one-line choices in the screens. The commands then move
-   to `commands\`.
+7. **Done: the other commands.** See `modernize-completed.md`.
 8. **`menu_select`**: its key loop without the `GOSUB` routines `crsr`, `limits` and `noadjust`.
    Then `CWSTRAT.BAS` and `CWS14.BI` are renamed `cws.bas` and `cws.bi` with `git mv`, as the layout
    says. The rename touches `play.py` and the README.

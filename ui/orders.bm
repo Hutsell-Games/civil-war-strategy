@@ -377,7 +377,7 @@ END SUB
 ' The Commands menu. After a command is carried out it shows again, on that command's row.
 ' A command that is refused or given up goes back to the main menu, as MAIN MENU and Esc do.
 SUB menu_commands
-DIM row AS INTEGER: DIM again AS INTEGER: DIM picked AS INTEGER: DIM side AS INTEGER: DIM drilled AS INTEGER
+DIM row AS INTEGER: DIM again AS INTEGER: DIM picked AS INTEGER: DIM found AS INTEGER: DIM drilled AS INTEGER
 	row = 1
 	DO
 	menu_col = PANEL_COL: menu_row = 13
@@ -405,9 +405,8 @@ DIM row AS INTEGER: DIM again AS INTEGER: DIM picked AS INTEGER: DIM side AS INT
 	CALL menu_city_fortify(picked)
 	IF side_cash(current_side) < COST_FORT THEN EXIT SUB
 	CASE 3
-	side = current_side
-	CALL army_combine(side)
-	IF side < 0 THEN
+	CALL menu_army_combine(current_side, found)
+	IF found = 0 THEN
 	CALL clear_bottom_line
 	COLOR COLOR_LIGHT_CYAN
 	PRINT "No eligible armies in same city to combine";

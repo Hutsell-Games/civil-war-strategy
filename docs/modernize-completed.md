@@ -780,3 +780,37 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
      lines of the game are run in part and 18 are not run: the two unreachable `GOTO`s of
      `navy_combat` are gone, the computer's "no port for a first ship" is part of a line now,
      and `ai_navy_raid` has one new line that nothing can reach.
+7. **Done: the other commands.** Three more SUBs chose between the player and the computer with
+   `side = current_side`. Each is split, and the commands moved to `commands\`.
+   - **Join.** `army_combine` is `menu_army_combine` (the new `ui\army.bm`) for the player and
+     `ai_combine` (`ai\ai.bm`) for the computer, which picks a city at random.
+     `army_list_combine_cities` (`rules\army.bm`) fills the list for both. The command is three
+     parts in `commands\army.bm`: `army_combine_gather`, `army_combine_done` and
+     `army_combine_redraw`. The player's menu pauses between the last two, and says so when no
+     army joined; the computer does neither.
+   - **The train.** `railroad_move` is gone. The player's half is in `menu_main_railroad`
+     (`menu_railroad`, `railroad_start`, the pause). The computer's is `ai_railroad_orders`.
+     The train's arrival at the start of the month's moves calls `railroad_arrive` in
+     `turn_resolve`, with the pause for the player's side. `railroad_finish` clears the panel
+     and the bottom line for all three.
+   - **Raze.** The Raze menu is `menu_raze_fort` (`ui\army.bm`), and the computer's choice is
+     the FUNCTION `ai_razes_fort`. `turn_enter_city` no longer jumps from the player's Yes into
+     the computer's block.
+   - **Moved with `git mv`:** `ui\army.bm`, `ui\city.bm` and `ui\railroad.bm` to `commands\`.
+     `check_map_links`, a printed report, went from `ui\city.bm` to `ui\reports.bm`.
+   - **Left in `ui\`:** the month's moves (`ui\turn.bm`) and the battle (`ui\battle.bm`). They
+     are not orders: they play the month and ask the player on the way (the Retreat menu, "hit
+     any key"). `menu_army_retreat` keeps its test of whose army retreats, since a menu for the
+     computer's army makes no sense; the computer's choice is the rule `turn_retreat_city`.
+     Recruiting was split in phase 7 (`menu_army_recruit`, `ai_recruit`, `army_recruit`).
+   - **A script first**, recorded on the code before this step: `join`. No script had the
+     player combine armies with success, and none had a train of the computer's arrive in the
+     computer's turn; a prepared save gives both.
+   - **Commit `aa2f80b` (step 6) does not build.** It took this step's three `git mv` renames
+     from the index, without the `$INCLUDE` lines that follow them. This step's commit builds.
+   - **A check that varies under load.** With four jobs, `play.py compare` three times found
+     the two builds apart at the Hall of Fame's name prompt (`options`, once `rebel`): the
+     cursor's "on" or "off" in the QB64pe build's state. Alone, with two jobs, and in a fourth
+     run with four jobs the scripts passed. The game's code at that prompt did not change.
+   - Unit tests: 2 new ones, so 123 in all. 37 scripts. Lines moved without a test: none. 188
+     lines of the game are run in part and 18 are not run.

@@ -26,10 +26,12 @@ SUB menu_main (start)
 	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
 END SUB
 
-' Railroad: the train's picture and its capacity, then the move (railroad_move, ui/railroad.bm).
-' With an army on the train already, it says so.
+' Railroad: the train's picture and its capacity. Then the player picks an army and where its
+' train goes (menu_railroad, ui/orders.bm), and the train leaves (commands/railroad.bm). With
+' an army on the train already, it says so.
 SUB menu_main_railroad
 DIM x AS INTEGER: DIM y AS INTEGER: DIM z AS INTEGER: DIM limit AS INTEGER
+DIM army AS INTEGER: DIM city AS INTEGER
 	IF train_army(current_side) = 0 THEN
 		COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 		PSET (550, 20), 0
@@ -40,7 +42,10 @@ DIM x AS INTEGER: DIM y AS INTEGER: DIM z AS INTEGER: DIM limit AS INTEGER
 		COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN COLOR COLOR_LIGHT_CYAN
 		limit = railroad_capacity(current_side)
 		CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
-		CALL railroad_move(current_side)
+		CALL menu_railroad(current_side, army, city)
+		IF army > 0 THEN CALL railroad_start(current_side, army, city)
+		CALL wait_seconds(PAUSE_LONG)
+		CALL railroad_finish
 	ELSE
 		CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Railroad is already carrying "; army_name$(train_army(current_side)); " to "; city_name$(army_order(train_army(current_side)));
 	END IF

@@ -11,7 +11,7 @@ END FUNCTION
 
 ' A side takes city c: the city's value in victory points, and 100 more taken from the other
 ' side when it is that side's capital, which the other side then no longer has. A fort loses a
-' level when weaken_fort is above 0. city_capture (ui/city.bm) shows it.
+' level when weaken_fort is above 0. city_capture (commands/city.bm) shows it.
 SUB city_take (city, side, weaken_fort)
 	city_owner(city) = side
 	side_victory_points(side) = side_victory_points(side) + city_value(city)
@@ -44,7 +44,7 @@ END SUB
 ' Gives every road a way back: when city i has a road to a city that has no road to i, the
 ' road back is added in that city's first free slot. Each road without a way back is listed
 ' in from_city() and to_city(), with added() 1 when the road back was added and 0 when the
-' city had no free slot. count is the length of the list. check_map_links (ui/city.bm) shows it.
+' city had no free slot. count is the length of the list. check_map_links (ui/reports.bm) shows it.
 SUB city_fix_return_routes (count, added(), from_city(), to_city())
 DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM index AS INTEGER
 count = 0

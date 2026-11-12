@@ -1,5 +1,5 @@
 ' The rules of a side's train. They draw nothing. railroad_start and railroad_arrive
-' (ui/railroad.bm) show the train and call them.
+' (commands/railroad.bm) show the train and call them.
 
 ' Puts an army on the train for a city. The army leaves its city, which passes to the next army
 ' there, if any.

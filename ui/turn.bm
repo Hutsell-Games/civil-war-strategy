@@ -41,7 +41,13 @@ CALL draw_update_box
 '==========================================================================
 '                       Assign Time of Action
 '==========================================================================
-FOR i = SIDE_UNION TO SIDE_REBEL: IF train_army(i) > 0 THEN CALL railroad_move(i): LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B: CALL draw_train_box
+FOR i = SIDE_UNION TO SIDE_REBEL
+	IF train_army(i) > 0 THEN
+		CALL railroad_arrive(i)
+		IF i = current_side THEN CALL wait_seconds(PAUSE_LONG)
+		CALL railroad_finish
+		LINE (5, 17)-(100, 63), 3, BF: LINE (5, 17)-(100, 63), 0, B: CALL draw_train_box
+	END IF
 NEXT i
 
 CALL turn_set_move_order
@@ -198,7 +204,7 @@ END SUB
 ' An army moves into the city, which is now free of the enemy, and takes it if it is not
 ' its side's. Without a battle, the player may raze a fort there, and the computer does.
 SUB turn_enter_city (active, target, fought)
-DIM s AS INTEGER: DIM c AS INTEGER
+DIM s AS INTEGER: DIM c AS INTEGER: DIM raze AS INTEGER
 s = army_side(active)
 CALL draw_map_marker(army_city(active), target, MARK_ERASE_ARMY)
 CALL turn_occupy(active, target)
@@ -208,26 +214,16 @@ CALL draw_army_flag(active)
 '---------------------------------------------------------------------------
 	IF city_owner(army_city(active)) = s GOTO horde
 	c = army_city(active)
-	IF opt_players = PLAYERS_ONE AND s = current_side AND city_fort(c) > 0 AND fought = 0 THEN
-		menu_col = PANEL_COL: menu_row = 15
-		menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN
-		menu_text$(0) = "Raze ?"
-		menu_text$(1) = "No"
-		menu_text$(2) = "Yes"
-		menu_item_count = 2
-		CALL menu_select(MENU_PLAIN)
-		CALL clear_right_panel
-		IF menu_choice = 2 GOTO smoke
+	raze = 0
+	IF opt_players = PLAYERS_ONE AND city_fort(c) > 0 AND fought = 0 THEN
+		IF s = current_side THEN CALL menu_raze_fort(raze) ELSE raze = ai_razes_fort(c)
 	END IF
-	IF opt_players = PLAYERS_ONE AND s <> current_side AND city_fort(c) > 0 AND fought = 0 THEN
-		IF opt_realism >= REALISM_ON AND city_y(c) > 150 THEN
-smoke:
+	IF raze = 1 THEN
 			CALL turn_raze_fort(c)
 			CALL city_redraw_fort(c)
 			CALL clear_bottom_line
 			PRINT army_name$(active); " has destroyed the forts at "; city_name$(c);
 			wait_seconds 3
-		END IF
 	END IF
 	CALL city_capture(active, c, s, fought)
 horde:
@@ -237,7 +233,7 @@ END SUB
 ' The computer's half of the month: special events, then each of its decisions in turn, which
 ' carry out their orders on screen.
 SUB ai_turn
-DIM who AS INTEGER: DIM c AS INTEGER: DIM a AS INTEGER
+DIM who AS INTEGER: DIM c AS INTEGER
 CALL special_events
 who = other_side(current_side)
 c = 9: IF current_side = SIDE_UNION THEN c = 15
@@ -248,8 +244,8 @@ CALL ai_fortify(who)
 CALL ai_raise_forces(who)
 CALL ai_fleet_orders(who)
 	CALL draw_fleets
-a = who: CALL army_combine(a)
-CALL railroad_move(who)
+CALL ai_combine(who)
+CALL ai_railroad_orders(who)
 CALL ai_army_orders(who, c)
 CALL ai_drill(who)
 END SUB

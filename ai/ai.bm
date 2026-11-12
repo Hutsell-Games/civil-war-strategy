@@ -1,6 +1,6 @@
 ' The computer's decisions. They draw nothing themselves: their messages are SUBs of ui/ai.bm,
-' and they carry out an order through the same SUBs as the player's commands (the fleet's
-' orders of commands/navy.bm, army_combine, army_recruit, army_resupply, railroad_move).
+' and they carry out an order through the same SUBs as the player's menus: the commands of
+' commands/navy.bm, commands/army.bm and commands/railroad.bm.
 
 ' The computer supplies each of its armies that has none.
 SUB ai_resupply (who)
@@ -325,6 +325,41 @@ DIM x AS INTEGER: DIM i AS INTEGER: DIM target AS INTEGER: DIM y AS INTEGER: DIM
 		NEXT i
 	END IF
 	IF side_cash(side) < COST_RECRUIT THEN menu_choice = menu_item_count
+END SUB
+
+' The computer combines the armies in one of the cities where armies can combine, picked at
+' random.
+SUB ai_combine (side)
+DIM city AS INTEGER: DIM best AS INTEGER: DIM joined AS INTEGER
+	CALL army_list_combine_cities(side)
+	IF menu_item_count = 0 THEN EXIT SUB
+	menu_choice = 1 + INT(menu_item_count * RND)
+	city = menu_value(menu_choice)
+	CALL army_combine_gather(side, city, best, joined)
+	IF joined = 0 THEN EXIT SUB
+	CALL army_combine_done(side, city, best, joined)
+	CALL army_combine_redraw(side, city, best)
+END SUB
+
+' 1 when the computer's army razes the fort of a city it takes without a battle: under the
+' Realism setting, in the lower part of the map.
+FUNCTION ai_razes_fort (city)
+	ai_razes_fort = 0
+	IF opt_realism >= REALISM_ON AND city_y(city) > 150 THEN ai_razes_fort = 1
+END FUNCTION
+
+' The computer's train. With an army aboard, it arrives. With none, the computer may send one
+' (ai_railroad).
+SUB ai_railroad_orders (side)
+DIM army AS INTEGER: DIM city AS INTEGER
+SELECT CASE train_army(side)
+	CASE 0
+	CALL ai_railroad(side, army, city)
+	IF army > 0 THEN CALL railroad_start(side, army, city)
+	CASE IS > 0
+	CALL railroad_arrive(side)
+END SELECT
+	CALL railroad_finish
 END SUB
 
 ' The computer's train: an army that is far from the enemy, and a city of its own that the

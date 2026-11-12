@@ -1,0 +1,41 @@
+' The player's menus for the armies' orders that the computer gives too. Each asks the
+' player, then gives the order (commands/army.bm). The computer's are ai_combine and
+' ai_razes_fort (ai/ai.bm). The other menus for armies are in ui/orders.bm.
+
+' Commands, Join: the player picks a city where armies can combine, and they become one.
+' found is 0 when there is no such city.
+SUB menu_army_combine (side, found)
+DIM city AS INTEGER: DIM best AS INTEGER: DIM joined AS INTEGER
+	found = 0
+	CALL army_list_combine_cities(side)
+	IF menu_item_count = 0 THEN EXIT SUB
+	found = 1
+	menu_text$(0) = "Join"
+	menu_choice = MENU_START + 10: menu_highlight = COLOR_LIGHT_CYAN
+	CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
+	IF menu_choice < 1 THEN EXIT SUB
+	city = menu_value(menu_choice)
+	CALL army_combine_gather(side, city, best, joined)
+	IF joined = 0 THEN
+		PRINT "No valid armies to combine at this time in "; city_name$(city);
+		wait_seconds opt_pause!
+		EXIT SUB
+	END IF
+	CALL army_combine_done(side, city, best, joined)
+	CALL wait_seconds(opt_pause!)
+	CALL army_combine_redraw(side, city, best)
+END SUB
+
+' Raze ?: the player's army takes a city with a fort, without a battle. raze is 1 on Yes.
+SUB menu_raze_fort (raze)
+	raze = 0
+	menu_col = PANEL_COL: menu_row = 15
+	menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN
+	menu_text$(0) = "Raze ?"
+	menu_text$(1) = "No"
+	menu_text$(2) = "Yes"
+	menu_item_count = 2
+	CALL menu_select(MENU_PLAIN)
+	CALL clear_right_panel
+	IF menu_choice = 2 THEN raze = 1
+END SUB

@@ -1,8 +1,8 @@
 ' The rules of the armies. They draw nothing. The screens of raising, supplying and combining
-' armies are in ui/army.bm, and call these.
+' armies are in commands/army.bm, and call these.
 
 ' Combining armies. Army 0 gathers the armies of a city, and the army of the best leader among
-' them takes them over. army_combine (ui/army.bm) calls army_combine_start, then
+' them takes them over. army_combine_gather (commands/army.bm) calls army_combine_start, then
 ' army_combine_add for each army of the side, army_combine_absorb for each that joins, and
 ' army_combine_finish.
 SUB army_combine_start (city)
@@ -55,7 +55,7 @@ SUB army_combine_finish (city, best, joined)
 END SUB
 
 ' A new army in a city: its supplies, experience, leader and size, and the price of 100 taken
-' from the side. army_new (ui/army.bm) shows it.
+' from the side. army_new (commands/army.bm) shows it.
 SUB army_raise (side, slot, city)
 DIM x AS INTEGER: DIM a AS INTEGER
 	army_supply(slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(slot) = army_supply(slot) + 2
@@ -86,7 +86,7 @@ END SUB
 
 ' The next commander of a side, in slot: the first army without a city that has a name on the
 ' list, or a name made up for the first army without a city. slot is 0 when every army has a
-' city. army_get_commander (ui/army.bm) says so.
+' city. army_get_commander (commands/army.bm) says so.
 SUB army_pick_commander (side, slot)
 DIM fin AS INTEGER: DIM a$
 DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
@@ -111,7 +111,7 @@ END SUB
 
 ' Buys supplies for an army, up to the resupply level, as far as the side's cash goes. result is
 ' SUPPLY_BOUGHT, SUPPLY_NO_CASH when the cash was not enough, or SUPPLY_CUT_OFF when the army is
-' cut off under the Realism setting. army_resupply (ui/army.bm) shows it.
+' cut off under the Realism setting. army_resupply (commands/army.bm) shows it.
 SUB army_buy_supply (army, result)
 DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 		result = SUPPLY_CUT_OFF
@@ -190,6 +190,26 @@ END SUB
 SUB army_drill (army)
 	army_experience(army) = army_experience(army) + 1
 	army_order(army) = ORDER_BUSY
+END SUB
+
+' Fills the menu with the side's cities where armies can combine: a city with an army that
+' holds it and another that has no order. menu_item_count is 0 when there is none.
+SUB army_list_combine_cities (side)
+DIM fin AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
+	menu_color = COLOR_CYAN: menu_highlight = COLOR_CYAN
+	menu_col = PANEL_COL: menu_row = 2
+	star = side_first_army(side): fin = side_last_army(side)
+	menu_item_count = 0
+	FOR i = 1 TO MAX_CITIES
+		IF city_owner(i) = side AND city_army(i) > 0 THEN
+			FOR j = star TO fin
+			IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
+			NEXT j
+		END IF
+	NEXT i
+
+	IF menu_item_count = 0 THEN EXIT SUB
+	CALL menu_bubble_sort(menu_item_count)
 END SUB
 
 ' Gives an army its order: a city to march to, or ORDER_NONE, ORDER_BUSY or ORDER_DONE.
