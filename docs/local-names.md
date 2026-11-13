@@ -38,9 +38,8 @@ Done on 2026-11-12. The tables are in `local-names-completed.md`.
 
 The labels that only skipped or left a loop were removed on 2026-11-12 (`local-names-completed.md`).
 
-Five labels are left, all in `menu_city_select` (`ui\orders.bm`), with 7 lines that jump to them: `fnew`,
-`minus1`, `morecap`, `plus1` and `spin2`. They are the city picker's key loop: three loops inside a
-`SELECT CASE` inside a loop. Removing them is a rewrite of the SUB, not a replacement line by line.
+The last five, in `menu_city_select` (`ui\orders.bm`), went the same day when its key loop was rewritten
+(`modernize-completed.md`, "the last labels"). No label is left.
 
 ## Part 3: constants that read unclearly
 

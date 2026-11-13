@@ -99,7 +99,7 @@ DIM letter$: DIM tries AS INTEGER: DIM k AS INTEGER: DIM start_city AS INTEGER
 		menu_text$(1) = "  "
 		menu_text$(3) = "  "
 		menu_item_count = 3: letter$ = city_name$(city)
-morecap:
+	DO
 		menu_col = 68: menu_row = 15: menu_color = COLOR_CYAN: menu_choice = MENU_START + 2
 		menu_text$(2) = city_name$(city)
 		CALL menu_select(MENU_RAW_KEYS): CALL clear_right_panel
@@ -112,29 +112,28 @@ morecap:
 		FOR k = 1 TO MAX_CITIES
 		IF LEFT$(city_name$(k), 1) = letter$ THEN
 			start_city = city: city = k
-spin2:
-			IF city_owner(city) = current_side GOTO morecap
+			DO WHILE city_owner(city) <> current_side
 				city = city + 1
 				IF city > MAX_CITIES THEN city = 1
-				tries = tries + 1: IF tries < 39 GOTO spin2
-				city = start_city: GOTO morecap
+				tries = tries + 1: IF tries >= 39 THEN city = start_city: EXIT DO
+			LOOP
+			EXIT FOR
 		END IF
 		NEXT k
-		GOTO morecap
 		CASE 1
-minus1:
+		DO
 		city = city - 1: IF city < 1 THEN city = MAX_CITIES
-		IF city_owner(city) <> current_side GOTO minus1 ELSE GOTO morecap
+		LOOP UNTIL city_owner(city) = current_side
 		CASE 2
-		GOTO fnew
+		EXIT SUB
 		CASE 3
-plus1:
+		DO
 		city = city + 1: IF city > MAX_CITIES THEN city = 1
-		IF city_owner(city) <> current_side GOTO plus1 ELSE GOTO morecap
+		LOOP UNTIL city_owner(city) = current_side
 		CASE ELSE
-		city = 0
+		city = 0: EXIT SUB
 		END SELECT
-fnew:
+	LOOP
 END SUB
 
 ' The Troops command: the player picks a city from the month's list and raises men there,

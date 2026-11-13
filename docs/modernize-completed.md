@@ -943,3 +943,17 @@ Both steps:
   changed statement that no test runs: the `EXIT SUB` on the first line of `ai_raise_forces`,
   after the Union computer's first ship. The `GOTO isok` it replaced was not run either.
 - Unit tests: 124, one new. 38 scripts, unchanged recordings, both compilers.
+
+**Done (2026-11-12): the last labels.** `menu_city_select` (`ui\orders.bm`) was the last SUB with
+`GOTO`: 7 jumps to five labels. The game now has no `GOTO`, `GOSUB` or label. The only
+`ON ERROR GOTO` left is `ON ERROR GOTO 0`.
+
+- The picker's menu is a `DO` loop. Esc, Enter and `CASE ELSE` leave with `EXIT SUB`; every other
+  key shows the menu again.
+- A letter takes the first city that starts with it, then steps forward in a `DO WHILE` loop to a
+  city of the player's. After 39 steps it goes back to the city it started from (`EXIT DO`), as
+  before. `EXIT FOR` ends the search, where the jump back to the menu ended it before.
+- The arrows step back or forward in a `DO ... LOOP UNTIL` the city is the player's.
+- Lines that no test runs: 17. The give-up after 39 cities was a line of its own and is now the end
+  of the line that counts the steps. It still never runs. 126 unit tests and 38 scripts pass, with
+  unchanged recordings and both compilers.

@@ -199,7 +199,7 @@ Phase 7's rule for these lines still holds:
 - A step that must rewrite lines no test runs (the `GOTO` knots of `navy_commands` and `turn_resolve`)
   waits for its tests.
 
-The 18 lines that no test runs (20 before phase 9 step 6). The table names the SUB, not the line
+The 17 lines that no test runs (20 before phase 9 step 6, 18 before the last labels went). The table names the SUB, not the line
 numbers, because each step moves the lines; `report.txt` has the numbers of the day.
 
 | File | SUB | Lines | Why |
@@ -213,7 +213,6 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `rules\battle.bm` | `battle_losses` | 2 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
 | `ai\ai.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
 | `rules\turn.bm` | `turn_set_move_order` | 2 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
-| `ui\orders.bm` | `menu_city_select` | 1 | The picker found no city of the player's among 39; the player always holds the city it started on |
 | `ui\orders.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 
