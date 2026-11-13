@@ -1,11 +1,11 @@
 SUB draw_union_victory
-DIM x AS INTEGER: DIM i AS INTEGER
+DIM capitol_wing AS INTEGER: DIM i AS INTEGER
 SCREEN 12
 CLS
 LINE (1, 1)-(639, 150), 4, BF
 LINE (1, 150)-(639, 300), 15, BF
 LINE (1, 300)-(639, 450), 1, BF
-x = 0
+capitol_wing = 0
 LINE (150, 190)-(500, 254), 7, B
 LINE (270, 190)-(370, 254), 7, B
 LINE (270, 185)-(370, 175), 7, B
@@ -14,14 +14,14 @@ LINE (270, 235)-(370, 254), 7, B
 CIRCLE (320, 150), 74, 7, .2, 2.95, 2.1
 LINE (285, 138)-(355, 168), 7, B
 lwing:
-PSET (180 + 120 * x, 200), 0
+PSET (180 + 120 * capitol_wing, 200), 0
 
 DRAW "C7ER1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1F1R1F1R1F1"
 DRAW "R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1L47D4R48U3D51L4U17L41D17L3U47"
 FOR i = 1 TO 7: DRAW "BR6R2D25L2U25": NEXT i
 DRAW "BD33R2"
 FOR i = 1 TO 5: DRAW "L40BR40D3": NEXT i
-x = x + 1: IF x < 3 GOTO lwing
+capitol_wing = capitol_wing + 1: IF capitol_wing < 3 GOTO lwing
 PSET (270, 190), 0
 FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
 PSET (344, 190), 0
@@ -122,127 +122,127 @@ RETURN
 relee:
 END SUB
 
-SUB draw_surrender (side)
-DIM s AS INTEGER: DIM side_color AS INTEGER: DIM w AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+SUB draw_surrender (army)
+DIM side AS INTEGER: DIM side_color AS INTEGER: DIM panel_left AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 SCREEN 12
-s = SIDE_UNION: side_color = 1: COLOR COLOR_BLACK: w = 514
-IF army_side(side) = SIDE_REBEL THEN side_color = 7: s = SIDE_REBEL
+side = SIDE_UNION: side_color = 1: COLOR COLOR_BLACK: panel_left = 514
+IF army_side(army) = SIDE_REBEL THEN side_color = 7: side = SIDE_REBEL
 '               background
-LINE (w + 15, 440)-(w + 125, 16), 2, BF
-LINE (w + 15, 16)-(w + 125, 290), 3, BF
-LINE (w + 14, 16)-(w + 125, 440), side_color, B
+LINE (panel_left + 15, 440)-(panel_left + 125, 16), 2, BF
+LINE (panel_left + 15, 16)-(panel_left + 125, 290), 3, BF
+LINE (panel_left + 14, 16)-(panel_left + 125, 440), side_color, B
 x = 77: y = 280
-CIRCLE (w + x + 10, y + 30), 30, 4, , , .1
-PAINT (w + x + 10, y + 30), 6, 4
-LINE (w + x, y + 28)-(w + x + 6, y + 28): LINE -(w + x + 6, y + 8)
-LINE -(w + x + 8, y + 8): LINE -(w + x + 8, y + 28)
-LINE -(w + x + 12, y + 28): LINE -(w + x + 12, y + 12)
-LINE -(w + x + 15, y + 12): LINE -(w + x + 15, y + 30)
-LINE -(w + x + 18, y + 30): LINE -(w + x + 18, y + 20)
-LINE -(w + x + 21, y + 21): LINE -(w + x + 21, y + 32)
-LINE -(w + x + 25, y + 32): LINE -(w + x + 25, y + 17)
-LINE -(w + x + 27, y + 17): LINE -(w + x + 25, y - 10)
-LINE -(w + x + 19, y - 14): LINE -(w + x + 15, y - 5)
-LINE -(w + x + 12, y - 12): LINE -(w + x + 8, y - 15)
-LINE -(w + x + 6, y - 15): LINE -(w + x + 6, y - 11)
-LINE -(w + x + 3, y - 14): LINE -(w + x + 2, y - 14)
-LINE -(w + x + 1, y - 10): LINE -(w + x - 3, y - 11)
-LINE -(w + x - 3, y + 15): LINE -(w + x, y + 15)
-LINE -(w + x, y - 3): LINE -(w + x + 2, y - 3)
-LINE -(w + x, y + 28)
-PAINT (w + x + 10, y), 8 - side_color, 0
+CIRCLE (panel_left + x + 10, y + 30), 30, 4, , , .1
+PAINT (panel_left + x + 10, y + 30), 6, 4
+LINE (panel_left + x, y + 28)-(panel_left + x + 6, y + 28): LINE -(panel_left + x + 6, y + 8)
+LINE -(panel_left + x + 8, y + 8): LINE -(panel_left + x + 8, y + 28)
+LINE -(panel_left + x + 12, y + 28): LINE -(panel_left + x + 12, y + 12)
+LINE -(panel_left + x + 15, y + 12): LINE -(panel_left + x + 15, y + 30)
+LINE -(panel_left + x + 18, y + 30): LINE -(panel_left + x + 18, y + 20)
+LINE -(panel_left + x + 21, y + 21): LINE -(panel_left + x + 21, y + 32)
+LINE -(panel_left + x + 25, y + 32): LINE -(panel_left + x + 25, y + 17)
+LINE -(panel_left + x + 27, y + 17): LINE -(panel_left + x + 25, y - 10)
+LINE -(panel_left + x + 19, y - 14): LINE -(panel_left + x + 15, y - 5)
+LINE -(panel_left + x + 12, y - 12): LINE -(panel_left + x + 8, y - 15)
+LINE -(panel_left + x + 6, y - 15): LINE -(panel_left + x + 6, y - 11)
+LINE -(panel_left + x + 3, y - 14): LINE -(panel_left + x + 2, y - 14)
+LINE -(panel_left + x + 1, y - 10): LINE -(panel_left + x - 3, y - 11)
+LINE -(panel_left + x - 3, y + 15): LINE -(panel_left + x, y + 15)
+LINE -(panel_left + x, y - 3): LINE -(panel_left + x + 2, y - 3)
+LINE -(panel_left + x, y + 28)
+PAINT (panel_left + x + 10, y), 8 - side_color, 0
 
-CIRCLE (w + x + 7, y - 10), 3, 0: PAINT (w + x + 7, y - 10), 0, 0
-CIRCLE (w + x + 20, y - 8), 3, 0: PAINT (w + x + 20, y - 8), 0, 0
+CIRCLE (panel_left + x + 7, y - 10), 3, 0: PAINT (panel_left + x + 7, y - 10), 0, 0
+CIRCLE (panel_left + x + 20, y - 8), 3, 0: PAINT (panel_left + x + 20, y - 8), 0, 0
 
-LINE (w + x + 5, y - 30)-(w + x + 6, y - 9)
-LINE (w + x + 20, y)-(w + x + 35, y + 30)
-LINE (w + x + 20, y + 1)-(w + x + 35, y + 31)
-LINE (w + x + 22, y - 31)-(w + x + 21, y - 8)
-LINE (w + x - 1, y - 28)-(w + x, y - 8)
+LINE (panel_left + x + 5, y - 30)-(panel_left + x + 6, y - 9)
+LINE (panel_left + x + 20, y)-(panel_left + x + 35, y + 30)
+LINE (panel_left + x + 20, y + 1)-(panel_left + x + 35, y + 31)
+LINE (panel_left + x + 22, y - 31)-(panel_left + x + 21, y - 8)
+LINE (panel_left + x - 1, y - 28)-(panel_left + x, y - 8)
 '                       boot
-CIRCLE (w + 37, 425), 22, 8, , , .3
-PAINT (w + 37, 430), 8, 8
-LINE (w + 26, 426)-(w + 46, 426)
-LINE -(w + 46, 423): LINE -(w + 36, 419)
-LINE -(w + 36, 397): LINE -(w + 26, 397)
-LINE -(w + 26, 426)
-PAINT (w + 27, 399), 0, 0
+CIRCLE (panel_left + 37, 425), 22, 8, , , .3
+PAINT (panel_left + 37, 430), 8, 8
+LINE (panel_left + 26, 426)-(panel_left + 46, 426)
+LINE -(panel_left + 46, 423): LINE -(panel_left + 36, 419)
+LINE -(panel_left + 36, 397): LINE -(panel_left + 26, 397)
+LINE -(panel_left + 26, 426)
+PAINT (panel_left + 27, 399), 0, 0
 '                       arm
-LINE (w + 26, 397)-(w + 25, 396): LINE -(w + 24, 374)
-LINE -(w + 25, 346): LINE (w + 25, 346)-(w + 22, 341)
-LINE -(w + 46, 341): LINE -(w + 46, 349)
-LINE -(w + 41, 365): LINE -(w + 41, 380)
-LINE -(w + 36, 398)
-PAINT (w + 30, 350), side_color, 0
+LINE (panel_left + 26, 397)-(panel_left + 25, 396): LINE -(panel_left + 24, 374)
+LINE -(panel_left + 25, 346): LINE (panel_left + 25, 346)-(panel_left + 22, 341)
+LINE -(panel_left + 46, 341): LINE -(panel_left + 46, 349)
+LINE -(panel_left + 41, 365): LINE -(panel_left + 41, 380)
+LINE -(panel_left + 36, 398)
+PAINT (panel_left + 30, 350), side_color, 0
 '                       saber
-LINE (w + 55, 288)-(w + 58, 360), 14, BF
-LINE (w + 55, 288)-(w + 55, 360), 14
-LINE (w + 56, 361)-(w + 55, 360), 14
-LINE (w + 57, 361)-(w + 58, 350), 14
-LINE (w + 58, 350)-(w + 58, 288), 14
-LINE (w + 55, 272)-(w + 62, 288), 6, B
-LINE (w + 56, 273)-(w + 61, 287), 6, B
-LINE (w + 57, 274)-(w + 60, 286), 6, B
+LINE (panel_left + 55, 288)-(panel_left + 58, 360), 14, BF
+LINE (panel_left + 55, 288)-(panel_left + 55, 360), 14
+LINE (panel_left + 56, 361)-(panel_left + 55, 360), 14
+LINE (panel_left + 57, 361)-(panel_left + 58, 350), 14
+LINE (panel_left + 58, 350)-(panel_left + 58, 288), 14
+LINE (panel_left + 55, 272)-(panel_left + 62, 288), 6, B
+LINE (panel_left + 56, 273)-(panel_left + 61, 287), 6, B
+LINE (panel_left + 57, 274)-(panel_left + 60, 286), 6, B
 		  
-LINE (w + 54, 295)-(w + 60, 305), 12, BF
-LINE (w + 53, 294)-(w + 61, 306), 0, B
-LINE (w + 57, 303)-(w + 61, 303)
-LINE (w + 57, 298)-(w + 61, 298)
-LINE (w + 34, 310)-(w + 46, 312), side_color, BF
-LINE (w + 25, 380)-(w + 35, 378)
-LINE (w + 25, 365)-(w + 34, 366)
+LINE (panel_left + 54, 295)-(panel_left + 60, 305), 12, BF
+LINE (panel_left + 53, 294)-(panel_left + 61, 306), 0, B
+LINE (panel_left + 57, 303)-(panel_left + 61, 303)
+LINE (panel_left + 57, 298)-(panel_left + 61, 298)
+LINE (panel_left + 34, 310)-(panel_left + 46, 312), side_color, BF
+LINE (panel_left + 25, 380)-(panel_left + 35, 378)
+LINE (panel_left + 25, 365)-(panel_left + 34, 366)
 '                       shoulder
 COLOR COLOR_BLACK
-LINE (w + 53, 297)-(w + 31, 305): LINE -(w + 25, 270)
-LINE -(w + 18, 270): LINE -(w + 16, 275)
-LINE -(w + 21, 309): LINE -(w + 28, 316)
-LINE -(w + 52, 306): LINE -(w + 53, 298)
-PAINT (w + 20, 280), side_color, 0
-LINE (w + 30, 310)-(w + 32, 305): LINE -(w + 25, 307)
-LINE (w + 46, 298)-(w + 47, 275)
-LINE (w + 47, 275)-(w + 41, 269)
-LINE (w + 41, 269)-(w + 25, 269)
-PAINT (w + 45, 275), side_color, 0
-CIRCLE (w + 40, 275), 1, 14
-CIRCLE (w + 40, 285), 1, 14
-CIRCLE (w + 40, 295), 1, 14
+LINE (panel_left + 53, 297)-(panel_left + 31, 305): LINE -(panel_left + 25, 270)
+LINE -(panel_left + 18, 270): LINE -(panel_left + 16, 275)
+LINE -(panel_left + 21, 309): LINE -(panel_left + 28, 316)
+LINE -(panel_left + 52, 306): LINE -(panel_left + 53, 298)
+PAINT (panel_left + 20, 280), side_color, 0
+LINE (panel_left + 30, 310)-(panel_left + 32, 305): LINE -(panel_left + 25, 307)
+LINE (panel_left + 46, 298)-(panel_left + 47, 275)
+LINE (panel_left + 47, 275)-(panel_left + 41, 269)
+LINE (panel_left + 41, 269)-(panel_left + 25, 269)
+PAINT (panel_left + 45, 275), side_color, 0
+CIRCLE (panel_left + 40, 275), 1, 14
+CIRCLE (panel_left + 40, 285), 1, 14
+CIRCLE (panel_left + 40, 295), 1, 14
 
-LINE (w + 21, 306)-(w + 18, 340)
-LINE (w + 18, 340)-(w + 47, 340)
-LINE (w + 46, 310)-(w + 48, 339)
-PAINT (w + 30, 330), side_color, 0
-LINE (w + 46, 312)-(w + 21, 316), 0, BF
-LINE (w + 25, 312)-(w + 35, 313), side_color, BF
+LINE (panel_left + 21, 306)-(panel_left + 18, 340)
+LINE (panel_left + 18, 340)-(panel_left + 47, 340)
+LINE (panel_left + 46, 310)-(panel_left + 48, 339)
+PAINT (panel_left + 30, 330), side_color, 0
+LINE (panel_left + 46, 312)-(panel_left + 21, 316), 0, BF
+LINE (panel_left + 25, 312)-(panel_left + 35, 313), side_color, BF
 
-LINE (w + 30, 268)-(w + 41, 264), 12, BF
-LINE (w + 30, 263)-(w + 41, 263), 0
-LINE (w + 30, 264)-(w + 26, 260): LINE -(w + 25, 248)
-LINE -(w + 28, 243): LINE -(w + 46, 243)
-LINE -(w + 48, 245): LINE -(w + 48, 248)
-LINE -(w + 51, 254): LINE -(w + 51, 255)
-LINE -(w + 48, 256): LINE -(w + 48, 261)
-LINE -(w + 46, 263): LINE -(w + 39, 263)
-PAINT (w + 40, 250), 12, 0
+LINE (panel_left + 30, 268)-(panel_left + 41, 264), 12, BF
+LINE (panel_left + 30, 263)-(panel_left + 41, 263), 0
+LINE (panel_left + 30, 264)-(panel_left + 26, 260): LINE -(panel_left + 25, 248)
+LINE -(panel_left + 28, 243): LINE -(panel_left + 46, 243)
+LINE -(panel_left + 48, 245): LINE -(panel_left + 48, 248)
+LINE -(panel_left + 51, 254): LINE -(panel_left + 51, 255)
+LINE -(panel_left + 48, 256): LINE -(panel_left + 48, 261)
+LINE -(panel_left + 46, 263): LINE -(panel_left + 39, 263)
+PAINT (panel_left + 40, 250), 12, 0
 
-LINE (w + 16, 242)-(w + 57, 241), 0, BF
-LINE (w + 45, 240)-(w + 28, 240)
-LINE -(w + 31, 232): LINE -(w + 45, 232)
-LINE -(w + 48, 240)
-PAINT (w + 40, 235), side_color, 0
+LINE (panel_left + 16, 242)-(panel_left + 57, 241), 0, BF
+LINE (panel_left + 45, 240)-(panel_left + 28, 240)
+LINE -(panel_left + 31, 232): LINE -(panel_left + 45, 232)
+LINE -(panel_left + 48, 240)
+PAINT (panel_left + 40, 235), side_color, 0
 
-LINE (w + 80, 303)-(w + 81, 200), 6, BF
+LINE (panel_left + 80, 303)-(panel_left + 81, 200), 6, BF
 
-LINE (w + 48, 251)-(w + 44, 250), 0, B
-LINE (w + 29, 263)-(w + 43, 266)
-LINE -(w + 46, 266): LINE -(w + 48, 263)
-LINE -(w + 48, 260): LINE -(w + 37, 258)
-LINE -(w + 36, 255): LINE -(w + 37, 250)
-LINE -(w + 39, 246): LINE -(w + 40, 243)
-side_color = 0: IF s = SIDE_REBEL THEN side_color = 15: LINE (547, 263)-(558, 263), 15
-PAINT (w + 33, 250), side_color, 0
-PAINT (w + 42, 264), side_color, 0
+LINE (panel_left + 48, 251)-(panel_left + 44, 250), 0, B
+LINE (panel_left + 29, 263)-(panel_left + 43, 266)
+LINE -(panel_left + 46, 266): LINE -(panel_left + 48, 263)
+LINE -(panel_left + 48, 260): LINE -(panel_left + 37, 258)
+LINE -(panel_left + 36, 255): LINE -(panel_left + 37, 250)
+LINE -(panel_left + 39, 246): LINE -(panel_left + 40, 243)
+side_color = 0: IF side = SIDE_REBEL THEN side_color = 15: LINE (547, 263)-(558, 263), 15
+PAINT (panel_left + 33, 250), side_color, 0
+PAINT (panel_left + 42, 264), side_color, 0
 
-CALL draw_flag(other_side(s), 26, 0)
-IF side < 99 THEN CALL wait_seconds(opt_pause!)
+CALL draw_flag(other_side(side), 26, 0)
+IF army < 99 THEN CALL wait_seconds(opt_pause!)
 END SUB

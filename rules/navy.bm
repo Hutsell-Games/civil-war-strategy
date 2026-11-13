@@ -81,10 +81,10 @@ END SUB
 ' Attack on the army in the city the fleet lies off: losses of its men, in hundreds, and some
 ' of its supplies. The army keeps at least 100 men.
 SUB navy_bombard_army (side, army, losses)
-DIM pct!: DIM x AS INTEGER
-	pct! = .005 * fleet_size(side) + .02 * RND: losses = army_size(army) * pct!: IF losses < 1 THEN losses = 1
-	x = .5 * fleet_size(side) + 1: IF x > army_supply(army) THEN x = army_supply(army)
-	army_supply(army) = army_supply(army) - x
+DIM loss_rate!: DIM supply_loss AS INTEGER
+	loss_rate! = .005 * fleet_size(side) + .02 * RND: losses = army_size(army) * loss_rate!: IF losses < 1 THEN losses = 1
+	supply_loss = .5 * fleet_size(side) + 1: IF supply_loss > army_supply(army) THEN supply_loss = army_supply(army)
+	army_supply(army) = army_supply(army) - supply_loss
 	army_size(army) = army_size(army) - losses: IF army_size(army) < 1 THEN army_size(army) = 1
 END SUB
 
@@ -171,12 +171,12 @@ END FUNCTION
 ' Naval combat: 1 when the side's shot hits. An ironclad against a wooden ship has a better
 ' chance, and a wooden ship against an ironclad a worse one.
 FUNCTION navy_shot_hits (side)
-DIM pct!: DIM a$
-	pct! = 0: a$ = RIGHT$(fleet_ships$(side), 1)
-	IF a$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
-		IF a$ = "I" THEN pct! = .1 ELSE pct! = -.1
+DIM ironclad_bonus!: DIM ship$
+	ironclad_bonus! = 0: ship$ = RIGHT$(fleet_ships$(side), 1)
+	IF ship$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
+		IF ship$ = "I" THEN ironclad_bonus! = .1 ELSE ironclad_bonus! = -.1
 	END IF
-	navy_shot_hits = 0: IF RND <= .5 + pct! THEN navy_shot_hits = 1
+	navy_shot_hits = 0: IF RND <= .5 + ironclad_bonus! THEN navy_shot_hits = 1
 END FUNCTION
 
 ' Naval combat: the loser's fleet is sunk. The loser's side gets 10 victory points (TODO.md).

@@ -2,7 +2,7 @@
 ' Fame. The rules are in rules/victory.bm.
 
 SUB hall_of_fame
-DIM i AS INTEGER: DIM side AS INTEGER: DIM k AS INTEGER: DIM a$
+DIM i AS INTEGER: DIM side AS INTEGER: DIM k AS INTEGER: DIM commander$
 DIM hall_name$(2, 5): DIM hall_score(2, 5)
 COLOR COLOR_YELLOW: LOCATE 28, 1: PRINT "press a key"; : CALL wait_key("H")
 SCREEN 0: COLOR COLOR_YELLOW, COLOR_MAGENTA: CLS : COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
@@ -25,11 +25,11 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 			FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
 			LOCATE 12, 1: PRINT "Congratulations ! Score of"; side_victory_points(side)
 			PRINT "New Entry into "; side_name$(side); " HALL of FAME in place "; i
-			IF opt_players = PLAYERS_ONE AND side <> current_side THEN a$ = "COMPUTER": PRINT a$; " was "; side_name$(side); " commander": GOTO automate
+			IF opt_players = PLAYERS_ONE AND side <> current_side THEN commander$ = "COMPUTER": PRINT commander$; " was "; side_name$(side); " commander": GOTO automate
 who4:
-			PRINT "What is name of "; side_name$(side); " commander"; : CALL script_mark_key_wait(4, ""): INPUT a$: IF a$ = "" GOTO who4
+			PRINT "What is name of "; side_name$(side); " commander"; : CALL script_mark_key_wait(4, ""): INPUT commander$: IF commander$ = "" GOTO who4
 automate:
-			CALL hall_of_fame_insert(side, i, a$, hall_name$(), hall_score())
+			CALL hall_of_fame_insert(side, i, commander$, hall_name$(), hall_score())
 foun:
 			NEXT side
 	       
@@ -38,8 +38,8 @@ foun:
 END SUB
 
 SUB check_victory_conditions
-DIM union_men AS INTEGER: DIM rule AS INTEGER: DIM rebel_men AS INTEGER: DIM a$: DIM side AS INTEGER
-	CALL victory_forces(union_men, rebel_men)
+DIM union_troops AS INTEGER: DIM rule AS INTEGER: DIM rebel_troops AS INTEGER: DIM a$: DIM side AS INTEGER
+	CALL victory_forces(union_troops, rebel_troops)
 
 	CALL clear_bottom_line: COLOR COLOR_YELLOW
 	IF victory_time_near = 1 THEN
@@ -47,15 +47,15 @@ DIM union_men AS INTEGER: DIM rule AS INTEGER: DIM rebel_men AS INTEGER: DIM a$:
 		CALL show_message_box(a$, 4)
 	END IF
     FOR side = SIDE_UNION TO SIDE_REBEL
-	CALL victory_rule_met(side, union_men, rebel_men, rule)
+	CALL victory_rule_met(side, union_troops, rebel_troops, rule)
 	IF rule > 0 THEN CALL end_game(side, rule): EXIT SUB
-	CALL victory_warnings(side, union_men, rebel_men)
+	CALL victory_warnings(side, union_troops, rebel_troops)
     NEXT side
 END SUB
 
 ' Warns when a side is close to a victory rule: cities, income or army strength. union_men is the
 ' Union's men and rebel_men the Rebels'.
-SUB victory_warnings (side, union_men, rebel_men)
+SUB victory_warnings (side, union_troops, rebel_troops)
 DIM a$
 	CALL clear_bottom_line: COLOR COLOR_YELLOW
 	IF victory_near_cities(side) = 1 THEN
@@ -68,7 +68,7 @@ DIM a$
 		CALL show_message_box(a$, 4)
 	END IF
 
-	IF victory_near_force(side, union_men, rebel_men) = 1 THEN
+	IF victory_near_force(side, union_troops, rebel_troops) = 1 THEN
 		a$ = side_name$(side) + "side close to" + STR$(victory_rule(VICTORY_FORCE_RATIO)) + ":1 strength ratio"
 		CALL show_message_box(a$, 4)
 	END IF

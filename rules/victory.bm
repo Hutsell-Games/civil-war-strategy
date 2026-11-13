@@ -2,11 +2,11 @@
 ' ui/victory.bm.
 
 ' The men in the field: union_men the Union's and rebel_men the Rebels', in hundreds.
-SUB victory_forces (union_men, rebel_men)
+SUB victory_forces (union_troops, rebel_troops)
 DIM j AS INTEGER
-	union_men = 0: FOR j = 1 TO ARMIES_PER_SIDE: IF army_city(j) > 0 THEN union_men = union_men + army_size(j)
+	union_troops = 0: FOR j = 1 TO ARMIES_PER_SIDE: IF army_city(j) > 0 THEN union_troops = union_troops + army_size(j)
 	NEXT j
-	rebel_men = 0: FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: IF army_city(j) > 0 THEN rebel_men = rebel_men + army_size(j)
+	rebel_troops = 0: FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: IF army_city(j) > 0 THEN rebel_troops = rebel_troops + army_size(j)
 	NEXT j
 END SUB
 
@@ -25,9 +25,9 @@ END FUNCTION
 ' The victory rule that the side has met, in rule: 2 time, 3 cities, 4 income, 5 the capital,
 ' 6 the strength ratio, 7 the enemy wiped out, which also gives 300 victory points. rule is 0
 ' when it has met none. union_men and rebel_men are the sides' men (victory_forces).
-SUB victory_rule_met (side, union_men, rebel_men, rule)
+SUB victory_rule_met (side, union_troops, rebel_troops, rule)
 rule = 0
-	IF (side = 1 AND rebel_men = 0) OR (side = 2 AND union_men = 0) THEN rule = 7: side_victory_points(side) = side_victory_points(side) + 300: GOTO finis
+	IF (side = 1 AND rebel_troops = 0) OR (side = 2 AND union_troops = 0) THEN rule = 7: side_victory_points(side) = side_victory_points(side) + 300: GOTO finis
 
 	IF turn_year >= victory_rule(VICTORY_YEAR) AND turn_month >= victory_rule(VICTORY_MONTH) AND victory_rule(VICTORY_YEAR) > 0 THEN rule = 2: GOTO finis
 	IF side_city_count(side) >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN rule = 3: GOTO finis
@@ -36,12 +36,12 @@ rule = 0
 
 	IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
 		IF side = 1 THEN
-			IF rebel_men = 0 THEN rule = 7: GOTO finis
-			IF union_men / rebel_men > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: GOTO finis
+			IF rebel_troops = 0 THEN rule = 7: GOTO finis
+			IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: GOTO finis
 		END IF
 		IF side = 2 THEN
-			IF union_men = 0 THEN rule = 7: GOTO finis
-			IF rebel_men / union_men > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: GOTO finis
+			IF union_troops = 0 THEN rule = 7: GOTO finis
+			IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: GOTO finis
 		END IF
 	END IF
 finis:
@@ -61,10 +61,10 @@ END FUNCTION
 
 ' 1 when the side has nine tenths of the strength ratio the ratio rule asks for. union_men and
 ' rebel_men are the sides' men.
-FUNCTION victory_near_force (side, union_men, rebel_men)
+FUNCTION victory_near_force (side, union_troops, rebel_troops)
 victory_near_force = 0
-IF victory_rule(VICTORY_FORCE_RATIO) > 0 AND union_men > 0 AND rebel_men > 0 THEN
-	IF (side = SIDE_UNION AND union_men / rebel_men > .9 * victory_rule(VICTORY_FORCE_RATIO)) OR (side = SIDE_REBEL AND rebel_men / union_men > .9 * victory_rule(VICTORY_FORCE_RATIO)) THEN victory_near_force = 1
+IF victory_rule(VICTORY_FORCE_RATIO) > 0 AND union_troops > 0 AND rebel_troops > 0 THEN
+	IF (side = SIDE_UNION AND union_troops / rebel_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) OR (side = SIDE_REBEL AND rebel_troops / union_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) THEN victory_near_force = 1
 END IF
 END FUNCTION
 
@@ -101,12 +101,12 @@ END FUNCTION
 
 ' Puts commander name$ in the side's Hall of Fame at place i, with the side's score. The entries
 ' below move down one, and the last drops out.
-SUB hall_of_fame_insert (side, i, name$, hall_name$(), hall_score())
+SUB hall_of_fame_insert (side, place, name$, hall_name$(), hall_score())
 DIM j AS INTEGER
-	FOR j = 5 TO i + 1 STEP -1
+	FOR j = 5 TO place + 1 STEP -1
 	hall_score(side, j) = hall_score(side, j - 1)
 	hall_name$(side, j) = hall_name$(side, j - 1)
 	NEXT j
-	hall_name$(side, i) = name$
-	hall_score(side, i) = side_victory_points(side)
+	hall_name$(side, place) = name$
+	hall_score(side, place) = side_victory_points(side)
 END SUB

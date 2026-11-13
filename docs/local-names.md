@@ -67,7 +67,7 @@ compilers) gave the same results as before.
 | `limit` | The number of entries to sort. | Parameter: `sort_move_order`, `menu_bubble_sort` | `count` | `limit` (kept) |
 | `FALSE` | A local that is always 0, used as false. | `sort_move_order`, `menu_bubble_sort` | Delete; write `0`, or add `CONST FALSE = 0` to `cws.bi` | Deleted; `CONST FALSE = 0` in `cws.bi` |
 | `pct!` | A chance, compared with a random number. | `army_recruit_cities` (`event_roll` is in part 1b) | `chance!` | |
-| `x`, `y` | The Union's and the Rebels' men in the field, in hundreds (`victory_forces`). | Parameter: `victory_forces`, `victory_rule_met`, `victory_near_force`, `victory_warnings`. Local: `check_victory_conditions` | `union_men`, `rebel_men` | |
+| `x`, `y` | The Union's and the Rebels' men in the field, in hundreds (`victory_forces`). | Parameter: `victory_forces`, `victory_rule_met`, `victory_near_force`, `victory_warnings`. Local: `check_victory_conditions` | `union_men`, `rebel_men` | `union_troops`, `rebel_troops` |
 | `i` | A side. | Parameter: `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_won`, `victory_warnings`, `end_game`. Local: `check_victory_conditions` | `side` | |
 | `j` | A victory rule, 2 to 7. | Parameter: `victory_rule_met`, `victory_play_on`, `victory_won`, `end_game`. Local: `check_victory_conditions` | `rule` | |
 | `a$`, `t$` | A message built and then printed or passed to `scribe_message`. About 230 uses. | Most SUBs that print | Kept, or `message$`. Part 1b lists the ones that hold something else. | |
@@ -76,13 +76,30 @@ compilers) gave the same results as before.
 
 By file, in the order of the SUBs. A name in 1a is listed here only where it means something else.
 
+**Done on 2026-11-12**, by `tools\refactor\rename_locals_1b.py` (106 SUBs and the main module). A row with an
+empty "Your name" got the proposed name. Three things were done beyond the rows:
+
+- An army slot is `army_slot` in every SUB that had `slot` for it: `army_new`, `army_get_commander`,
+  `navy_land_army`, `army_raise`, `army_pick_commander`, `army_detach`, `army_place_new`, `army_recruit_bonus`,
+  `ai_navy_invade` and `menu_navy_invade`. `load_game` and `save_game` keep `slot` for a saved game's number.
+- Men are `troops` in every name: 1a's `union_men` and `rebel_men` became `union_troops` and `rebel_troops`.
+- `army_pick_commander` passes `(i)`, by value, because `army_generate_name` changes its first argument.
+  That is what the copy in `x` was for.
+
+Three names the user asked about were not taken, each for a reason:
+
+- `leader_name$` and `army_name$` are shared arrays, so the locals are `generated_name$` and `short_name$`.
+- `draw_train`'s `from` is `city`, not `city_from`: `train_city` is where the train is, also after it arrives.
+- `hall_of_fame`'s `a$` stays `commander$`, not `player_name$`: it is "COMPUTER" when the computer's side
+  enters the Hall of Fame.
+
 #### `cws.bas` (the main program)
 
 | SUB | Current | What it holds | Proposed | Your name |
 |-----|---------|---------------|----------|-----------|
 | main | `chosit` | The option the main menu starts on next time, as `MENU_START` + its row. It is kept from one game to the next. | `main_menu_start` | |
 | main | `a$` | The "EVENTS FOR" line written to the history. | `message$` | |
-| `DECLARE` lines | `who%`, `flag%`, `xbar%`, `vary%`, `z%`, `w%`, `a%`, `active%` | The parameter names of the 10 `DECLARE` lines that have parameters (of 14). They are the old names and do not match the SUBs. | Delete the `DECLARE` lines (QB64 needs none), or give them the SUBs' names | |
+| `DECLARE` lines | `who%`, `flag%`, `xbar%`, `vary%`, `z%`, `w%`, `a%`, `active%` | The parameter names of the 10 `DECLARE` lines that have parameters (of 14). They are the old names and do not match the SUBs. | Delete the `DECLARE` lines (QB64 needs none), or give them the SUBs' names | Deleted |
 
 #### `ai\ai.bm`
 
@@ -91,19 +108,19 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `ai_fortify` | `side_cash` | A local scalar with the same name as the shared array `side_cash()`. It is always 0. It is read once, in `side_cash < 222` (part 4, item 9); every `side_cash(side)` is the array. | Kept until item 9 is decided | |
 | `ai_fortify` | `target` | The city to fortify. | `city` | |
 | `ai_fortify` | `x` | The army in that city. | `army` | |
-| `ai_fortify_pick` | `target` (parameter) | The city picked to fortify, out. | `fort_city` | |
-| `ai_fortify_pick` | `x` | The city of the army being looked at. | `city` | |
+| `ai_fortify_pick` | `target` (parameter) | The city picked to fortify, out. | `fort_city` | `city` |
+| `ai_fortify_pick` | `x` | The city of the army being looked at. | `city` | `candidate_city` |
 | `ai_raise_forces` | `slush` | The cost of a ship, held back from the cash while the computer recruits, then given back. | `ship_reserve` | |
 | `ai_raise_forces` | `x` | The number of armies, from `ai_count_armies`. | `army_count` | |
 | `ai_count_armies` | `x` | The number of the side's armies, less 2 when outnumbered. The FUNCTION's result. | `army_count` | |
 | `ai_count_armies` | `y`, `z` | The other side's and this side's strength, in tenths of the men. | `enemy_strength`, `own_strength` | |
 | `ai_army_order` | `target` | The city the army is in. | `city` | |
-| `ai_army_order` | `x` | The army's size. | `army_men` (see part 4, item 6) | |
+| `ai_army_order` | `x` | The army's size. | `army_men` (see part 4, item 6) | `army_troops` |
 | `ai_army_order` | `k` | A city next to the capital. | `neighbor` | |
 | `ai_army_order` | `flag` | The enemy's strength near that city. It is not a flag. | `neighbor_strength` | |
 | `ai_army_order` | `best` | The road picked, from `ai_evaluate_move`. | `best_road` | |
 | `ai_army_order` | `y` | The army already in the city the order goes to. | `other_army` | |
-| `ai_evaluate_move` | `x` (parameter) | Two things. First, how much the computer wants to stay in a fortified city. At the end, the road picked, out. | `best_road` for the parameter, and a new local `stay_weight` for the first use | |
+| `ai_evaluate_move` | `x` (parameter) | Two things. First, how much the computer wants to stay in a fortified city. At the end, the road picked, out. | `best_road` for the parameter, and a new local `stay_weight` for the first use | `best_road`, `stay_weight`, and `best_score` in the last loop |
 | `ai_evaluate_move` | `best` | Two things: the army's size, then the number of the best road so far. | `own_strength`, then `best_road` | |
 | `ai_evaluate_move` | `max` | The number of roads out of the city. | `road_count` | |
 | `ai_evaluate_move` | `a` | The city at the end of the road being scored. | `to_city` | |
@@ -121,7 +138,7 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `ai_railroad` | `index` | The army picked to send: the one farthest from the enemy. | `spare_army` | |
 | `ai_railroad` | `x` | Two things: how many enemy cities are next to an army, then a count of track from `railroad_route_count`. | `enemy_neighbors`, then `routes` | |
 | `ai_railroad` | `from` | Two things: a city next to an army's city, then the city the train leaves. | `neighbor`, then `from_city` | |
-| `ai_railroad` | `target` | A city looked at as the start or the end of the train ride. | `candidate` | |
+| `ai_railroad` | `target` | A city looked at as the start or the end of the train ride. | `candidate` | `candidate_city` |
 | `ai_railroad` | `x1` | The city the train goes to. | `to_city` | |
 | `ai_pick_port` | `x` | How many enemy ports are on the list. | `enemy_ports` | |
 | `ai_pick_port` | `target` | A port on the list. | `port` | |
@@ -130,9 +147,9 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 
 | SUB | Current | What it holds | Proposed | Your name |
 |-----|---------|---------------|----------|-----------|
-| `army_recruit` | `empty` | A free army slot. | `slot` | |
+| `army_recruit` | `empty` | A free army slot. | `slot` | `army_slot` |
 | `city_capture` | `c` (parameter) | The city. | `city` | |
-| `city_capture` | `capital` | 1 when the city was the enemy's capital. | `was_capital` | |
+| `city_capture` | `capital` | 1 when the city was the enemy's capital. | `was_capital` | `was_enemy_capital` |
 | `navy_bombard` | `target` | The city the fleet lies off. | `city` | |
 | `navy_bombard` | `killd` | The men the army lost, in hundreds. | `casualties` | |
 | `navy_land_army` | `c` | The city the fleet is in. | `city` | |
@@ -163,11 +180,11 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `event_roll` | `plus` | The difficulty, turned round for the Union. It makes events likelier and bigger. | `event_weight` | |
 | `event_roll` | `empty` | The Rebel port that the English ships sail to. | `port` | |
 | `event_roll` | `x` | Two things: the ships to add to a fleet, then a counter of armies. | `new_ships`, then `count` | |
-| `event_riot_city` | `x` | A city picked at random. | `city_tried` | |
-| `draw_union_victory` | `x` | Which of the Capitol's two wings is being drawn. | `wing` | |
+| `event_riot_city` | `x` | A city picked at random. | `city_tried` | `candidate_city` |
+| `draw_union_victory` | `x` | Which part of the Capitol's front is being drawn, 0 to 2. | `wing` | `capitol_wing` |
 | `draw_surrender` | `side` (parameter) | An army, not a side. The caller passes `index`, an army (`ui\turn.bm` line 196). | `army` | |
 | `draw_surrender` | `s` | The army's side. | `side` | |
-| `draw_surrender` | `w` | The left edge of the right panel, 514 pixels. | `panel_x` | |
+| `draw_surrender` | `w` | The left edge of the right panel, 514 pixels. | `panel_x` | `panel_left` |
 
 #### `port\`
 
@@ -179,7 +196,7 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `load_game` | `a` | The side whose turn it is, read from the saved game. | `saved_side` | |
 | `load_game` | `myside` | The side in `CWS.CFG`. It is read and then not used. | `config_side` | |
 | `save_game` | `myside` | The side written to `CWS.CFG`. | `config_side` | |
-| `DIR$` | `f$` | The file name found. | `found$` | |
+| `DIR$` | `f$` | The file name found. | `found$` | `found_file$` |
 | `script_shell` | `sp` | Where the first space is. | `space_at` | |
 | `script_shell` | `c$` | The command, trimmed. `command$` is a keyword. | `trimmed$` | |
 | `script_shell` | `d$` | The file's contents. | `contents$` | |
@@ -190,19 +207,19 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | SUB | Current | What it holds | Proposed | Your name |
 |-----|---------|---------------|----------|-----------|
 | `army_combine_add` | `pct!` | The army's share of the men in the combined army. | `share!` | |
-| `army_raise` | `x` | The new army's size. | `men` | |
-| `army_add_recruits` | `x` | The men added. | `men` | |
-| `army_pick_commander` | `x` | The army slot passed to `army_generate_name`. | Delete; pass `i` | |
-| `army_pick_commander` | `a$` | The made-up leader's name. | `name$` | |
+| `army_raise` | `x` | The new army's size. | `men` | `troops` |
+| `army_add_recruits` | `x` | The men added. | `men` | `troops` |
+| `army_pick_commander` | `x` | The army slot passed to `army_generate_name`. | Delete; pass `i` | Deleted; passes `(i)` |
+| `army_pick_commander` | `a$` | The made-up leader's name. | `name$` | `generated_name$` |
 | `army_buy_supply` | `x` | The supply the cash can buy, then the supply bought. | `supply_added` (`SUPPLY_BOUGHT` is a CONST) | |
 | `army_buy_supply` | `y` | The army's new supply level. | `new_supply` | |
-| `army_generate_name` | `x` | The number written as a Roman numeral. | `number` | |
+| `army_generate_name` | `x` | How many `I` to add to the Roman numeral, 0 to 3. | `number` | `ones` |
 | `army_recruit_cities` | `max` | How many cities are offered. | `offer_count` | |
 | `army_recruit_cities` | `x` | A city on the list. | `city` | |
 | `battle_strengths` | `x`, `x1` | The attacker's and the defender's strength, built step by step. | `attack_strength`, `defend_strength` | |
 | `battle_strengths` | `R!` | The defender's size over the attacker's. | `size_ratio!` | |
 | `battle_fight` | `attack`, `defend` (parameters) | The two strengths. | `attack_strength`, `defend_strength` | |
-| `battle_fight` | `scale` | The size of the die: the larger strength, plus 1. | `die_size` | |
+| `battle_fight` | `scale` | The size of the die: the larger strength, plus 1. | `die_size` | `scale` (kept) |
 | `battle_fight` | `star`, `fin` | Here two dice rolls, not two armies. | `attack_roll`, `defend_roll` | |
 | `battle_fight` | `hit`, `hit1` | 1 when the attacker's roll hits, and when the defender's does. | `attacker_hit`, `defender_hit` | |
 | `battle_losses` | `pct!` | The share of an army lost. | `loss_rate!` | |
@@ -217,10 +234,10 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `navy_shot_hits` | `a$` | The letter of the last ship in the fleet. | `ship$` | |
 | `railroad_route_count` | `x` | The count of track. The FUNCTION's result. | `routes` | |
 | `railroad_route_count` | `y`, `z` | A city next to the city, and a city two roads away. | `neighbor`, `far_city` | |
-| `railroad_capacity` | `x` | Two things: a number of cities, then the most the train can carry. | `base_cities`, then `most` | |
+| `railroad_capacity` | `x` | Two things: a number of cities, then the most the train can carry. | `base_cities`, then `most` | `base_cities`, then `max_capacity` |
 | `game_apply_settings` | `a$` | A row of ship letters. | `ships$` | |
 | `turn_strength_ratio` | `x`, `y` | The Rebels' and the Union's strength. The letters are the other way round from `victory_forces`. | `rebel_strength`, `union_strength` | |
-| `turn_retreat_city` | `flee` | The best city found so far. | `best_city` | |
+| `turn_retreat_city` | `flee` | The road to the best city found so far. | `best_city` | `best_road` |
 | `turn_retreat_city` | `x` | A city next to the city. | `neighbor` | |
 | `turn_collect_income` | `x` | A city's owner. | `owner` | |
 | `turn_set_move_order` | `x` | Set to 1 to 4 by army size, and never read. | Delete | |
@@ -234,7 +251,7 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `draw_ai_plan`, `draw_ai_drill` | `i` (parameter) | The army. | `army` | |
 | `calculate_battle` | `attack`, `defend` | The two strengths. | `attack_strength`, `defend_strength` | |
 | `calculate_battle` | `a` | Two things: the odds in percent, then the winner's side. | `odds_pct`, then `winner_side` | |
-| `calculate_battle` | `k` | The defender's fort level, for the picture. | `fort_level` | |
+| `calculate_battle` | `k` | The defender's fort level, for the picture. | `fort_level` | `fort_level`; `k` stays the loop counter |
 | `calculate_battle` | `t$` | Two things: the fort picture's file name, then a message. | `file$`, then `message$` | |
 | `calculate_battle` | `y` | The column of the right panel, 68. | `col` | |
 | `special_events` | `who` | The side the event was rolled for (`event_roll`). | `event_side` | |
@@ -245,12 +262,12 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `menu_select`, `menu_arrow_key` | `leave` | 1 when the menu is to close. | `done` | |
 | `menu_select` | `a$` | The key pressed. | `pressed$` | |
 | `menu_arrow_key` | `k$` (parameter) | The key's second byte. | `pressed$` | |
-| `menu_select` | `c1$` | An option's first letter. | `initial$` | |
+| `menu_select` | `c1$` | An option's first letter. | `initial$` | `menu_initial_letter$` |
 | `menu_select`, `menu_mark_row` | `flag` | 1 when `menu_mark_row` has printed the row itself. | `row_shown` | |
 | `menu_mark_row` | `target` | The army in the row's city. | `army` | |
-| `menu_mark_row` | `t$` | Two things: the army's name, then the face picture's file name. | `name$`, then `file$` | |
-| `menu_mark_row` | `a` | The face picture's number. | `face` | |
-| `menu_measure_width` | `x` | An option's length. | `length` | |
+| `menu_mark_row` | `t$` | Two things: the army's name, then the face picture's file name. | `name$`, then `file$` | `short_name$`, then `file$` |
+| `menu_mark_row` | `a` | The face picture's number. | `face` | `face_pic` |
+| `menu_measure_width` | `x` | An option's length. | `length` | `menu_option_length` |
 | `show_message_box` | `seconds` (parameter) | The box's fill color, not a time. Every caller passes 4 (red). The box waits `PAUSE_LONG`. | `box_color` | |
 | `show_message_box` | `x`, `y` | Set and never read. | Delete | |
 | `show_message_box` | `g2()` | The screen under the box, put back at the end. | `saved_screen()` | |
@@ -272,11 +289,11 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `menu_railroad` | `x` | Two things: the army's side (never read), then a count of track. | `routes` | |
 | `menu_railroad` | `target`, `from`, `x1` | The city whose track is counted, the city the train leaves, the city it goes to. | `route_city`, `from_city`, `to_city` | |
 | `menu_army_detach`, `menu_army_drill` | `target` | The army's city. | `city` | |
-| `menu_army_detach` | `empty` | A free army slot. | `slot` | |
+| `menu_army_detach` | `empty` | A free army slot. | `slot` | `army_slot` |
 | `menu_victory_conditions` | `chosit` | The option the menu starts on next time, as 21 + its row. | `start_option` | |
-| `report_armies` | `x`, `y` | Several numbers in turn: the two sides' victory points added up, three percents, the income of both sides with the capitals' bonus. | `total_points`, `percent`, `all_income` (`total_income` is shared) | |
+| `report_armies` | `x`, `y` | Several numbers in turn: the two sides' victory points added up, three percents, the income of both sides with the capitals' bonus. | `total_points`, `percent`, `all_income` (`total_income` is shared) | `total_points`, `percent`, `all_income`, `total_troops`, `ironclads`, `row` |
 | `report_intelligence` | `z` | The width of an army's box, in columns. | `box_width` | |
-| `report_force_summary` | `summ()` | The men in each city. | `city_men()` | |
+| `report_force_summary` | `summ()` | The men in each city. | `city_men()` | `city_troops()` |
 | `report_recap` | `x` | The lines printed. | `line_count` | |
 | `check_map_links` | `x`, `y` | The roads that could not be fixed, and the roads fixed. | `unresolved`, `fixed` | |
 | `print_centered` | `y` (parameter), `x` | The row, and the column it starts at. | `row`, `col` | |
@@ -288,7 +305,7 @@ By file, in the order of the SUBs. A name in 1a is listed here only where it mea
 | `turn_defender_retreats` | `flee` | The city the player picked to retreat to. | `chosen_city` | |
 | `turn_defender_retreats` | `move2` | The city the army retreats to. | `retreat_city` | |
 | `turn_army_surrenders` | `x` | The army's side. | `side` | |
-| `turn_enter_city` | `c` | The city entered. | `city` | |
+| `turn_enter_city` | `c` | The city entered. | `city` | `city`; its parameter `target` is `to_city` |
 | `ai_turn` | `who` | The computer's side. | `ai_side` | |
 | `hall_of_fame` | `a$` | The commander's name, typed in. | `commander$` | |
 | `hall_of_fame`, `end_game` | `j`, `k` | Declared and never used. | Delete | |
@@ -336,20 +353,20 @@ Two to note now:
 
 ## Part 4: found while reading
 
-None of these is fixed by a rename. Items 1 to 3 are names that say the wrong thing, and their rows are in part 1.
+None of these is fixed by a rename. Items 1 to 3 and 7 were names that said the wrong thing; part 1b renamed them.
 Items 4 to 9 look like bugs of the original, kept like the others (decision 3). Fixing one changes how the game
 plays, so each would be its own decision and a `TODO.md` row.
 
 1. **`show_message_box (text$, seconds)`**: `seconds` is the box's color. Every caller passes 4.
 2. **`draw_surrender (side)`** is passed an army and calls `army_side(side)` on it.
 3. **`ai_evaluate_move (army, x)`**: `x` is a weight going in and the chosen road coming out.
-4. **`ai_army_order`, the capital check** (`ai\ai.bm` line 148): `k = city_road(target, j): IF j = 0 GOTO
-   nocap`. `j` runs from 1, so the test is never true. It most likely meant `k = 0`. As written,
+4. **`ai_army_order`, the capital check** (`ai\ai.bm` line 148): `neighbor = city_road(city, j): IF j = 0 GOTO
+   nocap`. `j` runs from 1, so the test is never true. It most likely meant `neighbor = 0`. As written,
    `city_nearby_enemy_strength(0)` is called for an empty road.
-5. **`ai_evaluate_move`, the fort factor** (line 206): `IF city_fort(a) = 3 THEN x1 = 3`. Forts go up to 2
+5. **`ai_evaluate_move`, the fort factor** (line 206): `IF city_fort(to_city) = 3 THEN fort_factor = 3`. Forts go up to 2
    (`MAX_FORT`), so the factor is never 3.
-6. **`ai_army_order`, "eliminate crossing moves"** (line 158): `IF army_order(y) = x`, where `x` is the army's
-   size, not a city. It most likely meant the army's city (`target`). As written it matches only by chance,
+6. **`ai_army_order`, "eliminate crossing moves"** (line 158): `IF army_order(other_army) = army_troops`, where
+   `army_troops` is the army's size, not a city. It most likely meant the army's city (`city`). As written it matches only by chance,
    so crossing moves are mostly not removed.
 7. **`turn_strength_ratio`** uses `y` for the Union and `x` for the Rebels. `victory_forces` and its callers
    use them the other way round. Not a bug, but easy to get wrong. The proposed names remove it.
@@ -369,5 +386,3 @@ Found by the same scan and kept:
 - Two parameters that are never used: `side` of `army_combine_done` and `city` of `navy_blast`. Taking them out
   changes their callers too.
 - Parameters that are only set: these are the SUBs' results (`ordered`, `again`, `result` and the others).
-- `turbo` in `menu_army_cancel` is read but never set, so it is always 0 (part 1b).
-- In `cws.bas`, 10 `DECLARE` lines still carry the old parameter names.

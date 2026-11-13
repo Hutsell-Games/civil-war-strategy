@@ -4,12 +4,12 @@
 ' Rolls the month's special event and carries out what it does. event is EVENT_NONE when
 ' nothing happens. variant picks the message of EVENT_MERCENARIES (0 French, 1 British) and
 ' of EVENT_UPRISING (0 the Indian uprisings, 1 the 90-day enlistees, 2 the 1864 furloughs).
-' who is the side the event is rolled for: SIDE_UNION's events are good for the South.
+' event_side is the side the event is rolled for: SIDE_UNION's events are good for the South.
 ' EVENT_RIOTS is rolled here and carried out by event_riot. EVENT_RIFLES is followed by
 ' Stanton's prediction, as EVENT_STANTON is.
-SUB event_roll (event, variant, who)
-DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM army AS INTEGER
-event = EVENT_NONE: variant = 0: who = 0
+SUB event_roll (event, variant, event_side)
+DIM k AS INTEGER: DIM event_weight AS INTEGER: DIM chance!: DIM share_kept!: DIM port AS INTEGER: DIM i AS INTEGER: DIM new_ships AS INTEGER: DIM count AS INTEGER: DIM army AS INTEGER
+event = EVENT_NONE: variant = 0: event_side = 0
 CALL script_dice_next
 '==========================================================================
 '                              Special Events
@@ -19,13 +19,13 @@ IF opt_realism >= REALISM_ON AND turn_year = IRONCLAD_YEAR AND turn_month < IRON
 	EXIT SUB
 END IF
 IF opt_event_balance = 0 THEN EXIT SUB
-plus = opt_difficulty: IF current_side = SIDE_UNION THEN plus = 6 - opt_difficulty
-pct! = .005 * (turn_year - 1860) * plus * plus: IF pct! > .9 THEN pct! = .9
-IF script_rnd! > pct! THEN EXIT SUB
+event_weight = opt_difficulty: IF current_side = SIDE_UNION THEN event_weight = 6 - opt_difficulty
+chance! = .005 * (turn_year - 1860) * event_weight * event_weight: IF chance! > .9 THEN chance! = .9
+IF script_rnd! > chance! THEN EXIT SUB
 
-who = SIDE_UNION: IF script_rnd! > .1 * opt_event_balance THEN who = SIDE_REBEL
+event_side = SIDE_UNION: IF script_rnd! > .1 * opt_event_balance THEN event_side = SIDE_REBEL
 
-SELECT CASE who
+SELECT CASE event_side
 '----------------------------------------------------------------------------
 '                               good for South
 '----------------------------------------------------------------------------
@@ -35,25 +35,25 @@ SELECT CASE who
 	IF script_rnd! > .9 THEN event = EVENT_RIOTS: EXIT SUB
 
 	IF script_rnd! > .2 OR fleet_size(SIDE_REBEL) >= MAX_FLEET_SHIPS GOTO mercen
-	IF fleet_size(SIDE_REBEL) > 0 AND fleet_city(SIDE_REBEL) <> FLEET_AT_SEA THEN empty = fleet_city(SIDE_REBEL): GOTO float1
-		empty = 0
+	IF fleet_size(SIDE_REBEL) > 0 AND fleet_city(SIDE_REBEL) <> FLEET_AT_SEA THEN port = fleet_city(SIDE_REBEL): GOTO float1
+		port = 0
 		FOR i = 1 TO MAX_CITIES
-		IF city_owner(i) = SIDE_REBEL AND city_port_type(i) = PORT_SEA AND fleet_city(SIDE_UNION) <> i THEN empty = i: EXIT FOR
+		IF city_owner(i) = SIDE_REBEL AND city_port_type(i) = PORT_SEA AND fleet_city(SIDE_UNION) <> i THEN port = i: EXIT FOR
 		NEXT i
-	IF empty = 0 GOTO mercen
+	IF port = 0 GOTO mercen
 float1:
 	event = EVENT_ENGLISH_SHIPS
-	fleet_size(SIDE_REBEL) = fleet_size(SIDE_REBEL) + 2 * plus
+	fleet_size(SIDE_REBEL) = fleet_size(SIDE_REBEL) + 2 * event_weight
 	IF fleet_size(SIDE_REBEL) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_REBEL) = MAX_FLEET_SHIPS
-	x = fleet_size(SIDE_REBEL) - LEN(fleet_ships$(SIDE_REBEL))
-	fleet_ships$(SIDE_REBEL) = fleet_ships$(SIDE_REBEL) + STRING$(x, "W")
-	fleet_city(SIDE_REBEL) = empty
+	new_ships = fleet_size(SIDE_REBEL) - LEN(fleet_ships$(SIDE_REBEL))
+	fleet_ships$(SIDE_REBEL) = fleet_ships$(SIDE_REBEL) + STRING$(new_ships, "W")
+	fleet_city(SIDE_REBEL) = port
 	GOTO dull1
 mercen:
 	IF script_rnd! > .1 OR side_city_count(SIDE_REBEL) < 30 GOTO money
 	variant = 0: IF script_rnd! > .5 THEN variant = 1
 	event = EVENT_MERCENARIES
-	army_size(army) = army_size(army) + 100 * plus
+	army_size(army) = army_size(army) + 100 * event_weight
 	army_experience(army) = MAX_EXPERIENCE: army_supply(army) = MAX_SUPPLY
 	GOTO dull1
 money:
@@ -64,16 +64,16 @@ cotton:
 	IF script_rnd! > .5 OR side_city_count(SIDE_REBEL) < 12 GOTO uprising
 	event = EVENT_COTTON
 purse:
-	side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 * plus
+	side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 * event_weight
 	GOTO dull1
 uprising:
-	pct! = .9
+	share_kept! = .9
 	variant = 0
 	IF script_rnd! > .5 THEN variant = 1
-	IF turn_year = 1864 AND turn_month > 5 THEN variant = 2: pct! = .8
+	IF turn_year = 1864 AND turn_month > 5 THEN variant = 2: share_kept! = .8
 	event = EVENT_UPRISING
 	FOR k = 1 TO ARMIES_PER_SIDE
-	army_size(k) = pct! * army_size(k)
+	army_size(k) = share_kept! * army_size(k)
 	NEXT k
 	GOTO dull1
 '----------------------------------------------------------------------------
@@ -83,16 +83,16 @@ uprising:
 	IF script_rnd! > .1 OR fleet_city(SIDE_UNION) = 0 OR fleet_size(SIDE_UNION) >= MAX_FLEET_SHIPS GOTO event2
 	IF script_rnd! > .95 THEN event = EVENT_RIOTS: EXIT SUB
 	event = EVENT_SHIPWORKS
-	fleet_size(SIDE_UNION) = fleet_size(SIDE_UNION) + plus
+	fleet_size(SIDE_UNION) = fleet_size(SIDE_UNION) + event_weight
 	IF fleet_size(SIDE_UNION) > MAX_FLEET_SHIPS THEN fleet_size(SIDE_UNION) = MAX_FLEET_SHIPS
-	x = fleet_size(SIDE_UNION) - LEN(fleet_ships$(SIDE_UNION))
-	fleet_ships$(SIDE_UNION) = fleet_ships$(SIDE_UNION) + STRING$(x, "W")
+	new_ships = fleet_size(SIDE_UNION) - LEN(fleet_ships$(SIDE_UNION))
+	fleet_ships$(SIDE_UNION) = fleet_ships$(SIDE_UNION) + STRING$(new_ships, "W")
 	GOTO dull2
 event2:
 	IF script_rnd! < .7 GOTO abe
 	event = EVENT_VOLUNTEERS
-	x = 0: FOR i = 1 TO ARMIES_PER_SIDE: x = x + 1: IF x > 5 GOTO dull2
-	IF army_size(i) > 0 AND script_rnd! > .5 THEN army_size(i) = army_size(i) * 1.1 + plus
+	count = 0: FOR i = 1 TO ARMIES_PER_SIDE: count = count + 1: IF count > 5 GOTO dull2
+	IF army_size(i) > 0 AND script_rnd! > .5 THEN army_size(i) = army_size(i) * 1.1 + event_weight
 	NEXT i: GOTO dull2
 abe:
 	IF emancipation_done = 0 AND turn_year > 1862 THEN
@@ -110,7 +110,7 @@ abe:
 	END IF
 	IF script_rnd! > .5 THEN
 		event = EVENT_DONATIONS
-		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * plus
+		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * event_weight
 		GOTO dull2
 	END IF
 	IF script_rnd! > .5 AND turn_year > FIRST_YEAR THEN
@@ -135,14 +135,14 @@ END SUB
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.
 ' city is 0 when no such city is found.
 SUB event_riot_city (side, city)
-DIM k AS INTEGER: DIM x AS INTEGER
+DIM k AS INTEGER: DIM candidate_city AS INTEGER
 city = 0
 	IF opt_realism = REALISM_OFF THEN EXIT SUB
 	IF side_city_count(side) = 1 THEN EXIT SUB
 	FOR k = 1 TO 99
-	x = 1 + INT(MAX_CITIES * script_rnd!)
-		IF city_first_owner(x) <> side AND city_owner(x) = side AND city_army(x) = 0 THEN
-			city = x: city_owner(x) = SIDE_NONE: EXIT SUB
+	candidate_city = 1 + INT(MAX_CITIES * script_rnd!)
+		IF city_first_owner(candidate_city) <> side AND city_owner(candidate_city) = side AND city_army(candidate_city) = 0 THEN
+			city = candidate_city: city_owner(candidate_city) = SIDE_NONE: EXIT SUB
 		END IF
 	NEXT k
 END SUB

@@ -30,7 +30,7 @@ game plays changes the recorded screens.
 - **Resume Saved Game with no saved game shows the main menu on a black screen.** The map is not drawn until
   F3 or a menu draws it.
 - **`normal_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
-  on `xbar + SQR(vary) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
+  on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
 - **`railroad_capacity` counts cities from the player's side, not from the side it is asked about**
   (`TestTraincapacityCountsByPlayersSide`): it uses `current_side` where the rest of the FUNCTION uses `side`.
@@ -48,7 +48,8 @@ game plays changes the recorded screens.
   (`army_add_recruits` passes 0, as `army_recruit` passed `empty`, which was 0 there). It was most likely
   meant for the army recruited.
 - **The computer checks the wrong city's track before a train to its capital.** `ai_railroad` (`ai\ai.bm`)
-  calls `railroad_route_count(side, target)` with `target` left from the loop before, not the capital.
+  calls `railroad_route_count(side, candidate_city)` with `candidate_city` left from the loop before, not the
+  capital.
 - **The winner of a battle gets none of the loser's supplies.** `turn_army_lost` (`rules\turn.bm`)
   sets the loser's supplies to 0 and then adds them to the winner's (`TestTurnArmyLost`).
 - **An army that surrenders or is crushed gives 25 victory points to its own side.** `turn_army_lost`

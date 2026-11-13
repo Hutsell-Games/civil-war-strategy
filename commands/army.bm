@@ -46,18 +46,18 @@ SUB army_combine_redraw (side, city, best)
 		CALL draw_stack_markers(side)
 END SUB
 
-SUB army_new (side, slot, city)
-	CALL army_raise(side, slot, city)
-	COLOR COLOR_LIGHT_RED: CALL clear_bottom_line: PRINT "Placing NEW army "; slot; army_name$(slot); " in "; city_name$(city);
-	PRINT " Size = "; : CALL print_army_size(slot)
+SUB army_new (side, army_slot, city)
+	CALL army_raise(side, army_slot, city)
+	COLOR COLOR_LIGHT_RED: CALL clear_bottom_line: PRINT "Placing NEW army "; army_slot; army_name$(army_slot); " in "; city_name$(city);
+	PRINT " Size = "; : CALL print_army_size(army_slot)
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, .5
-	CALL draw_army_flag(slot)
+	CALL draw_army_flag(army_slot)
 	CALL wait_seconds(opt_pause! - .5)
 END SUB
 
-SUB army_get_commander (side, slot)
-	CALL army_pick_commander(side, slot)
-	IF slot = 0 THEN CALL clear_bottom_line: PRINT "No more "; side_name$(side); " commanders available"; : CALL wait_seconds(opt_pause!)
+SUB army_get_commander (side, army_slot)
+	CALL army_pick_commander(side, army_slot)
+	IF army_slot = 0 THEN CALL clear_bottom_line: PRINT "No more "; side_name$(side); " commanders available"; : CALL wait_seconds(opt_pause!)
 END SUB
 
 SUB army_resupply (army)
@@ -72,16 +72,16 @@ END SUB
 ' Raises men in a city for 100: a new army under the next commander, or more men for the
 ' army already there. raised is 0 when a new army was needed and no commander is left.
 SUB army_recruit (side, city, raised)
-DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM from_city AS INTEGER: DIM isolated AS INTEGER
+DIM army_slot AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM from_city AS INTEGER: DIM isolated AS INTEGER
 	raised = 1
-	empty = 0
+	army_slot = 0
 	CALL city_update_occupier(city)
 	IF city_army(city) > 0 THEN i = city_army(city): GOTO add2
-	CALL army_get_commander((side), empty)
+	CALL army_get_commander((side), army_slot)
        
-	IF empty = 0 THEN raised = 0: EXIT SUB
-	CALL army_place_new(empty, city)
-	CALL army_new(side, empty, city)
+	IF army_slot = 0 THEN raised = 0: EXIT SUB
+	CALL army_place_new(army_slot, city)
+	CALL army_new(side, army_slot, city)
 	EXIT SUB
 add2:
 	CALL army_add_recruits(side, i, isolated)

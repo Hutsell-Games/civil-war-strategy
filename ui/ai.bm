@@ -1,29 +1,29 @@
 ' The computer's messages, in the order its decisions in ai/ai.bm call them.
 
 ' A fort the computer built.
-SUB draw_ai_fort (target)
-	CALL clear_bottom_line: PRINT city_name$(target); " fortifications increased to "; city_fort(target);
-	CALL draw_map_marker(target, 0, MARK_FLASH_FRAME)
+SUB draw_ai_fort (city)
+	CALL clear_bottom_line: PRINT city_name$(city); " fortifications increased to "; city_fort(city);
+	CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
 	CALL draw_cities
 END SUB
 
 ' An army's move order: its line and a pointer on the map, and a message when the pause is long.
-SUB draw_ai_plan (i, text_color)
+SUB draw_ai_plan (army, text_color)
 	IF opt_pause! > 1 THEN
 		COLOR text_color: CALL clear_bottom_line
-		PRINT army_name$(i); " plans to move from "; city_name$(army_city(i)); " to "; city_name$(army_order(i));
+		PRINT army_name$(army); " plans to move from "; city_name$(army_city(army)); " to "; city_name$(army_order(army));
 	END IF
-		CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
-		CALL draw_map_marker(army_city(i), army_order(i), MARK_POINTER)
+		CALL draw_map_marker(army_city(army), army_order(army), MARK_MOVE_LINE)
+		CALL draw_map_marker(army_city(army), army_order(army), MARK_POINTER)
 	CALL wait_seconds(opt_pause! - 1)
-	PUT (city_x(army_city(i)) - 20, city_y(army_city(i)) - 19), saved_under_marker, PSET
+	PUT (city_x(army_city(army)) - 20, city_y(army_city(army)) - 19), saved_under_marker, PSET
 END SUB
 
 ' An army that drilled.
-SUB draw_ai_drill (i)
+SUB draw_ai_drill (army)
 		IF opt_pause! > 1 THEN
 		CALL clear_bottom_line
-			PRINT army_name$(i); " has drilled to reach experience level "; army_experience(i);
+			PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
 		END IF
 		CALL wait_seconds(opt_pause! - 1)
 END SUB

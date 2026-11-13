@@ -30,15 +30,15 @@ END SUB
 ' train goes (menu_railroad, ui/orders.bm), and the train leaves (commands/railroad.bm). With
 ' an army on the train already, it says so.
 SUB menu_main_railroad
-DIM x AS INTEGER: DIM y AS INTEGER: DIM z AS INTEGER: DIM capacity AS INTEGER
+DIM x AS INTEGER: DIM y AS INTEGER: DIM side_color AS INTEGER: DIM capacity AS INTEGER
 DIM army AS INTEGER: DIM city AS INTEGER
 	IF train_army(current_side) = 0 THEN
 		COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
 		PSET (550, 20), 0
 		DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
-		z = 9: IF current_side = SIDE_REBEL THEN z = 7
+		side_color = 9: IF current_side = SIDE_REBEL THEN side_color = 7
 		x = POINT(0): y = POINT(1)
-		PAINT (x, y), z, 15
+		PAINT (x, y), side_color, 15
 		COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN COLOR COLOR_LIGHT_CYAN
 		capacity = railroad_capacity(current_side)
 		CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(capacity)); "00";

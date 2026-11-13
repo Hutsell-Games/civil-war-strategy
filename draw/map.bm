@@ -115,20 +115,20 @@ CALL draw_cities
 END SUB
 
 SUB draw_city_names
-DIM k AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER
+DIM k AS INTEGER: DIM j AS INTEGER: DIM letter_x AS INTEGER: DIM letter AS INTEGER
 FOR k = 1 TO MAX_CITIES
 	FOR j = 1 TO LEN(city_name$(k))
-	a = city_x(k) + 6 * (j - 4) - 3
-	x = ASC(MID$(UCASE$(city_name$(k)), j, 1)) - 64
-	IF a > 527 GOTO nextc
-	PSET (a, city_y(k) + 12), 10
+	letter_x = city_x(k) + 6 * (j - 4) - 3
+	letter = ASC(MID$(UCASE$(city_name$(k)), j, 1)) - 64
+	IF letter_x > 527 GOTO nextc
+	PSET (letter_x, city_y(k) + 12), 10
 	
 	IF city_port_type(k) < PORT_RIVER THEN
 		IF opt_alt_colors = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
 	ELSE
 		DRAW "C10"
 	END IF
-	IF x > 0 AND x < 27 THEN DRAW map_font$(x)
+	IF letter > 0 AND letter < 27 THEN DRAW map_font$(letter)
 	NEXT j
 nextc:
 NEXT k
@@ -154,11 +154,11 @@ END SUB
 
 SUB draw_stack_markers (side)
 DIM y AS INTEGER
-DIM i AS INTEGER: DIM target AS INTEGER: DIM x AS INTEGER
+DIM i AS INTEGER: DIM city AS INTEGER: DIM x AS INTEGER
 FOR i = side_first_army(side) TO side_last_army(side)
 IF army_size(i) > 0 AND city_army(army_city(i)) <> i THEN
-	target = army_city(i)
-	x = city_x(target) - 12: y = city_y(target) - 12
+	city = army_city(i)
+	x = city_x(city) - 12: y = city_y(city) - 12
 	CIRCLE (x, y), 3, 14
 END IF
 NEXT i
@@ -227,7 +227,7 @@ LINE (66, 375)-(52, 375), 10
 END SUB
 
 SUB draw_map
-DIM y AS INTEGER: DIM a$: DIM j AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER
+DIM y AS INTEGER: DIM a$: DIM j AS INTEGER: DIM letter AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER
 SCREEN 12
 LINE (1, 16)-(527, 440), 10, B
 PAINT (200, 200), 2, 10
@@ -525,8 +525,8 @@ IF raiding_side > 0 THEN
 LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
 y = 312
 a$ = "COMMERCE"
-FOR j = 1 TO LEN(a$): x = ASC(MID$(UCASE$(a$), j, 1)) - 64
-PSET (440 + 10 * j, y), 0: DRAW map_font$(x)
+FOR j = 1 TO LEN(a$): letter = ASC(MID$(UCASE$(a$), j, 1)) - 64
+PSET (440 + 10 * j, y), 0: DRAW map_font$(letter)
 NEXT j
 ELSE
 LINE (447, 291)-(525, 335), 1, BF

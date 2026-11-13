@@ -1,15 +1,15 @@
 ' The number of cities next to city that side holds: 0 when the city is cut off.
 FUNCTION city_is_connected (side, city)
-DIM j AS INTEGER: DIM y AS INTEGER: DIM friendly_neighbors AS INTEGER
+DIM j AS INTEGER: DIM neighbor AS INTEGER: DIM friendly_neighbors AS INTEGER
 friendly_neighbors = 0
 FOR j = 1 TO MAX_ROADS
-y = city_road(city, j)
-IF y > 0 AND city_owner(y) = side THEN friendly_neighbors = friendly_neighbors + 1
+neighbor = city_road(city, j)
+IF neighbor > 0 AND city_owner(neighbor) = side THEN friendly_neighbors = friendly_neighbors + 1
 NEXT j
 city_is_connected = friendly_neighbors
 END FUNCTION
 
-' A side takes city c: the city's value in victory points, and 100 more taken from the other
+' A side takes a city: the city's value in victory points, and 100 more taken from the other
 ' side when it is that side's capital, which the other side then no longer has. A fort loses a
 ' level when weaken_fort is above 0. city_capture (commands/city.bm) shows it.
 SUB city_take (city, side, weaken_fort)
@@ -46,27 +46,27 @@ END SUB
 ' in from_city() and to_city(), with added() 1 when the road back was added and 0 when the
 ' city had no free slot. count is the length of the list. check_map_links (ui/reports.bm) shows it.
 SUB city_fix_return_routes (count, added(), from_city(), to_city())
-DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM index AS INTEGER
+DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM neighbor AS INTEGER
 count = 0
 FOR i = 1 TO MAX_CITIES
 FOR j = 1 TO MAX_ROADS: IF city_road(i, j) = 0 GOTO done
-	index = city_road(i, j)
+	neighbor = city_road(i, j)
 	FOR k = 1 TO MAX_ROADS
-	IF city_road(index, k) = i GOTO ret
-	IF city_road(index, k) = 0 THEN city_road(index, k) = i: count = count + 1: added(count) = 1: from_city(count) = index: to_city(count) = i: GOTO ret
+	IF city_road(neighbor, k) = i GOTO ret
+	IF city_road(neighbor, k) = 0 THEN city_road(neighbor, k) = i: count = count + 1: added(count) = 1: from_city(count) = neighbor: to_city(count) = i: GOTO ret
 	NEXT k
-	count = count + 1: added(count) = 0: from_city(count) = index: to_city(count) = i
+	count = count + 1: added(count) = 0: from_city(count) = neighbor: to_city(count) = i
 ret:
 NEXT j
 done:
 NEXT i
 END SUB
 
-SUB city_update_occupier (x)
+SUB city_update_occupier (city)
 DIM i AS INTEGER
-city_army(x) = 0
+city_army(city) = 0
 FOR i = 1 TO MAX_ARMIES
-IF army_city(i) = x THEN city_army(x) = i: GOTO holdup
+IF army_city(i) = city THEN city_army(city) = i: GOTO holdup
 NEXT i
 holdup:
 END SUB

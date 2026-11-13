@@ -1,27 +1,13 @@
 OPTION _EXPLICIT
 DEFINT A-Z
-DECLARE SUB draw_flag_icon (x%, y%, z%)
-DECLARE SUB navy_remove_ship (who%)
-DECLARE SUB draw_flag (who%, w%, a%)
-DECLARE SUB check_map_links ()
-DECLARE SUB draw_ironclad ()
-DECLARE SUB normal_random_number (xbar%, vary%, result%)
-DECLARE SUB menu_army_relieve (who%)
-DECLARE SUB menu_army_retreat (active%, x%)
-DECLARE SUB draw_schooner ()
-DECLARE SUB draw_fleet_ship (who%, i%)
-DECLARE SUB draw_stack_markers (who%)
-DECLARE SUB draw_train (who%, flag%)
-DECLARE FUNCTION railroad_capacity% (who%)
-DECLARE SUB draw_top_bar ()
 ' $INCLUDE: 'cws.bi'
-DIM replay AS INTEGER: DIM a$: DIM chosit AS INTEGER: DIM action AS INTEGER: DIM ended AS INTEGER
+DIM replay AS INTEGER: DIM message$: DIM main_menu_start AS INTEGER: DIM action AS INTEGER: DIM ended AS INTEGER
 DIM new_game AS INTEGER: DIM month_over AS INTEGER
 
 CALL script_mute
 replay = 0
 ' Each game: the title, then the main menu until the game ends or a new one is asked for.
-' chosit, the row the main menu starts on, is kept from one game to the next.
+' main_menu_start, the row the main menu starts on, is kept from one game to the next.
 DO
 	CALL game_new
 	CALL show_title(replay): replay = 1
@@ -31,38 +17,38 @@ DO
 	IF menu_choice = 1 THEN CLS : CALL menu_load_game ELSE CALL show_new_game
 	new_game = 0
 	DO
-		CALL menu_main(chosit)
+		CALL menu_main(main_menu_start)
 		ended = 0
 		SELECT CASE menu_choice
 			CASE 1
-				IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting ELSE CALL menu_army_recruit((current_side)): chosit = 23
+				IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting ELSE CALL menu_army_recruit((current_side)): main_menu_start = 23
 			CASE 2
 				CALL menu_army_move
-				chosit = 23
+				main_menu_start = 23
 			CASE 3
 				IF turn_navy_done = 0 THEN CALL menu_navy_commands((current_side))
-				chosit = 25
+				main_menu_start = 25
 			CASE 4
 				CALL menu_main_railroad
 			CASE 5
-				CALL menu_main_end_turn(ended): IF ended = 0 THEN chosit = 24
+				CALL menu_main_end_turn(ended): IF ended = 0 THEN main_menu_start = 24
 			CASE 6
-				CALL menu_main_inform: chosit = 27
+				CALL menu_main_inform: main_menu_start = 27
 			CASE 7
-				chosit = 28
+				main_menu_start = 28
 				CALL menu_commands
 			CASE 8
-				chosit = 29
+				main_menu_start = 29
 				CALL menu_utility
 			CASE 9
-				chosit = 30
+				main_menu_start = 30
 				CALL menu_files(action)
 				IF action = FILES_NEW_GAME THEN new_game = 1
 				IF action = FILES_QUIT THEN END
 			CASE MENU_END_TURN_KEY
 				ended = 1
 			CASE ELSE
-				chosit = 22
+				main_menu_start = 22
 		END SELECT
 		IF ended = 1 THEN
 			CALL turn_reset_commands
@@ -70,11 +56,11 @@ DO
 			IF month_over = 0 THEN
 				CALL draw_player_turn: CALL draw_map
 			ELSE
-				a$ = "--------> EVENTS FOR " + month_name$(turn_month) + " " + STR$(turn_year) + " --------"
-				CALL scribe_message(a$, SHOW_NOT)
+				message$ = "--------> EVENTS FOR " + month_name$(turn_month) + " " + STR$(turn_year) + " --------"
+				CALL scribe_message(message$, SHOW_NOT)
 				CALL turn_resolve
 				CALL turn_collect_income
-				chosit = 22
+				main_menu_start = 22
 				IF opt_players = PLAYERS_TWO THEN CALL draw_player_turn: CALL draw_map
 				CALL check_victory_conditions
 				IF game_over > 0 THEN new_game = 1

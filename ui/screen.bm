@@ -3,11 +3,11 @@ IF put_back = SNAP_SAVE THEN GET (x - 10, y - 10)-(x + 10, y + 10), saved_under_
 IF put_back = SNAP_RESTORE THEN PUT (x - 10, y - 10), saved_under_marker, PSET
 END SUB
 
-SUB print_centered (y, text$)
-DIM x AS INTEGER
-x = LEN(text$)
-x = 26 - x \ 2
-LOCATE y, 7 + x: PRINT text$
+SUB print_centered (row, text$)
+DIM col AS INTEGER
+col = LEN(text$)
+col = 26 - col \ 2
+LOCATE row, 7 + col: PRINT text$
 END SUB
 
 SUB clear_bottom_line
@@ -54,7 +54,7 @@ DO WHILE INKEY$ = "": LOOP
 END SUB
 
 SUB draw_top_bar
-DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM side_color AS INTEGER: DIM a$
+DIM i AS INTEGER: DIM total_points AS INTEGER: DIM percent AS INTEGER: DIM side_color AS INTEGER: DIM a$
 	LOCATE 1, 1: PRINT SPACE$(80);
 	COLOR COLOR_LIGHT_CYAN
 	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR COLOR_YELLOW: PRINT month_name$(turn_month); ","; turn_year; "  "
@@ -66,16 +66,16 @@ DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM side_color AS INTEGER:
 
 	FOR i = SIDE_UNION TO SIDE_REBEL: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
 	NEXT i
-	x = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL): y = 0
+	total_points = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL): percent = 0
 	side_color = 9: IF current_side = SIDE_REBEL THEN side_color = 7
 	LINE (580, 15)-(580, 35), 15
 	LINE (530, 20)-(630, 30), 8 - side_color, BF
-	IF x > 0 THEN y = 100 * (side_victory_points(current_side) / x)
+	IF total_points > 0 THEN percent = 100 * (side_victory_points(current_side) / total_points)
 
-	LINE (530, 20)-(530 + y, 30), side_color, BF
+	LINE (530, 20)-(530 + percent, 30), side_color, BF
 	COLOR side_color: LOCATE 4, 68: PRINT "VP :"; side_victory_points(current_side)
 
-	LOCATE 5, 68: PRINT "("; y; "%)"
+	LOCATE 5, 68: PRINT "("; percent; "%)"
 
 a$ = "  Snd": IF opt_sound < SOUND_MUSIC THEN a$ = "   Snd": IF opt_sound = SOUND_OFF THEN a$ = "      "
 IF opt_graphics >= GRAPHICS_BASIC THEN a$ = a$ + " G" + LTRIM$(STR$(opt_graphics))

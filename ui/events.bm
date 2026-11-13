@@ -2,8 +2,8 @@
 ' in game/events.bm.
 
 SUB special_events
-DIM event AS INTEGER: DIM variant AS INTEGER: DIM who AS INTEGER: DIM k AS INTEGER: DIM a$
-CALL event_roll(event, variant, who)
+DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER: DIM a$
+CALL event_roll(event, variant, event_side)
 IF event = EVENT_NONE THEN EXIT SUB
 IF event = EVENT_IRONCLADS THEN
 	COLOR COLOR_YELLOW: CALL clear_bottom_line
@@ -13,8 +13,8 @@ IF event = EVENT_IRONCLADS THEN
 	EXIT SUB
 END IF
 CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "SPECIAL EVENT...";
-IF event = EVENT_RIOTS THEN CALL event_riot(who): EXIT SUB
-IF who = SIDE_UNION THEN CALL clear_bottom_line
+IF event = EVENT_RIOTS THEN CALL event_riot(event_side): EXIT SUB
+IF event_side = SIDE_UNION THEN CALL clear_bottom_line
 SELECT CASE event
 	CASE EVENT_ENGLISH_SHIPS
 	CALL scribe_message("England has given ships to the South", SHOW_BOX)
@@ -51,7 +51,7 @@ SELECT CASE event
 	CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
 END SELECT
 
-IF who = SIDE_UNION GOTO dull1
+IF event_side = SIDE_UNION GOTO dull1
 dull2:
 	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	CALL wait_key("N"): EXIT SUB
@@ -62,14 +62,14 @@ END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.
 SUB event_riot (side)
-DIM x AS INTEGER
-CALL event_riot_city(side, x)
-IF x = 0 THEN EXIT SUB
+DIM city AS INTEGER
+CALL event_riot_city(side, city)
+IF city = 0 THEN EXIT SUB
 	CALL clear_bottom_line: COLOR COLOR_WHITE
-	PRINT " Riots have broken out in "; city_name$(x);
+	PRINT " Riots have broken out in "; city_name$(city);
 	CALL draw_cities
 	wait_seconds opt_pause!
 	CALL clear_bottom_line
-	CALL show_message_box(city_name$(x) + " is now NEUTRAL !", 4)
+	CALL show_message_box(city_name$(city) + " is now NEUTRAL !", 4)
 	wait_seconds opt_pause!
 END SUB

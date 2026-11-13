@@ -1,27 +1,27 @@
-SUB animate_army (army, background_saved)
-DIM y AS INTEGER: DIM y1 AS INTEGER
-DIM from_city AS INTEGER: DIM to2 AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM x1 AS INTEGER
-from_city = army_city(army): to2 = army_order(army): army_city(army) = 0
+SUB animate_army (army, picture_taken)
+DIM y AS INTEGER: DIM step_y AS INTEGER
+DIM from_city AS INTEGER: DIM to_city AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM step_x AS INTEGER
+from_city = army_city(army): to_city = army_order(army): army_city(army) = 0
 x = city_x(from_city) - 12
 y = city_y(from_city) - 11
-x1 = .5 * (city_x(to2) + city_x(from_city))
-y1 = .5 * (city_y(to2) + city_y(from_city))
+step_x = .5 * (city_x(to_city) + city_x(from_city))
+step_y = .5 * (city_y(to_city) + city_y(from_city))
 
 CALL city_update_occupier(from_city): IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
        
-IF background_saved > 0 GOTO already
+IF picture_taken > 0 GOTO already
 	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
 	IF city_army(from_city) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 already:
 
 	FOR i = 2 TO 8
-	x1 = .1 * (i * city_x(to2) + (10 - i) * city_x(from_city))
-	y1 = .1 * (i * city_y(to2) + (10 - i) * city_y(from_city))
-	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), saved_under_marker
-	PUT (x1 - 10, y1 - 10), saved_under_army, PSET
+	step_x = .1 * (i * city_x(to_city) + (10 - i) * city_x(from_city))
+	step_y = .1 * (i * city_y(to_city) + (10 - i) * city_y(from_city))
+	GET (step_x - 10, step_y - 10)-(step_x + 9, step_y + 9), saved_under_marker
+	PUT (step_x - 10, step_y - 10), saved_under_army, PSET
 	IF opt_pause! > 1 THEN CALL wait_seconds(.1) ELSE CALL wait_seconds(.02)
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 200, .1: SOUND 50, .1
-	PUT (x1 - 10, y1 - 10), saved_under_marker, PSET
+	PUT (step_x - 10, step_y - 10), saved_under_marker, PSET
 	NEXT i
 	army_city(army) = from_city
 END SUB
@@ -52,10 +52,10 @@ END IF
 END SUB
 
 SUB draw_train (side, show)
-DIM from AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
+DIM city AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
 	IF train_city(side) = 0 THEN EXIT SUB
-	from = train_city(side)
-	x = city_x(from) - 12: y = city_y(from) - 11
+	city = train_city(side)
+	x = city_x(city) - 12: y = city_y(city) - 11
 SELECT CASE show
 	CASE IS > 0
 	LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
@@ -87,10 +87,10 @@ SELECT CASE side
 END SELECT
 END SUB
 
-SUB draw_flag (side, w, a)
+SUB draw_flag (side, x_offset, top_y)
 DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-x = 585 + w: y = 200: IF w = 0 THEN y = 180
-IF a <> 0 THEN y = a
+x = 585 + x_offset: y = 200: IF x_offset = 0 THEN y = 180
+IF top_y <> 0 THEN y = top_y
 SELECT CASE side
 	CASE 1
 	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
@@ -98,7 +98,7 @@ SELECT CASE side
 	LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
 	NEXT i
 	LINE (x - 17, y - 15)-(x, y), 1, BF
-	IF w = 0 THEN COLOR COLOR_LIGHT_BLUE: LOCATE 10, 70: PRINT "U N I O N"
+	IF x_offset = 0 THEN COLOR COLOR_LIGHT_BLUE: LOCATE 10, 70: PRINT "U N I O N"
 	FOR i = -16 TO -1 STEP 3
 		FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
 	NEXT i
@@ -118,7 +118,7 @@ SELECT CASE side
 	LINE (x - 16, y - 15)-(x + 17, y + 6), 1
 	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
 
-	IF w = 0 THEN COLOR COLOR_RED: LOCATE 10, 70: PRINT "R E B E L"
+	IF x_offset = 0 THEN COLOR COLOR_RED: LOCATE 10, 70: PRINT "R E B E L"
 	CASE ELSE
 END SELECT
 END SUB

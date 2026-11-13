@@ -149,11 +149,11 @@ END SUB
 ' gives the computer's side cash. Each side's cash becomes its income, and it gets up to 50
 ' more.
 SUB game_apply_settings
-DIM i AS INTEGER: DIM a$
+DIM i AS INTEGER: DIM ships$
 	IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
 		FOR i = SIDE_UNION TO SIDE_REBEL
-			a$ = STRING$(LEN(fleet_ships$(i)), "W")
-			fleet_ships$(i) = a$
+			ships$ = STRING$(LEN(fleet_ships$(i)), "W")
+			fleet_ships$(i) = ships$
 		NEXT i
 	END IF
 	IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN opt_players = PLAYERS_ONE

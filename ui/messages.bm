@@ -1,22 +1,22 @@
-SUB show_message_box (text$, seconds)
+SUB show_message_box (text$, box_color)
 DIM menu_width AS INTEGER
-DIM g2(1 TO 8000)
+DIM saved_screen(1 TO 8000)
 menu_text$(1) = text$
 menu_col = 32 - LEN(text$) \ 2
 menu_row = 10: menu_item_count = 1
 menu_width = menu_measure_width
 IF menu_width > 59 THEN menu_width = 59: text$ = LEFT$(text$, 59)
-	GET (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 15, 16 * (menu_row + 3) + 7), g2
+	GET (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 15, 16 * (menu_row + 3) + 7), saved_screen
 	VIEW (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + 3) + 4)
 	CLS 1
 	VIEW
 	LINE (8 * menu_col, 16 * menu_row - 1)-(8 * (menu_col + menu_width + 1) + 15, 16 * (menu_row + 3) + 7), 0, BF
-	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + 3)), seconds, BF
+	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + 3)), box_color, BF
 	LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + 3)), 15, B
 	COLOR COLOR_YELLOW
 	LOCATE menu_row + 2, menu_col + 2: PRINT text$
 	CALL wait_seconds(PAUSE_LONG)
-	PUT (8 * menu_col - 4, 16 * menu_row - 3), g2, PSET
+	PUT (8 * menu_col - 4, 16 * menu_row - 3), saved_screen, PSET
 END SUB
 
 SUB scribe_message (text$, display)

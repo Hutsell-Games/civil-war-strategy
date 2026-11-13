@@ -28,21 +28,21 @@ END SUB
 ' Attack: the fleet bombards the enemy city it lies off. It hurts the army there, or a fort
 ' fires back, or the city without either may turn neutral.
 SUB navy_bombard (side)
-DIM target AS INTEGER: DIM army AS INTEGER: DIM killd AS INTEGER: DIM damaged AS INTEGER: DIM result AS INTEGER
+DIM city AS INTEGER: DIM army AS INTEGER: DIM casualties AS INTEGER: DIM damaged AS INTEGER: DIM result AS INTEGER
 	CALL clear_bottom_line: COLOR COLOR_LIGHT_RED: PRINT side_name$(side); " fleet bombards "; city_name$(fleet_city(side));
 	CALL draw_map_marker(fleet_city(side), 0, MARK_EXPLOSION)
 
-	target = fleet_city(side): army = city_army(target): IF army = 0 GOTO deserted
-	CALL navy_bombard_army(side, army, killd)
-	CALL clear_bottom_line: PRINT army_name$(army); " suffered "; 100 * killd; " casualties";
+	city = fleet_city(side): army = city_army(city): IF army = 0 GOTO deserted
+	CALL navy_bombard_army(side, army, casualties)
+	CALL clear_bottom_line: PRINT army_name$(army); " suffered "; 100 * casualties; " casualties";
 	CALL wait_seconds(opt_pause!)
 	EXIT SUB
 deserted:
-	IF city_fort(target) = 0 GOTO blast
-	CALL navy_shore_battery(side, target, damaged)
+	IF city_fort(city) = 0 GOTO blast
+	CALL navy_shore_battery(side, city, damaged)
 	IF damaged = 1 GOTO hurt1
 	CALL clear_bottom_line
-	PRINT side_name$(city_owner(target)); " shore battery sunk an attacking ship!"; fleet_size(side); "ship(s) left! ";
+	PRINT side_name$(city_owner(city)); " shore battery sunk an attacking ship!"; fleet_size(side); "ship(s) left! ";
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5
 	CALL wait_seconds(opt_pause!)
 	IF fleet_size(side) < 1 THEN
@@ -53,13 +53,13 @@ deserted:
 	END IF
 	GOTO deserted
 hurt1:
-	CALL clear_bottom_line: PRINT city_name$(target); " fortifications damaged";
-	CALL city_redraw_fort(target)
+	CALL clear_bottom_line: PRINT city_name$(city); " fortifications damaged";
+	CALL city_redraw_fort(city)
 	CALL wait_seconds(opt_pause!)
 	EXIT SUB
 blast:
-	CALL navy_blast(side, target, result)
-	IF result = BLAST_FIRM THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(target); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
+	CALL navy_blast(side, city, result)
+	IF result = BLAST_FIRM THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(city); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
 	IF result = BLAST_LOYAL THEN CALL clear_bottom_line: PRINT "The CAPITAL steadfastly stands loyal"; : CALL wait_seconds(opt_pause!): EXIT SUB
 	CALL clear_bottom_line: PRINT city_name$(fleet_city(side)); " is now  NEUTRAL";
 	CALL draw_cities
@@ -110,13 +110,13 @@ SUB navy_start_raid (side)
 END SUB
 
 ' Invasion: a ship lands a new army of 3,500 in the neutral city the fleet lies off, and the
-' ship is lost. slot is the new army's, from army_get_commander.
-SUB navy_land_army (side, slot)
-DIM c AS INTEGER
+' ship is lost. army_slot is the new army's, from army_get_commander.
+SUB navy_land_army (side, army_slot)
+DIM city AS INTEGER
 	CALL navy_remove_ship(side)
-	c = fleet_city(side): CALL army_new((side), slot, c)
-	CALL city_capture(slot, c, side, 0)
-	CALL navy_landed(side, slot)
+	city = fleet_city(side): CALL army_new((side), army_slot, city)
+	CALL city_capture(army_slot, city, side, 0)
+	CALL navy_landed(side, army_slot)
 END SUB
 
 ' After a fleet has moved or fought: notes which side raids commerce, and draws the map again.
@@ -244,9 +244,9 @@ END SUB
 
 ' The side's fleet leaves the fight for one of its other sea ports.
 SUB navy_combat_retreat (side)
-DIM target AS INTEGER
-	 CALL navy_retreat_port(side, target)
-	 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is retreating to "; city_name$(target); : CALL wait_seconds(opt_pause!)
+DIM port AS INTEGER
+	 CALL navy_retreat_port(side, port)
+	 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT side_name$(side); " is retreating to "; city_name$(port); : CALL wait_seconds(opt_pause!)
 END SUB
 
 ' The computer's fleet fights: it fires volley after volley until a fleet is sunk. The menu's

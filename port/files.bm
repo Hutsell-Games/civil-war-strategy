@@ -1,5 +1,5 @@
 SUB load_scenario
-DIM k AS INTEGER: DIM i AS INTEGER: DIM a AS INTEGER
+DIM k AS INTEGER: DIM i AS INTEGER: DIM army_count AS INTEGER
 	OPEN "I", 1, SCNDIR + "cwslead.dat"
 	FOR i = 1 TO 40: INPUT #1, leader_name$(i), leader_rating(i): NEXT i
 	CLOSE #1
@@ -10,12 +10,12 @@ DIM k AS INTEGER: DIM i AS INTEGER: DIM a AS INTEGER
 '               set end game conditions
 	FOR i = 1 TO 6: INPUT #1, victory_rule(i): NEXT i
 	victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
-	INPUT #1, a             ' number of Yankee armies
-FOR i = 1 TO a
+	INPUT #1, army_count             ' number of Yankee armies
+FOR i = 1 TO army_count
 	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
 NEXT i
-	INPUT #1, a             ' number of Rebel armies
-FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + a
+	INPUT #1, army_count             ' number of Rebel armies
+FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + army_count
 	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
 	city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
 NEXT i
@@ -33,15 +33,15 @@ END SUB
 ' Reads the map's cities and roads from cities.grd. Adds each city to its owner's count,
 ' victory points and cash.
 SUB load_cities
-DIM i AS INTEGER: DIM j AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER
+DIM i AS INTEGER: DIM j AS INTEGER: DIM unused AS INTEGER: DIM owner AS INTEGER
 city_name$(0) = "NONE"
 OPEN "I", 1, SCNDIR + "cities.grd"
 total_income = union_income_bonus + 200
-FOR i = 1 TO MAX_CITIES: INPUT #1, a, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
+FOR i = 1 TO MAX_CITIES: INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
 city_first_owner(i) = city_owner(i)
 CALL city_update_occupier(i)
 FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
-IF city_owner(i) > 0 THEN x = city_owner(i): side_city_count(x) = side_city_count(x) + 1: side_victory_points(x) = side_victory_points(x) + city_value(i)
+IF city_owner(i) > 0 THEN owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_victory_points(owner) = side_victory_points(owner) + city_value(i)
 IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
 total_income = total_income + city_value(i)
 NEXT i
@@ -53,10 +53,10 @@ END SUB
 ' settings of cws.cfg. The menu of saved games is menu_load_game (ui/files.bm).
 SUB load_game (slot)
 DIM last_army AS INTEGER
-DIM k AS INTEGER: DIM side AS INTEGER: DIM first_army AS INTEGER: DIM myside AS INTEGER
-DIM i AS INTEGER: DIM a AS INTEGER: DIM unused AS INTEGER
+DIM k AS INTEGER: DIM side AS INTEGER: DIM first_army AS INTEGER: DIM config_side AS INTEGER
+DIM i AS INTEGER: DIM saved_side AS INTEGER: DIM unused AS INTEGER
 	OPEN "I", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
-	INPUT #1, turn_month, turn_year, union_income_bonus, a
+	INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
 	FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
 	IF army_city(i) > 0 THEN
 		IF army_name$(i) = leader_name$(i) THEN
@@ -77,14 +77,14 @@ DIM i AS INTEGER: DIM a AS INTEGER: DIM unused AS INTEGER
 	NEXT i
        
 	CLOSE #1
-	CALL config_read(myside)
-	current_side = a
+	CALL config_read(config_side)
+	current_side = saved_side
 END SUB
 
 ' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The menu of the slots is
 ' menu_save_game (ui/files.bm).
 SUB save_game (slot)
-DIM i AS INTEGER: DIM myside AS INTEGER
+DIM i AS INTEGER: DIM config_side AS INTEGER
 	OPEN "O", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
 	WRITE #1, turn_month, turn_year, union_income_bonus, current_side
 	FOR i = 1 TO MAX_ARMIES: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
@@ -95,9 +95,9 @@ DIM i AS INTEGER: DIM myside AS INTEGER
 	NEXT i
 	CLOSE #1
        
-	myside = current_side
-	IF myside < 1 OR myside > 2 THEN myside = 1
-	CALL config_write(myside)
+	config_side = current_side
+	IF config_side < 1 OR config_side > 2 THEN config_side = 1
+	CALL config_write(config_side)
 END SUB
 
 ' Notes that no saved game is on the disk, so that the Files menu shows Load as "-". Only a

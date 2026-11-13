@@ -205,8 +205,8 @@ AssertEqualInt 0, fleet_city(2), "nowhere"
 END SUB
 
 ' ------------------------------------------------------------------- normal
-' A draw around xbar with the variance vary. It sums 12 RNDs and takes off
-' 5.5, though the sum averages 6, so the draws center on xbar + SQR(vary) / 2.
+' A draw around mean with the variance given. It sums 12 RNDs and takes off
+' 5.5, though the sum averages 6, so the draws center on mean + SQR(variance) / 2.
 
 SUB TestNormalDrawsHigh
 RANDOMIZE 1

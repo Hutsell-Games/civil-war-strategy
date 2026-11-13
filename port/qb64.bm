@@ -9,10 +9,10 @@
 ' skipped, and the name is in upper case, as DOS gave it.
 ' Without this FUNCTION, QB64pe and QB64Rust read DIR$("*.sav") as an array.
 FUNCTION DIR$ (spec$)
-DIM f$
-IF spec$ = "" THEN f$ = _FILES$ ELSE f$ = _FILES$(spec$)
-DO WHILE RIGHT$(f$, 1) = CHR$(92) OR RIGHT$(f$, 1) = "/"
-	f$ = _FILES$
+DIM found_file$
+IF spec$ = "" THEN found_file$ = _FILES$ ELSE found_file$ = _FILES$(spec$)
+DO WHILE RIGHT$(found_file$, 1) = CHR$(92) OR RIGHT$(found_file$, 1) = "/"
+	found_file$ = _FILES$
 LOOP
-DIR$ = UCASE$(f$)
+DIR$ = UCASE$(found_file$)
 END FUNCTION

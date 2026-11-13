@@ -25,28 +25,28 @@ END SUB
 ' Counts the side's track out of a city: each road to a city of the side, and each road on
 ' from there to another city of the side.
 FUNCTION railroad_route_count (side, city)
-DIM x AS INTEGER: DIM j AS INTEGER: DIM y AS INTEGER: DIM m AS INTEGER: DIM z AS INTEGER
-	x = 0: FOR j = 1 TO MAX_ROADS
-	y = city_road(city, j)
-	IF y > 0 AND city_owner(y) = side THEN
-	x = x + 1
+DIM routes AS INTEGER: DIM j AS INTEGER: DIM neighbor AS INTEGER: DIM m AS INTEGER: DIM far_city AS INTEGER
+	routes = 0: FOR j = 1 TO MAX_ROADS
+	neighbor = city_road(city, j)
+	IF neighbor > 0 AND city_owner(neighbor) = side THEN
+	routes = routes + 1
 		FOR m = 1 TO MAX_ROADS
-		z = city_road(y, m)
-		IF z > 0 AND z <> city AND city_owner(z) = side THEN x = x + 1
+		far_city = city_road(neighbor, m)
+		IF far_city > 0 AND far_city <> city AND city_owner(far_city) = side THEN routes = routes + 1
 		NEXT m
 	END IF
 NEXT j
-railroad_route_count = x
+railroad_route_count = routes
 END FUNCTION
 
 ' The largest army that side's railroad can carry.
 FUNCTION railroad_capacity (side)
-DIM x AS INTEGER: DIM capacity AS INTEGER
+DIM base_cities AS INTEGER: DIM max_capacity AS INTEGER: DIM capacity AS INTEGER
 IF opt_realism = REALISM_OFF THEN railroad_capacity = train_capacity(side): EXIT FUNCTION
-x = 11: IF current_side = SIDE_REBEL THEN x = 23
-capacity = train_capacity(side) + 5 * (side_city_count(side) - x)
-x = 2 * train_capacity(side)
-IF capacity > x THEN capacity = x
-IF capacity < x \ 4 THEN capacity = x \ 4
+base_cities = 11: IF current_side = SIDE_REBEL THEN base_cities = 23
+capacity = train_capacity(side) + 5 * (side_city_count(side) - base_cities)
+max_capacity = 2 * train_capacity(side)
+IF capacity > max_capacity THEN capacity = max_capacity
+IF capacity < max_capacity \ 4 THEN capacity = max_capacity \ 4
 railroad_capacity = capacity
 END FUNCTION

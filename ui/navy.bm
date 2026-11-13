@@ -121,9 +121,9 @@ END SUB
 
 ' Invasion: a ship lands a new army in the neutral city the fleet lies off.
 SUB menu_navy_invade (side)
-DIM slot AS INTEGER
-	CALL army_get_commander((side), slot)
-	CALL navy_land_army(side, slot)
+DIM army_slot AS INTEGER
+	CALL army_get_commander((side), army_slot)
+	CALL navy_land_army(side, army_slot)
 	CALL turn_set_navy_done(1)
 END SUB
 

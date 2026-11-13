@@ -1,66 +1,66 @@
 ' A land battle as the player sees it: both armies' strengths step by step and the odds, the
 ' picture of the fort, the winner and the losses. The rules are in rules/battle.bm.
 SUB calculate_battle (attacker, defender, winner, loser)
-DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER: DIM attack AS INTEGER: DIM defend AS INTEGER
+DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER: DIM attack_strength AS INTEGER: DIM defend_strength AS INTEGER
 DIM rounds AS INTEGER: DIM attacker_losses AS INTEGER: DIM defender_losses AS INTEGER: DIM odds!
-DIM a$: DIM t$: DIM a AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER: DIM side_color AS INTEGER
+DIM a$: DIM file$: DIM message$: DIM odds_pct AS INTEGER: DIM winner_side AS INTEGER: DIM fort_level AS INTEGER: DIM k AS INTEGER: DIM col AS INTEGER: DIM side_color AS INTEGER
 CALL battle_strengths(attacker, defender, attack_steps(), defend_steps())
-attack = attack_steps(7): defend = defend_steps(8)
+attack_strength = attack_steps(7): defend_strength = defend_steps(8)
 
 CALL draw_map_marker(army_city(defender), 0, MARK_POINTER)
 LOCATE 1, 1: PRINT SPACE$(80)
-CALL clear_right_panel: y = 68: COLOR COLOR_LIGHT_CYAN: LOCATE 1, y: PRINT "Attacker"
+CALL clear_right_panel: col = 68: COLOR COLOR_LIGHT_CYAN: LOCATE 1, col: PRINT "Attacker"
 side_color = 9: IF army_side(attacker) = SIDE_REBEL THEN side_color = 7
-COLOR side_color: LOCATE 2, y: PRINT army_name$(attacker)
-LOCATE 3, y: CALL print_army_size(attacker)
-LOCATE 4, y: PRINT "Base    "; attack_steps(1)
-LOCATE 5, y: PRINT "Ldr/Exp "; attack_steps(2)
-LOCATE 6, y: PRINT "Small   "; attack_steps(3)
-LOCATE 7, y: PRINT "Outman  "; attack_steps(4)
+COLOR side_color: LOCATE 2, col: PRINT army_name$(attacker)
+LOCATE 3, col: CALL print_army_size(attacker)
+LOCATE 4, col: PRINT "Base    "; attack_steps(1)
+LOCATE 5, col: PRINT "Ldr/Exp "; attack_steps(2)
+LOCATE 6, col: PRINT "Small   "; attack_steps(3)
+LOCATE 7, col: PRINT "Outman  "; attack_steps(4)
 IF army_supply(attacker) < 1 THEN COLOR COLOR_LIGHT_MAGENTA
-LOCATE 8, y: PRINT "Supply  "; attack_steps(5): COLOR side_color
-LOCATE 9, y: PRINT "Difclt  "; attack_steps(6)
-COLOR COLOR_LIGHT_CYAN: LOCATE 11, y: PRINT "Attack  "; attack
+LOCATE 8, col: PRINT "Supply  "; attack_steps(5): COLOR side_color
+LOCATE 9, col: PRINT "Difclt  "; attack_steps(6)
+COLOR COLOR_LIGHT_CYAN: LOCATE 11, col: PRINT "Attack  "; attack_strength
 LINE (530, 155)-(635, 175), 11, B
 
-LOCATE 13, y: PRINT "Defender"
-COLOR 16 - side_color: LOCATE 14, y: PRINT army_name$(defender)
-LOCATE 15, y: CALL print_army_size(defender)
-LOCATE 16, y: PRINT "Base    "; INT(.01 * army_size(defender))
-LOCATE 17, y: PRINT "Defense "; defend_steps(1)
-LOCATE 18, y: PRINT "Ldr/Exp "; defend_steps(2)
-LOCATE 19, y: PRINT "Small   "; defend_steps(3)
-LOCATE 20, y: PRINT "Outman  "; defend_steps(4)
+LOCATE 13, col: PRINT "Defender"
+COLOR 16 - side_color: LOCATE 14, col: PRINT army_name$(defender)
+LOCATE 15, col: CALL print_army_size(defender)
+LOCATE 16, col: PRINT "Base    "; INT(.01 * army_size(defender))
+LOCATE 17, col: PRINT "Defense "; defend_steps(1)
+LOCATE 18, col: PRINT "Ldr/Exp "; defend_steps(2)
+LOCATE 19, col: PRINT "Small   "; defend_steps(3)
+LOCATE 20, col: PRINT "Outman  "; defend_steps(4)
 IF army_supply(defender) < 1 THEN COLOR COLOR_LIGHT_MAGENTA
-LOCATE 21, y: PRINT "Supply  "; defend_steps(5): COLOR 16 - side_color
-LOCATE 22, y: PRINT "Difclt  "; defend_steps(6)
+LOCATE 21, col: PRINT "Supply  "; defend_steps(5): COLOR 16 - side_color
+LOCATE 22, col: PRINT "Difclt  "; defend_steps(6)
 a$ = "Fort"
 IF city_fort(army_city(defender)) > 0 AND army_order(defender) = ORDER_NONE THEN
 	COLOR COLOR_LIGHT_MAGENTA: a$ = "Fort+"
 	IF city_fort(army_city(defender)) = MAX_FORT THEN a$ = "Fort++"
 END IF
-LOCATE 23, y: PRINT a$; TAB(76); defend_steps(7)
-COLOR COLOR_LIGHT_CYAN: LOCATE 25, y: PRINT "Defend  "; defend
+LOCATE 23, col: PRINT a$; TAB(76); defend_steps(7)
+COLOR COLOR_LIGHT_CYAN: LOCATE 25, col: PRINT "Defend  "; defend_strength
 LINE (530, 380)-(635, 400), 11, B
 
-odds! = attack / (attack + defend): a = INT(100 * odds!): IF a < 1 THEN a = 1
-a$ = LTRIM$(RTRIM$(STR$(a))) + "%"
-COLOR COLOR_YELLOW: LOCATE 27, y: PRINT "Odds:  "; a$;
+odds! = attack_strength / (attack_strength + defend_strength): odds_pct = INT(100 * odds!): IF odds_pct < 1 THEN odds_pct = 1
+a$ = LTRIM$(RTRIM$(STR$(odds_pct))) + "%"
+COLOR COLOR_YELLOW: LOCATE 27, col: PRINT "Odds:  "; a$;
 LINE (530, 412)-(635, 435), 14, B
 LINE (528, 410)-(637, 437), 14, B
 CALL wait_key("P")
 IF opt_graphics >= GRAPHICS_FULL THEN
 	CALL draw_cannon
-	k = city_fort(army_city(defender))
-	t$ = GFXDIR + "fort" + LTRIM$(STR$(k)) + ".vga"
-	IF LEN(DIR$(t$)) > 0 THEN
-		CALL load_picture(t$, pic_loaded())
+	fort_level = city_fort(army_city(defender))
+	file$ = GFXDIR + "fort" + LTRIM$(STR$(fort_level)) + ".vga"
+	IF LEN(DIR$(file$)) > 0 THEN
+		CALL load_picture(file$, pic_loaded())
 		PUT (550, 270), pic_loaded, PSET
 	END IF
 ELSE
 	CALL clear_right_panel
 END IF
-CALL battle_fight(attack, defend, attacker, defender, winner, loser, rounds)
+CALL battle_fight(attack_strength, defend_strength, attacker, defender, winner, loser, rounds)
 FOR k = 1 TO rounds: IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
 NEXT k
 '---------------------------------------------------------------------------
@@ -68,8 +68,8 @@ a$ = "UNION": IF army_side(winner) = SIDE_REBEL THEN a$ = "REBEL"
 COLOR COLOR_YELLOW: LOCATE 3, 68: PRINT a$; " VICTORY"
 LOCATE 4, 71: PRINT "in"
 LOCATE 5, 69: PRINT city_name$(army_city(defender))
-a = army_side(winner)
-CALL draw_flag(a, 0, 0)
+winner_side = army_side(winner)
+CALL draw_flag(winner_side, 0, 0)
 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(PAUSE_LONG)
 CALL battle_losses(attacker, defender, winner, attacker_losses, defender_losses)
 '---------------------------------------------------------------------------
@@ -83,9 +83,9 @@ CALL print_army_size(defender)
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defender_losses / army_size(defender)))))); "%)"
 '---------------------------------------------------------------------------
 menu_text$(1) = " (" + LTRIM$(RTRIM$(STR$(attacker_losses) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
-t$ = " (" + LTRIM$(RTRIM$(STR$(defender_losses) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
-menu_text$(2) = t$
-IF winner = defender THEN menu_text$(2) = menu_text$(1): menu_text$(1) = t$
+message$ = " (" + LTRIM$(RTRIM$(STR$(defender_losses) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
+menu_text$(2) = message$
+IF winner = defender THEN menu_text$(2) = menu_text$(1): menu_text$(1) = message$
 menu_text$(3) = "*" + army_name$(winner): menu_text$(4) = army_name$(loser)
 IF winner = defender THEN menu_text$(3) = army_name$(winner): menu_text$(4) = "*" + army_name$(loser)
 a$ = city_name$(army_city(defender)) + ": " + menu_text$(3) + menu_text$(1) + " defeats " + menu_text$(4) + menu_text$(2)
