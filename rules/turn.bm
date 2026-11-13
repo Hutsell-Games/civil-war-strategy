@@ -70,8 +70,14 @@ END SUB
 ' The strength ratio the computer plays by: the player's men against the computer's.
 SUB turn_strength_ratio
     DIM i AS INTEGER: DIM union_strength AS INTEGER: DIM rebel_strength AS INTEGER
-    union_strength = 0: FOR i = 1 TO ARMIES_PER_SIDE: union_strength = union_strength + .1 * army_size(i): NEXT i
-    rebel_strength = 0: FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: rebel_strength = rebel_strength + .1 * army_size(i): NEXT i
+    union_strength = 0
+    FOR i = 1 TO ARMIES_PER_SIDE
+        union_strength = union_strength + .1 * army_size(i)
+    NEXT i
+    rebel_strength = 0
+    FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES
+        rebel_strength = rebel_strength + .1 * army_size(i)
+    NEXT i
     IF current_side = SIDE_REBEL AND rebel_strength > 0 THEN ai_strength_ratio! = union_strength / rebel_strength ELSE ai_strength_ratio! = 1
     IF current_side = SIDE_UNION AND union_strength > 0 THEN ai_strength_ratio! = rebel_strength / union_strength ELSE IF current_side = SIDE_UNION THEN ai_strength_ratio! = 1
 END SUB
@@ -95,7 +101,8 @@ END SUB
 ' After the attacker withdrew, the defender loses its own order for the month (halted is 1)
 ' unless its leader's rating beats a draw from 0 to 11. old_order is its order before.
 SUB turn_defender_halts (army, halted, old_order)
-    halted = 0: old_order = army_order(army)
+    halted = 0
+    old_order = army_order(army)
     IF 11 * RND > army_leader_rating(army) THEN halted = 1: IF army_order(army) > 0 THEN army_order(army) = ORDER_DONE
 END SUB
 
@@ -109,7 +116,8 @@ SUB turn_retreat_city (city, attacker_side, refuge)
         neighbor = city_road(city, i)
         IF neighbor > 0 AND (city_owner(neighbor) = other_side(attacker_side)) AND city_value(neighbor) > best THEN
             IF best = 0 THEN
-                best_road = i: best = city_value(neighbor)
+                best_road = i
+                best = city_value(neighbor)
             ELSE
                 IF city_army(neighbor) = 0 THEN best_road = i: best = city_value(neighbor)
             END IF

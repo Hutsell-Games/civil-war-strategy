@@ -58,7 +58,8 @@ SUB menu_select (menu_item_show_beside%)
     IF menu_choice < MENU_START THEN menu_choice = 1
     IF menu_choice > MENU_START THEN menu_choice = menu_choice - MENU_START
     IF menu_choice > 21 THEN menu_choice = 1
-    row = menu_choice: IF row < 1 THEN row = 1
+    row = menu_choice
+    IF row < 1 THEN row = 1
     IF row > menu_item_count THEN row = 1
     menu_choice = row
     previous_row = row

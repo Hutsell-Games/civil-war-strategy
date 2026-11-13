@@ -78,9 +78,7 @@ SUB menu_report (side)
     CALL draw_map
 END SUB
 
-'..........................................................................
 '                               Army Report
-'..........................................................................
 SUB report_armies (side)
     DIM last_army AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER: DIM first_army AS INTEGER
     DIM side_color AS INTEGER: DIM total_points AS INTEGER: DIM percent AS INTEGER: DIM total_troops AS INTEGER: DIM ironclads AS INTEGER: DIM all_income AS INTEGER: DIM row AS INTEGER
@@ -97,7 +95,8 @@ SUB report_armies (side)
         PRINT "("; percent; " %)";
     END IF
     CALL draw_flag_icon(215, 8, side)
-    COLOR side_color: PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : percent = INT(side_city_count(side) * 2.5 + .5): PRINT percent; "%)";
+    COLOR side_color
+    PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : percent = INT(side_city_count(side) * 2.5 + .5): PRINT percent; "%)";
     PRINT TAB(50); : COLOR COLOR_LIGHT_RED: PRINT "Capital: "; city_name$(side_capital(side))
     all_income = total_income: IF side_capital(SIDE_UNION) > 0 THEN all_income = all_income + CAPITAL_INCOME
     IF side_capital(SIDE_REBEL) > 0 THEN all_income = all_income + CAPITAL_INCOME
@@ -130,9 +129,7 @@ SUB report_armies (side)
     CALL report_wait_key
 END SUB
 
-'..........................................................................
 '                               City Report
-'..........................................................................
 SUB report_cities
     DIM i AS INTEGER: DIM owner$
     CLS : LOCATE 1, 1: COLOR COLOR_YELLOW
@@ -157,9 +154,7 @@ SUB report_cities
     CALL report_wait_key
 END SUB
 
-'..........................................................................
 '                               Intelligence
-'..........................................................................
 SUB report_intelligence
     DIM last_army AS INTEGER: DIM k AS INTEGER: DIM box_width AS INTEGER: DIM j AS INTEGER
     DIM first_army AS INTEGER: DIM side_color AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
@@ -188,9 +183,7 @@ SUB report_intelligence
     CALL report_wait_key
 END SUB
 
-'..........................................................................
 '                               Force Summary
-'..........................................................................
 SUB report_force_summary
     DIM k AS INTEGER: DIM j AS INTEGER: DIM side_color AS INTEGER
     DIM city_troops(MAX_CITIES)
@@ -214,9 +207,7 @@ SUB report_force_summary
     CALL report_wait_key
 END SUB
 
-'..........................................................................
 '                               Battle Report
-'..........................................................................
 SUB report_battle_summary
     VIEW (200, 123)-(400, 284)
     CLS 1
@@ -240,9 +231,7 @@ SUB report_battle_summary
     CALL report_wait_key
 END SUB
 
-'..........................................................................
 '                               Recap (History)
-'..........................................................................
 SUB report_recap
     DIM line_count AS INTEGER: DIM history_line$
     CLS : line_count = 0
@@ -270,9 +259,11 @@ END SUB
 SUB check_map_links
     DIM unresolved AS INTEGER: DIM fixed AS INTEGER: DIM n AS INTEGER: DIM count AS INTEGER
     DIM added(MAX_CITIES * MAX_ROADS) AS INTEGER: DIM from_city(MAX_CITIES * MAX_ROADS) AS INTEGER: DIM to_city(MAX_CITIES * MAX_ROADS) AS INTEGER
-    CLS : COLOR COLOR_WHITE
+    CLS
+    COLOR COLOR_WHITE
     CALL city_fix_return_routes(count, added(), from_city(), to_city())
-    unresolved = 0: fixed = 0
+    unresolved = 0
+    fixed = 0
     FOR n = 1 TO count
         IF added(n) = 1 THEN PRINT "+ Adding return route from "; city_name$(from_city(n)); " to "; city_name$(to_city(n)): fixed = fixed + 1
         IF added(n) = 0 THEN unresolved = unresolved + 1: PRINT "Error in CITIES.GRD entry for city #"; to_city(n); city_name$(from_city(n)); ": no return route to "; city_name$(to_city(n)): wait_seconds 1

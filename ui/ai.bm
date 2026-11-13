@@ -3,7 +3,8 @@
 ' An army's move order: its line and a pointer on the map, and a message when the pause is long.
 SUB draw_ai_plan (army, text_color)
     IF opt_pause! > 1 THEN
-        COLOR text_color: CALL clear_bottom_line
+        COLOR text_color
+        CALL clear_bottom_line
         PRINT army_name$(army); " plans to move from "; city_name$(army_city(army)); " to "; city_name$(army_order(army));
     END IF
     CALL draw_map_marker(army_city(army), army_order(army), MARK_MOVE_LINE)

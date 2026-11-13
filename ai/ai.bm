@@ -345,7 +345,7 @@ SUB ai_combine (side)
     city = menu_value(menu_choice)
     CALL army_combine_gather(side, city, best, joined)
     IF joined = 0 THEN EXIT SUB
-    CALL army_combine_done(side, city, best, joined)
+    CALL army_combine_done(city, best, joined)
     CALL army_combine_redraw(side, city, best)
 END SUB
 

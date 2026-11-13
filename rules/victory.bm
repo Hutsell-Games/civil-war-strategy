@@ -4,9 +4,13 @@
 ' The men in the field: union_men the Union's and rebel_men the Rebels', in hundreds.
 SUB victory_forces (union_troops, rebel_troops)
     DIM j AS INTEGER
-    union_troops = 0: FOR j = 1 TO ARMIES_PER_SIDE: IF army_city(j) > 0 THEN union_troops = union_troops + army_size(j)
+    union_troops = 0
+    FOR j = 1 TO ARMIES_PER_SIDE
+        IF army_city(j) > 0 THEN union_troops = union_troops + army_size(j)
     NEXT j
-    rebel_troops = 0: FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: IF army_city(j) > 0 THEN rebel_troops = rebel_troops + army_size(j)
+    rebel_troops = 0
+    FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES
+        IF army_city(j) > 0 THEN rebel_troops = rebel_troops + army_size(j)
     NEXT j
 END SUB
 
@@ -85,7 +89,9 @@ END SUB
 ' A technical victory when the time ran out: both sides keep seven tenths of their points.
 SUB victory_technical_points
     DIM k AS INTEGER
-    FOR k = SIDE_UNION TO SIDE_REBEL: side_victory_points(k) = .7 * side_victory_points(k): NEXT k
+    FOR k = SIDE_UNION TO SIDE_REBEL
+        side_victory_points(k) = .7 * side_victory_points(k)
+    NEXT k
 END SUB
 
 ' The place in the side's Hall of Fame that its score earns: the first whose score it reaches, or

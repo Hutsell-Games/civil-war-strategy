@@ -43,7 +43,9 @@ SUB menu_navy_build (side, again)
     ship$ = "W"
 
     IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * cost THEN
-        menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_LIGHT_BLUE
+        menu_col = PANEL_COL
+        menu_row = 12
+        menu_color = COLOR_LIGHT_BLUE
         menu_text$(0) = "Type"
         menu_text$(1) = "Wooden"
         menu_text$(2) = "Ironclad"

@@ -11,7 +11,8 @@ SUB menu_army_combine (side, found)
     IF menu_item_count = 0 THEN EXIT SUB
     found = 1
     menu_text$(0) = "Join"
-    menu_choice = MENU_START + 10: menu_highlight = COLOR_LIGHT_CYAN
+    menu_choice = MENU_START + 10
+    menu_highlight = COLOR_LIGHT_CYAN
     CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
     IF menu_choice < 1 THEN EXIT SUB
     city = menu_value(menu_choice)
@@ -21,7 +22,7 @@ SUB menu_army_combine (side, found)
         wait_seconds opt_pause!
         EXIT SUB
     END IF
-    CALL army_combine_done(side, city, best, joined)
+    CALL army_combine_done(city, best, joined)
     CALL wait_seconds(opt_pause!)
     CALL army_combine_redraw(side, city, best)
 END SUB

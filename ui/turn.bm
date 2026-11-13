@@ -2,13 +2,15 @@
 
 SUB turn_date_and_supply
     DIM i AS INTEGER: DIM k AS INTEGER: DIM blockaded AS INTEGER: DIM starved AS INTEGER
-    '---------------------------------------------------------------------------
-    FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 THEN CALL draw_army_flag(i)
+
+    FOR i = 1 TO MAX_ARMIES
+        IF army_city(i) > 0 THEN CALL draw_army_flag(i)
     NEXT i
-    '---------------------------------------------------------------------------
+
     CALL turn_advance_month
-    '---------------------------------------------------------------------------
-    FOR i = 1 TO MAX_ARMIES: IF army_city(i) < 1 THEN _CONTINUE
+
+    FOR i = 1 TO MAX_ARMIES
+        IF army_city(i) < 1 THEN _CONTINUE
         CALL turn_army_supply(i, blockaded, starved)
         IF blockaded = 1 THEN CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
         COLOR COLOR_LIGHT_MAGENTA
@@ -37,9 +39,8 @@ SUB turn_resolve
     CALL clear_bottom_line: PRINT "press any key for "; month_name$(turn_month); ","; turn_year; " events";
     CALL wait_key("U")
     CALL draw_update_box
-    '==========================================================================
+
     '                       Assign Time of Action
-    '==========================================================================
     FOR i = SIDE_UNION TO SIDE_REBEL
         IF train_army(i) > 0 THEN
             CALL railroad_arrive(i)
@@ -50,9 +51,8 @@ SUB turn_resolve
     NEXT i
 
     CALL turn_set_move_order
-    '==========================================================================
+
     '                       Begin Main Loop
-    '==========================================================================
     FOR j = 1 TO MAX_ARMIES
         IF move_order_key(j) = MOVE_KEY_NONE THEN EXIT FOR
         moving_army = INT(move_order_key(j) / 100): moving_army = move_order_key(j) - 100 * moving_army
@@ -65,7 +65,8 @@ SUB turn_resolve
 
     CALL clear_bottom_line
     LINE (390, 350)-(520, 400), 1, BF
-    COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+    COLOR COLOR_LIGHT_MAGENTA
+    LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
     CALL turn_update_victory_points
     IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL wait_key("K")
 END SUB
@@ -76,7 +77,9 @@ SUB turn_move_army (moving_army)
     DIM side AS INTEGER: DIM to_city AS INTEGER: DIM fought AS INTEGER: DIM took AS INTEGER: DIM starved AS INTEGER
     side = army_side(moving_army)
     IF army_order(moving_army) < 1 THEN EXIT SUB
-    COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(moving_army); " is moving to "; city_name$(army_order(moving_army));
+    COLOR COLOR_LIGHT_CYAN
+    CALL clear_bottom_line
+    PRINT army_name$(moving_army); " is moving to "; city_name$(army_order(moving_army));
 
     CALL turn_army_marches(moving_army, starved)
     IF starved = 1 THEN CALL wait_seconds(opt_pause!): CALL clear_bottom_line: PRINT army_name$(moving_army); " is out of supplies !";
@@ -88,7 +91,9 @@ SUB turn_move_army (moving_army)
     to_city = army_order(moving_army)
     IF city_army(to_city) > 0 THEN
         IF army_side(city_army(to_city)) = side THEN
-            COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(moving_army); " and "; army_name$(city_army(to_city)); " meet in "; city_name$(to_city); : CALL wait_seconds(opt_pause!)
+            COLOR COLOR_LIGHT_CYAN
+            CALL clear_bottom_line
+            PRINT army_name$(moving_army); " and "; army_name$(city_army(to_city)); " meet in "; city_name$(to_city); : CALL wait_seconds(opt_pause!)
             CALL draw_map_marker(army_order(moving_army), 0, MARK_FLASH_FRAME)
             CALL clear_bottom_line
         ELSE
@@ -109,7 +114,9 @@ SUB turn_attack (moving_army, city, fought, took)
         CALL draw_map_marker(city, 0, MARK_EXPLOSION)
         defender = city_army(city)
 
-        COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(moving_army); " attacks "; army_name$(defender); " in "; city_name$(army_city(defender)); : CALL wait_seconds(opt_pause! - 1)
+        COLOR COLOR_LIGHT_CYAN
+        CALL clear_bottom_line
+        PRINT army_name$(moving_army); " attacks "; army_name$(defender); " in "; city_name$(army_city(defender)); : CALL wait_seconds(opt_pause! - 1)
         IF army_size(defender) > 0 THEN CALL calculate_battle(moving_army, defender, winner, loser): fought = 1: IF opt_graphics >= GRAPHICS_BASIC THEN CALL draw_update_box
         CALL turn_battle_experience(winner)
 
@@ -197,7 +204,8 @@ SUB turn_army_surrenders (army, moving_army)
     IF opt_sound >= SOUND_MUSIC AND side <> current_side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
     IF army_order(army) > 0 THEN CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_ARMY)
     CALL turn_army_lost(army, moving_army)
-    CALL wait_seconds(PAUSE_LONG): CALL clear_right_panel
+    CALL wait_seconds(PAUSE_LONG)
+    CALL clear_right_panel
 END SUB
 
 ' An army moves into the city, which is now free of the enemy, and takes it if it is not
@@ -208,9 +216,8 @@ SUB turn_enter_city (moving_army, to_city, fought)
     CALL draw_map_marker(army_city(moving_army), to_city, MARK_ERASE_ARMY)
     CALL turn_occupy(moving_army, to_city)
     CALL draw_army_flag(moving_army)
-    '---------------------------------------------------------------------------
+
     '                            City Capture
-    '---------------------------------------------------------------------------
     IF city_owner(army_city(moving_army)) <> side THEN
         city = army_city(moving_army)
         raze = 0
@@ -235,9 +242,11 @@ SUB ai_turn
     DIM ai_side AS INTEGER: DIM side_color AS INTEGER
     CALL special_events
     ai_side = other_side(current_side)
-    side_color = 9: IF current_side = SIDE_UNION THEN side_color = 15
+    side_color = 9
+    IF current_side = SIDE_UNION THEN side_color = 15
     LOCATE 1, 1: PRINT SPACE$(80);
-    COLOR side_color: LOCATE 1, 10: PRINT side_name$(ai_side); " Side is making decisions";
+    COLOR side_color
+    LOCATE 1, 10: PRINT side_name$(ai_side); " Side is making decisions";
     CALL ai_resupply(ai_side)
     CALL ai_fortify(ai_side)
     CALL ai_raise_forces(ai_side)

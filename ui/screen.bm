@@ -61,10 +61,13 @@ SUB draw_top_bar
     LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
     LOCATE 7, 68: PRINT "Funds:"; side_cash(current_side);
 
-    FOR i = SIDE_UNION TO SIDE_REBEL: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
     NEXT i
-    total_points = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL): percent = 0
-    side_color = 9: IF current_side = SIDE_REBEL THEN side_color = 7
+    total_points = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL)
+    percent = 0
+    side_color = 9
+    IF current_side = SIDE_REBEL THEN side_color = 7
     LINE (580, 15)-(580, 35), 15
     LINE (530, 20)-(630, 30), 8 - side_color, BF
     IF total_points > 0 THEN percent = 100 * (side_victory_points(current_side) / total_points)
@@ -86,7 +89,8 @@ END SUB
 ' The screen between two players' turns: whose turn it is. Waits for a key.
 SUB draw_player_turn
     DIM side_color AS INTEGER
-    side_color = 1: IF current_side = SIDE_REBEL THEN side_color = 7
+    side_color = 1
+    IF current_side = SIDE_REBEL THEN side_color = 7
     CLS : LINE (100, 200)-(500, 300), side_color, BF
     LINE (100, 200)-(500, 300), 8 - side_color, B
     COLOR COLOR_GRAY: LOCATE 14, 31: PRINT " "; month_name$(turn_month); turn_year

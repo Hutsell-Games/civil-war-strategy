@@ -9,8 +9,12 @@ SUB calculate_battle (attacker, defender, winner, loser)
 
     CALL draw_map_marker(army_city(defender), 0, MARK_POINTER)
     LOCATE 1, 1: PRINT SPACE$(80)
-    CALL clear_right_panel: col = 68: COLOR COLOR_LIGHT_CYAN: LOCATE 1, col: PRINT "Attacker"
-    side_color = 9: IF army_side(attacker) = SIDE_REBEL THEN side_color = 7
+    CALL clear_right_panel
+    col = 68
+    COLOR COLOR_LIGHT_CYAN
+    LOCATE 1, col: PRINT "Attacker"
+    side_color = 9
+    IF army_side(attacker) = SIDE_REBEL THEN side_color = 7
     COLOR side_color: LOCATE 2, col: PRINT army_name$(attacker)
     LOCATE 3, col: CALL print_army_size(attacker)
     LOCATE 4, col: PRINT "Base    "; attack_steps(1)
@@ -61,9 +65,10 @@ SUB calculate_battle (attacker, defender, winner, loser)
         CALL clear_right_panel
     END IF
     CALL battle_fight(attack_strength, defend_strength, attacker, defender, winner, loser, rounds)
-    FOR k = 1 TO rounds: IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
+    FOR k = 1 TO rounds
+        IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
     NEXT k
-    '---------------------------------------------------------------------------
+
     winner_label$ = "UNION": IF army_side(winner) = SIDE_REBEL THEN winner_label$ = "REBEL"
     COLOR COLOR_YELLOW: LOCATE 3, 68: PRINT winner_label$; " VICTORY"
     LOCATE 4, 71: PRINT "in"
@@ -72,7 +77,7 @@ SUB calculate_battle (attacker, defender, winner, loser)
     CALL draw_flag(winner_side, 0, 0)
     CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(PAUSE_LONG)
     CALL battle_losses(attacker, defender, winner, attacker_losses, defender_losses)
-    '---------------------------------------------------------------------------
+
     COLOR side_color
     LOCATE 1, 1: PRINT "Attack Loss: ";
     PRINT LTRIM$(RTRIM$(STR$(attacker_losses)) + "00"); "/";
@@ -81,7 +86,7 @@ SUB calculate_battle (attacker, defender, winner, loser)
     COLOR 16 - side_color: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(defender_losses)) + "00"); "/";
     CALL print_army_size(defender)
     PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defender_losses / army_size(defender)))))); "%)"
-    '---------------------------------------------------------------------------
+
     menu_text$(1) = " (" + LTRIM$(RTRIM$(STR$(attacker_losses) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
     message$ = " (" + LTRIM$(RTRIM$(STR$(defender_losses) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
     menu_text$(2) = message$
@@ -92,7 +97,9 @@ SUB calculate_battle (attacker, defender, winner, loser)
     CALL scribe_message(history_line$, SHOW_HISTORY_ONLY)
 
     IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
-        COLOR COLOR_YELLOW: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL wait_key("B")
+        COLOR COLOR_YELLOW
+        CALL clear_bottom_line
+        PRINT "hit any key to continue"; : CALL wait_key("B")
     END IF
 
     CALL battle_apply_losses(attacker, defender, winner, attacker_losses, defender_losses)

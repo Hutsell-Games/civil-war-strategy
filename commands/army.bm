@@ -28,7 +28,7 @@ SUB army_combine_gather (side, city, best, joined)
 END SUB
 
 ' Join, second part: the armies that joined become one under the best leader.
-SUB army_combine_done (side, city, best, joined)
+SUB army_combine_done (city, best, joined)
     CALL army_combine_finish(city, best, joined)
     IF joined > 1 THEN
         PRINT "New army "; best; " of "; : CALL print_army_size(best): PRINT " is commanded by "; army_name$(best);

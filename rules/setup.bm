@@ -1,6 +1,7 @@
 ' The Union's extra income each month, from the Balance setting.
 SUB set_union_advantage
-    union_income_bonus = 120 * opt_difficulty: IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
+    union_income_bonus = 120 * opt_difficulty
+    IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
     IF opt_realism >= REALISM_ON THEN union_income_bonus = union_income_bonus * .7
 END SUB
 
@@ -24,13 +25,18 @@ SUB vary_start_conditions
             army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
         END IF
     NEXT k
-    FOR k = 1 TO MAX_CITIES: CALL city_update_occupier(k): NEXT k
-    fleet_size(SIDE_UNION) = 10 * RND: IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
-    fleet_size(SIDE_REBEL) = 10 * RND: IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
+    FOR k = 1 TO MAX_CITIES
+        CALL city_update_occupier(k)
+    NEXT k
+    fleet_size(SIDE_UNION) = 10 * RND
+    IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
+    fleet_size(SIDE_REBEL) = 10 * RND
+    IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
     FOR i = SIDE_UNION TO SIDE_REBEL
         fleet_ships$(i) = ""
         FOR j = 1 TO fleet_size(i)
-            ship$ = "W": IF RND > .45 * current_side THEN ship$ = "I"
+            ship$ = "W"
+            IF RND > .45 * current_side THEN ship$ = "I"
             fleet_ships$(i) = fleet_ships$(i) + ship$
         NEXT j
     NEXT i
@@ -123,7 +129,8 @@ END SUB
 
 ' Aggress: the next level of the computer's boldness, 0 to 5, and after 5 again 0.
 SUB option_next_aggression
-    opt_ai_aggression = opt_ai_aggression + 1: IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
+    opt_ai_aggression = opt_ai_aggression + 1
+    IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
 END SUB
 
 ' A new game: the scenario and the settings are read, and the map's cities.
@@ -138,14 +145,26 @@ END SUB
 ' Clears the armies, the fleets, the trains and the victory points for a new game.
 SUB game_reset
     DIM k AS INTEGER
-    game_over = 0: turn_recruit_state = 0
-    FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = ORDER_NONE: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
-    union_income_bonus = 0: emancipation_done = 0
-    FOR k = SIDE_UNION TO SIDE_REBEL
-        fleet_size(k) = 0: fleet_city(k) = 0
-        train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
+    game_over = 0
+    turn_recruit_state = 0
+    FOR k = 1 TO MAX_ARMIES
+        army_size(k) = 0
+        army_city(k) = 0
+        army_order(k) = ORDER_NONE
+        army_leader_rating(k) = 0
+        army_name$(k) = ""
     NEXT k
-    saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
+    union_income_bonus = 0
+    emancipation_done = 0
+    FOR k = SIDE_UNION TO SIDE_REBEL
+        fleet_size(k) = 0
+        fleet_city(k) = 0
+        train_army(k) = 0
+        side_victory_points(k) = 0
+        train_city(k) = 0
+    NEXT k
+    saves_exist = 1
+    victory_rule(VICTORY_MONTH) = 1
 END SUB
 
 ' After the scenario and the settings are read. Under the Realism setting a game that starts
@@ -167,5 +186,8 @@ SUB game_apply_settings
     IF opt_pause! < 1 THEN opt_pause! = 2
     IF current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
     IF current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
-    FOR i = SIDE_UNION TO SIDE_REBEL: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        side_income(i) = side_cash(i)
+        side_cash(i) = side_cash(i) + 50 * RND
+    NEXT i
 END SUB

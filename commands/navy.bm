@@ -67,7 +67,7 @@ SUB navy_bombard (side)
             CALL navy_finish_move: EXIT SUB
         END IF
     LOOP
-    CALL navy_blast(side, city, result)
+    CALL navy_blast(side, result)
     IF result = BOMBARD_HOLDS THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(city); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
     IF result = BOMBARD_CAPITAL_HOLDS THEN CALL clear_bottom_line: PRINT "The CAPITAL steadfastly stands loyal"; : CALL wait_seconds(opt_pause!): EXIT SUB
     CALL clear_bottom_line

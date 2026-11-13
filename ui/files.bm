@@ -79,7 +79,8 @@ SUB menu_save_game
     COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Saving";
     CALL save_game(slot)
     PRINT STRING$(MAX_CITIES, ".");
-    CLS : CALL draw_map
+    CLS
+    CALL draw_map
     IF slot = 1 THEN CALL turn_reset_commands
 END SUB
 
