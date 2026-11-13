@@ -130,9 +130,9 @@ END SUB
 ' Ship against ship, for the player's fleet: before each volley the player chooses to attack
 ' or to retreat to a port.
 SUB menu_navy_combat (side)
-DIM over AS INTEGER
-DIM hit(SIDE_REBEL)
-	CALL navy_combat_begin(hit())
+DIM combat_over AS INTEGER
+DIM hits(SIDE_REBEL)
+	CALL navy_combat_begin(hits())
 	DO
 		CALL navy_combat_draw
 		DO
@@ -142,6 +142,6 @@ DIM hit(SIDE_REBEL)
 			menu_item_count = 2: menu_color = COLOR_CYAN: menu_highlight = COLOR_YELLOW: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
 		LOOP UNTIL menu_choice = 1 OR menu_choice = 2
 		IF menu_choice = 2 THEN CALL navy_combat_retreat(side): EXIT SUB
-		CALL navy_combat_volley(side, hit(), over)
-	LOOP UNTIL over = 1
+		CALL navy_combat_volley(side, hits(), combat_over)
+	LOOP UNTIL combat_over = 1
 END SUB

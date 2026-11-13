@@ -1,48 +1,48 @@
 SUB animate_army (army, background_saved)
 DIM y AS INTEGER: DIM y1 AS INTEGER
-DIM from AS INTEGER: DIM to2 AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM x1 AS INTEGER
-from = army_city(army): to2 = army_order(army): army_city(army) = 0
-x = city_x(from) - 12
-y = city_y(from) - 11
-x1 = .5 * (city_x(to2) + city_x(from))
-y1 = .5 * (city_y(to2) + city_y(from))
+DIM from_city AS INTEGER: DIM to2 AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM x1 AS INTEGER
+from_city = army_city(army): to2 = army_order(army): army_city(army) = 0
+x = city_x(from_city) - 12
+y = city_y(from_city) - 11
+x1 = .5 * (city_x(to2) + city_x(from_city))
+y1 = .5 * (city_y(to2) + city_y(from_city))
 
-CALL city_update_occupier(from): IF city_army(from) > 0 THEN CALL draw_army_flag(city_army(from))
+CALL city_update_occupier(from_city): IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
        
 IF background_saved > 0 GOTO already
 	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
-	IF city_army(from) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+	IF city_army(from_city) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 already:
 
 	FOR i = 2 TO 8
-	x1 = .1 * (i * city_x(to2) + (10 - i) * city_x(from))
-	y1 = .1 * (i * city_y(to2) + (10 - i) * city_y(from))
+	x1 = .1 * (i * city_x(to2) + (10 - i) * city_x(from_city))
+	y1 = .1 * (i * city_y(to2) + (10 - i) * city_y(from_city))
 	GET (x1 - 10, y1 - 10)-(x1 + 9, y1 + 9), saved_under_marker
 	PUT (x1 - 10, y1 - 10), saved_under_army, PSET
 	IF opt_pause! > 1 THEN CALL wait_seconds(.1) ELSE CALL wait_seconds(.02)
 	IF opt_sound >= SOUND_EFFECTS THEN SOUND 200, .1: SOUND 50, .1
 	PUT (x1 - 10, y1 - 10), saved_under_marker, PSET
 	NEXT i
-	army_city(army) = from
+	army_city(army) = from_city
 END SUB
 
 SUB animate_city (city)
-DIM c AS INTEGER
-FOR c = 1 TO 15 STEP 2
-CALL draw_city_dot(city, c)
+DIM dot_color AS INTEGER
+FOR dot_color = 1 TO 15 STEP 2
+CALL draw_city_dot(city, dot_color)
 CALL wait_seconds(.1)
-NEXT c
-c = 9: IF city_owner(city) = SIDE_REBEL THEN c = 7
-IF city_owner(city) = SIDE_NONE THEN c = 12
-CALL draw_city_dot(city, c)
+NEXT dot_color
+dot_color = 9: IF city_owner(city) = SIDE_REBEL THEN dot_color = 7
+IF city_owner(city) = SIDE_NONE THEN dot_color = 12
+CALL draw_city_dot(city, dot_color)
 END SUB
 
 SUB draw_army_flag (army)
-DIM who AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-who = army_side(army)
+DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+side = army_side(army)
 x = city_x(army_city(army)) - 12
 y = city_y(army_city(army)) - 11
-CALL draw_flag_icon(x, y, who)
+CALL draw_flag_icon(x, y, side)
 IF army_supply(army) < 1 THEN
 	x = x - 3: y = y + 4
 	PSET (x, y), 13: DRAW "C11S8"
@@ -52,16 +52,16 @@ END IF
 END SUB
 
 SUB draw_train (side, show)
-DIM from AS INTEGER: DIM x AS INTEGER: DIM c AS INTEGER: DIM y AS INTEGER
+DIM from AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
 	IF train_city(side) = 0 THEN EXIT SUB
 	from = train_city(side)
 	x = city_x(from) - 12: y = city_y(from) - 11
 SELECT CASE show
 	CASE IS > 0
 	LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-	PSET (x - 6, y - 2), 3: c = 9: IF side = SIDE_REBEL THEN c = 15
+	PSET (x - 6, y - 2), 3: side_color = 9: IF side = SIDE_REBEL THEN side_color = 15
 	DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
-	x = POINT(0): y = POINT(1): PAINT (x, y), c, 0
+	x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
 	CASE ELSE
 	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
 END SELECT

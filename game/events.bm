@@ -8,7 +8,7 @@
 ' EVENT_RIOTS is rolled here and carried out by event_riot. EVENT_RIFLES is followed by
 ' Stanton's prediction, as EVENT_STANTON is.
 SUB event_roll (event, variant, who)
-DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM index AS INTEGER
+DIM k AS INTEGER: DIM plus AS INTEGER: DIM pct!: DIM empty AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM army AS INTEGER
 event = EVENT_NONE: variant = 0: who = 0
 CALL script_dice_next
 '==========================================================================
@@ -53,8 +53,8 @@ mercen:
 	IF script_rnd! > .1 OR side_city_count(SIDE_REBEL) < 30 GOTO money
 	variant = 0: IF script_rnd! > .5 THEN variant = 1
 	event = EVENT_MERCENARIES
-	army_size(index) = army_size(index) + 100 * plus
-	army_experience(index) = MAX_EXPERIENCE: army_supply(index) = MAX_SUPPLY
+	army_size(army) = army_size(army) + 100 * plus
+	army_experience(army) = MAX_EXPERIENCE: army_supply(army) = MAX_SUPPLY
 	GOTO dull1
 money:
 	IF script_rnd! > .3 OR side_city_count(SIDE_REBEL) < 12 GOTO cotton
@@ -134,14 +134,14 @@ END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.
 ' city is 0 when no such city is found.
-SUB event_riot_city (who, city)
+SUB event_riot_city (side, city)
 DIM k AS INTEGER: DIM x AS INTEGER
 city = 0
 	IF opt_realism = REALISM_OFF THEN EXIT SUB
-	IF side_city_count(who) = 1 THEN EXIT SUB
+	IF side_city_count(side) = 1 THEN EXIT SUB
 	FOR k = 1 TO 99
 	x = 1 + INT(MAX_CITIES * script_rnd!)
-		IF city_first_owner(x) <> who AND city_owner(x) = who AND city_army(x) = 0 THEN
+		IF city_first_owner(x) <> side AND city_owner(x) = side AND city_army(x) = 0 THEN
 			city = x: city_owner(x) = SIDE_NONE: EXIT SUB
 		END IF
 	NEXT k

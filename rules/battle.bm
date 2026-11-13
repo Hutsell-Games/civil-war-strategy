@@ -129,18 +129,18 @@ END SUB
 ' Takes the losses from both armies and records the battle: each side's casualties, and a battle won
 ' and a victory point for the winner's side.
 SUB battle_apply_losses (attacker, defender, winner, attacker_losses, defender_losses)
-DIM s AS INTEGER
+DIM side AS INTEGER
 army_size(attacker) = army_size(attacker) - attacker_losses
 army_size(defender) = army_size(defender) - defender_losses
 IF army_size(defender) < 1 THEN army_size(defender) = 1
 '---------------------------------------------------------------------------
-s = 1: IF attacker > 2 THEN s = 2
-side_casualties&(s) = side_casualties&(s) + attacker_losses
-side_casualties&(other_side(s)) = side_casualties&(other_side(s)) + defender_losses
+side = 1: IF attacker > 2 THEN side = 2
+side_casualties&(side) = side_casualties&(side) + attacker_losses
+side_casualties&(other_side(side)) = side_casualties&(other_side(side)) + defender_losses
 '---------------------------------------------------------------------------
-s = army_side(winner)
-side_battles_won(s) = side_battles_won(s) + 1
-side_victory_points(s) = side_victory_points(s) + 1
+side = army_side(winner)
+side_battles_won(side) = side_battles_won(side) + 1
+side_victory_points(side) = side_victory_points(side) + 1
 END SUB
 
 SUB normal_random_number (xbar, vary, result)

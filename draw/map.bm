@@ -75,10 +75,10 @@ END SUB
 
 SUB draw_cities
 DIM x AS INTEGER: DIM y AS INTEGER: DIM j AS INTEGER
-DIM i AS INTEGER: DIM c AS INTEGER
+DIM i AS INTEGER: DIM dot_color AS INTEGER
 FOR i = 1 TO MAX_CITIES
-c = 9: IF city_owner(i) = SIDE_REBEL THEN c = 7
-IF city_owner(i) = SIDE_NONE THEN c = 12
+dot_color = 9: IF city_owner(i) = SIDE_REBEL THEN dot_color = 7
+IF city_owner(i) = SIDE_NONE THEN dot_color = 12
 x = city_x(i): y = city_y(i)
 IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
 	PUT (x - 6, y - 6), pic_capital, PSET
@@ -90,7 +90,7 @@ IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
 ELSE
 	IF city_fort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
 	IF city_fort(i) >= MAX_FORT THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-	CALL draw_city_dot(i, c)
+	CALL draw_city_dot(i, dot_color)
 END IF
 IF opt_graphics = GRAPHICS_OFF GOTO nocon
 	FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
@@ -99,11 +99,11 @@ nocon:
 NEXT i
 END SUB
 
-' A city's dot in color c, without its fort mark.
-SUB draw_city_dot (city, c)
+' A city's dot in dot_color, without its fort mark.
+SUB draw_city_dot (city, dot_color)
 CIRCLE (city_x(city), city_y(city)), 4, 0
-CIRCLE (city_x(city), city_y(city)), 3, c
-PAINT (city_x(city), city_y(city)), c, c
+CIRCLE (city_x(city), city_y(city)), 3, dot_color
+PAINT (city_x(city), city_y(city)), dot_color, dot_color
 END SUB
 
 ' Erases a city's fort mark and draws the cities again, after its fort level changed.
@@ -135,21 +135,21 @@ NEXT k
 END SUB
 
 SUB draw_fleets
-DIM s AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
-FOR s = SIDE_UNION TO SIDE_REBEL
-IF fleet_size(s) = 0 OR fleet_city(s) = 0 THEN fleet_city(s) = 0: GOTO sink
-IF fleet_city(s) = 30 THEN x = 515: y = 268: GOTO float
-IF fleet_city(s) = 28 THEN x = 517: y = 172: GOTO float
-IF fleet_city(s) = 17 THEN x = 380: y = 425: GOTO float
-IF fleet_city(s) = FLEET_AT_SEA THEN x = 495: y = 310: GOTO float
-x = city_x(fleet_city(s)) + 25: y = city_y(fleet_city(s)) + 25
-IF fleet_city(s) = 24 THEN y = y + 5: x = x - 5
+DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM ship_type AS INTEGER
+FOR side = SIDE_UNION TO SIDE_REBEL
+IF fleet_size(side) = 0 OR fleet_city(side) = 0 THEN fleet_city(side) = 0: GOTO sink
+IF fleet_city(side) = 30 THEN x = 515: y = 268: GOTO float
+IF fleet_city(side) = 28 THEN x = 517: y = 172: GOTO float
+IF fleet_city(side) = 17 THEN x = 380: y = 425: GOTO float
+IF fleet_city(side) = FLEET_AT_SEA THEN x = 495: y = 310: GOTO float
+x = city_x(fleet_city(side)) + 25: y = city_y(fleet_city(side)) + 25
+IF fleet_city(side) = 24 THEN y = y + 5: x = x - 5
 float:
 	PSET (x, y), 1
-	a = 1: IF LEFT$(fleet_ships$(s), 1) = "I" THEN a = 2
-	CALL draw_ship_icon(s, a)
+	ship_type = 1: IF LEFT$(fleet_ships$(side), 1) = "I" THEN ship_type = 2
+	CALL draw_ship_icon(side, ship_type)
 sink:
-NEXT s
+NEXT side
 END SUB
 
 SUB draw_stack_markers (side)

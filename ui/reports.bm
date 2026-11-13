@@ -83,13 +83,13 @@ END SUB
 '                               Army Report
 '..........................................................................
 SUB report_armies (side)
-DIM fin AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER: DIM star AS INTEGER
-DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-star = side_first_army(side): fin = side_last_army(side)
-CLS : LOCATE 1, 1: c = 9: IF side = SIDE_REBEL THEN c = 15
-COLOR c
+DIM last_army AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER: DIM first_army AS INTEGER
+DIM side_color AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+first_army = side_first_army(side): last_army = side_last_army(side)
+CLS : LOCATE 1, 1: side_color = 9: IF side = SIDE_REBEL THEN side_color = 15
+COLOR side_color
 PRINT " Report for "; side_name$(side); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49); : COLOR COLOR_YELLOW: PRINT " Victory Points "; side_victory_points(side);
-IF c = 15 THEN c = 7
+IF side_color = 15 THEN side_color = 7
 x = side_victory_points(side) + side_victory_points(other_side(side))
 IF x = 0 THEN
 	PRINT
@@ -98,14 +98,14 @@ ELSE
 	PRINT "("; y; " %)";
 END IF
 CALL draw_flag_icon(215, 8, side)
-COLOR c: PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(side_city_count(side) * 2.5 + .5): PRINT x; "%)";
+COLOR side_color: PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40); : PRINT "("; : x = INT(side_city_count(side) * 2.5 + .5): PRINT x; "%)";
 PRINT TAB(50); : COLOR COLOR_LIGHT_RED: PRINT "Capital: "; city_name$(side_capital(side))
 y = total_income: IF side_capital(SIDE_UNION) > 0 THEN y = y + CAPITAL_INCOME
 IF side_capital(SIDE_REBEL) > 0 THEN y = y + CAPITAL_INCOME
 PRINT side_income(side); "/"; y; TAB(15); "INCOME"; TAB(40); "("; : x = (side_income(side) / total_income) * 100: PRINT x; "%)   "; : COLOR COLOR_YELLOW: PRINT "Cash:"; side_cash(side)
 COLOR COLOR_LIGHT_CYAN: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
-x = 0: FOR i = star TO fin
-COLOR c
+x = 0: FOR i = first_army TO last_army
+COLOR side_color
 IF army_city(i) < 1 GOTO deadeye
 x = x + army_size(i)
 PRINT i; TAB(5); army_name$(i); TAB(25); : y = CSRLIN
@@ -163,14 +163,14 @@ END SUB
 '                               Intelligence
 '..........................................................................
 SUB report_intelligence
-DIM fin AS INTEGER: DIM k AS INTEGER: DIM z AS INTEGER: DIM j AS INTEGER
-DIM star AS INTEGER: DIM c AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-c = 9: IF current_side = SIDE_REBEL THEN c = 7
+DIM last_army AS INTEGER: DIM k AS INTEGER: DIM z AS INTEGER: DIM j AS INTEGER
+DIM first_army AS INTEGER: DIM side_color AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+side_color = 9: IF current_side = SIDE_REBEL THEN side_color = 7
 CALL draw_map
-star = side_first_army(current_side): fin = side_last_army(current_side)
-FOR k = star TO fin
+first_army = side_first_army(current_side): last_army = side_last_army(current_side)
+FOR k = first_army TO last_army
 	IF army_size(k) > 0 THEN
-	COLOR c
+	COLOR side_color
 	x = city_x(army_city(k))
 	y = city_y(army_city(k))
 	z = 10: IF army_size(k) < 1000 THEN z = 9
@@ -194,7 +194,7 @@ END SUB
 '                               Force Summary
 '..........................................................................
 SUB report_force_summary
-DIM k AS INTEGER: DIM j AS INTEGER: DIM c AS INTEGER
+DIM k AS INTEGER: DIM j AS INTEGER: DIM side_color AS INTEGER
 DIM summ(MAX_CITIES)
 FOR k = 1 TO MAX_CITIES
 	IF city_army(k) > 0 THEN
@@ -207,8 +207,8 @@ NEXT k
 CLS : CALL draw_map
 FOR k = 1 TO MAX_CITIES
 IF summ(k) > 0 THEN
-	c = 9: IF city_owner(k) = SIDE_REBEL THEN c = 7
-	COLOR c
+	side_color = 9: IF city_owner(k) = SIDE_REBEL THEN side_color = 7
+	COLOR side_color
 	LOCATE INT(city_y(k) / 16 + 1), city_x(k) / 8: PRINT summ(k)
 END IF
 NEXT k

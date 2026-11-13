@@ -61,9 +61,9 @@ dull1:
 END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.
-SUB event_riot (who)
+SUB event_riot (side)
 DIM x AS INTEGER
-CALL event_riot_city(who, x)
+CALL event_riot_city(side, x)
 IF x = 0 THEN EXIT SUB
 	CALL clear_bottom_line: COLOR COLOR_WHITE
 	PRINT " Riots have broken out in "; city_name$(x);

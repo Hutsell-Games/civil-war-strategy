@@ -1,12 +1,12 @@
 ' The number of cities next to city that side holds: 0 when the city is cut off.
 FUNCTION city_is_connected (side, city)
-DIM j AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
-a = 0
+DIM j AS INTEGER: DIM y AS INTEGER: DIM friendly_neighbors AS INTEGER
+friendly_neighbors = 0
 FOR j = 1 TO MAX_ROADS
 y = city_road(city, j)
-IF y > 0 AND city_owner(y) = side THEN a = a + 1
+IF y > 0 AND city_owner(y) = side THEN friendly_neighbors = friendly_neighbors + 1
 NEXT j
-city_is_connected = a
+city_is_connected = friendly_neighbors
 END FUNCTION
 
 ' A side takes city c: the city's value in victory points, and 100 more taken from the other

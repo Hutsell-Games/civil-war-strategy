@@ -5,6 +5,8 @@ DEFINT A-Z
 CONST SIDE_NONE = 0
 CONST SIDE_UNION = 1
 CONST SIDE_REBEL = 2
+' A yes-or-no that is no: the sorts' swaps% before a pass has swapped anything.
+CONST FALSE = 0
 ' Limits. Army slots 1 to 20 are the Union's, 21 to 40 the Rebels'.
 CONST MAX_CITIES = 40
 CONST MAX_ARMIES = 40

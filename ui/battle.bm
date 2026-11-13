@@ -3,28 +3,28 @@
 SUB calculate_battle (attacker, defender, winner, loser)
 DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER: DIM attack AS INTEGER: DIM defend AS INTEGER
 DIM rounds AS INTEGER: DIM attacker_losses AS INTEGER: DIM defender_losses AS INTEGER: DIM odds!
-DIM a$: DIM t$: DIM a AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER: DIM c AS INTEGER
+DIM a$: DIM t$: DIM a AS INTEGER: DIM k AS INTEGER: DIM y AS INTEGER: DIM side_color AS INTEGER
 CALL battle_strengths(attacker, defender, attack_steps(), defend_steps())
 attack = attack_steps(7): defend = defend_steps(8)
 
 CALL draw_map_marker(army_city(defender), 0, MARK_POINTER)
 LOCATE 1, 1: PRINT SPACE$(80)
 CALL clear_right_panel: y = 68: COLOR COLOR_LIGHT_CYAN: LOCATE 1, y: PRINT "Attacker"
-c = 9: IF army_side(attacker) = SIDE_REBEL THEN c = 7
-COLOR c: LOCATE 2, y: PRINT army_name$(attacker)
+side_color = 9: IF army_side(attacker) = SIDE_REBEL THEN side_color = 7
+COLOR side_color: LOCATE 2, y: PRINT army_name$(attacker)
 LOCATE 3, y: CALL print_army_size(attacker)
 LOCATE 4, y: PRINT "Base    "; attack_steps(1)
 LOCATE 5, y: PRINT "Ldr/Exp "; attack_steps(2)
 LOCATE 6, y: PRINT "Small   "; attack_steps(3)
 LOCATE 7, y: PRINT "Outman  "; attack_steps(4)
 IF army_supply(attacker) < 1 THEN COLOR COLOR_LIGHT_MAGENTA
-LOCATE 8, y: PRINT "Supply  "; attack_steps(5): COLOR c
+LOCATE 8, y: PRINT "Supply  "; attack_steps(5): COLOR side_color
 LOCATE 9, y: PRINT "Difclt  "; attack_steps(6)
 COLOR COLOR_LIGHT_CYAN: LOCATE 11, y: PRINT "Attack  "; attack
 LINE (530, 155)-(635, 175), 11, B
 
 LOCATE 13, y: PRINT "Defender"
-COLOR 16 - c: LOCATE 14, y: PRINT army_name$(defender)
+COLOR 16 - side_color: LOCATE 14, y: PRINT army_name$(defender)
 LOCATE 15, y: CALL print_army_size(defender)
 LOCATE 16, y: PRINT "Base    "; INT(.01 * army_size(defender))
 LOCATE 17, y: PRINT "Defense "; defend_steps(1)
@@ -32,7 +32,7 @@ LOCATE 18, y: PRINT "Ldr/Exp "; defend_steps(2)
 LOCATE 19, y: PRINT "Small   "; defend_steps(3)
 LOCATE 20, y: PRINT "Outman  "; defend_steps(4)
 IF army_supply(defender) < 1 THEN COLOR COLOR_LIGHT_MAGENTA
-LOCATE 21, y: PRINT "Supply  "; defend_steps(5): COLOR 16 - c
+LOCATE 21, y: PRINT "Supply  "; defend_steps(5): COLOR 16 - side_color
 LOCATE 22, y: PRINT "Difclt  "; defend_steps(6)
 a$ = "Fort"
 IF city_fort(army_city(defender)) > 0 AND army_order(defender) = ORDER_NONE THEN
@@ -73,12 +73,12 @@ CALL draw_flag(a, 0, 0)
 CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(PAUSE_LONG)
 CALL battle_losses(attacker, defender, winner, attacker_losses, defender_losses)
 '---------------------------------------------------------------------------
-COLOR c
+COLOR side_color
 LOCATE 1, 1: PRINT "Attack Loss: ";
 PRINT LTRIM$(RTRIM$(STR$(attacker_losses)) + "00"); "/";
 CALL print_army_size(attacker)
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker)))))); "%) ²";
-COLOR 16 - c: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(defender_losses)) + "00"); "/";
+COLOR 16 - side_color: PRINT "² Defend Loss: "; : PRINT LTRIM$(RTRIM$(STR$(defender_losses)) + "00"); "/";
 CALL print_army_size(defender)
 PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defender_losses / army_size(defender)))))); "%)"
 '---------------------------------------------------------------------------

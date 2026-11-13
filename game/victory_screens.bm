@@ -123,14 +123,14 @@ relee:
 END SUB
 
 SUB draw_surrender (side)
-DIM s AS INTEGER: DIM c AS INTEGER: DIM w AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+DIM s AS INTEGER: DIM side_color AS INTEGER: DIM w AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 SCREEN 12
-s = SIDE_UNION: c = 1: COLOR COLOR_BLACK: w = 514
-IF army_side(side) = SIDE_REBEL THEN c = 7: s = SIDE_REBEL
+s = SIDE_UNION: side_color = 1: COLOR COLOR_BLACK: w = 514
+IF army_side(side) = SIDE_REBEL THEN side_color = 7: s = SIDE_REBEL
 '               background
 LINE (w + 15, 440)-(w + 125, 16), 2, BF
 LINE (w + 15, 16)-(w + 125, 290), 3, BF
-LINE (w + 14, 16)-(w + 125, 440), c, B
+LINE (w + 14, 16)-(w + 125, 440), side_color, B
 x = 77: y = 280
 CIRCLE (w + x + 10, y + 30), 30, 4, , , .1
 PAINT (w + x + 10, y + 30), 6, 4
@@ -150,7 +150,7 @@ LINE -(w + x + 1, y - 10): LINE -(w + x - 3, y - 11)
 LINE -(w + x - 3, y + 15): LINE -(w + x, y + 15)
 LINE -(w + x, y - 3): LINE -(w + x + 2, y - 3)
 LINE -(w + x, y + 28)
-PAINT (w + x + 10, y), 8 - c, 0
+PAINT (w + x + 10, y), 8 - side_color, 0
 
 CIRCLE (w + x + 7, y - 10), 3, 0: PAINT (w + x + 7, y - 10), 0, 0
 CIRCLE (w + x + 20, y - 8), 3, 0: PAINT (w + x + 20, y - 8), 0, 0
@@ -174,7 +174,7 @@ LINE -(w + 25, 346): LINE (w + 25, 346)-(w + 22, 341)
 LINE -(w + 46, 341): LINE -(w + 46, 349)
 LINE -(w + 41, 365): LINE -(w + 41, 380)
 LINE -(w + 36, 398)
-PAINT (w + 30, 350), c, 0
+PAINT (w + 30, 350), side_color, 0
 '                       saber
 LINE (w + 55, 288)-(w + 58, 360), 14, BF
 LINE (w + 55, 288)-(w + 55, 360), 14
@@ -189,7 +189,7 @@ LINE (w + 54, 295)-(w + 60, 305), 12, BF
 LINE (w + 53, 294)-(w + 61, 306), 0, B
 LINE (w + 57, 303)-(w + 61, 303)
 LINE (w + 57, 298)-(w + 61, 298)
-LINE (w + 34, 310)-(w + 46, 312), c, BF
+LINE (w + 34, 310)-(w + 46, 312), side_color, BF
 LINE (w + 25, 380)-(w + 35, 378)
 LINE (w + 25, 365)-(w + 34, 366)
 '                       shoulder
@@ -198,12 +198,12 @@ LINE (w + 53, 297)-(w + 31, 305): LINE -(w + 25, 270)
 LINE -(w + 18, 270): LINE -(w + 16, 275)
 LINE -(w + 21, 309): LINE -(w + 28, 316)
 LINE -(w + 52, 306): LINE -(w + 53, 298)
-PAINT (w + 20, 280), c, 0
+PAINT (w + 20, 280), side_color, 0
 LINE (w + 30, 310)-(w + 32, 305): LINE -(w + 25, 307)
 LINE (w + 46, 298)-(w + 47, 275)
 LINE (w + 47, 275)-(w + 41, 269)
 LINE (w + 41, 269)-(w + 25, 269)
-PAINT (w + 45, 275), c, 0
+PAINT (w + 45, 275), side_color, 0
 CIRCLE (w + 40, 275), 1, 14
 CIRCLE (w + 40, 285), 1, 14
 CIRCLE (w + 40, 295), 1, 14
@@ -211,9 +211,9 @@ CIRCLE (w + 40, 295), 1, 14
 LINE (w + 21, 306)-(w + 18, 340)
 LINE (w + 18, 340)-(w + 47, 340)
 LINE (w + 46, 310)-(w + 48, 339)
-PAINT (w + 30, 330), c, 0
+PAINT (w + 30, 330), side_color, 0
 LINE (w + 46, 312)-(w + 21, 316), 0, BF
-LINE (w + 25, 312)-(w + 35, 313), c, BF
+LINE (w + 25, 312)-(w + 35, 313), side_color, BF
 
 LINE (w + 30, 268)-(w + 41, 264), 12, BF
 LINE (w + 30, 263)-(w + 41, 263), 0
@@ -229,7 +229,7 @@ LINE (w + 16, 242)-(w + 57, 241), 0, BF
 LINE (w + 45, 240)-(w + 28, 240)
 LINE -(w + 31, 232): LINE -(w + 45, 232)
 LINE -(w + 48, 240)
-PAINT (w + 40, 235), c, 0
+PAINT (w + 40, 235), side_color, 0
 
 LINE (w + 80, 303)-(w + 81, 200), 6, BF
 
@@ -239,9 +239,9 @@ LINE -(w + 46, 266): LINE -(w + 48, 263)
 LINE -(w + 48, 260): LINE -(w + 37, 258)
 LINE -(w + 36, 255): LINE -(w + 37, 250)
 LINE -(w + 39, 246): LINE -(w + 40, 243)
-c = 0: IF s = SIDE_REBEL THEN c = 15: LINE (547, 263)-(558, 263), 15
-PAINT (w + 33, 250), c, 0
-PAINT (w + 42, 264), c, 0
+side_color = 0: IF s = SIDE_REBEL THEN side_color = 15: LINE (547, 263)-(558, 263), 15
+PAINT (w + 33, 250), side_color, 0
+PAINT (w + 42, 264), side_color, 0
 
 CALL draw_flag(other_side(s), 26, 0)
 IF side < 99 THEN CALL wait_seconds(opt_pause!)

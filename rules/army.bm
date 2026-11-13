@@ -57,14 +57,14 @@ END SUB
 ' A new army in a city: its supplies, experience, leader and size, and the price of 100 taken
 ' from the side. army_new (commands/army.bm) shows it.
 SUB army_raise (side, slot, city)
-DIM x AS INTEGER: DIM a AS INTEGER
+DIM x AS INTEGER: DIM friendly_neighbors AS INTEGER
 	army_supply(slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(slot) = army_supply(slot) + 2
 	army_experience(slot) = 1: IF side = SIDE_REBEL THEN army_experience(slot) = 2
 	army_leader_rating(slot) = leader_rating(slot)
 	army_name$(slot) = leader_name$(slot): leader_name$(slot) = ""
 
 	x = 70: IF opt_realism >= REALISM_ON THEN x = 3 * city_value(city) + 33
-	a = city_is_connected(side, city): IF a < 1 THEN x = x \ 3
+	friendly_neighbors = city_is_connected(side, city): IF friendly_neighbors < 1 THEN x = x \ 3
 	city_army(city) = slot: army_size(slot) = x
 	side_cash(side) = side_cash(side) - COST_RECRUIT
 	army_city(slot) = city
@@ -72,7 +72,7 @@ DIM x AS INTEGER: DIM a AS INTEGER
 END SUB
 
 SUB sort_move_order (limit)
-DIM FALSE AS INTEGER: DIM i AS INTEGER: DIM swaps%
+DIM i AS INTEGER: DIM swaps%
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -88,16 +88,16 @@ END SUB
 ' list, or a name made up for the first army without a city. slot is 0 when every army has a
 ' city. army_get_commander (commands/army.bm) says so.
 SUB army_pick_commander (side, slot)
-DIM fin AS INTEGER: DIM a$
-DIM star AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
+DIM last_army AS INTEGER: DIM a$
+DIM first_army AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER
 	slot = 0
-	star = side_first_army(side): fin = side_last_army(side)
-	FOR i = star TO fin
+	first_army = side_first_army(side): last_army = side_last_army(side)
+	FOR i = first_army TO last_army
 	IF army_city(i) = 0 AND leader_name$(i) <> "" THEN slot = i: EXIT SUB
 	NEXT i
 
 '                 generic leaders if set list is exhausted
-	FOR i = star TO fin
+	FOR i = first_army TO last_army
 	IF army_city(i) = 0 THEN
 		x = i
 		CALL army_generate_name(x, a$)
@@ -113,21 +113,21 @@ END SUB
 ' SUPPLY_BOUGHT, SUPPLY_NO_CASH when the cash was not enough, or SUPPLY_CUT_OFF when the army is
 ' cut off under the Realism setting. army_resupply (commands/army.bm) shows it.
 SUB army_buy_supply (army, result)
-DIM who AS INTEGER: DIM a AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+DIM side AS INTEGER: DIM friendly_neighbors AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
 		result = SUPPLY_CUT_OFF
-		who = army_side(army)
+		side = army_side(army)
 		IF opt_realism >= REALISM_ON THEN
-			a = city_is_connected(who, army_city(army))
-			IF a < 1 THEN EXIT SUB
+			friendly_neighbors = city_is_connected(side, army_city(army))
+			IF friendly_neighbors < 1 THEN EXIT SUB
 		END IF
 		result = SUPPLY_NO_CASH
-		IF army_size(army) > 0 THEN x = side_cash(who) / army_size(army) * 10
+		IF army_size(army) > 0 THEN x = side_cash(side) / army_size(army) * 10
 		y = x + army_supply(army): IF y > RESUPPLY_LEVEL THEN x = RESUPPLY_LEVEL - army_supply(army)
 		IF x >= 1 THEN
-			army_supply(army) = army_supply(army) + x: side_cash(who) = side_cash(who) - .1 * x * army_size(army)
+			army_supply(army) = army_supply(army) + x: side_cash(side) = side_cash(side) - .1 * x * army_size(army)
 			result = SUPPLY_BOUGHT
 		END IF
-		IF side_cash(who) < 0 THEN side_cash(who) = 0
+		IF side_cash(side) < 0 THEN side_cash(side) = 0
 END SUB
 
 SUB army_generate_name (army, name$)
@@ -195,14 +195,14 @@ END SUB
 ' Fills the menu with the side's cities where armies can combine: a city with an army that
 ' holds it and another that has no order. menu_item_count is 0 when there is none.
 SUB army_list_combine_cities (side)
-DIM fin AS INTEGER: DIM star AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
+DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
 	menu_color = COLOR_CYAN: menu_highlight = COLOR_CYAN
 	menu_col = PANEL_COL: menu_row = 2
-	star = side_first_army(side): fin = side_last_army(side)
+	first_army = side_first_army(side): last_army = side_last_army(side)
 	menu_item_count = 0
 	FOR i = 1 TO MAX_CITIES
 		IF city_owner(i) = side AND city_army(i) > 0 THEN
-			FOR j = star TO fin
+			FOR j = first_army TO last_army
 			IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
 			NEXT j
 		END IF
@@ -244,12 +244,12 @@ END SUB
 ' city's value, a third of it when the city is cut off (isolated is then 1). The side pays
 ' 100. The Balance setting's extra men go to army 0, as before (TODO.md).
 SUB army_add_recruits (side, army, isolated)
-DIM x AS INTEGER: DIM a AS INTEGER
+DIM x AS INTEGER: DIM friendly_neighbors AS INTEGER
 	x = 45: isolated = 0
 	IF opt_realism >= REALISM_ON THEN
 		x = 2 * city_value(army_city(army)) + 20
-		a = city_is_connected(side, army_city(army))
-		IF a < 1 THEN x = x \ 3: isolated = 1
+		friendly_neighbors = city_is_connected(side, army_city(army))
+		IF friendly_neighbors < 1 THEN x = x \ 3: isolated = 1
 	END IF
 	army_size(army) = army_size(army) + x
 	CALL army_recruit_bonus(0)
@@ -266,7 +266,7 @@ END SUB
 ' Fills the menu with the cities where a side may recruit this month. They are drawn at
 ' random; the player's list is kept for the month. menu_item_count is 0 when there is none.
 SUB army_recruit_cities (side)
-DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM x AS INTEGER
+DIM i AS INTEGER: DIM max AS INTEGER: DIM chance!: DIM x AS INTEGER
 	menu_item_count = 0
 	menu_text$(0) = "Recruit"
 	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: x = turn_recruit_city(i): menu_text$(i) = city_name$(x): menu_value(i) = x: NEXT i: menu_item_count = turn_recruit_state: GOTO alldone
@@ -274,12 +274,12 @@ DIM i AS INTEGER: DIM max AS INTEGER: DIM pct!: DIM x AS INTEGER
 	IF opt_difficulty < 3 THEN max = max + 1
 
 	FOR i = 1 TO MAX_CITIES
-	IF side_city_count(side) > 0 THEN pct! = .6 * max / side_city_count(side) ELSE pct! = .3
-	IF menu_item_count = 0 AND i > 20 THEN pct! = .3
-	IF menu_item_count < 2 AND i > 30 THEN pct! = .3
+	IF side_city_count(side) > 0 THEN chance! = .6 * max / side_city_count(side) ELSE chance! = .3
+	IF menu_item_count = 0 AND i > 20 THEN chance! = .3
+	IF menu_item_count < 2 AND i > 30 THEN chance! = .3
 	menu_value(i) = 0
-	IF city_army(i) > 0 AND city_owner(i) = side THEN pct! = .4
-	IF RND < pct! AND city_owner(i) = side THEN
+	IF city_army(i) > 0 AND city_owner(i) = side THEN chance! = .4
+	IF RND < chance! AND city_owner(i) = side THEN
 		IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) GOTO foe
 		menu_item_count = menu_item_count + 1
 		menu_text$(menu_item_count) = city_name$(i)

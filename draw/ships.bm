@@ -1,7 +1,7 @@
 SUB draw_fleet_ship (side, i)
-DIM a AS INTEGER
-a = 1: IF MID$(fleet_ships$(side), i, 1) = "I" THEN a = 2
-CALL draw_ship_icon(side, a)
+DIM ship_type AS INTEGER
+ship_type = 1: IF MID$(fleet_ships$(side), i, 1) = "I" THEN ship_type = 2
+CALL draw_ship_icon(side, ship_type)
 END SUB
 
 SUB draw_ship_icon (side, ship_type)

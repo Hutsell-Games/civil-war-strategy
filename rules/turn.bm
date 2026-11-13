@@ -48,18 +48,18 @@ END SUB
 ' port uses a day, and an army in a sea port blockaded by the other side's fleet uses one
 ' (blockaded is 1). An army left without supplies may lose a tenth of its men (starved is 1).
 SUB turn_army_supply (army, blockaded, starved)
-DIM s AS INTEGER: DIM a AS INTEGER
-s = army_side(army)
-IF side_cash(s) >= .2 * army_size(army) THEN
-	a = 1: IF opt_realism >= REALISM_ON THEN a = city_is_connected(s, army_city(army))
-	IF a > 0 THEN
+DIM side AS INTEGER: DIM friendly_neighbors AS INTEGER
+side = army_side(army)
+IF side_cash(side) >= .2 * army_size(army) THEN
+	friendly_neighbors = 1: IF opt_realism >= REALISM_ON THEN friendly_neighbors = city_is_connected(side, army_city(army))
+	IF friendly_neighbors > 0 THEN
 		army_supply(army) = army_supply(army) + 1
-		side_cash(s) = side_cash(s) - .2 * army_size(army)
+		side_cash(side) = side_cash(side) - .2 * army_size(army)
 	END IF
 END IF
 IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(army)) < PORT_SEA THEN army_supply(army) = army_supply(army) - 1
 blockaded = 0: starved = 0
-IF city_port_type(army_city(army)) = PORT_SEA AND fleet_city(other_side(s)) = army_city(army) THEN army_supply(army) = army_supply(army) - 1: blockaded = 1
+IF city_port_type(army_city(army)) = PORT_SEA AND fleet_city(other_side(side)) = army_city(army) THEN army_supply(army) = army_supply(army) - 1: blockaded = 1
 IF army_supply(army) < 1 THEN
 	army_supply(army) = 0
 	starved = 1
@@ -130,9 +130,9 @@ END SUB
 ' An army is crushed or surrenders to the army winner: its slot is cleared, the other side of
 ' winner gets 25 victory points, and winner takes its supplies, which are 0 by then (TODO.md).
 SUB turn_army_lost (army, winner)
-DIM s AS INTEGER
-	s = army_side(winner)
-	side_victory_points(other_side(s)) = side_victory_points(other_side(s)) + 25
+DIM side AS INTEGER
+	side = army_side(winner)
+	side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 25
 	army_city(army) = 0: leader_name$(army) = "": army_name$(army) = ""
 	army_size(army) = 0: army_leader_rating(army) = 0
 	army_experience(army) = 0: army_order(army) = ORDER_NONE: army_supply(army) = 0
@@ -185,7 +185,7 @@ END SUB
 ' Gives each army with an order its place in the month's moves and sorts them. An army
 ' out of supplies moves last; a large one moves later; a good leader may move sooner.
 SUB turn_set_move_order
-DIM i AS INTEGER: DIM x AS INTEGER
+DIM i AS INTEGER
 FOR i = 1 TO MAX_ARMIES
 move_order_key(i) = MOVE_KEY_NONE
 IF army_order(i) < 0 THEN army_order(i) = ORDER_NONE
@@ -193,13 +193,11 @@ IF army_city(i) > 0 AND army_order(i) > 0 THEN move_order_key(i) = INT(4 + 4 * R
 IF army_supply(i) < 1 AND army_order(i) > 0 THEN move_order_key(i) = 900 + i
 SELECT CASE army_size(i)         'bigger armies move slower
 	CASE IS > 400
-		IF move_order_key(i) < 900 THEN move_order_key(i) = move_order_key(i) + 100: x = 2
+		IF move_order_key(i) < 900 THEN move_order_key(i) = move_order_key(i) + 100
 	CASE IS > 800
-		IF move_order_key(i) < 800 THEN move_order_key(i) = move_order_key(i) + 200: x = 3
+		IF move_order_key(i) < 800 THEN move_order_key(i) = move_order_key(i) + 200
 	CASE IS > 1000
-		IF move_order_key(i) < 700 THEN move_order_key(i) = move_order_key(i) + 300: x = 4
-	CASE ELSE
-		x = 1
+		IF move_order_key(i) < 700 THEN move_order_key(i) = move_order_key(i) + 300
 END SELECT
 IF move_order_key(i) <> MOVE_KEY_NONE AND army_leader_rating(i) > 10 * RND THEN
 		move_order_key(i) = move_order_key(i) - 100 * (army_leader_rating(i) \ 2)

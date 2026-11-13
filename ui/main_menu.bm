@@ -30,7 +30,7 @@ END SUB
 ' train goes (menu_railroad, ui/orders.bm), and the train leaves (commands/railroad.bm). With
 ' an army on the train already, it says so.
 SUB menu_main_railroad
-DIM x AS INTEGER: DIM y AS INTEGER: DIM z AS INTEGER: DIM limit AS INTEGER
+DIM x AS INTEGER: DIM y AS INTEGER: DIM z AS INTEGER: DIM capacity AS INTEGER
 DIM army AS INTEGER: DIM city AS INTEGER
 	IF train_army(current_side) = 0 THEN
 		COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
@@ -40,8 +40,8 @@ DIM army AS INTEGER: DIM city AS INTEGER
 		x = POINT(0): y = POINT(1)
 		PAINT (x, y), z, 15
 		COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN COLOR COLOR_LIGHT_CYAN
-		limit = railroad_capacity(current_side)
-		CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(limit)); "00";
+		capacity = railroad_capacity(current_side)
+		CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(capacity)); "00";
 		CALL menu_railroad(current_side, army, city)
 		IF army > 0 THEN CALL railroad_start(current_side, army, city)
 		CALL wait_seconds(PAUSE_LONG)
@@ -64,10 +64,10 @@ END SUB
 
 ' Inform: the reports, then the lines of the armies' moves drawn again on the map.
 SUB menu_main_inform
-DIM i AS INTEGER: DIM star AS INTEGER: DIM fin AS INTEGER
+DIM i AS INTEGER: DIM first_army AS INTEGER: DIM last_army AS INTEGER
 	CALL menu_report((current_side))
-	star = side_first_army(current_side): fin = side_last_army(current_side)
-	FOR i = star TO fin
+	first_army = side_first_army(current_side): last_army = side_last_army(current_side)
+	FOR i = first_army TO last_army
 	IF army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
 	NEXT i
 END SUB

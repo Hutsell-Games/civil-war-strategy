@@ -1,5 +1,5 @@
 SUB menu_bubble_sort (limit)
-DIM FALSE AS INTEGER: DIM i AS INTEGER: DIM swaps%
+DIM i AS INTEGER: DIM swaps%
 DO
 	swaps% = FALSE
 	FOR i = 1 TO limit - 1
@@ -29,35 +29,35 @@ END SUB
 '                            2=double line
 '               if >10 then 10's digit=box color  1's digit= window type
 
-SUB draw_menu (b1, wide)
-DIM boxc AS INTEGER: DIM i AS INTEGER
-boxc = menu_color: IF menu_box_type > 10 THEN boxc = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * boxc
-COLOR boxc
-VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
+SUB draw_menu (title_col, menu_width)
+DIM box_color AS INTEGER: DIM i AS INTEGER
+box_color = menu_color: IF menu_box_type > 10 THEN box_color = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * box_color
+COLOR box_color
+VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
 CLS 1
 VIEW
-LINE (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8), menu_color, B
-LINE (8 * menu_col - 2, 16 * (menu_row + 1) + 3)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + 1) + 6), menu_color, B
+LINE (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8), menu_color, B
+LINE (8 * menu_col - 2, 16 * (menu_row + 1) + 3)-(8 * (menu_col + menu_width + 1) + 3, 16 * (menu_row + 1) + 6), menu_color, B
 IF ABS(menu_box_type) = BOX_DOUBLE THEN
-LINE (8 * menu_col - 2, 16 * menu_row - 8)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + menu_item_count + 2) + 4), menu_color, B
+LINE (8 * menu_col - 2, 16 * menu_row - 8)-(8 * (menu_col + menu_width + 1) + 3, 16 * (menu_row + menu_item_count + 2) + 4), menu_color, B
 END IF
 COLOR menu_color
 
-LOCATE menu_row + 1, menu_col + b1: PRINT menu_text$(0)
+LOCATE menu_row + 1, menu_col + title_col: PRINT menu_text$(0)
 FOR i = 1 TO menu_item_count
 LOCATE menu_row + 2 + i, menu_col + 2: PRINT menu_text$(i);
 NEXT i
 END SUB
 
 SUB menu_select (menu_item_show_beside%)
-DIM row1 AS INTEGER: DIM brx AS INTEGER: DIM leave AS INTEGER: DIM a$: DIM k AS INTEGER: DIM c1$
-DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER: DIM b1 AS INTEGER: DIM flag AS INTEGER
+DIM row1 AS INTEGER: DIM leave AS INTEGER: DIM a$: DIM k AS INTEGER: DIM c1$
+DIM menu_width AS INTEGER: DIM row AS INTEGER: DIM box_color AS INTEGER: DIM title_col AS INTEGER: DIM flag AS INTEGER
 	IF menu_color = 0 THEN menu_color = COLOR_GRAY
 	LOCATE 1, 1, 0
 	IF menu_text$(0) = "" THEN menu_text$(0) = "M E N U"
 
-	IF wide = 0 THEN wide = menu_measure_width
-	IF menu_col = 0 THEN menu_col = INT(40.5 - .5 * wide)
+	IF menu_width = 0 THEN menu_width = menu_measure_width
+	IF menu_col = 0 THEN menu_col = INT(40.5 - .5 * menu_width)
 	IF menu_choice < MENU_START THEN menu_choice = 1
 	IF menu_choice > MENU_START THEN menu_choice = menu_choice - MENU_START
 	IF menu_choice > 21 THEN menu_choice = 1
@@ -68,29 +68,26 @@ DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER
        
 	IF menu_row = 0 THEN menu_row = INT(11.5 - .5 * menu_item_count)
 	IF menu_row + menu_item_count > 26 THEN menu_row = 26 - menu_item_count
-       
-	brx = menu_col + wide + 1
-	bry = menu_row + menu_item_count + 3
-       
-	boxc = menu_color: IF menu_box_type > 10 THEN boxc = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * boxc
 
-	COLOR boxc
+	box_color = menu_color: IF menu_box_type > 10 THEN box_color = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * box_color
 
-	VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
+	COLOR box_color
+
+	VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
 	CLS 1
 	VIEW
-	LINE (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + wide + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8), menu_color, B
-	LINE (8 * menu_col - 2, 16 * (menu_row + 1) + 3)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + 1) + 6), menu_color, B
+	LINE (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8), menu_color, B
+	LINE (8 * menu_col - 2, 16 * (menu_row + 1) + 3)-(8 * (menu_col + menu_width + 1) + 3, 16 * (menu_row + 1) + 6), menu_color, B
 	IF ABS(menu_box_type) = BOX_DOUBLE THEN
-		LINE (8 * menu_col - 2, 16 * menu_row - 8)-(8 * (menu_col + wide + 1) + 3, 16 * (menu_row + menu_item_count + 2) + 4), menu_color, B
+		LINE (8 * menu_col - 2, 16 * menu_row - 8)-(8 * (menu_col + menu_width + 1) + 3, 16 * (menu_row + menu_item_count + 2) + 4), menu_color, B
 	END IF
 
 	COLOR menu_color
-	b1 = INT(.5 * (wide - LEN(menu_text$(0))) + .5) + 1
+	title_col = INT(.5 * (menu_width - LEN(menu_text$(0))) + .5) + 1
 
-	CALL draw_menu(b1, wide)
+	CALL draw_menu(title_col, menu_width)
 	DO
-		CALL menu_mark_row(menu_item_show_beside, row, wide, flag)
+		CALL menu_mark_row(menu_item_show_beside, row, menu_width, flag)
 		IF flag = 0 THEN
 			COLOR menu_highlight
 			LOCATE menu_row + 2 + row, menu_col + 2
@@ -106,7 +103,7 @@ DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER
 			IF LEN(a$) = 2 THEN
 				a$ = RIGHT$(a$, 1)
 				row1 = row
-				CALL menu_arrow_key(menu_item_show_beside, a$, row, b1, wide, leave)
+				CALL menu_arrow_key(menu_item_show_beside, a$, row, title_col, menu_width, leave)
 				EXIT DO
 			END IF
 			IF menu_item_show_beside = MENU_RAW_KEYS THEN menu_choice = -ASC(UCASE$(a$)): leave = 1: EXIT DO
@@ -127,7 +124,7 @@ DIM wide AS INTEGER: DIM row AS INTEGER: DIM bry AS INTEGER: DIM boxc AS INTEGER
 		IF ASC(a$) = KEY_ENTER THEN EXIT DO
 
 		' Another row: the old one is shown plain again.
-		IF menu_item_show_beside = MENU_CITY_ARMY THEN LOCATE menu_row + 2 + row1, menu_col + 2: PRINT SPACE$(wide);
+		IF menu_item_show_beside = MENU_CITY_ARMY THEN LOCATE menu_row + 2 + row1, menu_col + 2: PRINT SPACE$(menu_width);
 		COLOR menu_color
 		LOCATE menu_row + 2 + row1, menu_col + 2: PRINT menu_text$(row1)
 
@@ -146,7 +143,7 @@ END SUB
 ' A key of two bytes at a menu, given by its second byte. Up, Down, PgUp and PgDn move the row,
 ' round from one end to the other. At a main menu (MENU_PLAIN), F3 draws the screen again, F4
 ' shows the force report, and F7 ends the turn (leave = 1).
-SUB menu_arrow_key (kind, k$, row, b1, wide, leave)
+SUB menu_arrow_key (kind, k$, row, title_col, menu_width, leave)
 	SELECT CASE k$
 		CASE KEY_UP$: row = row - 1
 		CASE KEY_PAGE_UP$: row = 1
@@ -156,7 +153,7 @@ SUB menu_arrow_key (kind, k$, row, b1, wide, leave)
 			IF kind = MENU_PLAIN THEN
 				CLS
 				CALL draw_map
-				CALL draw_menu(b1, wide)
+				CALL draw_menu(title_col, menu_width)
 				CALL draw_top_bar
 			END IF
 		CASE KEY_F7$
@@ -166,7 +163,7 @@ SUB menu_arrow_key (kind, k$, row, b1, wide, leave)
 				CALL report_force_summary
 				CLS
 				CALL draw_map
-				CALL draw_menu(b1, wide)
+				CALL draw_menu(title_col, menu_width)
 				CALL draw_top_bar
 			END IF
 	END SELECT
@@ -177,7 +174,7 @@ END SUB
 ' What a menu shows beside its highlighted row, by the menu's kind: a marker on the map at
 ' the row's city or army, the army's numbers, or a face. For a city with an army, the row
 ' shows the army's name and flag is 1, so that menu_select does not print the row again.
-SUB menu_mark_row (kind, row, wide, flag)
+SUB menu_mark_row (kind, row, menu_width, flag)
 DIM target AS INTEGER: DIM t$: DIM x AS INTEGER: DIM y AS INTEGER: DIM a AS INTEGER
 	SELECT CASE kind
 		CASE MENU_CITY_BOX: CALL draw_map_marker(menu_value(row), 0, MARK_BOX)
@@ -186,9 +183,9 @@ DIM target AS INTEGER: DIM t$: DIM x AS INTEGER: DIM y AS INTEGER: DIM a AS INTE
 			IF target > 0 THEN
 			flag = 1
 			t$ = army_name$(target)
-			IF LEN(t$) > wide THEN t$ = LEFT$(t$, wide)
+			IF LEN(t$) > menu_width THEN t$ = LEFT$(t$, menu_width)
 			COLOR COLOR_LIGHT_RED
-			LOCATE menu_row + 2 + row, menu_col + 2: PRINT SPACE$(wide);
+			LOCATE menu_row + 2 + row, menu_col + 2: PRINT SPACE$(menu_width);
 			LOCATE menu_row + 2 + row, menu_col + 2: PRINT t$;
 			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
 			LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT "Size"; army_size(target);
@@ -229,11 +226,11 @@ END SUB
 
 ' The width a menu needs: its longest option, or its title and a space.
 FUNCTION menu_measure_width
-DIM i AS INTEGER: DIM x AS INTEGER: DIM wide AS INTEGER
-	wide = LEN(menu_text$(0)) + 1
+DIM i AS INTEGER: DIM x AS INTEGER: DIM menu_width AS INTEGER
+	menu_width = LEN(menu_text$(0)) + 1
 	FOR i = 1 TO menu_item_count
 	x = LEN(menu_text$(i))
-	IF x > wide THEN wide = x
+	IF x > menu_width THEN menu_width = x
 	NEXT i
-	menu_measure_width = wide
+	menu_measure_width = menu_width
 END FUNCTION
