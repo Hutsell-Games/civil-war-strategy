@@ -8,8 +8,6 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
 - **The real `SHELL "copy ..."`.** Under a script, `script_shell` (`port\script.bm`) copies in BASIC, because a
   `SHELL` opens a console window on the user's desktop. A test of the real one must run where a window does no
   harm: in QB64Rust's suites VM, or by hand.
-- **`ALTMAP.BAT` itself.** The scripts on the alternate map switch the files in `play.py`, not with the batch
-  file.
 - **A game that reaches March 1865 with the computer active.** The generated games end sooner, because a
   player who only ends turns is beaten in 1 to 21 turns. `union-time` and `two-player` reach the time limit
   with a passive computer or none.
@@ -50,6 +48,12 @@ game plays changes the recorded screens.
 - **The computer checks the wrong city's track before a train to its capital.** `ai_railroad` (`ai\ai.bm`)
   calls `railroad_route_count(side, candidate_city)` with `candidate_city` left from the loop before, not the
   capital.
+- **The computer's test for crossing moves compares an order with an army's size.** `ai_army_order`
+  (`ai\ai.bm`, "eliminate crossing moves") cancels a move into a city of its own when the army there has
+  `army_order(other_army) = army_troops`, the moving army's size in hundreds. The original has it too
+  (`armymove(y) = x`, with `x = armysize(i)`, `CWSTRAT.BAS` on `canonical-source`). It was most likely
+  meant as `= city`: the other army marches into the city this one leaves. As written it cancels a move
+  only when a size happens to equal a city number from 1 to 40.
 - **The winner of a battle gets none of the loser's supplies.** `turn_army_lost` (`rules\turn.bm`)
   sets the loser's supplies to 0 and then adds them to the winner's (`TestTurnArmyLost`).
 - **An army that surrenders or is crushed gives 25 victory points to its own side.** `turn_army_lost`
@@ -118,7 +122,8 @@ how the game plays.
 
 Left alone by group 2 (the special values):
 
-- **`fleet_city() = 0`, "the side has no fleet", has no constant.** It appears in 18 tests and assignments.
+- **`fleet_city() = 0`, "the side has no fleet", has no constant.** Its tests read `fleet_exists(side)`
+  since 2026-11-13 (`docs\structure-review.md`, item 2); 7 assignments of 0 are left.
   `docs\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
 - **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 195). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
@@ -131,8 +136,9 @@ Left alone by group 2 (the special values):
 - **`animate_army`'s parameter `background_saved` is misnamed** (`draw\icons.bm`). The `GET` it skips takes
   the army's flag picture from its city, not the background; `ANIMATE_PICTURE_TAKEN` says so (group 5).
   The parameter wants the name `picture_taken`.
-- **Tests of `army_order()` and `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
-  `docs\constants.md`, section 2.
+- **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
+  `docs\constants.md`, section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
+  since 2026-11-13.
 
 Left alone by group 6 (the settings and victory rules):
 

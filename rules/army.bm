@@ -92,12 +92,12 @@ SUB army_pick_commander (side, army_slot)
     army_slot = 0
     first_army = side_first_army(side): last_army = side_last_army(side)
     FOR i = first_army TO last_army
-        IF army_city(i) = 0 AND leader_name$(i) <> "" THEN army_slot = i: EXIT SUB
+        IF NOT army_exists(i) AND leader_name$(i) <> "" THEN army_slot = i: EXIT SUB
     NEXT i
 
     '                 generic leaders if set list is exhausted
     FOR i = first_army TO last_army
-        IF army_city(i) = 0 THEN
+        IF NOT army_exists(i) THEN
             ' (i): army_generate_name changes its first argument.
             CALL army_generate_name((i), generated_name$)
             army_slot = i
@@ -166,6 +166,23 @@ END FUNCTION
 
 FUNCTION other_side (side)
     other_side = SIDE_UNION + SIDE_REBEL - side
+END FUNCTION
+
+' The state that army_city() and army_order() hold, by name. Each gives -1 or 0, as a comparison
+' does. An army exists while it holds a city; army_city() is 0 for an empty slot.
+FUNCTION army_exists (army)
+    army_exists = army_city(army) > 0
+END FUNCTION
+
+' The army's order is a city to move to, not ORDER_NONE, ORDER_BUSY or ORDER_DONE.
+FUNCTION army_has_move (army)
+    army_has_move = army_order(army) > 0
+END FUNCTION
+
+' The army has acted this month: it is busy (ORDER_BUSY, after a fort, a drill, a combine, a
+' detach, a train or being raised) or done (ORDER_DONE, after a move or a battle).
+FUNCTION army_has_acted (army)
+    army_has_acted = army_order(army) < 0
 END FUNCTION
 
 ' Detaches three tenths of an army's men and supplies into the free slot, in the city given.

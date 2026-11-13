@@ -27,7 +27,7 @@ python tests\play.py coverage                    # the lines and the SUBs the sc
 python tests\play.py explore <keys file>         # one run, a PNG of every screen; for writing a script
 python tests\make_scripts.py                     # writes the generated scripts again (below)
 python tests\make_save.py <description> <out>    # writes a saved game from a description (below)
-python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and make_scripts.py
+python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and make_scripts.py, and the folder rules (test_layers.py)
 ```
 
 `--jobs N` (before the command) sets how many runs go at once (default 4). `CWS_SHOW_WINDOWS=1` shows the

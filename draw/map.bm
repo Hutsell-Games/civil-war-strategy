@@ -137,7 +137,7 @@ END SUB
 SUB draw_fleets
     DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM ship_type AS INTEGER
     FOR side = SIDE_UNION TO SIDE_REBEL
-        IF fleet_size(side) = 0 OR fleet_city(side) = 0 THEN fleet_city(side) = 0: _CONTINUE
+        IF fleet_size(side) = 0 OR NOT fleet_exists(side) THEN fleet_city(side) = 0: _CONTINUE
         SELECT CASE fleet_city(side)
             CASE 30: x = 515: y = 268
             CASE 28: x = 517: y = 172
@@ -533,7 +533,7 @@ SUB draw_map
     END IF
 
     FOR i = 1 TO MAX_ARMIES
-        IF army_city(i) > 0 THEN CALL draw_army_flag(i)
+        IF army_exists(i) THEN CALL draw_army_flag(i)
     NEXT i
 
     FOR k = SIDE_UNION TO SIDE_REBEL
@@ -542,7 +542,7 @@ SUB draw_map
 
     IF opt_players <> PLAYERS_TWO THEN
         FOR i = 1 TO MAX_ARMIES
-            IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+            IF army_exists(i) AND army_has_move(i) THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
         NEXT i
     END IF
     CALL draw_fleets

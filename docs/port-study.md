@@ -177,6 +177,9 @@ that it does not work on Linux, where the renames would be done by hand. The tes
 scripts on the alternate map switch the files in `play.py`, so the batch file itself is not tested (a
 `TODO.md` row). **Recommended: (a).**
 
+*Since 2026-11-13:* replaced. Each map is a folder of `scenarios\`, the player picks it after Start NEW Game,
+and `ALTMAP.BAT` is removed (`docs\scenario-plan.md`).
+
 **D6. The `GOSUB` fix is made though no script stopped.** *Panel:* the compiler engineer and the test engineer
 want it: the stack grows by one entry for each menu left by a letter, and a later `RETURN` placed after a menu
 would stop the game. It changes no screen. **Recommended: as built.**

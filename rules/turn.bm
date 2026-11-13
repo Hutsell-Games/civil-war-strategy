@@ -21,7 +21,7 @@ END SUB
 ' closed for the month when the side has no fleet and not the price of a ship.
 SUB turn_check_commands
     IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
-    IF side_cash(current_side) < COST_SHIP AND fleet_city(current_side) = 0 THEN turn_navy_done = 1
+    IF side_cash(current_side) < COST_SHIP AND NOT fleet_exists(current_side) THEN turn_navy_done = 1
 END SUB
 
 ' Troops is closed for the month.
@@ -103,7 +103,7 @@ END SUB
 SUB turn_defender_halts (army, halted, old_order)
     halted = 0
     old_order = army_order(army)
-    IF 11 * RND > army_leader_rating(army) THEN halted = 1: IF army_order(army) > 0 THEN army_order(army) = ORDER_DONE
+    IF 11 * RND > army_leader_rating(army) THEN halted = 1: IF army_has_move(army) THEN army_order(army) = ORDER_DONE
 END SUB
 
 ' refuge is the city the defender of city retreats to: the richest city of its side next to
@@ -197,9 +197,9 @@ SUB turn_set_move_order
     DIM i AS INTEGER
     FOR i = 1 TO MAX_ARMIES
         move_order_key(i) = MOVE_KEY_NONE
-        IF army_order(i) < 0 THEN army_order(i) = ORDER_NONE
-        IF army_city(i) > 0 AND army_order(i) > 0 THEN move_order_key(i) = INT(4 + 4 * RND) * 100 + i
-        IF army_supply(i) < 1 AND army_order(i) > 0 THEN move_order_key(i) = 900 + i
+        IF army_has_acted(i) THEN army_order(i) = ORDER_NONE
+        IF army_exists(i) AND army_has_move(i) THEN move_order_key(i) = INT(4 + 4 * RND) * 100 + i
+        IF army_supply(i) < 1 AND army_has_move(i) THEN move_order_key(i) = 900 + i
         SELECT CASE army_size(i)         'bigger armies move slower
             CASE IS > 400
                 IF move_order_key(i) < 900 THEN move_order_key(i) = move_order_key(i) + 100

@@ -6,11 +6,11 @@ SUB victory_forces (union_troops, rebel_troops)
     DIM j AS INTEGER
     union_troops = 0
     FOR j = 1 TO ARMIES_PER_SIDE
-        IF army_city(j) > 0 THEN union_troops = union_troops + army_size(j)
+        IF army_exists(j) THEN union_troops = union_troops + army_size(j)
     NEXT j
     rebel_troops = 0
     FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES
-        IF army_city(j) > 0 THEN rebel_troops = rebel_troops + army_size(j)
+        IF army_exists(j) THEN rebel_troops = rebel_troops + army_size(j)
     NEXT j
 END SUB
 

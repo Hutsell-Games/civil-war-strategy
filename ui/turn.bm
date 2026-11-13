@@ -4,13 +4,13 @@ SUB turn_date_and_supply
     DIM i AS INTEGER: DIM k AS INTEGER: DIM blockaded AS INTEGER: DIM starved AS INTEGER
 
     FOR i = 1 TO MAX_ARMIES
-        IF army_city(i) > 0 THEN CALL draw_army_flag(i)
+        IF army_exists(i) THEN CALL draw_army_flag(i)
     NEXT i
 
     CALL turn_advance_month
 
     FOR i = 1 TO MAX_ARMIES
-        IF army_city(i) < 1 THEN _CONTINUE
+        IF NOT army_exists(i) THEN _CONTINUE
         CALL turn_army_supply(i, blockaded, starved)
         IF blockaded = 1 THEN CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
         COLOR COLOR_LIGHT_MAGENTA
@@ -31,7 +31,7 @@ SUB turn_resolve
         CALL ai_turn
     ELSE
         FOR i = 1 TO MAX_ARMIES
-            IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+            IF army_exists(i) AND army_has_move(i) THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
         NEXT i
     END IF
     COLOR COLOR_YELLOW: LOCATE 1, 1: PRINT SPACE$(80);
@@ -76,7 +76,7 @@ END SUB
 SUB turn_move_army (moving_army)
     DIM side AS INTEGER: DIM to_city AS INTEGER: DIM fought AS INTEGER: DIM took AS INTEGER: DIM starved AS INTEGER
     side = army_side(moving_army)
-    IF army_order(moving_army) < 1 THEN EXIT SUB
+    IF NOT army_has_move(moving_army) THEN EXIT SUB
     COLOR COLOR_LIGHT_CYAN
     CALL clear_bottom_line
     PRINT army_name$(moving_army); " is moving to "; city_name$(army_order(moving_army));
@@ -125,7 +125,7 @@ SUB turn_attack (moving_army, city, fought, took)
             message$ = army_name$(loser) + "'s army is crushed in " + city_name$(army_city(defender))
             CALL scribe_message(message$, SHOW_BOX)
             CALL turn_army_surrenders(loser, moving_army)
-            IF army_city(moving_army) = 0 THEN EXIT SUB
+            IF NOT army_exists(moving_army) THEN EXIT SUB
         ELSE
             CALL clear_right_panel
             IF winner <> moving_army THEN CALL turn_attacker_withdraws(moving_army, city, defender): EXIT SUB
@@ -134,7 +134,7 @@ SUB turn_attack (moving_army, city, fought, took)
                 message$ = army_name$(defender) + " surrenders to " + army_name$(moving_army) + " in " + city_name$(army_city(defender))
                 CALL scribe_message(message$, SHOW_BOX)
                 CALL turn_army_surrenders(defender, moving_army)
-                IF army_city(moving_army) = 0 THEN EXIT SUB
+                IF NOT army_exists(moving_army) THEN EXIT SUB
             END IF
         END IF
         CALL city_update_occupier(city): IF city_army(city) = 0 THEN took = 1: EXIT SUB
@@ -171,7 +171,7 @@ SUB turn_defender_retreats (moving_army, city, defender, gone)
     gone = 0
     attacker_side = army_side(moving_army)
     CALL draw_map_marker(army_city(moving_army), city, MARK_ERASE_ARMY)
-    IF army_order(defender) > 0 THEN CALL draw_map_marker(city, army_order(defender), MARK_ERASE_ARMY)
+    IF army_has_move(defender) THEN CALL draw_map_marker(city, army_order(defender), MARK_ERASE_ARMY)
 
     CALL menu_army_retreat(defender, chosen_city)
     IF chosen_city > 0 THEN
@@ -202,7 +202,7 @@ SUB turn_army_surrenders (army, moving_army)
     IF opt_graphics >= GRAPHICS_FULL THEN CALL draw_surrender(army): COLOR COLOR_YELLOW: LOCATE 3, 68: PRINT army_name$(army): LOCATE 4, 68: PRINT "surrenders !"
     side = army_side(army)
     IF opt_sound >= SOUND_MUSIC AND side <> current_side THEN PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
-    IF army_order(army) > 0 THEN CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_ARMY)
+    IF army_has_move(army) THEN CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_ARMY)
     CALL turn_army_lost(army, moving_army)
     CALL wait_seconds(PAUSE_LONG)
     CALL clear_right_panel

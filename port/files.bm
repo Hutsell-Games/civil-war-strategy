@@ -439,7 +439,7 @@ SUB load_game (slot, problem$)
     IF named THEN LINE INPUT #1, text$
     INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
     FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
-        IF army_city(i) > 0 THEN
+        IF army_exists(i) THEN
             IF army_name$(i) = leader_name$(i) THEN
                 leader_name$(i) = ""
             ELSE

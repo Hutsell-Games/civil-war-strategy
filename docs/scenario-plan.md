@@ -1,7 +1,7 @@
 # Plan: scenarios in folders, picked in the game
 
-Drafted 2026-11-13. Steps 1 and 2 are committed (`2ba37f5`, `f97722d`). Step 3 is in the working
-tree.
+Drafted 2026-11-13. Done: steps 1 to 3 are committed (`2ba37f5`, `f97722d`, `fe4d78d`), and step 4
+is the commit that adds this line. What each step did is in `modernize-completed.md`.
 
 ## Goal
 

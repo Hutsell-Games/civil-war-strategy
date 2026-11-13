@@ -66,7 +66,8 @@ build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and 
    `graphics\` and the map, the setup and the leaders in `scenarios\`, with the alternate map's three files and
    `ALTMAP.BAT`. Nine lines name a folder now. `CWS.CFG`, `HISCORE.CWS`, the saved games and the history files
    stay beside the program. Since 2026-11-13 each map has a folder of `scenarios\`, `standard\` and `alternate\`,
-   and `ALTMAP.BAT` no longer works (`docs\scenario-plan.md`).
+   and `ALTMAP.BAT` is removed: the player picks the map after Start NEW Game, and a saved game names its
+   map in its first line (`docs\scenario-plan.md`).
 10. **The test hooks**: `SCRIPT.BM`, included at the end of `CWSTRAT.BAS`, and calls to it in the sources. When
     the environment variable `CWS_SEED` is not set, the program behaves as before. Each changed line is listed
     in "The test hooks", below.

@@ -123,7 +123,7 @@ FUNCTION event_possible (row, good_side)
     event_possible = 1
     SELECT CASE event_effect(row)
         CASE EFFECT_SHIPS
-            IF fleet_city(good_side) = 0 OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN event_possible = 0
+            IF NOT fleet_exists(good_side) OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN event_possible = 0
         CASE EFFECT_SHIPS_TO_PORT
             CALL event_delivery_port(good_side, port, found)
             IF found = 0 OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN event_possible = 0
@@ -136,7 +136,7 @@ END FUNCTION
 SUB event_delivery_port (side, port, found)
     DIM i AS INTEGER
     port = 0: found = 0
-    IF fleet_size(side) > 0 AND fleet_city(side) <> FLEET_AT_SEA THEN
+    IF fleet_size(side) > 0 AND NOT fleet_is_at_sea(side) THEN
         port = fleet_city(side): found = 1
         EXIT SUB
     END IF

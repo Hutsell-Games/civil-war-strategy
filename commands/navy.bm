@@ -93,7 +93,7 @@ SUB navy_sail_to (side, city, sailed)
     CALL draw_navy_box
     LOCATE 10, 25: PRINT side_name$(side); " fleet of"; fleet_size(side); "ship(s) is sailing"
     LOCATE 11, 25: PRINT "From ";
-    IF fleet_city(side) <= MAX_CITIES THEN
+    IF NOT fleet_is_at_sea(side) THEN
         PRINT city_name$(fleet_city(side));
     ELSE
         PRINT "Raiding";
@@ -162,7 +162,7 @@ SUB navy_commerce_raid
             ELSE
                 COLOR COLOR_WHITE: PRINT side_name$(raider); " raiders have lost a ship ("; fleet_size(raider); " remain)";
                 IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
-                IF fleet_city(raider) > 0 THEN
+                IF fleet_exists(raider) THEN
                     wait_seconds PAUSE_LONG
                     again = 1
                 ELSE

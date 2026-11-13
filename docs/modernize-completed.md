@@ -3,6 +3,32 @@
 The finished parts of `modernize-plan.md`, moved here on 2026-11-11. The plan keeps the decisions, the
 phases still to do and the rules that still hold. Line numbers are those of the day each part was written.
 
+## Scenarios in folders (2026-11-13)
+
+`scenarios\ALTMAP.BAT` renamed six files to switch the map, on Windows only. The plan that replaced it
+is `scenario-plan.md`; it was done in four commits.
+
+- **The folders** (`2ba37f5`). Each map is a folder of `scenarios\`, `standard\` and `alternate\`, with
+  `CITIES.GRD`, `CWS.INI` and `CWSLEAD.DAT`; the files moved with `git mv`, unchanged.
+  `scenarios\SCENARIOS.LST` names each folder and its title. `load_scenario_list` (`port\files.bm`)
+  reads it, and `scenario_file$` gives a file of the scenario in use (`scenario_now`). No screen
+  changed.
+- **The menu** (`f97722d`). After Start NEW Game, `menu_scenario` (`ui\main_menu.bm`) lists the
+  titles; Esc goes back to the title menu, and a list of one line shows no menu. Picking another
+  map runs `game_new` again. Every script that starts a new game answers the menu, and `#! altmap`
+  is gone from `play.py`. The alternate map now loads after the random numbers are seeded, so its
+  starting cash differs: `pass-union-altmap`, `pass-rebel-altmap`, `war-union-altmap` and
+  `war-rebel-altmap` were recorded again. The user removed `ALTMAP.BAT`.
+- **The saved game** (`fe4d78d`). `save_game` writes the scenario's folder as the first line, and
+  `load_game` reads that scenario's leaders and map first when it differs. A save without the line
+  loads as the first scenario; one whose scenario is not in the list is refused with a message on
+  the Load menu's bottom line. The new script `scenario-save` saves on the alternate map and loads
+  it from the standard map. `files` was recorded again for the new hashes of its saves.
+- **The documents.** `TODO.md` loses the untested `ALTMAP.BAT`; `port-study.md` D5 and
+  `devnotes.md` item 9 say what replaced it. Decisions 3 and 6 of `modernize-plan.md` were narrowed
+  in the first commit: a change that is meant is its own commit and records again only the scripts
+  that differ.
+
 ## Phase 11 step 2 (2026-11-13)
 
 Question 1 answered: war texts go to data files. The user then asked for more than the texts: the

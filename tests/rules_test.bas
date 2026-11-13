@@ -1698,6 +1698,39 @@ SUB TestAiRazesFort
     AssertEqualInt 0, ai_razes_fort(6), "not at line 150 or above"
 END SUB
 
+' ------------------------------------------ the army and fleet state, by name
+' Each gives -1 or 0, as the comparison it stands for, so AND and OR work on it as before.
+
+SUB TestArmyStateByName
+    army_city(1) = 0: army_order(1) = ORDER_NONE
+    AssertEqualInt 0, army_exists(1), "an empty slot"
+    army_city(1) = 7
+    AssertEqualInt -1, army_exists(1), "an army in city 7"
+    AssertEqualInt 0, army_has_move(1), "ORDER_NONE is no move"
+    AssertEqualInt 0, army_has_acted(1), "ORDER_NONE has not acted"
+    army_order(1) = 12
+    AssertEqualInt -1, army_has_move(1), "an order to city 12"
+    AssertEqualInt 0, army_has_acted(1), "a move to make has not acted"
+    army_order(1) = ORDER_BUSY
+    AssertEqualInt 0, army_has_move(1), "ORDER_BUSY is no move"
+    AssertEqualInt -1, army_has_acted(1), "ORDER_BUSY has acted"
+    army_order(1) = ORDER_DONE
+    AssertEqualInt -1, army_has_acted(1), "ORDER_DONE has acted"
+END SUB
+
+SUB TestFleetStateByName
+    fleet_city(SIDE_UNION) = 0
+    AssertEqualInt 0, fleet_exists(SIDE_UNION), "no fleet"
+    AssertEqualInt 0, fleet_is_at_sea(SIDE_UNION), "no fleet is not at sea"
+    fleet_city(SIDE_UNION) = 30
+    AssertEqualInt -1, fleet_exists(SIDE_UNION), "a fleet off city 30"
+    AssertEqualInt 0, fleet_is_at_sea(SIDE_UNION), "off a city is not at sea"
+    fleet_city(SIDE_UNION) = FLEET_AT_SEA
+    AssertEqualInt -1, fleet_exists(SIDE_UNION), "a fleet at sea exists"
+    AssertEqualInt -1, fleet_is_at_sea(SIDE_UNION), "raiding"
+    AssertEqualInt 0, fleet_exists(SIDE_REBEL), "the other side's is apart"
+END SUB
+
 ' --------------------------------------- the fleets' small rules (phase 9)
 
 SUB TestNavyMarkSideAndCountShips

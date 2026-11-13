@@ -13,6 +13,17 @@ SUB navy_count_ships (side)
     fleet_size(side) = LEN(fleet_ships$(side))
 END SUB
 
+' The state that fleet_city() holds, by name. Each gives -1 or 0, as a comparison does.
+' fleet_city() is 0 when the side has no fleet, a city when the fleet lies off it, and
+' FLEET_AT_SEA when it is raiding.
+FUNCTION fleet_exists (side)
+    fleet_exists = fleet_city(side) > 0
+END FUNCTION
+
+FUNCTION fleet_is_at_sea (side)
+    fleet_is_at_sea = fleet_city(side) = FLEET_AT_SEA
+END FUNCTION
+
 ' 1 when ironclads can be built: always without the Realism setting, and with it from March
 ' 1862.
 FUNCTION navy_has_ironclads
@@ -158,7 +169,7 @@ SUB navy_note_raiding_side
     DIM k AS INTEGER
     raiding_side = SIDE_NONE
     FOR k = SIDE_UNION TO SIDE_REBEL
-        IF fleet_city(k) = FLEET_AT_SEA THEN raiding_side = k
+        IF fleet_is_at_sea(k) THEN raiding_side = k
     NEXT k
 END SUB
 
@@ -179,7 +190,7 @@ SUB navy_raid_round (raider, sank)
     ELSE
         raid_loss = 0
         CALL navy_remove_ship(raider)
-        IF fleet_city(raider) <= 0 THEN raiding_side = SIDE_NONE
+        IF NOT fleet_exists(raider) THEN raiding_side = SIDE_NONE
     END IF
 END SUB
 

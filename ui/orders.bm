@@ -40,7 +40,7 @@ SUB menu_city_fortify (city)
     menu_row = 2
     menu_item_count = 0
     FOR i = side_first_army(current_side) TO side_last_army(current_side)
-        IF army_city(i) > 0 AND city_fort(army_city(i)) < MAX_FORT THEN
+        IF army_exists(i) AND city_fort(army_city(i)) < MAX_FORT THEN
             menu_item_count = menu_item_count + 1
             menu_text$(menu_item_count) = city_name$(army_city(i))
             menu_value(menu_item_count) = army_city(i)
@@ -58,7 +58,7 @@ SUB menu_city_fortify (city)
     COLOR COLOR_CYAN
     CALL city_build_fort(current_side, city)
     CALL draw_fort_built(city)
-    IF army_order(army) > 0 THEN CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_LINE)
+    IF army_has_move(army) THEN CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_LINE)
     CALL army_set_order(army, ORDER_BUSY)
     CALL draw_army_flag(army)
     CALL draw_stack_markers(current_side)
@@ -84,7 +84,7 @@ SUB menu_army_select (army, city)
     first_army = side_first_army(current_side)
     last_army = side_last_army(current_side)
     FOR i = first_army TO last_army
-        IF army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(army_city(i)): menu_value(menu_item_count) = army_city(i)
+        IF army_exists(i) AND army_order(i) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(army_city(i)): menu_value(menu_item_count) = army_city(i)
     NEXT i
     IF menu_item_count = 0 THEN army = -1: EXIT SUB
     menu_text$(0) = "From"
@@ -204,7 +204,7 @@ SUB menu_army_cancel (side)
     FOR j = first_army TO last_army
         short_name$ = army_name$(j)
         IF LEN(short_name$) > 10 THEN found_at = INSTR(short_name$, " "): short_name$ = RIGHT$(short_name$, LEN(short_name$) - found_at)
-        IF army_city(j) > 0 AND army_order(j) > 0 THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = short_name$: menu_value(menu_item_count) = army_city(j)
+        IF army_exists(j) AND army_has_move(j) THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = short_name$: menu_value(menu_item_count) = army_city(j)
     NEXT j
     CALL menu_bubble_sort(menu_item_count)
     menu_col = PANEL_COL
@@ -218,7 +218,7 @@ SUB menu_army_cancel (side)
             city = menu_value(menu_choice)
 
             FOR i = first_army TO last_army
-                IF army_city(i) = city THEN found_at = INSTR(army_name$(i), menu_text$(menu_choice)): IF found_at > 0 AND army_order(i) > 0 THEN army = i
+                IF army_city(i) = city THEN found_at = INSTR(army_name$(i), menu_text$(menu_choice)): IF found_at > 0 AND army_has_move(i) THEN army = i
             NEXT i
 
             CALL clear_bottom_line
@@ -243,7 +243,7 @@ SUB menu_army_relieve (side)
     last_army = side_last_army(side)
     menu_item_count = 0
     FOR i = first_army TO last_army
-        IF army_size(i) > 0 AND army_city(i) > 0 AND army_order(i) = ORDER_NONE THEN
+        IF army_size(i) > 0 AND army_exists(i) AND army_order(i) = ORDER_NONE THEN
             menu_item_count = menu_item_count + 1
             menu_text$(menu_item_count) = army_name$(i)
             IF LEN(menu_text$(menu_item_count)) > 11 THEN menu_text$(menu_item_count) = LEFT$(menu_text$(menu_item_count), 11)
@@ -332,7 +332,7 @@ SUB menu_supply (picked)
     menu_color = COLOR_MAGENTA
     menu_item_count = 0
     FOR i = first_army TO last_army
-        IF army_city(i) = 0 OR army_supply(i) > 1 THEN _CONTINUE
+        IF NOT army_exists(i) OR army_supply(i) > 1 THEN _CONTINUE
         IF opt_realism >= REALISM_ON THEN
             friendly_neighbors = city_is_connected(current_side, army_city(i))
             IF friendly_neighbors < 1 THEN CALL clear_bottom_line: COLOR COLOR_WHITE: PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !"; : wait_seconds opt_pause!: _CONTINUE
@@ -416,21 +416,21 @@ END SUB
 SUB menu_navy_items (side)
     menu_text$(0) = "Ships"
     menu_text$(1) = "Build"
-    IF fleet_city(side) <> FLEET_AT_SEA THEN
+    IF NOT fleet_is_at_sea(side) THEN
         IF side_cash(side) < COST_SHIP OR fleet_size(side) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(side)) <> side THEN menu_text$(1) = "-": menu_choice = MENU_START + 2
     END IF
     menu_text$(2) = "Attack"
-    IF fleet_city(side) <> FLEET_AT_SEA THEN
+    IF NOT fleet_is_at_sea(side) THEN
         IF city_owner(fleet_city(side)) <> other_side(side) THEN menu_text$(2) = "-": menu_choice = MENU_START + 1
     ELSE
         menu_text$(1) = "-": menu_text$(2) = "-": menu_choice = MENU_START + 3
     END IF
-    menu_text$(3) = "Sail": IF fleet_city(side) < 1 THEN menu_text$(3) = "-"
+    menu_text$(3) = "Sail": IF NOT fleet_exists(side) THEN menu_text$(3) = "-"
     menu_text$(4) = "Raid": IF fleet_size(side) < 1 OR raiding_side = side THEN menu_text$(4) = "-"
     menu_col = PANEL_COL
     menu_row = 12
     menu_item_count = 4
-    IF fleet_city(side) <> FLEET_AT_SEA THEN
+    IF NOT fleet_is_at_sea(side) THEN
         IF side = SIDE_UNION AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
         IF opt_realism = REALISM_OFF AND side = SIDE_REBEL AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
     END IF

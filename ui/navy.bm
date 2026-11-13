@@ -31,10 +31,10 @@ SUB menu_navy_build (side, again)
     DIM cost AS INTEGER: DIM ship$
     again = 1
     cost = COST_SHIP
-    IF side_cash(side) < cost OR fleet_city(side) = FLEET_AT_SEA THEN EXIT SUB
+    IF side_cash(side) < cost OR fleet_is_at_sea(side) THEN EXIT SUB
     IF fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
 
-    IF fleet_city(side) > 0 THEN
+    IF fleet_exists(side) THEN
         IF city_owner(fleet_city(side)) <> side THEN EXIT SUB
         IF city_port_type(fleet_city(side)) < PORT_SEA THEN EXIT SUB
     END IF
@@ -73,10 +73,10 @@ END SUB
 ' acted this month, even when the city is not the enemy's and nothing is bombarded.
 SUB menu_navy_attack (side, again)
     again = 0
-    IF fleet_city(side) = FLEET_AT_SEA THEN again = 1: EXIT SUB
+    IF fleet_is_at_sea(side) THEN again = 1: EXIT SUB
     ' The computer's test of whether to sail instead drew a random number here for the player too.
     CALL random_discard
-    IF fleet_city(side) < 1 THEN EXIT SUB
+    IF NOT fleet_exists(side) THEN EXIT SUB
     CALL turn_set_navy_done(1)
     IF city_owner(fleet_city(side)) <> other_side(side) THEN again = 1: EXIT SUB
     CALL navy_bombard(side)
@@ -88,11 +88,11 @@ SUB menu_navy_sail (side, again)
     DIM sailed AS INTEGER
     again = 0
     CALL navy_count_ships(side)
-    IF fleet_city(side) < 1 OR fleet_size(side) < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
+    IF NOT fleet_exists(side) OR fleet_size(side) < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
 
     CALL navy_list_ports(side)
     COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68
-    IF fleet_city(side) < 41 THEN
+    IF NOT fleet_is_at_sea(side) THEN
         PRINT city_name$(fleet_city(side))
     ELSE
         PRINT "Raiding"

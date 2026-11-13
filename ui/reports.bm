@@ -104,13 +104,13 @@ SUB report_armies (side)
     COLOR COLOR_LIGHT_CYAN: PRINT " #      Name             Size  Location   Ldr Exp Suply Move To"
     total_troops = 0: FOR i = first_army TO last_army
         COLOR side_color
-        IF army_city(i) < 1 THEN _CONTINUE
+        IF NOT army_exists(i) THEN _CONTINUE
         total_troops = total_troops + army_size(i)
         PRINT i; TAB(5); army_name$(i); TAB(25); : row = CSRLIN
         CALL print_army_size(i): PRINT TAB(32); city_name$(army_city(i));
         IF side <> current_side THEN PRINT : _CONTINUE
         PRINT TAB(43); army_leader_rating(i); TAB(47); army_experience(i); TAB(52); army_supply(i);
-        PRINT TAB(57); : IF army_order(i) > -1 THEN PRINT city_name$(army_order(i)) ELSE PRINT "Resting"
+        PRINT TAB(57); : IF NOT army_has_acted(i) THEN PRINT city_name$(army_order(i)) ELSE PRINT "Resting"
         IF city_fort(army_city(i)) > 0 THEN LOCATE row, 68: PRINT "FORT +"; city_fort(army_city(i))
     NEXT i
     PRINT " "; STRING$(70, "Ä")
@@ -122,7 +122,7 @@ SUB report_armies (side)
         IF MID$(fleet_ships$(side), k, 1) = "I" THEN ironclads = ironclads + 1
     NEXT k
     IF ironclads > 0 THEN PRINT "("; ironclads; "Ironclads) ";
-    IF fleet_city(side) > 0 AND fleet_city(side) < FLEET_AT_SEA THEN PRINT "in "; city_name$(fleet_city(side)) ELSE PRINT
+    IF fleet_exists(side) AND NOT fleet_is_at_sea(side) THEN PRINT "in "; city_name$(fleet_city(side)) ELSE PRINT
     IF train_army(side) > 0 THEN COLOR COLOR_YELLOW: PRINT " Army #"; train_army(side); army_name$(train_army(side)); " on train to "; city_name$(army_order(train_army(side)));
     LINE (0, 0)-(639, 449), 15, B
     LINE (0, 62)-(639, 62), 15

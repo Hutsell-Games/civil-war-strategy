@@ -68,7 +68,7 @@ SUB menu_main_inform
     CALL menu_report((current_side))
     first_army = side_first_army(current_side): last_army = side_last_army(current_side)
     FOR i = first_army TO last_army
-        IF army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+        IF army_has_move(i) THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
     NEXT i
 END SUB
 
