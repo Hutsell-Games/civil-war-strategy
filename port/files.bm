@@ -1,11 +1,27 @@
+' Reads scenarios/SCENARIOS.LST: each scenario's folder and title, up to MAX_SCENARIOS.
+SUB load_scenario_list
+    scenario_count = 0
+    OPEN "I", 1, SCNDIR + "scenarios.lst"
+    DO WHILE NOT EOF(1) AND scenario_count < MAX_SCENARIOS
+        scenario_count = scenario_count + 1
+        INPUT #1, scenario_folder$(scenario_count), scenario_title$(scenario_count)
+    LOOP
+    CLOSE #1
+END SUB
+
+' The path of one of the files of the scenario the game is on (scenario_now).
+FUNCTION scenario_file$ (name$)
+    scenario_file$ = SCNDIR + scenario_folder$(scenario_now) + "/" + name$
+END FUNCTION
+
 SUB load_scenario
     DIM k AS INTEGER: DIM i AS INTEGER: DIM army_count AS INTEGER
-    OPEN "I", 1, SCNDIR + "cwslead.dat"
+    OPEN "I", 1, scenario_file$("cwslead.dat")
     FOR i = 1 TO MAX_LEADERS
         INPUT #1, leader_name$(i), leader_rating(i)
     NEXT i
     CLOSE #1
-    OPEN "I", 1, SCNDIR + "cws.ini"
+    OPEN "I", 1, scenario_file$("cws.ini")
     FOR i = 0 TO 2
         INPUT #1, side_name$(i)
     NEXT i
@@ -41,8 +57,8 @@ SUB load_scenario
 END SUB
 
 ' Reads the events table from a file written like scenarios/EVENTS.DAT, whose head says what
-' each line means. The sides' names must be read first (load_scenario). ALTMAP does not swap
-' this file. A line that cannot be read ends the reading: event_file_error$ then names the
+' each line means. The sides' names must be read first (load_scenario). Every scenario uses
+' the same file. A line that cannot be read ends the reading: event_file_error$ then names the
 ' file and the line and says why. It is "" when the whole file was read.
 SUB load_events (file$)
     DIM file_num AS INTEGER: DIM line_num AS INTEGER: DIM row AS INTEGER: DIM cut AS INTEGER
@@ -360,7 +376,7 @@ END FUNCTION
 SUB load_cities
     DIM i AS INTEGER: DIM j AS INTEGER: DIM unused AS INTEGER: DIM owner AS INTEGER
     city_name$(0) = "NONE"
-    OPEN "I", 1, SCNDIR + "cities.grd"
+    OPEN "I", 1, scenario_file$("cities.grd")
     total_income = union_income_bonus + 200
     FOR i = 1 TO MAX_CITIES
         INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
@@ -440,8 +456,16 @@ END SUB
 ' Notes that no saved game is on the disk, so that the Files menu shows Load as "-". Only a
 ' new game sets saves_exist back (TODO.md).
 SUB saved_games_check
-    IF LEN(DIR$("*.sav")) = 0 THEN saves_exist = 0
+    IF NOT any_saved_game THEN saves_exist = 0
 END SUB
+
+' Whether one of the nine save slots, cws1.sav to cws9.sav, holds a saved game.
+FUNCTION any_saved_game
+    DIM k AS INTEGER
+    FOR k = 1 TO 9
+        IF _FILEEXISTS("cws" + LTRIM$(STR$(k)) + ".sav") THEN any_saved_game = -1: EXIT FUNCTION
+    NEXT k
+END FUNCTION
 
 SUB config_read (side)
     OPEN "I", 1, "cws.cfg"
@@ -495,7 +519,7 @@ END SUB
 ' Starts the history file cws.his with the date. The history of the game before is kept as
 ' oldhist.ory.
 SUB history_start
-    IF LEN(DIR$("cws.his")) > 0 THEN CALL script_shell("copy cws.his oldhist.ory")
+    IF _FILEEXISTS("cws.his") THEN CALL script_shell("copy cws.his oldhist.ory")
     OPEN "O", 2, "cws.his"
     PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
     CLOSE #2

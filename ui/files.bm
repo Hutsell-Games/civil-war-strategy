@@ -37,12 +37,12 @@ END SUB
 ' again only when the game picked is the menu's first (TODO.md).
 SUB menu_load_game
     DIM k AS INTEGER: DIM file$: DIM row AS INTEGER
-    IF LEN(DIR$("*.sav")) = 0 THEN menu_choice = MENU_ESCAPED: EXIT SUB
+    IF NOT any_saved_game THEN menu_choice = MENU_ESCAPED: EXIT SUB
     menu_text$(0) = "Load"
     menu_item_count = 0
     FOR k = 1 TO 9
         file$ = "cws" + LTRIM$(STR$(k)) + ".sav"
-        IF LEN(DIR$(file$)) > 0 THEN
+        IF _FILEEXISTS(file$) THEN
             menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = file$: menu_value(menu_item_count) = k
         END IF
     NEXT k
@@ -70,7 +70,7 @@ SUB menu_save_game
     menu_text$(0) = "Save Game"
     FOR k = 1 TO 9
         menu_text$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
-        IF LEN(DIR$(menu_text$(k))) > 0 THEN menu_text$(k) = menu_text$(k) + " û"
+        IF _FILEEXISTS(menu_text$(k)) THEN menu_text$(k) = menu_text$(k) + " û"
     NEXT k
     menu_col = PANEL_COL: menu_item_count = 9
     CALL menu_select(MENU_PLAIN)

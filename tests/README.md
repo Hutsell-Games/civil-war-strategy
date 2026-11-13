@@ -133,8 +133,8 @@ The `CWS.CFG` of a run is written fresh. By default it is the one that came with
 the Union side, the full map, balanced play, one player, fast display, random events that favor the Rebels,
 January campaigns and realism on, history off, aggression 3. The fields are `CFG_FIELDS` in `play.py`.
 
-`#! altmap` switches the three files of the alternate map (`ALTMAP.GRD`, `ALTMAP.INI`, `ALTLEAD.DAT`) with the
-game's own in the run's `scenarios` folder, as `scenarios\ALTMAP.BAT` does by renaming.
+`#! altmap` copies the three files of `scenarios\alternate` (`CITIES.GRD`, `CWS.INI`, `CWSLEAD.DAT`) over those
+of `scenarios\standard` in the run's folder, so that the game starts on the alternate map.
 
 ### Prepared saved games
 

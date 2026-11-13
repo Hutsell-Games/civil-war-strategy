@@ -133,8 +133,10 @@ SUB option_next_aggression
     IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
 END SUB
 
-' A new game: the scenario and the settings are read, and the map's cities.
+' A new game: the scenario and the settings are read, and the map's cities. The first game
+' reads the list of scenarios and starts on its first.
 SUB game_new
+    IF scenario_now = 0 THEN CALL load_scenario_list: scenario_now = 1
     CALL game_reset
     CALL load_scenario
     CALL load_events(SCNDIR + "events.dat")

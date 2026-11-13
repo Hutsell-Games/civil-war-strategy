@@ -113,5 +113,4 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'game/victory_screens.bm'
 ' $INCLUDE: 'game/tunes.bm'
 ' $INCLUDE: 'port/files.bm'
-' $INCLUDE: 'port/qb64.bm'
 ' $INCLUDE: 'port/script.bm'

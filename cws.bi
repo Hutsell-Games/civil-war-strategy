@@ -19,6 +19,7 @@ CONST MAX_SUPPLY = 10
 CONST MAX_EXPERIENCE = 10
 CONST MAX_LEADER_RATING = 9
 CONST MAX_CASH = 19999
+CONST MAX_SCENARIOS = 9
 ' fleet_city(): the fleet is at sea, raiding commerce.
 CONST FLEET_AT_SEA = 99
 ' city_port_type(): 0 for no port.
@@ -247,6 +248,9 @@ DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_ca
 ' for when that is another (SIDE_NONE when it is the same). event_before() is 1 for an
 ' announcement, which is tried before the month's roll. event_instead() and event_then() are
 ' rows, 0 for none. event_done() is set when the event has happened in this game.
+' The scenarios of scenarios/SCENARIOS.LST (load_scenario_list, port/files.bm): each one's folder
+' and title. scenario_now is the row of the scenario the game is on.
+DIM SHARED scenario_count, scenario_now, scenario_folder$(MAX_SCENARIOS), scenario_title$(MAX_SCENARIOS)
 DIM SHARED event_count, event_banner$, event_file_error$
 DIM SHARED event_name$(MAX_EVENTS), event_favors(MAX_EVENTS), event_listed(MAX_EVENTS), event_done(MAX_EVENTS)
 DIM SHARED event_before(MAX_EVENTS), event_for(MAX_EVENTS)

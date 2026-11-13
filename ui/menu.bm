@@ -185,7 +185,7 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
                 LINE (548, 148)-(592, 216), 15, B
                 face_pic = row: IF current_side = SIDE_UNION THEN face_pic = 6 - row
                 file$ = GFXDIR + "face" + LTRIM$(STR$(face_pic)) + ".vga"
-                IF LEN(DIR$(file$)) > 0 THEN
+                IF _FILEEXISTS(file$) THEN
                     CALL load_picture(file$, pic_face())
                     PUT (550, 150), pic_face, PSET
                     IF current_side = SIDE_REBEL THEN

@@ -13,7 +13,7 @@ computer's side alone acts: it recruits, moves, builds ships, fights and wins. T
                          side has no army left
 
 Each is one of GAMES: a style, a seed, a side, whether the game is played on the alternate map
-(the files ALTMAP.BAT switches in), and the settings that go with the seed (the map's detail, the
+(scenarios/alternate), and the settings that go with the seed (the map's detail, the
 play balance, the computer's aggression ...). The names of the games on the alternate map have
 "altmap" in place of the seed.
 

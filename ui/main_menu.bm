@@ -76,7 +76,7 @@ END SUB
 ' in the main module. The title tune plays before the first game only (replay is 0).
 SUB show_title (replay)
     DIM k AS INTEGER
-    IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
+    IF _FILEEXISTS(GFXDIR + "mtn.vga") THEN
         CALL load_picture(GFXDIR + "mtn.vga", pic_mountain())
     ELSE
         COLOR COLOR_WHITE: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": wait_seconds PAUSE_LONG

@@ -57,7 +57,7 @@ SUB calculate_battle (attacker, defender, winner, loser)
         CALL draw_cannon
         fort_level = city_fort(army_city(defender))
         file$ = GFXDIR + "fort" + LTRIM$(STR$(fort_level)) + ".vga"
-        IF LEN(DIR$(file$)) > 0 THEN
+        IF _FILEEXISTS(file$) THEN
             CALL load_picture(file$, pic_loaded())
             PUT (550, 270), pic_loaded, PSET
         END IF

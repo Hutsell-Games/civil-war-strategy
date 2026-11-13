@@ -234,7 +234,7 @@ SUB draw_map
     PAINT (200, 200), 2, 10
     COLOR COLOR_LIGHT_GREEN
     '==========================  Mountains =================================
-    IF LEN(DIR$(GFXDIR + "mtn.vga")) > 0 THEN
+    IF _FILEEXISTS(GFXDIR + "mtn.vga") THEN
         PUT (380, 30), pic_mountain, PSET
         PUT (270, 200), pic_mountain, PSET
         PUT (310, 160), pic_mountain, PSET

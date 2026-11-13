@@ -24,7 +24,10 @@ shared arrays, no `TYPE` and no `CONST`. `CWSTRAT.BAS` (745 lines) has no SUB of
 3. **Every step keeps the recorded screens identical.** `python tests\play.py check` must pass with no
    script recorded again. That holds the order of the random numbers and every pixel. The known bugs
    (`TODO.md`, "The game", and the list at the end of `sub-names.md`) are kept. Each is fixed later as its
-   own decision with its own new recording.
+   own decision with its own new recording. Narrowed on 2026-11-13 (user, `scenario-plan.md` P1): a
+   refactor step keeps the recorded screens identical. A change to behavior or the screen that is meant
+   is its own commit. It records again only the scripts whose checkpoints differ, and its commit message
+   lists them.
 4. **Tests first.** Phase 0 measures which lines the scripts and unit tests reach and fills the gaps before
    those parts are changed.
 5. **Start fresh from `qb64rust`.** Branch `extract-graphics` is read for what worked (its file split, its
@@ -32,7 +35,8 @@ shared arrays, no `TYPE` and no `CONST`. `CWSTRAT.BAS` (745 lines) has no SUB of
 6. **Data: rename first, records later.** The shared arrays and scalars are renamed first
    (`armysize` to `army_size`). A later phase groups them into records (`armies(i).size`,
    `cities(i).owner`, `sides(s).cash`). The saved-game file keeps its format. Overtaken on
-   2026-11-12: phase 10 closed with no records ("Phase 10: records").
+   2026-11-12: phase 10 closed with no records ("Phase 10: records"). One exception (user, 2026-11-13):
+   the saved game gains the scenario's name as its first field (`scenario-plan.md`, step 3).
 7. **Rule SUBs do no input or output.** At the end a rule SUB draws nothing, prints nothing and reads no
    key, so `tests\rules_test.bas` can call every one. A SUB that mixes rules and screen (`battle`, `navy`,
    `tupdate`) becomes a rule part and a show part, called in the same order as today.
@@ -200,7 +204,8 @@ Phase 7's rule for these lines still holds:
 - A step that must rewrite lines no test runs (the `GOTO` knots of `navy_commands` and `turn_resolve`)
   waits for its tests.
 
-The 17 lines that no test runs (20 before phase 9 step 6, 18 before the last labels went). The table names the SUB, not the line
+The 15 lines that no test runs (20 before phase 9 step 6, 18 before the last labels went, 17 before
+`DIR$` went on 2026-11-13). The table names the SUB, not the line
 numbers, because each step moves the lines; `report.txt` has the numbers of the day.
 
 | File | SUB | Lines | Why |
@@ -209,7 +214,6 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `ai\ai.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
 | `ai\ai.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. `ai_raise_forces` builds the first ship before it. It was the `THEN` part of a one-line `IF` until 2026-11-12 |
 | `ai\ai.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
-| `port\qb64.bm` | `DIR$` | 2 | `DIR$("")` for the next match; the game never calls it that way |
 | `rules\battle.bm` | `battle_strengths` | 1 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
 | `rules\battle.bm` | `battle_losses` | 2 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
 | `ai\ai.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |

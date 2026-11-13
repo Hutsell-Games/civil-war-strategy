@@ -18,8 +18,8 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
     #! timeout <seconds>     the longest the run may take (default 300)
     #! program <name>        the program the script plays: cws (cws.bas, the game), the
                              only one and the default
-    #! altmap                the run starts on the alternate map: the three ALTMAP files take the
-                             places of the game's map, setup and leaders, as ALTMAP.BAT does
+    #! altmap                the run starts on the alternate map: the files of scenarios/alternate
+                             take the places of those of scenarios/standard
     #! files <name> ...      files of the run's folder to check after the run: each becomes a
                              last entry "file <name> <hash>" (or "file <name> missing")
     #! data <folder>         the files of tests/data/<folder> go into the run's folder, over those
@@ -61,6 +61,10 @@ NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
 }
 # The folders of data files, copied whole into a run's folder.
 DATA_FOLDERS: tuple[str, ...] = ("graphics", "scenarios")
+# The folders of scenarios/: the scenario a game starts on (the first of SCENARIOS.LST), and the
+# alternate map.
+FIRST_SCENARIO = "standard"
+ALTERNATE_SCENARIO = "alternate"
 # Files that every run takes from here instead of the repo's folder, when this folder exists.
 TEST_DATA = GAME / "tests" / "data"
 # The name of the configuration file the run starts with; play.py writes it.
@@ -439,7 +443,7 @@ def copy_test_folder(work: Path, source: Path) -> None:
             old.unlink()
         if path.suffix == ".save":
             try:
-                make_save.write_save(path, work / "scenarios", folder / name)
+                make_save.write_save(path, work / "scenarios" / FIRST_SCENARIO, folder / name)
             except make_save.SaveError as e:
                 raise SetupError(str(e)) from None
         else:
@@ -455,19 +459,11 @@ def remove_files(work: Path, names: list[str]) -> None:
         path.unlink()
 
 
-# The files ALTMAP.BAT switches: the alternate map, setup and leaders, and the game's own.
-ALTMAP_PAIRS = (("ALTMAP.GRD", "CITIES.GRD"), ("ALTMAP.INI", "CWS.INI"), ("ALTLEAD.DAT", "CWSLEAD.DAT"))
-
-
-def swap_altmap(work: Path, folder: str = "") -> None:
-    """Switches the alternate map's three files with the game's, as ALTMAP.BAT does by renaming."""
-    where = work / folder
-    names = {p.name.lower(): p for p in where.iterdir()}
-    for alt, own in ALTMAP_PAIRS:
-        a, b = names[alt.lower()], names[own.lower()]
-        data = a.read_bytes()
-        a.write_bytes(b.read_bytes())
-        b.write_bytes(data)
+def use_alternate_map(scenarios: Path) -> None:
+    """Copies the files of the alternate map's folder over those of the scenario a game starts on
+    (FIRST_SCENARIO), so that the run starts on the alternate map."""
+    for path in (scenarios / ALTERNATE_SCENARIO).iterdir():
+        shutil.copy2(path, scenarios / FIRST_SCENARIO / path.name)
 
 
 def write_cfg(work: Path, cfg: dict[str, str]) -> None:
@@ -497,7 +493,7 @@ def run_script(tools: Tools, exe: Path, script: Script, compiler: str, tag: str 
     copy_data(work)
     write_cfg(work, script.cfg)
     if script.altmap:
-        swap_altmap(work, "scenarios")
+        use_alternate_map(work / "scenarios")
     for name in script.data:
         copy_test_folder(work, TEST_DATA / name)
     remove_files(work, script.without)

@@ -5,7 +5,7 @@
 
 play.py calls write_save for each `<name>.save` file of a script's `#! data` folder and puts
 `<name>.sav` in the run's folder. The save starts as the scenario's opening position (CWS.INI,
-CITIES.GRD and CWSLEAD.DAT of the run's scenarios folder), and each line of the description
+CITIES.GRD and CWSLEAD.DAT of the run's scenarios/standard folder), and each line of the description
 changes one thing. Blank lines and lines that start with "#" are skipped.
 
     date <month> <year>               the turn, as 11 1864
@@ -187,7 +187,7 @@ def main(argv: list[str]) -> int:
         print(__doc__)
         return 2
     try:
-        write_save(Path(argv[0]), Path(__file__).resolve().parent.parent / "scenarios", Path(argv[1]))
+        write_save(Path(argv[0]), Path(__file__).resolve().parent.parent / "scenarios" / "standard", Path(argv[1]))
     except SaveError as e:
         print(f"make_save.py: {e}", file=sys.stderr)
         return 2

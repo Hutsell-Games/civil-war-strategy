@@ -147,17 +147,18 @@ class ScriptTest(unittest.TestCase):
             self.assertEqual((Path(d) / "CWS.CFG").read_text(),
                              "2,3,0,3,1,1,7,600,300,1,1,36,134,3992,5041,0,3\n")
 
-    def test_altmap_switches_the_three_files(self):
+    def test_altmap_copies_the_alternate_folder_over_the_first(self):
         with tempfile.TemporaryDirectory() as d:
+            standard, alternate = Path(d) / "standard", Path(d) / "alternate"
+            standard.mkdir()
+            alternate.mkdir()
             for name in ("CITIES.GRD", "CWS.INI", "CWSLEAD.DAT"):
-                (Path(d) / name).write_text("own " + name)
-            for name in ("altmap.grd", "ALTMAP.INI", "ALTLEAD.DAT"):
-                (Path(d) / name).write_text("alt " + name)
-            play.swap_altmap(Path(d))
-            self.assertEqual((Path(d) / "CITIES.GRD").read_text(), "alt altmap.grd")
-            self.assertEqual((Path(d) / "altmap.grd").read_text(), "own CITIES.GRD")
-            self.assertEqual((Path(d) / "CWS.INI").read_text(), "alt ALTMAP.INI")
-            self.assertEqual((Path(d) / "CWSLEAD.DAT").read_text(), "alt ALTLEAD.DAT")
+                (standard / name).write_text("standard " + name)
+                (alternate / name).write_text("alternate " + name)
+            play.use_alternate_map(Path(d))
+            for name in ("CITIES.GRD", "CWS.INI", "CWSLEAD.DAT"):
+                self.assertEqual((standard / name).read_text(), "alternate " + name)
+                self.assertEqual((alternate / name).read_text(), "alternate " + name)
 
 
 class CopyDataTest(unittest.TestCase):
@@ -325,7 +326,7 @@ class TestDataTest(unittest.TestCase):
 
 
 class MakeSaveTest(unittest.TestCase):
-    SCENARIOS = play.GAME / "scenarios"
+    SCENARIOS = play.GAME / "scenarios" / play.FIRST_SCENARIO
 
     def game(self, description=""):
         import make_save

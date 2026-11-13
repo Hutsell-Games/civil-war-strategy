@@ -1865,7 +1865,7 @@ SUB TestSaveGameAndLoadItAgain
     train_army(SIDE_REBEL) = 22: train_city(SIDE_REBEL) = 25
     opt_difficulty = 4: opt_history = 1
     CALL save_game(3)
-    AssertEqualStr "CWS3.SAV", DIR$("cws3.sav"), "the slot's file"
+    AssertEqualInt -1, _FILEEXISTS("cws3.sav"), "the slot's file"
 
     turn_month = 0: turn_year = 0: union_income_bonus = 0: current_side = SIDE_UNION
     army_name$(22) = "": army_size(22) = 0: army_leader_rating(22) = 0: army_city(22) = 0
@@ -1915,16 +1915,17 @@ SUB TestSavedGamesCheck
     AssertEqualInt 0, saves_exist, "still 0 after a save (as in the original)"
 END SUB
 
-' ------------------------------------------------------- QB64.BM, SCRIPT.BM
-
-SUB TestDirFindsAFileByPattern
-    d$ = TestTempDir$ + "/"
-    AssertEqualStr "", DIR$(d$ + "*.sav"), "no saved game"
-    f = FREEFILE: OPEN d$ + "cws3.sav" FOR OUTPUT AS #f: PRINT #f, "x": CLOSE #f
-    AssertEqualStr "CWS3.SAV", DIR$(d$ + "*.sav"), "found, in upper case"
-    AssertEqualStr "CWS3.SAV", DIR$(d$ + "cws3.sav"), "found by its name"
-    AssertEqualStr "", DIR$(d$ + "cws4.sav"), "another name"
+' any_saved_game looks at the nine slots only: another .sav file is not a saved game.
+SUB TestAnySavedGameLooksAtTheSlots
+    CHDIR TestTempDir$
+    AssertEqualInt 0, any_saved_game, "no saved game"
+    f = FREEFILE: OPEN "other.sav" FOR OUTPUT AS #f: PRINT #f, "x": CLOSE #f
+    AssertEqualInt 0, any_saved_game, "a .sav file that is not a slot"
+    f = FREEFILE: OPEN "cws9.sav" FOR OUTPUT AS #f: PRINT #f, "x": CLOSE #f
+    AssertEqualInt -1, any_saved_game, "the last slot"
 END SUB
+
+' ------------------------------------------------------- SCRIPT.BM
 
 SUB TestScriptdateIsFixedUnderAScript
     AssertEqualStr DATE$, script_date$, "not scripted: today"
@@ -1981,5 +1982,4 @@ END SUB
 '$INCLUDE: '../game/victory_screens.bm'
 '$INCLUDE: '../game/tunes.bm'
 '$INCLUDE: '../port/files.bm'
-'$INCLUDE: '../port/qb64.bm'
 '$INCLUDE: '../port/script.bm'

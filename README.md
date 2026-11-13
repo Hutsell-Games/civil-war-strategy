@@ -21,8 +21,9 @@ yet, so the workflow has not run.
 
 Run the program from this folder. It reads its pictures from `graphics` and its map, setup, leaders
 and special events from `scenarios`. Its settings (`CWS.CFG`), its Hall of Fame (`HISCORE.CWS`),
-saved games and history files stay beside the program. To play on the alternate map, run
-`ALTMAP.BAT` in `scenarios`; run it again to switch back.
+saved games and history files stay beside the program. Each map is a folder of
+`scenarios`: `standard` and `alternate`. The game starts on the first folder named in
+`scenarios\SCENARIOS.LST`.
 
 Four things of the DOS game are pictures and text in `docs` now, because the DOS programs that showed them
 have no source: the title screen, the burning capital, the picture of Lincoln, and the help screens of F1
