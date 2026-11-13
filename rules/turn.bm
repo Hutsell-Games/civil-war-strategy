@@ -87,10 +87,9 @@ IF army_experience(army) < MAX_EXPERIENCE THEN army_experience(army) = army_expe
 END SUB
 
 ' The attacker withdrew to the city it came from (in its order) and is done for the month.
+' (army_order(army)) is a copy: turn_retreat_to changes the order after it sets the city.
 SUB turn_withdraw (army)
-army_city(army) = army_order(army)
-city_army(army_city(army)) = army
-army_order(army) = ORDER_DONE
+CALL turn_retreat_to(army, (army_order(army)))
 END SUB
 
 ' After the attacker withdrew, the defender loses its own order for the month (halted is 1)

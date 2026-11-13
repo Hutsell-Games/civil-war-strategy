@@ -48,6 +48,11 @@ END SUB
 ' the computer.
 SUB option_swap_side
 	current_side = other_side(current_side)
+	CALL option_events_favor_computer
+END SUB
+
+' The special events favor the side left to the computer: 7 for the Rebels, 3 for the Union.
+SUB option_events_favor_computer
 	IF current_side = SIDE_UNION THEN opt_event_balance = 7
 	IF current_side = SIDE_REBEL THEN opt_event_balance = 3
 END SUB
@@ -158,8 +163,7 @@ DIM i AS INTEGER: DIM ships$
 	END IF
 	IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN opt_players = PLAYERS_ONE
 	IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
-	IF current_side = SIDE_UNION THEN opt_event_balance = 7
-	IF current_side = SIDE_REBEL THEN opt_event_balance = 3
+	CALL option_events_favor_computer
 	IF opt_pause! < 1 THEN opt_pause! = 2
 	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
 	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty

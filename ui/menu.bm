@@ -27,12 +27,9 @@ END SUB
 '            entering with choose+21 causes choose to be default entry
 '       wtype = window type (0 = no line; 1=single line;
 '                            2=double line
-'               if >10 then 10's digit=box color  1's digit= window type
 
 SUB draw_menu (title_col, menu_width)
-DIM box_color AS INTEGER: DIM i AS INTEGER
-box_color = menu_color: IF menu_box_type > 10 THEN box_color = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * box_color
-COLOR box_color
+DIM i AS INTEGER
 VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
 CLS 1
 VIEW
@@ -51,7 +48,7 @@ END SUB
 
 SUB menu_select (menu_item_show_beside%)
 DIM previous_row AS INTEGER: DIM done AS INTEGER: DIM pressed$: DIM k AS INTEGER: DIM menu_initial_letter$
-DIM menu_width AS INTEGER: DIM row AS INTEGER: DIM box_color AS INTEGER: DIM title_col AS INTEGER: DIM row_shown AS INTEGER
+DIM menu_width AS INTEGER: DIM row AS INTEGER: DIM title_col AS INTEGER: DIM row_shown AS INTEGER
 	IF menu_color = 0 THEN menu_color = COLOR_GRAY
 	LOCATE 1, 1, 0
 	IF menu_text$(0) = "" THEN menu_text$(0) = "M E N U"
@@ -69,20 +66,6 @@ DIM menu_width AS INTEGER: DIM row AS INTEGER: DIM box_color AS INTEGER: DIM tit
 	IF menu_row = 0 THEN menu_row = INT(11.5 - .5 * menu_item_count)
 	IF menu_row + menu_item_count > 26 THEN menu_row = 26 - menu_item_count
 
-	box_color = menu_color: IF menu_box_type > 10 THEN box_color = INT(menu_box_type / 10): menu_box_type = menu_box_type - 10 * box_color
-
-	COLOR box_color
-
-	VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
-	CLS 1
-	VIEW
-	LINE (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8), menu_color, B
-	LINE (8 * menu_col - 2, 16 * (menu_row + 1) + 3)-(8 * (menu_col + menu_width + 1) + 3, 16 * (menu_row + 1) + 6), menu_color, B
-	IF ABS(menu_box_type) = BOX_DOUBLE THEN
-		LINE (8 * menu_col - 2, 16 * menu_row - 8)-(8 * (menu_col + menu_width + 1) + 3, 16 * (menu_row + menu_item_count + 2) + 4), menu_color, B
-	END IF
-
-	COLOR menu_color
 	title_col = INT(.5 * (menu_width - LEN(menu_text$(0))) + .5) + 1
 
 	CALL draw_menu(title_col, menu_width)

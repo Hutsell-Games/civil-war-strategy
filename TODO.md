@@ -63,6 +63,10 @@ game plays changes the recorded screens.
   (`rules\navy.bm`) adds them to the loser, as both of the original's two blocks did
   (`TestNavyFleetDefeated`). A fleet sunk by a shore battery gives 5 to the other side
   (`navy_fleet_lost`), so the 10 were most likely meant for the winner.
+- **The Rebels' bonus for holding more than 34 cities is built on the Union's points.**
+  `turn_update_victory_points` (`rules\turn.bm`) sets the Rebels' points to the Union's points plus 100,
+  where the Union's half adds 100 to its own. The original has it too (`CWSTRAT.BAS` line 2625 on
+  `canonical-source`). The two halves can become one SUB for each side once this is decided.
 - **F7 in the SOUNDS menu most likely stops the game with an error.** Read from the code, not tried.
   The menu takes F7 as "end the turn" and returns 99 (`MENU_END_TURN_KEY`). `menu_option_sound`
   (`ui\options.bm`) then prints `menu_text$(99)`, and the array has 21 entries. No other menu of the

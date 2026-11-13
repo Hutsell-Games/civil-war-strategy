@@ -8,7 +8,7 @@ DIM a$: DIM was_enemy_capital AS INTEGER: DIM razed AS INTEGER
 	CALL city_take(city, side, weaken_fort)
 	CALL clear_bottom_line
 	a$ = army_name$(moving_army) + " has captured " + city_name$(city)
-	COLOR COLOR_LIGHT_CYAN: PRINT army_name$(moving_army) + " has captured " + city_name$(city);
+	COLOR COLOR_LIGHT_CYAN: PRINT a$;
 	IF army_side(moving_army) = SIDE_UNION AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
 	IF army_side(moving_army) = SIDE_REBEL AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	IF was_enemy_capital = 0 THEN CALL animate_city(city)

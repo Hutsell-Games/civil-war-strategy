@@ -51,13 +51,19 @@ DIM side AS INTEGER: DIM i AS INTEGER: DIM army AS INTEGER: DIM cost AS INTEGER
 		IF side_cash(current_side) < cost THEN CALL clear_bottom_line: PRINT "Fortifications for "; city_name$(city); " cost "; cost; " and you only have "; side_cash(current_side); : CALL wait_seconds(4): EXIT SUB
 		COLOR COLOR_CYAN
 		CALL city_build_fort(current_side, city)
-		CALL clear_bottom_line: PRINT city_name$(city); " fortifications increased to "; city_fort(city);
-		CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
-		CALL draw_cities
+		CALL draw_fort_built(city)
 		IF army_order(army) > 0 THEN CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_LINE)
 		CALL army_set_order(army, ORDER_BUSY)
 		CALL draw_army_flag(army)
 		CALL draw_stack_markers(side)
+END SUB
+
+' A fort built, by the player's Fortify or by the computer (ai_fortify): the message, a flash
+' at the city and the cities drawn again.
+SUB draw_fort_built (city)
+	CALL clear_bottom_line: PRINT city_name$(city); " fortifications increased to "; city_fort(city);
+	CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
+	CALL draw_cities
 END SUB
 
 SUB menu_army_select (army, city)
@@ -140,14 +146,20 @@ DIM city AS INTEGER: DIM raised AS INTEGER
 	IF menu_item_count = 0 THEN EXIT SUB
 	DO
 	IF side_cash(side) < COST_RECRUIT THEN EXIT SUB
-	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
-	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
+	CALL draw_recruit_funds(side)
 	IF menu_choice > 0 THEN menu_choice = MENU_START + menu_choice
 	CALL menu_select(MENU_CITY_ARMY): CALL clear_right_panel
 	IF menu_choice < 1 THEN EXIT SUB
 	city = menu_value(menu_choice)
 	CALL army_recruit(side, city, raised)
 	LOOP
+END SUB
+
+' Before each pick of a city to recruit in, by the player or the computer (draw_ai_funds):
+' the side's funds, when the player may see them, and the menu's place.
+SUB draw_recruit_funds (side)
+	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
+	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
 END SUB
 
 ' The cities where a side may recruit (rules/army.bm), in the menu's color.

@@ -416,6 +416,25 @@ AssertEqualInt 200, side_cash(1), "for 100"
 AssertEqualInt 0, isolated, "not isolated without the Realism setting"
 END SUB
 
+SUB TestArmyAddRecruitsWithRealismCutOff
+opt_realism = REALISM_ON: opt_difficulty = 3: current_side = 1
+city_value(7) = 20: army_city(4) = 7: army_size(4) = 100: side_cash(1) = 300
+CALL army_add_recruits(1, 4, isolated)
+AssertEqualInt 120, army_size(4), "(2 * 20 + 20) \ 3 more: city 7 has no road to a Union city"
+AssertEqualInt 1, isolated, "isolated"
+END SUB
+
+' recruit_troops: the men a city gives under the Realism setting.
+SUB TestRecruitTroopsByCityValue
+city_value(7) = 20: city_value(8) = 20: city_road(7, 1) = 8: city_owner(8) = 1
+AssertEqualInt 93, recruit_troops(1, 7, 0), "a new army: 3 * 20 + 33"
+AssertEqualInt 60, recruit_troops(1, 7, 1), "added men: 2 * 20 + 20"
+AssertEqualInt 31, recruit_troops(2, 7, 0), "a third, cut off from the Rebels' cities"
+AssertEqualInt 20, recruit_troops(2, 7, 1), "a third of 60"
+AssertEqualInt 70, recruits_cut_off(1, 7, 70), "not cut off: all of it"
+AssertEqualInt 23, recruits_cut_off(2, 7, 70), "cut off: 70 \ 3"
+END SUB
+
 ' ---------------------------------------------------------------------- mxw
 ' The width of a menu: its longest entry, or its title and one more.
 

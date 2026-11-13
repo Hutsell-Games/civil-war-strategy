@@ -44,16 +44,13 @@ SELECT CASE mark
 	CALL wait_seconds(opt_pause! - .5)
 	CALL screen_snapshot(x, y, SNAP_RESTORE)
 	CASE MARK_BOX          ' draw white box
-	x = city_x(from_city) - 12: y = city_y(from_city) - 11
 	GET (x - 8, y - 8)-(x + 8, y + 8), saved_under_marker
 	LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
 	LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
 	     CASE MARK_RESTORE     ' replace old image
-	x = city_x(from_city) - 12: y = city_y(from_city) - 11
 	IF x > 0 THEN PUT (x - 8, y - 8), saved_under_marker, PSET
        
 	CASE MARK_POINTER          ' draw arrow pointer
-	x = city_x(from_city) - 12: y = city_y(from_city) - 11
 	GET (x - 8, y - 8)-(x + 10, y + 7), saved_under_marker
 	x = x + 7: y = y + 5
 	LINE (x + 2, y)-(x + 2, y - 8), 12

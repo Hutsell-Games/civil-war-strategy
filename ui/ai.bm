@@ -1,12 +1,5 @@
 ' The computer's messages, in the order its decisions in ai/ai.bm call them.
 
-' A fort the computer built.
-SUB draw_ai_fort (city)
-	CALL clear_bottom_line: PRINT city_name$(city); " fortifications increased to "; city_fort(city);
-	CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
-	CALL draw_cities
-END SUB
-
 ' An army's move order: its line and a pointer on the map, and a message when the pause is long.
 SUB draw_ai_plan (army, text_color)
 	IF opt_pause! > 1 THEN
@@ -31,8 +24,7 @@ END SUB
 ' Before the computer picks a city to recruit in: its funds, when the player may see them, and
 ' the menu's place. The cursor is left where the pick's loop over the list used to leave it.
 SUB draw_ai_funds (side)
-	IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN CALL clear_bottom_line: PRINT side_name$(side); " funds available "; side_cash(side);
-	menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_CYAN
+	CALL draw_recruit_funds(side)
 	IF menu_item_count > 0 THEN LOCATE 14 + menu_item_count, 69
 END SUB
 

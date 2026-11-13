@@ -57,14 +57,13 @@ END SUB
 ' A new army in a city: its supplies, experience, leader and size, and the price of 100 taken
 ' from the side. army_new (commands/army.bm) shows it.
 SUB army_raise (side, army_slot, city)
-DIM troops AS INTEGER: DIM friendly_neighbors AS INTEGER
+DIM troops AS INTEGER
 	army_supply(army_slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(army_slot) = army_supply(army_slot) + 2
 	army_experience(army_slot) = 1: IF side = SIDE_REBEL THEN army_experience(army_slot) = 2
 	army_leader_rating(army_slot) = leader_rating(army_slot)
 	army_name$(army_slot) = leader_name$(army_slot): leader_name$(army_slot) = ""
 
-	troops = 70: IF opt_realism >= REALISM_ON THEN troops = 3 * city_value(city) + 33
-	friendly_neighbors = city_is_connected(side, city): IF friendly_neighbors < 1 THEN troops = troops \ 3
+	troops = 70: IF opt_realism >= REALISM_ON THEN troops = recruit_troops(side, city, 0) ELSE troops = recruits_cut_off(side, city, troops)
 	city_army(city) = army_slot: army_size(army_slot) = troops
 	side_cash(side) = side_cash(side) - COST_RECRUIT
 	army_city(army_slot) = city
@@ -177,7 +176,6 @@ SUB army_detach (army, city, army_slot)
 	army_city(army_slot) = city: army_experience(army_slot) = army_experience(army): army_order(army_slot) = ORDER_NONE
 	army_leader_rating(army_slot) = leader_rating(army_slot)
 	army_name$(army_slot) = leader_name$(army_slot): leader_name$(army_slot) = ""
-	army_experience(army_slot) = army_experience(army)
 END SUB
 
 ' A month of drill: one more level of experience, and the army is busy for the month.
@@ -238,17 +236,30 @@ END SUB
 ' city's value, a third of it when the city is cut off (isolated is then 1). The side pays
 ' 100. The Balance setting's extra men go to army 0, as before (TODO.md).
 SUB army_add_recruits (side, army, isolated)
-DIM troops AS INTEGER: DIM friendly_neighbors AS INTEGER
+DIM troops AS INTEGER
 	troops = 45: isolated = 0
 	IF opt_realism >= REALISM_ON THEN
-		troops = 2 * city_value(army_city(army)) + 20
-		friendly_neighbors = city_is_connected(side, army_city(army))
-		IF friendly_neighbors < 1 THEN troops = troops \ 3: isolated = 1
+		troops = recruit_troops(side, army_city(army), 1)
+		IF city_is_connected(side, army_city(army)) < 1 THEN isolated = 1
 	END IF
 	army_size(army) = army_size(army) + troops
 	CALL army_recruit_bonus(0)
 	side_cash(side) = side_cash(side) - COST_RECRUIT
 END SUB
+
+' The men a city gives under the Realism setting, in hundreds: by the city's value, for a new
+' army, or for the army already there when joins_army is 1. A third of that when the city is
+' cut off. army_raise, army_add_recruits and the computer's pick (ai_recruit_pick) use it.
+FUNCTION recruit_troops (side, city, joins_army)
+DIM troops AS INTEGER
+	troops = 3 * city_value(city) + 33: IF joins_army = 1 THEN troops = 2 * city_value(city) + 20
+	recruit_troops = recruits_cut_off(side, city, troops)
+END FUNCTION
+
+' A third of troops when the side's city is cut off: no city next to it is the side's.
+FUNCTION recruits_cut_off (side, city, troops)
+	recruits_cut_off = troops: IF city_is_connected(side, city) < 1 THEN recruits_cut_off = troops \ 3
+END FUNCTION
 
 ' The Balance setting's extra men for a recruited army. The caller passes slot 0 when men
 ' join an army, and army_new sets a new army's size after it, as in the original.

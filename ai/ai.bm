@@ -26,7 +26,7 @@ DO
 	city_fort(city) = city_fort(city) + 1
 	army = city_army(city): army_order(army) = ORDER_BUSY
 	side_cash(side) = side_cash(side) - cost
-	CALL draw_ai_fort(city)
+	CALL draw_fort_built(city)
 	IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND RND > .5 AND side_cash < 222 THEN EXIT SUB
 	IF 3 * RND <= 1 + ai_strength_ratio! OR side_cash(side) < cost THEN EXIT SUB
 	CALL ai_fortify_pick(side, city)
@@ -286,7 +286,7 @@ END SUB
 
 ' The computer's pick from the recruiting list, left in menu_choice.
 SUB ai_recruit_pick (side)
-DIM army AS INTEGER: DIM best_score AS INTEGER: DIM i AS INTEGER: DIM city AS INTEGER: DIM score AS INTEGER: DIM friendly_neighbors AS INTEGER
+DIM army AS INTEGER: DIM best_score AS INTEGER: DIM i AS INTEGER: DIM city AS INTEGER: DIM score AS INTEGER
 		menu_choice = 0: army = 0
 		FOR i = 1 TO menu_item_count
 		city = menu_value(i)
@@ -299,15 +299,7 @@ DIM army AS INTEGER: DIM best_score AS INTEGER: DIM i AS INTEGER: DIM city AS IN
 		best_score = 0
 		FOR i = 1 TO menu_item_count
 		city = menu_value(i)
-		IF city_army(city) = 0 THEN
-			score = 3 * city_value(city) + 33
-			friendly_neighbors = city_is_connected(side, city)
-			IF friendly_neighbors < 1 THEN score = score \ 3
-		ELSE
-			score = 2 * city_value(city) + 20
-			friendly_neighbors = city_is_connected(side, city)
-			IF friendly_neighbors < 1 THEN score = score \ 3
-		END IF
+		IF city_army(city) = 0 THEN score = recruit_troops(side, city, 0) ELSE score = recruit_troops(side, city, 1)
 		IF score > best_score AND RND > .5 THEN best_score = score: menu_choice = i
 		NEXT i
 	END IF
