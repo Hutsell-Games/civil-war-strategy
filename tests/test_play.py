@@ -336,7 +336,9 @@ class MakeSaveTest(unittest.TestCase):
         self.assertEqual(game["armies"][1]["city"], 39)
         self.assertEqual(sum(1 for a in game["armies"].values() if a), 9)
         lines = make_save.save_text(game).splitlines()
-        self.assertEqual(len(lines), 85)
+        self.assertEqual(len(lines), 86)
+        # The scenario's folder first, as save_game writes it; then the game, from line 0 here.
+        self.assertEqual(lines.pop(0), '"standard"')
         self.assertEqual(lines[0], "3,1861,252,1")
         self.assertEqual(lines[1], '"McDowell",400,4,39,1,9,0')
         # City 39 holds army 1; city 1 is the Rebels' and holds no army.
@@ -349,7 +351,7 @@ class MakeSaveTest(unittest.TestCase):
         game = self.game("# late in the war\ndate 11 1864\nside 2\ncash 5 9000\nowner 1 1-40\nowner 2 1-30\nfort 2 5 6\n"
                          "fleet 1 - 0\nfleet 2 wwi 99\narmy 22 city=4 size=50 name=Old_Jack\nnoarmy 2-5\n"
                          "capital 39 0\ntrain 1 1 2\n")
-        lines = make_save.save_text(game).splitlines()
+        lines = make_save.save_text(game).splitlines()[1:]
         self.assertEqual(lines[0], "11,1864,252,2")
         self.assertEqual(lines[2], '"",0,0,0,0,0,0')
         self.assertEqual(lines[22].split(",")[:2], ['"Old Jack"', "50"])

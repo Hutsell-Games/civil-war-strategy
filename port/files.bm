@@ -9,6 +9,18 @@ SUB load_scenario_list
     CLOSE #1
 END SUB
 
+' The row of SCENARIOS.LST whose folder is folder$, whatever its case; -1 when none is. The
+' scenario the game is on (scenario_now) is found first, so that a game with no list (the unit
+' tests: row 0, folder "") finds its own.
+FUNCTION scenario_find (folder$)
+    DIM k AS INTEGER
+    scenario_find = -1
+    IF LCASE$(folder$) = LCASE$(scenario_folder$(scenario_now)) THEN scenario_find = scenario_now: EXIT FUNCTION
+    FOR k = 1 TO scenario_count
+        IF LCASE$(folder$) = LCASE$(scenario_folder$(k)) THEN scenario_find = k: EXIT FUNCTION
+    NEXT k
+END FUNCTION
+
 ' The path of one of the files of the scenario the game is on (scenario_now).
 FUNCTION scenario_file$ (name$)
     scenario_file$ = SCNDIR + scenario_folder$(scenario_now) + "/" + name$
@@ -393,14 +405,38 @@ SUB load_cities
     CLOSE #1
 END SUB
 
-' Reads the saved game cws<slot>.sav: the date, the armies, the cities, the sides, and the side
-' that plays. A leader who commands an army leaves the free leaders. Then it reads the
-' settings of cws.cfg. The menu of saved games is menu_load_game (ui/files.bm).
-SUB load_game (slot)
+' Reads the saved game cws<slot>.sav: the scenario, the date, the armies, the cities, the sides,
+' and the side that plays. A save of another scenario than the one loaded reads that scenario's
+' leaders and map first. A leader who commands an army leaves the free leaders. Then it reads
+' the settings of cws.cfg. problem$ is "" when the game was loaded; otherwise it says why not,
+' and nothing was changed. The menu of saved games is menu_load_game (ui/files.bm).
+SUB load_game (slot, problem$)
     DIM last_army AS INTEGER
     DIM k AS INTEGER: DIM side AS INTEGER: DIM first_army AS INTEGER: DIM config_side AS INTEGER
-    DIM i AS INTEGER: DIM saved_side AS INTEGER: DIM unused AS INTEGER
-    OPEN "I", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
+    DIM i AS INTEGER: DIM saved_side AS INTEGER: DIM unused AS INTEGER: DIM row AS INTEGER
+    DIM file$: DIM text$: DIM folder$: DIM named AS INTEGER
+    problem$ = ""
+    file$ = "cws" + LTRIM$(STR$(slot)) + ".sav"
+    ' The scenario first. The file is closed again, because load_scenario and load_cities read
+    ' their files as #1 too.
+    OPEN "I", 1, file$
+    LINE INPUT #1, text$
+    CLOSE #1
+    named = (LEFT$(text$, 1) = CHR$(34))
+    IF named THEN
+        folder$ = MID$(text$, 2, LEN(text$) - 2)
+    ELSE
+        ' A game saved before saves named their scenario: the first scenario's.
+        folder$ = scenario_folder$(1)
+    END IF
+    row = scenario_find(folder$)
+    IF row < 0 THEN
+        problem$ = file$ + " is a game of the scenario " + CHR$(34) + folder$ + CHR$(34) + ", which is not in SCENARIOS.LST"
+        EXIT SUB
+    END IF
+    IF row <> scenario_now THEN scenario_now = row: CALL load_scenario: CALL load_cities
+    OPEN "I", 1, file$
+    IF named THEN LINE INPUT #1, text$
     INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
     FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
         IF army_city(i) > 0 THEN
@@ -430,11 +466,12 @@ SUB load_game (slot)
     current_side = saved_side
 END SUB
 
-' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The menu of the slots is
-' menu_save_game (ui/files.bm).
+' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The file's first line is the
+' scenario's folder. The menu of the slots is menu_save_game (ui/files.bm).
 SUB save_game (slot)
     DIM i AS INTEGER: DIM config_side AS INTEGER
     OPEN "O", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
+    WRITE #1, scenario_folder$(scenario_now)
     WRITE #1, turn_month, turn_year, union_income_bonus, current_side
     FOR i = 1 TO MAX_ARMIES
         WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)

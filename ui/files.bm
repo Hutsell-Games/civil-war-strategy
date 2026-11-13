@@ -33,10 +33,11 @@ SUB menu_files (action)
 END SUB
 
 ' Load, and the title menu's Resume Saved Game: the player picks a saved game, and the map is
-' drawn with it. With no saved game it does nothing. The month's Troops, Moves and Ships open
-' again only when the game picked is the menu's first (TODO.md).
+' drawn with it. With no saved game, or one whose scenario is not in the list, it loads
+' nothing. The month's Troops, Moves and Ships open again only when the game picked is the
+' menu's first (TODO.md).
 SUB menu_load_game
-    DIM k AS INTEGER: DIM file$: DIM row AS INTEGER
+    DIM k AS INTEGER: DIM file$: DIM row AS INTEGER: DIM problem$
     IF NOT any_saved_game THEN menu_choice = MENU_ESCAPED: EXIT SUB
     menu_text$(0) = "Load"
     menu_item_count = 0
@@ -53,7 +54,11 @@ SUB menu_load_game
     IF menu_choice < 1 THEN EXIT SUB
     row = menu_choice
     COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Loading";
-    CALL load_game(menu_value(menu_choice))
+    CALL load_game(menu_value(menu_choice), problem$)
+    IF problem$ <> "" THEN
+        CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT problem$;: CALL wait_seconds(PAUSE_LONG)
+        CALL clear_bottom_line: menu_choice = MENU_ESCAPED: EXIT SUB
+    END IF
     PRINT STRING$(MAX_CITIES, ".");
     SCREEN 12: CLS
     CALL draw_map: CALL clear_bottom_line

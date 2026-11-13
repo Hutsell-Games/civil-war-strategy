@@ -187,6 +187,7 @@ on a desktop nobody sees.
 | `commands` | Each entry of COMMANDS, each report of Inform, ships that land an army, a railroad move; then to the game's end |
 | `options` | Every entry of the Utility menu, then a game with what they set, with sound and history on |
 | `files` | The Files menu: two games saved, Resume Saved Game at the title menu, Load, New Game, and the history file with Recap. Checks `cws1.sav`, `cws2.sav`, `cws.his`, `oldhist.ory` and `CWS.CFG` |
+| `scenario-save` | A game on the Alternate Map saved; a new game on the Standard Map; Load brings the Alternate Map back. Checks `cws1.sav`, whose first line names the scenario |
 | `navy` | The Union navy against New Orleans: three attacks, then an invasion |
 | `rebel` | The Rebels attack Washington three times; No-Override and Press Onward at the game's end |
 | `two-player` | Two players: the blank screen between their turns, Detach (the Rebels' own command), and 47 main menus to the time limit |

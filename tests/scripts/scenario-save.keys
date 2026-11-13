@@ -1,0 +1,46 @@
+#! seed 1861
+#! files cws1.sav
+# Civil War Strategy: a saved game knows its map. A new game on the Alternate Map is saved to cws1.sav.
+# Files, New Game, and Start NEW Game on the Standard Map. Then Files, Load: cws1.sav brings the Alternate
+# Map back with it. Files, Quit, Yes. cws1.sav is checked after the run: its first line names the scenario.
+
+# The title menu: Start NEW Game; the scenario menu: the Alternate Map.
+play until 2:V
+digest
+text s
+play until 2:S
+text a
+# March 1861, on the Alternate Map. Files: Save, to cws1.sav.
+play until 2:M
+digest
+text f
+prompt
+text s
+prompt
+key enter
+# Files: New Game, to the title menu: Start NEW Game; the scenario menu: the Standard Map.
+prompt
+text f
+prompt
+text n
+play until 2:V
+text s
+play until 2:S
+text s
+# March 1861, on the Standard Map. Files: Load, cws1.sav.
+play until 2:M
+digest
+text f
+prompt
+text l
+prompt
+key enter
+# The saved game, on the Alternate Map again. Files: Quit, Yes; END's key.
+play until 2:M
+digest
+text f
+prompt
+text q
+prompt
+text y
+repeat space

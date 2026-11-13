@@ -25,8 +25,8 @@ changes one thing. Blank lines and lines that start with "#" are skipped.
                                       blanks is written with "_" for each blank.
     noarmy <slots>                    empty slots: numbers and ranges
 
-The file has the 85 lines that save_game writes (port/files.bm): the date, 40 armies, 40 cities,
-and two lines for each side. A side's count of cities and its income are worked out from the
+The file has the 86 lines that save_game writes (port/files.bm): the scenario's folder, the date,
+40 armies, 40 cities, and two lines for each side. A side's count of cities and its income are worked out from the
 owners, as the game does at each new month.
 """
 
@@ -70,7 +70,8 @@ def opening(scenarios: Path) -> dict:
     ini = iter(values(find(scenarios, "cws.ini")))
     for _ in range(3 + 12):  # the side names and the month names
         next(ini)
-    game: dict = {"month": int(next(ini)), "year": int(next(ini)), "side": 1, "bonus": 252}
+    game: dict = {"scenario": scenarios.name, "month": int(next(ini)), "year": int(next(ini)), "side": 1,
+                  "bonus": 252}
     for _ in range(6):  # the victory rules
         next(ini)
     armies = {n: None for n in range(1, MAX_ARMIES + 1)}
@@ -156,7 +157,7 @@ def apply(game: dict, text: str, name: str) -> None:
 
 def save_text(game: dict) -> str:
     """The saved game as save_game's WRITE # statements write it."""
-    lines = [f"{game['month']},{game['year']},{game['bonus']},{game['side']}"]
+    lines = [f'"{game["scenario"]}"', f"{game['month']},{game['year']},{game['bonus']},{game['side']}"]
     for n in range(1, MAX_ARMIES + 1):
         a = game["armies"][n]
         if a is None or a["city"] == 0:

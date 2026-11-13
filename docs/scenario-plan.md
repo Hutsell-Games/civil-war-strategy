@@ -1,6 +1,7 @@
 # Plan: scenarios in folders, picked in the game
 
-Drafted 2026-11-13. Step 1 is committed (`2ba37f5`). Step 2 is in the working tree.
+Drafted 2026-11-13. Steps 1 and 2 are committed (`2ba37f5`, `f97722d`). Step 3 is in the working
+tree.
 
 ## Goal
 
@@ -104,7 +105,9 @@ compilers, as in the modernize plan.
 - `save_game` writes the scenario's folder name as the first field. `load_game` reads it. When it names
   another scenario than the one loaded, the leaders and the cities of that scenario are read first.
 - To check: `load_cities` adds to each side's city count, points and cash. `load_game` must still end
-  with the saved values.
+  with the saved values. Found: it does, because the save holds all three and is read after the
+  reload. The save must be closed during the reload, because `load_scenario` and `load_cities` read
+  their files as #1 too. With the file left open, QB64Rust ended with exit code 1 and QB64pe went on.
 - A save that names a folder that is missing gives a message and goes back to the menu.
 - A save without the field follows P4.
 - `make_save.py` writes the field. The round-trip test in `tests\rules_test.bas` (near line 1855) gets

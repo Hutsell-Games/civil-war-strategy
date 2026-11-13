@@ -1875,7 +1875,8 @@ SUB TestSaveGameAndLoadItAgain
     fleet_ships$(SIDE_UNION) = "": fleet_city(SIDE_UNION) = 0: fleet_size(SIDE_UNION) = 0
     train_army(SIDE_REBEL) = 0: train_city(SIDE_REBEL) = 0
     opt_difficulty = 0: opt_history = 0
-    CALL load_game(3)
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
     AssertEqualInt 7, turn_month, "the month"
     AssertEqualInt 1863, turn_year, "the year"
     AssertEqualInt 252, union_income_bonus, "the Union's extra income"
@@ -1902,6 +1903,56 @@ SUB TestSaveGameAndLoadItAgain
     AssertEqualInt 25, train_city(SIDE_REBEL), "where it goes"
     AssertEqualInt 4, opt_difficulty, "a setting, from cws.cfg"
     AssertEqualInt 1, opt_history, "another"
+END SUB
+
+' A saved game's first line is its scenario's folder. Loaded on that scenario, it reads the
+' scenario's files no second time.
+SUB TestSaveGameNamesItsScenario
+    CHDIR TestTempDir$
+    scenario_count = 2: scenario_folder$(1) = "standard": scenario_folder$(2) = "alternate": scenario_now = 2
+    turn_month = 9
+    CALL save_game(3)
+    f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f: LINE INPUT #f, text$: CLOSE #f
+    AssertEqualStr CHR$(34) + "alternate" + CHR$(34), text$, "the first line"
+    turn_month = 0
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt 9, turn_month, "the month, after the scenario's line"
+    AssertEqualInt 2, scenario_now, "still the same scenario"
+END SUB
+
+' A game saved before saves named their scenario has no such line. It loads as the first
+' scenario of the list.
+SUB TestSaveGameWithoutAScenarioLoads
+    CHDIR TestTempDir$
+    scenario_count = 1: scenario_folder$(1) = "standard": scenario_now = 1
+    turn_month = 9: turn_year = 1864
+    CALL save_game(3)
+    ' The same file without its first line, as the game wrote it before.
+    f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f: LINE INPUT #f, text$
+    g = FREEFILE: OPEN "cws4.sav" FOR OUTPUT AS #g
+    DO WHILE NOT EOF(f): LINE INPUT #f, text$: PRINT #g, text$: LOOP
+    CLOSE #f, #g
+    turn_month = 0: turn_year = 0
+    CALL load_game(4, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt 9, turn_month, "the month"
+    AssertEqualInt 1864, turn_year, "the year"
+    AssertEqualInt 1, scenario_now, "the first scenario"
+END SUB
+
+' A saved game of a scenario that is not in the list is not loaded, and the game is unchanged.
+SUB TestSaveGameOfAnUnknownScenario
+    CHDIR TestTempDir$
+    scenario_count = 1: scenario_folder$(1) = "standard": scenario_now = 1
+    f = FREEFILE: OPEN "cws5.sav" FOR OUTPUT AS #f
+    PRINT #f, CHR$(34) + "nowhere" + CHR$(34): PRINT #f, "3,1861,252,1"
+    CLOSE #f
+    turn_month = 7
+    CALL load_game(5, problem$)
+    AssertEqualStr "cws5.sav is a game of the scenario " + CHR$(34) + "nowhere" + CHR$(34) + ", which is not in SCENARIOS.LST", problem$, "why"
+    AssertEqualInt 7, turn_month, "nothing read"
+    AssertEqualInt 1, scenario_now, "the scenario stays"
 END SUB
 
 ' saves_exist goes to 0 when no saved game is on the disk, and nothing here sets it back.
