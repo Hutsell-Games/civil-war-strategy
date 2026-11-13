@@ -89,7 +89,7 @@ IF winner = defender THEN menu_text$(2) = menu_text$(1): menu_text$(1) = message
 menu_text$(3) = "*" + army_name$(winner): menu_text$(4) = army_name$(loser)
 IF winner = defender THEN menu_text$(3) = army_name$(winner): menu_text$(4) = "*" + army_name$(loser)
 a$ = city_name$(army_city(defender)) + ": " + menu_text$(3) + menu_text$(1) + " defeats " + menu_text$(4) + menu_text$(2)
-CALL scribe_message(a$, SHOW_NOT)
+CALL scribe_message(a$, SHOW_HISTORY_ONLY)
 
 IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
 COLOR COLOR_YELLOW: CALL clear_bottom_line: PRINT "hit any key to continue"; : CALL wait_key("B")

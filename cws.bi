@@ -62,7 +62,7 @@ CONST NAVY_SAIL = 3
 CONST NAVY_RAID = 4
 CONST NAVY_INVADE = 5
 ' scribe_message's display: write to the history only, or also on the bottom line, or in a box.
-CONST SHOW_NOT = 0
+CONST SHOW_HISTORY_ONLY = 0
 CONST SHOW_LINE = 1
 CONST SHOW_BOX = 2
 ' draw_train's show, and screen_snapshot's put_back.
@@ -82,9 +82,9 @@ CONST SUPPLY_CUT_OFF = -1
 CONST SUPPLY_NO_CASH = 0
 CONST SUPPLY_BOUGHT = 1
 ' navy_blast's result: the city stands firm, is the enemy's capital and stays loyal, or turns neutral.
-CONST BLAST_FIRM = 0
-CONST BLAST_LOYAL = 1
-CONST BLAST_NEUTRAL = 2
+CONST BOMBARD_HOLDS = 0
+CONST BOMBARD_CAPITAL_HOLDS = 1
+CONST BOMBARD_TURNS_NEUTRAL = 2
 ' menu_files' action: what the main module does after the Files menu.
 CONST FILES_BACK = 0
 CONST FILES_NEW_GAME = 1

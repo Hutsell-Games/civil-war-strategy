@@ -144,8 +144,8 @@ END SELECT
 	END IF
 	COLOR COLOR_YELLOW: LOCATE 4, 40 - .5 * LEN(a$)
 	IF opt_history > 0 THEN
-		CALL scribe_message(t$, SHOW_NOT)
-		CALL scribe_message(a$, SHOW_NOT)
+		CALL scribe_message(t$, SHOW_HISTORY_ONLY)
+		CALL scribe_message(a$, SHOW_HISTORY_ONLY)
 	END IF
 	PRINT a$: CALL hall_of_fame
 END SUB

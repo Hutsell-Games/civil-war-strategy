@@ -5,8 +5,8 @@ They left the names inside each SUB: its parameters, its `DIM` locals and its `G
 still the original's: `chosit`, `star` and `fin`, `xbar`, `slush`, `killd`, labels such as `deadman` and `puter`.
 
 This document listed them, on branch `refactor_naming` at commit `d70ccbb`. Parts 1 and 2, the renames of the
-locals and the labels removed, are done; they are in `local-names-completed.md`. What is left: the five
-labels of part 2, the constants of part 3 and the possible bugs of part 4.
+locals and the labels removed, are done, and so is part 3, the constants; they are in
+`local-names-completed.md`. What is left: the possible bugs of part 4.
 
 ## Rules the proposals follow
 
@@ -43,10 +43,7 @@ The last five, in `menu_city_select` (`ui\orders.bm`), went the same day when it
 
 ## Part 3: constants that read unclearly
 
-| Constant | What it means | Proposed | Your name |
-|----------|---------------|----------|-----------|
-| `SHOW_NOT` | `scribe_message` writes to the history only. | `SHOW_HISTORY_ONLY` | |
-| `BLAST_FIRM`, `BLAST_LOYAL`, `BLAST_NEUTRAL` | The result of `navy_blast`, an attack on a city with no army and no fort: it stands firm, it is the capital and stays loyal, or it turns neutral. | `BOMBARD_HOLDS`, `BOMBARD_CAPITAL_HOLDS`, `BOMBARD_TURNS_NEUTRAL` | |
+Done on 2026-11-12 with the proposed names. The table is in `local-names-completed.md`.
 
 ## Part 4: found while reading
 

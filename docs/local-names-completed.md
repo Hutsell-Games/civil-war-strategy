@@ -289,6 +289,15 @@ There were about 90 labels. Most did nothing but skip to the next pass of a loop
 `EXIT FOR`, `EXIT SUB`, an `IF` block or a `DO` loop, and their labels are gone
 (`modernize-completed.md`, "After the plan: the labels"). No `GOSUB` is left.
 
+## Part 3: constants that read unclearly
+
+Renamed on 2026-11-12 with the proposed names (user). Only the names changed, not the values.
+
+| Was | Now | What it means |
+|-----|-----|---------------|
+| `SHOW_NOT` | `SHOW_HISTORY_ONLY` | `scribe_message` writes to the history only. |
+| `BLAST_FIRM`, `BLAST_LOYAL`, `BLAST_NEUTRAL` | `BOMBARD_HOLDS`, `BOMBARD_CAPITAL_HOLDS`, `BOMBARD_TURNS_NEUTRAL` | The result of `navy_blast`: the city stands firm, it is the capital and stays loyal, or it turns neutral. |
+
 ## Part 4: found while reading
 
 Items 1 to 3 and 7 were names that said the wrong thing; part 1b renamed them.

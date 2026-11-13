@@ -57,7 +57,7 @@ DO
 				CALL draw_player_turn: CALL draw_map
 			ELSE
 				message$ = "--------> EVENTS FOR " + month_name$(turn_month) + " " + STR$(turn_year) + " --------"
-				CALL scribe_message(message$, SHOW_NOT)
+				CALL scribe_message(message$, SHOW_HISTORY_ONLY)
 				CALL turn_resolve
 				CALL turn_collect_income
 				main_menu_start = 22

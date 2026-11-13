@@ -59,8 +59,8 @@ DIM city AS INTEGER: DIM army AS INTEGER: DIM casualties AS INTEGER: DIM damaged
 		END IF
 	LOOP
 	CALL navy_blast(side, city, result)
-	IF result = BLAST_FIRM THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(city); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
-	IF result = BLAST_LOYAL THEN CALL clear_bottom_line: PRINT "The CAPITAL steadfastly stands loyal"; : CALL wait_seconds(opt_pause!): EXIT SUB
+	IF result = BOMBARD_HOLDS THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(city); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
+	IF result = BOMBARD_CAPITAL_HOLDS THEN CALL clear_bottom_line: PRINT "The CAPITAL steadfastly stands loyal"; : CALL wait_seconds(opt_pause!): EXIT SUB
 	CALL clear_bottom_line: PRINT city_name$(fleet_city(side)); " is now  NEUTRAL";
 	CALL draw_cities
 	EXIT SUB

@@ -708,11 +708,11 @@ END SUB
 SUB TestNavyBlastCapitalAndNeutral
 fleet_size(1) = 20: side_capital(2) = 25: fleet_city(1) = 25: city_owner(25) = 2
 CALL navy_blast(1, 25, result)
-AssertEqualInt BLAST_LOYAL, result, "the capital stays loyal"
+AssertEqualInt BOMBARD_CAPITAL_HOLDS, result, "the capital stays loyal"
 AssertEqualInt 2, city_owner(25), "still the Rebels'"
 fleet_city(1) = 7: city_owner(7) = 2: city_value(7) = 10
 CALL navy_blast(1, 7, result)
-AssertEqualInt BLAST_NEUTRAL, result, "20 ships: the city always gives in"
+AssertEqualInt BOMBARD_TURNS_NEUTRAL, result, "20 ships: the city always gives in"
 AssertEqualInt 0, city_owner(7), "neutral"
 AssertEqualInt 10, side_victory_points(1), "its value for the Union"
 END SUB

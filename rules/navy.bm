@@ -103,15 +103,16 @@ SUB navy_fleet_lost (side)
 	IF side = current_side THEN fleet_pursuit = 0
 END SUB
 
-' Attack on a city with neither army nor fort. result is BLAST_FIRM when the citizens stand firm,
-' BLAST_LOYAL when the city is the other side's capital, which stays loyal, and BLAST_NEUTRAL when
-' the city turns neutral; the side then gets the city's value in victory points.
+' Attack on a city with neither army nor fort. result is BOMBARD_HOLDS when the citizens stand
+' firm, BOMBARD_CAPITAL_HOLDS when the city is the other side's capital, which stays loyal, and
+' BOMBARD_TURNS_NEUTRAL when the city turns neutral; the side then gets the city's value in
+' victory points.
 SUB navy_blast (side, city, result)
-	result = BLAST_FIRM
+	result = BOMBARD_HOLDS
 	IF RND > .25 + .07 * fleet_size(side) THEN EXIT SUB
-	result = BLAST_LOYAL
+	result = BOMBARD_CAPITAL_HOLDS
 	IF fleet_city(side) = side_capital(other_side(side)) THEN EXIT SUB
-	result = BLAST_NEUTRAL
+	result = BOMBARD_TURNS_NEUTRAL
 	city_owner(fleet_city(side)) = SIDE_NONE
 	side_victory_points(side) = side_victory_points(side) + city_value(fleet_city(side))
 END SUB
