@@ -542,9 +542,21 @@ END SUB
 SUB TestVictoryPointsKeepEightTenths
     side_victory_points(1) = 100: side_income(1) = 50: side_city_count(1) = 30
     side_victory_points(2) = 10: side_income(2) = 0: side_city_count(2) = 40
-    CALL turn_update_victory_points
+    CALL turn_update_victory_points(SIDE_UNION)
+    CALL turn_update_victory_points(SIDE_REBEL)
     AssertEqualInt 154, side_victory_points(1), "80, 24 for income and cities, 50 for 30 cities"
     AssertEqualInt 170, side_victory_points(2), "8, 12 for income and cities, 50 for 30 cities and 100 for 35"
+END SUB
+
+SUB TestOnlyUnionVictoryPointsStopAtZero
+    side_victory_points(1) = -50: side_victory_points(2) = -50
+    side_city_count(1) = 5: side_city_count(2) = 20
+    current_side = SIDE_REBEL
+    CALL turn_update_victory_points(SIDE_UNION)
+    CALL turn_update_victory_points(SIDE_REBEL)
+    AssertEqualInt 0, side_victory_points(1), "the Union's -38 stops at 0"
+    AssertEqualInt -34, side_victory_points(2), "the Rebels' -40 and 6 for their cities stays below 0"
+    AssertTrue ai_strength_ratio! = .7, "the Union holds 5 cities: the Rebel computer gains .7"
 END SUB
 
 ' ---------------------------------------------------------- ai_count_armies

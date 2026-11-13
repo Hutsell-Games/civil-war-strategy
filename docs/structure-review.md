@@ -159,6 +159,13 @@ passed.
 For phase 11's list of what QB64 made awkward: the FUNCTION was first named `fleet_at_sea`, and neither
 compiler accepted it. Names ignore case, so it is the same name as the constant `FLEET_AT_SEA`.
 
+**Item 5, one SUB for both sides**, in the working tree on 2026-11-13, not committed.
+`turn_update_victory_points (side)` (`rules\turn.bm`) does one side's month; `turn_resolve` (`ui\turn.bm`)
+and the unit test call it for the Union, then the Rebels. The two halves differed in one line: only the
+Union's points stop at 0. That line is kept behind `side = SIDE_UNION`, and `TODO.md` has a row for it.
+A new unit test, `TestOnlyUnionVictoryPointsStopAtZero`, pins it and the strength ratio. The 40 scripts
+passed `check` and `compare` on unchanged recordings, and the 158 unit tests passed.
+
 ## Questions for the user
 
 1. **The order above:** go ahead with it, or keep to the `ai\ai.bm` steps?

@@ -35,6 +35,10 @@ What each fix did is in `docs\modernize-completed.md`, "The kept bugs fixed".
   (`rules\battle.bm`) tests the ratio `CASE IS < .5` before `CASE IS < .2`, so the second case, which
   halves the defender's strength, is never reached. The same kind as the `SELECT CASE` fixes of
   2026-11-13, found after the ruling.
+- **Only the Union's victory points stop at 0.** `turn_update_victory_points` (`rules\turn.bm`) sets the
+  Union's points to 0 when they fall below 1, and leaves the Rebels' alone. The Rebels' points go below 0
+  when they lose their capital with fewer than 100 points (`city_take`, `rules\city.bm`), and stay there
+  until their income brings them back. `TestOnlyUnionVictoryPointsStopAtZero` pins it.
 - **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
   (`ai\ai.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
   bombards the city anyway when it is the enemy's. The change of order does not stop this attack.

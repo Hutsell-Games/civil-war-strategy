@@ -218,15 +218,12 @@ SUB turn_set_move_order
     CALL sort_move_order(MAX_ARMIES)
 END SUB
 
-' The month's victory points: each side keeps eight tenths and gains by its income and
-' cities. A computer that holds few cities gets a higher strength ratio.
-SUB turn_update_victory_points
-    side_victory_points(SIDE_UNION) = .8 * side_victory_points(SIDE_UNION) + .3 * (side_income(SIDE_UNION) + side_city_count(SIDE_UNION))
-    IF side_city_count(SIDE_UNION) > 29 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 50: IF side_city_count(SIDE_UNION) > 34 THEN side_victory_points(SIDE_UNION) = side_victory_points(SIDE_UNION) + 100
-    IF current_side = SIDE_REBEL AND side_city_count(SIDE_UNION) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
-
-    IF side_victory_points(SIDE_UNION) < 1 THEN side_victory_points(SIDE_UNION) = 0
-    side_victory_points(SIDE_REBEL) = .8 * side_victory_points(SIDE_REBEL) + .3 * (side_income(SIDE_REBEL) + side_city_count(SIDE_REBEL))
-    IF side_city_count(SIDE_REBEL) > 29 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 50: IF side_city_count(SIDE_REBEL) > 34 THEN side_victory_points(SIDE_REBEL) = side_victory_points(SIDE_REBEL) + 100
-    IF current_side = SIDE_UNION AND side_city_count(SIDE_REBEL) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
+' The month's victory points of one side: it keeps eight tenths and gains by its income and
+' cities. A computer whose enemy holds few cities gets a higher strength ratio. Only the
+' Union's points stop at 0 (TODO.md).
+SUB turn_update_victory_points (side)
+    side_victory_points(side) = .8 * side_victory_points(side) + .3 * (side_income(side) + side_city_count(side))
+    IF side_city_count(side) > 29 THEN side_victory_points(side) = side_victory_points(side) + 50: IF side_city_count(side) > 34 THEN side_victory_points(side) = side_victory_points(side) + 100
+    IF current_side = other_side(side) AND side_city_count(side) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
+    IF side = SIDE_UNION AND side_victory_points(side) < 1 THEN side_victory_points(side) = 0
 END SUB

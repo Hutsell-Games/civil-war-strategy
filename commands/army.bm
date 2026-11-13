@@ -9,17 +9,26 @@ SUB army_combine_gather (side, city, best, joined)
     DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM j AS INTEGER: DIM status AS INTEGER
     first_army = side_first_army(side)
     last_army = side_last_army(side)
-    CALL clear_bottom_line: PRINT "Combining "; side_name$(side); " armies in "; city_name$(city); :  CALL wait_seconds(opt_pause!)
+    CALL clear_bottom_line
+    PRINT "Combining "; side_name$(side); " armies in "; city_name$(city);
+    CALL wait_seconds(opt_pause!)
 
     CALL army_combine_start(city)
 
-    best = 0: joined = 0
+    best = 0
+    joined = 0
     FOR j = first_army TO last_army
         CALL army_combine_add(j, city, best, status)
-        IF status = COMBINE_TOO_LARGE THEN CALL clear_bottom_line: PRINT "Cannot combine "; army_name$(j); "... TOO LARGE"; : CALL wait_seconds(opt_pause!)
+        IF status = COMBINE_TOO_LARGE THEN 
+            CALL clear_bottom_line
+            PRINT "Cannot combine "; army_name$(j); "... TOO LARGE";
+            CALL wait_seconds(opt_pause!)
+        END IF
         IF status = COMBINE_JOINED THEN
             joined = joined + 1
-            CALL clear_bottom_line: PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces"; : CALL wait_seconds(opt_pause!)
+            CALL clear_bottom_line
+            PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces";
+            CALL wait_seconds(opt_pause!)
             CALL army_combine_absorb(j)
         END IF
     NEXT j

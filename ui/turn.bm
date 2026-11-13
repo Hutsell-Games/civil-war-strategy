@@ -67,7 +67,8 @@ SUB turn_resolve
     LINE (390, 350)-(520, 400), 1, BF
     COLOR COLOR_LIGHT_MAGENTA
     LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
-    CALL turn_update_victory_points
+    CALL turn_update_victory_points(SIDE_UNION)
+    CALL turn_update_victory_points(SIDE_REBEL)
     IF opt_players = PLAYERS_TWO THEN CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "press a key"; : CALL wait_key("K")
 END SUB
 
