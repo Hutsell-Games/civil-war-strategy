@@ -18,8 +18,6 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
     #! timeout <seconds>     the longest the run may take (default 300)
     #! program <name>        the program the script plays: cws (cws.bas, the game), the
                              only one and the default
-    #! altmap                the run starts on the alternate map: the files of scenarios/alternate
-                             take the places of those of scenarios/standard
     #! files <name> ...      files of the run's folder to check after the run: each becomes a
                              last entry "file <name> <hash>" (or "file <name> missing")
     #! data <folder>         the files of tests/data/<folder> go into the run's folder, over those
@@ -61,10 +59,9 @@ NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
 }
 # The folders of data files, copied whole into a run's folder.
 DATA_FOLDERS: tuple[str, ...] = ("graphics", "scenarios")
-# The folders of scenarios/: the scenario a game starts on (the first of SCENARIOS.LST), and the
-# alternate map.
+# The folder of scenarios/ that a game starts on (the first of SCENARIOS.LST). make_save.py
+# starts a saved game from its opening position.
 FIRST_SCENARIO = "standard"
-ALTERNATE_SCENARIO = "alternate"
 # Files that every run takes from here instead of the repo's folder, when this folder exists.
 TEST_DATA = GAME / "tests" / "data"
 # The name of the configuration file the run starts with; play.py writes it.
@@ -209,7 +206,6 @@ class Script:
     timeout: int = DEFAULT_TIMEOUT
     program: str = DEFAULT_PROGRAM
     files: list[str] = field(default_factory=list)
-    altmap: bool = False
     data: list[str] = field(default_factory=list)
     without: list[str] = field(default_factory=list)
     dice: str = ""
@@ -243,8 +239,6 @@ def load_script(keys: Path) -> Script:
             if words[1] not in PROGRAMS:
                 raise SetupError(f"{where}: unknown program {words[1]!r} (programs: {', '.join(PROGRAMS)})")
             script.program = words[1]
-        elif words == ["altmap"]:
-            script.altmap = True
         elif words[0] == "files" and len(words) > 1:
             script.files += words[1:]
         elif words[0] == "data" and len(words) == 2:
@@ -459,13 +453,6 @@ def remove_files(work: Path, names: list[str]) -> None:
         path.unlink()
 
 
-def use_alternate_map(scenarios: Path) -> None:
-    """Copies the files of the alternate map's folder over those of the scenario a game starts on
-    (FIRST_SCENARIO), so that the run starts on the alternate map."""
-    for path in (scenarios / ALTERNATE_SCENARIO).iterdir():
-        shutil.copy2(path, scenarios / FIRST_SCENARIO / path.name)
-
-
 def write_cfg(work: Path, cfg: dict[str, str]) -> None:
     """Writes CWS.CFG: one line of numbers, as the game's WRITE # writes them."""
     for old in work.iterdir():
@@ -492,8 +479,6 @@ def run_script(tools: Tools, exe: Path, script: Script, compiler: str, tag: str 
     work.mkdir(parents=True)
     copy_data(work)
     write_cfg(work, script.cfg)
-    if script.altmap:
-        use_alternate_map(work / "scenarios")
     for name in script.data:
         copy_test_folder(work, TEST_DATA / name)
     remove_files(work, script.without)

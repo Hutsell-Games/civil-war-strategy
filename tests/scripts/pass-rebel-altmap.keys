@@ -3,7 +3,6 @@
 # Written by tests/make_scripts.py.
 #! seed 1865
 #! cfg side=2 history=1
-#! altmap
 #! files cws.his HISCORE.CWS
 #! timeout 900
 
@@ -18,6 +17,10 @@ rule 2:O text q
 play until 2:V
 digest
 text s
+
+# The scenario menu: the Alternate Map.
+play until 2:S
+text a
 
 # Each month's main menu: a digest, then END TURN.
 repeat 1

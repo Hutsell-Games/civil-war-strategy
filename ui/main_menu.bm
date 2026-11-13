@@ -104,6 +104,25 @@ SUB menu_title
     CALL menu_select(MENU_PLAIN)
 END SUB
 
+' The scenario menu, beside the title menu after Start NEW Game: the titles of SCENARIOS.LST,
+' starting on the scenario the game is on. picked is the row chosen, or 0 when the menu was
+' left by Esc or by a key that names no row. With one scenario there is no menu, and picked is
+' that scenario.
+SUB menu_scenario (picked)
+    DIM k AS INTEGER
+    picked = scenario_now
+    IF scenario_count < 2 THEN EXIT SUB
+    menu_text$(0) = "Scenario"
+    FOR k = 1 TO scenario_count
+        menu_text$(k) = scenario_title$(k)
+    NEXT k
+    menu_col = 58: menu_row = 20: menu_color = COLOR_MAGENTA: menu_item_count = scenario_count
+    menu_choice = MENU_START + scenario_now
+    CALL menu_select(MENU_PLAIN)
+    picked = 0
+    IF menu_choice >= 1 AND menu_choice <= scenario_count THEN picked = menu_choice
+END SUB
+
 ' A new game begins: the history file is started when History is on, and the map is drawn.
 SUB show_new_game
     IF opt_history = 1 THEN

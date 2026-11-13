@@ -19,6 +19,10 @@ play until 2:V
 digest
 text s
 
+# The scenario menu: the Standard Map.
+play until 2:S
+text s
+
 # The main menu: UTILITY, End Cond. Victory Conditions starts on Time: down and Enter
 # turn off each of the four others. Esc there, and Esc at the Utility menu.
 play until 2:M

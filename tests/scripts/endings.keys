@@ -28,6 +28,9 @@ rule 2:R key enter
 play until 2:V
 digest
 text s
+# The scenario menu: the Standard Map.
+play until 2:S
+text s
 play until 2:M
 digest
 text u
@@ -63,6 +66,9 @@ key enter
 # Game 2. Start NEW Game; UTILITY, Aggress three times, End Cond: Time, Cities, Income and Force Ratio off.
 play until 2:V
 digest
+text s
+# The scenario menu: the Standard Map.
+play until 2:S
 text s
 play until 2:M
 digest
@@ -105,6 +111,9 @@ key enter
 # Game 3. Start NEW Game; UTILITY, End Cond: Cities, Income, Capital and Force Ratio off.
 play until 2:V
 digest
+text s
+# The scenario menu: the Standard Map.
+play until 2:S
 text s
 play until 2:M
 digest

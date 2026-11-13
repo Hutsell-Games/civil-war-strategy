@@ -28,6 +28,9 @@ rule 2:O text q
 play until 2:V
 digest
 text s
+# The scenario menu: the Standard Map.
+play until 2:S
+text s
 # March 1861. Troops: recruit at the first city, out.
 play until 2:M
 digest

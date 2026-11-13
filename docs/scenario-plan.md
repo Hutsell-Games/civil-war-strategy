@@ -1,6 +1,6 @@
 # Plan: scenarios in folders, picked in the game
 
-Drafted 2026-11-13. Step 1 is in the working tree.
+Drafted 2026-11-13. Step 1 is committed (`2ba37f5`). Step 2 is in the working tree.
 
 ## Goal
 
@@ -84,8 +84,11 @@ compilers, as in the modernize plan.
 
 - After "Start NEW Game", `menu_scenario` (`ui\main_menu.bm`) lists the titles. Esc goes back to the
   title menu.
-- When the choice is not the scenario already loaded, `game_new` runs again with that folder. To check:
-  the second load draws no random number, so a game on the standard map plays as before.
+- When the choice is not the scenario already loaded, `game_new` runs again with that folder. Found:
+  `game_apply_settings` draws two random numbers (each side's extra cash, `50 * RND`). The first load
+  draws them before `script_start` seeds the numbers; the second draws them after. So a game on the
+  standard map plays as before, and a game on the alternate map starts with other cash and goes
+  differently (one checked: the Union's April 1861 funds are 364, not 350).
 - Every script that chooses Start NEW Game gets one more line to answer the menu. `make_scripts.py` writes
   it for the 14 generated games. The scripts that resume a prepared save do not pass the menu.
 - `#! altmap` goes. The four alternate-map scripts pick the second row. `swap_altmap` and its test in

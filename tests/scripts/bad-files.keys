@@ -11,6 +11,9 @@
 play until 2:V
 digest
 text s
+# The scenario menu: the Standard Map.
+play until 2:S
+text s
 play until 2:M
 digest
 

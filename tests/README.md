@@ -118,7 +118,6 @@ Each script is a keys file with lines that set up its run, which `play.py` reads
 #! seed 1861                 the random seed (default 1)
 #! cfg side=2 history=1      fields of the CWS.CFG the program starts with
 #! timeout 600               the longest the run may take, in seconds (default 300)
-#! altmap                    the run starts on the alternate map
 #! files cws.his cws1.sav    files to check after the run, by their hashes
 #! data events-south         the files of tests\data\events-south go into the run's folder
 #! without graphics/MTN.VGA  files the run starts without
@@ -133,8 +132,9 @@ The `CWS.CFG` of a run is written fresh. By default it is the one that came with
 the Union side, the full map, balanced play, one player, fast display, random events that favor the Rebels,
 January campaigns and realism on, history off, aggression 3. The fields are `CFG_FIELDS` in `play.py`.
 
-`#! altmap` copies the three files of `scenarios\alternate` (`CITIES.GRD`, `CWS.INI`, `CWSLEAD.DAT`) over those
-of `scenarios\standard` in the run's folder, so that the game starts on the alternate map.
+After Start NEW Game the title menu shows the scenario menu, which announces its wait as `2:S`. A script
+picks the map there: `text s` for the Standard Map, `text a` for the Alternate Map. Resume Saved Game skips
+the menu.
 
 ### Prepared saved games
 

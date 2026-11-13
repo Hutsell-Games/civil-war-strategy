@@ -9,6 +9,9 @@
 prompt
 state
 key enter
+# the scenario menu: the Standard Map
+prompt
+key enter
 # March 1861, main menu: Troops
 prompt
 state

@@ -31,6 +31,9 @@ rule 2:O text q
 play until 2:V
 digest
 text s
+# The scenario menu: the Standard Map.
+play until 2:S
+text s
 # March 1861, the main menu: UTILITY; Aggress three times; Balance: Union +; End Cond.
 play until 2:M
 digest

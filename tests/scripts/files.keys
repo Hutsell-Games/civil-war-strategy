@@ -104,6 +104,9 @@ text n
 prompt
 digest
 text s
+# The scenario menu: the Standard Map.
+prompt
+text s
 # Inform: Recap, now that there is a history file; a key.
 prompt
 text i
@@ -119,6 +122,9 @@ prompt
 text f
 prompt
 text n
+prompt
+text s
+# The scenario menu: the Standard Map.
 prompt
 text s
 play until 2:M

@@ -1,9 +1,8 @@
 # A whole game as the Union side, which only ends each turn; the computer plays the Rebel side, on the alternate map.
-# A digest at each of the 5 main menus, at Game Over and at the title menus.
+# A digest at each of the 4 main menus, at Game Over and at the title menus.
 # Written by tests/make_scripts.py.
 #! seed 1865
 #! cfg side=1 history=1
-#! altmap
 #! files cws.his HISCORE.CWS
 #! timeout 900
 
@@ -19,8 +18,12 @@ play until 2:V
 digest
 text s
 
+# The scenario menu: the Alternate Map.
+play until 2:S
+text a
+
 # Each month's main menu: a digest, then END TURN.
-repeat 5
+repeat 4
 play until 2:M
 digest
 text e

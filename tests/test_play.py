@@ -89,14 +89,17 @@ class ScriptTest(unittest.TestCase):
         with self.assertRaises(play.SetupError):
             self.load("#! speed 3\n")
 
-    def test_program_files_and_altmap(self):
-        s = self.load("#! program cws\n#! files cws.his HISCORE.CWS\n#! files cws1.sav\n#! altmap\n")
+    def test_program_and_files(self):
+        s = self.load("#! program cws\n#! files cws.his HISCORE.CWS\n#! files cws1.sav\n")
         self.assertEqual(s.program, "cws")
         self.assertEqual(s.files, ["cws.his", "HISCORE.CWS", "cws1.sav"])
-        self.assertTrue(s.altmap)
         plain = self.load("key space\n")
         self.assertEqual(plain.program, "cws")
-        self.assertFalse(plain.altmap)
+
+    def test_altmap_is_gone(self):
+        # The scenario menu picks the map now; a script that still asks for #! altmap is stale.
+        with self.assertRaises(play.SetupError):
+            self.load("#! altmap\n")
 
     def test_unknown_program(self):
         with self.assertRaises(play.SetupError):
@@ -147,18 +150,6 @@ class ScriptTest(unittest.TestCase):
             self.assertEqual((Path(d) / "CWS.CFG").read_text(),
                              "2,3,0,3,1,1,7,600,300,1,1,36,134,3992,5041,0,3\n")
 
-    def test_altmap_copies_the_alternate_folder_over_the_first(self):
-        with tempfile.TemporaryDirectory() as d:
-            standard, alternate = Path(d) / "standard", Path(d) / "alternate"
-            standard.mkdir()
-            alternate.mkdir()
-            for name in ("CITIES.GRD", "CWS.INI", "CWSLEAD.DAT"):
-                (standard / name).write_text("standard " + name)
-                (alternate / name).write_text("alternate " + name)
-            play.use_alternate_map(Path(d))
-            for name in ("CITIES.GRD", "CWS.INI", "CWSLEAD.DAT"):
-                self.assertEqual((standard / name).read_text(), "alternate " + name)
-                self.assertEqual((alternate / name).read_text(), "alternate " + name)
 
 
 class CopyDataTest(unittest.TestCase):

@@ -18,6 +18,10 @@ play until 2:V
 digest
 text s
 
+# The scenario menu: the Standard Map.
+play until 2:S
+text s
+
 # Each month's main menu: a digest, then END TURN.
 repeat 5
 play until 2:M

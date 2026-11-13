@@ -1,10 +1,9 @@
 # A whole game as the Rebel side, which only ends each turn; the computer plays the Union side, on the alternate map.
 # Every victory condition but the time limit is turned off first.
-# A digest at each of the 10 main menus, at Game Over and at the title menus.
+# A digest at each of the 20 main menus, at Game Over and at the title menus.
 # Written by tests/make_scripts.py.
 #! seed 1869
 #! cfg side=2 history=1 bold=4 randbal=3
-#! altmap
 #! files cws.his HISCORE.CWS
 #! timeout 900
 
@@ -19,6 +18,10 @@ rule 2:O text q
 play until 2:V
 digest
 text s
+
+# The scenario menu: the Alternate Map.
+play until 2:S
+text a
 
 # The main menu: UTILITY, End Cond. Victory Conditions starts on Time: down and Enter
 # turn off each of the four others. Esc there, and Esc at the Utility menu.
@@ -49,7 +52,7 @@ prompt
 key esc
 
 # Each month's main menu: a digest, then END TURN.
-repeat 10
+repeat 20
 play until 2:M
 digest
 text e

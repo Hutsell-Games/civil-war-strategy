@@ -91,7 +91,6 @@ def header(game: Game, about: str, probe: bool = False) -> list[str]:
         "# Written by tests/make_scripts.py.",
         f"#! seed {game.seed}",
         f"#! cfg {cfg}",
-        *(["#! altmap"] if game.altmap else []),
         "#! files cws.his HISCORE.CWS",
         "#! timeout 900",
         "",
@@ -106,6 +105,10 @@ def header(game: Game, about: str, probe: bool = False) -> list[str]:
         "play until 2:V",
         "digest",
         "text s",
+        "",
+        f"# The scenario menu: the {'Alternate' if game.altmap else 'Standard'} Map.",
+        "play until 2:S",
+        f"text {'a' if game.altmap else 's'}",
     ]
     if game.style == "war":
         lines += [

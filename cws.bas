@@ -2,7 +2,7 @@ OPTION _EXPLICIT
 DEFINT A-Z
 ' $INCLUDE: 'cws.bi'
 DIM replay AS INTEGER: DIM message$: DIM main_menu_start AS INTEGER: DIM action AS INTEGER: DIM ended AS INTEGER
-DIM new_game AS INTEGER: DIM month_over AS INTEGER
+DIM new_game AS INTEGER: DIM month_over AS INTEGER: DIM title_choice AS INTEGER: DIM picked AS INTEGER
 
 CALL script_mute
 replay = 0
@@ -13,9 +13,24 @@ DO
     IF event_file_error$ <> "" THEN PRINT event_file_error$: END
     CALL show_title(replay): replay = 1
     CALL script_start
-    CALL menu_title
-    IF menu_choice = TITLE_QUIT THEN CLS : END
-    IF menu_choice = TITLE_RESUME THEN CLS : CALL menu_load_game ELSE CALL show_new_game
+    ' The title menu, and for a new game the scenario menu. Esc there goes back to the title menu.
+    DO
+        CALL menu_title
+        title_choice = menu_choice
+        IF title_choice = TITLE_QUIT THEN CLS : END
+        picked = scenario_now
+        IF title_choice <> TITLE_RESUME THEN
+            CALL menu_scenario(picked)
+            IF picked = 0 THEN CALL draw_title
+        END IF
+    LOOP UNTIL picked > 0
+    IF title_choice = TITLE_RESUME THEN
+        CLS : CALL menu_load_game
+    ELSE
+        ' Another scenario than the one loaded: the game starts again on it.
+        IF picked <> scenario_now THEN scenario_now = picked: CALL game_new
+        CALL show_new_game
+    END IF
     new_game = 0
     DO
         CALL menu_main(main_menu_start)
