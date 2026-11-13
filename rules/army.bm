@@ -18,7 +18,7 @@ SUB army_combine_add (army, city, best, status)
     DIM share!
     status = COMBINE_SKIPPED
     IF army_order(army) <> ORDER_NONE OR army_city(army) <> city OR army_size(army) = 0 THEN EXIT SUB
-    IF army_size(0) + army_size(army) > 1250 THEN status = COMBINE_TOO_LARGE: EXIT SUB
+    IF army_size(0) + army_size(army) > MAX_ARMY_SIZE THEN status = COMBINE_TOO_LARGE: EXIT SUB
 
     IF army_leader_rating(army) > army_leader_rating(0) THEN
         army_name$(0) = army_name$(army)
@@ -264,8 +264,8 @@ END FUNCTION
 ' The Balance setting's extra men for a recruited army. The caller passes slot 0 when men
 ' join an army, and army_new sets a new army's size after it, as in the original.
 SUB army_recruit_bonus (army_slot)
-    IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(army_slot) = army_size(army_slot) + 15 - 5 * opt_difficulty
-    IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
+    IF current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN army_size(army_slot) = army_size(army_slot) + 15 - 5 * opt_difficulty
+    IF current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
 END SUB
 
 ' Fills the menu with the cities where a side may recruit this month. They are drawn at
@@ -276,7 +276,7 @@ SUB army_recruit_cities (side)
     menu_text$(0) = "Recruit"
     IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: city = turn_recruit_city(i): menu_text$(i) = city_name$(city): menu_value(i) = city: NEXT i: menu_item_count = turn_recruit_state: CALL menu_bubble_sort(menu_item_count): EXIT SUB
     offer_count = 4: IF RND > .8 THEN offer_count = offer_count - 1
-    IF opt_difficulty < 3 THEN offer_count = offer_count + 1
+    IF opt_difficulty < DIFFICULTY_EVEN THEN offer_count = offer_count + 1
 
     FOR i = 1 TO MAX_CITIES
         IF side_city_count(side) > 0 THEN chance! = .6 * offer_count / side_city_count(side) ELSE chance! = .3

@@ -1,14 +1,22 @@
 SUB load_scenario
     DIM k AS INTEGER: DIM i AS INTEGER: DIM army_count AS INTEGER
     OPEN "I", 1, SCNDIR + "cwslead.dat"
-    FOR i = 1 TO 40: INPUT #1, leader_name$(i), leader_rating(i): NEXT i
+    FOR i = 1 TO MAX_LEADERS
+        INPUT #1, leader_name$(i), leader_rating(i)
+    NEXT i
     CLOSE #1
     OPEN "I", 1, SCNDIR + "cws.ini"
-    FOR i = 0 TO 2: INPUT #1, side_name$(i): NEXT i
-    FOR i = 1 TO 12: INPUT #1, month_name$(i): NEXT i
+    FOR i = 0 TO 2
+        INPUT #1, side_name$(i)
+    NEXT i
+    FOR i = 1 TO MONTHS_PER_YEAR
+        INPUT #1, month_name$(i)
+    NEXT i
     INPUT #1, turn_month, turn_year
     '               set end game conditions
-    FOR i = 1 TO 6: INPUT #1, victory_rule(i): NEXT i
+    FOR i = 1 TO 6
+        INPUT #1, victory_rule(i)
+    NEXT i
     victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
     INPUT #1, army_count             ' number of Yankee armies
     FOR i = 1 TO army_count
@@ -25,7 +33,9 @@ SUB load_scenario
     FOR k = SIDE_UNION TO SIDE_REBEL: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
     INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
 
-    FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
+    FOR i = 1 TO 8
+        INPUT #1, flag_star_x(i), flag_star_y(i)
+    NEXT i  ' star locations on flag
     CLOSE #1
     CALL config_read(current_side)
 END SUB
@@ -37,10 +47,14 @@ SUB load_cities
     city_name$(0) = "NONE"
     OPEN "I", 1, SCNDIR + "cities.grd"
     total_income = union_income_bonus + 200
-    FOR i = 1 TO MAX_CITIES: INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
+    FOR i = 1 TO MAX_CITIES
+        INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
         city_first_owner(i) = city_owner(i)
         CALL city_update_occupier(i)
-        FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
+        FOR j = 1 TO MAX_ROADS
+            INPUT #1, city_road(i, j)
+        NEXT j
+        INPUT #1, city_port_type(i), city_fort(i)
         IF city_owner(i) > 0 THEN owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_victory_points(owner) = side_victory_points(owner) + city_value(i)
         IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
         total_income = total_income + city_value(i)
@@ -63,15 +77,19 @@ SUB load_game (slot)
                 leader_name$(i) = ""
             ELSE
                 side = army_side(i)
-                first_army = side_first_army(side): last_army = side_last_army(side)
+                first_army = side_first_army(side)
+                last_army = side_last_army(side)
                 FOR k = first_army TO last_army
                     IF army_name$(i) = leader_name$(k) THEN leader_name$(k) = "": EXIT FOR
                 NEXT k
             END IF
         END IF
     NEXT i
-    FOR i = 1 TO MAX_CITIES: INPUT #1, city_army(i), city_owner(i), city_fort(i): NEXT i
-    FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+    FOR i = 1 TO MAX_CITIES
+        INPUT #1, city_army(i), city_owner(i), city_fort(i)
+    NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
         INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
         fleet_size(i) = LEN(fleet_ships$(i))
     NEXT i
@@ -87,10 +105,14 @@ SUB save_game (slot)
     DIM i AS INTEGER: DIM config_side AS INTEGER
     OPEN "O", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
     WRITE #1, turn_month, turn_year, union_income_bonus, current_side
-    FOR i = 1 TO MAX_ARMIES: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+    FOR i = 1 TO MAX_ARMIES
+        WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
     NEXT i
-    FOR i = 1 TO MAX_CITIES: WRITE #1, city_army(i), city_owner(i), city_fort(i): NEXT i
-    FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+    FOR i = 1 TO MAX_CITIES
+        WRITE #1, city_army(i), city_owner(i), city_fort(i)
+    NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
         WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
     NEXT i
     CLOSE #1
@@ -119,13 +141,14 @@ SUB config_write (side)
 END SUB
 
 SUB save_battle_summary
-    DIM k AS INTEGER: DIM a$
+    DIM k AS INTEGER: DIM winner_mark$
     IF opt_history > 0 THEN
         OPEN "O", #1, "battsumm"
         PRINT #1, " SIDE      BATTLES WON       LOSSES"
         FOR k = SIDE_UNION TO SIDE_REBEL
-            a$ = " ": IF victory_reason = k THEN a$ = "*"
-            PRINT #1, a$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
+            winner_mark$ = " "
+            IF victory_reason = k THEN winner_mark$ = "*"
+            PRINT #1, winner_mark$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
         NEXT k
         CLOSE #1
     END IF
@@ -135,17 +158,23 @@ END SUB
 SUB hall_of_fame_load (names$(), scores())
     DIM side AS INTEGER: DIM i AS INTEGER
     OPEN "I", 1, "hiscore.cws"
-    FOR side = SIDE_UNION TO SIDE_REBEL: FOR i = 1 TO 5
+    FOR side = SIDE_UNION TO SIDE_REBEL
+        FOR i = 1 TO 5
             INPUT #1, names$(side, i), scores(side, i)
-    NEXT i: NEXT side: CLOSE #1
+        NEXT i
+    NEXT side
+    CLOSE #1
 END SUB
 
 SUB hall_of_fame_save (names$(), scores())
     DIM side AS INTEGER: DIM i AS INTEGER
     OPEN "O", 1, "hiscore.cws"
-    FOR side = SIDE_UNION TO SIDE_REBEL: FOR i = 1 TO 5
+    FOR side = SIDE_UNION TO SIDE_REBEL
+        FOR i = 1 TO 5
             WRITE #1, names$(side, i), scores(side, i)
-    NEXT i: NEXT side: CLOSE #1
+        NEXT i
+    NEXT side
+    CLOSE #1
 END SUB
 
 ' Starts the history file cws.his with the date. The history of the game before is kept as

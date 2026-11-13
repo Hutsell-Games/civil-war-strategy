@@ -2,8 +2,10 @@ SUB draw_map_marker (from_city, to_city, mark)
     DIM x AS INTEGER: DIM y AS INTEGER: DIM x1 AS INTEGER: DIM y1 AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
     IF from_city < 1 OR from_city > MAX_CITIES THEN EXIT SUB
     IF to_city < 0 THEN EXIT SUB
-    x = city_x(from_city) - 12: y = city_y(from_city) - 11
-    x1 = city_x(to_city): y1 = city_y(to_city)
+    x = city_x(from_city) - 12
+    y = city_y(from_city) - 11
+    x1 = city_x(to_city)
+    y1 = city_y(to_city)
     SELECT CASE mark
         CASE MARK_MOVE_LINE
             LINE (x, y)-(x1, y1), 15, , &HF0F0
@@ -73,9 +75,11 @@ SUB draw_cities
     DIM x AS INTEGER: DIM y AS INTEGER: DIM j AS INTEGER
     DIM i AS INTEGER: DIM dot_color AS INTEGER
     FOR i = 1 TO MAX_CITIES
-        dot_color = 9: IF city_owner(i) = SIDE_REBEL THEN dot_color = 7
+        dot_color = 9
+        IF city_owner(i) = SIDE_REBEL THEN dot_color = 7
         IF city_owner(i) = SIDE_NONE THEN dot_color = 12
-        x = city_x(i): y = city_y(i)
+        x = city_x(i)
+        y = city_y(i)
         IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
             PUT (x - 6, y - 6), pic_capital, PSET
             LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
@@ -89,7 +93,8 @@ SUB draw_cities
             CALL draw_city_dot(i, dot_color)
         END IF
         IF opt_graphics = GRAPHICS_OFF THEN _CONTINUE
-        FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
+        FOR j = 1 TO MAX_ROADS
+            IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
         NEXT j
     NEXT i
 END SUB
@@ -104,7 +109,8 @@ END SUB
 ' Erases a city's fort mark and draws the cities again, after its fort level changed.
 SUB city_redraw_fort (city)
     DIM x AS INTEGER: DIM y AS INTEGER
-    x = city_x(city): y = city_y(city)
+    x = city_x(city)
+    y = city_y(city)
     LINE (x - 5, y - 5)-(x + 5, y + 5), 2, BF
     CALL draw_cities
 END SUB
@@ -222,7 +228,7 @@ SUB draw_map_touchup
 END SUB
 
 SUB draw_map
-    DIM y AS INTEGER: DIM a$: DIM j AS INTEGER: DIM letter AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER
+    DIM word$: DIM j AS INTEGER: DIM letter AS INTEGER: DIM i AS INTEGER: DIM k AS INTEGER
     SCREEN 12
     LINE (1, 16)-(527, 440), 10, B
     PAINT (200, 200), 2, 10
@@ -518,10 +524,9 @@ SUB draw_map
     IF opt_graphics >= GRAPHICS_NAMES THEN CALL draw_city_names
     IF raiding_side > 0 THEN
         LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
-        y = 312
-        a$ = "COMMERCE"
-        FOR j = 1 TO LEN(a$): letter = ASC(MID$(UCASE$(a$), j, 1)) - 64
-            PSET (440 + 10 * j, y), 0: DRAW map_font$(letter)
+        word$ = "COMMERCE"
+        FOR j = 1 TO LEN(word$): letter = ASC(MID$(UCASE$(word$), j, 1)) - 64
+            PSET (440 + 10 * j, 312), 0: DRAW map_font$(letter)
         NEXT j
     ELSE
         LINE (447, 291)-(525, 335), 1, BF
@@ -536,10 +541,12 @@ SUB draw_map
     NEXT k
 
     IF opt_players <> PLAYERS_TWO THEN
-        FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+        FOR i = 1 TO MAX_ARMIES
+            IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
         NEXT i
     END IF
     CALL draw_fleets
     CALL draw_train_box
-    COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+    COLOR COLOR_LIGHT_MAGENTA
+    LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
 END SUB

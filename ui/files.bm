@@ -36,14 +36,14 @@ END SUB
 ' drawn with it. With no saved game it does nothing. The month's Troops, Moves and Ships open
 ' again only when the game picked is the menu's first (TODO.md).
 SUB menu_load_game
-    DIM k AS INTEGER: DIM t$: DIM row AS INTEGER
+    DIM k AS INTEGER: DIM file$: DIM row AS INTEGER
     IF LEN(DIR$("*.sav")) = 0 THEN menu_choice = MENU_ESCAPED: EXIT SUB
     menu_text$(0) = "Load"
     menu_item_count = 0
     FOR k = 1 TO 9
-        t$ = "cws" + LTRIM$(STR$(k)) + ".sav"
-        IF LEN(DIR$(t$)) > 0 THEN
-            menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = t$: menu_value(menu_item_count) = k
+        file$ = "cws" + LTRIM$(STR$(k)) + ".sav"
+        IF LEN(DIR$(file$)) > 0 THEN
+            menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = file$: menu_value(menu_item_count) = k
         END IF
     NEXT k
     CALL menu_bubble_sort((menu_item_count))

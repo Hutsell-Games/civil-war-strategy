@@ -7,7 +7,7 @@ END SUB
 ' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
 ' and the leaders' ratings at random.
 SUB vary_start_conditions
-    DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM a$
+    DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM ship$
     CALL load_scenario
     side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
     side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
@@ -30,13 +30,13 @@ SUB vary_start_conditions
     FOR i = SIDE_UNION TO SIDE_REBEL
         fleet_ships$(i) = ""
         FOR j = 1 TO fleet_size(i)
-            a$ = "W": IF RND > .45 * current_side THEN a$ = "I"
-            fleet_ships$(i) = fleet_ships$(i) + a$
+            ship$ = "W": IF RND > .45 * current_side THEN ship$ = "I"
+            fleet_ships$(i) = fleet_ships$(i) + ship$
         NEXT j
     NEXT i
     IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
 
-    FOR k = 1 TO 40
+    FOR k = 1 TO MAX_LEADERS
         IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
         IF leader_rating(k) < 1 THEN leader_rating(k) = 1
     NEXT k
@@ -165,7 +165,7 @@ SUB game_apply_settings
     IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
     CALL option_events_favor_computer
     IF opt_pause! < 1 THEN opt_pause! = 2
-    IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
-    IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
+    IF current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
+    IF current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
     FOR i = SIDE_UNION TO SIDE_REBEL: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
 END SUB

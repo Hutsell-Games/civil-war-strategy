@@ -51,7 +51,7 @@ SUB wait_key (letter$)
 END SUB
 
 SUB draw_top_bar
-    DIM i AS INTEGER: DIM total_points AS INTEGER: DIM percent AS INTEGER: DIM side_color AS INTEGER: DIM a$
+    DIM i AS INTEGER: DIM total_points AS INTEGER: DIM percent AS INTEGER: DIM side_color AS INTEGER: DIM settings$
     LOCATE 1, 1: PRINT SPACE$(80);
     COLOR COLOR_LIGHT_CYAN
     LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR COLOR_YELLOW: PRINT month_name$(turn_month); ","; turn_year; "  "
@@ -74,13 +74,13 @@ SUB draw_top_bar
 
     LOCATE 5, 68: PRINT "("; percent; "%)"
 
-    a$ = "  Snd": IF opt_sound < SOUND_MUSIC THEN a$ = "   Snd": IF opt_sound = SOUND_OFF THEN a$ = "      "
-    IF opt_graphics >= GRAPHICS_BASIC THEN a$ = a$ + " G" + LTRIM$(STR$(opt_graphics))
-    a$ = a$ + STR$(opt_players)
+    settings$ = "  Snd": IF opt_sound < SOUND_MUSIC THEN settings$ = "   Snd": IF opt_sound = SOUND_OFF THEN settings$ = "      "
+    IF opt_graphics >= GRAPHICS_BASIC THEN settings$ = settings$ + " G" + LTRIM$(STR$(opt_graphics))
+    settings$ = settings$ + STR$(opt_players)
     COLOR side_color
     LOCATE 26, 68: PRINT "F3 Redrw Scrn"
     LOCATE 27, 68: PRINT "F7 End Turn"
-    LOCATE 28, 68: PRINT a$
+    LOCATE 28, 68: PRINT settings$
 END SUB
 
 ' The screen between two players' turns: whose turn it is. Waits for a key.

@@ -22,7 +22,7 @@ END SUB
 SUB scribe_message (text$, display)
     SELECT CASE display
         CASE SHOW_LINE: CALL clear_bottom_line: PRINT text$;
-        CASE SHOW_BOX: CALL show_message_box(text$, 4)
+        CASE SHOW_BOX: CALL show_message_box(text$, COLOR_RED)
     END SELECT
     IF opt_history > 0 THEN
         OPEN "A", 2, "cws.his"

@@ -2,7 +2,7 @@
 ' in game/events.bm.
 
 SUB special_events
-    DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER: DIM a$
+    DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER: DIM nation$: DIM message$
     CALL event_roll(event, variant, event_side)
     IF event = EVENT_NONE THEN EXIT SUB
     IF event = EVENT_IRONCLADS THEN
@@ -20,17 +20,17 @@ SUB special_events
             CALL scribe_message("England has given ships to the South", SHOW_BOX)
             CALL draw_fleets
         CASE EVENT_MERCENARIES
-            a$ = "French": IF variant = 1 THEN a$ = "British"
-            CALL scribe_message(a$ + " mercenaries join " + army_name$(0) + "'s army", SHOW_BOX)
+            nation$ = "French": IF variant = 1 THEN nation$ = "British"
+            CALL scribe_message(nation$ + " mercenaries join " + army_name$(0) + "'s army", SHOW_BOX)
         CASE EVENT_LOAN
             CALL scribe_message("The South has obtained a loan from Europe", SHOW_BOX)
         CASE EVENT_COTTON
             CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", SHOW_BOX)
         CASE EVENT_UPRISING
-            a$ = "Union troops diverted to fight Western Indian uprisings"
-            IF variant = 1 THEN a$ = "Union 90-day enlistees return home"
-            IF variant = 2 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections"
-            CALL scribe_message(a$, SHOW_BOX)
+            message$ = "Union troops diverted to fight Western Indian uprisings"
+            IF variant = 1 THEN message$ = "Union 90-day enlistees return home"
+            IF variant = 2 THEN message$ = "20% of Union forces take furloughs to vote in 1864 elections"
+            CALL scribe_message(message$, SHOW_BOX)
         CASE EVENT_SHIPWORKS
             CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
         CASE EVENT_VOLUNTEERS
@@ -70,6 +70,6 @@ SUB event_riot (side)
     CALL draw_cities
     wait_seconds opt_pause!
     CALL clear_bottom_line
-    CALL show_message_box(city_name$(city) + " is now NEUTRAL !", 4)
+    CALL show_message_box(city_name$(city) + " is now NEUTRAL !", COLOR_RED)
     wait_seconds opt_pause!
 END SUB

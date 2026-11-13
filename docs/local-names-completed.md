@@ -42,7 +42,7 @@ compilers) gave the same results as before.
 | `x`, `y` | The Union's and the Rebels' men in the field, in hundreds (`victory_forces`). | Parameter: `victory_forces`, `victory_rule_met`, `victory_near_force`, `victory_warnings`. Local: `check_victory_conditions` | `union_men`, `rebel_men` | `union_troops`, `rebel_troops` |
 | `i` | A side. | Parameter: `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_won`, `victory_warnings`, `end_game`. Local: `check_victory_conditions` | `side` | |
 | `j` | A victory rule, 2 to 7. | Parameter: `victory_rule_met`, `victory_play_on`, `victory_won`, `end_game`. Local: `check_victory_conditions` | `rule` | |
-| `a$`, `t$` | A message built and then printed or passed to `scribe_message`. About 230 uses. | Most SUBs that print | Kept, or `message$`. Part 1b lists the ones that hold something else. | |
+| `a$`, `t$` | A message built and then printed or passed to `scribe_message`. About 230 uses. | Most SUBs that print | Kept, or `message$`. Part 1b lists the ones that hold something else. | `a$` renamed in every SUB (2026-11-13): `message$` for a message, a name of its own elsewhere (`setting$`, `check_mark$`, `owner$`, `reason$`, `history_line$`, …). `t$` renamed too: `file$`, `favor$`, `income_text$`, `message$`. |
 
 ### 1b. Names that mean something of their own in one SUB
 

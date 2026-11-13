@@ -1,13 +1,16 @@
 SUB animate_army (army, picture_taken)
     DIM y AS INTEGER: DIM step_y AS INTEGER
     DIM from_city AS INTEGER: DIM to_city AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM step_x AS INTEGER
-    from_city = army_city(army): to_city = army_order(army): army_city(army) = 0
+    from_city = army_city(army)
+    to_city = army_order(army)
+    army_city(army) = 0
     x = city_x(from_city) - 12
     y = city_y(from_city) - 11
     step_x = .5 * (city_x(to_city) + city_x(from_city))
     step_y = .5 * (city_y(to_city) + city_y(from_city))
 
-    CALL city_update_occupier(from_city): IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
+    CALL city_update_occupier(from_city)
+    IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
 
     IF picture_taken <= 0 THEN
         GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
@@ -32,7 +35,8 @@ SUB animate_city (city)
         CALL draw_city_dot(city, dot_color)
         CALL wait_seconds(.1)
     NEXT dot_color
-    dot_color = 9: IF city_owner(city) = SIDE_REBEL THEN dot_color = 7
+    dot_color = 9
+    IF city_owner(city) = SIDE_REBEL THEN dot_color = 7
     IF city_owner(city) = SIDE_NONE THEN dot_color = 12
     CALL draw_city_dot(city, dot_color)
 END SUB
@@ -55,7 +59,8 @@ SUB draw_train (side, show)
     DIM city AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
     IF train_city(side) = 0 THEN EXIT SUB
     city = train_city(side)
-    x = city_x(city) - 12: y = city_y(city) - 11
+    x = city_x(city) - 12
+    y = city_y(city) - 11
     SELECT CASE show
         CASE IS > 0
             LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
@@ -89,7 +94,9 @@ END SUB
 
 SUB draw_flag (side, x_offset, top_y)
     DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-    x = 585 + x_offset: y = 200: IF x_offset = 0 THEN y = 180
+    x = 585 + x_offset
+    y = 200
+    IF x_offset = 0 THEN y = 180
     IF top_y <> 0 THEN y = top_y
     SELECT CASE side
         CASE 1

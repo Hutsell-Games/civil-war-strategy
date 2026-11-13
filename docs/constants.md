@@ -24,6 +24,7 @@ Names in the tables use the SUB names of today. Phase 2 has renamed the SUBs by 
 | `3 - who` | The other side. | 60 | `other_side(side)`, a FUNCTION (answer 1) | |
 | `40` | The number of cities. | 47 together with the next row; not yet split | `MAX_CITIES` | |
 | `40` | The number of army slots. | | `MAX_ARMIES` | |
+| `40` | The number of leaders in `cwslead.dat`: the `DIM` and two loops. Added after phase 3 (user, 2026-11-13). | 4 | `MAX_LEADERS` | |
 | `20`, `21` | The Union's last army slot and the Rebels' first. | 11 in loops | `ARMIES_PER_SIDE`, and `side_army_range` for the loops | |
 | `< 21`, `> 20` | "This army is Union" or "is Rebel". | 33 | `army_side(army)`, a FUNCTION (answer 1) | |
 | `6` | The roads a city can have. | about 20 | `MAX_ROADS` | |
@@ -45,6 +46,7 @@ Names in the tables use the SUB names of today. Phase 2 has renamed the SUBs by 
 | `choose = -1` | The player left the menu with Esc. | about 10 | `MENU_ESCAPED` | |
 | `choose = 99` | The player pressed F7 in a plain menu (end the turn). | 1 set, read in the main module | `MENU_END_TURN_KEY` | |
 | `choose = 21 + n` going in | Start the menu on option `n`. Written `choose = 23`. | 55 | `MENU_START + 2`, with `MENU_START = 21` | |
+| `choose` = 1 to 3, 1 to 9 after the title and main menus | The rows of the title menu (Resume, New, Quit) and of the main menu (Troops to Files). Also the main menu's start, `MENU_START + row`. Added after phase 3 (user, 2026-11-13). | 29 | `TITLE_RESUME`, `TITLE_NEW_GAME`, `TITLE_QUIT`; `MAIN_TROOPS` … `MAIN_FILES` | |
 | `brray() = 999` | The army does not move this turn. | 3 | `MOVE_KEY_NONE` | |
 | `icon(999, …)` | No city: draw nothing. | 1 | Deleted: the line above it already sends every city above 40 to `noshow`. | |
 
@@ -114,6 +116,8 @@ The mode says what `menu` shows beside the options while the player moves throug
 | `realism` | 0, 1, 2 | Off; on; on, and the computer is more careful. | `REALISM_OFF`, `REALISM_ON`, `REALISM_HIGH` | |
 | `player` | 1, 2 | One player against the computer; two players. | `PLAYERS_ONE`, `PLAYERS_TWO` | |
 | `vicflag(1)` to `(6)` | 1 to 6 | Month and year of the time limit, cities, income, capital, force ratio. 43 uses. | `VICTORY_MONTH`, `VICTORY_YEAR`, `VICTORY_CITIES`, `VICTORY_INCOME`, `VICTORY_CAPITAL`, `VICTORY_FORCE_RATIO` | |
+| `victory_rule_met`'s `rule` | 2 to 6, 7 | The rule that was met: the same numbers as `victory_rule()` (`victory_play_on` adds 1 to `victory_rule(rule)`). 7: the enemy has no men left. Added after phase 3 (user, 2026-11-13). | `VICTORY_YEAR` to `VICTORY_FORCE_RATIO`, and `VICTORY_WIPED_OUT` | |
+| `opt_difficulty` | 3 | The middle level, where neither side gets help. The tests are `< 3` and `> 3`; the formulas beside them keep their numbers. Added after phase 3 (user, 2026-11-13). | `DIFFICULTY_EVEN` | |
 
 `graf`, `noise` and `realism` are compared with a number in 79 places, often as `> 0` or `> 2`.
 `graf > 2` becomes `graf >= GRAPHICS_FULL`: the same test, written with the level it means.
@@ -134,6 +138,17 @@ These are the Civil War's own numbers. Phase 3 names them in `CWS14.BI`; phase 1
 | `1862`, month 3 | When ironclads can be built. | 3 | `IRONCLAD_YEAR`, `IRONCLAD_MONTH` | |
 | `65` | The smallest army that can detach a part. | 1 | `MIN_DETACH_SIZE` | |
 | `5` | The supply level that Resupply fills to. | 2 | `RESUPPLY_LEVEL` | |
+
+Added after phase 3 (user, 2026-11-13):
+
+| Number | Meaning | Uses | Proposed | Your name |
+|--------|---------|-----:|----------|-----------|
+| `1250` | The largest army that Combine makes: 125,000 men. | 1 | `MAX_ARMY_SIZE` | |
+| `15` | Below 1,500 men an army fights at half strength, and the computer will not attack with it. | 3 | `SMALL_ARMY_SIZE` | |
+| `2`, `12` | The months a turn takes, and the months of a year. | 3 | `MONTHS_PER_TURN`, `MONTHS_PER_YEAR` | |
+
+The months in the season rules (`turn_month < 7 OR turn_month > 10`, "No campaigns in January") and the
+events' dates keep their numbers.
 
 Not named in phase 3: the factors inside the formulas of `battle`, `evaluate`, `smarts` and `events`
 (`.3 * armylead(attack)`, `IF RND > .9`). Each is used once and its line says what it does. They are looked

@@ -11,6 +11,7 @@ CONST FALSE = 0
 CONST MAX_CITIES = 40
 CONST MAX_ARMIES = 40
 CONST ARMIES_PER_SIDE = 20
+CONST MAX_LEADERS = 40
 CONST MAX_ROADS = 6
 CONST MAX_FLEET_SHIPS = 10
 CONST MAX_FORT = 2
@@ -33,6 +34,19 @@ CONST MOVE_KEY_NONE = 999
 CONST MENU_START = 21
 CONST MENU_ESCAPED = -1
 CONST MENU_END_TURN_KEY = 99
+' The rows of the title menu (menu_title) and of the main menu (menu_main).
+CONST TITLE_RESUME = 1
+CONST TITLE_NEW_GAME = 2
+CONST TITLE_QUIT = 3
+CONST MAIN_TROOPS = 1
+CONST MAIN_MOVES = 2
+CONST MAIN_SHIPS = 3
+CONST MAIN_RAILROAD = 4
+CONST MAIN_END_TURN = 5
+CONST MAIN_INFORM = 6
+CONST MAIN_COMMANDS = 7
+CONST MAIN_UTILITY = 8
+CONST MAIN_FILES = 9
 ' The marks of draw_map_marker, its third argument.
 CONST MARK_MOVE_LINE = 1
 CONST MARK_RECRUIT = 2
@@ -119,6 +133,8 @@ CONST REALISM_ON = 1
 CONST REALISM_HIGH = 2
 CONST PLAYERS_ONE = 1
 CONST PLAYERS_TWO = 2
+' opt_difficulty runs from 1 to 5; at 3 neither side gets help.
+CONST DIFFICULTY_EVEN = 3
 ' The rules of victory_rule(): when the time runs out, and the cities, income, capital and force ratio
 ' that win. A rule that is off is 0 or negative.
 CONST VICTORY_MONTH = 1
@@ -127,6 +143,8 @@ CONST VICTORY_CITIES = 3
 CONST VICTORY_INCOME = 4
 CONST VICTORY_CAPITAL = 5
 CONST VICTORY_FORCE_RATIO = 6
+' victory_rule_met's rule is one of the rules above, or this: the enemy has no men left.
+CONST VICTORY_WIPED_OUT = 7
 ' The Civil War's own rule numbers. Phase 11 moves them to game\.
 CONST COST_RECRUIT = 100
 CONST COST_SHIP = 100
@@ -138,6 +156,11 @@ CONST IRONCLAD_YEAR = 1862
 CONST IRONCLAD_MONTH = 3
 CONST MIN_DETACH_SIZE = 65
 CONST RESUPPLY_LEVEL = 5
+' army_size is in hundreds of men: an army can hold 125,000 men, and one below 1,500 fights at half strength.
+CONST MAX_ARMY_SIZE = 1250
+CONST SMALL_ARMY_SIZE = 15
+CONST MONTHS_PER_TURN = 2
+CONST MONTHS_PER_YEAR = 12
 ' The 16 colors, for COLOR statements and the menu's colors. The pictures keep their numbers.
 CONST COLOR_BLACK = 0
 CONST COLOR_BLUE = 1
@@ -185,10 +208,10 @@ COMMON SHARED side_victory_points(), opt_graphics, opt_sound, side_capital(), op
 COMMON SHARED train_capacity(), map_font$(), move_order_key(), opt_winter_campaigns, opt_event_balance, opt_realism, side_casualties&()
 COMMON SHARED game_over, opt_history, victory_reason, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
 '==========================================================================
-DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(40), turn_recruit_city(5)
-DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(40)
+DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(MAX_LEADERS), turn_recruit_city(5)
+DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(MAX_LEADERS)
 DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
-DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(12)
+DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(MONTHS_PER_YEAR)
 DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)
 DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
 DIM SHARED side_victory_points(2), side_capital(2), emancipation_done, train_city(2), fleet_ships$(2)

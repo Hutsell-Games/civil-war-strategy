@@ -104,9 +104,6 @@ game plays changes the recorded screens.
 Left alone by phase 3, group 1, of `docs\modernize-plan.md` (the sides and limits). None of these changes
 how the game plays.
 
-- **The 40 leaders have no constant.** `leader_name$()` and `leader_rating()` hold 40 leaders. Their loops
-  (`port\files.bm` line 4, Vary Start in `rules\setup.bm` line 39) and their `DIM` keep the number 40.
-  `docs\constants.md` has no row for them; a `MAX_LEADERS` would be a new name to agree.
 - **`draw_surrender (side)` is passed an army, not a side** (`game\victory_screens.bm`, called from
   `turn_resolve`). Its test now reads `army_side(side)`. The parameter wants the name `army`.
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 142 and 147).
@@ -141,16 +138,13 @@ Left alone by group 6 (the settings and victory rules):
 - **The Realism switch is `opt_realism = 1 - opt_realism`** (`option_toggle_realism`, `rules\setup.bm`). It toggles between
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
-- **The rule that ended the game has no constants**: `rule = 2: EXIT SUB` to `rule = 6` in
-  `victory_rule_met` (`rules\victory.bm`), and 7 for the other ending. The numbers follow
-  `VICTORY_YEAR` to `VICTORY_FORCE_RATIO`, but `rule` is a code of its own; `docs\constants.md` has no row for it.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
-  (`port\files.bm` line 11) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which
+  (`port\files.bm` line 17) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which
   also maps a rule to a menu row (`i - 1`).
 
 Left alone by group 7 (the rule numbers):
 
-- **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 39), where the cities are read. The 200
+- **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 49), where the cities are read. The 200
   may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 101). That is

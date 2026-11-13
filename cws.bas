@@ -13,42 +13,42 @@ DO
     CALL show_title(replay): replay = 1
     CALL script_start
     CALL menu_title
-    IF menu_choice = 3 THEN CLS : END
-    IF menu_choice = 1 THEN CLS : CALL menu_load_game ELSE CALL show_new_game
+    IF menu_choice = TITLE_QUIT THEN CLS : END
+    IF menu_choice = TITLE_RESUME THEN CLS : CALL menu_load_game ELSE CALL show_new_game
     new_game = 0
     DO
         CALL menu_main(main_menu_start)
         ended = 0
         SELECT CASE menu_choice
-            CASE 1
-                IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting ELSE CALL menu_army_recruit((current_side)): main_menu_start = 23
-            CASE 2
+            CASE MAIN_TROOPS
+                IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting ELSE CALL menu_army_recruit((current_side)): main_menu_start = MENU_START + MAIN_MOVES
+            CASE MAIN_MOVES
                 CALL menu_army_move
-                main_menu_start = 23
-            CASE 3
+                main_menu_start = MENU_START + MAIN_MOVES
+            CASE MAIN_SHIPS
                 IF turn_navy_done = 0 THEN CALL menu_navy_commands((current_side))
-                main_menu_start = 25
-            CASE 4
+                main_menu_start = MENU_START + MAIN_RAILROAD
+            CASE MAIN_RAILROAD
                 CALL menu_main_railroad
-            CASE 5
-                CALL menu_main_end_turn(ended): IF ended = 0 THEN main_menu_start = 24
-            CASE 6
-                CALL menu_main_inform: main_menu_start = 27
-            CASE 7
-                main_menu_start = 28
+            CASE MAIN_END_TURN
+                CALL menu_main_end_turn(ended): IF ended = 0 THEN main_menu_start = MENU_START + MAIN_SHIPS
+            CASE MAIN_INFORM
+                CALL menu_main_inform: main_menu_start = MENU_START + MAIN_INFORM
+            CASE MAIN_COMMANDS
+                main_menu_start = MENU_START + MAIN_COMMANDS
                 CALL menu_commands
-            CASE 8
-                main_menu_start = 29
+            CASE MAIN_UTILITY
+                main_menu_start = MENU_START + MAIN_UTILITY
                 CALL menu_utility
-            CASE 9
-                main_menu_start = 30
+            CASE MAIN_FILES
+                main_menu_start = MENU_START + MAIN_FILES
                 CALL menu_files(action)
                 IF action = FILES_NEW_GAME THEN new_game = 1
                 IF action = FILES_QUIT THEN END
             CASE MENU_END_TURN_KEY
                 ended = 1
             CASE ELSE
-                main_menu_start = 22
+                main_menu_start = MENU_START + MAIN_TROOPS
         END SELECT
         IF ended = 1 THEN
             CALL turn_reset_commands
@@ -60,7 +60,7 @@ DO
                 CALL scribe_message(message$, SHOW_HISTORY_ONLY)
                 CALL turn_resolve
                 CALL turn_collect_income
-                main_menu_start = 22
+                main_menu_start = MENU_START + MAIN_TROOPS
                 IF opt_players = PLAYERS_TWO THEN CALL draw_player_turn: CALL draw_map
                 CALL check_victory_conditions
                 IF game_over > 0 THEN new_game = 1

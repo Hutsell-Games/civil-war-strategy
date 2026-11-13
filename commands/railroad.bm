@@ -14,7 +14,9 @@ END SUB
 SUB railroad_start (side, army, city)
     DIM from_city AS INTEGER
     from_city = army_city(army)
-    COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT army_name$(army); " is taking the train from "; city_name$(from_city); " to "; city_name$(city);
+    COLOR COLOR_LIGHT_CYAN
+    CALL clear_bottom_line
+    PRINT army_name$(army); " is taking the train from "; city_name$(from_city); " to "; city_name$(city);
     CALL railroad_board(side, army, city)
     CALL draw_train(side, DRAW_SHOW)
     IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
@@ -32,7 +34,9 @@ SUB railroad_arrive (side)
     IF city_army(train_from_city(side)) > 0 THEN CALL draw_army_flag(city_army(train_from_city(side)))
     CALL draw_train(side, DRAW_SHOW)
 
-    COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Train with "; army_name$(army); " has arrived in "; city_name$(army_city(army)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2
+    COLOR COLOR_LIGHT_CYAN
+    CALL clear_bottom_line
+    PRINT "Train with "; army_name$(army); " has arrived in "; city_name$(army_city(army)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2
     CALL wait_seconds(opt_pause!)
     x = city_x(army_city(army)) - 12: y = city_y(army_city(army)) - 11
     LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF

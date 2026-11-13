@@ -17,7 +17,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     IF army_size(attacker) / army_size(defender) > .2 THEN attack_strength = attack_strength + .3 * army_leader_rating(attacker) + .3 * army_experience(attacker): IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
     IF army_experience(attacker) > 8 THEN attack_strength = attack_strength + 1: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
     attack_steps(2) = attack_strength
-    IF army_size(attacker) < 15 THEN attack_strength = .5 * attack_strength: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
+    IF army_size(attacker) < SMALL_ARMY_SIZE THEN attack_strength = .5 * attack_strength: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
     attack_steps(3) = attack_strength
     IF army_size(attacker) / army_size(defender) <= .5 THEN attack_strength = attack_strength - 2: IF attack_strength < 1 THEN attack_strength = 1
     IF army_size(attacker) / army_size(defender) > 3 THEN attack_strength = attack_strength + 2: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
@@ -28,8 +28,8 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     attack_steps(5) = attack_strength
     IF attack_strength < 1 THEN attack_strength = 1
     '                       Adjust attack advantage
-    IF army_side(attacker) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN attack_strength = attack_strength + 2 * opt_difficulty - 6
-    IF army_side(attacker) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN attack_strength = attack_strength + 6 - 2 * opt_difficulty
+    IF army_side(attacker) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN attack_strength = attack_strength + 2 * opt_difficulty - 6
+    IF army_side(attacker) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN attack_strength = attack_strength + 6 - 2 * opt_difficulty
     attack_steps(6) = attack_strength
     IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
     attack_steps(7) = attack_strength
@@ -39,7 +39,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     IF army_size(defender) / army_size(attacker) > .2 THEN defend_strength = defend_strength + .3 * army_leader_rating(defender) + .3 * army_experience(defender): IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
     IF army_experience(defender) > 8 THEN defend_strength = defend_strength + 1: IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
     defend_steps(2) = defend_strength
-    IF army_size(defender) < 15 THEN defend_strength = .5 * defend_strength
+    IF army_size(defender) < SMALL_ARMY_SIZE THEN defend_strength = .5 * defend_strength
     defend_steps(3) = defend_strength
 
     size_ratio! = army_size(defender) / army_size(attacker)
@@ -61,8 +61,8 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     defend_steps(5) = defend_strength
     IF defend_strength < 1 THEN defend_strength = 1
     '                       Adjust defend advantage
-    IF army_side(defender) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN defend_strength = defend_strength + 2 * opt_difficulty - 6
-    IF army_side(defender) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN defend_strength = defend_strength + 6 - 2 * opt_difficulty
+    IF army_side(defender) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN defend_strength = defend_strength + 2 * opt_difficulty - 6
+    IF army_side(defender) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN defend_strength = defend_strength + 6 - 2 * opt_difficulty
     defend_steps(6) = defend_strength
 
     IF army_order(defender) = ORDER_NONE THEN defend_strength = defend_strength * (1 + city_fort(army_city(defender)))

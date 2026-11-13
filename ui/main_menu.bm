@@ -12,10 +12,10 @@ SUB menu_main (start)
     menu_color = COLOR_RED
     menu_col = PANEL_COL: menu_row = 13
     menu_text$(0) = "Main"
-    menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN menu_text$(1) = "-": start = 23
-    menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF start = 23 THEN start = 24
-    menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN menu_text$(3) = "-": IF start = 24 THEN start = 25
-    menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN menu_text$(4) = "-": IF start = 25 THEN start = 26
+    menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN menu_text$(1) = "-": start = MENU_START + MAIN_MOVES
+    menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF start = MENU_START + MAIN_MOVES THEN start = MENU_START + MAIN_SHIPS
+    menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN menu_text$(3) = "-": IF start = MENU_START + MAIN_SHIPS THEN start = MENU_START + MAIN_RAILROAD
+    menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN menu_text$(4) = "-": IF start = MENU_START + MAIN_RAILROAD THEN start = MENU_START + MAIN_END_TURN
     menu_text$(5) = "END TURN"
     menu_text$(6) = "Inform"
     menu_text$(7) = "COMMANDS"
@@ -100,7 +100,7 @@ SUB menu_title
     menu_text$(2) = "Start NEW Game"
     menu_text$(3) = "Quit to DOS"
     menu_col = 33: menu_row = 20: menu_color = COLOR_MAGENTA: menu_item_count = 3
-    menu_choice = MENU_START + 2
+    menu_choice = MENU_START + TITLE_NEW_GAME
     CALL menu_select(MENU_PLAIN)
 END SUB
 

@@ -11,15 +11,15 @@ SUB draw_army_stats (army)
 END SUB
 
 SUB print_army_size (army)
-    DIM a$
-    a$ = LTRIM$(RTRIM$(STR$(army_size(army)))) + "00"
-    PRINT a$;
+    DIM size$
+    size$ = LTRIM$(RTRIM$(STR$(army_size(army)))) + "00"
+    PRINT size$;
 END SUB
 
 SUB menu_victory_conditions
-    DIM a$: DIM t$: DIM i AS INTEGER: DIM start_option AS INTEGER
-    a$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Cities"
-    t$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Total Income"
+    DIM cities_text$: DIM income_text$: DIM i AS INTEGER: DIM start_option AS INTEGER
+    cities_text$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Cities"
+    income_text$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Total Income"
     menu_text$(8) = "Time: " + month_name$(victory_rule(VICTORY_MONTH)) + STR$(ABS(victory_rule(VICTORY_YEAR)))
     menu_text$(9) = RTRIM$(STR$(ABS(victory_rule(VICTORY_FORCE_RATIO)))) + ":1 Force Ratio"
     COLOR COLOR_WHITE: LOCATE 1, 1: PRINT "Press ENTER to toggle ending conditions";
@@ -30,8 +30,8 @@ SUB menu_victory_conditions
         menu_choice = start_option
         menu_text$(0) = "Victory Conditions"
         menu_text$(1) = menu_text$(1) + menu_text$(8)
-        menu_text$(2) = menu_text$(2) + a$
-        menu_text$(3) = menu_text$(3) + t$
+        menu_text$(2) = menu_text$(2) + cities_text$
+        menu_text$(3) = menu_text$(3) + income_text$
         menu_text$(4) = menu_text$(4) + "Capital Captured"
         menu_text$(5) = menu_text$(5) + menu_text$(9)
         menu_text$(6) = "DONE"
@@ -134,19 +134,19 @@ END SUB
 '                               City Report
 '..........................................................................
 SUB report_cities
-    DIM i AS INTEGER: DIM a$
+    DIM i AS INTEGER: DIM owner$
     CLS : LOCATE 1, 1: COLOR COLOR_YELLOW
     PRINT "City Report"; TAB(20); month_name$(turn_month); ","; turn_year: COLOR COLOR_WHITE
     PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
     LINE (1, 30)-(630, 30), 15
-    FOR i = 1 TO 20: COLOR COLOR_RED: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR COLOR_LIGHT_BLUE: a$ = "UNION"
-        IF city_owner(i) = SIDE_REBEL THEN COLOR COLOR_GRAY: a$ = "REBEL"
-        LOCATE 2 + i, 1: PRINT i; TAB(6); city_name$(i); TAB(18); a$; TAB(29); city_value(i)
+    FOR i = 1 TO 20: COLOR COLOR_RED: owner$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR COLOR_LIGHT_BLUE: owner$ = "UNION"
+        IF city_owner(i) = SIDE_REBEL THEN COLOR COLOR_GRAY: owner$ = "REBEL"
+        LOCATE 2 + i, 1: PRINT i; TAB(6); city_name$(i); TAB(18); owner$; TAB(29); city_value(i)
     NEXT i
 
-    FOR i = 21 TO 40: COLOR COLOR_RED: a$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR COLOR_LIGHT_BLUE: a$ = "UNION"
-        IF city_owner(i) = SIDE_REBEL THEN COLOR COLOR_GRAY: a$ = "REBEL"
-        LOCATE i - 18, 41: PRINT i; TAB(46); city_name$(i); TAB(58); a$; TAB(69); city_value(i)
+    FOR i = 21 TO 40: COLOR COLOR_RED: owner$ = "neutral": IF city_owner(i) = SIDE_UNION THEN COLOR COLOR_LIGHT_BLUE: owner$ = "UNION"
+        IF city_owner(i) = SIDE_REBEL THEN COLOR COLOR_GRAY: owner$ = "REBEL"
+        LOCATE i - 18, 41: PRINT i; TAB(46); city_name$(i); TAB(58); owner$; TAB(69); city_value(i)
     NEXT i
     LINE (1, 360)-(630, 360), 15
     COLOR COLOR_LIGHT_BLUE: LOCATE 24, 1: PRINT "Side    No. Cities   Income    Cash"
@@ -244,16 +244,16 @@ END SUB
 '                               Recap (History)
 '..........................................................................
 SUB report_recap
-    DIM line_count AS INTEGER: DIM a$
+    DIM line_count AS INTEGER: DIM history_line$
     CLS : line_count = 0
     OPEN "I", 2, "cws.his"
     DO WHILE NOT EOF(2)
-        INPUT #2, a$
-        COLOR COLOR_GRAY: IF INSTR(a$, "[") THEN COLOR COLOR_WHITE
-        IF INSTR(a$, ">") THEN COLOR COLOR_YELLOW
-        IF INSTR(a$, "..") THEN COLOR COLOR_LIGHT_CYAN
-        IF INSTR(a$, "!") THEN COLOR COLOR_LIGHT_RED
-        LOCATE 29, 1: PRINT a$
+        INPUT #2, history_line$
+        COLOR COLOR_GRAY: IF INSTR(history_line$, "[") THEN COLOR COLOR_WHITE
+        IF INSTR(history_line$, ">") THEN COLOR COLOR_YELLOW
+        IF INSTR(history_line$, "..") THEN COLOR COLOR_LIGHT_CYAN
+        IF INSTR(history_line$, "!") THEN COLOR COLOR_LIGHT_RED
+        LOCATE 29, 1: PRINT history_line$
         line_count = line_count + 1
         IF line_count > 27 THEN wait_seconds .4
     LOOP

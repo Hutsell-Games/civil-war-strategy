@@ -34,13 +34,13 @@ END SUB
 SUB turn_next_player (month_over)
     month_over = 1
     IF opt_players = PLAYERS_TWO THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN month_over = 0: EXIT SUB
-    IF current_side > 2 THEN current_side = SIDE_UNION
+    IF current_side > SIDE_REBEL THEN current_side = SIDE_UNION
 END SUB
 
 ' Two months pass.
 SUB turn_advance_month
-    turn_month = turn_month + 2
-    IF turn_month > 12 THEN turn_month = 1: turn_year = turn_year + 1
+    turn_month = turn_month + MONTHS_PER_TURN
+    IF turn_month > MONTHS_PER_YEAR THEN turn_month = 1: turn_year = turn_year + 1
 END SUB
 
 ' An army's supplies for the month. Its side pays for a day of supply if it can, and the army
