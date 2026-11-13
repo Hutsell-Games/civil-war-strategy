@@ -269,7 +269,7 @@ for a SUB that writes at the cursor, as a `PRINT` statement does.
 | `evaluate` | `ai_evaluate_move` |
 | `events` | `special_events` |
 | `filer` | `file_management` |
-| `flags` | `draw_flag` |
+| `flags` | `draw_large_flag` |
 | `flashcity` | `animate_city` |
 | `fortify` | `menu_city_fortify` |
 | `icon` | `draw_map_marker` |

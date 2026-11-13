@@ -1,3 +1,4 @@
+' Animate the army flag icon as it moves between locations.
 SUB animate_army (army, picture_taken)
     DIM y AS INTEGER: DIM step_y AS INTEGER
     DIM from_city AS INTEGER: DIM to_city AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM step_x AS INTEGER
@@ -29,6 +30,7 @@ SUB animate_army (army, picture_taken)
     army_city(army) = from_city
 END SUB
 
+' Flash the city icon.
 SUB animate_city (city)
     DIM dot_color AS INTEGER
     FOR dot_color = 1 TO 15 STEP 2
@@ -64,7 +66,9 @@ SUB draw_train (side, show)
     SELECT CASE show
         CASE IS > 0
             LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-            PSET (x - 6, y - 2), 3: side_color = 9: IF side = SIDE_REBEL THEN side_color = 15
+            PSET (x - 6, y - 2), 3
+            side_color = 9
+            IF side = SIDE_REBEL THEN side_color = 15
             DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
             x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
         CASE ELSE
@@ -92,7 +96,7 @@ SUB draw_flag_icon (x, y, side)
     END SELECT
 END SUB
 
-SUB draw_flag (side, x_offset, top_y)
+SUB draw_large_flag (side, x_offset, top_y)
     DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
     x = 585 + x_offset
     y = 200

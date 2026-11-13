@@ -3,7 +3,7 @@
 Two kinds of test live here:
 
 - **Unit tests** (`rules_test.bas`) call the SUBs that draw nothing and check what they return. Run them with
-  `qb64rust test tests`.
+  `qb64rust test tests\rules_test.bas` (`qb64rust test tests` also runs any copy of it under `tests\out`).
 - **Whole-game scripts** (`scripts\*.keys`) play the game from the title menu to its end, with a fixed random
   seed, and compare its screens with the screens recorded earlier. They are what makes a change safe: a change
   that alters any screen of any script fails.
@@ -34,7 +34,7 @@ python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and
 program's window. Otherwise it runs on a desktop of its own that is never shown, and your keys and mouse cannot
 reach it. Everything a run makes goes into `tests\out\`, which git ignores. A build is made again only when a
 source file, the compiler or the screen hook changed. What a command prints also goes to
-`tests\out\last-<command>.txt`. All 25 scripts take about half a minute with four jobs.
+`tests\out\last-<command>.txt`. All 39 scripts take about half a minute with four jobs.
 
 Each run starts in a fresh copy of the game's data files in `tests\out\run\`, so the files in the repo are never
 changed. The copy takes the top-level files that are not sources, documents or DOS programs, and the folders
@@ -161,7 +161,7 @@ settings (`#! cfg`), and the leaders' names of the scenario, which the game read
 
 ### Forced dice
 
-`#! dice` gives the random numbers of the special events (`special_events`, `game\events.bm`), so that a
+`#! dice` gives the random numbers of the special events (`special_events`, `rules\events.bm`), so that a
 script can make an event happen. The events draw their numbers through `script_rnd!` (`port\script.bm`).
 Without `#! dice` it returns `RND`, so every other script plays as before.
 
@@ -204,6 +204,7 @@ on a desktop nobody sees.
 | `navy-losses` | From a prepared save, as the Rebels: a shore battery sinks their only ship, no army is left free to move, the Balance menu's faces, the Raze menu, and "NO SHIPYARDS AVAILABLE" |
 | `menu-keys` | At the main menu, PgDn, Down from the last row round to the first, PgDn and PgUp |
 | `bad-files` | A run without `MTN.VGA`, with a `CWS.CFG` that names no player count and no display speed, and with a map that has two one-way roads, which Chk Links reports |
+| `bad-events` | A run with a `scenarios\EVENTS.DAT` that has a line the game cannot read: the game names the file, the line and the reason, and ends before the title |
 | `sound-union` | The game starts with music on as the Union: the title tune, the ironclads' announcement and an event's tune run, unheard |
 | `sound-rebel` | The same as the Rebels: "Shenandoah" at the title, and the tune of an event that favors the South |
 

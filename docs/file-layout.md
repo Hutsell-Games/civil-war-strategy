@@ -22,6 +22,7 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) became `cws.bas` in 
 | `turn.bm` | `turn_set_moves_done`, `turn_set_navy_done`, `turn_reset_commands`, `turn_check_commands`, `turn_close_recruiting`, `turn_next_player` (new in phase 9), `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
 | `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7); the Utility menu's settings (new in phase 9): `option_swap_side`, `option_toggle_players`, `option_next_graphics`, `option_set_sound`, `option_set_display_speed`, `option_toggle_alt_colors`, `option_set_balance`, `option_set_event_balance`, `option_toggle_winter_campaigns`, `option_toggle_realism`, `option_toggle_history`, `option_next_aggression`, `option_events_favor_computer` (new after the plan); the start of a game (new in phase 9, out of the main module): `game_new`, `game_reset`, `game_apply_settings` |
 | `victory.bm` | `victory_toggle_rule` (new in phase 9), `victory_forces`, `victory_time_near`, `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_play_on`, `victory_won`, `victory_technical_points`, `hall_of_fame_place`, `hall_of_fame_insert` (`check_victory_conditions`, `victory_warnings`, `end_game` and `hall_of_fame` until phase 8 moved them to `ui\victory.bm`) |
+| `events.bm` | `event_roll`, `event_pick`, `event_target`, `event_chance!`, `event_conditions_hold`, `event_possible`, `event_delivery_port`, `event_apply`, `event_riot_city`, `event_find` (in `game\` until phase 11 made the events data: `scenarios\EVENTS.DAT`) |
 
 ## ai\
 
@@ -58,7 +59,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 | `navy.bm` | `menu_navy_commands`, `menu_navy_build`, `menu_navy_attack`, `menu_navy_sail`, `menu_navy_raid`, `menu_navy_invade`, `menu_navy_combat` (new in phase 9: the player's half of the navy's commands; the file of phase 8 moved to `commands\navy.bm`) |
 | `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city`, `ai_turn` (new in phase 8: the month's moves) |
 | `ai.bm` | `draw_ai_plan`, `draw_ai_drill`, `draw_ai_funds`, `draw_ai_navy_color` (new in phase 8: the computer's messages) |
-| `events.bm` | `special_events`, `event_riot` (new in phase 8: the special events' messages and tunes) |
+| `events.bm` | `special_events`, `event_show_city` (`event_riot` until phase 11), `event_message$`, `text_replace` (new in phase 8: the special events' messages and tunes) |
 | `victory.bm` | `check_victory_conditions`, `victory_warnings`, `end_game`, `hall_of_fame` (new in phase 8: the warnings, the victory screens and the Hall of Fame) |
 
 ## draw\
@@ -66,7 +67,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 | File | SUBs |
 |------|------|
 | `map.bm` | `draw_map`, `draw_map_touchup`, `draw_cities`, `draw_city_names`, `draw_map_marker`, `draw_stack_markers`, `draw_fleets` |
-| `icons.bm` | `draw_flag_icon`, `draw_flag`, `draw_army_flag`, `draw_train`, `animate_army`, `animate_city` |
+| `icons.bm` | `draw_flag_icon`, `draw_large_flag`, `draw_army_flag`, `draw_train`, `animate_army`, `animate_city` |
 | `ships.bm` | `draw_fleet_ship`, `draw_ship_icon`, `draw_ironclad`, `draw_schooner`, `draw_fleet_sailing`, `draw_navy_box`, `draw_ship_sunk` |
 | `pictures.bm` | `draw_cannon`, `draw_chesapeake`, `draw_title` |
 
@@ -76,13 +77,12 @@ and shows what happened. Nothing here opens a menu or reads a key.
 |------|------|
 | `victory_screens.bm` | `draw_union_victory`, `draw_rebel_victory`, `draw_surrender` |
 | `tunes.bm` | `play_shenandoah`, `play_title_music` |
-| `events.bm` | `event_roll`, `event_riot_city` (`special_events` and `event_riot` until phase 8 moved them to `ui\events.bm`) |
 
 ## port\
 
 | File | SUBs |
 |------|------|
-| `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_cities`, `load_game`, `save_game`, `saved_games_check`, `history_start`, `config_read`, `config_write`, `save_battle_summary` (`file_management` until phase 7 split it; the menus of `load_game` and `save_game` until phase 9 moved them to `ui\files.bm`) |
+| `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_events` (with `event_clear_row`, `event_read_line`, `event_read_side`, `event_read_conditions`, `event_read_effect`, `event_read_chance`, `text_is_number`, `text_last_space`), `load_cities`, `load_game`, `save_game`, `saved_games_check`, `history_start`, `config_read`, `config_write`, `save_battle_summary` (`file_management` until phase 7 split it; the menus of `load_game` and `save_game` until phase 9 moved them to `ui\files.bm`) |
 | `qb64.bm` | `DIR$` (from `QB64.BM`) |
 | `script.bm` | `script_start`, `script_date$`, `script_tick%`, `script_shell`, `script_mark_key_wait` (from `SCRIPT.BM`) |
 

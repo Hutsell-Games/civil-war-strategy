@@ -3,6 +3,56 @@
 The finished parts of `modernize-plan.md`, moved here on 2026-11-11. The plan keeps the decisions, the
 phases still to do and the rules that still hold. Line numbers are those of the day each part was written.
 
+## Phase 11 step 2 (2026-11-13)
+
+Question 1 answered: war texts go to data files. The user then asked for more than the texts: the
+whole of each special event is data, so that the code does not know which war is fought.
+
+- **`scenarios\EVENTS.DAT` holds the 18 events**, each under its name in brackets with labeled lines:
+  the side it favors, its conditions (`if`), its effect, its texts, and `when`, `for`, `instead`,
+  `then`, `redraw` and `listed`. Its `[events]` section holds the banner and the month's chance.
+  The head of the file says what each line means.
+- **`load_events` (`port\files.bm`) reads it** into the events table (`event_*` and `condition_*` in
+  `cws.bi`); `game_new` calls it after the scenario. A line it cannot read ends the game at its
+  start with the file, the line and the reason (`event_file_error$`). It refuses a line twice, an
+  event name twice, a bracket left open, a word where a number goes, an effect with the wrong
+  count of numbers, and a `listed` or `when` it does not know.
+- **`event_roll` moved to `rules\events.bm`** (from `game\events.bm`) and no longer names an event.
+  It goes down the favored side's rows and takes the first whose conditions hold and whose effect
+  can be carried out. `event_apply` carries out one of ten effects (`EFFECT_*`). The 16 `EVENT_*`
+  constants but `EVENT_NONE`, and `emancipation_done`, are gone; `event_done()` holds what has
+  happened.
+- **The ironclads' announcement is an event too** (`when = before`): it is tried before the roll,
+  also with random events off. Its date stays the rule `IRONCLAD_YEAR` and `IRONCLAD_MONTH` of
+  `cws.bi`, which the navy uses; the file repeats it, and `TestEventIroncladsMatchTheRule` checks
+  that the two agree.
+- **The month's chance is a line of the file**: `.005 x (year - 1860) x weight x weight, at most
+  .9`. It is worked out in double precision and rounded once, as the old line was; with single
+  precision at each step, 24 of the 50 values of 1861 to 1870 differed in their last bit.
+  `TestEventChanceAsBefore` checks all 50.
+- **The random numbers are drawn in the order of before**, so every recorded screen is unchanged.
+  Three things in the file keep that order: a silent event (the Rebels' points in January 1864 and
+  1865), `instead` (the furloughs for the uprising from June 1864, the riot for the shipworks), and
+  `then` (Stanton's prediction after the rifles).
+- **Kept as they were:** the mercenaries join army 0 (`TODO.md`); the volunteers reach five armies;
+  a riot that finds no city still shows the banner.
+- **Tests:** the 38 scripts pass with both compilers, and a new one, `bad-events`, starts the game
+  with a file it cannot read. The unit tests reach every event by its name (`event_find`), every
+  line of the reader, and files of another war: Wars of Napoleon's chance, an announcement like
+  its Trafalgar, and an event whose effect is for the other side (`for`), as its Hapsburgs give
+  France cash. Of the new code only one older line is run in part (`modernize-plan.md`, "Lines
+  that no test runs").
+- **Checked against Wars of Napoleon** (`WON2.BM`, `SUB events`). The order of the events, the
+  fall-through when one cannot happen, the roll conditions and the delivery port fit as they
+  are. The chance, the announcement before the roll, `for` and `{side}` were added for it. What
+  it still needs is code: Trafalgar sets the fleet to 10 ships; "windfall tax revenues" add a
+  random amount; a traitor gives his army to a new commander; its revolt picks the city by
+  another rule; its rally grows up to 10 armies that grew; and the conditions "fleet at sea"
+  and "fleet size". Those wait for that port's own phase 11.
+
+The events' two tunes are still `PLAY` strings in `ui\events.bm`. The other 24 war-naming strings
+wait on step 3; questions 2 and 3 are still open.
+
 ## Progress, phase by phase
 
 Updated 2026-11-11. Phase 1 is committed (`1727bf9`). Phase 2 is done in the working tree, not committed:

@@ -1,0 +1,6 @@
+# Civil War Strategy: an events file with a line the game cannot read (tests/data/bad-events).
+# The game names the file, the line and the reason, and ends before the title. The only
+# checkpoint is the screen at the end, with END's "Press any key to continue".
+#! data bad-events
+
+repeat space

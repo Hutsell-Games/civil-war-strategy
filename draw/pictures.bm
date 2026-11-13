@@ -92,5 +92,5 @@ SUB draw_title
     LOCATE 28, 60: PRINT "v1.57"
     LINE (190, 170)-(440, 260), 1, B
     LINE (180, 180)-(450, 250), 7, B
-    CALL draw_flag(SIDE_UNION, -440, 0): CALL draw_flag(SIDE_REBEL, -100, 0)
+    CALL draw_large_flag(SIDE_UNION, -440, 0): CALL draw_large_flag(SIDE_REBEL, -100, 0)
 END SUB

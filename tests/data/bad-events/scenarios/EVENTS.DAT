@@ -1,0 +1,9 @@
+; An events file with a line the game cannot read (tests/scripts/bad-events.keys).
+
+[events]
+banner = SPECIAL EVENT...
+
+[rain]
+favors = Rebel
+effect = rain 3
+text = It rains

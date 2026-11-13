@@ -103,23 +103,47 @@ CONST BOMBARD_TURNS_NEUTRAL = 2
 CONST FILES_BACK = 0
 CONST FILES_NEW_GAME = 1
 CONST FILES_QUIT = 2
-' event_roll's event: the special event of the month (game/events.bm).
+' event_roll's event: a row of the events table (1 to event_count), or this.
 CONST EVENT_NONE = 0
-CONST EVENT_IRONCLADS = 1
-CONST EVENT_RIOTS = 2
-CONST EVENT_ENGLISH_SHIPS = 3
-CONST EVENT_MERCENARIES = 4
-CONST EVENT_LOAN = 5
-CONST EVENT_COTTON = 6
-CONST EVENT_UPRISING = 7
-CONST EVENT_SHIPWORKS = 8
-CONST EVENT_VOLUNTEERS = 9
-CONST EVENT_EMANCIPATION = 10
-CONST EVENT_REELECTION = 11
-CONST EVENT_DONATIONS = 12
-CONST EVENT_DESERTERS = 13
-CONST EVENT_RIFLES = 14
-CONST EVENT_STANTON = 15
+' The events table, read from scenarios/EVENTS.DAT (load_events, port/files.bm).
+CONST MAX_EVENTS = 40
+CONST MAX_EVENT_TEXTS = 4
+CONST MAX_EVENT_CONDITIONS = 120
+CONST MAX_CHANCE_FACTORS = 6
+' chance_kind(): a factor of the month's chance of an event (event_chance!, rules/events.bm).
+CONST CHANCE_NUMBER = 1
+CONST CHANCE_WEIGHT = 2
+CONST CHANCE_YEAR = 3
+CONST CHANCE_DIFFICULTY = 4
+' event_effect(): what an event does (event_apply, rules/events.bm).
+CONST EFFECT_NONE = 0
+CONST EFFECT_POINTS = 1
+CONST EFFECT_ENEMY_POINTS_TIMES = 2
+CONST EFFECT_CASH = 3
+CONST EFFECT_SHIPS = 4
+CONST EFFECT_SHIPS_TO_PORT = 5
+CONST EFFECT_REINFORCE = 6
+CONST EFFECT_ARMIES_GROW = 7
+CONST EFFECT_ENEMY_ARMIES_TIMES = 8
+CONST EFFECT_EXPERIENCE = 9
+CONST EFFECT_CITY_NEUTRAL = 10
+' condition_subject(): what a condition of an event tests.
+CONST SUBJECT_ROLL = 1
+CONST SUBJECT_YEAR = 2
+CONST SUBJECT_MONTH = 3
+CONST SUBJECT_CITIES = 4
+CONST SUBJECT_ONCE = 5
+CONST SUBJECT_REALISM = 6
+' condition_relation(): how the subject is compared with condition_value!().
+CONST RELATION_IS = 1
+CONST RELATION_ABOVE = 2
+CONST RELATION_BELOW = 3
+CONST RELATION_AT_LEAST = 4
+CONST RELATION_AT_MOST = 5
+' event_redraw(): what is drawn again after an event's message.
+CONST REDRAW_NONE = 0
+CONST REDRAW_FLEETS = 1
+CONST REDRAW_MAP = 2
 ' Settings: opt_graphics, opt_sound, opt_realism, opt_players.
 CONST GRAPHICS_OFF = 0
 CONST GRAPHICS_BASIC = 1
@@ -152,6 +176,8 @@ CONST COST_FORT = 200
 CONST COST_MOVE_CAPITAL = 500
 CONST CAPITAL_INCOME = 100
 CONST FIRST_YEAR = 1861
+' The ironclads' date. The announcement [ironclads] of scenarios/EVENTS.DAT names it too
+' (TestEventIroncladsMatchTheRule checks that the two agree).
 CONST IRONCLAD_YEAR = 1862
 CONST IRONCLAD_MONTH = 3
 CONST MIN_DETACH_SIZE = 65
@@ -214,8 +240,29 @@ DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(MAX
 DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(MONTHS_PER_YEAR)
 DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)
 DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
-DIM SHARED side_victory_points(2), side_capital(2), emancipation_done, train_city(2), fleet_ships$(2)
+DIM SHARED side_victory_points(2), side_capital(2), train_city(2), fleet_ships$(2)
 DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_casualties&(2), side_battles_won(2), city_first_owner(MAX_CITIES)
+' The events table: one row for each special event of scenarios/EVENTS.DAT, in the file's order.
+' event_favors() is the side the event is good for, and event_for() the side its effect is
+' for when that is another (SIDE_NONE when it is the same). event_before() is 1 for an
+' announcement, which is tried before the month's roll. event_instead() and event_then() are
+' rows, 0 for none. event_done() is set when the event has happened in this game.
+DIM SHARED event_count, event_banner$, event_file_error$
+DIM SHARED event_name$(MAX_EVENTS), event_favors(MAX_EVENTS), event_listed(MAX_EVENTS), event_done(MAX_EVENTS)
+DIM SHARED event_before(MAX_EVENTS), event_for(MAX_EVENTS)
+DIM SHARED event_effect(MAX_EVENTS), event_amount!(MAX_EVENTS, 1), event_redraw(MAX_EVENTS)
+DIM SHARED event_text$(MAX_EVENTS, MAX_EVENT_TEXTS), event_text_count(MAX_EVENTS), event_outcome$(MAX_EVENTS)
+DIM SHARED event_instead(MAX_EVENTS), event_then(MAX_EVENTS)
+' An event's conditions are two runs of the condition arrays: those of its "if" line and
+' those of its "instead" line.
+DIM SHARED event_if_first(MAX_EVENTS), event_if_count(MAX_EVENTS), event_instead_first(MAX_EVENTS), event_instead_count(MAX_EVENTS)
+DIM SHARED condition_count, condition_subject(MAX_EVENT_CONDITIONS), condition_relation(MAX_EVENT_CONDITIONS), condition_value!(MAX_EVENT_CONDITIONS)
+' The month's chance of an event: the product of its factors, then chance_plus#, then at most
+' chance_most# when chance_has_most is 1 (the chance line of EVENTS.DAT).
+DIM SHARED chance_count, chance_kind(MAX_CHANCE_FACTORS), chance_value#(MAX_CHANCE_FACTORS), chance_plus#, chance_most#, chance_has_most
+' Set by event_roll for the texts of the event: the city of a riot, the army that was
+' reinforced, and the side the effect was for. They fill {city}, {army} and {side}.
+DIM SHARED event_city, event_army, event_target_side
 ' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
 DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
 DIM SHARED pic_face(1 TO 1564)

@@ -1,0 +1,215 @@
+' The special events: which one happens in a month and what it does. The events themselves
+' are rows of the events table, read from scenarios/EVENTS.DAT (load_events, port/files.bm).
+' Nothing here draws; the messages are special_events and event_show_city (ui/events.bm).
+
+' Rolls the month's special event and carries out what it does. event is a row of the events
+' table, or EVENT_NONE when nothing happens. variant is the text of the event that was
+' picked, from 0. event_side is the side the event is rolled for: the event is good for the
+' other side. It is 0 for an announcement, and when nothing happens.
+' First the announcements are tried, every month, even with random events off. Then, when
+' the month's chance passes, a side is drawn and its events are tried.
+SUB event_roll (event, variant, event_side)
+    DIM event_weight AS INTEGER
+    event = EVENT_NONE: variant = 0: event_side = 0: event_city = 0: event_army = 0: event_target_side = SIDE_NONE
+    CALL script_dice_next
+    event_weight = opt_difficulty: IF current_side = SIDE_UNION THEN event_weight = 6 - opt_difficulty
+    CALL event_pick(1, SIDE_NONE, event_weight, event, variant)
+    IF event <> EVENT_NONE THEN EXIT SUB
+    IF opt_event_balance = 0 THEN EXIT SUB
+    IF script_rnd! > event_chance!(event_weight) THEN EXIT SUB
+
+    event_side = SIDE_UNION: IF script_rnd! > .1 * opt_event_balance THEN event_side = SIDE_REBEL
+    CALL event_pick(0, other_side(event_side), event_weight, event, variant)
+END SUB
+
+' Tries events in the table's order: the announcements when before is 1, else the events
+' that favor good_side. Takes the first whose conditions hold and whose effect can be carried
+' out, and carries it out. An event without a text is silent: the list goes on after it.
+' The numbers are drawn in a fixed order: those of the "if" line, then one to pick a text
+' when the event has several, then those of the "instead" line, then those of the effect.
+SUB event_pick (before, good_side, weight, event, variant)
+    DIM row AS INTEGER: DIM chosen AS INTEGER: DIM side AS INTEGER: DIM holds AS INTEGER: DIM k AS INTEGER
+    DIM rolled!
+    FOR row = 1 TO event_count
+        side = good_side: IF before <> 0 THEN side = event_favors(row)
+        IF event_before(row) = before AND event_listed(row) <> 0 AND event_favors(row) = side THEN
+            holds = event_conditions_hold(event_if_first(row), event_if_count(row), row, side)
+            IF holds THEN holds = event_possible(row, event_target(row, side))
+            IF holds THEN
+                chosen = row: variant = 0
+                IF event_text_count(row) > 1 THEN
+                    rolled! = script_rnd!
+                    FOR k = 1 TO event_text_count(row) - 1
+                        IF rolled! > k / event_text_count(row) THEN variant = k
+                    NEXT k
+                END IF
+                IF event_instead(row) <> 0 THEN
+                    IF event_conditions_hold(event_instead_first(row), event_instead_count(row), row, side) THEN
+                        IF event_possible(event_instead(row), event_target(event_instead(row), side)) THEN chosen = event_instead(row): variant = 0
+                    END IF
+                END IF
+                event_target_side = event_target(chosen, side)
+                CALL event_apply(chosen, event_target_side, weight)
+                event_done(chosen) = 1
+                IF event_text_count(chosen) > 0 THEN
+                    event = chosen
+                    IF event_then(chosen) <> 0 THEN
+                        CALL event_apply(event_then(chosen), event_target(event_then(chosen), side), weight)
+                        event_done(event_then(chosen)) = 1
+                    END IF
+                    EXIT SUB
+                END IF
+            END IF
+        END IF
+    NEXT row
+END SUB
+
+' The side an event's effect is for: its "for" line, else the side it favors.
+FUNCTION event_target (row, side)
+    event_target = side: IF event_for(row) <> SIDE_NONE THEN event_target = event_for(row)
+END FUNCTION
+
+' The month's chance of an event, from the chance line of EVENTS.DAT. weight is 1 to 5, from
+' the Balance setting. The factors are multiplied in the file's order, in double precision,
+' and the sum is rounded to single precision once, as the line it replaced was:
+' .005 * (turn_year - 1860) * weight * weight (TestEventChanceAsBefore).
+FUNCTION event_chance! (weight)
+    DIM k AS INTEGER: DIM product#: DIM chance!
+    product# = 1
+    FOR k = 1 TO chance_count
+        SELECT CASE chance_kind(k)
+            CASE CHANCE_NUMBER: product# = product# * chance_value#(k)
+            CASE CHANCE_WEIGHT: product# = product# * weight
+            CASE CHANCE_YEAR: product# = product# * (turn_year - chance_value#(k))
+            CASE CHANCE_DIFFICULTY: product# = product# * (opt_difficulty - chance_value#(k))
+        END SELECT
+    NEXT k
+    chance! = product# + chance_plus#
+    IF chance_has_most <> 0 AND chance! > chance_most# THEN chance! = chance_most#
+    event_chance! = chance!
+END FUNCTION
+
+' Whether a run of conditions holds for an event: count of them, from first. Every
+' condition is looked at, also after one has failed, so a "roll" always draws its number.
+' good_side is the side the event favors; "cities" counts its cities.
+FUNCTION event_conditions_hold (first, count, row, good_side)
+    DIM k AS INTEGER: DIM amount!: DIM met AS INTEGER
+    event_conditions_hold = 1
+    FOR k = first TO first + count - 1
+        SELECT CASE condition_subject(k)
+            CASE SUBJECT_ROLL: amount! = script_rnd!
+            CASE SUBJECT_YEAR: amount! = turn_year
+            CASE SUBJECT_MONTH: amount! = turn_month
+            CASE SUBJECT_CITIES: amount! = side_city_count(good_side)
+            CASE SUBJECT_REALISM: amount! = opt_realism
+        END SELECT
+        met = 0
+        SELECT CASE condition_relation(k)
+            CASE RELATION_IS: IF amount! = condition_value!(k) THEN met = 1
+            CASE RELATION_ABOVE: IF amount! > condition_value!(k) THEN met = 1
+            CASE RELATION_BELOW: IF amount! < condition_value!(k) THEN met = 1
+            CASE RELATION_AT_LEAST: IF amount! >= condition_value!(k) THEN met = 1
+            CASE RELATION_AT_MOST: IF amount! <= condition_value!(k) THEN met = 1
+        END SELECT
+        IF condition_subject(k) = SUBJECT_ONCE THEN met = 1 - event_done(row)
+        IF met = 0 THEN event_conditions_hold = 0
+    NEXT k
+END FUNCTION
+
+' Whether an event's effect can be carried out. Ships need a fleet that is not full; ships
+' to a port also need the port. Every other effect can always be carried out.
+FUNCTION event_possible (row, good_side)
+    DIM port AS INTEGER: DIM found AS INTEGER
+    event_possible = 1
+    SELECT CASE event_effect(row)
+        CASE EFFECT_SHIPS
+            IF fleet_city(good_side) = 0 OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN event_possible = 0
+        CASE EFFECT_SHIPS_TO_PORT
+            CALL event_delivery_port(good_side, port, found)
+            IF found = 0 OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN event_possible = 0
+    END SELECT
+END FUNCTION
+
+' The port where new ships are delivered to a side: the port of its fleet, or without a
+' fleet in port the side's first sea port that the enemy's fleet is not in. found is 0 when
+' there is none.
+SUB event_delivery_port (side, port, found)
+    DIM i AS INTEGER
+    port = 0: found = 0
+    IF fleet_size(side) > 0 AND fleet_city(side) <> FLEET_AT_SEA THEN
+        port = fleet_city(side): found = 1
+        EXIT SUB
+    END IF
+    FOR i = 1 TO MAX_CITIES
+        IF city_owner(i) = side AND city_port_type(i) = PORT_SEA AND fleet_city(other_side(side)) <> i THEN port = i: found = 1: EXIT FOR
+    NEXT i
+END SUB
+
+' Carries out an event's effect for the side it is good for. weight is 1 to 5, from the
+' Balance setting. It sets event_city for a riot and event_army for a reinforcement.
+SUB event_apply (row, good_side, weight)
+    DIM bad_side AS INTEGER: DIM i AS INTEGER: DIM first AS INTEGER: DIM new_ships AS INTEGER: DIM port AS INTEGER: DIM found AS INTEGER
+    DIM amount!: DIM second!
+    bad_side = other_side(good_side)
+    amount! = event_amount!(row, 0): second! = event_amount!(row, 1)
+    SELECT CASE event_effect(row)
+        CASE EFFECT_POINTS
+            side_victory_points(good_side) = side_victory_points(good_side) + amount!
+            side_victory_points(bad_side) = side_victory_points(bad_side) + second!
+        CASE EFFECT_ENEMY_POINTS_TIMES
+            side_victory_points(bad_side) = amount! * side_victory_points(bad_side)
+        CASE EFFECT_CASH
+            side_cash(good_side) = side_cash(good_side) + amount! * weight
+        CASE EFFECT_SHIPS, EFFECT_SHIPS_TO_PORT
+            IF event_effect(row) = EFFECT_SHIPS_TO_PORT THEN CALL event_delivery_port(good_side, port, found)
+            fleet_size(good_side) = fleet_size(good_side) + amount! * weight
+            IF fleet_size(good_side) > MAX_FLEET_SHIPS THEN fleet_size(good_side) = MAX_FLEET_SHIPS
+            new_ships = fleet_size(good_side) - LEN(fleet_ships$(good_side))
+            fleet_ships$(good_side) = fleet_ships$(good_side) + STRING$(new_ships, "W")
+            IF event_effect(row) = EFFECT_SHIPS_TO_PORT THEN fleet_city(good_side) = port
+        CASE EFFECT_REINFORCE
+            ' The men join army 0, which is no army, as in the original game (TODO.md).
+            event_army = 0
+            army_size(event_army) = army_size(event_army) + amount! * weight
+            army_experience(event_army) = MAX_EXPERIENCE: army_supply(event_army) = MAX_SUPPLY
+        CASE EFFECT_ARMIES_GROW
+            first = side_first_army(good_side)
+            FOR i = first TO first + 4
+                IF army_size(i) > 0 AND script_rnd! > .5 THEN army_size(i) = army_size(i) * amount! + second! * weight
+            NEXT i
+        CASE EFFECT_ENEMY_ARMIES_TIMES
+            FOR i = side_first_army(bad_side) TO side_last_army(bad_side)
+                army_size(i) = amount! * army_size(i)
+            NEXT i
+        CASE EFFECT_EXPERIENCE
+            FOR i = side_first_army(good_side) TO side_last_army(good_side)
+                IF army_experience(i) + amount! <= MAX_EXPERIENCE THEN army_experience(i) = army_experience(i) + amount!
+            NEXT i
+        CASE EFFECT_CITY_NEUTRAL
+            CALL event_riot_city(bad_side, event_city)
+    END SELECT
+END SUB
+
+' A riot: a city that the side took from the other side, with no army in it, turns neutral.
+' city is 0 when no such city is found.
+SUB event_riot_city (side, city)
+    DIM k AS INTEGER: DIM candidate_city AS INTEGER
+    city = 0
+    IF opt_realism = REALISM_OFF THEN EXIT SUB
+    IF side_city_count(side) = 1 THEN EXIT SUB
+    FOR k = 1 TO 99
+        candidate_city = 1 + INT(MAX_CITIES * script_rnd!)
+        IF city_first_owner(candidate_city) <> side AND city_owner(candidate_city) = side AND city_army(candidate_city) = 0 THEN
+            city = candidate_city: city_owner(candidate_city) = SIDE_NONE: EXIT SUB
+        END IF
+    NEXT k
+END SUB
+
+' The row of the event with a name of EVENTS.DAT, in lower case. 0 when there is none.
+FUNCTION event_find (name$)
+    DIM row AS INTEGER
+    event_find = 0
+    FOR row = 1 TO event_count
+        IF event_name$(row) = name$ THEN event_find = row: EXIT FUNCTION
+    NEXT row
+END FUNCTION

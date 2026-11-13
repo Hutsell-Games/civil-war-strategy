@@ -1,55 +1,25 @@
 ' The special events as the player sees them: the message of each, and its tune. The rules are
-' in game/events.bm.
+' in rules/events.bm. The events and their texts come from scenarios/EVENTS.DAT (load_events).
 
 SUB special_events
-    DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER: DIM nation$: DIM message$
+    DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER
     CALL event_roll(event, variant, event_side)
     IF event = EVENT_NONE THEN EXIT SUB
-    IF event = EVENT_IRONCLADS THEN
+    ' An announcement: its text on the bottom line, and an alarm.
+    IF event_before(event) <> 0 THEN
         COLOR COLOR_YELLOW: CALL clear_bottom_line
-        PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
+        PRINT event_message$(event_text$(event, variant));
         IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
         CALL wait_key("I")
         EXIT SUB
     END IF
-    CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "SPECIAL EVENT...";
-    IF event = EVENT_RIOTS THEN CALL event_riot(event_side): EXIT SUB
+    CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT event_banner$;
+    IF event_effect(event) = EFFECT_CITY_NEUTRAL THEN CALL event_show_city(event): EXIT SUB
     IF event_side = SIDE_UNION THEN CALL clear_bottom_line
-    SELECT CASE event
-        CASE EVENT_ENGLISH_SHIPS
-            CALL scribe_message("England has given ships to the South", SHOW_BOX)
-            CALL draw_fleets
-        CASE EVENT_MERCENARIES
-            nation$ = "French": IF variant = 1 THEN nation$ = "British"
-            CALL scribe_message(nation$ + " mercenaries join " + army_name$(0) + "'s army", SHOW_BOX)
-        CASE EVENT_LOAN
-            CALL scribe_message("The South has obtained a loan from Europe", SHOW_BOX)
-        CASE EVENT_COTTON
-            CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", SHOW_BOX)
-        CASE EVENT_UPRISING
-            message$ = "Union troops diverted to fight Western Indian uprisings"
-            IF variant = 1 THEN message$ = "Union 90-day enlistees return home"
-            IF variant = 2 THEN message$ = "20% of Union forces take furloughs to vote in 1864 elections"
-            CALL scribe_message(message$, SHOW_BOX)
-        CASE EVENT_SHIPWORKS
-            CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
-        CASE EVENT_VOLUNTEERS
-            CALL scribe_message("Volunteer troops swell the Union ranks", SHOW_BOX)
-        CASE EVENT_EMANCIPATION
-            CALL scribe_message("Abraham Lincoln announces the Emancipation Proclamation", SHOW_BOX)
-            CALL draw_map
-        CASE EVENT_REELECTION
-            CALL scribe_message("Lincoln has been reelected", SHOW_BOX)
-        CASE EVENT_DONATIONS
-            CALL scribe_message("Wealthy Unionists give generously to the Federal Cause", SHOW_BOX)
-        CASE EVENT_DESERTERS
-            CALL scribe_message("Rebel deserters leave the battlefield to go home", SHOW_BOX)
-        CASE EVENT_RIFLES
-            CALL scribe_message("Union soldiers now have repeating rifles", SHOW_BOX)
-            CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
-        CASE EVENT_STANTON
-            CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
-    END SELECT
+    CALL scribe_message(event_message$(event_text$(event, variant)), SHOW_BOX)
+    IF event_then(event) <> 0 THEN CALL scribe_message(event_message$(event_text$(event_then(event), 0)), SHOW_BOX)
+    IF event_redraw(event) = REDRAW_FLEETS THEN CALL draw_fleets
+    IF event_redraw(event) = REDRAW_MAP THEN CALL draw_map
 
     IF event_side = SIDE_UNION THEN
         IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
@@ -60,16 +30,37 @@ SUB special_events
     END IF
 END SUB
 
-' A riot: a city that the side took from the other side, with no army in it, turns neutral.
-SUB event_riot (side)
-    DIM city AS INTEGER
-    CALL event_riot_city(side, city)
-    IF city = 0 THEN EXIT SUB
+' An event that turned a city neutral: its text on the bottom line, the cities drawn again,
+' then its outcome in a box. Nothing is shown when no city was found.
+SUB event_show_city (event)
+    IF event_city = 0 THEN EXIT SUB
     CALL clear_bottom_line: COLOR COLOR_WHITE
-    PRINT " Riots have broken out in "; city_name$(city);
+    PRINT event_message$(event_text$(event, 0));
     CALL draw_cities
     wait_seconds opt_pause!
     CALL clear_bottom_line
-    CALL show_message_box(city_name$(city) + " is now NEUTRAL !", COLOR_RED)
+    CALL show_message_box(event_message$(event_outcome$(event)), COLOR_RED)
     wait_seconds opt_pause!
+END SUB
+
+' An event's text with {city}, {army} and {side} filled in: the city of a riot, the army that
+' was reinforced and the side the effect was for (event_city, event_army and
+' event_target_side, set by event_roll).
+FUNCTION event_message$ (text$)
+    DIM message$
+    message$ = text$
+    CALL text_replace(message$, "{city}", city_name$(event_city))
+    CALL text_replace(message$, "{army}", army_name$(event_army))
+    CALL text_replace(message$, "{side}", side_name$(event_target_side))
+    event_message$ = message$
+END FUNCTION
+
+' Puts with$ in place of every find$ in text$.
+SUB text_replace (text$, find$, with$)
+    DIM at AS INTEGER
+    at = INSTR(text$, find$)
+    DO WHILE at > 0
+        text$ = LEFT$(text$, at - 1) + with$ + MID$(text$, at + LEN(find$))
+        at = INSTR(at + LEN(with$), text$, find$)
+    LOOP
 END SUB

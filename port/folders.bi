@@ -4,4 +4,4 @@
 ' Included by cws.bi. The forward slash works on Windows too.
 ' ===========================================================================
 CONST GFXDIR = "graphics/"      ' pictures (.VGA): the icon, the mountains, the faces and the forts
-CONST SCNDIR = "scenarios/"     ' the map (CITIES.GRD), the setup (CWS.INI), the leaders (CWSLEAD.DAT), and the alternate map's three files
+CONST SCNDIR = "scenarios/"     ' the map (CITIES.GRD), the setup (CWS.INI), the leaders (CWSLEAD.DAT), the special events (EVENTS.DAT), and the alternate map's three files

@@ -74,7 +74,7 @@ SUB calculate_battle (attacker, defender, winner, loser)
     LOCATE 4, 71: PRINT "in"
     LOCATE 5, 69: PRINT city_name$(army_city(defender))
     winner_side = army_side(winner)
-    CALL draw_flag(winner_side, 0, 0)
+    CALL draw_large_flag(winner_side, 0, 0)
     CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender)); : CALL wait_seconds(PAUSE_LONG)
     CALL battle_losses(attacker, defender, winner, attacker_losses, defender_losses)
 

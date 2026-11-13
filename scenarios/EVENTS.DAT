@@ -1,0 +1,182 @@
+; The special events of the war. The game reads this file when it starts (load_events), and
+; stops with the line it cannot read when there is one.
+;
+; Each month the game first tries the announcements (events with "when = before"), in this
+; file's order, even with random events off. The first one that holds is the month's event.
+; Otherwise, when random events are on, it draws against the month's chance. When that
+; passes, it draws the side the event is good for, goes down that side's events in this
+; file's order, and takes the first whose "if" line holds and whose effect can be carried out.
+;
+; [events] holds what is the same for every event:
+;   banner  = the line shown before an event's message
+;   chance  = the month's chance of an event, 0 to 1: factors parted by " x ", multiplied in
+;             their order, then ", plus" a number and ", at most" a number. A factor is a
+;             number, weight (1 to 5, from the Balance setting), year, difficulty (1 to 5),
+;             or (year - a number) or (difficulty - a number).
+;
+; An event starts with its name in brackets. Its lines, each at most once but "text":
+;
+;   when    = roll (as without the line), or before: an announcement, tried before the roll.
+;             It is shown on the bottom line with an alarm, and needs no favors line.
+;   favors  = the side the event is good for: a side's name from CWS.INI, or 1 or 2
+;   for     = the side the effect is for, when it is not the side the event favors
+;   if      = conditions, parted by commas. All must hold. Without the line the event
+;             always holds, so it should be the side's last.
+;               roll above .9        a random number from 0 to 1 is drawn and compared
+;               year is 1864         also: month; cities (those the favored side holds);
+;                                    realism (the setting: 0 off, 1 on, 2 high)
+;               once                 the event has not happened in this game
+;             The comparisons are: is, above, below, at least, at most.
+;   effect  = what the event does. "x weight" means times 1 to 5, from the Balance setting.
+;               points 100 -100           victory points for the side, and for its enemy
+;               enemy points times .5     the enemy's victory points are multiplied
+;               cash 100                  cash for the side, x weight
+;               ships 1                   ships for the side's fleet, x weight; it needs a fleet
+;               ships to port 2           the same, and the fleet goes to a sea port; it needs one
+;               reinforce 100             men for one army, x weight, with full experience and supply
+;               armies grow 1.1 1         each of the side's first five armies, on a coin toss,
+;                                         is multiplied by the first number and gets the second x weight
+;               enemy armies times .9     every army of the enemy is multiplied
+;               experience 2              every army of the side gains experience
+;               city neutral              a city the enemy took, with no army in it, turns neutral
+;             "The side" is the for line's side, else the side the event favors.
+;   text    = the message. Several text lines are variants: one is picked at random.
+;             {city} is the city of "city neutral", {army} the army of "reinforce", and
+;             {side} the name of the side the effect is for.
+;             Put the text in double quotes to keep a space at its start or end.
+;   outcome = a second message, for "city neutral": shown in a box after the text.
+;   instead = another event and a condition: when this event is taken, the condition holds
+;             and the other event's effect can be carried out, the other event happens in
+;             its place. Its conditions and effect take the side this event favors.
+;   then    = another event that also happens, with its effect and its text, for the side
+;             this event favors.
+;   redraw  = fleets or map: drawn again after the message.
+;   listed  = yes (as without the line), or no: the event is not in its side's list. Only
+;             "instead" and "then" reach it.
+;
+; An event without a text is silent: its effect is carried out and the game goes on down
+; the list.
+;
+; The order of the lines of an event does not matter. The order of the events does.
+
+[events]
+banner = SPECIAL EVENT...
+chance = .005 x (year - 1860) x weight x weight, at most .9
+
+; ---------------------------------------------------------------- announcements
+
+; Its date is the rule IRONCLAD_YEAR and IRONCLAD_MONTH of cws.bi, which the navy uses too.
+[ironclads]
+when = before
+if = realism at least 1, year is 1862, month below 3
+text = SPECIAL DEVELOPMENT : IRONCLAD ships now available
+
+; ---------------------------------------------------------------- good for the South
+
+[bonus 1864]
+favors = Rebel
+if = year is 1864, month is 1
+effect = points 50
+
+[bonus 1865]
+favors = Rebel
+if = year is 1865, month is 1
+effect = points 100
+
+[riots]
+favors = Rebel
+if = roll above .9
+effect = city neutral
+text = " Riots have broken out in {city}"
+outcome = {city} is now NEUTRAL !
+
+[english ships]
+favors = Rebel
+if = roll at most .2
+effect = ships to port 2
+text = England has given ships to the South
+redraw = fleets
+
+[mercenaries]
+favors = Rebel
+if = roll at most .1, cities at least 30
+effect = reinforce 100
+text = French mercenaries join {army}'s army
+text = British mercenaries join {army}'s army
+
+[loan]
+favors = Rebel
+if = roll at most .3, cities at least 12
+effect = cash 100
+text = The South has obtained a loan from Europe
+
+[cotton]
+favors = Rebel
+if = roll at most .5, cities at least 12
+effect = cash 100
+text = Cash from cotton sales fill the Rebel Treasury
+
+[uprising]
+favors = Rebel
+effect = enemy armies times .9
+text = Union troops diverted to fight Western Indian uprisings
+text = Union 90-day enlistees return home
+instead = furloughs if year is 1864, month above 5
+
+[furloughs]
+favors = Rebel
+listed = no
+effect = enemy armies times .8
+text = 20% of Union forces take furloughs to vote in 1864 elections
+
+; ---------------------------------------------------------------- good for the Union
+
+[shipworks]
+favors = Union
+if = roll at most .1
+effect = ships 1
+text = Union shipworks have produced extra ships
+instead = riots if roll above .95
+
+[volunteers]
+favors = Union
+if = roll at least .7
+effect = armies grow 1.1 1
+text = Volunteer troops swell the Union ranks
+
+[emancipation]
+favors = Union
+if = once, year above 1862
+effect = points 100 -100
+text = Abraham Lincoln announces the Emancipation Proclamation
+redraw = map
+
+[reelection]
+favors = Union
+if = year is 1864, month is 11
+effect = enemy points times .5
+text = Lincoln has been reelected
+
+[donations]
+favors = Union
+if = roll above .5
+effect = cash 100
+text = Wealthy Unionists give generously to the Federal Cause
+
+[deserters]
+favors = Union
+if = roll above .5, year above 1861
+effect = enemy armies times .92
+text = Rebel deserters leave the battlefield to go home
+
+[rifles]
+favors = Union
+if = roll above .5, year above 1861
+effect = experience 2
+text = Union soldiers now have repeating rifles
+then = stanton
+
+[stanton]
+favors = Union
+effect = points 10
+text = Secretary of War Stanton predicts the end of the Rebellion

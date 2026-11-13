@@ -19,10 +19,10 @@ merge into `main`, and by hand once it is on `main` (Actions, Build, Run workflo
 `civil-war-strategy` holds the game with its data files, ready to play. This branch is not merged into `main`
 yet, so the workflow has not run.
 
-Run the program from this folder. It reads its pictures from `graphics` and its map, setup and leaders from
-`scenarios`. Its settings (`CWS.CFG`), its Hall of Fame (`HISCORE.CWS`), saved games and history files stay
-beside the program. To play on the alternate map, run `ALTMAP.BAT` in `scenarios`; run it again to switch
-back.
+Run the program from this folder. It reads its pictures from `graphics` and its map, setup, leaders
+and special events from `scenarios`. Its settings (`CWS.CFG`), its Hall of Fame (`HISCORE.CWS`),
+saved games and history files stay beside the program. To play on the alternate map, run
+`ALTMAP.BAT` in `scenarios`; run it again to switch back.
 
 Four things of the DOS game are pictures and text in `docs` now, because the DOS programs that showed them
 have no source: the title screen, the burning capital, the picture of Lincoln, and the help screens of F1

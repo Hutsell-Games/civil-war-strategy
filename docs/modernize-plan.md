@@ -154,8 +154,9 @@ records"). Its step 1, the script and `sides`, was committed as `3043c01`, and s
 `trains`, as `ae6da81`. Both were taken back in `a04672d`, and phase 10 is closed with no records
 (2026-11-12; "Why no records", below).
 
-**Next:** phase 11, the war's own content. Its plan is drafted below ("Phase 11: the war's own
-content"); the user answers its three open questions before any code changes.
+**Next:** phase 11, the war's own content. Question 1 is answered (data files); the special events,
+their rules and their texts, are in `scenarios\EVENTS.DAT`. Questions 2 and 3 are still open before
+steps 1 and 3–4.
 
 Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show_gaps.py`,
 `var_uses.py`, `count_numbers.py`). They are not committed.
@@ -217,9 +218,7 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 
 Of the 178 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
-only with the sound on. In `game\events.bm` five are left: the cap `chance! > .9` (it needs the year 1868),
-the cap of the Rebel fleet at 10 ships, the `EXIT SUB` after the volunteers' loop, which leaves at its
-sixth army, and the riot's two early returns (realism off; a side with one city).
+only with the sound on. In `rules\events.bm` one is left: the riot's early return for a side with one city.
 
 A step of phases 7 to 9 that rewrites a line still looks that line up in `tests\out\coverage\report.txt`
 first (`play.py coverage`).
@@ -416,7 +415,7 @@ undone, for the reason above: the places that clear an army do not clear the sam
 
 ## Phase 11: the war's own content
 
-Drafted 2026-11-12. Not started: its questions are open (below).
+Drafted 2026-11-12. Question 1 answered 2026-11-13 (below). Questions 2 and 3 are still open.
 
 ### The test of this phase
 
@@ -433,11 +432,12 @@ Surveyed on 2026-11-12 at `a04672d`.
 |------|-------------|---------------:|
 | Side names, month names, start date, victory rules, starting armies and cash | `scenarios\CWS.INI` (data already) | |
 | Leaders; cities and roads | `scenarios\CWSLEAD.DAT`, `CITIES.GRD` (data already) | |
-| The events' rules, the tunes, the victory screens | `game\events.bm`, `tunes.bm`, `victory_screens.bm` (in `game\` already) | 431 |
-| The events' texts ("Lincoln has been reelected") and their two tunes | `ui\events.bm` | 15 texts |
+| The tunes, the victory screens | `game\tunes.bm`, `victory_screens.bm` (in `game\` already) | 275 |
+| The events: when each happens, what it does and its texts ("Lincoln has been reelected") | `scenarios\EVENTS.DAT` (data since 2026-11-13; read by `load_events`, rolled by `rules\events.bm`, shown by `ui\events.bm`) | 18 events |
+| The events' two tunes | `ui\events.bm` (`PLAY` strings) | 2 |
 | Other texts that name the war ("Union", "Rebel", "ironclad") | `ui\options.bm` 6, `ui\reports.bm` 5, `ui\victory.bm` 3, `ui\battle.bm` 2, `ui\orders.bm` 2, `commands\navy.bm` 2, `rules\army.bm` 2, `ui\navy.bm` 1, `draw\pictures.bm` 1 | 24 texts |
 | The map's line work | `draw\map.bm` (`draw_map`, `draw_map_touchup`), `draw\pictures.bm` (`draw_chesapeake`) | about 410 |
-| The flags | `draw\icons.bm` (`draw_flag`, `draw_flag_icon`) | about 55 |
+| The flags | `draw\icons.bm` (`draw_large_flag`, `draw_flag_icon`) | about 55 |
 | The title, the cannon, the ironclad and the schooner | `draw\pictures.bm`, `draw\ships.bm` | about 370 |
 | The rule numbers (prices, the ironclads' date, the first year) | `cws.bi`, the block "The Civil War's own rule numbers" | 10 constants |
 | Rules that treat the two sides differently (the Union's two extra supply in `rules\army.bm` line 61, `union_income_bonus`) | `rules\`, `ai\` | not yet counted |
@@ -447,9 +447,14 @@ Surveyed on 2026-11-12 at `a04672d`.
 1. **Move what is the war's and is already a SUB**: the flags, the map's line work, the title,
    the cannon and the two ship pictures go to `game\`, whole (as phase 6 moved SUBs). The ten
    rule constants go to a `game\rules.bi`.
-2. **The events' texts** leave `ui\events.bm` for `game\`.
+2. **The events** leave `game\events.bm` and `ui\events.bm` for `scenarios\EVENTS.DAT`, rules and
+   texts (done 2026-11-13; question 1; `modernize-completed.md`, "Phase 11 step 2"). The code
+   keeps ten effects and names no event. An event that needs an eleventh effect needs code. Wars
+   of Napoleon's events fit the file's form; six of its effects and two conditions would need
+   code. Still in `ui\events.bm`: the two `PLAY` tunes, the alarm of an announcement, and the
+   bottom line cleared only for an event of the Union's roll.
 3. **The other 24 texts**, each looked at: a text that only uses `side_name$()` already passes
-   the test; one that spells "Union" does not.
+   the test; one that spells "Union" does not. Those that fail go to a data file too (question 1).
 4. **List the rules that treat the sides differently**, with a name for each. Whether they move
    is a question for the engine split, not for this phase.
 5. **A list of what QB64 made awkward**, kept from step 1 on. It is the evidence for whether
@@ -457,7 +462,9 @@ Surveyed on 2026-11-12 at `a04672d`.
 
 ### Open questions
 
-1. **Texts: code in `game\`, or a data file?** Decision 19 says data files.
+1. **Texts: code in `game\`, or a data file?** **Data files** (user, 2026-11-13). The events
+   are in `scenarios\EVENTS.DAT`, with their rules: the user asked that the code not know which war
+   is fought. The other 24 war-naming strings follow the same rule in step 3.
 2. **The map's line work: code in `game\`, or a data file read by a small drawer?** Decision 19
    says a data file.
 3. **Are steps 1 to 4 the right size**, given the test above, or should the phase stop after

@@ -55,10 +55,11 @@ game plays changes the recorded screens.
 - **An army that surrenders or is crushed gives 25 victory points to its own side.** `turn_army_lost`
   adds them to `other_side` of the winner's side (`TestTurnArmyLost`). A battle's winner gets a point in
   `battle_apply_losses`, so the 25 were most likely meant for the winner too.
-- **The French or British mercenaries join army 0.** `event_roll` (`game\events.bm`) adds them to
-  `army_size(index)`, and `index` is never set, so the 10,000 men and the best experience go to army 0,
-  the slot that `army_combine` gathers armies in. The message names `army_name$(0)`
-  (`TestEventMercenariesJoinArmyZero`). It was most likely meant for one of the Rebels' armies.
+- **The French or British mercenaries join army 0.** `event_apply` (`rules\events.bm`, the effect
+  `reinforce`) adds them to army 0, as the original did with an `index` that was never set, so
+  the 10,000 men and the best experience go to army 0, the slot that `army_combine` gathers
+  armies in. The message names `army_name$(0)` (`TestEventMercenariesJoinArmyZero`). It was most
+  likely meant for one of the Rebels' armies.
 - **A fleet sunk in naval combat gives 10 victory points to its own side.** `navy_fleet_defeated`
   (`rules\navy.bm`) adds them to the loser, as both of the original's two blocks did
   (`TestNavyFleetDefeated`). A fleet sunk by a shore battery gives 5 to the other side
@@ -147,8 +148,9 @@ Left alone by group 7 (the rule numbers):
 - **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 49), where the cities are read. The 200
   may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
-- **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 101). That is
-  the date of an event, not `IRONCLAD_YEAR`, so it stays; phase 11 moves the events' dates to data.
+- **The Emancipation Proclamation comes after 1862** (`year above 1862`, `[emancipation]` in
+  `scenarios\EVENTS.DAT`). That is the date of an event, not `IRONCLAD_YEAR`; phase 11 moved the
+  events' dates to data (2026-11-13).
 - **`ai_fortify` compares `side_cash` with no index**: `side_cash < 222` (`ai\ai.bm` line 30). Every other use
   is `side_cash(who)`. Here `side_cash` is a local scalar, declared so that `OPTION _EXPLICIT` accepts it,
   and it is always 0, as the original's undeclared `cash` was. So the test is always true.

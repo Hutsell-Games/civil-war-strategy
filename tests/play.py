@@ -811,7 +811,8 @@ def unit_test_counts(tools: Tools, folder: Path, jobs: int) -> Path | None:
     log = folder / "unit-tests-log.txt"
     print("running the unit tests with --coverage ...", flush=True)
     env = dict(os.environ, QB64RUST_COVERAGE=str(raw))
-    cmd = [str(tools.exes["rust"]), "test", "tests", "--coverage", "--jobs", str(jobs)]
+    # The test file by name: `test tests` would also run the copies of it that tools leave in tests/out.
+    cmd = [str(tools.exes["rust"]), "test", "tests/rules_test.bas", "--coverage", "--jobs", str(jobs)]
     with open(log, "wb") as out:
         rc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, cwd=GAME, env=env).returncode
     print(f"{'FAIL' if rc else 'ok  '}  unit tests" + (f": exit code {rc}; see {rel(log)}" if rc else ""))

@@ -1,5 +1,5 @@
 ' Unit tests of the game's rules that draw nothing.
-' Run from the repo's folder:  qb64rust test tests
+' Run from the repo's folder:  qb64rust test tests/rules_test.bas
 '
 ' Each test runs in a program of its own, so every shared array starts at
 ' zero. A test sets the few values the SUB reads, calls it and checks what
@@ -821,63 +821,506 @@ SUB TestAiRecruitPickSmallArmy
 END SUB
 
 ' ------------------------------------------------------ the special events
-' script_dice$ gives event_roll its draws, as CWS_DICE does under a script.
-' The Balance setting 5, difficulty 3 and 1863 give a chance of .135; a draw
-' of 0 passes it.
+' The events are rows of the table read from scenarios\EVENTS.DAT. event_find gives the row
+' of a name. script_dice$ gives event_roll its draws, as CWS_DICE does under a script: the
+' chance of an event, the side, then the draws of the side's events in the file's order.
+' The Balance setting 5, difficulty 3 and 1863 give a chance of .135; a draw of 0 passes it.
+' A second draw of 0 gives the South's events, one of .9 the Union's.
+
+' Reads the game's events table, and sets what most tests of event_roll start from.
+' A test's program moves to its own folder when it starts; _STARTDIR$ is this file's folder.
+SUB events_for_test
+    side_name$(1) = "Union": side_name$(2) = "Rebel"
+    CALL load_events(_STARTDIR$ + "/../scenarios/events.dat")
+    opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+END SUB
+
+SUB TestLoadEventsReadsTheTable
+    CALL events_for_test
+    AssertEqualStr "", event_file_error$, "the whole file was read"
+    AssertEqualInt 18, event_count, "an announcement, nine events for the South and eight for the Union"
+    AssertEqualStr "SPECIAL EVENT...", event_banner$, "the banner"
+    AssertEqualInt 4, chance_count, "the chance has four factors"
+    AssertEqualInt CHANCE_YEAR, chance_kind(2), "the second: the years"
+    AssertEqualInt 1860, chance_value#(2), "since 1860"
+    AssertEqualInt 1, chance_has_most, "the chance has a cap"
+    row = event_find("ironclads")
+    AssertEqualInt 1, event_before(row), "an announcement"
+    AssertEqualInt SIDE_NONE, event_favors(row), "that favors no side"
+    row = event_find("riots")
+    AssertEqualInt SIDE_REBEL, event_favors(row), "the side by its name"
+    AssertEqualInt 0, event_before(row), "an event of the roll"
+    AssertEqualInt EFFECT_CITY_NEUTRAL, event_effect(row), "an effect without a number"
+    AssertEqualStr " Riots have broken out in {city}", event_text$(row, 0), "quotes keep the space at the start"
+    AssertEqualStr "{city} is now NEUTRAL !", event_outcome$(row), "the outcome"
+    row = event_find("mercenaries")
+    AssertEqualInt 2, event_text_count(row), "two texts"
+    AssertEqualInt 2, event_if_count(row), "two conditions"
+    AssertEqualInt SUBJECT_CITIES, condition_subject(event_if_first(row) + 1), "the second: the cities"
+    AssertEqualInt RELATION_AT_LEAST, condition_relation(event_if_first(row) + 1), "at least"
+    AssertEqualInt 30, condition_value!(event_if_first(row) + 1), "30"
+    row = event_find("uprising")
+    AssertEqualInt event_find("furloughs"), event_instead(row), "instead names an event further down"
+    AssertEqualInt 2, event_instead_count(row), "with two conditions"
+    AssertEqualInt 0, event_listed(event_find("furloughs")), "which is not in the list"
+    row = event_find("emancipation")
+    AssertEqualInt 100, event_amount!(row, 0), "the effect's first number"
+    AssertEqualInt -100, event_amount!(row, 1), "and its second"
+    AssertEqualInt REDRAW_MAP, event_redraw(row), "the map is drawn again"
+    AssertEqualInt event_find("stanton"), event_then(event_find("rifles")), "then names an event"
+END SUB
+
+' The ironclads' announcement repeats the rule's date (IRONCLAD_YEAR, IRONCLAD_MONTH of
+' cws.bi), which the navy uses. The two must agree.
+SUB TestEventIroncladsMatchTheRule
+    CALL events_for_test
+    row = event_find("ironclads")
+    first = event_if_first(row)
+    AssertEqualInt 3, event_if_count(row), "the Realism setting, the year and the month"
+    AssertEqualInt SUBJECT_YEAR, condition_subject(first + 1), "the year"
+    AssertEqualInt IRONCLAD_YEAR, condition_value!(first + 1), "is IRONCLAD_YEAR"
+    AssertEqualInt SUBJECT_MONTH, condition_subject(first + 2), "the month"
+    AssertEqualInt RELATION_BELOW, condition_relation(first + 2), "below"
+    AssertEqualInt IRONCLAD_MONTH, condition_value!(first + 2), "IRONCLAD_MONTH"
+END SUB
+
+' The chance line gives the same number as the line it replaced, bit for bit, for every year
+' of the war and every weight.
+SUB TestEventChanceAsBefore
+    CALL events_for_test
+    FOR turn_year = 1861 TO 1870
+        FOR w = 1 TO 5
+            old! = .005 * (turn_year - 1860) * w * w: IF old! > .9 THEN old! = .9
+            AssertEqualSingle old!, event_chance!(w), "the year" + STR$(turn_year) + ", weight" + STR$(w)
+        NEXT w
+    NEXT turn_year
+END SUB
+
+' Writes an events file of the test's own and reads it. The lines are parted by "|".
+SUB events_from_text (lines$)
+    rest$ = lines$
+    f = FREEFILE: OPEN TestTempDir$ + "events.dat" FOR OUTPUT AS #f
+    DO WHILE rest$ <> ""
+        cut = INSTR(rest$, "|")
+        IF cut = 0 THEN PRINT #f, rest$: rest$ = "" ELSE PRINT #f, LEFT$(rest$, cut - 1): rest$ = MID$(rest$, cut + 1)
+    LOOP
+    CLOSE #f
+    side_name$(1) = "Union": side_name$(2) = "Rebel"
+    CALL load_events(TestTempDir$ + "events.dat")
+END SUB
+
+' The reason of event_file_error$, without the file and the line.
+FUNCTION events_why$
+    events_why$ = MID$(event_file_error$, INSTR(event_file_error$, ": ") + 2)
+END FUNCTION
+
+SUB TestLoadEventsNamesTheLineItCannotRead
+    CALL events_from_text("; a comment|[rain]|favors = 2|effect = rain 3|text = never read")
+    AssertEqualStr TestTempDir$ + "events.dat, line 4: unknown effect: rain", event_file_error$, "an effect that is not known"
+    AssertEqualInt SIDE_REBEL, event_favors(1), "favors takes a number too"
+    AssertEqualInt 0, event_text_count(1), "the reading stops at the line"
+    CALL events_from_text("[rain]|favors = France")
+    AssertEqualStr "favors needs a side's name, 1 or 2", events_why$, "a side that is not known"
+    CALL events_from_text("[rain]|favors = 1x")
+    AssertEqualStr "favors needs a side's name, 1 or 2", events_why$, "a number with more after it"
+    CALL events_from_text("[rain]|favors = 1|for = Spain")
+    AssertEqualStr "for needs a side's name, 1 or 2", events_why$, "for"
+    CALL events_from_text("[rain]|when = later")
+    AssertEqualStr "when needs before or roll", events_why$, "when"
+    CALL events_from_text("[rain]|listed = false")
+    AssertEqualStr "listed needs yes or no", events_why$, "listed"
+    CALL events_from_text("[rain]|favors = Union|if = year 1864")
+    AssertEqualStr "cannot read the condition: year 1864", events_why$, "a condition without its comparison"
+    CALL events_from_text("[rain]|favors = Union|if = day is 4")
+    AssertEqualStr "cannot read the condition: day is 4", events_why$, "a subject that is not known"
+    CALL events_from_text("[rain]|favors = Union|if = year near 1864")
+    AssertEqualStr "cannot read the condition: year near 1864", events_why$, "a comparison that is not known"
+    CALL events_from_text("[rain]|favors = Union|if = roll above x")
+    AssertEqualStr "cannot read the condition: roll above x", events_why$, "a number that is not a number"
+    CALL events_from_text("[rain]|favors = Union|if = roll above .5.5")
+    AssertEqualStr "cannot read the condition: roll above .5.5", events_why$, "two points"
+    CALL events_from_text("[rain]|favors = Union|instead = snow")
+    AssertEqualStr "instead needs an event, the word if and a condition", events_why$, "instead without a condition"
+    CALL events_from_text("[rain]|favors = Union|redraw = sky")
+    AssertEqualStr "redraw needs fleets or map", events_why$, "redraw"
+    CALL events_from_text("[rain]|favors = Union|weather = wet")
+    AssertEqualStr "unknown line: weather", events_why$, "a line that is not known"
+    CALL events_from_text("[rain]|favors = Union|text = a|text = b|text = c|text = d|text = e")
+    AssertEqualStr "too many texts", events_why$, "five texts"
+    CALL events_from_text("[rain]|a line")
+    AssertEqualStr "the line has no =", events_why$, "no ="
+    CALL events_from_text("favors = Union")
+    AssertEqualStr "the line belongs to no event: favors", events_why$, "a line before the first event"
+    CALL events_from_text("[rain")
+    AssertEqualStr "a name in brackets needs its ]", events_why$, "a bracket left open"
+    CALL events_from_text("[rain]|favors = 1|[rain]")
+    AssertEqualStr "a second event named rain", events_why$, "a name twice"
+    CALL events_from_text("[rain]|favors = 1|favors = 2")
+    AssertEqualStr "a second favors line", events_why$, "a line twice"
+    CALL events_from_text("[rain]|if = once|effect = cash 1|if = roll above .5")
+    AssertEqualStr "a second if line", events_why$, "if twice"
+    CALL events_from_text("[events]|banner = a|[events]")
+    AssertEqualStr "a second [events]", events_why$, "[events] twice"
+    CALL events_from_text("[events]|banner = a|banner = b")
+    AssertEqualStr "a second banner line", events_why$, "banner twice"
+    CALL events_from_text("[events]|motto = none")
+    AssertEqualStr "unknown line in [events]: motto", events_why$, "a line of [events] that is not known"
+END SUB
+
+' Each effect takes the numbers it needs, no more and no fewer.
+SUB TestLoadEventsCountsTheEffectsNumbers
+    CALL events_from_text("[rain]|effect = cash")
+    AssertEqualStr "cash needs 1 number", events_why$, "cash without its amount"
+    CALL events_from_text("[rain]|effect = cash 1.2.3")
+    AssertEqualStr "unknown effect: cash 1.2.3", events_why$, "an amount that is not a number"
+    CALL events_from_text("[rain]|effect = points")
+    AssertEqualStr "points needs 1 or 2 numbers", events_why$, "points"
+    CALL events_from_text("[rain]|effect = armies grow 1.1")
+    AssertEqualStr "armies grow needs 2 numbers", events_why$, "armies grow"
+    CALL events_from_text("[rain]|effect = city neutral 3")
+    AssertEqualStr "city neutral needs no number", events_why$, "city neutral"
+    CALL events_from_text("[rain]|effect = points 1 2 3")
+    AssertEqualStr "too many numbers in the effect", events_why$, "three numbers"
+END SUB
+
+SUB TestLoadEventsReadsTheChance
+    CALL events_from_text("[events]|banner = b|chance = .05 x (difficulty - 3), plus .1")
+    AssertEqualStr "", event_file_error$, "read"
+    opt_difficulty = 5
+    AssertEqualSingle .05 * (5 - 3) + .1, event_chance!(1), "as Wars of Napoleon works it out"
+    CALL events_from_text("[events]|banner = b|chance = year x difficulty x 2")
+    turn_year = 3: opt_difficulty = 4
+    AssertEqualSingle 24, event_chance!(1), "the year and the difficulty alone"
+    CALL events_from_text("[events]|banner = b|chance = .05 x luck")
+    AssertEqualStr "cannot read the chance: luck", events_why$, "a factor that is not known"
+    CALL events_from_text("[events]|banner = b|chance = (year - x)")
+    AssertEqualStr "cannot read the chance: (year - x)", events_why$, "a year less a word"
+    CALL events_from_text("[events]|banner = b|chance = (weight - 1)")
+    AssertEqualStr "cannot read the chance: (weight - 1)", events_why$, "only the year and the difficulty take a number off"
+    CALL events_from_text("[events]|banner = b|chance = .1, minus 2")
+    AssertEqualStr "cannot read the chance: minus 2", events_why$, "a part after the factors that is not known"
+    CALL events_from_text("[events]|banner = b|chance = .1, at most y")
+    AssertEqualStr "cannot read the chance: at most y", events_why$, "a cap that is not a number"
+    CALL events_from_text("[events]|banner = b|chance = 1 x 1 x 1 x 1 x 1 x 1 x 1")
+    AssertEqualStr "too many factors in the chance", events_why$, "seven factors"
+END SUB
+
+SUB TestLoadEventsChecksNamesAtTheEnd
+    CALL events_from_text("[rain]|text = wet")
+    AssertEqualStr TestTempDir$ + "events.dat, [rain]: has no favors line", event_file_error$, "favors is needed"
+    CALL events_from_text("[rain]|when = before|effect = cash 1")
+    AssertEqualStr "has an effect but no side: it needs a favors or a for line", events_why$, "an announcement with an effect"
+    CALL events_from_text("[rain]|favors = Union|then = snow")
+    AssertEqualStr "names an event that is not there: snow", events_why$, "then"
+    CALL events_from_text("[rain]|favors = Union|instead = hail if roll above .5")
+    AssertEqualStr "names an event that is not there: hail", events_why$, "instead"
+    CALL events_from_text("[events]|chance = .1|[rain]|favors = 1")
+    AssertEqualStr TestTempDir$ + "events.dat: [events] needs a banner line", event_file_error$, "the banner"
+    CALL events_from_text("[events]|banner = a")
+    AssertEqualStr "[events] needs a chance line", events_why$, "the chance"
+END SUB
+
+SUB TestLoadEventsStopsAtTheLimits
+    many$ = ""
+    FOR i = 1 TO MAX_EVENTS + 1: many$ = many$ + "[e" + LTRIM$(STR$(i)) + "]|": NEXT i
+    CALL events_from_text(many$)
+    AssertEqualStr "too many events", events_why$, "41 events"
+    many$ = "[rain]|favors = Union|"
+    FOR i = 1 TO 13: many$ = many$ + "[r" + LTRIM$(STR$(i)) + "]|favors = 1|if = once, once, once, once, once, once, once, once, once, once|": NEXT i
+    CALL events_from_text(many$)
+    AssertEqualStr "too many conditions", events_why$, "130 conditions"
+END SUB
+
+' A file of the test's own: the code knows no event by name. The chance is that of Wars of
+' Napoleon. A third text is picked by a draw above two thirds, every comparison is used, and
+' {side} names the side.
+SUB TestEventsOfAnotherWar
+    CALL events_from_text("[events]|banner = b|chance = .05 x (difficulty - 3), plus .1|[tribute]|favors = 1|when = roll|listed = yes|if = month below 3, cities at most 4, year at least 1805|effect = cash 10|text = a|text = b|text = {side} is paid|[calm]|favors = 1|effect = points 1|text = calm")
+    AssertEqualStr "", event_file_error$, "read"
+    opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863: turn_month = 2
+    side_city_count(1) = 4
+    script_dice$ = "0.1,.9,.7"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("tribute"), event, "a draw of .1 passes the chance of .1, and side 1's first event holds"
+    AssertEqualInt 2, variant, "a draw above two thirds: the third text"
+    AssertEqualInt 30, side_cash(1), "its cash"
+    AssertEqualStr "Union is paid", event_message$(event_text$(event, variant)), "{side}"
+    turn_month = 3: script_dice$ = "0,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("calm"), event, "March: the next event"
+    script_dice$ = ".11"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt EVENT_NONE, event, "a draw of .11 fails the chance"
+END SUB
+
+' An event favors one side and its effect is for the other, as Wars of Napoleon's Hapsburgs
+' give France cash. {side} names the side the effect is for.
+SUB TestEventForAnotherSide
+    CALL events_from_text("[events]|banner = b|chance = 1|[gold]|favors = 2|for = 1|effect = cash 100|text = gold for {side}")
+    AssertEqualStr "", event_file_error$, "read"
+    opt_event_balance = 5: opt_difficulty = 3: current_side = 2
+    script_dice$ = "0,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("gold"), event, "the event of side 2"
+    AssertEqualInt 300, side_cash(1), "the cash goes to side 1"
+    AssertEqualInt 0, side_cash(2), "not to side 2"
+    AssertEqualStr "gold for Union", event_message$(event_text$(event, variant)), "{side}"
+END SUB
+
+' An announcement comes before the roll, also with random events off. One that favors a side
+' can carry out an effect, as Wars of Napoleon's Trafalgar does. A silent one lets the next
+' come.
+SUB TestEventAnnouncements
+    CALL events_from_text("[events]|banner = b|chance = 1|[quiet]|when = before|favors = 2|effect = points 5|[trafalgar]|when = before|favors = 2|if = year is 1805, month is 11, roll above .2|effect = points 40|text = Nelson|[later]|favors = 1|effect = cash 1|text = later")
+    AssertEqualStr "", event_file_error$, "read"
+    opt_event_balance = 0: turn_year = 1805: turn_month = 11
+    script_dice$ = ".5"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("trafalgar"), event, "the announcement, with random events off"
+    AssertEqualInt 0, who, "rolled for no side"
+    AssertEqualInt 45, side_victory_points(2), "the silent one first, then Trafalgar"
+    script_dice$ = ".1"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt EVENT_NONE, event, "the roll of .1 fails, and random events are off"
+    AssertEqualInt 50, side_victory_points(2), "the silent one again"
+END SUB
+
+' "instead" takes the other event only when its effect can be carried out: ships need a fleet.
+SUB TestEventInsteadNeedsItsEffect
+    CALL events_from_text("[events]|banner = b|chance = 1|[calm]|favors = 1|effect = points 1|text = calm|instead = ships if roll above .5|[ships]|favors = 1|listed = no|effect = ships 2|text = ships")
+    AssertEqualStr "", event_file_error$, "read"
+    opt_event_balance = 5: opt_difficulty = 3: current_side = 2
+    script_dice$ = "0,.9,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("calm"), event, "no fleet: no ships, so the event stays"
+    fleet_city(1) = 4: fleet_size(1) = 1: fleet_ships$(1) = "W"
+    script_dice$ = "0,.9,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("ships"), event, "with a fleet: the ships instead"
+    AssertEqualInt 7, fleet_size(1), "two for each point of plus"
+END SUB
 
 SUB TestEventIroncladsComeFirst
-    opt_realism = REALISM_ON: turn_year = IRONCLAD_YEAR: turn_month = 1
+    CALL events_for_test
+    opt_realism = REALISM_ON: turn_year = IRONCLAD_YEAR: turn_month = 1: opt_event_balance = 0
     CALL event_roll(event, variant, who)
-    AssertEqualInt EVENT_IRONCLADS, event, "January 1862 with the Realism setting"
+    AssertEqualInt event_find("ironclads"), event, "January 1862 with the Realism setting, even with random events off"
+    turn_month = IRONCLAD_MONTH
+    CALL event_roll(event, variant, who)
+    AssertEqualInt EVENT_NONE, event, "not from March"
 END SUB
 
 SUB TestEventNoneWithoutBalance
-    opt_event_balance = 0: turn_year = 1863
+    CALL events_for_test
+    opt_event_balance = 0
     CALL event_roll(event, variant, who)
     AssertEqualInt EVENT_NONE, event, "the Balance setting 0: no events"
 END SUB
 
 SUB TestEventLoanForTheSouth
-    opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+    CALL events_for_test
     side_city_count(2) = 15
     script_dice$ = "0,0,0,.5,.5,0"
     CALL event_roll(event, variant, who)
-    AssertEqualInt EVENT_LOAN, event, "no riot, no ships, no mercenaries: a loan"
+    AssertEqualInt event_find("loan"), event, "no riot, no ships, no mercenaries: a loan"
     AssertEqualInt SIDE_UNION, who, "an event rolled for the Union is good for the South"
     AssertEqualInt 300, side_cash(2), "100 for each point of plus"
 END SUB
 
+SUB TestEventCottonForTheSouth
+    CALL events_for_test
+    side_city_count(2) = 15
+    script_dice$ = "0,0,0,.5,.5,.4,.4"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("cotton"), event, "the loan's draw fails and the cotton's passes"
+    AssertEqualInt 300, side_cash(2), "100 for each point of plus"
+END SUB
+
 SUB TestEventEnglishShipsJoinFleetInPort
-    opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+    CALL events_for_test
     fleet_size(2) = 3: fleet_ships$(2) = "WWW": fleet_city(2) = 12
     script_dice$ = "0,0,0,0"
     CALL event_roll(event, variant, who)
-    AssertEqualInt EVENT_ENGLISH_SHIPS, event, "no riot, and the draw for ships passes"
+    AssertEqualInt event_find("english ships"), event, "no riot, and the draw for ships passes"
     AssertEqualInt 9, fleet_size(2), "two ships for each point of plus"
     AssertEqualStr "WWWWWWWWW", fleet_ships$(2), "all wooden"
     AssertEqualInt 12, fleet_city(2), "the fleet stays in its port"
 END SUB
 
+' Without a fleet in port the ships go to the Rebels' first sea port that the Union's fleet
+' is not in. Without such a port the event does not happen and the list goes on.
+SUB TestEventEnglishShipsNeedAPort
+    CALL events_for_test
+    city_owner(8) = 2: city_port_type(8) = PORT_SEA: city_owner(9) = 2: city_port_type(9) = PORT_SEA
+    fleet_city(1) = 8
+    script_dice$ = "0,0,0,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("english ships"), event, "a new fleet"
+    AssertEqualInt 9, fleet_city(2), "in port 9: the Union's fleet is in port 8"
+    AssertEqualInt 6, fleet_size(2), "of six ships"
+    city_owner(8) = 1: city_owner(9) = 1: fleet_size(2) = 0: fleet_ships$(2) = "": fleet_city(2) = 0
+    script_dice$ = "0,0,0,0,.5,.9,.9,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("uprising"), event, "no port: no ships, and the last event of the list comes"
+    AssertEqualInt 0, fleet_size(2), "no ships"
+END SUB
+
 SUB TestEventMercenariesJoinArmyZero
-    opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+    CALL events_for_test
     side_city_count(2) = 30
     script_dice$ = "0,0,0,.5,0,.9"
     CALL event_roll(event, variant, who)
-    AssertEqualInt EVENT_MERCENARIES, event, "30 cities: mercenaries"
+    AssertEqualInt event_find("mercenaries"), event, "30 cities: mercenaries"
     AssertEqualInt 1, variant, "British"
     AssertEqualInt 300, army_size(0), "they join army 0, as in the original (TODO.md)"
     AssertEqualInt MAX_EXPERIENCE, army_experience(0), "with the best experience"
+    army_name$(0) = "Nobody"
+    AssertEqualStr "British mercenaries join Nobody's army", event_message$(event_text$(event, variant)), "the text names army 0"
+END SUB
+
+' The South's last event. From June 1864 the furloughs take its place.
+SUB TestEventUprisingAndFurloughs
+    CALL events_for_test
+    army_size(1) = 100: army_size(21) = 100
+    script_dice$ = "0,0,0,.5,.5,.9,.9,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("uprising"), event, "every draw fails: the uprising"
+    AssertEqualInt 1, variant, "its second text"
+    AssertEqualInt 90, army_size(1), "the Union's armies lose a tenth"
+    AssertEqualInt 100, army_size(21), "the Rebels' none"
+    turn_year = 1864: turn_month = 6: army_size(1) = 100
+    script_dice$ = "0,0,0,.5,.5,.9,.9,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("furloughs"), event, "June 1864: the furloughs instead"
+    AssertEqualInt 0, variant, "its only text"
+    AssertEqualInt 80, army_size(1), "a fifth"
+END SUB
+
+' Two events without a text: the Rebels' points in January 1864 and 1865. The list goes on.
+SUB TestEventBonusInJanuary
+    CALL events_for_test
+    turn_year = 1864: turn_month = 1: side_city_count(2) = 15
+    script_dice$ = "0,0,0,.5,.5,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt 50, side_victory_points(2), "50 points in January 1864"
+    AssertEqualInt event_find("loan"), event, "and an event after it"
+    turn_year = 1865
+    script_dice$ = "0,0,0,.5,.5,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt 150, side_victory_points(2), "100 more in January 1865"
+END SUB
+
+' The South's riot is in a city the Union took. Without the Realism setting no city riots,
+' and the event is still the month's.
+SUB TestEventRiotsForTheSouth
+    CALL events_for_test
+    opt_realism = REALISM_HIGH: turn_month = 5: side_city_count(1) = 5
+    city_first_owner(7) = 2: city_owner(7) = 1: city_name$(7) = "Atlanta"
+    script_dice$ = "0,0,.95,.15"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("riots"), event, "a draw above .9"
+    AssertEqualInt 7, event_city, "the draw .15 picks city 7"
+    AssertEqualInt SIDE_NONE, city_owner(7), "it turns neutral"
+    AssertEqualStr " Riots have broken out in Atlanta", event_message$(event_text$(event, 0)), "the text names the city"
+    AssertEqualStr "Atlanta is now NEUTRAL !", event_message$(event_outcome$(event)), "and so does the outcome"
+    opt_realism = REALISM_OFF
+    script_dice$ = "0,0,.95"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("riots"), event, "the riot"
+    AssertEqualInt 0, event_city, "in no city"
+END SUB
+
+SUB TestEventShipworks
+    CALL events_for_test
+    fleet_size(1) = 2: fleet_ships$(1) = "WI": fleet_city(1) = 5
+    script_dice$ = "0,.9,0,.5"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("shipworks"), event, "the Union has a fleet, and the draw passes"
+    AssertEqualInt SIDE_REBEL, who, "an event rolled for the Rebels is good for the Union"
+    AssertEqualInt 5, fleet_size(1), "a ship for each point of plus"
+    AssertEqualStr "WIWWW", fleet_ships$(1), "wooden"
+    AssertEqualInt 5, fleet_city(1), "the fleet stays where it is"
+END SUB
+
+' A draw above .95 after the shipworks' own: a riot in a Rebel city takes their place.
+SUB TestEventRiotsInsteadOfShipworks
+    CALL events_for_test
+    fleet_size(1) = 2: fleet_ships$(1) = "WW": fleet_city(1) = 5
+    script_dice$ = "0,.9,0,.99"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("riots"), event, "the riot instead"
+    AssertEqualInt 2, fleet_size(1), "no ships"
+    fleet_city(1) = 0
+    script_dice$ = "0,.9,0,.99"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("volunteers"), event, "without a fleet: no shipworks and no riot, and .99 is the volunteers' draw"
+END SUB
+
+' Each of the Union's first five armies that has men grows on a draw above .5.
+SUB TestEventVolunteers
+    CALL events_for_test
+    army_size(1) = 100: army_size(2) = 100: army_size(6) = 100
+    script_dice$ = "0,.9,.5,.7,.6,.4,.6,.6,.6"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("volunteers"), event, "a draw of .7 or more"
+    AssertEqualInt 113, army_size(1), "a tenth more, and one for each point of plus"
+    AssertEqualInt 100, army_size(2), "its draw failed"
+    AssertEqualInt 0, army_size(3), "an army without men stays so"
+    AssertEqualInt 100, army_size(6), "the sixth army is not looked at"
 END SUB
 
 SUB TestEventEmancipation
-    opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+    CALL events_for_test
     side_victory_points(1) = 200: side_victory_points(2) = 200
     script_dice$ = "0,.9,.5,0"
     CALL event_roll(event, variant, who)
-    AssertEqualInt EVENT_EMANCIPATION, event, "the Proclamation, once, after 1862"
+    AssertEqualInt event_find("emancipation"), event, "the Proclamation, once, after 1862"
     AssertEqualInt 300, side_victory_points(1), "100 points for the Union"
     AssertEqualInt 100, side_victory_points(2), "100 from the Rebels"
-    AssertEqualInt 1, emancipation_done, "not again"
+    AssertEqualInt 1, event_done(event), "not again"
+    script_dice$ = "0,.9,.5,0,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("donations"), event, "the next time another event comes"
+    AssertEqualInt 300, side_cash(1), "100 for each point of plus"
+END SUB
+
+SUB TestEventReelection
+    CALL events_for_test
+    turn_year = 1864: turn_month = 11: event_done(event_find("emancipation")) = 1
+    side_victory_points(2) = 200
+    script_dice$ = "0,.9,.5,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("reelection"), event, "November 1864"
+    AssertEqualInt 100, side_victory_points(2), "the Rebels lose half their points"
+END SUB
+
+SUB TestEventDeserters
+    CALL events_for_test
+    event_done(event_find("emancipation")) = 1
+    army_size(1) = 100: army_size(21) = 100
+    script_dice$ = "0,.9,.5,0,0,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("deserters"), event, "no donations, and the next draw passes"
+    AssertEqualInt 92, army_size(21), "the Rebels' armies lose 8 in 100"
+    AssertEqualInt 100, army_size(1), "the Union's none"
+END SUB
+
+' The rifles are followed by Stanton's prediction: its points and its text.
+SUB TestEventRiflesThenStanton
+    CALL events_for_test
+    event_done(event_find("emancipation")) = 1
+    army_experience(1) = 5: army_experience(2) = 9: army_experience(21) = 5
+    script_dice$ = "0,.9,.5,0,0,0,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("rifles"), event, "the last draw passes"
+    AssertEqualInt 7, army_experience(1), "two more"
+    AssertEqualInt 9, army_experience(2), "not past the best experience"
+    AssertEqualInt 5, army_experience(21), "the Rebels' stay"
+    AssertEqualInt 10, side_victory_points(1), "Stanton's ten points"
+    script_dice$ = "0,.9,.5,0,0,0,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("stanton"), event, "every draw fails: Stanton alone"
+    AssertEqualInt 20, side_victory_points(1), "ten more"
 END SUB
 
 SUB TestEventRiotCity
@@ -1355,7 +1798,7 @@ SUB TestTurnNextPlayer
 END SUB
 
 SUB TestGameReset
-    game_over = 1: turn_recruit_state = -1: saves_exist = 0: emancipation_done = 1: union_income_bonus = 252
+    game_over = 1: turn_recruit_state = -1: saves_exist = 0: event_done(3) = 1: union_income_bonus = 252
     army_size(7) = 90: army_city(7) = 12: army_order(7) = 5: army_leader_rating(7) = 4: army_name$(7) = "Banks"
     fleet_size(SIDE_REBEL) = 3: fleet_city(SIDE_REBEL) = 27: train_army(SIDE_UNION) = 7: train_city(SIDE_UNION) = 30
     side_victory_points(SIDE_UNION) = 400: victory_rule(VICTORY_MONTH) = 3
@@ -1363,7 +1806,7 @@ SUB TestGameReset
     AssertEqualInt 0, game_over, "the game is on"
     AssertEqualInt 0, turn_recruit_state, "Troops open"
     AssertEqualInt 1, saves_exist, "Load open"
-    AssertEqualInt 0, emancipation_done, "no Emancipation Proclamation yet"
+    AssertEqualInt 0, event_done(3), "no event has happened yet"
     AssertEqualInt 0, union_income_bonus, "no extra income yet"
     AssertEqualInt 0, army_size(7) + army_city(7) + army_order(7) + army_leader_rating(7), "no army"
     AssertEqualStr "", army_name$(7), "nor its name"
@@ -1508,6 +1951,7 @@ END SUB
 '$INCLUDE: '../rules/navy.bm'
 '$INCLUDE: '../rules/railroad.bm'
 '$INCLUDE: '../rules/setup.bm'
+'$INCLUDE: '../rules/events.bm'
 '$INCLUDE: '../rules/turn.bm'
 '$INCLUDE: '../rules/victory.bm'
 '$INCLUDE: '../ai/ai.bm'
@@ -1536,7 +1980,6 @@ END SUB
 '$INCLUDE: '../draw/pictures.bm'
 '$INCLUDE: '../game/victory_screens.bm'
 '$INCLUDE: '../game/tunes.bm'
-'$INCLUDE: '../game/events.bm'
 '$INCLUDE: '../port/files.bm'
 '$INCLUDE: '../port/qb64.bm'
 '$INCLUDE: '../port/script.bm'

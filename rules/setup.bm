@@ -137,6 +137,7 @@ END SUB
 SUB game_new
     CALL game_reset
     CALL load_scenario
+    CALL load_events(SCNDIR + "events.dat")
     CALL game_apply_settings
     CALL set_union_advantage
     CALL load_cities
@@ -155,7 +156,7 @@ SUB game_reset
         army_name$(k) = ""
     NEXT k
     union_income_bonus = 0
-    emancipation_done = 0
+    FOR k = 1 TO MAX_EVENTS: event_done(k) = 0: NEXT k
     FOR k = SIDE_UNION TO SIDE_REBEL
         fleet_size(k) = 0
         fleet_city(k) = 0

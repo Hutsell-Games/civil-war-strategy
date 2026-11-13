@@ -10,6 +10,7 @@ replay = 0
 ' main_menu_start, the row the main menu starts on, is kept from one game to the next.
 DO
     CALL game_new
+    IF event_file_error$ <> "" THEN PRINT event_file_error$: END
     CALL show_title(replay): replay = 1
     CALL script_start
     CALL menu_title
@@ -82,6 +83,7 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'rules/navy.bm'
 ' $INCLUDE: 'rules/railroad.bm'
 ' $INCLUDE: 'rules/setup.bm'
+' $INCLUDE: 'rules/events.bm'
 ' $INCLUDE: 'rules/turn.bm'
 ' $INCLUDE: 'rules/victory.bm'
 ' $INCLUDE: 'ai/ai.bm'
@@ -110,7 +112,6 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'draw/pictures.bm'
 ' $INCLUDE: 'game/victory_screens.bm'
 ' $INCLUDE: 'game/tunes.bm'
-' $INCLUDE: 'game/events.bm'
 ' $INCLUDE: 'port/files.bm'
 ' $INCLUDE: 'port/qb64.bm'
 ' $INCLUDE: 'port/script.bm'

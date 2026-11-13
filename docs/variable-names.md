@@ -66,7 +66,7 @@ Indexed by side: 1 Union, 2 Rebel.
 | `casualty&()` | Men it has lost. | 15 | `side_casualties&()` | (stays an array) | |
 | `vptotal` | The two sides' incomes added, used for percentages in the reports. | 6 | `total_income` | (stays a scalar) | |
 | `usadv` | The Union's income bonus, set from the difficulty. | 9 | `union_income_bonus` | `game\` (phase 11) | |
-| `emancipate` | 1 once the Emancipation Proclamation event has happened. | 3 | `emancipation_done` | `game\` (phase 11) | |
+| `emancipate` | 1 once the Emancipation Proclamation event has happened. | 3 | `emancipation_done` | `game\` (phase 11) | Became `event_done()`, one flag for each event, on 2026-11-13. |
 
 ## Navy
 
