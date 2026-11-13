@@ -32,32 +32,32 @@ DIM city AS INTEGER: DIM army AS INTEGER: DIM casualties AS INTEGER: DIM damaged
 	CALL clear_bottom_line: COLOR COLOR_LIGHT_RED: PRINT side_name$(side); " fleet bombards "; city_name$(fleet_city(side));
 	CALL draw_map_marker(fleet_city(side), 0, MARK_EXPLOSION)
 
-	city = fleet_city(side): army = city_army(city): IF army = 0 GOTO deserted
-	CALL navy_bombard_army(side, army, casualties)
-	CALL clear_bottom_line: PRINT army_name$(army); " suffered "; 100 * casualties; " casualties";
-	CALL wait_seconds(opt_pause!)
-	EXIT SUB
-deserted:
-	IF city_fort(city) = 0 GOTO blast
-	CALL navy_shore_battery(side, city, damaged)
-	IF damaged = 1 GOTO hurt1
-	CALL clear_bottom_line
-	PRINT side_name$(city_owner(city)); " shore battery sunk an attacking ship!"; fleet_size(side); "ship(s) left! ";
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5
-	CALL wait_seconds(opt_pause!)
-	IF fleet_size(side) < 1 THEN
-		CALL navy_fleet_lost(side): CALL draw_navy_box
-		LOCATE 12, 27: PRINT side_name$(side); " fleet eliminated"
-		CALL wait_seconds(PAUSE_LONG)
-		CALL navy_finish_move: EXIT SUB
+	city = fleet_city(side): army = city_army(city)
+	IF army <> 0 THEN
+		CALL navy_bombard_army(side, army, casualties)
+		CALL clear_bottom_line: PRINT army_name$(army); " suffered "; 100 * casualties; " casualties";
+		CALL wait_seconds(opt_pause!)
+		EXIT SUB
 	END IF
-	GOTO deserted
-hurt1:
-	CALL clear_bottom_line: PRINT city_name$(city); " fortifications damaged";
-	CALL city_redraw_fort(city)
-	CALL wait_seconds(opt_pause!)
-	EXIT SUB
-blast:
+	DO UNTIL city_fort(city) = 0
+		CALL navy_shore_battery(side, city, damaged)
+		IF damaged = 1 THEN
+			CALL clear_bottom_line: PRINT city_name$(city); " fortifications damaged";
+			CALL city_redraw_fort(city)
+			CALL wait_seconds(opt_pause!)
+			EXIT SUB
+		END IF
+		CALL clear_bottom_line
+		PRINT side_name$(city_owner(city)); " shore battery sunk an attacking ship!"; fleet_size(side); "ship(s) left! ";
+		IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5
+		CALL wait_seconds(opt_pause!)
+		IF fleet_size(side) < 1 THEN
+			CALL navy_fleet_lost(side): CALL draw_navy_box
+			LOCATE 12, 27: PRINT side_name$(side); " fleet eliminated"
+			CALL wait_seconds(PAUSE_LONG)
+			CALL navy_finish_move: EXIT SUB
+		END IF
+	LOOP
 	CALL navy_blast(side, city, result)
 	IF result = BLAST_FIRM THEN CALL clear_bottom_line: PRINT "Citizens of "; city_name$(city); " stand firm against the attack"; : CALL wait_seconds(opt_pause!): EXIT SUB
 	IF result = BLAST_LOYAL THEN CALL clear_bottom_line: PRINT "The CAPITAL steadfastly stands loyal"; : CALL wait_seconds(opt_pause!): EXIT SUB
@@ -133,8 +133,9 @@ END SUB
 ' The fleet that raids commerce: it sinks part of the other side's income, or loses a ship
 ' and tries again while it has one.
 SUB navy_commerce_raid
-DIM ship_type AS INTEGER: DIM k AS INTEGER: DIM raider AS INTEGER: DIM sank AS INTEGER
-raid:
+DIM ship_type AS INTEGER: DIM k AS INTEGER: DIM raider AS INTEGER: DIM sank AS INTEGER: DIM again AS INTEGER
+DO
+again = 0
 CALL navy_raid_round(raider, sank)
 IF raider > 0 THEN
 	CALL clear_bottom_line
@@ -149,7 +150,7 @@ IF raider > 0 THEN
 		IF opt_sound >= SOUND_EFFECTS THEN SOUND 590, .5: SOUND 999, .5: SOUND 1999, .5
 		IF fleet_city(raider) > 0 THEN
 			wait_seconds PAUSE_LONG
-			GOTO raid
+			again = 1
 		ELSE
 			LINE (447, 291)-(525, 335), 1, BF
 			FOR k = 1 TO 5: CIRCLE (480, 315), 4 * k, 11: NEXT k
@@ -158,6 +159,7 @@ IF raider > 0 THEN
 		END IF
 	END IF
 END IF
+LOOP WHILE again = 1
 END SUB
 
 ' Ship against ship: the two fleets are in the same place. The four SUBs below are its parts.
@@ -202,13 +204,14 @@ END SUB
 ' A volley: the side's fleet and the other fire until a ship is sunk. combat_over is 1 when that
 ' ship was its fleet's last, and the fight is over.
 SUB navy_combat_volley (side, hits(), combat_over)
-DIM x AS INTEGER: DIM y AS INTEGER
+DIM x AS INTEGER: DIM y AS INTEGER: DIM struck AS INTEGER
 	combat_over = 0
-firemore:
+	DO
 	 IF opt_sound >= SOUND_EFFECTS THEN SOUND 77, .5: SOUND 59, .5: CALL wait_seconds(.1)
-	 IF navy_shot_hits(side) = 1 GOTO hitem ELSE GOTO hitme1
-hitem:
-	 hits(other_side(side)) = hits(other_side(side)) - 1: CALL navy_show_hits(hits()): IF hits(other_side(side)) > 0 GOTO firemore
+	 struck = side: IF navy_shot_hits(side) = 1 THEN struck = other_side(side)
+	 hits(struck) = hits(struck) - 1: CALL navy_show_hits(hits())
+	LOOP WHILE hits(struck) > 0
+	IF struck = other_side(side) THEN
 	 x = 10 + 50 * fleet_size(other_side(side))
 	 y = 90: IF side = SIDE_UNION THEN y = 190
 	 CALL draw_ship_sunk(x, y)
@@ -224,8 +227,7 @@ hitem:
 	 END IF
 	 hits(other_side(side)) = navy_ship_hits(other_side(side))
 	 EXIT SUB
-hitme1:
-	 hits(side) = hits(side) - 1: CALL navy_show_hits(hits()): IF hits(side) > 0 GOTO firemore
+	END IF
 	 x = 10 + 50 * fleet_size(side)
 	 y = 190: IF side = SIDE_UNION THEN y = 90
 	 CALL draw_ship_sunk(x, y)

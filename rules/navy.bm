@@ -193,8 +193,7 @@ SUB navy_retreat_port (side, port)
 DIM i AS INTEGER
 	 port = 0
 	 FOR i = 1 TO MAX_CITIES
-	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN port = i: IF RND > .3 GOTO found1
+	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN port = i: IF RND > .3 THEN EXIT FOR
 	 NEXT i
-found1:
 	 fleet_city(side) = port
 END SUB

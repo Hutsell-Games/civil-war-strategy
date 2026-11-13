@@ -16,7 +16,7 @@ CASE 1                          'wooden ship
 	DRAW "C0U9": DRAW "BR13": DRAW "C0D9BU7R3"
 	DRAW "C0L7BL5C0L7BD3BL2BD1BL1BD1C0R11BR3": DRAW "C0R10BL12"
 	PSET (x + 8, y - 1)
-	GOSUB jack
+	CALL draw_ship_jack(side)
 
 CASE 2                          'ironclad
 	DRAW "BL15BD4E1"
@@ -24,18 +24,19 @@ CASE 2                          'ironclad
 	DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1": DRAW "C0R2BR3C0R2BR3C0R2"
 	DRAW "BU3BL10D1": DRAW "C0U4R1D4BR9"
 	PSET (x + 8, y - 1)
-	GOSUB jack
+	CALL draw_ship_jack(side)
 CASE ELSE
 END SELECT
-EXIT SUB
-jack:
+END SUB
+
+' The side's flag on a ship's icon, drawn from the last point.
+SUB draw_ship_jack (side)
 	SELECT CASE side
 	CASE 1
 	DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
 	CASE 2
 	DRAW "C4R4U1L4U1R4U1L4C3F4BU4C3G4BD2BR2BU1"
 	END SELECT
-	RETURN
 END SUB
 
 SUB draw_ironclad

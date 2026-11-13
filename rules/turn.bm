@@ -153,8 +153,10 @@ END SUB
 
 ' An army in a city of its side gathers supplies: a day, and more with a chance of 2 in 10 each.
 SUB turn_army_forages (army)
-horde:
-IF army_supply(army) < MAX_SUPPLY THEN army_supply(army) = army_supply(army) + 1: IF RND > .8 GOTO horde
+DO
+	IF army_supply(army) >= MAX_SUPPLY THEN EXIT SUB
+	army_supply(army) = army_supply(army) + 1
+LOOP WHILE RND > .8
 END SUB
 
 ' The month's income: each side gets its cities' values and its capital's income, and loses

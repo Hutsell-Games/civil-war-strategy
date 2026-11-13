@@ -8,7 +8,7 @@ NEXT i
 '---------------------------------------------------------------------------
 CALL turn_advance_month
 '---------------------------------------------------------------------------
-FOR i = 1 TO MAX_ARMIES: IF army_city(i) < 1 GOTO rip
+FOR i = 1 TO MAX_ARMIES: IF army_city(i) < 1 THEN _CONTINUE
 CALL turn_army_supply(i, blockaded, starved)
 IF blockaded = 1 THEN CALL clear_bottom_line: PRINT army_name$(i); " is blockaded"; : CALL wait_seconds(opt_pause!)
 COLOR COLOR_LIGHT_MAGENTA
@@ -18,7 +18,6 @@ IF starved = 1 THEN
 	CALL draw_army_flag(i)
 	CALL wait_seconds(opt_pause!)
 END IF
-rip:
 NEXT i
 FOR k = SIDE_UNION TO SIDE_REBEL: CALL draw_stack_markers(k): NEXT k
 CALL turn_strength_ratio
@@ -106,7 +105,7 @@ END SUB
 SUB turn_attack (moving_army, city, fought, took)
 DIM defender AS INTEGER: DIM winner AS INTEGER: DIM loser AS INTEGER: DIM gone AS INTEGER: DIM a$
 took = 0
-enemy:
+DO
 CALL draw_map_marker(city, 0, MARK_EXPLOSION)
 defender = city_army(city)
 
@@ -120,22 +119,20 @@ IF army_size(loser) < 2 THEN
 	CALL scribe_message(a$, SHOW_BOX)
 	CALL turn_army_surrenders(loser, moving_army)
 	IF army_city(moving_army) = 0 THEN EXIT SUB
-	GOTO holdon
+ELSE
+	CALL clear_right_panel
+	IF winner <> moving_army THEN CALL turn_attacker_withdraws(moving_army, city, defender): EXIT SUB
+	CALL turn_defender_retreats(moving_army, city, defender, gone)
+	IF gone = 0 THEN
+		a$ = army_name$(defender) + " surrenders to " + army_name$(moving_army) + " in " + city_name$(army_city(defender))
+		CALL scribe_message(a$, SHOW_BOX)
+		CALL turn_army_surrenders(defender, moving_army)
+		IF army_city(moving_army) = 0 THEN EXIT SUB
+	END IF
 END IF
-
-CALL clear_right_panel
-IF winner <> moving_army THEN CALL turn_attacker_withdraws(moving_army, city, defender): EXIT SUB
-CALL turn_defender_retreats(moving_army, city, defender, gone)
-IF gone = 0 THEN
-	a$ = army_name$(defender) + " surrenders to " + army_name$(moving_army) + " in " + city_name$(army_city(defender))
-	CALL scribe_message(a$, SHOW_BOX)
-	CALL turn_army_surrenders(defender, moving_army)
-	IF army_city(moving_army) = 0 THEN EXIT SUB
-END IF
-holdon:
 	CALL city_update_occupier(city): IF city_army(city) = 0 THEN took = 1: EXIT SUB
 	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "There are still defenders in "; city_name$(city); : CALL wait_seconds(99)
-	GOTO enemy
+LOOP
 END SUB
 
 ' The attacker lost the battle: it goes back to the city it came from. The defender may lose
@@ -169,11 +166,13 @@ attacker_side = army_side(moving_army)
 	CALL draw_map_marker(army_city(moving_army), city, MARK_ERASE_ARMY)
 	IF army_order(defender) > 0 THEN CALL draw_map_marker(city, army_order(defender), MARK_ERASE_ARMY)
 
-	CALL menu_army_retreat(defender, chosen_city): IF chosen_city > 0 THEN retreat_city = chosen_city: GOTO outta
-
-	CALL turn_retreat_city(city, attacker_side, retreat_city)
-	IF retreat_city = 0 THEN EXIT SUB
-outta:
+	CALL menu_army_retreat(defender, chosen_city)
+	IF chosen_city > 0 THEN
+		retreat_city = chosen_city
+	ELSE
+		CALL turn_retreat_city(city, attacker_side, retreat_city)
+		IF retreat_city = 0 THEN EXIT SUB
+	END IF
 	CALL draw_army_flag(defender)                  ' in old city
 
 	army_order(defender) = retreat_city
@@ -212,21 +211,21 @@ CALL draw_army_flag(moving_army)
 '---------------------------------------------------------------------------
 '                            City Capture
 '---------------------------------------------------------------------------
-	IF city_owner(army_city(moving_army)) = side GOTO horde
-	city = army_city(moving_army)
-	raze = 0
-	IF opt_players = PLAYERS_ONE AND city_fort(city) > 0 AND fought = 0 THEN
-		IF side = current_side THEN CALL menu_raze_fort(raze) ELSE raze = ai_razes_fort(city)
-	END IF
-	IF raze = 1 THEN
+	IF city_owner(army_city(moving_army)) <> side THEN
+		city = army_city(moving_army)
+		raze = 0
+		IF opt_players = PLAYERS_ONE AND city_fort(city) > 0 AND fought = 0 THEN
+			IF side = current_side THEN CALL menu_raze_fort(raze) ELSE raze = ai_razes_fort(city)
+		END IF
+		IF raze = 1 THEN
 			CALL turn_raze_fort(city)
 			CALL city_redraw_fort(city)
 			CALL clear_bottom_line
 			PRINT army_name$(moving_army); " has destroyed the forts at "; city_name$(city);
 			wait_seconds 3
+		END IF
+		CALL city_capture(moving_army, city, side, fought)
 	END IF
-	CALL city_capture(moving_army, city, side, fought)
-horde:
 CALL turn_army_forages(moving_army)
 END SUB
 

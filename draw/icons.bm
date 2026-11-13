@@ -9,10 +9,10 @@ step_y = .5 * (city_y(to_city) + city_y(from_city))
 
 CALL city_update_occupier(from_city): IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
        
-IF picture_taken > 0 GOTO already
+IF picture_taken <= 0 THEN
 	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
 	IF city_army(from_city) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-already:
+END IF
 
 	FOR i = 2 TO 8
 	step_x = .1 * (i * city_x(to_city) + (10 - i) * city_x(from_city))

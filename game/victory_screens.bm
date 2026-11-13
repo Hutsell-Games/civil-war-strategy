@@ -5,7 +5,6 @@ CLS
 LINE (1, 1)-(639, 150), 4, BF
 LINE (1, 150)-(639, 300), 15, BF
 LINE (1, 300)-(639, 450), 1, BF
-capitol_wing = 0
 LINE (150, 190)-(500, 254), 7, B
 LINE (270, 190)-(370, 254), 7, B
 LINE (270, 185)-(370, 175), 7, B
@@ -13,7 +12,7 @@ LINE (280, 173)-(360, 168), 7, B
 LINE (270, 235)-(370, 254), 7, B
 CIRCLE (320, 150), 74, 7, .2, 2.95, 2.1
 LINE (285, 138)-(355, 168), 7, B
-lwing:
+FOR capitol_wing = 0 TO 2
 PSET (180 + 120 * capitol_wing, 200), 0
 
 DRAW "C7ER1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1F1R1F1R1F1"
@@ -21,7 +20,7 @@ DRAW "R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1L47D4R48U3D51L4U17L41D17L3U47"
 FOR i = 1 TO 7: DRAW "BR6R2D25L2U25": NEXT i
 DRAW "BD33R2"
 FOR i = 1 TO 5: DRAW "L40BR40D3": NEXT i
-capitol_wing = capitol_wing + 1: IF capitol_wing < 3 GOTO lwing
+NEXT capitol_wing
 PSET (270, 190), 0
 FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
 PSET (344, 190), 0
@@ -57,7 +56,16 @@ LINE (242, 95)-(395, 145), 4, BF
 PAINT (4, 20), 1, 15
 
 LINE (2, 239)-(637, 438), 2, BF
-GOSUB stars
+FOR i = 1 TO 8
+x = flag_star_x(i): y = flag_star_y(i)
+PSET (x, y), 0
+LINE (x + 2, y - 1)-(x + 8, y + 16), 15
+LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
+LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
+LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
+LINE -(x, y - 9): LINE -(x + 16, y - 9)
+LINE -(x + 2, y - 1): PAINT (x, y), 15
+NEXT i
 
 '                               landscape
 PSET (1, 240)
@@ -94,7 +102,7 @@ PAINT (x - 5, y + 15), 8
 
 FOR i = 1 TO 6: LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF: NEXT i
 
-IF opt_sound < SOUND_MUSIC GOTO relee
+IF opt_sound < SOUND_MUSIC THEN EXIT SUB
 PLAY "MBMS T120"
 PLAY "O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
 PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8"
@@ -104,22 +112,6 @@ PLAY "L16 T150 g a b T120 O4 L8 c e d. c16 O3 a O4 c4 O3 a O4 d4."
 PLAY "O3 a O4 d4. O3 T150 L16 g a b T120 L8 O4 c e d. c16"
 PLAY "L8 O3 a b O4 c. O3 a16 g e O4 c. O3 e16 e d4 e c4. e d4. a"
 PLAY "L8 g e O4 c. e16 d c4 O3 e c4. e d4. a g e O4 e4. c16 d c4"
-
-GOTO relee
-
-stars:
-FOR i = 1 TO 8
-x = flag_star_x(i): y = flag_star_y(i)
-PSET (x, y), 0
-LINE (x + 2, y - 1)-(x + 8, y + 16), 15
-LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
-LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
-LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
-LINE -(x, y - 9): LINE -(x + 16, y - 9)
-LINE -(x + 2, y - 1): PAINT (x, y), 15
-NEXT i
-RETURN
-relee:
 END SUB
 
 SUB draw_surrender (army)

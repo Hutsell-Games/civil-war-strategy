@@ -205,8 +205,8 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | File | SUB | Lines | Why |
 |------|-----|-------|-----|
 | `rules\setup.bm` | `vary_start_conditions` | 3 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
-| `ai\ai.bm` | `ai_fortify` | 1 | `IF target > 0 GOTO capital` follows `IF ... GOTO capital ELSE GOTO city2`; nothing reaches it |
 | `ai\ai.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
+| `ai\ai.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. `ai_raise_forces` builds the first ship before it. It was the `THEN` part of a one-line `IF` until 2026-11-12 |
 | `ai\ai.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
 | `port\qb64.bm` | `DIR$` | 2 | `DIR$("")` for the next match; the game never calls it that way |
 | `rules\battle.bm` | `battle_strengths` | 1 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
@@ -217,10 +217,10 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `ui\orders.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 
-Of the 185 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
-only with the sound on. In `special_events` eight are left: the exit when random events are off, the cap
-`pct! > .9` (it needs the year 1868), England's ships when the Rebel fleet is in port, the cap of the
-Rebel fleet at 10 ships, and the riot's two early returns (realism off; a side with one city).
+Of the 178 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
+only with the sound on. In `game\events.bm` five are left: the cap `chance! > .9` (it needs the year 1868),
+the cap of the Rebel fleet at 10 ships, the `EXIT SUB` after the volunteers' loop, which leaves at its
+sixth army, and the riot's two early returns (realism off; a side with one city).
 
 A step of phases 7 to 9 that rewrites a line still looks that line up in `tests\out\coverage\report.txt`
 first (`play.py coverage`).
@@ -230,7 +230,8 @@ first (`play.py coverage`).
 - **Six `GOSUB` routines** that only their own SUB uses: `crsr`, `limits` and `noadjust` in
   `menu_select` (the key loop, which phase 9 reworks), `add1s` in `army_generate_name`, `jack` in
   `draw\ships.bm` and `stars` in `game\victory_screens.bm`. Phase 9 step 8 removed the three of
-  `menu_select`.
+  `menu_select`. The other three went with the labels on 2026-11-12 (`modernize-completed.md`,
+  "After the plan: the labels").
 - **The main module's menus**, a web of `GOTO menu0`, `GOTO optmen` and `GOTO utile` (phase 9).
 - **`calculate_battle`**, whose split parts a rule from its screen (phase 8).
 - **`army_clear`** (step 4): it waited for phase 10 and stays undone ("Phase 10: records").

@@ -828,6 +828,17 @@ AssertEqualInt SIDE_UNION, who, "an event rolled for the Union is good for the S
 AssertEqualInt 300, side_cash(2), "100 for each point of plus"
 END SUB
 
+SUB TestEventEnglishShipsJoinFleetInPort
+opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
+fleet_size(2) = 3: fleet_ships$(2) = "WWW": fleet_city(2) = 12
+script_dice$ = "0,0,0,0"
+CALL event_roll(event, variant, who)
+AssertEqualInt EVENT_ENGLISH_SHIPS, event, "no riot, and the draw for ships passes"
+AssertEqualInt 9, fleet_size(2), "two ships for each point of plus"
+AssertEqualStr "WWWWWWWWW", fleet_ships$(2), "all wooden"
+AssertEqualInt 12, fleet_city(2), "the fleet stays in its port"
+END SUB
+
 SUB TestEventMercenariesJoinArmyZero
 opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
 side_city_count(2) = 30

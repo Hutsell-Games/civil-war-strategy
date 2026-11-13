@@ -23,21 +23,18 @@ END SUB
 
 SUB draw_train_box
 DIM i AS INTEGER: DIM side_color AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-IF train_army(SIDE_UNION) + train_army(SIDE_REBEL) = 0 GOTO notrain
+IF train_army(SIDE_UNION) + train_army(SIDE_REBEL) = 0 THEN EXIT SUB
 LINE (5, 17)-(100, 63), 3, BF
 LINE (5, 17)-(100, 47), 0, B
 LINE (5, 47)-(100, 63), 0, B
 
 FOR i = SIDE_UNION TO SIDE_REBEL
-IF train_army(i) = 0 GOTO notrane
+IF train_army(i) = 0 THEN _CONTINUE
 PSET (15, 25), 3: side_color = 9: IF i = 2 THEN side_color = 15: PSET (60, 25), 3
 DRAW "C0S4" + TRAIN_OUTLINE$ + "U8L2U5BF4"
 x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
 LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(city_name$(army_order(train_army(i))), 5)
-notrane:
 NEXT i
-
-notrain:
 END SUB
 
 SUB wait_seconds (seconds!)

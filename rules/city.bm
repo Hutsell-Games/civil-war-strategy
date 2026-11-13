@@ -46,19 +46,18 @@ END SUB
 ' in from_city() and to_city(), with added() 1 when the road back was added and 0 when the
 ' city had no free slot. count is the length of the list. check_map_links (ui/reports.bm) shows it.
 SUB city_fix_return_routes (count, added(), from_city(), to_city())
-DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM neighbor AS INTEGER
+DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM neighbor AS INTEGER: DIM linked AS INTEGER
 count = 0
 FOR i = 1 TO MAX_CITIES
-FOR j = 1 TO MAX_ROADS: IF city_road(i, j) = 0 GOTO done
+FOR j = 1 TO MAX_ROADS: IF city_road(i, j) = 0 THEN EXIT FOR
 	neighbor = city_road(i, j)
+	linked = 0
 	FOR k = 1 TO MAX_ROADS
-	IF city_road(neighbor, k) = i GOTO ret
-	IF city_road(neighbor, k) = 0 THEN city_road(neighbor, k) = i: count = count + 1: added(count) = 1: from_city(count) = neighbor: to_city(count) = i: GOTO ret
+	IF city_road(neighbor, k) = i THEN linked = 1: EXIT FOR
+	IF city_road(neighbor, k) = 0 THEN city_road(neighbor, k) = i: count = count + 1: added(count) = 1: from_city(count) = neighbor: to_city(count) = i: linked = 1: EXIT FOR
 	NEXT k
-	count = count + 1: added(count) = 0: from_city(count) = neighbor: to_city(count) = i
-ret:
+	IF linked = 0 THEN count = count + 1: added(count) = 0: from_city(count) = neighbor: to_city(count) = i
 NEXT j
-done:
 NEXT i
 END SUB
 
@@ -66,7 +65,6 @@ SUB city_update_occupier (city)
 DIM i AS INTEGER
 city_army(city) = 0
 FOR i = 1 TO MAX_ARMIES
-IF army_city(i) = city THEN city_army(city) = i: GOTO holdup
+IF army_city(i) = city THEN city_army(city) = i: EXIT SUB
 NEXT i
-holdup:
 END SUB

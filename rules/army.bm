@@ -131,30 +131,24 @@ DIM side AS INTEGER: DIM friendly_neighbors AS INTEGER: DIM supply_added AS INTE
 END SUB
 
 SUB army_generate_name (army, name$)
-DIM ones AS INTEGER: DIM k AS INTEGER
+DIM ones AS INTEGER
 name$ = "Union ": IF army_side(army) = SIDE_REBEL THEN name$ = "Rebel "
 IF army_side(army) = SIDE_REBEL THEN army = army - ARMIES_PER_SIDE
 IF army > 10 THEN name$ = name$ + "X": army = army - 10
 SELECT CASE army
 	CASE IS < 4
-	ones = army: GOSUB add1s
+	ones = army
 	CASE 4
 	name$ = name$ + "IV"
 	CASE 5 TO 8
 	name$ = name$ + "V"
 	ones = army - 5
-	GOSUB add1s
 	CASE 9
 	name$ = name$ + "IX"
 	CASE 10
 	name$ = name$ + "X"
 END SELECT
-EXIT SUB
-
-add1s:
-IF ones > 0 THEN FOR k = 1 TO ones: name$ = name$ + "I": NEXT k
-RETURN
-
+IF ones > 0 THEN name$ = name$ + STRING$(ones, "I")
 END SUB
 
 ' The first and last army slots of a side: 1 and 20 for the Union, 21 and 40 for the Rebels.
@@ -269,7 +263,7 @@ SUB army_recruit_cities (side)
 DIM i AS INTEGER: DIM offer_count AS INTEGER: DIM chance!: DIM city AS INTEGER
 	menu_item_count = 0
 	menu_text$(0) = "Recruit"
-	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: city = turn_recruit_city(i): menu_text$(i) = city_name$(city): menu_value(i) = city: NEXT i: menu_item_count = turn_recruit_state: GOTO alldone
+	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: city = turn_recruit_city(i): menu_text$(i) = city_name$(city): menu_value(i) = city: NEXT i: menu_item_count = turn_recruit_state: CALL menu_bubble_sort(menu_item_count): EXIT SUB
 	offer_count = 4: IF RND > .8 THEN offer_count = offer_count - 1
 	IF opt_difficulty < 3 THEN offer_count = offer_count + 1
 
@@ -280,15 +274,13 @@ DIM i AS INTEGER: DIM offer_count AS INTEGER: DIM chance!: DIM city AS INTEGER
 	menu_value(i) = 0
 	IF city_army(i) > 0 AND city_owner(i) = side THEN chance! = .4
 	IF RND < chance! AND city_owner(i) = side THEN
-		IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) GOTO foe
+		IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) THEN _CONTINUE
 		menu_item_count = menu_item_count + 1
 		menu_text$(menu_item_count) = city_name$(i)
 		menu_value(menu_item_count) = i
-		IF menu_item_count > offer_count - 1 GOTO alldone
+		IF menu_item_count > offer_count - 1 THEN EXIT FOR
 	END IF
-foe:
 	NEXT i
-alldone:
 	IF menu_item_count = 0 THEN EXIT SUB
 	IF side = current_side AND turn_recruit_state = 0 THEN FOR i = 1 TO menu_item_count: turn_recruit_city(i) = menu_value(i): NEXT i: turn_recruit_state = menu_item_count
 	CALL menu_bubble_sort(menu_item_count)

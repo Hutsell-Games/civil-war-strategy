@@ -27,24 +27,23 @@ END FUNCTION
 ' when it has met none. union_men and rebel_men are the sides' men (victory_forces).
 SUB victory_rule_met (side, union_troops, rebel_troops, rule)
 rule = 0
-	IF (side = 1 AND rebel_troops = 0) OR (side = 2 AND union_troops = 0) THEN rule = 7: side_victory_points(side) = side_victory_points(side) + 300: GOTO finis
+	IF (side = 1 AND rebel_troops = 0) OR (side = 2 AND union_troops = 0) THEN rule = 7: side_victory_points(side) = side_victory_points(side) + 300: EXIT SUB
 
-	IF turn_year >= victory_rule(VICTORY_YEAR) AND turn_month >= victory_rule(VICTORY_MONTH) AND victory_rule(VICTORY_YEAR) > 0 THEN rule = 2: GOTO finis
-	IF side_city_count(side) >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN rule = 3: GOTO finis
-	IF side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN rule = 4: GOTO finis
-	IF victory_rule(VICTORY_CAPITAL) > 0 AND side_capital(other_side(side)) = 0 AND side_capital(side) > 0 THEN rule = 5: GOTO finis
+	IF turn_year >= victory_rule(VICTORY_YEAR) AND turn_month >= victory_rule(VICTORY_MONTH) AND victory_rule(VICTORY_YEAR) > 0 THEN rule = 2: EXIT SUB
+	IF side_city_count(side) >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN rule = 3: EXIT SUB
+	IF side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN rule = 4: EXIT SUB
+	IF victory_rule(VICTORY_CAPITAL) > 0 AND side_capital(other_side(side)) = 0 AND side_capital(side) > 0 THEN rule = 5: EXIT SUB
 
 	IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
 		IF side = 1 THEN
-			IF rebel_troops = 0 THEN rule = 7: GOTO finis
-			IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: GOTO finis
+			IF rebel_troops = 0 THEN rule = 7: EXIT SUB
+			IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: EXIT SUB
 		END IF
 		IF side = 2 THEN
-			IF union_troops = 0 THEN rule = 7: GOTO finis
-			IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: GOTO finis
+			IF union_troops = 0 THEN rule = 7: EXIT SUB
+			IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: EXIT SUB
 		END IF
 	END IF
-finis:
 END SUB
 
 ' 1 when the side holds nine tenths of the cities the cities rule asks for.

@@ -76,14 +76,15 @@ DIM army_slot AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: 
 	raised = 1
 	army_slot = 0
 	CALL city_update_occupier(city)
-	IF city_army(city) > 0 THEN i = city_army(city): GOTO add2
-	CALL army_get_commander((side), army_slot)
+	IF city_army(city) <= 0 THEN
+		CALL army_get_commander((side), army_slot)
        
-	IF army_slot = 0 THEN raised = 0: EXIT SUB
-	CALL army_place_new(army_slot, city)
-	CALL army_new(side, army_slot, city)
-	EXIT SUB
-add2:
+		IF army_slot = 0 THEN raised = 0: EXIT SUB
+		CALL army_place_new(army_slot, city)
+		CALL army_new(side, army_slot, city)
+		EXIT SUB
+	END IF
+	i = city_army(city)
 	CALL army_add_recruits(side, i, isolated)
 	from_city = army_city(i): x = city_x(from_city) - 12: y = city_y(from_city) - 11
 	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army

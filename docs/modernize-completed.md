@@ -875,3 +875,71 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    records" in `modernize-plan.md`). The seven army rows of `variable-names.md` now say
    "(stays an array)" as well, and `make_records.py` stays for a later change or another port.
    `army_clear` (phase 7, step 4) stays undone. No code changed.
+
+## After the plan: the labels
+
+**Done (2026-11-12): the labels.** The game had 148 lines with `GOTO` or `GOSUB` in 19 files.
+7 are left, all in `menu_city_select` (`local-names.md`, Part 2), and no `GOSUB`. The work was
+two steps: the labels that only skip, then nine SUBs whose jumps made a loop or a branch.
+
+The first step:
+
+- **A jump to the end of a SUB is `EXIT SUB`:** `victory_rule_met` (9), `ai_army_order` (7),
+  `event_roll`, `menu_city_fortify`, `menu_army_select`, `menu_army_move`, `draw_map_marker`,
+  `draw_train_box`, `city_update_occupier`, `ai_fortify_pick`.
+- **A jump to a loop's `NEXT` is `_CONTINUE`,** the first use of it in the game: `ai_railroad`
+  (6), `ai_evaluate_move`, `ai_fortify_pick`, `city_nearby_enemy_strength`, `ai_pick_port`,
+  `army_recruit_cities`, `menu_supply`, `report_armies`, `hall_of_fame`, `draw_cities`,
+  `draw_fleets`, `draw_train_box`, `turn_date_and_supply`. A jump to the line after `NEXT` is
+  `EXIT FOR`.
+- **A jump over a few lines is an `IF` block:** `ai_fleet_orders`, `ai_army_order`,
+  `army_recruit`, `menu_army_move`, `turn_defender_retreats`, `turn_enter_city`,
+  `special_events`, `animate_army`, `draw_map`, and `end_game`'s three victory screens.
+  `draw_fleets` picks the fleet's place with `SELECT CASE`.
+- **A jump back is a loop:** `turn_army_forages`, `menu_army_relieve`, `menu_railroad`,
+  `menu_victory_conditions`, the commander's name in `hall_of_fame`, and the Capitol's three
+  wings in `draw_union_victory` (a `FOR`).
+- **`event_roll` has no label left.** Each event is an `IF` block that ends in `EXIT SUB`. The
+  loan and the cotton each add the cash in their own block. The tests are the old ones turned
+  round (`> .2 OR` became `<= .2 AND`), so the draws come in the same order.
+- **A jump out of an inner loop to the outer loop's `NEXT` sets a flag:** `enemy_bound` in
+  `ai_evaluate_move`, `linked` in `city_fix_return_routes`. `ai_evaluate_move` sets
+  `road_count = 6` before its loop, not after it.
+- **The three `GOSUB` routines:** `add1s` is `STRING$(ones, "I")` after the `SELECT CASE` of
+  `army_generate_name`. `jack` is a new SUB, `draw_ship_jack (side)` (`draw\ships.bm`). `stars`
+  is in line in `draw_rebel_victory`, where its one `GOSUB` was.
+- **Three labels that nothing jumped to are deleted:** `move9`, `movopt`, `counter`.
+
+The second step, the nine SUBs:
+
+- **`ai_fortify`** picks the capital or calls `ai_fortify_pick`, then fortifies in a `DO` loop
+  that picks again at its end. The test that ended it is turned round (`3 * RND <= ... OR`), so
+  it draws its number as before. The line that nothing reached, `IF city > 0 GOTO capital`, is
+  deleted.
+- **`ai_raise_forces`:** two jumps are `EXIT SUB`; `ship_reserve` is still 0 there, so the line
+  they skipped to added nothing. The third jump only skipped `ai_recruit` when the cash was
+  under `COST_RECRUIT`. It is dropped: `ai_recruit` makes that test in its first line.
+- **`ai_evaluate_move`:** the score for a city of the player's is two `IF`s, one for an empty
+  city and a block for a city with an army.
+- **`army_recruit_cities`:** the month's saved list sorts the menu and leaves (`EXIT SUB`). The
+  lines it jumped to did no more than that for a saved list.
+- **`navy_bombard`:** the shore battery fires in `DO UNTIL city_fort(city) = 0`.
+- **`navy_commerce_raid`:** a `DO` loop that runs again (`again = 1`) when the raiders lost a
+  ship and have one left.
+- **`navy_combat_volley`:** the shots are a `DO` loop that ends when a ship has no hits left.
+  `struck` is the side of that ship.
+- **`turn_attack`:** a `DO` loop over the defenders, with an `ELSE` for the loser that is not
+  crushed.
+- **`end_game`:** the jump back into an `IF` block is gone. Its lines are a new SUB,
+  `end_game_play_on (rule)` (`ui\victory.bm`), called from both menus.
+
+Both steps:
+
+- **Lines that no test runs:** 18, as before, but not the same ones. `ai_fortify`'s dead line
+  is deleted. `ai_fleet_orders`' start of the Union's first fleet was the `THEN` part of a
+  one-line `IF` and is a line of its own now; its statements did not change. `event_roll`'s
+  England's ships for a Rebel fleet in port was rewritten without a test, so it got one:
+  `TestEventEnglishShipsJoinFleetInPort`. 178 lines are run in part. One of them holds a
+  changed statement that no test runs: the `EXIT SUB` on the first line of `ai_raise_forces`,
+  after the Union computer's first ship. The `GOTO isok` it replaced was not run either.
+- Unit tests: 124, one new. 38 scripts, unchanged recordings, both compilers.

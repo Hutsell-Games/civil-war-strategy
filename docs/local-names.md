@@ -312,37 +312,14 @@ Three names the user asked about were not taken, each for a reason:
 
 ## Part 2: `GOTO` and `GOSUB` labels
 
-There are about 90 labels. Many are jokes or abbreviations, and a few mislead. Many do nothing but skip to the
-next pass of a loop (`GOTO puter` lands on `puter: NEXT i`) or to the end of a SUB. QB64's `_CONTINUE` and
-`EXIT SUB` can replace those, and then the label goes away. Proposals come when this part is reached.
+There were about 90 labels. Most did nothing but skip to the next pass of a loop (`GOTO puter` landed on
+`puter: NEXT i`), leave a loop, or go to the end of a SUB. On 2026-11-12 those were replaced by `_CONTINUE`,
+`EXIT FOR`, `EXIT SUB`, an `IF` block or a `DO` loop, and their labels are gone
+(`modernize-completed.md`, "After the plan: the labels"). No `GOSUB` is left.
 
-| File | Labels |
-|------|--------|
-| `ai\ai.bm` | `alle`, `alleval`, `allof`, `capital`, `city2`, `deadman` (two), `endlook`, `isok`, `move9`, `movenavy`, `neutral`, `nocap`, `ourn`, `picked`, `puted`, `puter`, `tally3`, `tally4`, `tally5` |
-| `commands\army.bm` | `add2` |
-| `commands\navy.bm` | `blast`, `deserted`, `firemore`, `hitem`, `hitme1`, `hurt1`, `raid` |
-| `draw\icons.bm` | `already` |
-| `draw\map.bm` | `float`, `nextc`, `nocon`, `nosee`, `noshow`, `sink` |
-| `draw\ships.bm` | `jack` (`GOSUB`) |
-| `game\events.bm` | `abe`, `cotton`, `dull1`, `dull2`, `event2`, `float1`, `mercen`, `money`, `purse`, `uprising` |
-| `game\victory_screens.bm` | `lwing`, `relee`, `stars` (`GOSUB`) |
-| `rules\army.bm` | `add1s` (`GOSUB`), `alldone`, `foe` |
-| `rules\city.bm` | `done`, `holdup`, `ret` |
-| `rules\navy.bm` | `found1` |
-| `rules\turn.bm` | `horde` |
-| `ui\orders.bm` | `aboard`, `alone`, `counter`, `dudd`, `finix`, `fnew`, `have2`, `minus1`, `morecap`, `movopt`, `nocity`, `notarg`, `plus1`, `spin2`, `tent` |
-| `ui\reports.bm` | `cheer`, `deadeye`, `what4` |
-| `ui\screen.bm` | `notrain`, `notrane` |
-| `ui\turn.bm` | `enemy`, `holdon`, `horde`, `outta`, `rip` |
-| `ui\victory.bm` | `automate`, `death`, `foun`, `play4ever`, `who4` |
-| `rules\victory.bm` | `finis` |
-
-Two to note now:
-
-- **`notrain` and `notrane`** (`draw_train_box`, `ui\screen.bm`) are two labels in one SUB that differ by one
-  letter. `notrane` skips one side's train; `notrain` skips the whole box.
-- **`game\events.bm` labels name the next test, not what happens.** `GOTO cotton` runs when the loan does
-  *not* happen, and `GOTO purse` jumps over the cotton test to pay the loan.
+Five labels are left, all in `menu_city_select` (`ui\orders.bm`), with 7 lines that jump to them: `fnew`,
+`minus1`, `morecap`, `plus1` and `spin2`. They are the city picker's key loop: three loops inside a
+`SELECT CASE` inside a loop. Removing them is a rewrite of the SUB, not a replacement line by line.
 
 ## Part 3: constants that read unclearly
 

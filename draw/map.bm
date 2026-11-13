@@ -1,7 +1,7 @@
 SUB draw_map_marker (from_city, to_city, mark)
 DIM x AS INTEGER: DIM y AS INTEGER: DIM x1 AS INTEGER: DIM y1 AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-IF from_city < 1 OR from_city > MAX_CITIES GOTO noshow
-IF to_city < 0 GOTO noshow
+IF from_city < 1 OR from_city > MAX_CITIES THEN EXIT SUB
+IF to_city < 0 THEN EXIT SUB
 x = city_x(from_city) - 12: y = city_y(from_city) - 11
 x1 = city_x(to_city): y1 = city_y(to_city)
 SELECT CASE mark
@@ -70,7 +70,6 @@ SELECT CASE mark
 
 	CASE ELSE
 END SELECT
-noshow:
 END SUB
 
 SUB draw_cities
@@ -92,10 +91,9 @@ ELSE
 	IF city_fort(i) >= MAX_FORT THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
 	CALL draw_city_dot(i, dot_color)
 END IF
-IF opt_graphics = GRAPHICS_OFF GOTO nocon
+IF opt_graphics = GRAPHICS_OFF THEN _CONTINUE
 	FOR j = 1 TO MAX_ROADS: IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
 	NEXT j
-nocon:
 NEXT i
 END SUB
 
@@ -120,7 +118,7 @@ FOR k = 1 TO MAX_CITIES
 	FOR j = 1 TO LEN(city_name$(k))
 	letter_x = city_x(k) + 6 * (j - 4) - 3
 	letter = ASC(MID$(UCASE$(city_name$(k)), j, 1)) - 64
-	IF letter_x > 527 GOTO nextc
+	IF letter_x > 527 THEN EXIT FOR
 	PSET (letter_x, city_y(k) + 12), 10
 	
 	IF city_port_type(k) < PORT_RIVER THEN
@@ -130,25 +128,25 @@ FOR k = 1 TO MAX_CITIES
 	END IF
 	IF letter > 0 AND letter < 27 THEN DRAW map_font$(letter)
 	NEXT j
-nextc:
 NEXT k
 END SUB
 
 SUB draw_fleets
 DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM ship_type AS INTEGER
 FOR side = SIDE_UNION TO SIDE_REBEL
-IF fleet_size(side) = 0 OR fleet_city(side) = 0 THEN fleet_city(side) = 0: GOTO sink
-IF fleet_city(side) = 30 THEN x = 515: y = 268: GOTO float
-IF fleet_city(side) = 28 THEN x = 517: y = 172: GOTO float
-IF fleet_city(side) = 17 THEN x = 380: y = 425: GOTO float
-IF fleet_city(side) = FLEET_AT_SEA THEN x = 495: y = 310: GOTO float
-x = city_x(fleet_city(side)) + 25: y = city_y(fleet_city(side)) + 25
-IF fleet_city(side) = 24 THEN y = y + 5: x = x - 5
-float:
+IF fleet_size(side) = 0 OR fleet_city(side) = 0 THEN fleet_city(side) = 0: _CONTINUE
+SELECT CASE fleet_city(side)
+	CASE 30: x = 515: y = 268
+	CASE 28: x = 517: y = 172
+	CASE 17: x = 380: y = 425
+	CASE FLEET_AT_SEA: x = 495: y = 310
+	CASE ELSE
+	x = city_x(fleet_city(side)) + 25: y = city_y(fleet_city(side)) + 25
+	IF fleet_city(side) = 24 THEN y = y + 5: x = x - 5
+END SELECT
 	PSET (x, y), 1
 	ship_type = 1: IF LEFT$(fleet_ships$(side), 1) = "I" THEN ship_type = 2
 	CALL draw_ship_icon(side, ship_type)
-sink:
 NEXT side
 END SUB
 
@@ -540,10 +538,10 @@ FOR k = SIDE_UNION TO SIDE_REBEL
 CALL draw_stack_markers(k)
 NEXT k
 
-IF opt_players = PLAYERS_TWO GOTO nosee
-FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
-NEXT i
-nosee:
+IF opt_players <> PLAYERS_TWO THEN
+	FOR i = 1 TO MAX_ARMIES: IF army_city(i) > 0 AND army_order(i) > 0 THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+	NEXT i
+END IF
 CALL draw_fleets
 CALL draw_train_box
 COLOR COLOR_LIGHT_MAGENTA: LOCATE 24, 51: PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year

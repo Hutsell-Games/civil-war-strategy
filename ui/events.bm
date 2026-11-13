@@ -51,13 +51,13 @@ SELECT CASE event
 	CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
 END SELECT
 
-IF event_side = SIDE_UNION GOTO dull1
-dull2:
-	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-	CALL wait_key("N"): EXIT SUB
-dull1:
+IF event_side = SIDE_UNION THEN
 	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
 	CALL wait_key("S")
+ELSE
+	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+	CALL wait_key("N")
+END IF
 END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.

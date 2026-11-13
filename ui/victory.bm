@@ -20,17 +20,19 @@ FOR i = 1 TO 6: LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²": NEXT i
 		      
 			FOR side = SIDE_UNION TO SIDE_REBEL
 			i = hall_of_fame_place(side, hall_score())
-			IF i = 0 GOTO foun
+			IF i = 0 THEN _CONTINUE
 			COLOR COLOR_WHITE, COLOR_BLUE: IF side = SIDE_REBEL THEN COLOR COLOR_RED, COLOR_GRAY
 			FOR k = 12 TO 14: LOCATE k, 1: PRINT SPACE$(80); : NEXT k
 			LOCATE 12, 1: PRINT "Congratulations ! Score of"; side_victory_points(side)
 			PRINT "New Entry into "; side_name$(side); " HALL of FAME in place "; i
-			IF opt_players = PLAYERS_ONE AND side <> current_side THEN commander$ = "COMPUTER": PRINT commander$; " was "; side_name$(side); " commander": GOTO automate
-who4:
-			PRINT "What is name of "; side_name$(side); " commander"; : CALL script_mark_key_wait(4, ""): INPUT commander$: IF commander$ = "" GOTO who4
-automate:
+			IF opt_players = PLAYERS_ONE AND side <> current_side THEN
+				commander$ = "COMPUTER": PRINT commander$; " was "; side_name$(side); " commander"
+			ELSE
+				DO
+					PRINT "What is name of "; side_name$(side); " commander"; : CALL script_mark_key_wait(4, ""): INPUT commander$
+				LOOP WHILE commander$ = ""
+			END IF
 			CALL hall_of_fame_insert(side, i, commander$, hall_name$(), hall_score())
-foun:
 			NEXT side
 	       
 		CALL hall_of_fame_save(hall_name$(), hall_score())
@@ -119,13 +121,7 @@ END SELECT
 	IF rule = 7 THEN menu_item_count = 1
 	CALL menu_select(MENU_PLAIN)
 
-	IF menu_choice <> 1 AND rule < 7 THEN
-play4ever:
-			CALL victory_play_on(rule)
-			CLS
-			CALL draw_map
-			EXIT SUB
-	END IF
+	IF menu_choice <> 1 AND rule < 7 THEN CALL end_game_play_on(rule): EXIT SUB
 	menu_text$(0) = "Options"
 	menu_text$(1) = "Quit this Game"
 	menu_text$(2) = "Play More"
@@ -134,20 +130,30 @@ play4ever:
 	menu_col = 27: menu_row = 18
 	IF rule <> 7 THEN
 		CALL menu_select(MENU_PLAIN)
-		IF menu_choice <> 1 GOTO play4ever
+		IF menu_choice <> 1 THEN CALL end_game_play_on(rule): EXIT SUB
 	END IF
 
 	CALL victory_won(side, rule)
 	CALL draw_map: CALL save_battle_summary: CALL report_battle_summary
-	IF rule = 2 THEN CALL victory_technical_points: CALL draw_rebel_victory: GOTO death
-
-	IF side = SIDE_UNION THEN CALL draw_union_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(SIDE_UNION)): PRINT t$: GOTO death
-	IF side = SIDE_REBEL THEN CALL draw_rebel_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL)): PRINT t$
-death:
+	IF rule = 2 THEN
+		CALL victory_technical_points: CALL draw_rebel_victory
+	ELSEIF side = SIDE_UNION THEN
+		CALL draw_union_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(SIDE_UNION)): PRINT t$
+	ELSEIF side = SIDE_REBEL THEN
+		CALL draw_rebel_victory: COLOR COLOR_WHITE: LOCATE 2, 27: t$ = "REBEL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL)): PRINT t$
+	END IF
 	COLOR COLOR_YELLOW: LOCATE 4, 40 - .5 * LEN(a$)
 	IF opt_history > 0 THEN
 		CALL scribe_message(t$, SHOW_NOT)
 		CALL scribe_message(a$, SHOW_NOT)
 	END IF
 	PRINT a$: CALL hall_of_fame
+END SUB
+
+' The player plays on after a victory rule was met: the rule is raised or turned off, and
+' the map is drawn again.
+SUB end_game_play_on (rule)
+	CALL victory_play_on(rule)
+	CLS
+	CALL draw_map
 END SUB

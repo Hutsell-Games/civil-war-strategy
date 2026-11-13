@@ -105,7 +105,7 @@ how the game plays.
   `docs\constants.md` has no row for them; a `MAX_LEADERS` would be a new name to agree.
 - **`draw_surrender (side)` is passed an army, not a side** (`game\victory_screens.bm`, called from
   `turn_resolve`). Its test now reads `army_side(side)`. The parameter wants the name `army`.
-- **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 144 and 149).
+- **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 142 and 147).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
   report needs laying out again.
 - **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 28 and 29). That is a random
@@ -118,7 +118,7 @@ Left alone by group 2 (the special values):
 
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** It appears in 18 tests and assignments.
   `docs\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
-- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 158). The 900
+- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 195). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
 - **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
@@ -137,9 +137,9 @@ Left alone by group 6 (the settings and victory rules):
 - **The Realism switch is `opt_realism = 1 - opt_realism`** (`option_toggle_realism`, `rules\setup.bm`). It toggles between
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
-- **The rule that ended the game has no constants**: `j = 2: GOTO finis` to `j = 6` in
+- **The rule that ended the game has no constants**: `rule = 2: EXIT SUB` to `rule = 6` in
   `victory_rule_met` (`rules\victory.bm`), and 7 for the other ending. The numbers follow
-  `VICTORY_YEAR` to `VICTORY_FORCE_RATIO`, but `j` is a code of its own; `docs\constants.md` has no row for it.
+  `VICTORY_YEAR` to `VICTORY_FORCE_RATIO`, but `rule` is a code of its own; `docs\constants.md` has no row for it.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
   (`port\files.bm` line 11) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which
   also maps a rule to a menu row (`i - 1`).
@@ -149,9 +149,9 @@ Left alone by group 7 (the rule numbers):
 - **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 39), where the cities are read. The 200
   may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
-- **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 93). That is
+- **The Emancipation Proclamation comes after 1862** (`turn_year > 1862`, `game\events.bm` line 101). That is
   the date of an event, not `IRONCLAD_YEAR`, so it stays; phase 11 moves the events' dates to data.
-- **`ai_fortify` compares `side_cash` with no index**: `side_cash < 222` (`ai\ai.bm` line 35). Every other use
+- **`ai_fortify` compares `side_cash` with no index**: `side_cash < 222` (`ai\ai.bm` line 30). Every other use
   is `side_cash(who)`. Here `side_cash` is a local scalar, declared so that `OPTION _EXPLICIT` accepts it,
   and it is always 0, as the original's undeclared `cash` was. So the test is always true.
 
@@ -163,7 +163,7 @@ Left alone by group 8 (the colors):
 - **`COLOR 16 - c` shows the other side's color** (`ui\battle.bm` lines 27, 35 and 81): 16 - 9 is 7 and
   16 - 7 is 9. It stays as written; it would go with `side_color`.
 - **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 56, Chk Links;
-  `ui\turn.bm` line 131, "There are still defenders"; left alone by group 9). It goes with phase 7's
+  `ui\turn.bm` line 134, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
 - **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 56): 0 there means "no color set",
