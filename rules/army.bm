@@ -54,8 +54,8 @@ SUB army_combine_finish (city, best, joined)
     city_army(city) = best
 END SUB
 
-' A new army in a city: its supplies, experience, leader and size, and the price of 100 taken
-' from the side. army_new (commands/army.bm) shows it.
+' A new army in a city: its supplies, experience, leader and size with the Balance setting's
+' extra men, and the price of 100 taken from the side. army_new (commands/army.bm) shows it.
 SUB army_raise (side, army_slot, city)
     DIM troops AS INTEGER
     army_supply(army_slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(army_slot) = army_supply(army_slot) + 2
@@ -65,6 +65,7 @@ SUB army_raise (side, army_slot, city)
 
     troops = 70: IF opt_realism >= REALISM_ON THEN troops = recruit_troops(side, city, 0) ELSE troops = recruits_cut_off(side, city, troops)
     city_army(city) = army_slot: army_size(army_slot) = troops
+    CALL army_recruit_bonus(side, army_slot)
     side_cash(side) = side_cash(side) - COST_RECRUIT
     army_city(army_slot) = city
     army_order(army_slot) = ORDER_BUSY
@@ -242,16 +243,9 @@ SUB army_take_leader (army, leader)
     leader_name$(leader) = ""
 END SUB
 
-' The first step of a new army raised by recruiting: it is placed in the city, with the Balance
-' setting's extra men, which army_new then overwrites (TODO.md).
-SUB army_place_new (army_slot, city)
-    army_city(army_slot) = city
-    CALL army_recruit_bonus(army_slot)
-END SUB
-
 ' More men for the army in a city: 4,500, or under the Realism setting a number from the
-' city's value, a third of it when the city is cut off (isolated is then 1). The side pays
-' 100. The Balance setting's extra men go to army 0, as before (TODO.md).
+' city's value, a third of it when the city is cut off (isolated is then 1), and the Balance
+' setting's extra men. The side pays 100.
 SUB army_add_recruits (side, army, isolated)
     DIM troops AS INTEGER
     troops = 45: isolated = 0
@@ -260,7 +254,7 @@ SUB army_add_recruits (side, army, isolated)
         IF city_is_connected(side, army_city(army)) < 1 THEN isolated = 1
     END IF
     army_size(army) = army_size(army) + troops
-    CALL army_recruit_bonus(0)
+    CALL army_recruit_bonus(side, army)
     side_cash(side) = side_cash(side) - COST_RECRUIT
 END SUB
 
@@ -278,11 +272,12 @@ FUNCTION recruits_cut_off (side, city, troops)
     recruits_cut_off = troops: IF city_is_connected(side, city) < 1 THEN recruits_cut_off = troops \ 3
 END FUNCTION
 
-' The Balance setting's extra men for a recruited army. The caller passes slot 0 when men
-' join an army, and army_new sets a new army's size after it, as in the original.
-SUB army_recruit_bonus (army_slot)
-    IF current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN army_size(army_slot) = army_size(army_slot) + 15 - 5 * opt_difficulty
-    IF current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
+' The Balance setting's extra men for an army of side that recruits. As in battle_strengths,
+' they go to the computer's side when the setting favors it. The original added them to army 0,
+' or to a new army just before its size was set, so they were never seen.
+SUB army_recruit_bonus (side, army_slot)
+    IF side = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN army_size(army_slot) = army_size(army_slot) + 15 - 5 * opt_difficulty
+    IF side = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
 END SUB
 
 ' Fills the menu with the cities where a side may recruit this month. They are drawn at

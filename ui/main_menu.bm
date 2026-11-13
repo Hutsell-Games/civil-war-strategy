@@ -23,7 +23,7 @@ SUB menu_main (start)
     menu_text$(9) = "Files"
     menu_item_count = 9
     menu_choice = start
-    CALL menu_select(MENU_PLAIN): CALL clear_right_panel
+    CALL menu_select(MENU_MAIN_KEYS): CALL clear_right_panel
 END SUB
 
 ' Railroad: the train's picture and its capacity. Then the player picks an army and where its

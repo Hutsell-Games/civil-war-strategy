@@ -163,4 +163,5 @@ compiler accepted it. Names ignore case, so it is the same name as the constant 
 
 1. **The order above:** go ahead with it, or keep to the `ai\ai.bm` steps?
 2. **The kept bugs:** rule on `TODO.md`'s "The game" rows in one batch now, or leave them until after
-   this work? The merge of the player's and the computer's commands waits on that.
+   this work? The merge of the player's and the computer's commands waits on that. Answered 2026-11-13
+   (user): now. All but three are fixed (`TODO.md`, "The game").

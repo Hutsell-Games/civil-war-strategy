@@ -1,9 +1,10 @@
 #! seed 1861
 # Civil War Strategy played from the start (QB64Rust's tools/screen/README.md, "Prompts").
 # Two turns as the Union, from March to July 1861: recruit, two moves, a ship, a railroad move, the Union Armies,
-# Cities and Battles reports, Fortify, the Utility menu, a save; END TURN twice, so that the computer moves and two
+# Cities and Battles reports, Fortify, the Utility menu, a save; END TURN twice, so that the computer moves and
 # battles are fought; then Files, Quit, Yes. A prompt before every key: the game announces each wait, a menu after
-# every arrow key. A state at each new kind of screen.
+# every arrow key, except in the computer's second turn, whose waits a rule answers. A state at each new kind of
+# screen.
 
 # title menu: Start NEW Game
 prompt
@@ -200,19 +201,18 @@ prompt
 key up
 prompt
 key enter
-# The computer's turn: the month's events, the battle at Harper's Ferry, "hit any key to continue"
-prompt
-key space
-prompt
-key space
-prompt
-key space
-# July 1861, main menu on Troops: up (round) to Files
-prompt
+# The computer's turn: a space for each of its waits, up to July's main menu
+rule 1 key space
+rule 2:R key enter
+play until 2:M
+state
 key up
 prompt
 key enter
-# Options on Save: down twice to Quit; Quit: up to Yes; END's "Press any key to continue"
+# Options on Load (offered since the save): down three times to Quit; Quit: up to Yes; END's "Press any key to
+# continue"
+prompt
+key down
 prompt
 key down
 prompt

@@ -2,7 +2,7 @@
 # Civil War Strategy: every entry of the Utility menu, then a game with what they set (QB64Rust's
 # tools/screen/README.md, "Places and rules"). Vary Start first (it reads the configuration and the start again);
 # Graphics four times round; sound on, the last Sounds entry (silent: under a script the game plays at volume 0); Display Very
-# Slow, the other colors, Fast; Balance Rebel ++; End Cond time off and on; Random Events Neutral, OFF, Favor
+# Slow, the other colors, Fast; Balance Rebel ++; End Cond time off and on; Random Events Esc, Neutral, OFF, Favor
 # Rebels, Favor Union; Jan Campgn off; Realism off and on; Chk Links; History on; Aggress six times round; Side
 # Rebel and back; 2 Player and back. Then END TURN by rules: in November 1861 the Rebels win on cities (the
 # other colors, sound and history on), the Hall of Fame, Game Over, Quit. A run takes about 26 s: the notes take
@@ -83,7 +83,15 @@ prompt
 key enter
 prompt
 key esc
-# Random events: Neutral, OFF, Favor Rebels (the second F, by arrows), Favor Union
+# Random events: Esc, which shows the setting in force (Favor Rebels); then Neutral, OFF, Favor Rebels
+# (the second F, by arrows), Favor Union
+prompt
+text r
+prompt
+key esc
+prompt
+state
+key space
 prompt
 text r
 prompt

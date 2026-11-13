@@ -83,7 +83,6 @@ SUB army_recruit (side, city, raised)
         CALL army_get_commander((side), army_slot)
 
         IF army_slot = 0 THEN raised = 0: EXIT SUB
-        CALL army_place_new(army_slot, city)
         CALL army_new(side, army_slot, city)
         EXIT SUB
     END IF

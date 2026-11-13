@@ -2,8 +2,7 @@
 ' and call these.
 
 ' City 0 stands for "no port". Before a fleet's order it is given to the fleet's side, so that
-' the owner of the port of a side without a fleet is that side. The computer's fleet orders
-' (ai_fleet_orders) read it later, as the last order left it.
+' the owner of the port of a side without a fleet is that side.
 SUB navy_mark_side (side)
     city_owner(0) = side
 END SUB
@@ -61,9 +60,8 @@ SUB navy_list_ports (side)
     NEXT i
 END SUB
 
-' Draws a random number and drops it. The player's Build and Attack call it where the
-' original drew a number for a test that only the computer's fleet uses, so that the random
-' numbers of a game stay in their order (TODO.md).
+' Draws a random number and drops it. The computer's Attack calls it where the original drew
+' a second number for its look at the order, so that the random numbers stay in their order.
 SUB random_discard
     DIM unused!
     unused! = RND
@@ -213,11 +211,11 @@ FUNCTION navy_shot_hits (side)
     IF RND <= .5 + ironclad_bonus! THEN navy_shot_hits = 1
 END FUNCTION
 
-' Naval combat: the loser's fleet is sunk. The loser's side gets 10 victory points (TODO.md).
-' The winner pursues when it is the side whose turn it is.
+' Naval combat: the loser's fleet is sunk, and the winner's side gets 10 victory points (the
+' original gave them to the loser). The winner pursues when it is the side whose turn it is.
 SUB navy_fleet_defeated (loser)
     fleet_city(loser) = 0: fleet_ships$(loser) = ""
-    side_victory_points(loser) = side_victory_points(loser) + 10
+    side_victory_points(other_side(loser)) = side_victory_points(other_side(loser)) + 10
     IF other_side(loser) = current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
 END SUB
 

@@ -1,6 +1,6 @@
 # A whole game as the Rebel side, which only ends each turn; the computer plays the Union side, on the alternate map.
 # Every victory condition but the time limit is turned off first.
-# A digest at each of the 20 main menus, at Game Over and at the title menus.
+# A digest at each of the 9 main menus, at Game Over and at the title menus.
 # Written by tests/make_scripts.py.
 #! seed 1869
 #! cfg side=2 history=1 bold=4 randbal=3
@@ -52,7 +52,7 @@ prompt
 key esc
 
 # Each month's main menu: a digest, then END TURN.
-repeat 20
+repeat 9
 play until 2:M
 digest
 text e

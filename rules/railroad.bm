@@ -47,7 +47,7 @@ FUNCTION railroad_capacity (side)
     DIM base_cities AS INTEGER: DIM max_capacity AS INTEGER: DIM capacity AS INTEGER
     IF opt_realism = REALISM_OFF THEN railroad_capacity = train_capacity(side): EXIT FUNCTION
     base_cities = 11
-    IF current_side = SIDE_REBEL THEN base_cities = 23
+    IF side = SIDE_REBEL THEN base_cities = 23
     capacity = train_capacity(side) + 5 * (side_city_count(side) - base_cities)
     max_capacity = 2 * train_capacity(side)
     IF capacity > max_capacity THEN capacity = max_capacity

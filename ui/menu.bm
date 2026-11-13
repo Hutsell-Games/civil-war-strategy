@@ -125,8 +125,10 @@ SUB menu_select (menu_item_show_beside%)
 END SUB
 
 ' A key of two bytes at a menu, given by its second byte. Up, Down, PgUp and PgDn move the row,
-' round from one end to the other. At a main menu (MENU_PLAIN), F3 draws the screen again, F4
-' shows the force report, and F7 ends the turn (done = 1).
+' round from one end to the other. At a plain menu (MENU_PLAIN) and the main menu
+' (MENU_MAIN_KEYS), F3 draws the screen again and F4 shows the force report. F7 ends the turn
+' (done = 1) at the main menu only: the original took it at every plain menu, where the 99
+' it gives back was read as a row.
 SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
     SELECT CASE pressed$
         CASE KEY_UP$: row = row - 1
@@ -134,16 +136,16 @@ SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
         CASE KEY_DOWN$: row = row + 1
         CASE KEY_PAGE_DOWN$: row = menu_item_count
         CASE KEY_F3$
-            IF kind = MENU_PLAIN THEN
+            IF kind = MENU_PLAIN OR kind = MENU_MAIN_KEYS THEN
                 CLS
                 CALL draw_map
                 CALL draw_menu(title_col, menu_width)
                 CALL draw_top_bar
             END IF
         CASE KEY_F7$
-            IF kind = MENU_PLAIN THEN menu_choice = MENU_END_TURN_KEY: done = 1
+            IF kind = MENU_MAIN_KEYS THEN menu_choice = MENU_END_TURN_KEY: done = 1
         CASE KEY_F4$
-            IF kind = MENU_PLAIN THEN
+            IF kind = MENU_PLAIN OR kind = MENU_MAIN_KEYS THEN
                 CALL report_force_summary
                 CLS
                 CALL draw_map

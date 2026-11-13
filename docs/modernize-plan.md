@@ -204,20 +204,20 @@ Phase 7's rule for these lines still holds:
 - A step that must rewrite lines no test runs (the `GOTO` knots of `navy_commands` and `turn_resolve`)
   waits for its tests.
 
-The 15 lines that no test runs (20 before phase 9 step 6, 18 before the last labels went, 17 before
-`DIR$` went on 2026-11-13). The table names the SUB, not the line
+The 12 lines that no test runs (20 before phase 9 step 6, 18 before the last labels went, 17 before
+`DIR$` went on 2026-11-13, 15 before the kept bugs were fixed the same day). The table names the SUB, not the line
 numbers, because each step moves the lines; `report.txt` has the numbers of the day.
 
 | File | SUB | Lines | Why |
 |------|-----|-------|-----|
-| `rules\setup.bm` | `vary_start_conditions` | 3 | Vary Start's second loop, `FOR k = 21 TO 6`, never runs (a bug of the original, kept) |
+| `rules\setup.bm` | `vary_start_conditions` | 2 | The Rebels' army removed by Vary Start; no script's draw removes one. The loop never ran until 2026-11-13 (`FOR k = 21 TO 6`) |
 | `ai\ai.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
 | `ai\ai.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. `ai_raise_forces` builds the first ship before it. It was the `THEN` part of a one-line `IF` until 2026-11-12 |
 | `ai\ai.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
 | `rules\battle.bm` | `battle_strengths` | 1 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
-| `rules\battle.bm` | `battle_losses` | 2 | `CASE IS > 800` comes after `CASE IS > 300`, which takes it (a bug of the original, kept) |
+| `rules\battle.bm` | `battle_losses` | 1 | The losses of a defender of more than 80,000 men; no script has one. The case came after `CASE IS > 300` until 2026-11-13 |
+| `ai\ai.bm` | `ai_fortify` | 1 | The Union computer stops fortifying when it has no fleet. Since 2026-11-13 a computer without a fleet builds one in the same turn (`ai_fleet_orders`), so no script's computer fortifies without one. A game can still reach it: the Union's fleet sunk in the player's turn, before the computer fortifies |
 | `ai\ai.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
-| `rules\turn.bm` | `turn_set_move_order` | 2 | `CASE IS > 800` and `CASE IS > 1000` come after `CASE IS > 400` (a bug of the original, kept) |
 | `ui\orders.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 

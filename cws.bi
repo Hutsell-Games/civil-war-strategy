@@ -68,6 +68,7 @@ CONST MENU_ARMY_STATS = 4
 CONST MENU_ARMY_POINTER = 6
 CONST MENU_FACES = 8
 CONST MENU_CITY_POINTER = 9
+CONST MENU_MAIN_KEYS = 10
 ' menu_box_type: a double line round the menu (0, no line, and 1, a single line, have no caller).
 CONST BOX_DOUBLE = 2
 ' The computer's order for its fleet (ai_navy_orders): the rows of the Ships menu.

@@ -38,8 +38,6 @@ SUB menu_navy_build (side, again)
         IF city_owner(fleet_city(side)) <> side THEN EXIT SUB
         IF city_port_type(fleet_city(side)) < PORT_SEA THEN EXIT SUB
     END IF
-    ' The computer's test of whether to build drew a random number here for the player too.
-    CALL random_discard
     ship$ = "W"
 
     IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * cost THEN
@@ -69,16 +67,14 @@ SUB menu_navy_build (side, again)
     CALL navy_fleet_founded(side, menu_value(menu_choice), ship$, cost)
 END SUB
 
-' Attack: the fleet bombards the city it lies off, if that is the enemy's. The fleet has then
-' acted this month, even when the city is not the enemy's and nothing is bombarded.
+' Attack: the fleet bombards the city it lies off, if that is the enemy's. Only then has the
+' fleet acted this month.
 SUB menu_navy_attack (side, again)
     again = 0
     IF fleet_is_at_sea(side) THEN again = 1: EXIT SUB
-    ' The computer's test of whether to sail instead drew a random number here for the player too.
-    CALL random_discard
     IF NOT fleet_exists(side) THEN EXIT SUB
-    CALL turn_set_navy_done(1)
     IF city_owner(fleet_city(side)) <> other_side(side) THEN again = 1: EXIT SUB
+    CALL turn_set_navy_done(1)
     CALL navy_bombard(side)
 END SUB
 
@@ -121,10 +117,12 @@ SUB menu_navy_raid (side, again)
     CALL navy_redraw_map
 END SUB
 
-' Invasion: a ship lands a new army in the neutral city the fleet lies off.
+' Invasion: a ship lands a new army in the neutral city the fleet lies off. With no commander
+' left it lands none.
 SUB menu_navy_invade (side)
     DIM army_slot AS INTEGER
     CALL army_get_commander((side), army_slot)
+    IF army_slot = 0 THEN EXIT SUB
     CALL navy_land_army(side, army_slot)
     CALL turn_set_navy_done(1)
 END SUB

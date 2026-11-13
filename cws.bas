@@ -13,20 +13,22 @@ DO
     IF event_file_error$ <> "" THEN PRINT event_file_error$: END
     CALL show_title(replay): replay = 1
     CALL script_start
-    ' The title menu, and for a new game the scenario menu. Esc there goes back to the title menu.
+    ' The title menu, and for a new game the scenario menu. Esc there goes back to the title menu,
+    ' and so does Resume Saved Game when no game is loaded.
     DO
         CALL menu_title
         title_choice = menu_choice
         IF title_choice = TITLE_QUIT THEN CLS : END
         picked = scenario_now
-        IF title_choice <> TITLE_RESUME THEN
+        IF title_choice = TITLE_RESUME THEN
+            CLS : CALL menu_load_game
+            IF menu_choice < 1 THEN picked = 0
+        ELSE
             CALL menu_scenario(picked)
-            IF picked = 0 THEN CALL draw_title
         END IF
+        IF picked = 0 THEN CALL draw_title
     LOOP UNTIL picked > 0
-    IF title_choice = TITLE_RESUME THEN
-        CLS : CALL menu_load_game
-    ELSE
+    IF title_choice <> TITLE_RESUME THEN
         ' Another scenario than the one loaded: the game starts again on it.
         IF picked <> scenario_now THEN scenario_now = picked: CALL game_new
         CALL show_new_game

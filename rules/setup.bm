@@ -6,7 +6,7 @@ SUB set_union_advantage
 END SUB
 
 ' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
-' and the leaders' ratings at random.
+' and the leaders' ratings at random. Each side may lose some of its first six armies.
 SUB vary_start_conditions
     DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM ship$
     CALL load_scenario
@@ -19,7 +19,7 @@ SUB vary_start_conditions
             army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
         END IF
     NEXT k
-    FOR k = 21 TO 6
+    FOR k = 21 TO 26
         IF RND > .6 THEN
             army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
             army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0

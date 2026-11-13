@@ -130,7 +130,9 @@ SUB ai_fleet_orders (side)
             IF RND < .9 THEN CALL ai_navy_orders(side, NAVY_SAIL)
             EXIT SUB
         END IF
-        IF side_cash(side) >= COST_SHIP AND fleet_size(side) < MAX_FLEET_SHIPS AND city_owner(fleet_city(side)) = side THEN 
+        ' A side with no fleet builds its first ship. The original read the owner of city 0,
+        ' which is the side whose fleet had the last order (navy_mark_side).
+        IF side_cash(side) >= COST_SHIP AND fleet_size(side) < MAX_FLEET_SHIPS AND (NOT fleet_exists(side) OR city_owner(fleet_city(side)) = side) THEN
             CALL ai_navy_orders(side, NAVY_BUILD)
         END IF
     END IF
@@ -173,12 +175,11 @@ END SUB
 
 ' The computer's move order for an army, or none (ordered is 0).
 SUB ai_army_order (side, army, ordered)
-    DIM city AS INTEGER: DIM army_troops AS INTEGER
+    DIM city AS INTEGER
     DIM enemy_strength AS INTEGER: DIM j AS INTEGER: DIM neighbor AS INTEGER: DIM neighbor_strength AS INTEGER: DIM best_road AS INTEGER: DIM other_army AS INTEGER
     ordered = 0
     city = army_city(army)
     IF NOT army_exists(army) OR army_has_acted(army) THEN EXIT SUB
-    army_troops = army_size(army)
     IF army_supply(army) < 1 AND RND > .1 THEN EXIT SUB
 
     menu_choice = 0
@@ -203,9 +204,11 @@ SUB ai_army_order (side, army, ordered)
     IF city_owner(army_order(army)) = side THEN
         other_army = city_army(army_order(army))
         IF other_army > 0 THEN
-            IF army_order(other_army) = army_troops THEN
+            ' Two armies of the side that would trade cities stay where they are. The original
+            ' compared the other army's order with this army's size.
+            IF army_order(other_army) = city THEN
                 army_order(army) = ORDER_NONE
-                EXIT SUB  ' eliminate crossing moves
+                EXIT SUB
             END IF
         END IF
     END IF
@@ -507,7 +510,7 @@ SUB ai_railroad (side, army, city)
         IF city_fort(i) > 0 AND city_army(i) = 0 THEN to_city = i: EXIT FOR
     NEXT i
     IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN
-        routes = railroad_route_count(side, candidate_city)
+        routes = railroad_route_count(side, side_capital(side))
         IF routes > 0 THEN
             enemy_strength = city_nearby_enemy_strength(side_capital(side))
             IF enemy_strength > 0 THEN to_city = side_capital(side)
@@ -563,35 +566,35 @@ SUB ai_navy_orders (side, order)
             CASE NAVY_ATTACK: CALL ai_navy_attack(side, action, again)
             CASE NAVY_SAIL: CALL ai_navy_sail(side, again)
             CASE NAVY_RAID: CALL ai_navy_raid(side, again)
-            CASE NAVY_INVADE: CALL ai_navy_invade(side, action)
+            CASE NAVY_INVADE: CALL ai_navy_invade(side)
         END SELECT
     LOOP WHILE again > 0
 END SUB
 
 ' Build, for the computer. It may decide against a ship, the more so the larger its fleet.
-' With the money for two ships it builds an ironclad, at a wooden ship's price. A new fleet
-' starts in one of its sea ports, picked at random. again is 1 when a ship was built, or when
-' the cash or a fleet at sea prevented it.
+' With the money for two ships it builds an ironclad, at the price of two, as the player pays
+' (the original charged one). A new fleet starts in one of its sea ports, picked at random.
+' again is 1 when a ship was built, or when the cash or a fleet at sea prevented it.
 SUB ai_navy_build (side, again)
-    DIM ship$
+    DIM ship$: DIM cost AS INTEGER
     again = 0
     IF side_cash(side) < COST_SHIP OR fleet_is_at_sea(side) THEN again = 1: EXIT SUB
     IF fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
     IF RND < .07 * fleet_size(side) THEN EXIT SUB
-    ship$ = "W"
+    ship$ = "W": cost = COST_SHIP
 
     IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * COST_SHIP THEN
         ' The place and color of the player's Type menu, set here too as before.
         menu_col = PANEL_COL: menu_row = 12: menu_color = COLOR_LIGHT_BLUE
-        ship$ = "I"
+        ship$ = "I": cost = 2 * COST_SHIP
     END IF
 
-    CALL navy_add_ship(side, ship$, COST_SHIP)
+    CALL navy_add_ship(side, ship$, cost)
     IF fleet_size(side) > 1 THEN CALL navy_ship_joins(side, ship$): again = 1: EXIT SUB
     CALL navy_list_shipyards(side)
     menu_choice = 1 + INT(menu_item_count * RND)
     IF menu_item_count < 1 THEN CALL navy_cancel_new_fleet(side): EXIT SUB
-    CALL navy_fleet_founded(side, menu_value(menu_choice), ship$, COST_SHIP)
+    CALL navy_fleet_founded(side, menu_value(menu_choice), ship$, cost)
     again = 1
 END SUB
 
@@ -651,14 +654,12 @@ SUB ai_navy_raid (side, again)
     CALL navy_redraw_map
 END SUB
 
-' Invasion, for the computer: a ship lands a new army. With no commander left it asks for
-' one again and again (TODO.md).
-SUB ai_navy_invade (side, action)
+' Invasion, for the computer: a ship lands a new army. With no commander left it lands
+' none. The original asked for one again without end.
+SUB ai_navy_invade (side)
     DIM army_slot AS INTEGER
-    DO
-        CALL army_get_commander((side), army_slot)
-        IF army_slot = 0 THEN action = NAVY_SAIL
-    LOOP WHILE army_slot = 0
+    CALL army_get_commander((side), army_slot)
+    IF army_slot = 0 THEN EXIT SUB
     CALL navy_land_army(side, army_slot)
 END SUB
 

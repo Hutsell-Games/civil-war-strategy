@@ -3,6 +3,91 @@
 The finished parts of `modernize-plan.md`, moved here on 2026-11-11. The plan keeps the decisions, the
 phases still to do and the rules that still hold. Line numbers are those of the day each part was written.
 
+## The kept bugs fixed (2026-11-13)
+
+The user ruled on `TODO.md`'s "The game" rows at once: 22 were fixed in one batch, and three are kept
+(`normal_random_number` drawing high, the pictures not shown, the train's and the cannon's pixels).
+The `SELECT CASE` branches that were never reached (`sub-names.md`, "Found while reading") were fixed
+with them. Each fix below names what the original did.
+
+The menus and files:
+
+- **Load after the first save.** `saved_games_check` (`port\files.bm`) sets `saves_exist` both ways from
+  the disk. It only ever set it to 0, so Load stayed "-" until a new game.
+- **Resume Saved Game with nothing loaded** (no saved game, Esc, or a save that cannot load) goes back to
+  the title menu (`cws.bas`). It went on to the main menu on a black screen.
+- **F7 ends the turn only at the main menu.** A new menu kind, `MENU_MAIN_KEYS` (`cws.bi`), is the main
+  menu's (`menu_main`); F3 and F4 still work at every plain menu. F7 gave 99 at every plain menu, which
+  SOUNDS printed as `menu_text$(99)`, Load read as a row and Save took as slot 99.
+- **Save and Load and the month's commands.** Every game loaded opens Troops, Moves and Ships again; a
+  save opens nothing (`menu_load_game`, `menu_save_game`). Both did so only for the menu's first row.
+- **Rndom Evt** prints the setting in force (`menu_option_events`), so Esc shows what is set. It kept
+  the last choice's text in a `STATIC`.
+- **Attack off a city that is not the enemy's** leaves Ships open (`menu_navy_attack`). The fleet was
+  marked as having acted before the city was checked.
+- **The player's Build and Attack draw no random number.** Their `random_discard` calls are gone. The
+  computer's Attack keeps its own.
+
+The navy and the events:
+
+- **Invasion with no commander left** lands no army, for the player and the computer
+  (`menu_navy_invade`, `ai_navy_invade`). The player's landed in slot 0; the computer asked again
+  without end. `ai_navy_invade` lost its `action` parameter.
+- **A computer side with no fleet builds its first ship** whatever city 0's owner is
+  (`ai_fleet_orders`). Whether it built depended on whose fleet had the last order.
+- **The mercenaries** join the army in the side's capital, or else form a new army there under the
+  next commander (`event_apply`, and the new `event_new_army`, `rules\events.bm`). With no commander left
+  they are lost. They joined army 0. The user ruled "a new army at Richmond"; a city holds one army, so
+  an army already in the capital takes them.
+- **The computer's ironclad** costs two ships, as the player's does (`ai_navy_build`).
+
+The rules:
+
+- **`railroad_capacity`** counts the cities of the side asked about, not the player's.
+- **Vary Start** may remove some of the Rebels' first six armies (`FOR k = 21 TO 26`). The loop ran
+  from 21 to 6 and never ran.
+- **Casualties** count for the attacker's side by `army_side` (`battle_apply_losses`). `attacker > 2`
+  counted Union armies 3 to 20 as Rebels.
+- **A battle takes a day of supply** from the attacker and the defender (`battle_fight`), not from
+  armies 1 and 2.
+- **The Balance setting's extra recruits** go to the army recruited, in `army_raise` and
+  `army_add_recruits`. They went to army 0, or to a new army just before its size was set.
+  `army_recruit_bonus` now takes the side, and gives the men only to the computer's side when the
+  setting favors it, as `battle_strengths` does with its strength. The original tested only the
+  player's side, so it would have given them to whoever recruited. `army_place_new` is gone: it only
+  set `army_city`, which `army_raise` sets.
+- **The computer's train to its capital** checks the capital's track (`ai_railroad`), not the last
+  city of the loop before.
+- **Crossing moves**: two of the computer's armies that would trade cities stay put
+  (`ai_army_order`). The test compared the other army's order with this army's size.
+- **An army lost** gives its supplies to the winner and 25 victory points to the winner's side
+  (`turn_army_lost`). The supplies were cleared first, and the points went to the loser's side.
+- **A fleet sunk in combat** gives 10 points to the winner's side (`navy_fleet_defeated`), not the
+  loser's.
+- **The Rebels' bonus for 35 cities** adds 100 to their own points (`turn_update_victory_points`), not
+  to the Union's.
+- **`SELECT CASE` in order**: `battle_losses` tests `> 800` before `> 300`, and `turn_set_move_order`
+  tests `> 1000`, `> 800` and `> 400` in that order.
+
+The tests:
+
+- The unit tests that pinned a bug now state the rule: `TestRailroadCapacityCountsBySide`,
+  `TestBattleCasualtiesBySide`, `TestBattleFightTakesSupplyFromTheArmies`,
+  `TestEventMercenariesFormAnArmy`, `TestTurnArmyLost`, `TestNavyFleetDefeated`, `TestSavedGamesCheck`
+  and `TestVictoryPointsKeepEightTenths`. New: `TestEventMercenariesJoinTheCapitalsArmy`,
+  `TestArmyRecruitBonus` and `TestArmyRaiseGetsTheRecruitBonus`. 157 unit tests.
+- 32 of the 40 scripts were recorded again. `make_scripts.py` wrote the generated ones
+  again; the games now last 1 to 14 turns (`pass`) and 9 to 24 (`war`).
+- Scripts written by hand that changed their steps: `options` (Esc in Rndom Evt, with a state),
+  `files` (Resume with no saved game returns to the title menu; Load is offered after the first save),
+  `endings` (game 3 now ends at the time limit; the `war` games still end with an army annihilated),
+  `union-manassas` (the computer's second turn by rules; the Files menu opens on Load once a game is
+  saved) and `navy-losses` (seed 2 for 6, so that the shore battery still sinks the ship at the first
+  shot).
+- Every changed line runs under the tests (`play.py coverage`). One line that ran before does not:
+  `ai_fortify`'s stop for a Union computer without a fleet (`modernize-plan.md`, "Lines that no test
+  runs"). 12 lines are not run, 15 before. 40 scripts pass `check` and `compare` with both compilers.
+
 ## Scenarios in folders (2026-11-13)
 
 `scenarios\ALTMAP.BAT` renamed six files to switch the map, on Windows only. The plan that replaced it

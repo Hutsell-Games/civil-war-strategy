@@ -34,10 +34,9 @@ END SUB
 
 ' Load, and the title menu's Resume Saved Game: the player picks a saved game, and the map is
 ' drawn with it. With no saved game, or one whose scenario is not in the list, it loads
-' nothing. The month's Troops, Moves and Ships open again only when the game picked is the
-' menu's first (TODO.md).
+' nothing. A game loaded opens the month's Troops, Moves and Ships again.
 SUB menu_load_game
-    DIM k AS INTEGER: DIM file$: DIM row AS INTEGER: DIM problem$
+    DIM k AS INTEGER: DIM file$: DIM problem$
     IF NOT any_saved_game THEN menu_choice = MENU_ESCAPED: EXIT SUB
     menu_text$(0) = "Load"
     menu_item_count = 0
@@ -52,7 +51,6 @@ SUB menu_load_game
     CALL menu_select(MENU_PLAIN)
     CALL clear_right_panel
     IF menu_choice < 1 THEN EXIT SUB
-    row = menu_choice
     COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Loading";
     CALL load_game(menu_value(menu_choice), problem$)
     IF problem$ <> "" THEN
@@ -65,11 +63,10 @@ SUB menu_load_game
     FOR k = SIDE_UNION TO SIDE_REBEL
         IF train_army(k) > 0 THEN CALL draw_train(k, DRAW_SHOW)
     NEXT k
-    IF row = 1 THEN CALL turn_reset_commands
+    CALL turn_reset_commands
 END SUB
 
-' Save: the player picks one of nine slots; a slot with a saved game has a mark. The month's
-' Troops, Moves and Ships open again when the slot is the first (TODO.md).
+' Save: the player picks one of nine slots; a slot with a saved game has a mark.
 SUB menu_save_game
     DIM k AS INTEGER: DIM slot AS INTEGER
     menu_text$(0) = "Save Game"
@@ -86,7 +83,6 @@ SUB menu_save_game
     PRINT STRING$(MAX_CITIES, ".");
     CLS
     CALL draw_map
-    IF slot = 1 THEN CALL turn_reset_commands
 END SUB
 
 ' Quit to DOS: Yes or No. action becomes FILES_QUIT on Yes.

@@ -490,10 +490,10 @@ SUB save_game (slot)
     CALL config_write(config_side)
 END SUB
 
-' Notes that no saved game is on the disk, so that the Files menu shows Load as "-". Only a
-' new game sets saves_exist back (TODO.md).
+' Notes whether a saved game is on the disk, so that the Files menu shows Load, or "-" when
+' there is none.
 SUB saved_games_check
-    IF NOT any_saved_game THEN saves_exist = 0
+    saves_exist = 0: IF any_saved_game THEN saves_exist = 1
 END SUB
 
 ' Whether one of the nine save slots, cws1.sav to cws9.sav, holds a saved game.

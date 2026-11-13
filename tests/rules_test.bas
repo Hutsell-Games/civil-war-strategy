@@ -159,10 +159,10 @@ SUB TestTraincapacityWithRealism
     side_city_count(1) = 40: limit = railroad_capacity(1): AssertEqualInt 40, limit, "never more than twice"
 END SUB
 
-SUB TestTraincapacityCountsByPlayersSide
+SUB TestRailroadCapacityCountsBySide
     train_capacity(1) = 600: opt_realism = 1: side_city_count(1) = 23
     current_side = 2
-    limit = railroad_capacity(1): AssertEqualInt 600, limit, "the Union's trains when the player is the Rebels"
+    limit = railroad_capacity(1): AssertEqualInt 660, limit, "the Union's 12 cities above 11, whoever plays"
 END SUB
 
 ' --------------------------------------------------------------------- void
@@ -256,14 +256,14 @@ SUB TestBattleCountsAnEmptyArmyAsOne
     AssertEqualInt 20, defend_steps(4), "50 to 1: the cap"
 END SUB
 
-SUB TestBattleFightTakesSupplyFromOneAndTwo
+SUB TestBattleFightTakesSupplyFromTheArmies
     RANDOMIZE 1
-    army_supply(1) = 2: army_supply(2) = 1: army_supply(21) = 3: army_supply(22) = 3
+    army_supply(1) = 2: army_supply(2) = 1: army_supply(21) = 3: army_supply(22) = 0
     CALL battle_fight(3, 6, 21, 22, winner, loser, rounds)
-    AssertEqualInt 1, army_supply(1), "army 1 loses a day"
-    AssertEqualInt 0, army_supply(2), "and army 2"
-    AssertEqualInt 3, army_supply(21), "not the attacker"
-    AssertEqualInt 3, army_supply(22), "nor the defender"
+    AssertEqualInt 2, army_supply(1), "not army 1"
+    AssertEqualInt 1, army_supply(2), "nor army 2"
+    AssertEqualInt 2, army_supply(21), "the attacker loses a day"
+    AssertEqualInt 0, army_supply(22), "the defender has none to lose"
     AssertTrue winner = 21 OR winner = 22, "a winner of the two:" + STR$(winner)
     AssertEqualInt 21 + 22 - winner, loser, "the other one loses"
     AssertTrue rounds >= 1, "at least one round:" + STR$(rounds)
@@ -287,13 +287,13 @@ SUB TestBattleLossesWithSeedOne
     AssertEqualInt 120, army_size(1), "not taken yet"
 END SUB
 
-SUB TestBattleCasualtiesByArmyNumber
+SUB TestBattleCasualtiesBySide
     army_size(3) = 120: army_size(21) = 80
     CALL battle_apply_losses(3, 21, 3, 10, 20)
     AssertEqualInt 110, army_size(3), "the attacker loses 10"
     AssertEqualInt 60, army_size(21), "the defender loses 20"
-    AssertEqualInt 10, side_casualties&(2), "Union army 3's losses count for the Rebels (attacker > 2)"
-    AssertEqualInt 20, side_casualties&(1), "and the Rebels' for the Union"
+    AssertEqualInt 10, side_casualties&(1), "Union army 3's losses count for the Union"
+    AssertEqualInt 20, side_casualties&(2), "and the Rebels' for the Rebels"
     AssertEqualInt 1, side_battles_won(1), "a battle won for the Union"
     AssertEqualInt 1, side_victory_points(1), "and a victory point"
 END SUB
@@ -371,6 +371,30 @@ SUB TestArmyCombineRefusesTooLarge
 END SUB
 
 ' ------------------------------------------------- raising and supplying
+' The Balance setting's extra men go to the computer's side when the setting favors it.
+SUB TestArmyRecruitBonus
+    current_side = SIDE_UNION: opt_difficulty = 1: opt_realism = REALISM_OFF
+    army_size(21) = 100: army_city(21) = 0: army_size(1) = 100: army_city(1) = 0
+    CALL army_add_recruits(SIDE_REBEL, 21, isolated)
+    AssertEqualInt 155, army_size(21), "the computer's Rebels: 4,500 and 1,000 more"
+    CALL army_add_recruits(SIDE_UNION, 1, isolated)
+    AssertEqualInt 145, army_size(1), "the player's Union: 4,500 only"
+    current_side = SIDE_REBEL: opt_difficulty = 5: army_size(1) = 100
+    CALL army_add_recruits(SIDE_UNION, 1, isolated)
+    AssertEqualInt 155, army_size(1), "the computer's Union at Balance 5: 1,000 more"
+    opt_difficulty = DIFFICULTY_EVEN: army_size(21) = 100
+    CALL army_add_recruits(SIDE_REBEL, 21, isolated)
+    AssertEqualInt 145, army_size(21), "an even Balance: none"
+END SUB
+
+SUB TestArmyRaiseGetsTheRecruitBonus
+    RANDOMIZE 1
+    current_side = SIDE_UNION: opt_difficulty = 2: opt_realism = REALISM_OFF
+    leader_name$(22) = "Hood": city_owner(9) = SIDE_REBEL: city_road(9, 1) = 10: city_owner(10) = SIDE_REBEL
+    CALL army_raise(SIDE_REBEL, 22, 9)
+    AssertEqualInt 75, army_size(22), "7,000 and 500 more"
+END SUB
+
 SUB TestArmyRaiseSetsUpANewArmy
     RANDOMIZE 1
     leader_name$(3) = "Pope": leader_rating(3) = 5: side_cash(1) = 500
@@ -520,7 +544,7 @@ SUB TestVictoryPointsKeepEightTenths
     side_victory_points(2) = 10: side_income(2) = 0: side_city_count(2) = 40
     CALL turn_update_victory_points
     AssertEqualInt 154, side_victory_points(1), "80, 24 for income and cities, 50 for 30 cities"
-    AssertEqualInt 254, side_victory_points(2), "over 34 cities the Rebels get the Union's points and 100"
+    AssertEqualInt 170, side_victory_points(2), "8, 12 for income and cities, 50 for 30 cities and 100 for 35"
 END SUB
 
 ' ---------------------------------------------------------- ai_count_armies
@@ -755,7 +779,8 @@ SUB TestNavyFleetDefeated
     current_side = 1: fleet_city(2) = 5: fleet_ships$(2) = "W"
     CALL navy_fleet_defeated(2)
     AssertEqualInt 0, fleet_city(2), "the Rebels' fleet is gone"
-    AssertEqualInt 10, side_victory_points(2), "10 points for the loser (as in the original)"
+    AssertEqualInt 10, side_victory_points(1), "10 points for the winner"
+    AssertEqualInt 0, side_victory_points(2), "none for the loser"
     AssertEqualInt 1, fleet_pursuit, "the Union, whose turn it is, won: pursuit"
     CALL navy_fleet_defeated(1)
     AssertEqualInt 0, fleet_pursuit, "the Union lost: no pursuit"
@@ -1165,17 +1190,47 @@ SUB TestEventEnglishShipsNeedAPort
     AssertEqualInt 0, fleet_size(2), "no ships"
 END SUB
 
-SUB TestEventMercenariesJoinArmyZero
+' The mercenaries form a new army in the capital under the next commander.
+SUB TestEventMercenariesFormAnArmy
     CALL events_for_test
+    CALL mercenaries_for_test
     side_city_count(2) = 30
     script_dice$ = "0,0,0,.5,0,.9"
     CALL event_roll(event, variant, who)
     AssertEqualInt event_find("mercenaries"), event, "30 cities: mercenaries"
     AssertEqualInt 1, variant, "British"
-    AssertEqualInt 300, army_size(0), "they join army 0, as in the original (TODO.md)"
-    AssertEqualInt MAX_EXPERIENCE, army_experience(0), "with the best experience"
-    army_name$(0) = "Nobody"
-    AssertEqualStr "British mercenaries join Nobody's army", event_message$(event_text$(event, variant)), "the text names army 0"
+    AssertEqualInt 22, event_army, "the next commander's slot"
+    AssertEqualInt 25, army_city(22), "in the capital"
+    AssertEqualInt 22, city_army(25), "the capital holds it"
+    AssertEqualInt 300, army_size(22), "of the mercenaries"
+    AssertEqualInt MAX_EXPERIENCE, army_experience(22), "with the best experience"
+    AssertEqualInt ORDER_BUSY, army_order(22), "it has acted this month"
+    AssertEqualStr "Longstreet", army_name$(22), "the commander's name"
+    AssertEqualStr "", leader_name$(22), "who leaves the free leaders"
+    AssertEqualStr "British mercenaries join Longstreet's army", event_message$(event_text$(event, variant)), "the text names it"
+    army_size(22) = 0: army_city(22) = 0: city_army(25) = 0
+END SUB
+
+' With an army in the capital, the mercenaries join it.
+SUB TestEventMercenariesJoinTheCapitalsArmy
+    CALL events_for_test
+    CALL mercenaries_for_test
+    army_size(23) = 100: army_city(23) = 25: city_army(25) = 23: army_name$(23) = "Hood"
+    side_city_count(2) = 30
+    script_dice$ = "0,0,0,.5,0,.9"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt 23, event_army, "the army in the capital"
+    AssertEqualInt 400, army_size(23), "gains them"
+    AssertEqualStr "Longstreet", leader_name$(22), "no commander is used"
+    army_size(23) = 0: army_city(23) = 0: city_army(25) = 0
+END SUB
+
+' The Rebels with no army, the capital 25 empty, and Longstreet the first free leader.
+SUB mercenaries_for_test
+    DIM i AS INTEGER
+    FOR i = 21 TO 40: army_city(i) = 0: army_size(i) = 0: leader_name$(i) = "": NEXT i
+    leader_name$(22) = "Longstreet": leader_rating(22) = 7
+    side_capital(2) = 25: city_army(25) = 0
 END SUB
 
 ' The South's last event. From June 1864 the furloughs take its place.
@@ -1509,8 +1564,13 @@ SUB TestTurnArmyLost
     CALL turn_army_lost(21, 1)
     AssertEqualInt 0, army_city(21), "the slot is cleared"
     AssertEqualStr "", army_name$(21), "and its name"
-    AssertEqualInt 25, side_victory_points(2), "25 points for the other side of the army that won"
-    AssertEqualInt 4, army_supply(1), "the winner gains none of its supplies (as in the original)"
+    AssertEqualInt 25, side_victory_points(1), "25 points for the side of the army that won"
+    AssertEqualInt 0, side_victory_points(2), "none for the loser's"
+    AssertEqualInt 10, army_supply(1), "the winner takes its supplies"
+    AssertEqualInt 0, army_supply(21), "which it has no more"
+    army_supply(1) = 9: army_city(22) = 6: army_supply(22) = 4
+    CALL turn_army_lost(22, 1)
+    AssertEqualInt MAX_SUPPLY, army_supply(1), "up to the most an army holds"
 END SUB
 
 SUB TestTurnOccupyAndForage
@@ -1988,7 +2048,7 @@ SUB TestSaveGameOfAnUnknownScenario
     AssertEqualInt 1, scenario_now, "the scenario stays"
 END SUB
 
-' saves_exist goes to 0 when no saved game is on the disk, and nothing here sets it back.
+' saves_exist is 0 when no saved game is on the disk, and 1 again once a game is saved.
 SUB TestSavedGamesCheck
     CHDIR TestTempDir$
     saves_exist = 1
@@ -1996,7 +2056,7 @@ SUB TestSavedGamesCheck
     AssertEqualInt 0, saves_exist, "no saved game"
     CALL save_game(1)
     CALL saved_games_check
-    AssertEqualInt 0, saves_exist, "still 0 after a save (as in the original)"
+    AssertEqualInt 1, saves_exist, "1 after a save"
 END SUB
 
 ' any_saved_game looks at the nine slots only: another .sav file is not a saved game.

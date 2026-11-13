@@ -73,13 +73,13 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
 END SUB
 
 ' The fight: each army rolls against its strength until one hits and the other does not. It also
-' takes a day of supply from armies 1 and 2, whoever fights. rounds is how many rolls it took.
+' takes a day of supply from each of the two armies. rounds is how many rolls it took.
 SUB battle_fight (attack_strength, defend_strength, attacker, defender, winner, loser, rounds)
-    DIM i AS INTEGER: DIM scale AS INTEGER: DIM attacker_hit AS INTEGER: DIM defender_hit AS INTEGER: DIM attack_roll AS INTEGER: DIM defend_roll AS INTEGER
+    DIM scale AS INTEGER: DIM attacker_hit AS INTEGER: DIM defender_hit AS INTEGER: DIM attack_roll AS INTEGER: DIM defend_roll AS INTEGER
     scale = attack_strength: IF defend_strength > scale THEN scale = defend_strength
     scale = scale + 1
-    FOR i = 1 TO 2: IF army_supply(i) > 0 THEN army_supply(i) = army_supply(i) - 1
-    NEXT i
+    IF army_supply(attacker) > 0 THEN army_supply(attacker) = army_supply(attacker) - 1
+    IF army_supply(defender) > 0 THEN army_supply(defender) = army_supply(defender) - 1
     rounds = 0
     DO
         attacker_hit = 0: defender_hit = 0
@@ -96,10 +96,10 @@ SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
     DIM loss_rate!: DIM mean AS INTEGER: DIM variance AS INTEGER
     loss_rate! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender)): IF winner = attacker THEN loss_rate! = 1.3 * loss_rate!
     SELECT CASE army_size(defender)
-        CASE IS > 300
-            loss_rate! = .9 * loss_rate!
         CASE IS > 800
             loss_rate! = .8 * loss_rate!
+        CASE IS > 300
+            loss_rate! = .9 * loss_rate!
     END SELECT
     mean = army_size(attacker) * loss_rate!
     variance = mean * (1 - loss_rate!)
@@ -108,10 +108,10 @@ SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
     loss_rate! = .01 * rule_attack_loss + .02 * city_fort(army_city(defender))
     IF winner = defender THEN loss_rate! = 1.5 * loss_rate!
     SELECT CASE army_size(attacker)
-        CASE IS > 300
-            loss_rate! = .9 * loss_rate!
         CASE IS > 800
             loss_rate! = .8 * loss_rate!
+        CASE IS > 300
+            loss_rate! = .9 * loss_rate!
     END SELECT
     mean = army_size(defender) * loss_rate!
     variance = mean * (1 - loss_rate!)
@@ -136,7 +136,7 @@ SUB battle_apply_losses (attacker, defender, winner, attacker_losses, defender_l
     army_size(defender) = army_size(defender) - defender_losses
     IF army_size(defender) < 1 THEN army_size(defender) = 1
 
-    side = 1: IF attacker > 2 THEN side = 2
+    side = army_side(attacker)
     side_casualties&(side) = side_casualties&(side) + attacker_losses
     side_casualties&(other_side(side)) = side_casualties&(other_side(side)) + defender_losses
 

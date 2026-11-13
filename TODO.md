@@ -9,7 +9,7 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
   `SHELL` opens a console window on the user's desktop. A test of the real one must run where a window does no
   harm: in QB64Rust's suites VM, or by hand.
 - **A game that reaches March 1865 with the computer active.** The generated games end sooner, because a
-  player who only ends turns is beaten in 1 to 21 turns. `union-time` and `two-player` reach the time limit
+  player who only ends turns is beaten in 1 to 24 turns. `union-time` and `two-player` reach the time limit
   with a passive computer or none.
 - **Linux.** The game opens lower-case names of upper-case files (`"cities.grd"`, `"cws.cfg"`),
   and copies its history with `SHELL "copy ..."`, a Windows command. Then `play.py` would need its Linux
@@ -20,86 +20,24 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
 Each of these is how the game behaves, in DOS too by its code. Decide whether to change it. A change to how a
 game plays changes the recorded screens.
 
+Ruled on 2026-11-13 (user): the other 22 bugs of this list, and the `SELECT CASE` branches that were never
+reached (`docs\sub-names.md`, "Found while reading"), were fixed in one batch. The pictures,
+`normal_random_number` and the train's pixels below are kept; the other rows were found afterward.
+What each fix did is in `docs\modernize-completed.md`, "The kept bugs fixed".
+
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
   The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
   its title.
-- **Load stays "-" after a game's first save.** The Files menu sets `saves_exist` to 0 when it finds no saved game,
-  and only a new game sets it back. A player who saves for the first time cannot load in the same game.
-- **Resume Saved Game with no saved game shows the main menu on a black screen.** The map is not drawn until
-  F3 or a menu draws it.
 - **`normal_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
   on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
-- **`railroad_capacity` counts cities from the player's side, not from the side it is asked about**
-  (`TestTraincapacityCountsByPlayersSide`): it uses `current_side` where the rest of the FUNCTION uses `side`.
-- **Vary Start has a loop that never runs**: `FOR k = 21 TO 6` (`vary_start_conditions`, `rules\setup.bm`). The loop before
-  it clears some of the Union's first six armies; this one was probably meant for the Rebels' (21 to 26).
-- **Casualties are counted for the wrong side when Union armies 3 to 20 attack.** `battle_apply_losses`
-  (`rules\battle.bm`) has `s = 1: IF attacker > 2 THEN s = 2`, most likely meant as `attacker > 20`. Phase 3
-  of `docs\modernize-plan.md` left this line as it is, without `army_side`: the FUNCTION would fix the bug,
-  which changes the game (`TestBattleCasualtiesByArmyNumber` in `tests\rules_test.bas`).
-- **A battle takes a day of supply from armies 1 and 2, not from the armies that fight.** `battle_fight`
-  (`rules\battle.bm`) has `FOR i = 1 TO 2: IF army_supply(i) > 0 THEN army_supply(i) = army_supply(i) - 1`
-  (`TestBattleFightTakesSupplyFromOneAndTwo`). It was most likely meant for the attacker and the defender.
-- **The Balance setting's extra recruits are never added.** `army_recruit_bonus` (`rules\army.bm`) adds
-  men to a new army just before `army_raise` sets its size, and to army 0 when men join an army
-  (`army_add_recruits` passes 0, as `army_recruit` passed `empty`, which was 0 there). It was most likely
-  meant for the army recruited.
-- **The computer checks the wrong city's track before a train to its capital.** `ai_railroad` (`ai\ai.bm`)
-  calls `railroad_route_count(side, candidate_city)` with `candidate_city` left from the loop before, not the
-  capital.
-- **The computer's test for crossing moves compares an order with an army's size.** `ai_army_order`
-  (`ai\ai.bm`, "eliminate crossing moves") cancels a move into a city of its own when the army there has
-  `army_order(other_army) = army_troops`, the moving army's size in hundreds. The original has it too
-  (`armymove(y) = x`, with `x = armysize(i)`, `CWSTRAT.BAS` on `canonical-source`). It was most likely
-  meant as `= city`: the other army marches into the city this one leaves. As written it cancels a move
-  only when a size happens to equal a city number from 1 to 40.
-- **The winner of a battle gets none of the loser's supplies.** `turn_army_lost` (`rules\turn.bm`)
-  sets the loser's supplies to 0 and then adds them to the winner's (`TestTurnArmyLost`).
-- **An army that surrenders or is crushed gives 25 victory points to its own side.** `turn_army_lost`
-  adds them to `other_side` of the winner's side (`TestTurnArmyLost`). A battle's winner gets a point in
-  `battle_apply_losses`, so the 25 were most likely meant for the winner too.
-- **The French or British mercenaries join army 0.** `event_apply` (`rules\events.bm`, the effect
-  `reinforce`) adds them to army 0, as the original did with an `index` that was never set, so
-  the 10,000 men and the best experience go to army 0, the slot that `army_combine` gathers
-  armies in. The message names `army_name$(0)` (`TestEventMercenariesJoinArmyZero`). It was most
-  likely meant for one of the Rebels' armies.
-- **A fleet sunk in naval combat gives 10 victory points to its own side.** `navy_fleet_defeated`
-  (`rules\navy.bm`) adds them to the loser, as both of the original's two blocks did
-  (`TestNavyFleetDefeated`). A fleet sunk by a shore battery gives 5 to the other side
-  (`navy_fleet_lost`), so the 10 were most likely meant for the winner.
-- **The Rebels' bonus for holding more than 34 cities is built on the Union's points.**
-  `turn_update_victory_points` (`rules\turn.bm`) sets the Rebels' points to the Union's points plus 100,
-  where the Union's half adds 100 to its own. The original has it too (`CWSTRAT.BAS` line 2625 on
-  `canonical-source`). The two halves can become one SUB for each side once this is decided.
-- **F7 in the SOUNDS menu most likely stops the game with an error.** Read from the code, not tried.
-  The menu takes F7 as "end the turn" and returns 99 (`MENU_END_TURN_KEY`). `menu_option_sound`
-  (`ui\options.bm`) then prints `menu_text$(99)`, and the array has 21 entries. No other menu of the
-  Utility menu uses the number it gets back as an index. In the Files menu, F7 in the Load menu
-  reads `menu_value(99)` of 40 entries, and F7 in the Save menu saves the game as `cws99.sav`
-  (`menu_load_game` and `menu_save_game`, `ui\files.bm`).
-- **Saving in the first slot opens Troops, Moves and Ships again for the month, and loading does
-  so only for the Load menu's first game.** The main module tested `menu_choice = 1`, "Load was
-  chosen", after the menu of saved games had put its own row there. `menu_load_game` and
-  `menu_save_game` (`ui\files.bm`) keep it. A game loaded from another row keeps the "-" entries
-  of the game played before it.
-- **Rndom Evt left with Esc shows the text of the choice before.** `menu_option_events`
-  (`ui\options.bm`) keeps the last choice's text and prints it again, though nothing was chosen.
-- **The player's Build and Attack each use up a random number.** The original tested the
-  computer's choice with `IF action = ... AND RND ...`, and BASIC draws the number whoever plays.
-  `menu_navy_build` and `menu_navy_attack` (`ui\navy.bm`) call `random_discard` to keep the game's
-  numbers in order. Taking the calls out changes every game after a Build or an Attack.
-- **Attack on a city that is not the enemy's closes Ships for the month.** `menu_navy_attack`
-  notes that the fleet has acted before it checks the city, so choosing the "-" row costs the
-  month's sail or raid.
-- **The computer's ironclad costs what a wooden ship costs.** `ai_navy_build` (`ai\ai.bm`) builds
-  an ironclad when it has the cash for one, 200, and pays 100. The player pays 200.
-- **Invasion with no commander left.** The player's fleet loses a ship and lands the army in
-  slot 0 (`menu_navy_invade`). The computer asks for a commander again without end
-  (`ai_navy_invade`), so the game would hang; it needs all 20 of the computer's army slots in use.
-- **City 0's owner is the side that last gave its fleet an order** (`navy_mark_side`,
-  `rules\navy.bm`). `ai_fleet_orders` reads it for a side with no fleet, so whether the computer
-  builds a first ship depends on whose fleet acted last.
+- **A defender with very few men against the attacker is never halved.** `battle_strengths`
+  (`rules\battle.bm`) tests the ratio `CASE IS < .5` before `CASE IS < .2`, so the second case, which
+  halves the defender's strength, is never reached. The same kind as the `SELECT CASE` fixes of
+  2026-11-13, found after the ruling.
+- **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
+  (`ai\ai.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
+  bombards the city anyway when it is the enemy's. The change of order does not stop this attack.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.

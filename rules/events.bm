@@ -149,7 +149,7 @@ END SUB
 ' Balance setting. It sets event_city for a riot and event_army for a reinforcement.
 SUB event_apply (row, good_side, weight)
     DIM bad_side AS INTEGER: DIM i AS INTEGER: DIM first AS INTEGER: DIM new_ships AS INTEGER: DIM port AS INTEGER: DIM found AS INTEGER
-    DIM amount!: DIM second!
+    DIM amount!: DIM second!: DIM capital AS INTEGER
     bad_side = other_side(good_side)
     amount! = event_amount!(row, 0): second! = event_amount!(row, 1)
     SELECT CASE event_effect(row)
@@ -168,10 +168,16 @@ SUB event_apply (row, good_side, weight)
             fleet_ships$(good_side) = fleet_ships$(good_side) + STRING$(new_ships, "W")
             IF event_effect(row) = EFFECT_SHIPS_TO_PORT THEN fleet_city(good_side) = port
         CASE EFFECT_REINFORCE
-            ' The men join army 0, which is no army, as in the original game (TODO.md).
-            event_army = 0
-            army_size(event_army) = army_size(event_army) + amount! * weight
-            army_experience(event_army) = MAX_EXPERIENCE: army_supply(event_army) = MAX_SUPPLY
+            ' The men join the army in the side's capital, or else form a new army there under
+            ' the next commander. With neither they are lost (event_army is 0). The original
+            ' added them to army 0, which is no army.
+            capital = side_capital(good_side)
+            event_army = city_army(capital)
+            IF event_army = 0 THEN CALL event_new_army(good_side, capital, event_army)
+            IF event_army > 0 THEN
+                army_size(event_army) = army_size(event_army) + amount! * weight
+                army_experience(event_army) = MAX_EXPERIENCE: army_supply(event_army) = MAX_SUPPLY
+            END IF
         CASE EFFECT_ARMIES_GROW
             first = side_first_army(good_side)
             FOR i = first TO first + 4
@@ -188,6 +194,18 @@ SUB event_apply (row, good_side, weight)
         CASE EFFECT_CITY_NEUTRAL
             CALL event_riot_city(bad_side, event_city)
     END SELECT
+END SUB
+
+' A new army of no men in city, under the side's next commander, for a reinforcement. army is
+' 0 when no commander is left. It has acted this month, as an army raised has.
+SUB event_new_army (side, city, army)
+    CALL army_pick_commander(side, army)
+    IF army = 0 THEN EXIT SUB
+    army_leader_rating(army) = leader_rating(army)
+    army_name$(army) = leader_name$(army): leader_name$(army) = ""
+    army_size(army) = 0
+    army_city(army) = city: city_army(city) = army
+    army_order(army) = ORDER_BUSY
 END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.

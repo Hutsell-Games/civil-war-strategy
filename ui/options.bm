@@ -180,11 +180,11 @@ SUB menu_option_balance (picked)
     picked = 1
 END SUB
 
-' Rndom Evt: off, or which side the special events favor. favor$ keeps the text of the last
-' choice between calls, as the main module's t$ did: after an Esc the line shows it again.
+' Rndom Evt: off, or which side the special events favor. The line below shows the setting in
+' force. The original kept the last choice's text, so after an Esc it showed that instead.
 SUB menu_option_events
     DIM setting$
-    STATIC favor$
+    DIM favor$
     menu_text$(0) = "Random Events"
     menu_item_count = 4: menu_col = 30: menu_row = 8
     menu_text$(1) = "OFF"
@@ -196,8 +196,12 @@ SUB menu_option_events
     menu_color = COLOR_RED
 
     CALL option_set_event_balance(menu_choice)
-    IF menu_choice = 1 THEN favor$ = ""
-    IF menu_choice > 1 AND menu_choice < 5 THEN favor$ = menu_text$(menu_choice)
+    ' The setting in force, which Esc leaves as it was.
+    SELECT CASE opt_event_balance
+        CASE 3: favor$ = menu_text$(2)
+        CASE 5: favor$ = menu_text$(3)
+        CASE 7: favor$ = menu_text$(4)
+    END SELECT
     CALL clear_bottom_line
     setting$ = ""
     IF opt_event_balance = 0 THEN setting$ = "OFF"
