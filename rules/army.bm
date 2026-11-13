@@ -6,8 +6,8 @@
 ' army_combine_add for each army of the side, army_combine_absorb for each that joins, and
 ' army_combine_finish.
 SUB army_combine_start (city)
-		army_size(0) = 0: army_leader_rating(0) = 0: army_experience(0) = 0: army_city(0) = city
-		army_name$(0) = "": army_supply(0) = 0: army_order(0) = ORDER_NONE
+    army_size(0) = 0: army_leader_rating(0) = 0: army_experience(0) = 0: army_city(0) = city
+    army_name$(0) = "": army_supply(0) = 0: army_order(0) = ORDER_NONE
 END SUB
 
 ' army joins army 0 when it is in the city, has no order and has men (COMBINE_JOINED). Army 0
@@ -15,284 +15,284 @@ END SUB
 ' share of experience. status is COMBINE_TOO_LARGE when army 0 would have more than 125,000 men,
 ' and COMBINE_SKIPPED when army does not join.
 SUB army_combine_add (army, city, best, status)
-DIM share!
-	status = COMBINE_SKIPPED
-		IF army_order(army) <> ORDER_NONE OR army_city(army) <> city OR army_size(army) = 0 THEN EXIT SUB
-		IF army_size(0) + army_size(army) > 1250 THEN status = COMBINE_TOO_LARGE: EXIT SUB
+    DIM share!
+    status = COMBINE_SKIPPED
+    IF army_order(army) <> ORDER_NONE OR army_city(army) <> city OR army_size(army) = 0 THEN EXIT SUB
+    IF army_size(0) + army_size(army) > 1250 THEN status = COMBINE_TOO_LARGE: EXIT SUB
 
-		IF army_leader_rating(army) > army_leader_rating(0) THEN
-			army_name$(0) = army_name$(army)
-			army_leader_rating(0) = army_leader_rating(army)
-			best = army
-		END IF
+    IF army_leader_rating(army) > army_leader_rating(0) THEN
+        army_name$(0) = army_name$(army)
+        army_leader_rating(0) = army_leader_rating(army)
+        best = army
+    END IF
 
-		army_size(0) = army_size(0) + army_size(army)
-		IF army_size(0) < 1 THEN EXIT SUB
-		share! = (army_size(army) / army_size(0))
-		army_experience(0) = (1 - share!) * army_experience(0) + share! * army_experience(army)
-		status = COMBINE_JOINED
+    army_size(0) = army_size(0) + army_size(army)
+    IF army_size(0) < 1 THEN EXIT SUB
+    share! = (army_size(army) / army_size(0))
+    army_experience(0) = (1 - share!) * army_experience(0) + share! * army_experience(army)
+    status = COMBINE_JOINED
 END SUB
 
 ' The army's supplies go to army 0, and its slot is emptied. Its leader goes back to the list.
 SUB army_combine_absorb (army)
-		army_supply(0) = army_supply(0) + army_supply(army)
-		IF army_supply(0) > MAX_SUPPLY THEN army_supply(0) = MAX_SUPPLY
-		army_size(army) = 0: army_city(army) = 0: army_experience(army) = 0: army_order(army) = ORDER_NONE
-		leader_name$(army) = army_name$(army)
-		army_leader_rating(army) = 0: army_supply(army) = 0: army_name$(army) = ""
+    army_supply(0) = army_supply(0) + army_supply(army)
+    IF army_supply(0) > MAX_SUPPLY THEN army_supply(0) = MAX_SUPPLY
+    army_size(army) = 0: army_city(army) = 0: army_experience(army) = 0: army_order(army) = ORDER_NONE
+    leader_name$(army) = army_name$(army)
+    army_leader_rating(army) = 0: army_supply(army) = 0: army_name$(army) = ""
 END SUB
 
 ' The combined army takes the slot of the best leader's army, in the city. When more than one
 ' army joined, it can take no order this turn.
 SUB army_combine_finish (city, best, joined)
-		army_size(best) = army_size(0): army_leader_rating(best) = army_leader_rating(0)
-		army_experience(best) = army_experience(0): army_supply(best) = army_supply(0)
-		army_city(best) = city
-		army_name$(best) = army_name$(0)
-		leader_name$(best) = ""
-		IF joined > 1 THEN army_order(best) = ORDER_BUSY
-		city_army(city) = best
+    army_size(best) = army_size(0): army_leader_rating(best) = army_leader_rating(0)
+    army_experience(best) = army_experience(0): army_supply(best) = army_supply(0)
+    army_city(best) = city
+    army_name$(best) = army_name$(0)
+    leader_name$(best) = ""
+    IF joined > 1 THEN army_order(best) = ORDER_BUSY
+    city_army(city) = best
 END SUB
 
 ' A new army in a city: its supplies, experience, leader and size, and the price of 100 taken
 ' from the side. army_new (commands/army.bm) shows it.
 SUB army_raise (side, army_slot, city)
-DIM troops AS INTEGER
-	army_supply(army_slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(army_slot) = army_supply(army_slot) + 2
-	army_experience(army_slot) = 1: IF side = SIDE_REBEL THEN army_experience(army_slot) = 2
-	army_leader_rating(army_slot) = leader_rating(army_slot)
-	army_name$(army_slot) = leader_name$(army_slot): leader_name$(army_slot) = ""
+    DIM troops AS INTEGER
+    army_supply(army_slot) = 3 + 5 * RND: IF side = SIDE_UNION THEN army_supply(army_slot) = army_supply(army_slot) + 2
+    army_experience(army_slot) = 1: IF side = SIDE_REBEL THEN army_experience(army_slot) = 2
+    army_leader_rating(army_slot) = leader_rating(army_slot)
+    army_name$(army_slot) = leader_name$(army_slot): leader_name$(army_slot) = ""
 
-	troops = 70: IF opt_realism >= REALISM_ON THEN troops = recruit_troops(side, city, 0) ELSE troops = recruits_cut_off(side, city, troops)
-	city_army(city) = army_slot: army_size(army_slot) = troops
-	side_cash(side) = side_cash(side) - COST_RECRUIT
-	army_city(army_slot) = city
-	army_order(army_slot) = ORDER_BUSY
+    troops = 70: IF opt_realism >= REALISM_ON THEN troops = recruit_troops(side, city, 0) ELSE troops = recruits_cut_off(side, city, troops)
+    city_army(city) = army_slot: army_size(army_slot) = troops
+    side_cash(side) = side_cash(side) - COST_RECRUIT
+    army_city(army_slot) = city
+    army_order(army_slot) = ORDER_BUSY
 END SUB
 
 SUB sort_move_order (limit)
-DIM i AS INTEGER: DIM swaps%
-DO
-	swaps% = FALSE
-	FOR i = 1 TO limit - 1
-	IF move_order_key(i) > move_order_key(i + 1) THEN
-		SWAP move_order_key(i), move_order_key(i + 1)
-		swaps% = i
-	END IF
-	NEXT i
-LOOP WHILE swaps%
+    DIM i AS INTEGER: DIM swaps%
+    DO
+        swaps% = FALSE
+        FOR i = 1 TO limit - 1
+            IF move_order_key(i) > move_order_key(i + 1) THEN
+                SWAP move_order_key(i), move_order_key(i + 1)
+                swaps% = i
+            END IF
+        NEXT i
+    LOOP WHILE swaps%
 END SUB
 
 ' The next commander of a side, in army_slot: the first army without a city that has a name on the
 ' list, or a name made up for the first army without a city. army_slot is 0 when every army has a
 ' city. army_get_commander (commands/army.bm) says so.
 SUB army_pick_commander (side, army_slot)
-DIM last_army AS INTEGER: DIM generated_name$
-DIM first_army AS INTEGER: DIM i AS INTEGER
-	army_slot = 0
-	first_army = side_first_army(side): last_army = side_last_army(side)
-	FOR i = first_army TO last_army
-	IF army_city(i) = 0 AND leader_name$(i) <> "" THEN army_slot = i: EXIT SUB
-	NEXT i
+    DIM last_army AS INTEGER: DIM generated_name$
+    DIM first_army AS INTEGER: DIM i AS INTEGER
+    army_slot = 0
+    first_army = side_first_army(side): last_army = side_last_army(side)
+    FOR i = first_army TO last_army
+        IF army_city(i) = 0 AND leader_name$(i) <> "" THEN army_slot = i: EXIT SUB
+    NEXT i
 
-'                 generic leaders if set list is exhausted
-	FOR i = first_army TO last_army
-	IF army_city(i) = 0 THEN
-		' (i): army_generate_name changes its first argument.
-		CALL army_generate_name((i), generated_name$)
-		army_slot = i
-		leader_name$(i) = generated_name$
-		leader_rating(i) = 1 + 8 * RND
-		EXIT SUB
-	END IF
-	NEXT i
+    '                 generic leaders if set list is exhausted
+    FOR i = first_army TO last_army
+        IF army_city(i) = 0 THEN
+            ' (i): army_generate_name changes its first argument.
+            CALL army_generate_name((i), generated_name$)
+            army_slot = i
+            leader_name$(i) = generated_name$
+            leader_rating(i) = 1 + 8 * RND
+            EXIT SUB
+        END IF
+    NEXT i
 END SUB
 
 ' Buys supplies for an army, up to the resupply level, as far as the side's cash goes. result is
 ' SUPPLY_BOUGHT, SUPPLY_NO_CASH when the cash was not enough, or SUPPLY_CUT_OFF when the army is
 ' cut off under the Realism setting. army_resupply (commands/army.bm) shows it.
 SUB army_buy_supply (army, result)
-DIM side AS INTEGER: DIM friendly_neighbors AS INTEGER: DIM supply_added AS INTEGER: DIM new_supply AS INTEGER
-		result = SUPPLY_CUT_OFF
-		side = army_side(army)
-		IF opt_realism >= REALISM_ON THEN
-			friendly_neighbors = city_is_connected(side, army_city(army))
-			IF friendly_neighbors < 1 THEN EXIT SUB
-		END IF
-		result = SUPPLY_NO_CASH
-		IF army_size(army) > 0 THEN supply_added = side_cash(side) / army_size(army) * 10
-		new_supply = supply_added + army_supply(army): IF new_supply > RESUPPLY_LEVEL THEN supply_added = RESUPPLY_LEVEL - army_supply(army)
-		IF supply_added >= 1 THEN
-			army_supply(army) = army_supply(army) + supply_added: side_cash(side) = side_cash(side) - .1 * supply_added * army_size(army)
-			result = SUPPLY_BOUGHT
-		END IF
-		IF side_cash(side) < 0 THEN side_cash(side) = 0
+    DIM side AS INTEGER: DIM friendly_neighbors AS INTEGER: DIM supply_added AS INTEGER: DIM new_supply AS INTEGER
+    result = SUPPLY_CUT_OFF
+    side = army_side(army)
+    IF opt_realism >= REALISM_ON THEN
+        friendly_neighbors = city_is_connected(side, army_city(army))
+        IF friendly_neighbors < 1 THEN EXIT SUB
+    END IF
+    result = SUPPLY_NO_CASH
+    IF army_size(army) > 0 THEN supply_added = side_cash(side) / army_size(army) * 10
+    new_supply = supply_added + army_supply(army): IF new_supply > RESUPPLY_LEVEL THEN supply_added = RESUPPLY_LEVEL - army_supply(army)
+    IF supply_added >= 1 THEN
+        army_supply(army) = army_supply(army) + supply_added: side_cash(side) = side_cash(side) - .1 * supply_added * army_size(army)
+        result = SUPPLY_BOUGHT
+    END IF
+    IF side_cash(side) < 0 THEN side_cash(side) = 0
 END SUB
 
 SUB army_generate_name (army, name$)
-DIM ones AS INTEGER
-name$ = "Union ": IF army_side(army) = SIDE_REBEL THEN name$ = "Rebel "
-IF army_side(army) = SIDE_REBEL THEN army = army - ARMIES_PER_SIDE
-IF army > 10 THEN name$ = name$ + "X": army = army - 10
-SELECT CASE army
-	CASE IS < 4
-	ones = army
-	CASE 4
-	name$ = name$ + "IV"
-	CASE 5 TO 8
-	name$ = name$ + "V"
-	ones = army - 5
-	CASE 9
-	name$ = name$ + "IX"
-	CASE 10
-	name$ = name$ + "X"
-END SELECT
-IF ones > 0 THEN name$ = name$ + STRING$(ones, "I")
+    DIM ones AS INTEGER
+    name$ = "Union ": IF army_side(army) = SIDE_REBEL THEN name$ = "Rebel "
+    IF army_side(army) = SIDE_REBEL THEN army = army - ARMIES_PER_SIDE
+    IF army > 10 THEN name$ = name$ + "X": army = army - 10
+    SELECT CASE army
+        CASE IS < 4
+            ones = army
+        CASE 4
+            name$ = name$ + "IV"
+        CASE 5 TO 8
+            name$ = name$ + "V"
+            ones = army - 5
+        CASE 9
+            name$ = name$ + "IX"
+        CASE 10
+            name$ = name$ + "X"
+    END SELECT
+    IF ones > 0 THEN name$ = name$ + STRING$(ones, "I")
 END SUB
 
 ' The first and last army slots of a side: 1 and 20 for the Union, 21 and 40 for the Rebels.
 FUNCTION side_first_army (side)
-side_first_army = 1: IF side = SIDE_REBEL THEN side_first_army = ARMIES_PER_SIDE + 1
+    side_first_army = 1: IF side = SIDE_REBEL THEN side_first_army = ARMIES_PER_SIDE + 1
 END FUNCTION
 
 FUNCTION side_last_army (side)
-side_last_army = ARMIES_PER_SIDE: IF side = SIDE_REBEL THEN side_last_army = MAX_ARMIES
+    side_last_army = ARMIES_PER_SIDE: IF side = SIDE_REBEL THEN side_last_army = MAX_ARMIES
 END FUNCTION
 
 ' The side an army slot belongs to. Slot 0, no army, counts as the Union's, as the old tests army < 21 did.
 FUNCTION army_side (army)
-army_side = SIDE_UNION: IF army > ARMIES_PER_SIDE THEN army_side = SIDE_REBEL
+    army_side = SIDE_UNION: IF army > ARMIES_PER_SIDE THEN army_side = SIDE_REBEL
 END FUNCTION
 
 FUNCTION other_side (side)
-other_side = SIDE_UNION + SIDE_REBEL - side
+    other_side = SIDE_UNION + SIDE_REBEL - side
 END FUNCTION
 
 ' Detaches three tenths of an army's men and supplies into the free slot, in the city given.
 ' The new army takes the slot's leader and the old army's experience.
 SUB army_detach (army, city, army_slot)
-	army_supply(army_slot) = .3 * army_supply(army): army_supply(army) = army_supply(army) - army_supply(army_slot): IF army_supply(army) < 0 THEN army_supply(army) = 0
-	army_size(army_slot) = .3 * army_size(army): army_size(army) = army_size(army) - army_size(army_slot)
-	army_city(army_slot) = city: army_experience(army_slot) = army_experience(army): army_order(army_slot) = ORDER_NONE
-	army_leader_rating(army_slot) = leader_rating(army_slot)
-	army_name$(army_slot) = leader_name$(army_slot): leader_name$(army_slot) = ""
+    army_supply(army_slot) = .3 * army_supply(army): army_supply(army) = army_supply(army) - army_supply(army_slot): IF army_supply(army) < 0 THEN army_supply(army) = 0
+    army_size(army_slot) = .3 * army_size(army): army_size(army) = army_size(army) - army_size(army_slot)
+    army_city(army_slot) = city: army_experience(army_slot) = army_experience(army): army_order(army_slot) = ORDER_NONE
+    army_leader_rating(army_slot) = leader_rating(army_slot)
+    army_name$(army_slot) = leader_name$(army_slot): leader_name$(army_slot) = ""
 END SUB
 
 ' A month of drill: one more level of experience, and the army is busy for the month.
 SUB army_drill (army)
-	army_experience(army) = army_experience(army) + 1
-	army_order(army) = ORDER_BUSY
+    army_experience(army) = army_experience(army) + 1
+    army_order(army) = ORDER_BUSY
 END SUB
 
 ' Fills the menu with the side's cities where armies can combine: a city with an army that
 ' holds it and another that has no order. menu_item_count is 0 when there is none.
 SUB army_list_combine_cities (side)
-DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-	menu_color = COLOR_CYAN: menu_highlight = COLOR_CYAN
-	menu_col = PANEL_COL: menu_row = 2
-	first_army = side_first_army(side): last_army = side_last_army(side)
-	menu_item_count = 0
-	FOR i = 1 TO MAX_CITIES
-		IF city_owner(i) = side AND city_army(i) > 0 THEN
-			FOR j = first_army TO last_army
-			IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
-			NEXT j
-		END IF
-	NEXT i
+    DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
+    menu_color = COLOR_CYAN: menu_highlight = COLOR_CYAN
+    menu_col = PANEL_COL: menu_row = 2
+    first_army = side_first_army(side): last_army = side_last_army(side)
+    menu_item_count = 0
+    FOR i = 1 TO MAX_CITIES
+        IF city_owner(i) = side AND city_army(i) > 0 THEN
+            FOR j = first_army TO last_army
+                IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
+            NEXT j
+        END IF
+    NEXT i
 
-	IF menu_item_count = 0 THEN EXIT SUB
-	CALL menu_bubble_sort(menu_item_count)
+    IF menu_item_count = 0 THEN EXIT SUB
+    CALL menu_bubble_sort(menu_item_count)
 END SUB
 
 ' Gives an army its order: a city to march to, or ORDER_NONE, ORDER_BUSY or ORDER_DONE.
 SUB army_set_order (army, order)
-	army_order(army) = order
+    army_order(army) = order
 END SUB
 
 ' Relieve, first half: the army's leader goes back among the free leaders, in the army's slot.
 SUB army_free_leader (army)
-	leader_name$(army) = army_name$(army)
+    leader_name$(army) = army_name$(army)
 END SUB
 
 ' Relieve, second half: the army takes the free leader of a slot, with a point less than his
 ' rating. It loses a level of experience and is busy for the month.
 SUB army_take_leader (army, leader)
-	army_order(army) = ORDER_BUSY
-	army_leader_rating(army) = leader_rating(leader)
-	IF army_leader_rating(army) > 0 THEN army_leader_rating(army) = army_leader_rating(army) - 1
-	IF army_experience(army) > 0 THEN army_experience(army) = army_experience(army) - 1
-	army_name$(army) = leader_name$(leader)
-	leader_name$(leader) = ""
+    army_order(army) = ORDER_BUSY
+    army_leader_rating(army) = leader_rating(leader)
+    IF army_leader_rating(army) > 0 THEN army_leader_rating(army) = army_leader_rating(army) - 1
+    IF army_experience(army) > 0 THEN army_experience(army) = army_experience(army) - 1
+    army_name$(army) = leader_name$(leader)
+    leader_name$(leader) = ""
 END SUB
 
 ' The first step of a new army raised by recruiting: it is placed in the city, with the Balance
 ' setting's extra men, which army_new then overwrites (TODO.md).
 SUB army_place_new (army_slot, city)
-	army_city(army_slot) = city
-	CALL army_recruit_bonus(army_slot)
+    army_city(army_slot) = city
+    CALL army_recruit_bonus(army_slot)
 END SUB
 
 ' More men for the army in a city: 4,500, or under the Realism setting a number from the
 ' city's value, a third of it when the city is cut off (isolated is then 1). The side pays
 ' 100. The Balance setting's extra men go to army 0, as before (TODO.md).
 SUB army_add_recruits (side, army, isolated)
-DIM troops AS INTEGER
-	troops = 45: isolated = 0
-	IF opt_realism >= REALISM_ON THEN
-		troops = recruit_troops(side, army_city(army), 1)
-		IF city_is_connected(side, army_city(army)) < 1 THEN isolated = 1
-	END IF
-	army_size(army) = army_size(army) + troops
-	CALL army_recruit_bonus(0)
-	side_cash(side) = side_cash(side) - COST_RECRUIT
+    DIM troops AS INTEGER
+    troops = 45: isolated = 0
+    IF opt_realism >= REALISM_ON THEN
+        troops = recruit_troops(side, army_city(army), 1)
+        IF city_is_connected(side, army_city(army)) < 1 THEN isolated = 1
+    END IF
+    army_size(army) = army_size(army) + troops
+    CALL army_recruit_bonus(0)
+    side_cash(side) = side_cash(side) - COST_RECRUIT
 END SUB
 
 ' The men a city gives under the Realism setting, in hundreds: by the city's value, for a new
 ' army, or for the army already there when joins_army is 1. A third of that when the city is
 ' cut off. army_raise, army_add_recruits and the computer's pick (ai_recruit_pick) use it.
 FUNCTION recruit_troops (side, city, joins_army)
-DIM troops AS INTEGER
-	troops = 3 * city_value(city) + 33: IF joins_army = 1 THEN troops = 2 * city_value(city) + 20
-	recruit_troops = recruits_cut_off(side, city, troops)
+    DIM troops AS INTEGER
+    troops = 3 * city_value(city) + 33: IF joins_army = 1 THEN troops = 2 * city_value(city) + 20
+    recruit_troops = recruits_cut_off(side, city, troops)
 END FUNCTION
 
 ' A third of troops when the side's city is cut off: no city next to it is the side's.
 FUNCTION recruits_cut_off (side, city, troops)
-	recruits_cut_off = troops: IF city_is_connected(side, city) < 1 THEN recruits_cut_off = troops \ 3
+    recruits_cut_off = troops: IF city_is_connected(side, city) < 1 THEN recruits_cut_off = troops \ 3
 END FUNCTION
 
 ' The Balance setting's extra men for a recruited army. The caller passes slot 0 when men
 ' join an army, and army_new sets a new army's size after it, as in the original.
 SUB army_recruit_bonus (army_slot)
-	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(army_slot) = army_size(army_slot) + 15 - 5 * opt_difficulty
-	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
+    IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN army_size(army_slot) = army_size(army_slot) + 15 - 5 * opt_difficulty
+    IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
 END SUB
 
 ' Fills the menu with the cities where a side may recruit this month. They are drawn at
 ' random; the player's list is kept for the month. menu_item_count is 0 when there is none.
 SUB army_recruit_cities (side)
-DIM i AS INTEGER: DIM offer_count AS INTEGER: DIM chance!: DIM city AS INTEGER
-	menu_item_count = 0
-	menu_text$(0) = "Recruit"
-	IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: city = turn_recruit_city(i): menu_text$(i) = city_name$(city): menu_value(i) = city: NEXT i: menu_item_count = turn_recruit_state: CALL menu_bubble_sort(menu_item_count): EXIT SUB
-	offer_count = 4: IF RND > .8 THEN offer_count = offer_count - 1
-	IF opt_difficulty < 3 THEN offer_count = offer_count + 1
+    DIM i AS INTEGER: DIM offer_count AS INTEGER: DIM chance!: DIM city AS INTEGER
+    menu_item_count = 0
+    menu_text$(0) = "Recruit"
+    IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: city = turn_recruit_city(i): menu_text$(i) = city_name$(city): menu_value(i) = city: NEXT i: menu_item_count = turn_recruit_state: CALL menu_bubble_sort(menu_item_count): EXIT SUB
+    offer_count = 4: IF RND > .8 THEN offer_count = offer_count - 1
+    IF opt_difficulty < 3 THEN offer_count = offer_count + 1
 
-	FOR i = 1 TO MAX_CITIES
-	IF side_city_count(side) > 0 THEN chance! = .6 * offer_count / side_city_count(side) ELSE chance! = .3
-	IF menu_item_count = 0 AND i > 20 THEN chance! = .3
-	IF menu_item_count < 2 AND i > 30 THEN chance! = .3
-	menu_value(i) = 0
-	IF city_army(i) > 0 AND city_owner(i) = side THEN chance! = .4
-	IF RND < chance! AND city_owner(i) = side THEN
-		IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) THEN _CONTINUE
-		menu_item_count = menu_item_count + 1
-		menu_text$(menu_item_count) = city_name$(i)
-		menu_value(menu_item_count) = i
-		IF menu_item_count > offer_count - 1 THEN EXIT FOR
-	END IF
-	NEXT i
-	IF menu_item_count = 0 THEN EXIT SUB
-	IF side = current_side AND turn_recruit_state = 0 THEN FOR i = 1 TO menu_item_count: turn_recruit_city(i) = menu_value(i): NEXT i: turn_recruit_state = menu_item_count
-	CALL menu_bubble_sort(menu_item_count)
+    FOR i = 1 TO MAX_CITIES
+        IF side_city_count(side) > 0 THEN chance! = .6 * offer_count / side_city_count(side) ELSE chance! = .3
+        IF menu_item_count = 0 AND i > 20 THEN chance! = .3
+        IF menu_item_count < 2 AND i > 30 THEN chance! = .3
+        menu_value(i) = 0
+        IF city_army(i) > 0 AND city_owner(i) = side THEN chance! = .4
+        IF RND < chance! AND city_owner(i) = side THEN
+            IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) THEN _CONTINUE
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = city_name$(i)
+            menu_value(menu_item_count) = i
+            IF menu_item_count > offer_count - 1 THEN EXIT FOR
+        END IF
+    NEXT i
+    IF menu_item_count = 0 THEN EXIT SUB
+    IF side = current_side AND turn_recruit_state = 0 THEN FOR i = 1 TO menu_item_count: turn_recruit_city(i) = menu_value(i): NEXT i: turn_recruit_state = menu_item_count
+    CALL menu_bubble_sort(menu_item_count)
 END SUB

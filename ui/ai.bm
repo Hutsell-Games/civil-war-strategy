@@ -2,34 +2,34 @@
 
 ' An army's move order: its line and a pointer on the map, and a message when the pause is long.
 SUB draw_ai_plan (army, text_color)
-	IF opt_pause! > 1 THEN
-		COLOR text_color: CALL clear_bottom_line
-		PRINT army_name$(army); " plans to move from "; city_name$(army_city(army)); " to "; city_name$(army_order(army));
-	END IF
-		CALL draw_map_marker(army_city(army), army_order(army), MARK_MOVE_LINE)
-		CALL draw_map_marker(army_city(army), army_order(army), MARK_POINTER)
-	CALL wait_seconds(opt_pause! - 1)
-	PUT (city_x(army_city(army)) - 20, city_y(army_city(army)) - 19), saved_under_marker, PSET
+    IF opt_pause! > 1 THEN
+        COLOR text_color: CALL clear_bottom_line
+        PRINT army_name$(army); " plans to move from "; city_name$(army_city(army)); " to "; city_name$(army_order(army));
+    END IF
+    CALL draw_map_marker(army_city(army), army_order(army), MARK_MOVE_LINE)
+    CALL draw_map_marker(army_city(army), army_order(army), MARK_POINTER)
+    CALL wait_seconds(opt_pause! - 1)
+    PUT (city_x(army_city(army)) - 20, city_y(army_city(army)) - 19), saved_under_marker, PSET
 END SUB
 
 ' An army that drilled.
 SUB draw_ai_drill (army)
-		IF opt_pause! > 1 THEN
-		CALL clear_bottom_line
-			PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
-		END IF
-		CALL wait_seconds(opt_pause! - 1)
+    IF opt_pause! > 1 THEN
+        CALL clear_bottom_line
+        PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
+    END IF
+    CALL wait_seconds(opt_pause! - 1)
 END SUB
 
 ' Before the computer picks a city to recruit in: its funds, when the player may see them, and
 ' the menu's place. The cursor is left where the pick's loop over the list used to leave it.
 SUB draw_ai_funds (side)
-	CALL draw_recruit_funds(side)
-	IF menu_item_count > 0 THEN LOCATE 14 + menu_item_count, 69
+    CALL draw_recruit_funds(side)
+    IF menu_item_count > 0 THEN LOCATE 14 + menu_item_count, 69
 END SUB
 
 ' The color of the fleet's messages on the bottom line, set before the computer's fleet
 ' carries out an order.
 SUB draw_ai_navy_color
-	COLOR COLOR_LIGHT_CYAN
+    COLOR COLOR_LIGHT_CYAN
 END SUB

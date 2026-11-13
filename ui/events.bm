@@ -2,74 +2,74 @@
 ' in game/events.bm.
 
 SUB special_events
-DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER: DIM a$
-CALL event_roll(event, variant, event_side)
-IF event = EVENT_NONE THEN EXIT SUB
-IF event = EVENT_IRONCLADS THEN
-	COLOR COLOR_YELLOW: CALL clear_bottom_line
-	PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
-	IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
-	CALL wait_key("I")
-	EXIT SUB
-END IF
-CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "SPECIAL EVENT...";
-IF event = EVENT_RIOTS THEN CALL event_riot(event_side): EXIT SUB
-IF event_side = SIDE_UNION THEN CALL clear_bottom_line
-SELECT CASE event
-	CASE EVENT_ENGLISH_SHIPS
-	CALL scribe_message("England has given ships to the South", SHOW_BOX)
-	CALL draw_fleets
-	CASE EVENT_MERCENARIES
-	a$ = "French": IF variant = 1 THEN a$ = "British"
-	CALL scribe_message(a$ + " mercenaries join " + army_name$(0) + "'s army", SHOW_BOX)
-	CASE EVENT_LOAN
-	CALL scribe_message("The South has obtained a loan from Europe", SHOW_BOX)
-	CASE EVENT_COTTON
-	CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", SHOW_BOX)
-	CASE EVENT_UPRISING
-	a$ = "Union troops diverted to fight Western Indian uprisings"
-	IF variant = 1 THEN a$ = "Union 90-day enlistees return home"
-	IF variant = 2 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections"
-	CALL scribe_message(a$, SHOW_BOX)
-	CASE EVENT_SHIPWORKS
-	CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
-	CASE EVENT_VOLUNTEERS
-	CALL scribe_message("Volunteer troops swell the Union ranks", SHOW_BOX)
-	CASE EVENT_EMANCIPATION
-	CALL scribe_message("Abraham Lincoln announces the Emancipation Proclamation", SHOW_BOX)
-	CALL draw_map
-	CASE EVENT_REELECTION
-	CALL scribe_message("Lincoln has been reelected", SHOW_BOX)
-	CASE EVENT_DONATIONS
-	CALL scribe_message("Wealthy Unionists give generously to the Federal Cause", SHOW_BOX)
-	CASE EVENT_DESERTERS
-	CALL scribe_message("Rebel deserters leave the battlefield to go home", SHOW_BOX)
-	CASE EVENT_RIFLES
-	CALL scribe_message("Union soldiers now have repeating rifles", SHOW_BOX)
-	CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
-	CASE EVENT_STANTON
-	CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
-END SELECT
+    DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER: DIM a$
+    CALL event_roll(event, variant, event_side)
+    IF event = EVENT_NONE THEN EXIT SUB
+    IF event = EVENT_IRONCLADS THEN
+        COLOR COLOR_YELLOW: CALL clear_bottom_line
+        PRINT "SPECIAL DEVELOPMENT : IRONCLAD ships now available";
+        IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
+        CALL wait_key("I")
+        EXIT SUB
+    END IF
+    CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT "SPECIAL EVENT...";
+    IF event = EVENT_RIOTS THEN CALL event_riot(event_side): EXIT SUB
+    IF event_side = SIDE_UNION THEN CALL clear_bottom_line
+    SELECT CASE event
+        CASE EVENT_ENGLISH_SHIPS
+            CALL scribe_message("England has given ships to the South", SHOW_BOX)
+            CALL draw_fleets
+        CASE EVENT_MERCENARIES
+            a$ = "French": IF variant = 1 THEN a$ = "British"
+            CALL scribe_message(a$ + " mercenaries join " + army_name$(0) + "'s army", SHOW_BOX)
+        CASE EVENT_LOAN
+            CALL scribe_message("The South has obtained a loan from Europe", SHOW_BOX)
+        CASE EVENT_COTTON
+            CALL scribe_message("Cash from cotton sales fill the Rebel Treasury", SHOW_BOX)
+        CASE EVENT_UPRISING
+            a$ = "Union troops diverted to fight Western Indian uprisings"
+            IF variant = 1 THEN a$ = "Union 90-day enlistees return home"
+            IF variant = 2 THEN a$ = "20% of Union forces take furloughs to vote in 1864 elections"
+            CALL scribe_message(a$, SHOW_BOX)
+        CASE EVENT_SHIPWORKS
+            CALL scribe_message("Union shipworks have produced extra ships", SHOW_BOX)
+        CASE EVENT_VOLUNTEERS
+            CALL scribe_message("Volunteer troops swell the Union ranks", SHOW_BOX)
+        CASE EVENT_EMANCIPATION
+            CALL scribe_message("Abraham Lincoln announces the Emancipation Proclamation", SHOW_BOX)
+            CALL draw_map
+        CASE EVENT_REELECTION
+            CALL scribe_message("Lincoln has been reelected", SHOW_BOX)
+        CASE EVENT_DONATIONS
+            CALL scribe_message("Wealthy Unionists give generously to the Federal Cause", SHOW_BOX)
+        CASE EVENT_DESERTERS
+            CALL scribe_message("Rebel deserters leave the battlefield to go home", SHOW_BOX)
+        CASE EVENT_RIFLES
+            CALL scribe_message("Union soldiers now have repeating rifles", SHOW_BOX)
+            CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
+        CASE EVENT_STANTON
+            CALL scribe_message("Secretary of War Stanton predicts the end of the Rebellion", SHOW_BOX)
+    END SELECT
 
-IF event_side = SIDE_UNION THEN
-	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-	CALL wait_key("S")
-ELSE
-	IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-	CALL wait_key("N")
-END IF
+    IF event_side = SIDE_UNION THEN
+        IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+        CALL wait_key("S")
+    ELSE
+        IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+        CALL wait_key("N")
+    END IF
 END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.
 SUB event_riot (side)
-DIM city AS INTEGER
-CALL event_riot_city(side, city)
-IF city = 0 THEN EXIT SUB
-	CALL clear_bottom_line: COLOR COLOR_WHITE
-	PRINT " Riots have broken out in "; city_name$(city);
-	CALL draw_cities
-	wait_seconds opt_pause!
-	CALL clear_bottom_line
-	CALL show_message_box(city_name$(city) + " is now NEUTRAL !", 4)
-	wait_seconds opt_pause!
+    DIM city AS INTEGER
+    CALL event_riot_city(side, city)
+    IF city = 0 THEN EXIT SUB
+    CALL clear_bottom_line: COLOR COLOR_WHITE
+    PRINT " Riots have broken out in "; city_name$(city);
+    CALL draw_cities
+    wait_seconds opt_pause!
+    CALL clear_bottom_line
+    CALL show_message_box(city_name$(city) + " is now NEUTRAL !", 4)
+    wait_seconds opt_pause!
 END SUB

@@ -5,102 +5,102 @@
 ' the owner of the port of a side without a fleet is that side. The computer's fleet orders
 ' (ai_fleet_orders) read it later, as the last order left it.
 SUB navy_mark_side (side)
-	city_owner(0) = side
+    city_owner(0) = side
 END SUB
 
 ' Counts the fleet's ships again from its list of ships.
 SUB navy_count_ships (side)
-	fleet_size(side) = LEN(fleet_ships$(side))
+    fleet_size(side) = LEN(fleet_ships$(side))
 END SUB
 
 ' 1 when ironclads can be built: always without the Realism setting, and with it from March
 ' 1862.
 FUNCTION navy_has_ironclads
-	navy_has_ironclads = 1
-	IF opt_realism >= REALISM_ON AND ((turn_year < IRONCLAD_YEAR) OR (turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH)) THEN navy_has_ironclads = 0
+    navy_has_ironclads = 1
+    IF opt_realism >= REALISM_ON AND ((turn_year < IRONCLAD_YEAR) OR (turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH)) THEN navy_has_ironclads = 0
 END FUNCTION
 
 ' Fills the menu with the sea ports where the side can start a fleet: its own, without the
 ' port the other side's fleet lies off.
 SUB navy_list_shipyards (side)
-DIM i AS INTEGER
-	menu_text$(0) = "Port": menu_item_count = 0: menu_col = PANEL_COL: menu_row = 12
-	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) = PORT_SEA AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
-	NEXT i
+    DIM i AS INTEGER
+    menu_text$(0) = "Port": menu_item_count = 0: menu_col = PANEL_COL: menu_row = 12
+    FOR i = 1 TO MAX_CITIES: IF city_port_type(i) = PORT_SEA AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+    NEXT i
 END SUB
 
 ' Fills the menu with the sea ports the side's fleet can sail to: all but the one it lies off.
 SUB navy_list_ports (side)
-DIM i AS INTEGER
-	menu_item_count = 0
-	FOR i = 1 TO MAX_CITIES: IF city_port_type(i) > PORT_RIVER AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
-	NEXT i
+    DIM i AS INTEGER
+    menu_item_count = 0
+    FOR i = 1 TO MAX_CITIES: IF city_port_type(i) > PORT_RIVER AND fleet_city(side) <> i THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i
+    NEXT i
 END SUB
 
 ' Draws a random number and drops it. The player's Build and Attack call it where the
 ' original drew a number for a test that only the computer's fleet uses, so that the random
 ' numbers of a game stay in their order (TODO.md).
 SUB random_discard
-DIM unused!
-	unused! = RND
+    DIM unused!
+    unused! = RND
 END SUB
 
 SUB navy_remove_ship (side)
-fleet_size(side) = fleet_size(side) - 1
-IF fleet_size(side) > 0 THEN
-	fleet_ships$(side) = LEFT$(fleet_ships$(side), fleet_size(side))
-ELSE
-	fleet_ships$(side) = "": fleet_city(side) = 0: fleet_size(side) = 0
-END IF
+    fleet_size(side) = fleet_size(side) - 1
+    IF fleet_size(side) > 0 THEN
+        fleet_ships$(side) = LEFT$(fleet_ships$(side), fleet_size(side))
+    ELSE
+        fleet_ships$(side) = "": fleet_city(side) = 0: fleet_size(side) = 0
+    END IF
 END SUB
 
 ' Build: a ship of kind ship$ ("W" wooden, "I" ironclad) joins the side's fleet. Ironclads go
 ' first in fleet_ships$. A fleet that had ships pays cost now; a new one pays in
 ' navy_found_fleet, when its port is known.
 SUB navy_add_ship (side, ship$, cost)
-	fleet_size(side) = fleet_size(side) + 1
-	IF ship$ = "W" THEN
-		fleet_ships$(side) = fleet_ships$(side) + ship$
-	ELSE
-		fleet_ships$(side) = ship$ + fleet_ships$(side)
-	END IF
-	IF fleet_size(side) > 1 THEN side_cash(side) = side_cash(side) - cost
+    fleet_size(side) = fleet_size(side) + 1
+    IF ship$ = "W" THEN
+        fleet_ships$(side) = fleet_ships$(side) + ship$
+    ELSE
+        fleet_ships$(side) = ship$ + fleet_ships$(side)
+    END IF
+    IF fleet_size(side) > 1 THEN side_cash(side) = side_cash(side) - cost
 END SUB
 
 ' A new fleet of one ship in port city, for cost.
 SUB navy_found_fleet (side, city, cost)
-	fleet_city(side) = city
-	side_cash(side) = side_cash(side) - cost: fleet_size(side) = 1
+    fleet_city(side) = city
+    side_cash(side) = side_cash(side) - cost: fleet_size(side) = 1
 END SUB
 
 ' A new fleet has no port to start in: the ship is not built.
 SUB navy_cancel_new_fleet (side)
-	fleet_size(side) = 0: fleet_ships$(side) = ""
+    fleet_size(side) = 0: fleet_ships$(side) = ""
 END SUB
 
 ' Attack on the army in the city the fleet lies off: losses of its men, in hundreds, and some
 ' of its supplies. The army keeps at least 100 men.
 SUB navy_bombard_army (side, army, losses)
-DIM loss_rate!: DIM supply_loss AS INTEGER
-	loss_rate! = .005 * fleet_size(side) + .02 * RND: losses = army_size(army) * loss_rate!: IF losses < 1 THEN losses = 1
-	supply_loss = .5 * fleet_size(side) + 1: IF supply_loss > army_supply(army) THEN supply_loss = army_supply(army)
-	army_supply(army) = army_supply(army) - supply_loss
-	army_size(army) = army_size(army) - losses: IF army_size(army) < 1 THEN army_size(army) = 1
+    DIM loss_rate!: DIM supply_loss AS INTEGER
+    loss_rate! = .005 * fleet_size(side) + .02 * RND: losses = army_size(army) * loss_rate!: IF losses < 1 THEN losses = 1
+    supply_loss = .5 * fleet_size(side) + 1: IF supply_loss > army_supply(army) THEN supply_loss = army_supply(army)
+    army_supply(army) = army_supply(army) - supply_loss
+    army_size(army) = army_size(army) - losses: IF army_size(army) < 1 THEN army_size(army) = 1
 END SUB
 
 ' Attack on a city with a fort and no army: the fleet damages the fort (damaged is 1), or the
 ' shore battery sinks one of its ships.
 SUB navy_shore_battery (side, city, damaged)
-	damaged = 0
-	IF RND < .7 + .03 * (fleet_size(side) - city_fort(city)) THEN damaged = 1: city_fort(city) = city_fort(city) - 1: EXIT SUB
-	CALL navy_remove_ship(side)
+    damaged = 0
+    IF RND < .7 + .03 * (fleet_size(side) - city_fort(city)) THEN damaged = 1: city_fort(city) = city_fort(city) - 1: EXIT SUB
+    CALL navy_remove_ship(side)
 END SUB
 
 ' The shore battery sank the fleet's last ship. The other side gets 5 victory points.
 SUB navy_fleet_lost (side)
-	fleet_city(side) = 0: fleet_ships$(side) = ""
-	side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 5
-	IF side = current_side THEN fleet_pursuit = 0
+    fleet_city(side) = 0: fleet_ships$(side) = ""
+    side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 5
+    IF side = current_side THEN fleet_pursuit = 0
 END SUB
 
 ' Attack on a city with neither army nor fort. result is BOMBARD_HOLDS when the citizens stand
@@ -108,93 +108,93 @@ END SUB
 ' BOMBARD_TURNS_NEUTRAL when the city turns neutral; the side then gets the city's value in
 ' victory points.
 SUB navy_blast (side, city, result)
-	result = BOMBARD_HOLDS
-	IF RND > .25 + .07 * fleet_size(side) THEN EXIT SUB
-	result = BOMBARD_CAPITAL_HOLDS
-	IF fleet_city(side) = side_capital(other_side(side)) THEN EXIT SUB
-	result = BOMBARD_TURNS_NEUTRAL
-	city_owner(fleet_city(side)) = SIDE_NONE
-	side_victory_points(side) = side_victory_points(side) + city_value(fleet_city(side))
+    result = BOMBARD_HOLDS
+    IF RND > .25 + .07 * fleet_size(side) THEN EXIT SUB
+    result = BOMBARD_CAPITAL_HOLDS
+    IF fleet_city(side) = side_capital(other_side(side)) THEN EXIT SUB
+    result = BOMBARD_TURNS_NEUTRAL
+    city_owner(fleet_city(side)) = SIDE_NONE
+    side_victory_points(side) = side_victory_points(side) + city_value(fleet_city(side))
 END SUB
 
 ' Sail: the fleet is now off city.
 SUB navy_move_fleet (side, city)
-	fleet_city(side) = city
+    fleet_city(side) = city
 END SUB
 
 ' Raid: the fleet is at sea, raiding the other side's commerce.
 SUB navy_go_raiding (side)
-	fleet_city(side) = FLEET_AT_SEA: raiding_side = side
+    fleet_city(side) = FLEET_AT_SEA: raiding_side = side
 END SUB
 
 ' Invasion: the new army that the ship landed is 3,500 men, and its side gets back the 100
 ' that army_new took for it.
 SUB navy_landed (side, army)
-	side_cash(side) = side_cash(side) + COST_RECRUIT     'compensate for cost of recruiting new army
-	army_size(army) = 35
+    side_cash(side) = side_cash(side) + COST_RECRUIT     'compensate for cost of recruiting new army
+    army_size(army) = 35
 END SUB
 
 ' After a fleet has moved or fought: which side's fleet is at sea, raiding commerce.
 SUB navy_note_raiding_side
-DIM k AS INTEGER
-	raiding_side = SIDE_NONE
-	FOR k = SIDE_UNION TO SIDE_REBEL
-	IF fleet_city(k) = FLEET_AT_SEA THEN raiding_side = k
-	NEXT k
+    DIM k AS INTEGER
+    raiding_side = SIDE_NONE
+    FOR k = SIDE_UNION TO SIDE_REBEL
+        IF fleet_city(k) = FLEET_AT_SEA THEN raiding_side = k
+    NEXT k
 END SUB
 
 ' One round of the raid on commerce. raider is the side that raids, or 0 when none does. When
 ' sank is 1 its raiders sank raid_loss of the other side's income; when 0 it lost a ship, and
 ' raiding_side becomes 0 when that was its last.
 SUB navy_raid_round (raider, sank)
-IF fleet_size(raiding_side) < 1 THEN raiding_side = SIDE_NONE
-raider = raiding_side: sank = 0
-IF raider <= 0 THEN EXIT SUB
-	IF RND < .8 + .02 * fleet_size(raider) THEN
-		sank = 1
-		raid_loss = .05 * fleet_size(raider) * (1 + RND) * (side_income(other_side(raider)))
-		IF raid_loss < 1 THEN raid_loss = 1
-		IF raid_loss / side_income(other_side(raider)) > .3 THEN raid_loss = .3 * side_income(other_side(raider))
-		IF raider = current_side THEN fleet_pursuit = 1
-	ELSE
-		raid_loss = 0
-		CALL navy_remove_ship(raider)
-		IF fleet_city(raider) <= 0 THEN raiding_side = SIDE_NONE
-	END IF
+    IF fleet_size(raiding_side) < 1 THEN raiding_side = SIDE_NONE
+    raider = raiding_side: sank = 0
+    IF raider <= 0 THEN EXIT SUB
+    IF RND < .8 + .02 * fleet_size(raider) THEN
+        sank = 1
+        raid_loss = .05 * fleet_size(raider) * (1 + RND) * (side_income(other_side(raider)))
+        IF raid_loss < 1 THEN raid_loss = 1
+        IF raid_loss / side_income(other_side(raider)) > .3 THEN raid_loss = .3 * side_income(other_side(raider))
+        IF raider = current_side THEN fleet_pursuit = 1
+    ELSE
+        raid_loss = 0
+        CALL navy_remove_ship(raider)
+        IF fleet_city(raider) <= 0 THEN raiding_side = SIDE_NONE
+    END IF
 END SUB
 
 ' Naval combat: the hits the side's last ship can take, 20 for an ironclad and 10 for a wooden ship.
 FUNCTION navy_ship_hits (side)
-	navy_ship_hits = 10
-	IF RIGHT$(fleet_ships$(side), 1) = "I" THEN navy_ship_hits = 20
+    navy_ship_hits = 10
+    IF RIGHT$(fleet_ships$(side), 1) = "I" THEN navy_ship_hits = 20
 END FUNCTION
 
 ' Naval combat: 1 when the side's shot hits. An ironclad against a wooden ship has a better
 ' chance, and a wooden ship against an ironclad a worse one.
 FUNCTION navy_shot_hits (side)
-DIM ironclad_bonus!: DIM ship$
-	ironclad_bonus! = 0: ship$ = RIGHT$(fleet_ships$(side), 1)
-	IF ship$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
-		IF ship$ = "I" THEN ironclad_bonus! = .1 ELSE ironclad_bonus! = -.1
-	END IF
-	navy_shot_hits = 0: IF RND <= .5 + ironclad_bonus! THEN navy_shot_hits = 1
+    DIM ironclad_bonus!: DIM ship$
+    ironclad_bonus! = 0: ship$ = RIGHT$(fleet_ships$(side), 1)
+    IF ship$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
+        IF ship$ = "I" THEN ironclad_bonus! = .1 ELSE ironclad_bonus! = -.1
+    END IF
+    navy_shot_hits = 0: IF RND <= .5 + ironclad_bonus! THEN navy_shot_hits = 1
 END FUNCTION
 
 ' Naval combat: the loser's fleet is sunk. The loser's side gets 10 victory points (TODO.md).
 ' The winner pursues when it is the side whose turn it is.
 SUB navy_fleet_defeated (loser)
-	fleet_city(loser) = 0: fleet_ships$(loser) = ""
-	side_victory_points(loser) = side_victory_points(loser) + 10
-	IF other_side(loser) = current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
+    fleet_city(loser) = 0: fleet_ships$(loser) = ""
+    side_victory_points(loser) = side_victory_points(loser) + 10
+    IF other_side(loser) = current_side THEN fleet_pursuit = 1 ELSE fleet_pursuit = 0
 END SUB
 
 ' Naval combat: the side's fleet retreats to one of its other sea ports. Each in turn becomes
 ' the target, and the search stops there with a chance of 7 in 10. port is 0 when there is none.
 SUB navy_retreat_port (side, port)
-DIM i AS INTEGER
-	 port = 0
-	 FOR i = 1 TO MAX_CITIES
-	 IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN port = i: IF RND > .3 THEN EXIT FOR
-	 NEXT i
-	 fleet_city(side) = port
+    DIM i AS INTEGER
+    port = 0
+    FOR i = 1 TO MAX_CITIES
+        IF city_owner(i) = side THEN IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN port = i: IF RND > .3 THEN EXIT FOR
+    NEXT i
+    fleet_city(side) = port
 END SUB

@@ -1,0 +1,7 @@
+# Settings of QB64Rust for this program (QB64Rust's docs\MANUAL.md, "The settings file").
+
+# The layout of `qb64rust -y` and of Format Document in VS Code. Formatting changes only the indent: four
+# spaces a level, with the body of a SUB or FUNCTION one level in. The spacing inside a line stays as written.
+[format]
+keyword-case = "upper"
+auto-layout = false

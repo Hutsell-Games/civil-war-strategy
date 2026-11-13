@@ -3,229 +3,229 @@
 ' The Utility menu. It shows again after a setting is changed. Side, Chk Links, Esc, and an
 ' Esc in the SOUNDS or the Balance menu go back to the main menu.
 SUB menu_utility
-DIM a$: DIM row AS INTEGER: DIM picked AS INTEGER
-	menu_choice = MENU_START + 1
-	DO
-	menu_text$(0) = "Utility"
-	menu_text$(1) = "Side": IF opt_players = PLAYERS_TWO THEN menu_text$(2) = ""
-	menu_text$(2) = "1 Player": IF opt_players = PLAYERS_TWO THEN menu_text$(2) = "2 Player"
-	menu_text$(3) = "Graphics" + STR$(opt_graphics)
-	menu_text$(4) = "Noise": IF opt_sound >= SOUND_EFFECTS THEN menu_text$(4) = menu_text$(4) + STRING$(opt_sound, "*")
-	menu_text$(5) = "Display" + STR$(opt_pause!)
-	a$ = STR$(opt_difficulty): IF current_side = SIDE_UNION THEN a$ = STR$(6 - opt_difficulty)
-	menu_text$(6) = "Balance" + a$
-	menu_text$(7) = "End Cond"
-	a$ = "û": IF opt_event_balance = 0 THEN a$ = ""
-	menu_text$(8) = "Rndom Evt " + a$
-	menu_text$(9) = "Vary Start"
-	a$ = "": IF opt_winter_campaigns = 1 THEN a$ = "û"
-	menu_text$(10) = "Jan Campgn" + a$
-	a$ = "": IF opt_realism = REALISM_ON THEN a$ = "û"
-	menu_text$(11) = "Realism " + a$
-	menu_text$(12) = "Chk Links"
-	a$ = "": IF opt_history = 1 THEN a$ = "û"
-	menu_text$(13) = "History" + a$
-	menu_item_count = 13: menu_col = PANEL_COL: menu_row = 11
-	COLOR COLOR_LIGHT_CYAN: LOCATE menu_row - 2, menu_col: PRINT "esc=Main Menu"
-	IF opt_players = PLAYERS_ONE THEN menu_item_count = 14: menu_text$(14) = "Aggress" + STR$(opt_ai_aggression)
-	CALL menu_select(-1): CALL clear_right_panel
-	row = menu_choice
-	SELECT CASE row
-		CASE 1
-			CALL menu_option_side
-			EXIT SUB
-		CASE 2: CALL menu_option_players
-		CASE 3: CALL menu_option_graphics
-		CASE 4
-			CALL menu_option_sound(picked)
-			IF picked = 0 THEN EXIT SUB
-		CASE 5: CALL menu_option_display
-		CASE 6
-			CALL menu_option_balance(picked)
-			IF picked = 0 THEN EXIT SUB
-		CASE 7: CALL menu_victory_conditions
-		CASE 8: CALL menu_option_events
-		CASE 9
-			CALL vary_start_conditions
-			CLS
-			CALL draw_map
-		CASE 10: CALL menu_option_january
-		CASE 11: CALL menu_option_realism
-		CASE 12
-			CALL check_map_links
-			CALL wait_seconds(99)
-			CALL draw_map
-			EXIT SUB
-		CASE 13: CALL menu_option_history
-		CASE 14: CALL menu_option_aggression
-		CASE ELSE
-			EXIT SUB
-	END SELECT
-	menu_choice = MENU_START + row
-	LOOP
+    DIM a$: DIM row AS INTEGER: DIM picked AS INTEGER
+    menu_choice = MENU_START + 1
+    DO
+        menu_text$(0) = "Utility"
+        menu_text$(1) = "Side": IF opt_players = PLAYERS_TWO THEN menu_text$(2) = ""
+        menu_text$(2) = "1 Player": IF opt_players = PLAYERS_TWO THEN menu_text$(2) = "2 Player"
+        menu_text$(3) = "Graphics" + STR$(opt_graphics)
+        menu_text$(4) = "Noise": IF opt_sound >= SOUND_EFFECTS THEN menu_text$(4) = menu_text$(4) + STRING$(opt_sound, "*")
+        menu_text$(5) = "Display" + STR$(opt_pause!)
+        a$ = STR$(opt_difficulty): IF current_side = SIDE_UNION THEN a$ = STR$(6 - opt_difficulty)
+        menu_text$(6) = "Balance" + a$
+        menu_text$(7) = "End Cond"
+        a$ = "û": IF opt_event_balance = 0 THEN a$ = ""
+        menu_text$(8) = "Rndom Evt " + a$
+        menu_text$(9) = "Vary Start"
+        a$ = "": IF opt_winter_campaigns = 1 THEN a$ = "û"
+        menu_text$(10) = "Jan Campgn" + a$
+        a$ = "": IF opt_realism = REALISM_ON THEN a$ = "û"
+        menu_text$(11) = "Realism " + a$
+        menu_text$(12) = "Chk Links"
+        a$ = "": IF opt_history = 1 THEN a$ = "û"
+        menu_text$(13) = "History" + a$
+        menu_item_count = 13: menu_col = PANEL_COL: menu_row = 11
+        COLOR COLOR_LIGHT_CYAN: LOCATE menu_row - 2, menu_col: PRINT "esc=Main Menu"
+        IF opt_players = PLAYERS_ONE THEN menu_item_count = 14: menu_text$(14) = "Aggress" + STR$(opt_ai_aggression)
+        CALL menu_select(-1): CALL clear_right_panel
+        row = menu_choice
+        SELECT CASE row
+            CASE 1
+                CALL menu_option_side
+                EXIT SUB
+            CASE 2: CALL menu_option_players
+            CASE 3: CALL menu_option_graphics
+            CASE 4
+                CALL menu_option_sound(picked)
+                IF picked = 0 THEN EXIT SUB
+            CASE 5: CALL menu_option_display
+            CASE 6
+                CALL menu_option_balance(picked)
+                IF picked = 0 THEN EXIT SUB
+            CASE 7: CALL menu_victory_conditions
+            CASE 8: CALL menu_option_events
+            CASE 9
+                CALL vary_start_conditions
+                CLS
+                CALL draw_map
+            CASE 10: CALL menu_option_january
+            CASE 11: CALL menu_option_realism
+            CASE 12
+                CALL check_map_links
+                CALL wait_seconds(99)
+                CALL draw_map
+                EXIT SUB
+            CASE 13: CALL menu_option_history
+            CASE 14: CALL menu_option_aggression
+            CASE ELSE
+                EXIT SUB
+        END SELECT
+        menu_choice = MENU_START + row
+    LOOP
 END SUB
 
 ' Side: in a one-player game the player takes the other side.
 SUB menu_option_side
-	IF opt_players = PLAYERS_TWO THEN EXIT SUB
-	CALL option_swap_side
-	COLOR COLOR_LIGHT_BLUE: IF current_side = SIDE_REBEL THEN COLOR COLOR_GRAY
-	CALL clear_bottom_line: PRINT "Now playing "; side_name$(current_side); " side"; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
-	CALL draw_top_bar
+    IF opt_players = PLAYERS_TWO THEN EXIT SUB
+    CALL option_swap_side
+    COLOR COLOR_LIGHT_BLUE: IF current_side = SIDE_REBEL THEN COLOR COLOR_GRAY
+    CALL clear_bottom_line: PRINT "Now playing "; side_name$(current_side); " side"; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
+    CALL draw_top_bar
 END SUB
 
 ' 1 Player or 2 Player.
 SUB menu_option_players
-DIM a$
-	CALL option_toggle_players: CALL clear_bottom_line: COLOR COLOR_LIGHT_RED
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
-	a$ = "Solo": IF opt_players = PLAYERS_TWO THEN a$ = "2 Player"
-	PRINT a$; " Game";
+    DIM a$
+    CALL option_toggle_players: CALL clear_bottom_line: COLOR COLOR_LIGHT_RED
+    IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
+    a$ = "Solo": IF opt_players = PLAYERS_TWO THEN a$ = "2 Player"
+    PRINT a$; " Game";
 END SUB
 
 ' Graphics: the next level of the map's detail, and the map drawn with it.
 SUB menu_option_graphics
-DIM a$
-	CALL option_next_graphics
-	a$ = "ROADS"
-	IF opt_graphics = GRAPHICS_OFF THEN a$ = "DISABLED"
-	IF opt_graphics = GRAPHICS_NAMES THEN a$ = "CITY NAMES"
-	IF opt_graphics = GRAPHICS_FULL THEN a$ = "FULL"
-	CLS
-	CALL draw_map
-	CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Graphics : "; a$; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 2700, 1
+    DIM a$
+    CALL option_next_graphics
+    a$ = "ROADS"
+    IF opt_graphics = GRAPHICS_OFF THEN a$ = "DISABLED"
+    IF opt_graphics = GRAPHICS_NAMES THEN a$ = "CITY NAMES"
+    IF opt_graphics = GRAPHICS_FULL THEN a$ = "FULL"
+    CLS
+    CALL draw_map
+    CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Graphics : "; a$; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 2700, 1
 END SUB
 
 ' Noise: the SOUNDS menu. picked is 0 when the player left it with Esc.
 SUB menu_option_sound (picked)
-	picked = 0
-	CALL clear_right_panel: menu_choice = MENU_START + 1 + opt_sound
-	menu_text$(0) = "SOUNDS"
-	menu_text$(1) = "Quiet"
-	menu_text$(2) = "Sound"
-	menu_text$(3) = " & Sound"
-	menu_item_count = 3: menu_col = PANEL_COL: menu_row = 12
-	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
-	IF menu_choice < 1 THEN EXIT SUB
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Sound Option : "; menu_text$(menu_choice);
-	CALL option_set_sound(menu_choice - 1)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
-	picked = 1
+    picked = 0
+    CALL clear_right_panel: menu_choice = MENU_START + 1 + opt_sound
+    menu_text$(0) = "SOUNDS"
+    menu_text$(1) = "Quiet"
+    menu_text$(2) = "Sound"
+    menu_text$(3) = " & Sound"
+    menu_item_count = 3: menu_col = PANEL_COL: menu_row = 12
+    CALL menu_select(MENU_PLAIN): CALL clear_right_panel
+    IF menu_choice < 1 THEN EXIT SUB
+    COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Sound Option : "; menu_text$(menu_choice);
+    CALL option_set_sound(menu_choice - 1)
+    IF opt_sound >= SOUND_EFFECTS THEN SOUND 999, 1
+    picked = 1
 END SUB
 
 ' Display: how long a message stays, or the other set of colors.
 SUB menu_option_display
-	menu_choice = opt_pause! + 21
-	menu_text$(0) = "Display"
-	menu_text$(1) = "Fast"
-	menu_text$(2) = "Normal"
-	menu_text$(3) = "Slow"
-	menu_text$(4) = "Very Slow"
-	menu_text$(5) = "Reg Color": IF opt_alt_colors > 0 THEN menu_text$(5) = "Alt Color"
-	menu_col = PANEL_COL: menu_row = 15: menu_item_count = 5
-	CALL menu_select(MENU_PLAIN): CALL clear_right_panel
-	SELECT CASE menu_choice
-		CASE IS < 1
-		CASE IS < 5
-			CALL option_set_display_speed(menu_choice)
-			CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN
-			PRINT "Display Speed : "; menu_text$(menu_choice);
-		CASE 5
-			CALL option_toggle_alt_colors
-			CLS
-			CALL draw_map
-			CALL draw_top_bar
-	END SELECT
+    menu_choice = opt_pause! + 21
+    menu_text$(0) = "Display"
+    menu_text$(1) = "Fast"
+    menu_text$(2) = "Normal"
+    menu_text$(3) = "Slow"
+    menu_text$(4) = "Very Slow"
+    menu_text$(5) = "Reg Color": IF opt_alt_colors > 0 THEN menu_text$(5) = "Alt Color"
+    menu_col = PANEL_COL: menu_row = 15: menu_item_count = 5
+    CALL menu_select(MENU_PLAIN): CALL clear_right_panel
+    SELECT CASE menu_choice
+        CASE IS < 1
+        CASE IS < 5
+            CALL option_set_display_speed(menu_choice)
+            CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN
+            PRINT "Display Speed : "; menu_text$(menu_choice);
+        CASE 5
+            CALL option_toggle_alt_colors
+            CLS
+            CALL draw_map
+            CALL draw_top_bar
+    END SELECT
 END SUB
 
 ' Balance: the menu with the faces. picked is 0 when the player left it with Esc.
 SUB menu_option_balance (picked)
-	picked = 0
-	menu_choice = MENU_START + opt_difficulty
-	menu_text$(0) = "Balance"
-	menu_text$(1) = "Rebel ++"
-	menu_text$(2) = "Rebel +"
-	menu_text$(3) = "Balanced"
-	menu_text$(4) = "Union +"
-	menu_text$(5) = "Union ++"
-	menu_col = PANEL_COL: menu_row = 15: menu_item_count = 5
-	CALL menu_select(MENU_FACES): CALL clear_right_panel
-	IF menu_choice < 1 THEN EXIT SUB
-	CALL clear_bottom_line
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Play Balance : "; menu_text$(menu_choice);
-	CALL option_set_balance(menu_choice)
-	picked = 1
+    picked = 0
+    menu_choice = MENU_START + opt_difficulty
+    menu_text$(0) = "Balance"
+    menu_text$(1) = "Rebel ++"
+    menu_text$(2) = "Rebel +"
+    menu_text$(3) = "Balanced"
+    menu_text$(4) = "Union +"
+    menu_text$(5) = "Union ++"
+    menu_col = PANEL_COL: menu_row = 15: menu_item_count = 5
+    CALL menu_select(MENU_FACES): CALL clear_right_panel
+    IF menu_choice < 1 THEN EXIT SUB
+    CALL clear_bottom_line
+    COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Play Balance : "; menu_text$(menu_choice);
+    CALL option_set_balance(menu_choice)
+    picked = 1
 END SUB
 
 ' Rndom Evt: off, or which side the special events favor. t$ keeps the text of the last
 ' choice between calls, as the main module's t$ did: after an Esc the line shows it again.
 SUB menu_option_events
-DIM a$
-STATIC t$
-	menu_text$(0) = "Random Events"
-	menu_item_count = 4: menu_col = 30: menu_row = 8
-	menu_text$(1) = "OFF"
-	menu_text$(2) = "Favor Union ": IF opt_event_balance = 3 THEN menu_text$(2) = menu_text$(2) + " "
-	menu_text$(3) = "Neutral     ": IF opt_event_balance = 5 THEN menu_text$(3) = menu_text$(3) + " "
-	menu_text$(4) = "Favor Rebels": IF opt_event_balance = 7 THEN menu_text$(4) = menu_text$(4) + " "
-	menu_color = COLOR_MAGENTA
-	CALL menu_select(MENU_PLAIN)
-	menu_color = COLOR_RED
+    DIM a$
+    STATIC t$
+    menu_text$(0) = "Random Events"
+    menu_item_count = 4: menu_col = 30: menu_row = 8
+    menu_text$(1) = "OFF"
+    menu_text$(2) = "Favor Union ": IF opt_event_balance = 3 THEN menu_text$(2) = menu_text$(2) + " "
+    menu_text$(3) = "Neutral     ": IF opt_event_balance = 5 THEN menu_text$(3) = menu_text$(3) + " "
+    menu_text$(4) = "Favor Rebels": IF opt_event_balance = 7 THEN menu_text$(4) = menu_text$(4) + " "
+    menu_color = COLOR_MAGENTA
+    CALL menu_select(MENU_PLAIN)
+    menu_color = COLOR_RED
 
-	CALL option_set_event_balance(menu_choice)
-	IF menu_choice = 1 THEN t$ = ""
-	IF menu_choice > 1 AND menu_choice < 5 THEN t$ = menu_text$(menu_choice)
-	CALL clear_bottom_line
-	a$ = "": IF opt_event_balance = 0 THEN a$ = "OFF"
-	COLOR COLOR_LIGHT_CYAN: PRINT "Random Events : "; a$; " "; t$;
-	COLOR COLOR_YELLOW: PRINT "			press a key";
-	CALL wait_key("R")
-	CLS
-	CALL draw_map
+    CALL option_set_event_balance(menu_choice)
+    IF menu_choice = 1 THEN t$ = ""
+    IF menu_choice > 1 AND menu_choice < 5 THEN t$ = menu_text$(menu_choice)
+    CALL clear_bottom_line
+    a$ = "": IF opt_event_balance = 0 THEN a$ = "OFF"
+    COLOR COLOR_LIGHT_CYAN: PRINT "Random Events : "; a$; " "; t$;
+    COLOR COLOR_YELLOW: PRINT "			press a key";
+    CALL wait_key("R")
+    CLS
+    CALL draw_map
 END SUB
 
 ' Jan Campgn: whether an army may attack in January and February.
 SUB menu_option_january
-DIM a$
-	CALL option_toggle_winter_campaigns
-	a$ = "PROHIBITED": IF opt_winter_campaigns = 1 THEN a$ = "ALLOWED"
-	COLOR COLOR_LIGHT_CYAN
-	CALL clear_bottom_line
-	PRINT "January Campaigns : "; a$;
+    DIM a$
+    CALL option_toggle_winter_campaigns
+    a$ = "PROHIBITED": IF opt_winter_campaigns = 1 THEN a$ = "ALLOWED"
+    COLOR COLOR_LIGHT_CYAN
+    CALL clear_bottom_line
+    PRINT "January Campaigns : "; a$;
 END SUB
 
 ' Realism: recruits by the city's size, or a fixed number.
 SUB menu_option_realism
-	CALL option_toggle_realism
-	CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN
-	IF opt_realism = REALISM_OFF THEN
-		PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
-	ELSE
-		PRINT "REALISM ON: Recruiting based on CITY SIZE";
-	END IF
+    CALL option_toggle_realism
+    CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN
+    IF opt_realism = REALISM_OFF THEN
+        PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
+    ELSE
+        PRINT "REALISM ON: Recruiting based on CITY SIZE";
+    END IF
 END SUB
 
 ' History: whether the game's events go to the file cws.his.
 SUB menu_option_history
-DIM a$
-	CALL option_toggle_history
-	a$ = "OFF": IF opt_history = 1 THEN a$ = "ON"
-	CALL clear_bottom_line: PRINT "History is now "; a$;
+    DIM a$
+    CALL option_toggle_history
+    a$ = "OFF": IF opt_history = 1 THEN a$ = "ON"
+    CALL clear_bottom_line: PRINT "History is now "; a$;
 END SUB
 
 ' Aggress: how bold the computer is, 0 to 5.
 SUB menu_option_aggression
-DIM a$
-	CALL option_next_aggression
-	SELECT CASE opt_ai_aggression
-	CASE 0: a$ = "PASSIVE"
-	CASE 1: a$ = "TIMID"
-	CASE 2: a$ = "CAUTIOUS"
-	CASE 3: a$ = "NORMAL"
-	CASE 4: a$ = "BOLD"
-	CASE 5: a$ = "RECKLESS"
-	END SELECT
-	CALL clear_bottom_line
-	COLOR COLOR_LIGHT_CYAN
-	PRINT "Enemy Aggression : "; a$; " ("; opt_ai_aggression; ")";
+    DIM a$
+    CALL option_next_aggression
+    SELECT CASE opt_ai_aggression
+        CASE 0: a$ = "PASSIVE"
+        CASE 1: a$ = "TIMID"
+        CASE 2: a$ = "CAUTIOUS"
+        CASE 3: a$ = "NORMAL"
+        CASE 4: a$ = "BOLD"
+        CASE 5: a$ = "RECKLESS"
+    END SELECT
+    CALL clear_bottom_line
+    COLOR COLOR_LIGHT_CYAN
+    PRINT "Enemy Aggression : "; a$; " ("; opt_ai_aggression; ")";
 END SUB

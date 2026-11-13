@@ -1,104 +1,104 @@
 SUB screen_snapshot (x, y, put_back)
-IF put_back = SNAP_SAVE THEN GET (x - 10, y - 10)-(x + 10, y + 10), saved_under_marker
-IF put_back = SNAP_RESTORE THEN PUT (x - 10, y - 10), saved_under_marker, PSET
+    IF put_back = SNAP_SAVE THEN GET (x - 10, y - 10)-(x + 10, y + 10), saved_under_marker
+    IF put_back = SNAP_RESTORE THEN PUT (x - 10, y - 10), saved_under_marker, PSET
 END SUB
 
 SUB print_centered (row, text$)
-DIM col AS INTEGER
-col = LEN(text$)
-col = 26 - col \ 2
-LOCATE row, 7 + col: PRINT text$
+    DIM col AS INTEGER
+    col = LEN(text$)
+    col = 26 - col \ 2
+    LOCATE row, 7 + col: PRINT text$
 END SUB
 
 SUB clear_bottom_line
-LOCATE 29, 1: PRINT SPACE$(79);
-LOCATE 29, 1
+    LOCATE 29, 1: PRINT SPACE$(79);
+    LOCATE 29, 1
 END SUB
 
 SUB clear_right_panel
-VIEW (528, 1)-(639, 450)
-CLS 1
-VIEW
+    VIEW (528, 1)-(639, 450)
+    CLS 1
+    VIEW
 END SUB
 
 SUB draw_train_box
-DIM i AS INTEGER: DIM side_color AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-IF train_army(SIDE_UNION) + train_army(SIDE_REBEL) = 0 THEN EXIT SUB
-LINE (5, 17)-(100, 63), 3, BF
-LINE (5, 17)-(100, 47), 0, B
-LINE (5, 47)-(100, 63), 0, B
+    DIM i AS INTEGER: DIM side_color AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+    IF train_army(SIDE_UNION) + train_army(SIDE_REBEL) = 0 THEN EXIT SUB
+    LINE (5, 17)-(100, 63), 3, BF
+    LINE (5, 17)-(100, 47), 0, B
+    LINE (5, 47)-(100, 63), 0, B
 
-FOR i = SIDE_UNION TO SIDE_REBEL
-IF train_army(i) = 0 THEN _CONTINUE
-PSET (15, 25), 3: side_color = 9: IF i = 2 THEN side_color = 15: PSET (60, 25), 3
-DRAW "C0S4" + TRAIN_OUTLINE$ + "U8L2U5BF4"
-x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
-LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(city_name$(army_order(train_army(i))), 5)
-NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        IF train_army(i) = 0 THEN _CONTINUE
+        PSET (15, 25), 3: side_color = 9: IF i = 2 THEN side_color = 15: PSET (60, 25), 3
+        DRAW "C0S4" + TRAIN_OUTLINE$ + "U8L2U5BF4"
+        x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
+        LOCATE 4, 6 * (i - 1) + 2: PRINT LEFT$(city_name$(army_order(train_army(i))), 5)
+    NEXT i
 END SUB
 
 SUB wait_seconds (seconds!)
-DIM start!
-IF script_tick(seconds!) THEN EXIT SUB
-start! = TIMER
-DO WHILE TIMER - start! < seconds! AND INKEY$ = "": LOOP
+    DIM start!
+    IF script_tick(seconds!) THEN EXIT SUB
+    start! = TIMER
+    DO WHILE TIMER - start! < seconds! AND INKEY$ = "": LOOP
 END SUB
 
 ' Waits until a key is pressed. The letter tells a script which wait this is (port/script.bm).
 SUB wait_key (letter$)
-CALL script_mark_key_wait(1, letter$)
-DO WHILE INKEY$ = "": LOOP
+    CALL script_mark_key_wait(1, letter$)
+    DO WHILE INKEY$ = "": LOOP
 END SUB
 
 SUB draw_top_bar
-DIM i AS INTEGER: DIM total_points AS INTEGER: DIM percent AS INTEGER: DIM side_color AS INTEGER: DIM a$
-	LOCATE 1, 1: PRINT SPACE$(80);
-	COLOR COLOR_LIGHT_CYAN
-	LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR COLOR_YELLOW: PRINT month_name$(turn_month); ","; turn_year; "  "
+    DIM i AS INTEGER: DIM total_points AS INTEGER: DIM percent AS INTEGER: DIM side_color AS INTEGER: DIM a$
+    LOCATE 1, 1: PRINT SPACE$(80);
+    COLOR COLOR_LIGHT_CYAN
+    LOCATE 1, 10: PRINT "Input your decisions now for "; side_name$(current_side); " side "; : COLOR COLOR_YELLOW: PRINT month_name$(turn_month); ","; turn_year; "  "
 
-	CALL draw_flag((current_side), 0, 0)
-	COLOR COLOR_RED: IF opt_alt_colors > 0 THEN COLOR COLOR_GRAY
-	LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
-	LOCATE 7, 68: PRINT "Funds:"; side_cash(current_side);
+    CALL draw_flag((current_side), 0, 0)
+    COLOR COLOR_RED: IF opt_alt_colors > 0 THEN COLOR COLOR_GRAY
+    LOCATE 6, 68: PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
+    LOCATE 7, 68: PRINT "Funds:"; side_cash(current_side);
 
-	FOR i = SIDE_UNION TO SIDE_REBEL: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
-	NEXT i
-	total_points = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL): percent = 0
-	side_color = 9: IF current_side = SIDE_REBEL THEN side_color = 7
-	LINE (580, 15)-(580, 35), 15
-	LINE (530, 20)-(630, 30), 8 - side_color, BF
-	IF total_points > 0 THEN percent = 100 * (side_victory_points(current_side) / total_points)
+    FOR i = SIDE_UNION TO SIDE_REBEL: IF side_victory_points(i) < 0 THEN side_victory_points(i) = 0
+    NEXT i
+    total_points = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL): percent = 0
+    side_color = 9: IF current_side = SIDE_REBEL THEN side_color = 7
+    LINE (580, 15)-(580, 35), 15
+    LINE (530, 20)-(630, 30), 8 - side_color, BF
+    IF total_points > 0 THEN percent = 100 * (side_victory_points(current_side) / total_points)
 
-	LINE (530, 20)-(530 + percent, 30), side_color, BF
-	COLOR side_color: LOCATE 4, 68: PRINT "VP :"; side_victory_points(current_side)
+    LINE (530, 20)-(530 + percent, 30), side_color, BF
+    COLOR side_color: LOCATE 4, 68: PRINT "VP :"; side_victory_points(current_side)
 
-	LOCATE 5, 68: PRINT "("; percent; "%)"
+    LOCATE 5, 68: PRINT "("; percent; "%)"
 
-a$ = "  Snd": IF opt_sound < SOUND_MUSIC THEN a$ = "   Snd": IF opt_sound = SOUND_OFF THEN a$ = "      "
-IF opt_graphics >= GRAPHICS_BASIC THEN a$ = a$ + " G" + LTRIM$(STR$(opt_graphics))
-a$ = a$ + STR$(opt_players)
-COLOR side_color
-LOCATE 26, 68: PRINT "F3 Redrw Scrn"
-LOCATE 27, 68: PRINT "F7 End Turn"
-LOCATE 28, 68: PRINT a$
+    a$ = "  Snd": IF opt_sound < SOUND_MUSIC THEN a$ = "   Snd": IF opt_sound = SOUND_OFF THEN a$ = "      "
+    IF opt_graphics >= GRAPHICS_BASIC THEN a$ = a$ + " G" + LTRIM$(STR$(opt_graphics))
+    a$ = a$ + STR$(opt_players)
+    COLOR side_color
+    LOCATE 26, 68: PRINT "F3 Redrw Scrn"
+    LOCATE 27, 68: PRINT "F7 End Turn"
+    LOCATE 28, 68: PRINT a$
 END SUB
 
 ' The screen between two players' turns: whose turn it is. Waits for a key.
 SUB draw_player_turn
-DIM side_color AS INTEGER
-		side_color = 1: IF current_side = SIDE_REBEL THEN side_color = 7
-		CLS : LINE (100, 200)-(500, 300), side_color, BF
-		LINE (100, 200)-(500, 300), 8 - side_color, B
-		COLOR COLOR_GRAY: LOCATE 14, 31: PRINT " "; month_name$(turn_month); turn_year
-		COLOR COLOR_LIGHT_CYAN: LOCATE 17, 30: PRINT side_name$(current_side); " PLAYER TURN"
-		CALL wait_key("T")
+    DIM side_color AS INTEGER
+    side_color = 1: IF current_side = SIDE_REBEL THEN side_color = 7
+    CLS : LINE (100, 200)-(500, 300), side_color, BF
+    LINE (100, 200)-(500, 300), 8 - side_color, B
+    COLOR COLOR_GRAY: LOCATE 14, 31: PRINT " "; month_name$(turn_month); turn_year
+    COLOR COLOR_LIGHT_CYAN: LOCATE 17, 30: PRINT side_name$(current_side); " PLAYER TURN"
+    CALL wait_key("T")
 END SUB
 
 ' The UPDATE box beside the map, shown while the month's moves are played.
 SUB draw_update_box
-LINE (450, 318)-(526, 420), 1, BF
-LINE (527, 315)-(527, 439), 10
-COLOR COLOR_YELLOW: LOCATE 23, 50: PRINT "ษอออออออออออออป"
-LOCATE 24, 50: PRINT "บ U P D A T E บ"
-LOCATE 25, 50: PRINT "ศอออออออออออออผ"
+    LINE (450, 318)-(526, 420), 1, BF
+    LINE (527, 315)-(527, 439), 10
+    COLOR COLOR_YELLOW: LOCATE 23, 50: PRINT "ษอออออออออออออป"
+    LOCATE 24, 50: PRINT "บ U P D A T E บ"
+    LOCATE 25, 50: PRINT "ศอออออออออออออผ"
 END SUB

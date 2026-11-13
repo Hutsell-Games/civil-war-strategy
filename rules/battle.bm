@@ -8,145 +8,145 @@
 ' defend_steps(): 1 defense, 2 leader and experience, 3 small army, 4 outmanned, 5 supply,
 '   6 difficulty, 7 fort, 8 the defense.
 SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
-DIM attack_strength AS INTEGER: DIM defend_strength AS INTEGER: DIM size_ratio!
-IF army_size(defender) < 1 THEN army_size(defender) = 1
-IF army_size(attacker) < 1 THEN army_size(attacker) = 1
+    DIM attack_strength AS INTEGER: DIM defend_strength AS INTEGER: DIM size_ratio!
+    IF army_size(defender) < 1 THEN army_size(defender) = 1
+    IF army_size(attacker) < 1 THEN army_size(attacker) = 1
 
-attack_strength = .01 * army_size(attacker): IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
-attack_steps(1) = attack_strength
-IF army_size(attacker) / army_size(defender) > .2 THEN attack_strength = attack_strength + .3 * army_leader_rating(attacker) + .3 * army_experience(attacker): IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
-IF army_experience(attacker) > 8 THEN attack_strength = attack_strength + 1: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
-attack_steps(2) = attack_strength
-IF army_size(attacker) < 15 THEN attack_strength = .5 * attack_strength: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
-attack_steps(3) = attack_strength
-IF army_size(attacker) / army_size(defender) <= .5 THEN attack_strength = attack_strength - 2: IF attack_strength < 1 THEN attack_strength = 1
-IF army_size(attacker) / army_size(defender) > 3 THEN attack_strength = attack_strength + 2: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
-IF army_size(attacker) / army_size(defender) > 10 THEN attack_strength = rule_strength_cap
-IF army_size(attacker) / army_size(defender) <= .2 THEN attack_strength = 1
-attack_steps(4) = attack_strength
-IF army_supply(attacker) < 1 THEN attack_strength = .5 * attack_strength
-attack_steps(5) = attack_strength
-IF attack_strength < 1 THEN attack_strength = 1
-'                       Adjust attack advantage
-IF army_side(attacker) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN attack_strength = attack_strength + 2 * opt_difficulty - 6
-IF army_side(attacker) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN attack_strength = attack_strength + 6 - 2 * opt_difficulty
-attack_steps(6) = attack_strength
-IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
-attack_steps(7) = attack_strength
+    attack_strength = .01 * army_size(attacker): IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
+    attack_steps(1) = attack_strength
+    IF army_size(attacker) / army_size(defender) > .2 THEN attack_strength = attack_strength + .3 * army_leader_rating(attacker) + .3 * army_experience(attacker): IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
+    IF army_experience(attacker) > 8 THEN attack_strength = attack_strength + 1: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
+    attack_steps(2) = attack_strength
+    IF army_size(attacker) < 15 THEN attack_strength = .5 * attack_strength: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
+    attack_steps(3) = attack_strength
+    IF army_size(attacker) / army_size(defender) <= .5 THEN attack_strength = attack_strength - 2: IF attack_strength < 1 THEN attack_strength = 1
+    IF army_size(attacker) / army_size(defender) > 3 THEN attack_strength = attack_strength + 2: IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
+    IF army_size(attacker) / army_size(defender) > 10 THEN attack_strength = rule_strength_cap
+    IF army_size(attacker) / army_size(defender) <= .2 THEN attack_strength = 1
+    attack_steps(4) = attack_strength
+    IF army_supply(attacker) < 1 THEN attack_strength = .5 * attack_strength
+    attack_steps(5) = attack_strength
+    IF attack_strength < 1 THEN attack_strength = 1
+    '                       Adjust attack advantage
+    IF army_side(attacker) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN attack_strength = attack_strength + 2 * opt_difficulty - 6
+    IF army_side(attacker) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN attack_strength = attack_strength + 6 - 2 * opt_difficulty
+    attack_steps(6) = attack_strength
+    IF attack_strength > rule_strength_cap THEN attack_strength = rule_strength_cap
+    attack_steps(7) = attack_strength
 
-defend_strength = .013 * army_size(defender) + 1: IF opt_realism = REALISM_ON THEN defend_strength = .02 * army_size(defender) + 2: IF defend_strength > 20 THEN defend_strength = 20
-defend_steps(1) = defend_strength
-IF army_size(defender) / army_size(attacker) > .2 THEN defend_strength = defend_strength + .3 * army_leader_rating(defender) + .3 * army_experience(defender): IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
-IF army_experience(defender) > 8 THEN defend_strength = defend_strength + 1: IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
-defend_steps(2) = defend_strength
-IF army_size(defender) < 15 THEN defend_strength = .5 * defend_strength
-defend_steps(3) = defend_strength
+    defend_strength = .013 * army_size(defender) + 1: IF opt_realism = REALISM_ON THEN defend_strength = .02 * army_size(defender) + 2: IF defend_strength > 20 THEN defend_strength = 20
+    defend_steps(1) = defend_strength
+    IF army_size(defender) / army_size(attacker) > .2 THEN defend_strength = defend_strength + .3 * army_leader_rating(defender) + .3 * army_experience(defender): IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
+    IF army_experience(defender) > 8 THEN defend_strength = defend_strength + 1: IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
+    defend_steps(2) = defend_strength
+    IF army_size(defender) < 15 THEN defend_strength = .5 * defend_strength
+    defend_steps(3) = defend_strength
 
-size_ratio! = army_size(defender) / army_size(attacker)
-SELECT CASE size_ratio!
-	CASE IS > 10
-		defend_strength = rule_strength_cap
-	CASE IS > 1.5
-		defend_strength = defend_strength + 2
-	CASE IS < .5
-		defend_strength = .8 * defend_strength
-	CASE IS < .2
-		defend_strength = .5 * defend_strength
-END SELECT
-	IF defend_strength < 1 THEN defend_strength = 1
-	IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
+    size_ratio! = army_size(defender) / army_size(attacker)
+    SELECT CASE size_ratio!
+        CASE IS > 10
+            defend_strength = rule_strength_cap
+        CASE IS > 1.5
+            defend_strength = defend_strength + 2
+        CASE IS < .5
+            defend_strength = .8 * defend_strength
+        CASE IS < .2
+            defend_strength = .5 * defend_strength
+    END SELECT
+    IF defend_strength < 1 THEN defend_strength = 1
+    IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
 
-defend_steps(4) = defend_strength
-IF army_supply(defender) < 1 THEN defend_strength = .5 * defend_strength
-defend_steps(5) = defend_strength
-IF defend_strength < 1 THEN defend_strength = 1
-'                       Adjust defend advantage
-IF army_side(defender) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN defend_strength = defend_strength + 2 * opt_difficulty - 6
-IF army_side(defender) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN defend_strength = defend_strength + 6 - 2 * opt_difficulty
-defend_steps(6) = defend_strength
+    defend_steps(4) = defend_strength
+    IF army_supply(defender) < 1 THEN defend_strength = .5 * defend_strength
+    defend_steps(5) = defend_strength
+    IF defend_strength < 1 THEN defend_strength = 1
+    '                       Adjust defend advantage
+    IF army_side(defender) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > 3 THEN defend_strength = defend_strength + 2 * opt_difficulty - 6
+    IF army_side(defender) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < 3 THEN defend_strength = defend_strength + 6 - 2 * opt_difficulty
+    defend_steps(6) = defend_strength
 
-IF army_order(defender) = ORDER_NONE THEN defend_strength = defend_strength * (1 + city_fort(army_city(defender)))
-IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
-defend_steps(7) = defend_strength
-IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
-defend_steps(8) = defend_strength
+    IF army_order(defender) = ORDER_NONE THEN defend_strength = defend_strength * (1 + city_fort(army_city(defender)))
+    IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
+    defend_steps(7) = defend_strength
+    IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap
+    defend_steps(8) = defend_strength
 END SUB
 
 ' The fight: each army rolls against its strength until one hits and the other does not. It also
 ' takes a day of supply from armies 1 and 2, whoever fights. rounds is how many rolls it took.
 SUB battle_fight (attack_strength, defend_strength, attacker, defender, winner, loser, rounds)
-DIM i AS INTEGER: DIM scale AS INTEGER: DIM attacker_hit AS INTEGER: DIM defender_hit AS INTEGER: DIM attack_roll AS INTEGER: DIM defend_roll AS INTEGER
-scale = attack_strength: IF defend_strength > scale THEN scale = defend_strength
-scale = scale + 1
-FOR i = 1 TO 2: IF army_supply(i) > 0 THEN army_supply(i) = army_supply(i) - 1
-NEXT i
-rounds = 0
-DO
-	attacker_hit = 0: defender_hit = 0
-	attack_roll = scale * RND: defend_roll = scale * RND
-	rounds = rounds + 1
-	IF attack_roll <= attack_strength THEN attacker_hit = 1
-	IF defend_roll <= defend_strength THEN defender_hit = 1
-LOOP WHILE attacker_hit = defender_hit
-winner = defender: loser = attacker: IF attacker_hit = 1 THEN winner = attacker: loser = defender
+    DIM i AS INTEGER: DIM scale AS INTEGER: DIM attacker_hit AS INTEGER: DIM defender_hit AS INTEGER: DIM attack_roll AS INTEGER: DIM defend_roll AS INTEGER
+    scale = attack_strength: IF defend_strength > scale THEN scale = defend_strength
+    scale = scale + 1
+    FOR i = 1 TO 2: IF army_supply(i) > 0 THEN army_supply(i) = army_supply(i) - 1
+    NEXT i
+    rounds = 0
+    DO
+        attacker_hit = 0: defender_hit = 0
+        attack_roll = scale * RND: defend_roll = scale * RND
+        rounds = rounds + 1
+        IF attack_roll <= attack_strength THEN attacker_hit = 1
+        IF defend_roll <= defend_strength THEN defender_hit = 1
+    LOOP WHILE attacker_hit = defender_hit
+    winner = defender: loser = attacker: IF attacker_hit = 1 THEN winner = attacker: loser = defender
 END SUB
 
 ' The losses of both armies, in hundreds of men. battle_apply_losses takes them later.
 SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
-DIM loss_rate!: DIM mean AS INTEGER: DIM variance AS INTEGER
-loss_rate! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender)): IF winner = attacker THEN loss_rate! = 1.3 * loss_rate!
-SELECT CASE army_size(defender)
-	CASE IS > 300
-		loss_rate! = .9 * loss_rate!
-	CASE IS > 800
-		loss_rate! = .8 * loss_rate!
-END SELECT
-mean = army_size(attacker) * loss_rate!
-variance = mean * (1 - loss_rate!)
-CALL normal_random_number(mean, variance, defender_losses)
-'...........................................................................
-loss_rate! = .01 * rule_attack_loss + .02 * city_fort(army_city(defender)): IF winner = defender THEN loss_rate! = 1.5 * loss_rate!
-SELECT CASE army_size(attacker)
-	CASE IS > 300
-		loss_rate! = .9 * loss_rate!
-	CASE IS > 800
-		loss_rate! = .8 * loss_rate!
-END SELECT
-mean = army_size(defender) * loss_rate!
-variance = mean * (1 - loss_rate!)
-CALL normal_random_number(mean, variance, attacker_losses)
-'===========================================================================
+    DIM loss_rate!: DIM mean AS INTEGER: DIM variance AS INTEGER
+    loss_rate! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender)): IF winner = attacker THEN loss_rate! = 1.3 * loss_rate!
+    SELECT CASE army_size(defender)
+        CASE IS > 300
+            loss_rate! = .9 * loss_rate!
+        CASE IS > 800
+            loss_rate! = .8 * loss_rate!
+    END SELECT
+    mean = army_size(attacker) * loss_rate!
+    variance = mean * (1 - loss_rate!)
+    CALL normal_random_number(mean, variance, defender_losses)
+    '...........................................................................
+    loss_rate! = .01 * rule_attack_loss + .02 * city_fort(army_city(defender)): IF winner = defender THEN loss_rate! = 1.5 * loss_rate!
+    SELECT CASE army_size(attacker)
+        CASE IS > 300
+            loss_rate! = .9 * loss_rate!
+        CASE IS > 800
+            loss_rate! = .8 * loss_rate!
+    END SELECT
+    mean = army_size(defender) * loss_rate!
+    variance = mean * (1 - loss_rate!)
+    CALL normal_random_number(mean, variance, attacker_losses)
+    '===========================================================================
 
-attacker_losses = .8 * attacker_losses + .2 * defender_losses: IF attacker_losses < 1 THEN attacker_losses = 1
-defender_losses = .8 * defender_losses + .2 * attacker_losses: IF defender_losses < 1 THEN defender_losses = 1
-IF attacker_losses > 9 * defender_losses THEN attacker_losses = 9 * defender_losses
-IF defender_losses > 5 * attacker_losses THEN defender_losses = 5 * attacker_losses
+    attacker_losses = .8 * attacker_losses + .2 * defender_losses: IF attacker_losses < 1 THEN attacker_losses = 1
+    defender_losses = .8 * defender_losses + .2 * attacker_losses: IF defender_losses < 1 THEN defender_losses = 1
+    IF attacker_losses > 9 * defender_losses THEN attacker_losses = 9 * defender_losses
+    IF defender_losses > 5 * attacker_losses THEN defender_losses = 5 * attacker_losses
 
-IF attacker_losses >= army_size(attacker) THEN attacker_losses = army_size(attacker) - 1
-IF defender_losses >= army_size(defender) THEN defender_losses = army_size(defender) - 1
+    IF attacker_losses >= army_size(attacker) THEN attacker_losses = army_size(attacker) - 1
+    IF defender_losses >= army_size(defender) THEN defender_losses = army_size(defender) - 1
 END SUB
 
 ' Takes the losses from both armies and records the battle: each side's casualties, and a battle won
 ' and a victory point for the winner's side.
 SUB battle_apply_losses (attacker, defender, winner, attacker_losses, defender_losses)
-DIM side AS INTEGER
-army_size(attacker) = army_size(attacker) - attacker_losses
-army_size(defender) = army_size(defender) - defender_losses
-IF army_size(defender) < 1 THEN army_size(defender) = 1
-'---------------------------------------------------------------------------
-side = 1: IF attacker > 2 THEN side = 2
-side_casualties&(side) = side_casualties&(side) + attacker_losses
-side_casualties&(other_side(side)) = side_casualties&(other_side(side)) + defender_losses
-'---------------------------------------------------------------------------
-side = army_side(winner)
-side_battles_won(side) = side_battles_won(side) + 1
-side_victory_points(side) = side_victory_points(side) + 1
+    DIM side AS INTEGER
+    army_size(attacker) = army_size(attacker) - attacker_losses
+    army_size(defender) = army_size(defender) - defender_losses
+    IF army_size(defender) < 1 THEN army_size(defender) = 1
+    '---------------------------------------------------------------------------
+    side = 1: IF attacker > 2 THEN side = 2
+    side_casualties&(side) = side_casualties&(side) + attacker_losses
+    side_casualties&(other_side(side)) = side_casualties&(other_side(side)) + defender_losses
+    '---------------------------------------------------------------------------
+    side = army_side(winner)
+    side_battles_won(side) = side_battles_won(side) + 1
+    side_victory_points(side) = side_victory_points(side) + 1
 END SUB
 
 SUB normal_random_number (mean, variance, result)
-DIM sum!: DIM k AS INTEGER
-sum! = 0
-FOR k = 1 TO 12: sum! = sum! + RND: NEXT k
-sum! = sum! - 5.5
-result = mean + sum! * SQR(variance)
+    DIM sum!: DIM k AS INTEGER
+    sum! = 0
+    FOR k = 1 TO 12: sum! = sum! + RND: NEXT k
+    sum! = sum! - 5.5
+    result = mean + sum! * SQR(variance)
 END SUB

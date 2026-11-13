@@ -1,158 +1,158 @@
 SUB load_scenario
-DIM k AS INTEGER: DIM i AS INTEGER: DIM army_count AS INTEGER
-	OPEN "I", 1, SCNDIR + "cwslead.dat"
-	FOR i = 1 TO 40: INPUT #1, leader_name$(i), leader_rating(i): NEXT i
-	CLOSE #1
-	OPEN "I", 1, SCNDIR + "cws.ini"
-	FOR i = 0 TO 2: INPUT #1, side_name$(i): NEXT i
-	FOR i = 1 TO 12: INPUT #1, month_name$(i): NEXT i
-	INPUT #1, turn_month, turn_year
-'               set end game conditions
-	FOR i = 1 TO 6: INPUT #1, victory_rule(i): NEXT i
-	victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
-	INPUT #1, army_count             ' number of Yankee armies
-FOR i = 1 TO army_count
-	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
-NEXT i
-	INPUT #1, army_count             ' number of Rebel armies
-FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + army_count
-	INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
-	city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
-NEXT i
-FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i): NEXT i
-	INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
-	INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
-	FOR k = SIDE_UNION TO SIDE_REBEL: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
-	INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
+    DIM k AS INTEGER: DIM i AS INTEGER: DIM army_count AS INTEGER
+    OPEN "I", 1, SCNDIR + "cwslead.dat"
+    FOR i = 1 TO 40: INPUT #1, leader_name$(i), leader_rating(i): NEXT i
+    CLOSE #1
+    OPEN "I", 1, SCNDIR + "cws.ini"
+    FOR i = 0 TO 2: INPUT #1, side_name$(i): NEXT i
+    FOR i = 1 TO 12: INPUT #1, month_name$(i): NEXT i
+    INPUT #1, turn_month, turn_year
+    '               set end game conditions
+    FOR i = 1 TO 6: INPUT #1, victory_rule(i): NEXT i
+    victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
+    INPUT #1, army_count             ' number of Yankee armies
+    FOR i = 1 TO army_count
+        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
+    NEXT i
+    INPUT #1, army_count             ' number of Rebel armies
+    FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + army_count
+        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
+        city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
+    NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i): NEXT i
+    INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
+    INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
+    FOR k = SIDE_UNION TO SIDE_REBEL: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
+    INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
 
-FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
-	CLOSE #1
-	CALL config_read(current_side)
+    FOR i = 1 TO 8: INPUT #1, flag_star_x(i), flag_star_y(i): NEXT i  ' star locations on flag
+    CLOSE #1
+    CALL config_read(current_side)
 END SUB
 
 ' Reads the map's cities and roads from cities.grd. Adds each city to its owner's count,
 ' victory points and cash.
 SUB load_cities
-DIM i AS INTEGER: DIM j AS INTEGER: DIM unused AS INTEGER: DIM owner AS INTEGER
-city_name$(0) = "NONE"
-OPEN "I", 1, SCNDIR + "cities.grd"
-total_income = union_income_bonus + 200
-FOR i = 1 TO MAX_CITIES: INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
-city_first_owner(i) = city_owner(i)
-CALL city_update_occupier(i)
-FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
-IF city_owner(i) > 0 THEN owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_victory_points(owner) = side_victory_points(owner) + city_value(i)
-IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
-total_income = total_income + city_value(i)
-NEXT i
-CLOSE #1
+    DIM i AS INTEGER: DIM j AS INTEGER: DIM unused AS INTEGER: DIM owner AS INTEGER
+    city_name$(0) = "NONE"
+    OPEN "I", 1, SCNDIR + "cities.grd"
+    total_income = union_income_bonus + 200
+    FOR i = 1 TO MAX_CITIES: INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
+        city_first_owner(i) = city_owner(i)
+        CALL city_update_occupier(i)
+        FOR j = 1 TO MAX_ROADS: INPUT #1, city_road(i, j): NEXT j: INPUT #1, city_port_type(i), city_fort(i)
+        IF city_owner(i) > 0 THEN owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_victory_points(owner) = side_victory_points(owner) + city_value(i)
+        IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
+        total_income = total_income + city_value(i)
+    NEXT i
+    CLOSE #1
 END SUB
 
 ' Reads the saved game cws<slot>.sav: the date, the armies, the cities, the sides, and the side
 ' that plays. A leader who commands an army leaves the free leaders. Then it reads the
 ' settings of cws.cfg. The menu of saved games is menu_load_game (ui/files.bm).
 SUB load_game (slot)
-DIM last_army AS INTEGER
-DIM k AS INTEGER: DIM side AS INTEGER: DIM first_army AS INTEGER: DIM config_side AS INTEGER
-DIM i AS INTEGER: DIM saved_side AS INTEGER: DIM unused AS INTEGER
-	OPEN "I", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
-	INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
-	FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
-	IF army_city(i) > 0 THEN
-		IF army_name$(i) = leader_name$(i) THEN
-			leader_name$(i) = ""
-		ELSE
-			side = army_side(i)
-			first_army = side_first_army(side): last_army = side_last_army(side)
-			FOR k = first_army TO last_army
-			IF army_name$(i) = leader_name$(k) THEN leader_name$(k) = "": EXIT FOR
-			NEXT k
-		END IF
-	END IF
-	NEXT i
-	FOR i = 1 TO MAX_CITIES: INPUT #1, city_army(i), city_owner(i), city_fort(i): NEXT i
-	FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
-	INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
-	fleet_size(i) = LEN(fleet_ships$(i))
-	NEXT i
-       
-	CLOSE #1
-	CALL config_read(config_side)
-	current_side = saved_side
+    DIM last_army AS INTEGER
+    DIM k AS INTEGER: DIM side AS INTEGER: DIM first_army AS INTEGER: DIM config_side AS INTEGER
+    DIM i AS INTEGER: DIM saved_side AS INTEGER: DIM unused AS INTEGER
+    OPEN "I", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
+    INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
+    FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+        IF army_city(i) > 0 THEN
+            IF army_name$(i) = leader_name$(i) THEN
+                leader_name$(i) = ""
+            ELSE
+                side = army_side(i)
+                first_army = side_first_army(side): last_army = side_last_army(side)
+                FOR k = first_army TO last_army
+                    IF army_name$(i) = leader_name$(k) THEN leader_name$(k) = "": EXIT FOR
+                NEXT k
+            END IF
+        END IF
+    NEXT i
+    FOR i = 1 TO MAX_CITIES: INPUT #1, city_army(i), city_owner(i), city_fort(i): NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+        INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
+        fleet_size(i) = LEN(fleet_ships$(i))
+    NEXT i
+
+    CLOSE #1
+    CALL config_read(config_side)
+    current_side = saved_side
 END SUB
 
 ' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The menu of the slots is
 ' menu_save_game (ui/files.bm).
 SUB save_game (slot)
-DIM i AS INTEGER: DIM config_side AS INTEGER
-	OPEN "O", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
-	WRITE #1, turn_month, turn_year, union_income_bonus, current_side
-	FOR i = 1 TO MAX_ARMIES: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
-	NEXT i
-	FOR i = 1 TO MAX_CITIES: WRITE #1, city_army(i), city_owner(i), city_fort(i): NEXT i
-	FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
-	WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
-	NEXT i
-	CLOSE #1
-       
-	config_side = current_side
-	IF config_side < 1 OR config_side > 2 THEN config_side = 1
-	CALL config_write(config_side)
+    DIM i AS INTEGER: DIM config_side AS INTEGER
+    OPEN "O", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
+    WRITE #1, turn_month, turn_year, union_income_bonus, current_side
+    FOR i = 1 TO MAX_ARMIES: WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+    NEXT i
+    FOR i = 1 TO MAX_CITIES: WRITE #1, city_army(i), city_owner(i), city_fort(i): NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL: WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+        WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
+    NEXT i
+    CLOSE #1
+
+    config_side = current_side
+    IF config_side < 1 OR config_side > 2 THEN config_side = 1
+    CALL config_write(config_side)
 END SUB
 
 ' Notes that no saved game is on the disk, so that the Files menu shows Load as "-". Only a
 ' new game sets saves_exist back (TODO.md).
 SUB saved_games_check
-	IF LEN(DIR$("*.sav")) = 0 THEN saves_exist = 0
+    IF LEN(DIR$("*.sav")) = 0 THEN saves_exist = 0
 END SUB
 
 SUB config_read (side)
-	OPEN "I", 1, "cws.cfg"
-	INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-	CLOSE #1
+    OPEN "I", 1, "cws.cfg"
+    INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+    CLOSE #1
 END SUB
 
 SUB config_write (side)
-	OPEN "O", 1, "cws.cfg"
-	WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-	CLOSE #1
+    OPEN "O", 1, "cws.cfg"
+    WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+    CLOSE #1
 END SUB
 
 SUB save_battle_summary
-DIM k AS INTEGER: DIM a$
-IF opt_history > 0 THEN
-	OPEN "O", #1, "battsumm"
-	PRINT #1, " SIDE      BATTLES WON       LOSSES"
-	FOR k = SIDE_UNION TO SIDE_REBEL
-	a$ = " ": IF victory_reason = k THEN a$ = "*"
-	PRINT #1, a$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
-	NEXT k
-	CLOSE #1
-END IF
+    DIM k AS INTEGER: DIM a$
+    IF opt_history > 0 THEN
+        OPEN "O", #1, "battsumm"
+        PRINT #1, " SIDE      BATTLES WON       LOSSES"
+        FOR k = SIDE_UNION TO SIDE_REBEL
+            a$ = " ": IF victory_reason = k THEN a$ = "*"
+            PRINT #1, a$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
+        NEXT k
+        CLOSE #1
+    END IF
 END SUB
 
 ' Reads the Hall of Fame: five names and scores for each side.
 SUB hall_of_fame_load (names$(), scores())
-DIM side AS INTEGER: DIM i AS INTEGER
-	OPEN "I", 1, "hiscore.cws"
-	FOR side = SIDE_UNION TO SIDE_REBEL: FOR i = 1 TO 5
-	INPUT #1, names$(side, i), scores(side, i)
-	NEXT i: NEXT side: CLOSE #1
+    DIM side AS INTEGER: DIM i AS INTEGER
+    OPEN "I", 1, "hiscore.cws"
+    FOR side = SIDE_UNION TO SIDE_REBEL: FOR i = 1 TO 5
+            INPUT #1, names$(side, i), scores(side, i)
+    NEXT i: NEXT side: CLOSE #1
 END SUB
 
 SUB hall_of_fame_save (names$(), scores())
-DIM side AS INTEGER: DIM i AS INTEGER
-	OPEN "O", 1, "hiscore.cws"
-	FOR side = SIDE_UNION TO SIDE_REBEL: FOR i = 1 TO 5
-	WRITE #1, names$(side, i), scores(side, i)
-	NEXT i: NEXT side: CLOSE #1
+    DIM side AS INTEGER: DIM i AS INTEGER
+    OPEN "O", 1, "hiscore.cws"
+    FOR side = SIDE_UNION TO SIDE_REBEL: FOR i = 1 TO 5
+            WRITE #1, names$(side, i), scores(side, i)
+    NEXT i: NEXT side: CLOSE #1
 END SUB
 
 ' Starts the history file cws.his with the date. The history of the game before is kept as
 ' oldhist.ory.
 SUB history_start
-	IF LEN(DIR$("cws.his")) > 0 THEN CALL script_shell("copy cws.his oldhist.ory")
-	OPEN "O", 2, "cws.his"
-	PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
-	CLOSE #2
+    IF LEN(DIR$("cws.his")) > 0 THEN CALL script_shell("copy cws.his oldhist.ory")
+    OPEN "O", 2, "cws.his"
+    PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
+    CLOSE #2
 END SUB

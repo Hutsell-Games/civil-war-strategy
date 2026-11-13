@@ -3,109 +3,109 @@
 
 ' The men in the field: union_men the Union's and rebel_men the Rebels', in hundreds.
 SUB victory_forces (union_troops, rebel_troops)
-DIM j AS INTEGER
-	union_troops = 0: FOR j = 1 TO ARMIES_PER_SIDE: IF army_city(j) > 0 THEN union_troops = union_troops + army_size(j)
-	NEXT j
-	rebel_troops = 0: FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: IF army_city(j) > 0 THEN rebel_troops = rebel_troops + army_size(j)
-	NEXT j
+    DIM j AS INTEGER
+    union_troops = 0: FOR j = 1 TO ARMIES_PER_SIDE: IF army_city(j) > 0 THEN union_troops = union_troops + army_size(j)
+    NEXT j
+    rebel_troops = 0: FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES: IF army_city(j) > 0 THEN rebel_troops = rebel_troops + army_size(j)
+    NEXT j
 END SUB
 
 ' Turns a victory rule on or off (the Utility menu's End Cond). A rule that is off keeps
 ' its number as a negative.
 SUB victory_toggle_rule (rule)
-	victory_rule(rule) = -victory_rule(rule)
+    victory_rule(rule) = -victory_rule(rule)
 END SUB
 
 ' 1 when the time limit's year has come and its month is still ahead.
 FUNCTION victory_time_near
-victory_time_near = 0
-	IF victory_rule(VICTORY_YEAR) > 0 AND turn_year >= victory_rule(VICTORY_YEAR) AND turn_month < victory_rule(VICTORY_MONTH) THEN victory_time_near = 1
+    victory_time_near = 0
+    IF victory_rule(VICTORY_YEAR) > 0 AND turn_year >= victory_rule(VICTORY_YEAR) AND turn_month < victory_rule(VICTORY_MONTH) THEN victory_time_near = 1
 END FUNCTION
 
 ' The victory rule that the side has met, in rule: 2 time, 3 cities, 4 income, 5 the capital,
 ' 6 the strength ratio, 7 the enemy wiped out, which also gives 300 victory points. rule is 0
 ' when it has met none. union_men and rebel_men are the sides' men (victory_forces).
 SUB victory_rule_met (side, union_troops, rebel_troops, rule)
-rule = 0
-	IF (side = 1 AND rebel_troops = 0) OR (side = 2 AND union_troops = 0) THEN rule = 7: side_victory_points(side) = side_victory_points(side) + 300: EXIT SUB
+    rule = 0
+    IF (side = 1 AND rebel_troops = 0) OR (side = 2 AND union_troops = 0) THEN rule = 7: side_victory_points(side) = side_victory_points(side) + 300: EXIT SUB
 
-	IF turn_year >= victory_rule(VICTORY_YEAR) AND turn_month >= victory_rule(VICTORY_MONTH) AND victory_rule(VICTORY_YEAR) > 0 THEN rule = 2: EXIT SUB
-	IF side_city_count(side) >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN rule = 3: EXIT SUB
-	IF side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN rule = 4: EXIT SUB
-	IF victory_rule(VICTORY_CAPITAL) > 0 AND side_capital(other_side(side)) = 0 AND side_capital(side) > 0 THEN rule = 5: EXIT SUB
+    IF turn_year >= victory_rule(VICTORY_YEAR) AND turn_month >= victory_rule(VICTORY_MONTH) AND victory_rule(VICTORY_YEAR) > 0 THEN rule = 2: EXIT SUB
+    IF side_city_count(side) >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN rule = 3: EXIT SUB
+    IF side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN rule = 4: EXIT SUB
+    IF victory_rule(VICTORY_CAPITAL) > 0 AND side_capital(other_side(side)) = 0 AND side_capital(side) > 0 THEN rule = 5: EXIT SUB
 
-	IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
-		IF side = 1 THEN
-			IF rebel_troops = 0 THEN rule = 7: EXIT SUB
-			IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: EXIT SUB
-		END IF
-		IF side = 2 THEN
-			IF union_troops = 0 THEN rule = 7: EXIT SUB
-			IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: EXIT SUB
-		END IF
-	END IF
+    IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
+        IF side = 1 THEN
+            IF rebel_troops = 0 THEN rule = 7: EXIT SUB
+            IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: EXIT SUB
+        END IF
+        IF side = 2 THEN
+            IF union_troops = 0 THEN rule = 7: EXIT SUB
+            IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN rule = 6: EXIT SUB
+        END IF
+    END IF
 END SUB
 
 ' 1 when the side holds nine tenths of the cities the cities rule asks for.
 FUNCTION victory_near_cities (side)
-victory_near_cities = 0
-IF victory_rule(VICTORY_CITIES) > 0 AND side_city_count(side) >= .9 * victory_rule(VICTORY_CITIES) THEN victory_near_cities = 1
+    victory_near_cities = 0
+    IF victory_rule(VICTORY_CITIES) > 0 AND side_city_count(side) >= .9 * victory_rule(VICTORY_CITIES) THEN victory_near_cities = 1
 END FUNCTION
 
 ' 1 when the side has nine tenths of the share of the income the income rule asks for.
 FUNCTION victory_near_income (side)
-victory_near_income = 0
-IF victory_rule(VICTORY_INCOME) > 0 AND side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .009 * victory_rule(VICTORY_INCOME) THEN victory_near_income = 1
+    victory_near_income = 0
+    IF victory_rule(VICTORY_INCOME) > 0 AND side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .009 * victory_rule(VICTORY_INCOME) THEN victory_near_income = 1
 END FUNCTION
 
 ' 1 when the side has nine tenths of the strength ratio the ratio rule asks for. union_men and
 ' rebel_men are the sides' men.
 FUNCTION victory_near_force (side, union_troops, rebel_troops)
-victory_near_force = 0
-IF victory_rule(VICTORY_FORCE_RATIO) > 0 AND union_troops > 0 AND rebel_troops > 0 THEN
-	IF (side = SIDE_UNION AND union_troops / rebel_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) OR (side = SIDE_REBEL AND rebel_troops / union_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) THEN victory_near_force = 1
-END IF
+    victory_near_force = 0
+    IF victory_rule(VICTORY_FORCE_RATIO) > 0 AND union_troops > 0 AND rebel_troops > 0 THEN
+        IF (side = SIDE_UNION AND union_troops / rebel_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) OR (side = SIDE_REBEL AND rebel_troops / union_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) THEN victory_near_force = 1
+    END IF
 END FUNCTION
 
 ' The player plays on after the victory rule in rule was met: the rule asks for one more, and
 ' the capital rule (5) is turned off.
 SUB victory_play_on (rule)
-	victory_rule(rule) = victory_rule(rule) + 1
-	IF rule = 5 THEN victory_rule(rule) = 0
+    victory_rule(rule) = victory_rule(rule) + 1
+    IF rule = 5 THEN victory_rule(rule) = 0
 END SUB
 
 ' The game ends with the side's victory by the rule in rule: 100 more victory points when the enemy was
 ' wiped out (7), the side marked for the battle summary, and the game over.
 SUB victory_won (side, rule)
-IF rule = 7 THEN side_victory_points(side) = side_victory_points(side) + 100
-victory_reason = side
-game_over = 1
+    IF rule = 7 THEN side_victory_points(side) = side_victory_points(side) + 100
+    victory_reason = side
+    game_over = 1
 END SUB
 
 ' A technical victory when the time ran out: both sides keep seven tenths of their points.
 SUB victory_technical_points
-DIM k AS INTEGER
-FOR k = SIDE_UNION TO SIDE_REBEL: side_victory_points(k) = .7 * side_victory_points(k): NEXT k
+    DIM k AS INTEGER
+    FOR k = SIDE_UNION TO SIDE_REBEL: side_victory_points(k) = .7 * side_victory_points(k): NEXT k
 END SUB
 
 ' The place in the side's Hall of Fame that its score earns: the first whose score it reaches, or
 ' 0 when it reaches none.
 FUNCTION hall_of_fame_place (side, hall_score())
-DIM i AS INTEGER
-hall_of_fame_place = 0
-FOR i = 1 TO 5
-IF side_victory_points(side) >= hall_score(side, i) THEN hall_of_fame_place = i: EXIT FUNCTION
-NEXT i
+    DIM i AS INTEGER
+    hall_of_fame_place = 0
+    FOR i = 1 TO 5
+        IF side_victory_points(side) >= hall_score(side, i) THEN hall_of_fame_place = i: EXIT FUNCTION
+    NEXT i
 END FUNCTION
 
 ' Puts commander name$ in the side's Hall of Fame at place i, with the side's score. The entries
 ' below move down one, and the last drops out.
 SUB hall_of_fame_insert (side, place, name$, hall_name$(), hall_score())
-DIM j AS INTEGER
-	FOR j = 5 TO place + 1 STEP -1
-	hall_score(side, j) = hall_score(side, j - 1)
-	hall_name$(side, j) = hall_name$(side, j - 1)
-	NEXT j
-	hall_name$(side, place) = name$
-	hall_score(side, place) = side_victory_points(side)
+    DIM j AS INTEGER
+    FOR j = 5 TO place + 1 STEP -1
+        hall_score(side, j) = hall_score(side, j - 1)
+        hall_name$(side, j) = hall_name$(side, j - 1)
+    NEXT j
+    hall_name$(side, place) = name$
+    hall_score(side, place) = side_victory_points(side)
 END SUB

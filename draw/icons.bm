@@ -1,124 +1,124 @@
 SUB animate_army (army, picture_taken)
-DIM y AS INTEGER: DIM step_y AS INTEGER
-DIM from_city AS INTEGER: DIM to_city AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM step_x AS INTEGER
-from_city = army_city(army): to_city = army_order(army): army_city(army) = 0
-x = city_x(from_city) - 12
-y = city_y(from_city) - 11
-step_x = .5 * (city_x(to_city) + city_x(from_city))
-step_y = .5 * (city_y(to_city) + city_y(from_city))
+    DIM y AS INTEGER: DIM step_y AS INTEGER
+    DIM from_city AS INTEGER: DIM to_city AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM step_x AS INTEGER
+    from_city = army_city(army): to_city = army_order(army): army_city(army) = 0
+    x = city_x(from_city) - 12
+    y = city_y(from_city) - 11
+    step_x = .5 * (city_x(to_city) + city_x(from_city))
+    step_y = .5 * (city_y(to_city) + city_y(from_city))
 
-CALL city_update_occupier(from_city): IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
-       
-IF picture_taken <= 0 THEN
-	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
-	IF city_army(from_city) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-END IF
+    CALL city_update_occupier(from_city): IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
 
-	FOR i = 2 TO 8
-	step_x = .1 * (i * city_x(to_city) + (10 - i) * city_x(from_city))
-	step_y = .1 * (i * city_y(to_city) + (10 - i) * city_y(from_city))
-	GET (step_x - 10, step_y - 10)-(step_x + 9, step_y + 9), saved_under_marker
-	PUT (step_x - 10, step_y - 10), saved_under_army, PSET
-	IF opt_pause! > 1 THEN CALL wait_seconds(.1) ELSE CALL wait_seconds(.02)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 200, .1: SOUND 50, .1
-	PUT (step_x - 10, step_y - 10), saved_under_marker, PSET
-	NEXT i
-	army_city(army) = from_city
+    IF picture_taken <= 0 THEN
+        GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
+        IF city_army(from_city) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+    END IF
+
+    FOR i = 2 TO 8
+        step_x = .1 * (i * city_x(to_city) + (10 - i) * city_x(from_city))
+        step_y = .1 * (i * city_y(to_city) + (10 - i) * city_y(from_city))
+        GET (step_x - 10, step_y - 10)-(step_x + 9, step_y + 9), saved_under_marker
+        PUT (step_x - 10, step_y - 10), saved_under_army, PSET
+        IF opt_pause! > 1 THEN CALL wait_seconds(.1) ELSE CALL wait_seconds(.02)
+        IF opt_sound >= SOUND_EFFECTS THEN SOUND 200, .1: SOUND 50, .1
+        PUT (step_x - 10, step_y - 10), saved_under_marker, PSET
+    NEXT i
+    army_city(army) = from_city
 END SUB
 
 SUB animate_city (city)
-DIM dot_color AS INTEGER
-FOR dot_color = 1 TO 15 STEP 2
-CALL draw_city_dot(city, dot_color)
-CALL wait_seconds(.1)
-NEXT dot_color
-dot_color = 9: IF city_owner(city) = SIDE_REBEL THEN dot_color = 7
-IF city_owner(city) = SIDE_NONE THEN dot_color = 12
-CALL draw_city_dot(city, dot_color)
+    DIM dot_color AS INTEGER
+    FOR dot_color = 1 TO 15 STEP 2
+        CALL draw_city_dot(city, dot_color)
+        CALL wait_seconds(.1)
+    NEXT dot_color
+    dot_color = 9: IF city_owner(city) = SIDE_REBEL THEN dot_color = 7
+    IF city_owner(city) = SIDE_NONE THEN dot_color = 12
+    CALL draw_city_dot(city, dot_color)
 END SUB
 
 SUB draw_army_flag (army)
-DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
-side = army_side(army)
-x = city_x(army_city(army)) - 12
-y = city_y(army_city(army)) - 11
-CALL draw_flag_icon(x, y, side)
-IF army_supply(army) < 1 THEN
-	x = x - 3: y = y + 4
-	PSET (x, y), 13: DRAW "C11S8"
-	DRAW map_font$(19)
-	DRAW "S4"
-END IF
+    DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+    side = army_side(army)
+    x = city_x(army_city(army)) - 12
+    y = city_y(army_city(army)) - 11
+    CALL draw_flag_icon(x, y, side)
+    IF army_supply(army) < 1 THEN
+        x = x - 3: y = y + 4
+        PSET (x, y), 13: DRAW "C11S8"
+        DRAW map_font$(19)
+        DRAW "S4"
+    END IF
 END SUB
 
 SUB draw_train (side, show)
-DIM city AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
-	IF train_city(side) = 0 THEN EXIT SUB
-	city = train_city(side)
-	x = city_x(city) - 12: y = city_y(city) - 11
-SELECT CASE show
-	CASE IS > 0
-	LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
-	PSET (x - 6, y - 2), 3: side_color = 9: IF side = SIDE_REBEL THEN side_color = 15
-	DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
-	x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
-	CASE ELSE
-	LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-END SELECT
+    DIM city AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
+    IF train_city(side) = 0 THEN EXIT SUB
+    city = train_city(side)
+    x = city_x(city) - 12: y = city_y(city) - 11
+    SELECT CASE show
+        CASE IS > 0
+            LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
+            PSET (x - 6, y - 2), 3: side_color = 9: IF side = SIDE_REBEL THEN side_color = 15
+            DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
+            x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
+        CASE ELSE
+            LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+    END SELECT
 END SUB
 
 SUB draw_flag_icon (x, y, side)
-LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
-SELECT CASE side
-	CASE 1
-	LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
-	LINE (x - 7, y - 5)-(x - 1, y), 1, BF
-	LINE (x, y - 2)-(x + 7, y - 1), 7, B
-	LINE (x - 7, y + 2)-(x + 7, y + 3), 7, B
-	LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
-	CASE 2
-	LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
-	LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
-	LINE (x - 7, y - 4)-(x + 6, y + 5), 9
-	LINE (x - 7, y + 4)-(x + 6, y - 5), 9
-	LINE (x - 7, y - 5)-(x + 7, y + 5), 9
-	LINE (x - 7, y + 5)-(x + 7, y - 5), 9
-	CASE ELSE
-END SELECT
+    LINE (x - 5, y - 3)-(x + 10, y + 8), 0, BF
+    SELECT CASE side
+        CASE 1
+            LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
+            LINE (x - 7, y - 5)-(x - 1, y), 1, BF
+            LINE (x, y - 2)-(x + 7, y - 1), 7, B
+            LINE (x - 7, y + 2)-(x + 7, y + 3), 7, B
+            LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
+        CASE 2
+            LINE (x - 7, y - 5)-(x + 7, y + 5), 4, BF
+            LINE (x - 8, y - 6)-(x + 8, y + 6), 0, B
+            LINE (x - 7, y - 4)-(x + 6, y + 5), 9
+            LINE (x - 7, y + 4)-(x + 6, y - 5), 9
+            LINE (x - 7, y - 5)-(x + 7, y + 5), 9
+            LINE (x - 7, y + 5)-(x + 7, y - 5), 9
+        CASE ELSE
+    END SELECT
 END SUB
 
 SUB draw_flag (side, x_offset, top_y)
-DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-x = 585 + x_offset: y = 200: IF x_offset = 0 THEN y = 180
-IF top_y <> 0 THEN y = top_y
-SELECT CASE side
-	CASE 1
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
-	FOR i = -13 TO 9 STEP 5
-	LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
-	NEXT i
-	LINE (x - 17, y - 15)-(x, y), 1, BF
-	IF x_offset = 0 THEN COLOR COLOR_LIGHT_BLUE: LOCATE 10, 70: PRINT "U N I O N"
-	FOR i = -16 TO -1 STEP 3
-		FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
-	NEXT i
-	CASE 2
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
-	LINE (x - 17, y - 13)-(x + 15, y + 7), 7
-	LINE (x - 15, y - 15)-(x + 17, y + 5), 7
+    DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
+    x = 585 + x_offset: y = 200: IF x_offset = 0 THEN y = 180
+    IF top_y <> 0 THEN y = top_y
+    SELECT CASE side
+        CASE 1
+            LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+            FOR i = -13 TO 9 STEP 5
+                LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
+            NEXT i
+            LINE (x - 17, y - 15)-(x, y), 1, BF
+            IF x_offset = 0 THEN COLOR COLOR_LIGHT_BLUE: LOCATE 10, 70: PRINT "U N I O N"
+            FOR i = -16 TO -1 STEP 3
+                FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
+            NEXT i
+        CASE 2
+            LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
+            LINE (x - 17, y - 13)-(x + 15, y + 7), 7
+            LINE (x - 15, y - 15)-(x + 17, y + 5), 7
 
-	LINE (x - 17, y + 7)-(x + 17, y - 15), 1
-	LINE (x - 17, y + 6)-(x + 16, y - 15), 1
-	LINE (x - 16, y + 7)-(x + 17, y - 14), 1
-	LINE (x - 17, y + 5)-(x + 15, y - 15), 7
-	LINE (x - 15, y + 7)-(x + 17, y - 13), 7
+            LINE (x - 17, y + 7)-(x + 17, y - 15), 1
+            LINE (x - 17, y + 6)-(x + 16, y - 15), 1
+            LINE (x - 16, y + 7)-(x + 17, y - 14), 1
+            LINE (x - 17, y + 5)-(x + 15, y - 15), 7
+            LINE (x - 15, y + 7)-(x + 17, y - 13), 7
 
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 1
-	LINE (x - 17, y - 14)-(x + 16, y + 7), 1
-	LINE (x - 16, y - 15)-(x + 17, y + 6), 1
-	LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
+            LINE (x - 17, y - 15)-(x + 17, y + 7), 1
+            LINE (x - 17, y - 14)-(x + 16, y + 7), 1
+            LINE (x - 16, y - 15)-(x + 17, y + 6), 1
+            LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
 
-	IF x_offset = 0 THEN COLOR COLOR_RED: LOCATE 10, 70: PRINT "R E B E L"
-	CASE ELSE
-END SELECT
+            IF x_offset = 0 THEN COLOR COLOR_RED: LOCATE 10, 70: PRINT "R E B E L"
+        CASE ELSE
+    END SELECT
 END SUB

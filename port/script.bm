@@ -19,18 +19,18 @@
 
 ' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER.
 SUB script_start
-DIM seed$
-seed$ = ENVIRON$("CWS_SEED")
-IF seed$ = "" THEN RANDOMIZE TIMER: EXIT SUB
-scripted = 1
-RANDOMIZE VAL(seed$)
-script_dice$ = ENVIRON$("CWS_DICE")
+    DIM seed$
+    seed$ = ENVIRON$("CWS_SEED")
+    IF seed$ = "" THEN RANDOMIZE TIMER: EXIT SUB
+    scripted = 1
+    RANDOMIZE VAL(seed$)
+    script_dice$ = ENVIRON$("CWS_DICE")
 END SUB
 
 ' Makes PLAY and SOUND silent when the program is scripted. Called once, before the title
 ' tune, which plays before script_start seeds the random numbers.
 SUB script_mute
-IF ENVIRON$("CWS_SEED") <> "" THEN PLAY "V0"
+    IF ENVIRON$("CWS_SEED") <> "" THEN PLAY "V0"
 END SUB
 
 ' Forced dice for special_events. CWS_DICE holds groups of numbers, as in
@@ -41,30 +41,30 @@ END SUB
 ' is a real RND. Without CWS_DICE every draw is RND, in the same order as
 ' before, so a normal game and a script without dice play as they did.
 SUB script_dice_next
-DIM cut AS INTEGER
-script_dice_now$ = ""
-IF script_dice$ = "" THEN EXIT SUB
-cut = INSTR(script_dice$, ";")
-IF cut = 0 THEN script_dice_now$ = script_dice$: script_dice$ = "": EXIT SUB
-script_dice_now$ = LEFT$(script_dice$, cut - 1): script_dice$ = MID$(script_dice$, cut + 1)
+    DIM cut AS INTEGER
+    script_dice_now$ = ""
+    IF script_dice$ = "" THEN EXIT SUB
+    cut = INSTR(script_dice$, ";")
+    IF cut = 0 THEN script_dice_now$ = script_dice$: script_dice$ = "": EXIT SUB
+    script_dice_now$ = LEFT$(script_dice$, cut - 1): script_dice$ = MID$(script_dice$, cut + 1)
 END SUB
 
 FUNCTION script_rnd!
-DIM cut AS INTEGER: DIM item$
-IF script_dice_now$ = "" THEN script_rnd! = RND: EXIT FUNCTION
-cut = INSTR(script_dice_now$, ",")
-IF cut = 0 THEN
-	item$ = script_dice_now$: script_dice_now$ = ""
-ELSE
-	item$ = LEFT$(script_dice_now$, cut - 1): script_dice_now$ = MID$(script_dice_now$, cut + 1)
-END IF
-IF item$ = "r" THEN script_rnd! = RND ELSE script_rnd! = VAL(item$)
+    DIM cut AS INTEGER: DIM item$
+    IF script_dice_now$ = "" THEN script_rnd! = RND: EXIT FUNCTION
+    cut = INSTR(script_dice_now$, ",")
+    IF cut = 0 THEN
+        item$ = script_dice_now$: script_dice_now$ = ""
+    ELSE
+        item$ = LEFT$(script_dice_now$, cut - 1): script_dice_now$ = MID$(script_dice_now$, cut + 1)
+    END IF
+    IF item$ = "r" THEN script_rnd! = RND ELSE script_rnd! = VAL(item$)
 END FUNCTION
 
 ' The date the history file starts with: today, or a fixed one when the
 ' program is scripted, so that the file is the same in every run.
 FUNCTION script_date$
-IF scripted THEN script_date$ = "01-01-2000" ELSE script_date$ = DATE$
+    IF scripted THEN script_date$ = "01-01-2000" ELSE script_date$ = DATE$
 END FUNCTION
 
 ' wait_seconds's pause when the program is scripted. Gives 0 when it is not, and
@@ -72,12 +72,12 @@ END FUNCTION
 ' says "press a key" (the map's links, "There are still defenders"), so a
 ' script waits there for a key; a shorter one returns at once.
 FUNCTION script_tick% (seconds!)
-script_tick% = 0
-IF scripted = 0 THEN EXIT FUNCTION
-script_tick% = -1
-IF seconds! < 99 THEN EXIT FUNCTION
-CALL script_mark_key_wait(1, "L")
-DO WHILE INKEY$ = "": LOOP
+    script_tick% = 0
+    IF scripted = 0 THEN EXIT FUNCTION
+    script_tick% = -1
+    IF seconds! < 99 THEN EXIT FUNCTION
+    CALL script_mark_key_wait(1, "L")
+    DO WHILE INKEY$ = "": LOOP
 END FUNCTION
 
 ' SHELL cmd$, or under a script the same work done in BASIC. The game runs
@@ -86,18 +86,18 @@ END FUNCTION
 ' program runs on a hidden one, so the scripts must not run it. Copy
 ' replaces <to>, as copy does.
 SUB script_shell (cmd$)
-DIM space_at AS INTEGER: DIM contents$
-DIM trimmed$: DIM args$: DIM verb$: DIM from$: DIM file_num AS INTEGER: DIM into$
-IF scripted = 0 THEN SHELL cmd$: EXIT SUB
-trimmed$ = LTRIM$(RTRIM$(cmd$))
-space_at = INSTR(trimmed$, " "): verb$ = LCASE$(LEFT$(trimmed$, space_at - 1)): args$ = LTRIM$(MID$(trimmed$, space_at + 1))
-space_at = INSTR(args$, " "): from$ = LEFT$(args$, space_at - 1): into$ = LTRIM$(MID$(args$, space_at + 1))
-IF verb$ <> "copy" THEN SHELL cmd$: EXIT SUB
-IF NOT _FILEEXISTS(from$) THEN EXIT SUB
-file_num = FREEFILE: OPEN from$ FOR BINARY AS #file_num
-contents$ = SPACE$(LOF(file_num)): GET #file_num, , contents$: CLOSE #file_num
-IF _FILEEXISTS(into$) THEN KILL into$
-file_num = FREEFILE: OPEN into$ FOR BINARY AS #file_num: PUT #file_num, , contents$: CLOSE #file_num
+    DIM space_at AS INTEGER: DIM contents$
+    DIM trimmed$: DIM args$: DIM verb$: DIM from$: DIM file_num AS INTEGER: DIM into$
+    IF scripted = 0 THEN SHELL cmd$: EXIT SUB
+    trimmed$ = LTRIM$(RTRIM$(cmd$))
+    space_at = INSTR(trimmed$, " "): verb$ = LCASE$(LEFT$(trimmed$, space_at - 1)): args$ = LTRIM$(MID$(trimmed$, space_at + 1))
+    space_at = INSTR(args$, " "): from$ = LEFT$(args$, space_at - 1): into$ = LTRIM$(MID$(args$, space_at + 1))
+    IF verb$ <> "copy" THEN SHELL cmd$: EXIT SUB
+    IF NOT _FILEEXISTS(from$) THEN EXIT SUB
+    file_num = FREEFILE: OPEN from$ FOR BINARY AS #file_num
+    contents$ = SPACE$(LOF(file_num)): GET #file_num, , contents$: CLOSE #file_num
+    IF _FILEEXISTS(into$) THEN KILL into$
+    file_num = FREEFILE: OPEN into$ FOR BINARY AS #file_num: PUT #file_num, , contents$: CLOSE #file_num
 END SUB
 
 ' Says that the program is about to wait for a key. place names the kind of
@@ -120,13 +120,13 @@ END SUB
 '   4  a line of text: the name of the commander for the Hall of Fame
 ' Byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits.
 SUB script_mark_key_wait (place, letter$)
-DIM code AS INTEGER
-IF scripted = 0 THEN EXIT SUB
-code = 0
-IF letter$ <> "" THEN code = ASC(UCASE$(letter$))
-DEF SEG = 0
-POKE &H4F1, place
-POKE &H4F2, code
-POKE &H4F0, (PEEK(&H4F0) + 1) AND 255
-DEF SEG
+    DIM code AS INTEGER
+    IF scripted = 0 THEN EXIT SUB
+    code = 0
+    IF letter$ <> "" THEN code = ASC(UCASE$(letter$))
+    DEF SEG = 0
+    POKE &H4F1, place
+    POKE &H4F2, code
+    POKE &H4F0, (PEEK(&H4F0) + 1) AND 255
+    DEF SEG
 END SUB

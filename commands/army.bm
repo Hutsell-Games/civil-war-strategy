@@ -6,92 +6,92 @@
 ' is the army that will command, and joined the number that joined. The caller stops when
 ' joined is 0; otherwise it calls army_combine_done and army_combine_redraw.
 SUB army_combine_gather (side, city, best, joined)
-DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM j AS INTEGER: DIM status AS INTEGER
-		first_army = side_first_army(side): last_army = side_last_army(side)
-		CALL clear_bottom_line: PRINT "Combining "; side_name$(side); " armies in "; city_name$(city); :  CALL wait_seconds(opt_pause!)
+    DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM j AS INTEGER: DIM status AS INTEGER
+    first_army = side_first_army(side): last_army = side_last_army(side)
+    CALL clear_bottom_line: PRINT "Combining "; side_name$(side); " armies in "; city_name$(city); :  CALL wait_seconds(opt_pause!)
 
-		CALL army_combine_start(city)
-'...........................................................................
-		best = 0: joined = 0
-		FOR j = first_army TO last_army
-		CALL army_combine_add(j, city, best, status)
-		IF status = COMBINE_TOO_LARGE THEN CALL clear_bottom_line: PRINT "Cannot combine "; army_name$(j); "... TOO LARGE"; : CALL wait_seconds(opt_pause!)
-		IF status = COMBINE_JOINED THEN
-			joined = joined + 1
-			CALL clear_bottom_line: PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces"; : CALL wait_seconds(opt_pause!)
-			CALL army_combine_absorb(j)
-		END IF
-		NEXT j
+    CALL army_combine_start(city)
+    '...........................................................................
+    best = 0: joined = 0
+    FOR j = first_army TO last_army
+        CALL army_combine_add(j, city, best, status)
+        IF status = COMBINE_TOO_LARGE THEN CALL clear_bottom_line: PRINT "Cannot combine "; army_name$(j); "... TOO LARGE"; : CALL wait_seconds(opt_pause!)
+        IF status = COMBINE_JOINED THEN
+            joined = joined + 1
+            CALL clear_bottom_line: PRINT army_name$(j); " is combining his "; : CALL print_army_size(j): PRINT " forces"; : CALL wait_seconds(opt_pause!)
+            CALL army_combine_absorb(j)
+        END IF
+    NEXT j
 
-		CALL clear_bottom_line
+    CALL clear_bottom_line
 END SUB
 
 ' Join, second part: the armies that joined become one under the best leader.
 SUB army_combine_done (side, city, best, joined)
-		CALL army_combine_finish(city, best, joined)
-		IF joined > 1 THEN
-		PRINT "New army "; best; " of "; : CALL print_army_size(best): PRINT " is commanded by "; army_name$(best);
-		ELSE
-		PRINT "Only 1 eligible army -- cannot combine at this time";
-		END IF
+    CALL army_combine_finish(city, best, joined)
+    IF joined > 1 THEN
+        PRINT "New army "; best; " of "; : CALL print_army_size(best): PRINT " is commanded by "; army_name$(best);
+    ELSE
+        PRINT "Only 1 eligible army -- cannot combine at this time";
+    END IF
 END SUB
 
 ' Join, third part: the map shows the city's one army.
 SUB army_combine_redraw (side, city, best)
-		IF opt_sound >= SOUND_EFFECTS THEN SOUND 4000, .7
+    IF opt_sound >= SOUND_EFFECTS THEN SOUND 4000, .7
 
-		CALL draw_cities
-		CALL draw_army_flag(best)
-		CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
-		CALL draw_stack_markers(side)
+    CALL draw_cities
+    CALL draw_army_flag(best)
+    CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
+    CALL draw_stack_markers(side)
 END SUB
 
 SUB army_new (side, army_slot, city)
-	CALL army_raise(side, army_slot, city)
-	COLOR COLOR_LIGHT_RED: CALL clear_bottom_line: PRINT "Placing NEW army "; army_slot; army_name$(army_slot); " in "; city_name$(city);
-	PRINT " Size = "; : CALL print_army_size(army_slot)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, .5
-	CALL draw_army_flag(army_slot)
-	CALL wait_seconds(opt_pause! - .5)
+    CALL army_raise(side, army_slot, city)
+    COLOR COLOR_LIGHT_RED: CALL clear_bottom_line: PRINT "Placing NEW army "; army_slot; army_name$(army_slot); " in "; city_name$(city);
+    PRINT " Size = "; : CALL print_army_size(army_slot)
+    IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, .5
+    CALL draw_army_flag(army_slot)
+    CALL wait_seconds(opt_pause! - .5)
 END SUB
 
 SUB army_get_commander (side, army_slot)
-	CALL army_pick_commander(side, army_slot)
-	IF army_slot = 0 THEN CALL clear_bottom_line: PRINT "No more "; side_name$(side); " commanders available"; : CALL wait_seconds(opt_pause!)
+    CALL army_pick_commander(side, army_slot)
+    IF army_slot = 0 THEN CALL clear_bottom_line: PRINT "No more "; side_name$(side); " commanders available"; : CALL wait_seconds(opt_pause!)
 END SUB
 
 SUB army_resupply (army)
-DIM result AS INTEGER
-		CALL army_buy_supply(army, result)
-		IF result = SUPPLY_CUT_OFF THEN EXIT SUB
-		IF result = SUPPLY_NO_CASH THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army); 
-		IF result = SUPPLY_BOUGHT THEN CALL clear_bottom_line: PRINT army_name$(army); " has received supplies "; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 4500, .5
-		CALL wait_seconds(opt_pause!)
+    DIM result AS INTEGER
+    CALL army_buy_supply(army, result)
+    IF result = SUPPLY_CUT_OFF THEN EXIT SUB
+    IF result = SUPPLY_NO_CASH THEN CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army); 
+    IF result = SUPPLY_BOUGHT THEN CALL clear_bottom_line: PRINT army_name$(army); " has received supplies "; : IF opt_sound >= SOUND_EFFECTS THEN SOUND 4500, .5
+    CALL wait_seconds(opt_pause!)
 END SUB
 
 ' Raises men in a city for 100: a new army under the next commander, or more men for the
 ' army already there. raised is 0 when a new army was needed and no commander is left.
 SUB army_recruit (side, city, raised)
-DIM army_slot AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM from_city AS INTEGER: DIM isolated AS INTEGER
-	raised = 1
-	army_slot = 0
-	CALL city_update_occupier(city)
-	IF city_army(city) <= 0 THEN
-		CALL army_get_commander((side), army_slot)
-       
-		IF army_slot = 0 THEN raised = 0: EXIT SUB
-		CALL army_place_new(army_slot, city)
-		CALL army_new(side, army_slot, city)
-		EXIT SUB
-	END IF
-	i = city_army(city)
-	CALL army_add_recruits(side, i, isolated)
-	from_city = army_city(i): x = city_x(from_city) - 12: y = city_y(from_city) - 11
-	GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
-	CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
-	IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
-	COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
-	IF isolated = 1 THEN PRINT " ISOLATED !";
-	PUT (x - 9, y - 7), saved_under_army, PSET
-	CALL wait_seconds(opt_pause! - .5)
+    DIM army_slot AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM from_city AS INTEGER: DIM isolated AS INTEGER
+    raised = 1
+    army_slot = 0
+    CALL city_update_occupier(city)
+    IF city_army(city) <= 0 THEN
+        CALL army_get_commander((side), army_slot)
+
+        IF army_slot = 0 THEN raised = 0: EXIT SUB
+        CALL army_place_new(army_slot, city)
+        CALL army_new(side, army_slot, city)
+        EXIT SUB
+    END IF
+    i = city_army(city)
+    CALL army_add_recruits(side, i, isolated)
+    from_city = army_city(i): x = city_x(from_city) - 12: y = city_y(from_city) - 11
+    GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
+    CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
+    IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
+    COLOR COLOR_LIGHT_CYAN: CALL clear_bottom_line: PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to "; : CALL print_army_size(i)
+    IF isolated = 1 THEN PRINT " ISOLATED !";
+    PUT (x - 9, y - 7), saved_under_army, PSET
+    CALL wait_seconds(opt_pause! - .5)
 END SUB

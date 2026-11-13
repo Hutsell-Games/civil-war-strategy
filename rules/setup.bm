@@ -1,45 +1,45 @@
 ' The Union's extra income each month, from the Balance setting.
 SUB set_union_advantage
-	union_income_bonus = 120 * opt_difficulty: IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
-	IF opt_realism >= REALISM_ON THEN union_income_bonus = union_income_bonus * .7
+    union_income_bonus = 120 * opt_difficulty: IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
+    IF opt_realism >= REALISM_ON THEN union_income_bonus = union_income_bonus * .7
 END SUB
 
 ' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
 ' and the leaders' ratings at random.
 SUB vary_start_conditions
-DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM a$
-		CALL load_scenario
-		side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
-		side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
-		opt_ai_aggression = 5 * RND
-		FOR k = 1 TO 6
-			IF RND > .6 THEN
-			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 21 TO 6
-			IF RND > .6 THEN
-			army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-			army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
-			END IF
-		NEXT k
-		FOR k = 1 TO MAX_CITIES: CALL city_update_occupier(k): NEXT k
-		fleet_size(SIDE_UNION) = 10 * RND: IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
-		fleet_size(SIDE_REBEL) = 10 * RND: IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
-		FOR i = SIDE_UNION TO SIDE_REBEL
-			fleet_ships$(i) = ""
-			FOR j = 1 TO fleet_size(i)
-			a$ = "W": IF RND > .45 * current_side THEN a$ = "I"
-			fleet_ships$(i) = fleet_ships$(i) + a$
-		NEXT j
-		NEXT i
-		IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
+    DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM a$
+    CALL load_scenario
+    side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
+    side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
+    opt_ai_aggression = 5 * RND
+    FOR k = 1 TO 6
+        IF RND > .6 THEN
+            army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
+            army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
+        END IF
+    NEXT k
+    FOR k = 21 TO 6
+        IF RND > .6 THEN
+            army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
+            army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
+        END IF
+    NEXT k
+    FOR k = 1 TO MAX_CITIES: CALL city_update_occupier(k): NEXT k
+    fleet_size(SIDE_UNION) = 10 * RND: IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
+    fleet_size(SIDE_REBEL) = 10 * RND: IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        fleet_ships$(i) = ""
+        FOR j = 1 TO fleet_size(i)
+            a$ = "W": IF RND > .45 * current_side THEN a$ = "I"
+            fleet_ships$(i) = fleet_ships$(i) + a$
+        NEXT j
+    NEXT i
+    IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
 
-		FOR k = 1 TO 40
-		IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
-		IF leader_rating(k) < 1 THEN leader_rating(k) = 1
-		NEXT k
+    FOR k = 1 TO 40
+        IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
+        IF leader_rating(k) < 1 THEN leader_rating(k) = 1
+    NEXT k
 END SUB
 
 ' The settings of the Utility menu. Its menus are in ui/options.bm.
@@ -47,105 +47,105 @@ END SUB
 ' Side: the player takes the other side, and the special events favor the side left to
 ' the computer.
 SUB option_swap_side
-	current_side = other_side(current_side)
-	CALL option_events_favor_computer
+    current_side = other_side(current_side)
+    CALL option_events_favor_computer
 END SUB
 
 ' The special events favor the side left to the computer: 7 for the Rebels, 3 for the Union.
 SUB option_events_favor_computer
-	IF current_side = SIDE_UNION THEN opt_event_balance = 7
-	IF current_side = SIDE_REBEL THEN opt_event_balance = 3
+    IF current_side = SIDE_UNION THEN opt_event_balance = 7
+    IF current_side = SIDE_REBEL THEN opt_event_balance = 3
 END SUB
 
 ' One player or two.
 SUB option_toggle_players
-	opt_players = PLAYERS_ONE + PLAYERS_TWO - opt_players
+    opt_players = PLAYERS_ONE + PLAYERS_TWO - opt_players
 END SUB
 
 ' Graphics: the next level of the map's detail, and after the last the first again.
 SUB option_next_graphics
-	opt_graphics = opt_graphics + 1
-	IF opt_graphics > GRAPHICS_FULL THEN opt_graphics = GRAPHICS_OFF
+    opt_graphics = opt_graphics + 1
+    IF opt_graphics > GRAPHICS_FULL THEN opt_graphics = GRAPHICS_OFF
 END SUB
 
 SUB option_set_sound (level)
-	opt_sound = level
+    opt_sound = level
 END SUB
 
 ' Display: choice is the menu's row, 1 (Fast) to 4 (Very Slow). Very Slow is 8 seconds.
 SUB option_set_display_speed (choice)
-	opt_pause! = choice
-	IF opt_pause! = 4 THEN opt_pause! = 8
+    opt_pause! = choice
+    IF opt_pause! = 4 THEN opt_pause! = 8
 END SUB
 
 SUB option_toggle_alt_colors
-	opt_alt_colors = 1 - opt_alt_colors
+    opt_alt_colors = 1 - opt_alt_colors
 END SUB
 
 ' Balance: level is 1 (Rebel ++) to 5 (Union ++).
 SUB option_set_balance (level)
-	opt_difficulty = level
-	CALL set_union_advantage
+    opt_difficulty = level
+    CALL set_union_advantage
 END SUB
 
 ' Rndom Evt: choice is the menu's row: off, favor the Union, neutral, favor the Rebels.
 ' Any other choice changes nothing.
 SUB option_set_event_balance (choice)
-	SELECT CASE choice
-	CASE 1
-	opt_event_balance = 0
-	CASE 2
-	opt_event_balance = 3
-	CASE 3
-	opt_event_balance = 5
-	CASE 4
-	opt_event_balance = 7
-	CASE ELSE
-	END SELECT
+    SELECT CASE choice
+        CASE 1
+            opt_event_balance = 0
+        CASE 2
+            opt_event_balance = 3
+        CASE 3
+            opt_event_balance = 5
+        CASE 4
+            opt_event_balance = 7
+        CASE ELSE
+    END SELECT
 END SUB
 
 SUB option_toggle_winter_campaigns
-	opt_winter_campaigns = 1 - opt_winter_campaigns
+    opt_winter_campaigns = 1 - opt_winter_campaigns
 END SUB
 
 ' Realism: off or on. When it goes on, the Union's extra income is worked out again.
 SUB option_toggle_realism
-	opt_realism = 1 - opt_realism
-	IF opt_realism <> REALISM_OFF THEN
-		IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
-		CALL set_union_advantage
-	END IF
+    opt_realism = 1 - opt_realism
+    IF opt_realism <> REALISM_OFF THEN
+        IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
+        CALL set_union_advantage
+    END IF
 END SUB
 
 SUB option_toggle_history
-	opt_history = 1 - opt_history
+    opt_history = 1 - opt_history
 END SUB
 
 ' Aggress: the next level of the computer's boldness, 0 to 5, and after 5 again 0.
 SUB option_next_aggression
-	opt_ai_aggression = opt_ai_aggression + 1: IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
+    opt_ai_aggression = opt_ai_aggression + 1: IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
 END SUB
 
 ' A new game: the scenario and the settings are read, and the map's cities.
 SUB game_new
-	CALL game_reset
-	CALL load_scenario
-	CALL game_apply_settings
-	CALL set_union_advantage
-	CALL load_cities
+    CALL game_reset
+    CALL load_scenario
+    CALL game_apply_settings
+    CALL set_union_advantage
+    CALL load_cities
 END SUB
 
 ' Clears the armies, the fleets, the trains and the victory points for a new game.
 SUB game_reset
-DIM k AS INTEGER
-	game_over = 0: turn_recruit_state = 0
-	FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = ORDER_NONE: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
-	union_income_bonus = 0: emancipation_done = 0
-	FOR k = SIDE_UNION TO SIDE_REBEL
-	fleet_size(k) = 0: fleet_city(k) = 0
-	train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
-	NEXT k
-	saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
+    DIM k AS INTEGER
+    game_over = 0: turn_recruit_state = 0
+    FOR k = 1 TO MAX_ARMIES: army_size(k) = 0: army_city(k) = 0: army_order(k) = ORDER_NONE: army_leader_rating(k) = 0: army_name$(k) = "": NEXT k
+    union_income_bonus = 0: emancipation_done = 0
+    FOR k = SIDE_UNION TO SIDE_REBEL
+        fleet_size(k) = 0: fleet_city(k) = 0
+        train_army(k) = 0: side_victory_points(k) = 0: train_city(k) = 0
+    NEXT k
+    saves_exist = 1: victory_rule(VICTORY_MONTH) = 1
 END SUB
 
 ' After the scenario and the settings are read. Under the Realism setting a game that starts
@@ -154,18 +154,18 @@ END SUB
 ' gives the computer's side cash. Each side's cash becomes its income, and it gets up to 50
 ' more.
 SUB game_apply_settings
-DIM i AS INTEGER: DIM ships$
-	IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
-		FOR i = SIDE_UNION TO SIDE_REBEL
-			ships$ = STRING$(LEN(fleet_ships$(i)), "W")
-			fleet_ships$(i) = ships$
-		NEXT i
-	END IF
-	IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN opt_players = PLAYERS_ONE
-	IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
-	CALL option_events_favor_computer
-	IF opt_pause! < 1 THEN opt_pause! = 2
-	IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
-	IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
-	FOR i = SIDE_UNION TO SIDE_REBEL: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
+    DIM i AS INTEGER: DIM ships$
+    IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
+        FOR i = SIDE_UNION TO SIDE_REBEL
+            ships$ = STRING$(LEN(fleet_ships$(i)), "W")
+            fleet_ships$(i) = ships$
+        NEXT i
+    END IF
+    IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN opt_players = PLAYERS_ONE
+    IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
+    CALL option_events_favor_computer
+    IF opt_pause! < 1 THEN opt_pause! = 2
+    IF current_side = SIDE_UNION AND opt_difficulty < 3 THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
+    IF current_side = SIDE_REBEL AND opt_difficulty > 3 THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
+    FOR i = SIDE_UNION TO SIDE_REBEL: side_income(i) = side_cash(i): side_cash(i) = side_cash(i) + 50 * RND: NEXT i
 END SUB
