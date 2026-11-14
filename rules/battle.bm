@@ -2,7 +2,7 @@
 ' and calls them in this order: battle_strengths, battle_fight, battle_losses, battle_apply_losses.
 
 ' Both armies' strengths, step by step, as the right panel shows them. An army of fewer than 100
-' men fights as one of 100.
+' troops fights as one of 100.
 ' attack_steps(): 1 base, 2 leader and experience, 3 small army, 4 outmanned, 5 supply,
 '   6 difficulty, 7 the attack.
 ' defend_steps(): 1 defense, 2 leader and experience, 3 small army, 4 outmanned, 5 supply,
@@ -188,7 +188,7 @@ SUB battle_fight (attack_strength, defend_strength, attacker, defender, winner, 
 END SUB
 
 ' A loss rate for army's side, made smaller when army is large: by a tenth over 300 (30,000
-' men), by a fifth over 800. The product is written as battle_losses wrote it, so it rounds
+' troops), by a fifth over 800. The product is written as battle_losses wrote it, so it rounds
 ' the same.
 FUNCTION battle_size_rate! (loss_rate!, army)
     battle_size_rate! = loss_rate!
@@ -200,7 +200,7 @@ FUNCTION battle_size_rate! (loss_rate!, army)
     END SELECT
 END FUNCTION
 
-' The losses of both armies, in hundreds of men. battle_apply_losses takes them later.
+' The losses of both armies, in hundreds of troops. battle_apply_losses takes them later.
 SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
     DIM loss_rate!
     DIM mean AS INTEGER

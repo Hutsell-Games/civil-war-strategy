@@ -107,7 +107,7 @@ SUB army_resupply (army)
     CALL wait_seconds(opt_pause!)
 END SUB
 
-' Raises men in a city for 100: a new army under the next commander, or more men for the
+' Raises troops in a city for 100: a new army under the next commander, or more troops for the
 ' army already there. raised is 0 when a new army was needed and no commander is left.
 SUB army_recruit (side, city, raised)
     DIM army_slot AS INTEGER

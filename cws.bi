@@ -172,7 +172,7 @@ CONST VICTORY_CITIES = 3
 CONST VICTORY_INCOME = 4
 CONST VICTORY_CAPITAL = 5
 CONST VICTORY_FORCE_RATIO = 6
-' victory_rule_met's rule is one of the rules above, or this: the enemy has no men left.
+' victory_rule_met's rule is one of the rules above, or this: the enemy has no troops left.
 CONST VICTORY_WIPED_OUT = 7
 ' The Civil War's own rule numbers. Phase 11 moves them to game\.
 CONST COST_RECRUIT = 100
@@ -187,7 +187,7 @@ CONST IRONCLAD_YEAR = 1862
 CONST IRONCLAD_MONTH = 3
 CONST MIN_DETACH_SIZE = 65
 CONST RESUPPLY_LEVEL = 5
-' army_size is in hundreds of men: an army can hold 125,000 men, and one below 1,500 fights at half strength.
+' army_size is in hundreds of troops: an army can hold 125,000 troops, and one below 1,500 fights at half strength.
 CONST MAX_ARMY_SIZE = 1250
 CONST SMALL_ARMY_SIZE = 15
 CONST MONTHS_PER_TURN = 2

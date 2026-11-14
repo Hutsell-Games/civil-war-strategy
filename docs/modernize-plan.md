@@ -17,8 +17,8 @@ Its event data and rules are already in `scenarios\EVENTS.DAT` (archive, "Phase 
 Step 4's named inventory is complete below; it makes no decision about moving rules.
 Step 5's [QB64 friction list](qb64-friction.md) is started with evidence from the work
 already done; keep it current through the remaining content moves.
-Questions 2 and 3 below remain open before steps 1 and 3. The later structural cleanups
-have their own [active review](structure-review.md).
+Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews are
+[complete](archived/structure-review-completed.md).
 
 ## Current decisions and working rules
 
@@ -129,7 +129,17 @@ rules are inventoried below; deciding whether to move them belongs to the engine
 1. **Move what is the war's and is already a SUB**: the flags, the map's line work, the title,
    the cannon and the two ship pictures go to `game\`, whole (as phase 6 moved SUBs). The ten
    rule constants go to a `game\rules.bi`, with the four city constants beside them
-   ([structure-review.md](structure-review.md)).
+   (`VARY_REBEL_FLEET_CITY`, `VARY_REBEL_CAPITAL`, `AI_UNION_FLEET_CITY`, `AI_REBEL_HOLD_CITY`,
+   in `cws.bi` since 2026-11-14). The map's seven city numbers in `draw\map.bm` go with the
+   map's line work, so question 2 decides where they live:
+   - `draw_fleets`: fixed icon positions for a fleet at 30 Philadelphia, 28 Norfolk and
+     17 Jackson MS, and a shifted icon at 24 Mobile.
+   - `draw_map`: the box drawn when a fleet is at 30.
+   - `draw_map_marker`, `MARK_ERASE_ARMY`: erasing an army at 27 New Orleans or 28 Norfolk
+     redraws the coast (`draw_map_touchup`).
+
+   A city constant of 0 would not turn its rule off: `city_owner(0)` is a real element, which
+   `rules\navy.bm` writes. A second war that drops one of these rules needs a guard then.
 2. **Remaining event presentation.** The event data and rules are completed in the archive
    ("Phase 11 step 2"). Still in `ui\events.bm`: the two `PLAY` tunes, the alarm of an
    announcement, and the bottom line cleared only for an event of the Union's roll.

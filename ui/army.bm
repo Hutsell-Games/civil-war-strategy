@@ -48,10 +48,7 @@ SUB menu_raze_fort (raze)
     menu_row = 15
     menu_highlight = COLOR_WHITE
     menu_color = COLOR_CYAN
-    menu_text$(0) = "Raze ?"
-    menu_text$(1) = "No"
-    menu_text$(2) = "Yes"
-    menu_item_count = 2
+    CALL menu_set_two("Raze ?", "No", "Yes")
     CALL menu_select(MENU_PLAIN)
     CALL clear_right_panel
     IF menu_choice = 2 THEN
@@ -81,9 +78,7 @@ SUB menu_army_move
     menu_text$(0) = "To"
     FOR i = 1 TO MAX_ROADS
         IF city_road(city, i) > 0 THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = city_name$(city_road(city, i))
-            menu_value(menu_item_count) = city_road(city, i)
+            CALL menu_add_row(city_name$(city_road(city, i)), city_road(city, i))
         END IF
     NEXT i
     CALL menu_bubble_sort(menu_item_count)
@@ -131,9 +126,7 @@ SUB menu_army_select (army, city)
     last_army = side_last_army(current_side)
     FOR i = first_army TO last_army
         IF army_exists(i) AND army_order(i) = ORDER_NONE THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = city_name$(army_city(i))
-            menu_value(menu_item_count) = army_city(i)
+            CALL menu_add_row(city_name$(army_city(i)), army_city(i))
         END IF
     NEXT i
     IF menu_item_count = 0 THEN
@@ -157,9 +150,7 @@ SUB menu_army_select (army, city)
     FOR i = first_army TO last_army
         IF army_city(i) = city AND army_order(i) = ORDER_NONE THEN
             army = i
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = "Army" + STR$(i)
-            menu_value(menu_item_count) = i
+            CALL menu_add_row("Army" + STR$(i), i)
         END IF
     NEXT i
     IF menu_item_count = 1 THEN
@@ -178,7 +169,7 @@ SUB menu_army_select (army, city)
     army = menu_value(menu_choice)
 END SUB
 
-' The Troops command: the player picks a city from the month's list and raises men there,
+' The Troops command: the player picks a city from the month's list and raises troops there,
 ' again and again while the money lasts.
 SUB menu_army_recruit (side)
     DIM city AS INTEGER
@@ -250,9 +241,7 @@ SUB menu_army_cancel (side)
             short_name$ = RIGHT$(short_name$, LEN(short_name$) - found_at)
         END IF
         IF army_exists(j) AND army_has_move(j) THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = short_name$
-            menu_value(menu_item_count) = army_city(j)
+            CALL menu_add_row(short_name$, army_city(j))
         END IF
     NEXT j
     CALL menu_bubble_sort(menu_item_count)
@@ -311,12 +300,7 @@ SUB menu_army_relieve (side)
     menu_item_count = 0
     FOR i = first_army TO last_army
         IF army_size(i) > 0 AND army_exists(i) AND army_order(i) = ORDER_NONE THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = army_name$(i)
-            IF LEN(menu_text$(menu_item_count)) > 11 THEN
-                menu_text$(menu_item_count) = LEFT$(menu_text$(menu_item_count), 11)
-            END IF
-            menu_value(menu_item_count) = i
+            CALL menu_add_row(menu_short_name$(army_name$(i)), i)
         END IF
     NEXT i
 
@@ -342,12 +326,7 @@ SUB menu_army_relieve (side)
     menu_item_count = 0
     FOR i = first_army TO last_army
         IF leader_name$(i) <> "" THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = leader_name$(i)
-            IF LEN(menu_text$(menu_item_count)) > 11 THEN
-                menu_text$(menu_item_count) = LEFT$(menu_text$(menu_item_count), 11)
-            END IF
-            menu_value(menu_item_count) = i
+            CALL menu_add_row(menu_short_name$(leader_name$(i)), i)
         END IF
     NEXT i
     CALL menu_bubble_sort(menu_item_count)
@@ -389,9 +368,7 @@ SUB menu_army_retreat (defender, retreat_city)
     side = army_side(defender)
     FOR k = 1 TO MAX_ROADS
         IF city_road(city, k) > 0 AND city_owner(city_road(city, k)) = side THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = city_name$(city_road(city, k))
-            menu_value(menu_item_count) = city_road(city, k)
+            CALL menu_add_row(city_name$(city_road(city, k)), city_road(city, k))
         END IF
     NEXT k
     IF menu_item_count = 0 THEN
@@ -419,7 +396,6 @@ SUB menu_supply (picked)
     DIM last_army AS INTEGER
     DIM i AS INTEGER
     DIM friendly_neighbors AS INTEGER
-    DIM name_width AS INTEGER
     picked = 0
     first_army = side_first_army((current_side))
     last_army = side_last_army((current_side))
@@ -442,13 +418,7 @@ SUB menu_supply (picked)
                 _CONTINUE
             END IF
         END IF
-        menu_item_count = menu_item_count + 1
-        name_width = 11
-        IF LEN(army_name$(i)) < 11 THEN
-            name_width = LEN(army_name$(i))
-        END IF
-        menu_text$(menu_item_count) = LEFT$(army_name$(i), name_width)
-        menu_value(menu_item_count) = i
+        CALL menu_add_row(menu_short_name$(army_name$(i)), i)
     NEXT i
     IF menu_item_count = 0 THEN
         COLOR COLOR_LIGHT_CYAN

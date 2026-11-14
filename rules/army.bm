@@ -11,9 +11,9 @@ SUB army_combine_start (city)
     army_name$(0) = ""
 END SUB
 
-' army joins army 0 when it is in the city, has no order and has men (COMBINE_JOINED). Army 0
-' takes its leader when he is better than any before (best is then army), its men and their
-' share of experience. status is COMBINE_TOO_LARGE when army 0 would have more than 125,000 men,
+' army joins army 0 when it is in the city, has no order and has troops (COMBINE_JOINED). Army 0
+' takes its leader when he is better than any before (best is then army), its troops and their
+' share of experience. status is COMBINE_TOO_LARGE when army 0 would have more than 125,000 troops,
 ' and COMBINE_SKIPPED when army does not join.
 SUB army_combine_add (army, city, best, status)
     DIM share!
@@ -69,7 +69,7 @@ SUB army_combine_finish (city, best, joined)
 END SUB
 
 ' A new army in a city: its supplies, experience, leader and size with the Balance setting's
-' extra men, and the price of 100 taken from the side. army_new (commands/army.bm) shows it.
+' extra troops, and the price of 100 taken from the side. army_new (commands/army.bm) shows it.
 SUB army_raise (side, army_slot, city)
     DIM troops AS INTEGER
     army_supply(army_slot) = 3 + 5 * RND
@@ -206,7 +206,7 @@ SUB army_generate_name (army, name$)
     END IF
 END SUB
 
-' Empties the army's slot: no city, no men, no leader rating, experience, order or supplies.
+' Empties the army's slot: no city, no troops, no leader rating, experience, order or supplies.
 ' Its names are the caller's: each caller leaves or clears them in its own way.
 SUB army_clear (army)
     army_city(army) = 0
@@ -261,7 +261,7 @@ FUNCTION army_has_acted (army)
     army_has_acted = army_order(army) < 0
 END FUNCTION
 
-' Detaches three tenths of an army's men and supplies into the free slot, in the city given.
+' Detaches three tenths of an army's troops and supplies into the free slot, in the city given.
 ' The new army takes the slot's leader and the old army's experience.
 SUB army_detach (army, city, army_slot)
     army_supply(army_slot) = .3 * army_supply(army)
@@ -293,9 +293,9 @@ FUNCTION army_in_field (army)
     army_in_field = army_exists(army) OR (army > 0 AND train_army(army_side(army)) = army)
 END FUNCTION
 
-' A side's men in hundreds: the armies that hold a city, as the army report counts them. The
+' A side's troops in hundreds: the armies that hold a city, as the army report counts them. The
 ' report's "Enemy Forces" is this for the other side. The original printed the computer's
-' strength ratio times the side's men, which turn_update_victory_points raises by .7 when the
+' strength ratio times the side's troops, which turn_update_victory_points raises by .7 when the
 ' computer holds few cities.
 FUNCTION side_troops (side)
     DIM i AS INTEGER
@@ -309,7 +309,7 @@ FUNCTION side_troops (side)
     side_troops = troops
 END FUNCTION
 
-' A side's strength in thousands of men: a tenth of each army's size in hundreds, rounded at
+' A side's strength in thousands of troops: a tenth of each army's size in hundreds, rounded at
 ' each step as the sum is an INTEGER. The computer plays by it.
 FUNCTION side_strength (side)
     DIM i AS INTEGER
@@ -389,9 +389,9 @@ SUB army_take_leader (army, leader)
     END IF
 END SUB
 
-' More men for the army in a city: 4,500, or under the Realism setting a number from the
+' More troops for the army in a city: 4,500, or under the Realism setting a number from the
 ' city's value, a third of it when the city is cut off (isolated is then 1), and the Balance
-' setting's extra men. The side pays 100.
+' setting's extra troops. The side pays 100.
 SUB army_add_recruits (side, army, isolated)
     DIM troops AS INTEGER
     troops = 45
@@ -407,7 +407,7 @@ SUB army_add_recruits (side, army, isolated)
     side_cash(side) = side_cash(side) - COST_RECRUIT
 END SUB
 
-' The men a city gives under the Realism setting, in hundreds: by the city's value, for a new
+' The troops a city gives under the Realism setting, in hundreds: by the city's value, for a new
 ' army, or for the army already there when joins_army is 1. A third of that when the city is
 ' cut off. army_raise, army_add_recruits and the computer's pick (ai_recruit_pick) use it.
 FUNCTION recruit_troops (side, city, joins_army)
@@ -427,7 +427,7 @@ FUNCTION recruits_cut_off (side, city, troops)
     END IF
 END FUNCTION
 
-' The Balance setting's extra men for an army of side that recruits. As in battle_strengths,
+' The Balance setting's extra troops for an army of side that recruits. As in battle_strengths,
 ' they go to the computer's side when the setting favors it. The original added them to army 0,
 ' or to a new army just before its size was set, so they were never seen.
 SUB army_recruit_bonus (side, army_slot)

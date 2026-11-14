@@ -131,10 +131,7 @@ END SUB
 ' Quit to DOS: Yes or No. action becomes FILES_QUIT on Yes.
 SUB menu_quit (action)
     menu_choice = MENU_START + 2
-    menu_text$(0) = "Quit"
-    menu_text$(1) = "Yes"
-    menu_text$(2) = "No"
-    menu_item_count = 2
+    CALL menu_set_two("Quit", "Yes", "No")
     menu_color = COLOR_MAGENTA
     menu_col = PANEL_COL
     menu_row = 15

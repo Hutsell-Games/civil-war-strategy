@@ -102,6 +102,14 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 
 ## The code
 
+- **The loops over a city's roads stop at a 0 in three ways.** Some end at the first 0 (`EXIT FOR`,
+  as in `ai_army_order` and `city_fix_return_routes`), `ai_beyond_score` skips it (`_CONTINUE`), and
+  the menus of `ui\army.bm` test each road for more than 0. They agree only while a city has no 0
+  before its last road. The shipped `CITIES.GRD` files have none, and `city_fix_return_routes`
+  fills the first 0. A hand-made scenario with a gap plays differently in each loop. One way would
+  be for `load_cities` (`port\files.bm`) to close the gaps, so that every loop may end at the first 0.
+  Left from the structure review (`docs\archived\structure-review-completed.md`, "The small repeats").
+
 Left alone by phase 3, group 1, of `docs\archived\modernize-plan-completed.md` (the sides and limits). None of these changes
 how the game plays.
 

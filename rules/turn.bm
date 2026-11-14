@@ -69,7 +69,7 @@ END SUB
 ' An army's supplies for the month. Its side pays for a day of supply if it can, and the army
 ' must be connected to it under the Realism setting. Outside the summer an army away from a sea
 ' port uses a day, and an army in a sea port blockaded by the other side's fleet uses one
-' (blockaded is 1). An army left without supplies may lose a tenth of its men (starved is 1).
+' (blockaded is 1). An army left without supplies may lose a tenth of its troops (starved is 1).
 SUB turn_army_supply (army, blockaded, starved)
     DIM side AS INTEGER
     DIM friendly_neighbors AS INTEGER
@@ -102,7 +102,7 @@ SUB turn_army_supply (army, blockaded, starved)
     END IF
 END SUB
 
-' The strength ratio the computer plays by: the player's men against the computer's.
+' The strength ratio the computer plays by: the player's troops against the computer's.
 SUB turn_strength_ratio
     DIM union_strength AS INTEGER
     DIM rebel_strength AS INTEGER

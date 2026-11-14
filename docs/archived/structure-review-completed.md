@@ -1,8 +1,9 @@
 # Done: the review of the structure of the game's code
 
 The finished parts and original findings of `../structure-review.md`, archived from 2026-11-13
-onward. The active review keeps the remaining work and deliberately deferred items. Original
-findings, decisions and the second review's shared-rule results were moved here on 2026-11-14.
+onward. Original findings, decisions and the second review's shared-rule results were moved here
+on 2026-11-14. The review closed on 2026-11-14: its last open item, the map's city numbers, went
+to step 1 of phase 11 in `../modernize-plan.md`, and its deferred items are at the end of this file.
 
 ## The first review: findings and recommendation
 
@@ -11,7 +12,7 @@ structured the best way, and which patterns would make it easier to read and cha
 nested `IF`s of `ai\ai.bm`.
 
 Original findings and recommendation, retained as the record of the first review. Items 1 to 5
-were completed below; the city numbers remain in the active review. Counts describe the tree
+were completed below; the map's city numbers are in phase 11 step 1. Counts describe the tree
 on the date of the review.
 
 ### How it was measured
@@ -220,8 +221,8 @@ the orders, navy, army, turn, battle, menu, report and option menus. Skimmed: `d
 `events.bm`.
 
 The user took the pragmatic engineer's plan ("do as recommended", 2026-11-13). Items 4 and 9 and
-the small repeats were left out; their reasons remain in the active review under
-"Deliberately deferred from the second review".
+the small repeats were left out. Items 4 and 9 stay as they are ("Left as they are, from the
+second review", below). The small repeats were done on 2026-11-14 ("The small repeats", below).
 
 ### The rules that the player's menus and the computer each checked
 
@@ -343,6 +344,42 @@ was built and reverted: it put a new parameter on all 10 calls of
 Left alone: `battle_strengths` (see the second review's deferred items), `menu_utility`,
 `report_armies` and `end_game`, which are long but read top to bottom, and the four pictures
 drawn line by line (`draw_map`, `draw_schooner`, `draw_ironclad`, `draw_surrender`).
+
+## Left as they are, from the second review
+
+The user accepted the pragmatic engineer's plan on 2026-11-13. It left these two out:
+
+- **The two halves of `battle_strengths`** share three steps. It is one SUB read top to bottom, in the
+  order of the right panel; helpers would make one battle harder to follow and risk its rounding.
+- **The sea ports of a side** (`navy_list_shipyards`, `event_delivery_port`, `navy_retreat_port`): their
+  tests differ in three ways, so one FUNCTION would need a parameter for each.
+
+## The small repeats
+
+Done 2026-11-14, when the review closed (user: "yes" to doing them rather than waiting for each
+SUB's next change). The 198 unit tests passed. The 41 scripts passed `check` and `compare` on
+unchanged recordings, and `coverage` shows every new procedure run.
+
+- **The menus' lists.** `menu_add_row (text$, value)` (`ui\menu.bm`) adds a row and its value. It
+  replaces the same three lines in 8 places in `ui\army.bm` and 1 in `ui\city.bm`.
+- **Shortening a name.** `menu_short_name$` (`ui\menu.bm`) cuts a name to 11 characters, for the
+  Relieve menu's armies and leaders and the Supply menu. Each had a length test that `LEFT$` makes
+  needless, as did `menu_mark_row`'s. `menu_army_cancel` keeps its own way: it drops the first
+  name of a long one, and its search for the army picked depends on that text.
+- **The two-row menus.** `menu_set_two (heading$, first$, second$)` (`ui\menu.bm`) replaces four
+  lines in Raze, Quit, End Turn, the ship's Type, the fleets' Options, and the two menus at the end
+  of a game. `navy_combat_auto` (`commands\navy.bm`) still sets the Options texts, though the
+  computer's fight shows no menu.
+- **The `"00"` texts.** `troops_text$ (hundreds)` (`ui\reports.bm`) gives a number of troops from the
+  hundreds the game keeps. It replaces 11 texts in 7 lines, among them `menu_mark_row`'s "Size",
+  which printed the number and then stepped back over its trailing space.
+- **The cannon's sound.** `cannon_shot (gap!)` (`ui\battle.bm`) plays the two notes for a battle's
+  round, a fleet's volley and a shore battery's shot, and waits `gap!` seconds after.
+- **The road loops' three ways of stopping** were not changed. A loop over `city_road()` ends at
+  the first 0 (`EXIT FOR`), skips a 0 (`_CONTINUE`), or tests each road for more than 0. They agree
+  only while a city's roads have no 0 before the last road. The shipped `CITIES.GRD` files have
+  none, and `city_fix_return_routes` fills the first 0. One form would change how a hand-made
+  scenario with a gap plays, so it is a row in `TODO.md`, "The code".
 
 ## Questions for the user
 

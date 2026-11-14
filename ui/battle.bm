@@ -168,12 +168,20 @@ END SUB
 SUB battle_cannon_sound (rounds)
     DIM k AS INTEGER
     FOR k = 1 TO rounds
-        IF opt_sound >= SOUND_EFFECTS THEN
-            SOUND 77, .5
-            SOUND 59, .5
-            CALL wait_seconds(.1)
-        END IF
+        CALL cannon_shot(.1)
     NEXT k
+END SUB
+
+' A shot of a cannon or a ship's gun, two low notes, when sound effects are on. A gap above 0
+' waits that many seconds after it.
+SUB cannon_shot (gap!)
+    IF opt_sound >= SOUND_EFFECTS THEN
+        SOUND 77, .5
+        SOUND 59, .5
+        IF gap! > 0 THEN
+            CALL wait_seconds(gap!)
+        END IF
+    END IF
 END SUB
 
 ' The winner's flag and name in the right panel, and who defeats whom on the bottom line.
@@ -206,24 +214,24 @@ SUB draw_battle_losses (attacker, defender, attacker_losses, defender_losses)
     COLOR side_color
     LOCATE 1, 1
     PRINT "Attack Loss: ";
-    PRINT LTRIM$(RTRIM$(STR$(attacker_losses)) + "00"); "/";
+    PRINT troops_text$(attacker_losses); "/";
     CALL print_army_size(attacker)
     PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker)))))); "%) ²";
     COLOR 16 - side_color
     PRINT "² Defend Loss: ";
-    PRINT LTRIM$(RTRIM$(STR$(defender_losses)) + "00"); "/";
+    PRINT troops_text$(defender_losses); "/";
     CALL print_army_size(defender)
     PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defender_losses / army_size(defender)))))); "%)"
 END SUB
 
 ' The battle's line in the history, such as "Memphis: *Grant (1200/15000)  defeats Polk (3000/9000)".
-' The star marks the attacker. Each army shows its losses and its size before them, in men. The
+' The star marks the attacker. Each army shows its losses and its size before them, in troops. The
 ' attacker's text ends in a space, so a winning attacker's is followed by two.
 FUNCTION battle_history_line$ (attacker, defender, winner, loser, attacker_losses, defender_losses)
     DIM attacker_text$
     DIM defender_text$
-    attacker_text$ = " (" + LTRIM$(RTRIM$(STR$(attacker_losses) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
-    defender_text$ = " (" + LTRIM$(RTRIM$(STR$(defender_losses) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
+    attacker_text$ = " (" + troops_text$(attacker_losses) + "/" + troops_text$(army_size(attacker)) + ") "
+    defender_text$ = " (" + troops_text$(defender_losses) + "/" + troops_text$(army_size(defender)) + ")"
     IF winner = defender THEN
         battle_history_line$ = city_name$(army_city(defender)) + ": " + army_name$(winner) + defender_text$ + " defeats *" + army_name$(loser) + attacker_text$
     ELSE

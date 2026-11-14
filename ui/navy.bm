@@ -51,10 +51,7 @@ SUB menu_navy_build (side, again)
         menu_col = PANEL_COL
         menu_row = 12
         menu_color = COLOR_LIGHT_BLUE
-        menu_text$(0) = "Type"
-        menu_text$(1) = "Wooden"
-        menu_text$(2) = "Ironclad"
-        menu_item_count = 2
+        CALL menu_set_two("Type", "Wooden", "Ironclad")
         CALL menu_select(MENU_PLAIN)
         CALL clear_right_panel
         IF menu_choice < 1 THEN
@@ -189,10 +186,7 @@ SUB menu_navy_combat (side)
     DO
         CALL navy_combat_draw
         DO
-            menu_text$(0) = "Options"
-            menu_text$(1) = "Attack"
-            menu_text$(2) = "Retreat"
-            menu_item_count = 2
+            CALL menu_set_two("Options", "Attack", "Retreat")
             menu_color = COLOR_CYAN
             menu_highlight = COLOR_YELLOW
             menu_col = 50

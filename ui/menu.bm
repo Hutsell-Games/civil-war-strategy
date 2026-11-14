@@ -23,6 +23,26 @@ SUB menu_set_cities (cities(), count)
     NEXT i
 END SUB
 
+' Adds a row to the end of the menu: its text, and its number in menu_value().
+SUB menu_add_row (text$, value)
+    menu_item_count = menu_item_count + 1
+    menu_text$(menu_item_count) = text$
+    menu_value(menu_item_count) = value
+END SUB
+
+' A name cut to the 11 characters a menu of armies or leaders shows.
+FUNCTION menu_short_name$ (name$)
+    menu_short_name$ = LEFT$(name$, 11)
+END FUNCTION
+
+' A menu of two rows under its heading, such as "Quit" with "Yes" and "No".
+SUB menu_set_two (heading$, first$, second$)
+    menu_text$(0) = heading$
+    menu_text$(1) = first$
+    menu_text$(2) = second$
+    menu_item_count = 2
+END SUB
+
 '============================================================================
 '                GENmenu 3.05 : Generic Menu Main Module Level  12/91
 '                Updated to Use Graphic Screens 8, 9, 12
@@ -295,8 +315,6 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
     DIM army AS INTEGER
     DIM short_name$
     DIM file$
-    DIM x AS INTEGER
-    DIM y AS INTEGER
     DIM face_pic AS INTEGER
     SELECT CASE kind
         CASE MENU_CITY_BOX
@@ -306,10 +324,7 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
             army = city_army(menu_value(row))
             IF army > 0 THEN
                 row_shown = 1
-                short_name$ = army_name$(army)
-                IF LEN(short_name$) > menu_width THEN
-                    short_name$ = LEFT$(short_name$, menu_width)
-                END IF
+                short_name$ = LEFT$(army_name$(army), menu_width)
                 COLOR COLOR_LIGHT_RED
                 LOCATE menu_row + 2 + row, menu_col + 2
                 PRINT SPACE$(menu_width);
@@ -318,11 +333,7 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
                 LOCATE menu_row + 4 + menu_item_count, menu_col + 1
                 PRINT SPACE$(12);
                 LOCATE menu_row + 4 + menu_item_count, menu_col + 1
-                PRINT "Size"; army_size(army);
-                x = POS(0)
-                y = CSRLIN
-                LOCATE y, x - 1
-                PRINT "00";
+                PRINT "Size "; troops_text$(army_size(army));
             ELSE
                 row_shown = 0
                 LOCATE menu_row + 4 + menu_item_count, menu_col + 1

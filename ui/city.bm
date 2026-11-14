@@ -11,9 +11,7 @@ SUB menu_city_fortify (city)
     menu_item_count = 0
     FOR i = side_first_army(current_side) TO side_last_army(current_side)
         IF army_exists(i) AND city_fort(army_city(i)) < MAX_FORT THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = city_name$(army_city(i))
-            menu_value(menu_item_count) = army_city(i)
+            CALL menu_add_row(city_name$(army_city(i)), army_city(i))
         END IF
     NEXT i
     IF menu_item_count = 0 THEN

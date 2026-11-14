@@ -72,7 +72,7 @@ SUB load_scenario
     CALL config_read(current_side)
 END SUB
 
-' Reads one side's armies from cws.ini, open as #1: their count, then each army's city, men,
+' Reads one side's armies from cws.ini, open as #1: their count, then each army's city, troops,
 ' experience and supplies. Army i takes leader i of cwslead.dat, who leaves the free leaders.
 SUB load_scenario_armies (side)
     DIM army_count AS INTEGER

@@ -76,7 +76,7 @@ SUB menu_main_railroad
         END IF
         capacity = railroad_capacity(current_side)
         CALL clear_bottom_line
-        PRINT "Railroad capacity ="; RTRIM$(STR$(capacity)); "00";
+        PRINT "Railroad capacity = "; troops_text$(capacity);
         CALL menu_railroad(current_side, army, city)
         IF army > 0 THEN
             CALL railroad_start(current_side, army, city)
@@ -97,10 +97,7 @@ SUB menu_main_end_turn (ended)
     menu_highlight = COLOR_WHITE
     menu_color = COLOR_CYAN
     menu_choice = MENU_START + 2
-    menu_text$(0) = "End Turn"
-    menu_text$(1) = "Yes"
-    menu_text$(2) = "NOT YET"
-    menu_item_count = 2
+    CALL menu_set_two("End Turn", "Yes", "NOT YET")
     CALL menu_select(MENU_PLAIN)
     CALL clear_right_panel
     ended = 0

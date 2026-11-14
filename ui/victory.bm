@@ -96,8 +96,8 @@ SUB check_victory_conditions
     NEXT side
 END SUB
 
-' Warns when a side is close to a victory rule: cities, income or army strength. union_men is the
-' Union's men and rebel_men the Rebels'.
+' Warns when a side is close to a victory rule: cities, income or army strength. union_troops is the
+' Union's troops and rebel_troops the Rebels'.
 SUB victory_warnings (side, union_troops, rebel_troops)
     DIM message$
     CALL clear_bottom_line
@@ -160,10 +160,7 @@ SUB end_game (side, rule)
     CALL print_centered(12, message$)
     CALL print_centered(14, reason$)
 
-    menu_text$(0) = "End Game"
-    menu_text$(1) = "Yes"
-    menu_text$(2) = "No-Override"
-    menu_item_count = 2
+    CALL menu_set_two("End Game", "Yes", "No-Override")
     menu_color = COLOR_RED
     menu_col = 27
     menu_row = 18
@@ -177,13 +174,10 @@ SUB end_game (side, rule)
         CALL end_game_play_on(rule)
         EXIT SUB
     END IF
-    menu_text$(0) = "Options"
-    menu_text$(1) = "Quit this Game"
-    menu_text$(2) = "Play More"
+    CALL menu_set_two("Options", "Quit this Game", "Play More")
     IF opt_players = PLAYERS_ONE THEN
         menu_text$(2) = "No - Press Onward to " + city_name$(side_capital(other_side(current_side)))
     END IF
-    menu_item_count = 2
     menu_color = COLOR_DARK_GRAY
     menu_col = 27
     menu_row = 18

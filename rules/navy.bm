@@ -161,8 +161,8 @@ SUB navy_cancel_new_fleet (side)
     fleet_ships$(side) = ""
 END SUB
 
-' Attack on the army in the city the fleet lies off: losses of its men, in hundreds, and some
-' of its supplies. The army keeps at least 100 men.
+' Attack on the army in the city the fleet lies off: losses of its troops, in hundreds, and some
+' of its supplies. The army keeps at least 100 troops.
 SUB navy_bombard_army (side, army, losses)
     DIM loss_rate!
     DIM supply_loss AS INTEGER
@@ -232,7 +232,7 @@ SUB navy_go_raiding (side)
     raiding_side = side
 END SUB
 
-' Invasion: the new army that the ship landed is 3,500 men, and its side gets back the 100
+' Invasion: the new army that the ship landed is 3,500 troops, and its side gets back the 100
 ' that army_new took for it.
 SUB navy_landed (side, army)
     side_cash(side) = side_cash(side) + COST_RECRUIT 'compensate for cost of recruiting new army

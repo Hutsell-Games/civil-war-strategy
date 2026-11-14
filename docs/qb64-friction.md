@@ -148,7 +148,7 @@ general serialization library.
 
 **Evidence.** On 2026-11-14 four city numbers in `rules\setup.bm` and
 `ai\navy.bm` became constants in `cws.bi` (`VARY_REBEL_FLEET_CITY` and three
-more; [structure-review.md](structure-review.md)). A city's own column in
+more; [the completed structure review](archived/structure-review-completed.md)). A city's own column in
 `CITIES.GRD` would have fitted better. But `load_cities`
 ([port/files.bm](../port/files.bm)) reads each line by position with `INPUT #`.
 A new field changes the layout of both scenarios' files and of any scenario a

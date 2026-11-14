@@ -1,7 +1,7 @@
 ' The rules of victory and of the Hall of Fame. They draw nothing; the screens are in
 ' ui/victory.bm.
 
-' The men in the field: union_troops the Union's and rebel_troops the Rebels', in hundreds.
+' The troops in the field: union_troops the Union's and rebel_troops the Rebels', in hundreds.
 ' An army on a train counts (army_in_field).
 SUB victory_forces (union_troops, rebel_troops)
     DIM j AS INTEGER
@@ -35,7 +35,7 @@ END FUNCTION
 
 ' The victory rule that the side has met, in rule: 2 time, 3 cities, 4 income, 5 the capital,
 ' 6 the strength ratio, 7 the enemy wiped out, which also gives 300 victory points. rule is 0
-' when it has met none. union_men and rebel_men are the sides' men (victory_forces).
+' when it has met none. union_troops and rebel_troops are the sides' troops (victory_forces).
 SUB victory_rule_met (side, union_troops, rebel_troops, rule)
     rule = 0
     IF (side = SIDE_UNION AND rebel_troops = 0) OR (side = SIDE_REBEL AND union_troops = 0) THEN
@@ -101,8 +101,8 @@ FUNCTION victory_near_income (side)
     END IF
 END FUNCTION
 
-' 1 when the side has nine tenths of the strength ratio the ratio rule asks for. union_men and
-' rebel_men are the sides' men.
+' 1 when the side has nine tenths of the strength ratio the ratio rule asks for. union_troops and
+' rebel_troops are the sides' troops.
 FUNCTION victory_near_force (side, union_troops, rebel_troops)
     victory_near_force = 0
     IF victory_rule(VICTORY_FORCE_RATIO) > 0 AND union_troops > 0 AND rebel_troops > 0 THEN

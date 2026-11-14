@@ -256,7 +256,7 @@ END SUB
 ' ------------------------------------------------------------------- battle
 ' The rules of a land battle, which calculate_battle shows. The numbers are
 ' those of the scenario: attack loss 11, defend loss 9, strength cap 20.
-' Sizes are in hundreds of men.
+' Sizes are in hundreds of troops.
 
 SUB TestBattleStrengthsStepByStep
     DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
@@ -280,12 +280,12 @@ SUB TestBattleCountsAnEmptyArmyAsOne
     DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
     rule_strength_cap = 20: opt_difficulty = 3: army_size(21) = 50
     CALL battle_strengths(1, 21, attack_steps(), defend_steps())
-    AssertEqualInt 1, army_size(1), "an attacker of 0 men becomes 100"
+    AssertEqualInt 1, army_size(1), "an attacker of 0 troops becomes 100"
     AssertEqualInt 1, attack_steps(4), "outmanned 1 to 50: 1"
     AssertEqualInt 20, defend_steps(4), "50 to 1: the cap"
 END SUB
 
-' A defender with less than a fifth of the attacker's men has half its strength; with less
+' A defender with less than a fifth of the attacker's troops has half its strength; with less
 ' than half, eight tenths.
 SUB TestBattleOutnumberedDefender
     DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
@@ -322,11 +322,11 @@ END SUB
 
 SUB TestBattleSizeRateFallsForLargeArmies
     army_size(4) = 300
-    AssertEqualSingle .5, battle_size_rate!(.5, 4), "30,000 men: the whole rate"
+    AssertEqualSingle .5, battle_size_rate!(.5, 4), "30,000 troops: the whole rate"
     army_size(4) = 301
     AssertEqualSingle .9 * .5, battle_size_rate!(.5, 4), "more: nine tenths"
     army_size(4) = 800
-    AssertEqualSingle .9 * .5, battle_size_rate!(.5, 4), "80,000 men: still nine tenths"
+    AssertEqualSingle .9 * .5, battle_size_rate!(.5, 4), "80,000 troops: still nine tenths"
     army_size(4) = 801
     AssertEqualSingle .8 * .5, battle_size_rate!(.5, 4), "more: four fifths"
 END SUB
@@ -355,7 +355,7 @@ END SUB
 SUB TestBattleLeavesTheDefenderOne
     army_size(1) = 120: army_size(21) = 15
     CALL battle_apply_losses(1, 21, 1, 5, 20)
-    AssertEqualInt 1, army_size(21), "not below 100 men"
+    AssertEqualInt 1, army_size(21), "not below 100 troops"
     AssertEqualInt 5, side_casualties&(1), "army 1's losses count for the Union"
 END SUB
 
@@ -419,8 +419,8 @@ SUB TestArmyCombineTakesTheBestLeader
     CALL army_combine_add(3, 5, best, status)
     AssertEqualInt COMBINE_SKIPPED, status, "army 3 has an order: it does not join"
     CALL army_combine_finish(5, 2, 2)
-    AssertEqualInt 150, army_size(2), "the men of both"
-    AssertEqualInt 3, army_experience(2), "experience by share of men: 2/3 of 2 and 1/3 of 5"
+    AssertEqualInt 150, army_size(2), "the troops of both"
+    AssertEqualInt 3, army_experience(2), "experience by share of troops: 2/3 of 2 and 1/3 of 5"
     AssertEqualInt 10, army_supply(2), "3 + 9, at most 10"
     AssertEqualStr "Sherman", army_name$(2), "under Sherman"
     AssertEqualInt ORDER_BUSY, army_order(2), "two joined: no order this turn"
@@ -433,12 +433,12 @@ SUB TestArmyCombineRefusesTooLarge
     CALL army_combine_start(5)
     CALL army_combine_add(1, 5, best, status)
     CALL army_combine_add(2, 5, best, status)
-    AssertEqualInt COMBINE_TOO_LARGE, status, "130,000 men: too large"
-    AssertEqualInt 1200, army_size(0), "army 0 has army 1's men only"
+    AssertEqualInt COMBINE_TOO_LARGE, status, "130,000 troops: too large"
+    AssertEqualInt 1200, army_size(0), "army 0 has army 1's troops only"
 END SUB
 
 ' ------------------------------------------------- raising and supplying
-' The Balance setting's extra men go to the computer's side when the setting favors it.
+' The Balance setting's extra troops go to the computer's side when the setting favors it.
 SUB TestArmyRecruitBonus
     current_side = SIDE_UNION: opt_difficulty = 1: opt_realism = REALISM_OFF
     army_size(21) = 100: army_city(21) = 0: army_size(1) = 100: army_city(1) = 0
@@ -470,7 +470,7 @@ SUB TestArmyRaiseSetsUpANewArmy
     AssertEqualStr "", leader_name$(3), "is off the list"
     AssertEqualInt 5, army_leader_rating(3), "with his rating"
     AssertEqualInt 1, army_experience(3), "a Union army starts at 1"
-    AssertEqualInt 23, army_size(3), "7,000 men, a third of it in a city cut off"
+    AssertEqualInt 23, army_size(3), "7,000 troops, a third of them in a city cut off"
     AssertTrue army_supply(3) >= 5 AND army_supply(3) <= 10, "supplies from 5 to 10:" + STR$(army_supply(3))
     AssertEqualInt 7, army_city(3), "in city 7"
     AssertEqualInt 3, city_army(7), "which it holds"
@@ -483,7 +483,7 @@ SUB TestArmyBuySupplyUpToTheLevel
     CALL army_buy_supply(1, result)
     AssertEqualInt SUPPLY_BOUGHT, result, "bought"
     AssertEqualInt 5, army_supply(1), "up to the resupply level"
-    AssertEqualInt 960, side_cash(1), "4 days for 10,000 men cost 40"
+    AssertEqualInt 960, side_cash(1), "4 days for 10,000 troops cost 40"
     side_cash(1) = 2: army_supply(1) = 1
     CALL army_buy_supply(1, result)
     AssertEqualInt SUPPLY_NO_CASH, result, "not enough cash"
@@ -502,7 +502,7 @@ SUB TestArmyAddRecruits
     opt_difficulty = 3: current_side = 1
     army_city(4) = 7: army_size(4) = 100: side_cash(1) = 300
     CALL army_add_recruits(1, 4, isolated)
-    AssertEqualInt 145, army_size(4), "4,500 more men"
+    AssertEqualInt 145, army_size(4), "4,500 more troops"
     AssertEqualInt 200, side_cash(1), "for 100"
     AssertEqualInt 0, isolated, "not isolated without the Realism setting"
 END SUB
@@ -515,11 +515,11 @@ SUB TestArmyAddRecruitsWithRealismCutOff
     AssertEqualInt 1, isolated, "isolated"
 END SUB
 
-' recruit_troops: the men a city gives under the Realism setting.
+' recruit_troops: the troops a city gives under the Realism setting.
 SUB TestRecruitTroopsByCityValue
     city_value(7) = 20: city_value(8) = 20: city_road(7, 1) = 8: city_owner(8) = 1
     AssertEqualInt 93, recruit_troops(1, 7, 0), "a new army: 3 * 20 + 33"
-    AssertEqualInt 60, recruit_troops(1, 7, 1), "added men: 2 * 20 + 20"
+    AssertEqualInt 60, recruit_troops(1, 7, 1), "added troops: 2 * 20 + 20"
     AssertEqualInt 31, recruit_troops(2, 7, 0), "a third, cut off from the Rebels' cities"
     AssertEqualInt 20, recruit_troops(2, 7, 1), "a third of 60"
     AssertEqualInt 70, recruits_cut_off(1, 7, 70), "not cut off: all of it"
@@ -576,8 +576,8 @@ SUB TestDetachTakesThreeTenths
     army_size(21) = 100: army_supply(21) = 10: army_experience(21) = 4: army_city(21) = 25
     leader_name$(22) = "Jackson": leader_rating(22) = 9: army_order(22) = 7
     CALL army_detach(21, 25, 22)
-    AssertEqualInt 30, army_size(22), "the new army's men"
-    AssertEqualInt 70, army_size(21), "the old army's men"
+    AssertEqualInt 30, army_size(22), "the new army's troops"
+    AssertEqualInt 70, army_size(21), "the old army's troops"
     AssertEqualInt 3, army_supply(22), "the new army's supplies"
     AssertEqualInt 7, army_supply(21), "the old army's supplies"
     AssertEqualInt 25, army_city(22), "in the same city"
@@ -606,7 +606,7 @@ SUB TestSideStrengthCountsTheTrain
     AssertEqualInt 11, side_strength(SIDE_UNION), "a tenth of 107, rounded"
     train_army(SIDE_UNION) = 3
     AssertTrue army_in_field(3), "the army on the train"
-    AssertEqualInt 16, side_strength(SIDE_UNION), "and its men"
+    AssertEqualInt 16, side_strength(SIDE_UNION), "and its troops"
     AssertTrue NOT army_in_field(0), "slot 0 is no army"
     CALL victory_forces(union_troops, rebel_troops)
     AssertEqualInt 157, union_troops, "victory counts the train too"
@@ -717,11 +717,11 @@ SUB TestAiCountsItsArmies
     army_city(1) = 5: army_size(1) = 100
     army_city(21) = 25: army_size(21) = 100
     army_city(22) = 26: army_size(22) = 100
-    AssertEqualInt 2, ai_count_armies(2), "two armies, and more men than the Union"
+    AssertEqualInt 2, ai_count_armies(2), "two armies, and more troops than the Union"
     army_size(1) = 300
-    AssertEqualInt 0, ai_count_armies(2), "the Union has more men: two fewer"
+    AssertEqualInt 0, ai_count_armies(2), "the Union has more troops: two fewer"
     army_size(1) = 500
-    AssertEqualInt 0, ai_count_armies(2), "the Union has more than twice the men: none"
+    AssertEqualInt 0, ai_count_armies(2), "the Union has more than twice the troops: none"
     army_size(22) = 250
     AssertEqualInt 0, ai_count_armies(2), "500 against 350: two fewer"
 END SUB
@@ -824,7 +824,7 @@ SUB TestNavyBombardArmy
     RANDOMIZE 1
     fleet_size(1) = 4: army_size(21) = 100: army_supply(21) = 5
     CALL navy_bombard_army(1, 21, killd)
-    AssertTrue killd >= 2 AND killd <= 4, "2% to 4% of the men:" + STR$(killd)
+    AssertTrue killd >= 2 AND killd <= 4, "2% to 4% of the troops:" + STR$(killd)
     AssertEqualInt 100 - killd, army_size(21), "taken from the army"
     AssertEqualInt 2, army_supply(21), "3 days of supply lost"
 END SUB
@@ -908,7 +908,7 @@ END SUB
 SUB TestNavyLandedArmy
     side_cash(1) = 200: army_size(5) = 70
     CALL navy_landed(1, 5)
-    AssertEqualInt 35, army_size(5), "3,500 men"
+    AssertEqualInt 35, army_size(5), "3,500 troops"
     AssertEqualInt 300, side_cash(1), "the 100 given back"
 END SUB
 
@@ -1014,7 +1014,7 @@ SUB TestAiFortifyPickOutnumbered
     current_side = 1: opt_ai_aggression = 0: ai_strength_ratio! = 0
     army_city(21) = 5: army_size(21) = 50: city_army(5) = 21
     city_road(5, 1) = 6: city_owner(6) = 1: city_army(6) = 1: army_size(1) = 100
-    AssertEqualInt 5, ai_fortify_pick(2), "10,000 of the player's men next to 5,000"
+    AssertEqualInt 5, ai_fortify_pick(2), "10,000 of the player's troops next to 5,000"
     opt_ai_aggression = 3
     AssertEqualInt 0, ai_fortify_pick(2), "an aggressive computer does not fortify"
 END SUB
@@ -1051,7 +1051,7 @@ SUB TestAiMoveStrength
     army_city(21) = 1: army_size(21) = 500
     city_road(1, 1) = 2: city_army(2) = 1: army_size(1) = 100
     city_road(1, 2) = 3
-    AssertEqualInt 4, ai_move_strength(21), "50,000 men less 10,000 beside it, in hundredths"
+    AssertEqualInt 4, ai_move_strength(21), "50,000 troops less 10,000 beside it, in hundredths"
     opt_ai_aggression = 2
     AssertEqualInt 44, ai_move_strength(21), "and 20 for each level of aggression"
 END SUB
@@ -1069,7 +1069,7 @@ SUB TestAiAttackScore
     RANDOMIZE 1
     army_city(21) = 5: army_size(21) = 10: army_supply(21) = 5
     army_city(1) = 6: army_size(1) = 500: city_army(6) = 1
-    AssertEqualInt -9999, ai_attack_score(21, 1, 6, 100), "1,000 men against 50,000: never"
+    AssertEqualInt -9999, ai_attack_score(21, 1, 6, 100), "1,000 troops against 50,000: never"
     army_size(21) = 500: army_size(1) = 100: opt_ai_aggression = 1
     score = ai_attack_score(21, 1, 6, 100)
     AssertTrue score >= 300 AND score <= 350, "five to one: 100, half the 400 more, and up to 50:" + STR$(score)
@@ -1100,7 +1100,7 @@ SUB TestAiRailroadArmyAndCity
     AssertEqualInt 21, ai_railroad_army(2), "no enemy near it, and two cities by rail"
     AssertEqualInt 3, ai_railroad_city(2, 21), "of cities 2 and 3, near the enemy and to the north, the last"
     city_road(1, 2) = 6: city_owner(6) = 1: city_army(6) = 2: army_city(2) = 6: army_size(2) = 400
-    AssertEqualInt 0, ai_railroad_army(2), "40,000 of the enemy's men next to it: it stays"
+    AssertEqualInt 0, ai_railroad_army(2), "40,000 of the enemy's troops next to it: it stays"
 END SUB
 
 SUB TestArmyRecruitCitiesKeptForTheMonth
@@ -1118,7 +1118,7 @@ SUB TestAiRecruitPickSmallArmy
     DIM cities(MAX_CITIES) AS INTEGER
     cities(1) = 7: cities(2) = 3
     city_army(3) = 4: army_size(4) = 100: side_cash(2) = 500
-    AssertEqualInt 3, ai_recruit_pick(2, cities(), 2), "the city with an army under 15,500 men"
+    AssertEqualInt 3, ai_recruit_pick(2, cities(), 2), "the city with an army under 15,500 troops"
 END SUB
 
 ' A list of cities is sorted by name, and the menu shows the names with the cities' numbers.
@@ -1547,7 +1547,7 @@ SUB TestEventMercenariesNeedTheCapital
     AssertEqualInt 0, event_army, "no army reinforced"
     AssertEqualStr "Longstreet", leader_name$(22), "the commander stays free"
     AssertEqualInt 0, army_size(22), "and has no army"
-    AssertEqualInt 0, army_size(0), "no men go to army 0"
+    AssertEqualInt 0, army_size(0), "no troops go to army 0"
 END SUB
 
 ' With the capital empty and every army slot of the side in use, the event is skipped too.
@@ -1648,7 +1648,7 @@ SUB TestEventRiotsInsteadOfShipworks
     AssertEqualInt event_find("volunteers"), event, "without a fleet: no shipworks and no riot, and .99 is the volunteers' draw"
 END SUB
 
-' Each of the Union's first five armies that has men grows on a draw above .5.
+' Each of the Union's first five armies that has troops grows on a draw above .5.
 SUB TestEventVolunteers
     CALL events_for_test
     army_size(1) = 100: army_size(2) = 100: army_size(6) = 100
@@ -1657,7 +1657,7 @@ SUB TestEventVolunteers
     AssertEqualInt event_find("volunteers"), event, "a draw of .7 or more"
     AssertEqualInt 113, army_size(1), "a tenth more, and one for each point of plus"
     AssertEqualInt 100, army_size(2), "its draw failed"
-    AssertEqualInt 0, army_size(3), "an army without men stays so"
+    AssertEqualInt 0, army_size(3), "an army without troops stays so"
     AssertEqualInt 100, army_size(6), "the sixth army is not looked at"
 END SUB
 
@@ -1745,7 +1745,7 @@ END SUB
 SUB TestVictoryEnemyWipedOut
     side_victory_points(1) = 50
     CALL victory_rule_met(1, 100, 0, j)
-    AssertEqualInt 7, j, "the Rebels have no men in the field"
+    AssertEqualInt 7, j, "the Rebels have no troops in the field"
     AssertEqualInt 350, side_victory_points(1), "300 more points"
 END SUB
 
@@ -1765,7 +1765,7 @@ SUB TestVictoryNearRules
     victory_rule(VICTORY_FORCE_RATIO) = 3
     AssertEqualInt 1, victory_near_force(1, 280, 100), "2.8 to 1 against 3"
     AssertEqualInt 0, victory_near_force(2, 280, 100), "the Rebels are outnumbered"
-    AssertEqualInt 0, victory_near_force(1, 280, 0), "no Rebel men: no ratio"
+    AssertEqualInt 0, victory_near_force(1, 280, 0), "no Rebel troops: no ratio"
 END SUB
 
 SUB TestVictoryPlayOn
@@ -1816,7 +1816,7 @@ END SUB
 SUB TestTurnArmySupplyInWinter
     turn_month = 1: army_city(1) = 5: army_size(1) = 100: army_supply(1) = 2: side_cash(1) = 100
     CALL turn_army_supply(1, blockaded, starved)
-    AssertEqualInt 80, side_cash(1), "a day of supply for 10,000 men costs 20"
+    AssertEqualInt 80, side_cash(1), "a day of supply for 10,000 troops costs 20"
     AssertEqualInt 2, army_supply(1), "bought one, used one away from a sea port in winter"
     AssertEqualInt 0, blockaded, "not blockaded"
     AssertEqualInt 0, starved, "not starved"
@@ -1829,7 +1829,7 @@ SUB TestTurnArmySupplyBlockaded
     AssertEqualInt 1, blockaded, "the Union's fleet is in port 9"
     AssertEqualInt 1, starved, "the day it had is gone"
     AssertEqualInt 0, army_supply(21), "no supplies"
-    AssertEqualInt 40, army_size(21), "an army of 50 or fewer keeps its men"
+    AssertEqualInt 40, army_size(21), "an army of 50 or fewer keeps its troops"
 END SUB
 
 SUB TestTurnStrengthRatio
@@ -1838,7 +1838,7 @@ SUB TestTurnStrengthRatio
     AssertTrue ai_strength_ratio! = .5, "the computer's 5,000 against the player's 10,000:" + STR$(ai_strength_ratio!)
 END SUB
 
-' The army report's Enemy Forces: the men of the armies that hold a city, whatever the
+' The army report's Enemy Forces: the troops of the armies that hold a city, whatever the
 ' computer's strength ratio. An army on a train or an empty slot does not count.
 SUB TestSideTroops
     army_size(21) = 50: army_city(21) = 7
@@ -1910,7 +1910,7 @@ SUB TestArmyClearLeavesTheNames
     army_order(3) = 7: army_supply(3) = 2: army_name$(3) = "Grant": leader_name$(3) = "Meade"
     CALL army_clear(3)
     AssertEqualInt 0, army_city(3), "no city"
-    AssertEqualInt 0, army_size(3), "no men"
+    AssertEqualInt 0, army_size(3), "no troops"
     AssertEqualInt 0, army_leader_rating(3), "no leader rating"
     AssertEqualInt 0, army_experience(3), "no experience"
     AssertEqualInt ORDER_NONE, army_order(3), "no order"

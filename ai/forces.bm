@@ -106,8 +106,8 @@ SUB ai_raise_forces (side)
     side_cash(side) = side_cash(side) + ship_reserve
 END SUB
 
-' How many armies the computer's side has. Two fewer when the other side has more men, and
-' none when it has more than twice as many, so that the computer recruits. The men on a train
+' How many armies the computer's side has. Two fewer when the other side has more troops, and
+' none when it has more than twice as many, so that the computer recruits. The troops on a train
 ' count (side_strength); the army on it does not count as one of its armies.
 FUNCTION ai_count_armies (side)
     DIM i AS INTEGER
@@ -131,7 +131,7 @@ FUNCTION ai_count_armies (side)
     ai_count_armies = army_count
 END FUNCTION
 
-' The computer recruits: it picks a city from its list and raises men there, while the money
+' The computer recruits: it picks a city from its list and raises troops there, while the money
 ' lasts and it has a commander for a new army.
 SUB ai_recruit (side)
     DIM city AS INTEGER
