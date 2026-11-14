@@ -197,6 +197,19 @@ SUB battle_fight (attack_strength, defend_strength, attacker, defender, winner, 
     END IF
 END SUB
 
+' A loss rate for army's side, made smaller when army is large: by a tenth over 300 (30,000
+' men), by a fifth over 800. The product is written as battle_losses wrote it, so it rounds
+' the same.
+FUNCTION battle_size_rate! (loss_rate!, army)
+    battle_size_rate! = loss_rate!
+    SELECT CASE army_size(army)
+        CASE IS > 800
+            battle_size_rate! = .8 * loss_rate!
+        CASE IS > 300
+            battle_size_rate! = .9 * loss_rate!
+    END SELECT
+END FUNCTION
+
 ' The losses of both armies, in hundreds of men. battle_apply_losses takes them later.
 SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
     DIM loss_rate!
@@ -206,12 +219,7 @@ SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
     IF winner = attacker THEN
         loss_rate! = 1.3 * loss_rate!
     END IF
-    SELECT CASE army_size(defender)
-        CASE IS > 800
-            loss_rate! = .8 * loss_rate!
-        CASE IS > 300
-            loss_rate! = .9 * loss_rate!
-    END SELECT
+    loss_rate! = battle_size_rate!(loss_rate!, defender)
     mean = army_size(attacker) * loss_rate!
     variance = mean * (1 - loss_rate!)
     defender_losses = normal_random_number(mean, variance)
@@ -220,12 +228,7 @@ SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
     IF winner = defender THEN
         loss_rate! = 1.5 * loss_rate!
     END IF
-    SELECT CASE army_size(attacker)
-        CASE IS > 800
-            loss_rate! = .8 * loss_rate!
-        CASE IS > 300
-            loss_rate! = .9 * loss_rate!
-    END SELECT
+    loss_rate! = battle_size_rate!(loss_rate!, attacker)
     mean = army_size(defender) * loss_rate!
     variance = mean * (1 - loss_rate!)
     attacker_losses = normal_random_number(mean, variance)

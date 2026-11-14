@@ -299,6 +299,17 @@ SUB TestBattleFightWithSeedOne
     AssertEqualInt 1, rounds, "one round with seed 1"
 END SUB
 
+SUB TestBattleSizeRateFallsForLargeArmies
+    army_size(4) = 300
+    AssertEqualSingle .5, battle_size_rate!(.5, 4), "30,000 men: the whole rate"
+    army_size(4) = 301
+    AssertEqualSingle .9 * .5, battle_size_rate!(.5, 4), "more: nine tenths"
+    army_size(4) = 800
+    AssertEqualSingle .9 * .5, battle_size_rate!(.5, 4), "80,000 men: still nine tenths"
+    army_size(4) = 801
+    AssertEqualSingle .8 * .5, battle_size_rate!(.5, 4), "more: four fifths"
+END SUB
+
 SUB TestBattleLossesWithSeedOne
     RANDOMIZE 1
     rule_attack_loss = 11: rule_defend_loss = 9
