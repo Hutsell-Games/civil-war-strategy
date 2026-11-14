@@ -98,11 +98,11 @@ how the game plays.
 Left alone by group 2 (the special values):
 
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** Its tests read `fleet_exists(side)`
-  since 2026-11-13 (`docs\structure-review.md`, item 2); 7 assignments of 0 are left.
+  since 2026-11-13 (`docs\archived\structure-review-completed.md`, item 2); 7 assignments of 0 are left.
   `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
 - **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 195). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
-- **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
+- **`menu_select` treats a start above 42 as row 1**: `IF row > 21` (`menu_start_row`, `ui\menu.bm` line 184) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
   `MENU_START`, so it stays.
 - **The Utility menu calls `menu_select(-1)`** (`menu_utility`, `ui\options.bm` line 31). No mode has that number, so it is a

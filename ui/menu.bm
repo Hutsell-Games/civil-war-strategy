@@ -59,16 +59,17 @@ SUB draw_menu (title_col, menu_width)
     NEXT i
 END SUB
 
+' Shows the menu of menu_text$() and waits for the player's choice, left in menu_choice: a row,
+' MENU_ESCAPED for Esc, or what menu_arrow_key gives. menu_item_show_beside is the menu's kind
+' (MENU_PLAIN and the others): what it shows beside the highlighted row, and which keys it takes.
 SUB menu_select (menu_item_show_beside%)
     DIM previous_row AS INTEGER
     DIM done AS INTEGER
     DIM pressed$
-    DIM k AS INTEGER
-    DIM menu_initial_letter$
     DIM menu_width AS INTEGER
     DIM row AS INTEGER
     DIM title_col AS INTEGER
-    DIM row_shown AS INTEGER
+    DIM letter_row AS INTEGER
     IF menu_color = 0 THEN
         menu_color = COLOR_GRAY
     END IF
@@ -76,60 +77,22 @@ SUB menu_select (menu_item_show_beside%)
     IF menu_text$(0) = "" THEN
         menu_text$(0) = "M E N U"
     END IF
-
-    IF menu_width = 0 THEN
-        menu_width = menu_measure_width
-    END IF
-    IF menu_col = 0 THEN
-        menu_col = INT(40.5 - .5 * menu_width)
-    END IF
-    IF menu_choice < MENU_START THEN
-        menu_choice = 1
-    END IF
-    IF menu_choice > MENU_START THEN
-        menu_choice = menu_choice - MENU_START
-    END IF
-    IF menu_choice > 21 THEN
-        menu_choice = 1
-    END IF
-    row = menu_choice
-    IF row < 1 THEN
-        row = 1
-    END IF
-    IF row > menu_item_count THEN
-        row = 1
-    END IF
+    menu_width = menu_measure_width
+    CALL menu_place(menu_width)
+    row = menu_start_row
     menu_choice = row
     previous_row = row
-
-    IF menu_row = 0 THEN
-        menu_row = INT(11.5 - .5 * menu_item_count)
-    END IF
-    IF menu_row + menu_item_count > 26 THEN
-        menu_row = 26 - menu_item_count
-    END IF
 
     title_col = INT(.5 * (menu_width - LEN(menu_text$(0))) + .5) + 1
 
     CALL draw_menu(title_col, menu_width)
     DO
-        CALL menu_mark_row(menu_item_show_beside, row, menu_width, row_shown)
-        IF row_shown = 0 THEN
-            COLOR menu_highlight
-            LOCATE menu_row + 2 + row, menu_col + 2
-            PRINT menu_text$(row)
-            IF opt_alt_colors > 0 THEN
-                LINE (8 * (menu_col + 1), 16 * (menu_row + row + 1))-(8 * (menu_col + LEN(menu_text$(row)) + 1) - 1, 16 * (menu_row + row + 2) - 1), menu_highlight, B
-            END IF
-        END IF
+        CALL menu_show_selected(menu_item_show_beside, row, menu_width)
 
         ' Wait for a key that does something. A letter that starts no row is ignored.
         done = 0
         DO
-            CALL script_mark_key_wait(2, menu_text$(0))
-            DO
-                pressed$ = INKEY$
-            LOOP WHILE pressed$ = ""
+            pressed$ = menu_wait_key$
             IF ASC(pressed$) = KEY_ENTER THEN
                 EXIT DO
             END IF
@@ -150,14 +113,11 @@ SUB menu_select (menu_item_show_beside%)
                 EXIT DO
             END IF
             previous_row = row
-            FOR k = 1 TO menu_item_count
-                menu_initial_letter$ = UCASE$(LEFT$(LTRIM$(menu_text$(k)), 1))
-                IF menu_initial_letter$ = UCASE$(pressed$) THEN
-                    menu_choice = k
-                    done = 1
-                    EXIT FOR
-                END IF
-            NEXT k
+            letter_row = menu_letter_row(pressed$)
+            IF letter_row > 0 THEN
+                menu_choice = letter_row
+                done = 1
+            END IF
         LOOP UNTIL done = 1
         IF done = 1 THEN
             EXIT DO
@@ -182,16 +142,7 @@ SUB menu_select (menu_item_show_beside%)
         END IF
 
         ' Another row: the old one is shown plain again.
-        IF menu_item_show_beside = MENU_CITY_ARMY THEN
-            LOCATE menu_row + 2 + previous_row, menu_col + 2
-            PRINT SPACE$(menu_width);
-        END IF
-        COLOR menu_color
-        LOCATE menu_row + 2 + previous_row, menu_col + 2
-        PRINT menu_text$(previous_row)
-
-        CALL menu_unmark_row(menu_item_show_beside, previous_row)
-
+        CALL menu_show_plain(menu_item_show_beside, previous_row, menu_width)
         menu_choice = row
     LOOP
 
@@ -203,6 +154,92 @@ SUB menu_select (menu_item_show_beside%)
     menu_row = 0
     CALL menu_unmark_row(menu_item_show_beside, row)
     VIEW
+END SUB
+
+' Where the menu's box goes, when menu_col or menu_row is 0: centered across the screen, and
+' about the middle of it from top to bottom. A menu that would run off the bottom moves up.
+SUB menu_place (menu_width)
+    IF menu_col = 0 THEN
+        menu_col = INT(40.5 - .5 * menu_width)
+    END IF
+    IF menu_row = 0 THEN
+        menu_row = INT(11.5 - .5 * menu_item_count)
+    END IF
+    IF menu_row + menu_item_count > 26 THEN
+        menu_row = 26 - menu_item_count
+    END IF
+END SUB
+
+' The row a menu starts on, from menu_choice: MENU_START + row, or row 1 for anything that is
+' not a row of the menu.
+FUNCTION menu_start_row
+    DIM row AS INTEGER
+    row = menu_choice
+    IF row < MENU_START THEN
+        row = 1
+    END IF
+    IF row > MENU_START THEN
+        row = row - MENU_START
+    END IF
+    IF row > 21 THEN
+        row = 1
+    END IF
+    IF row < 1 THEN
+        row = 1
+    END IF
+    IF row > menu_item_count THEN
+        row = 1
+    END IF
+    menu_start_row = row
+END FUNCTION
+
+' Waits for a key at a menu, and gives it. A script is told that the menu waits.
+FUNCTION menu_wait_key$
+    DIM pressed$
+    CALL script_mark_key_wait(2, menu_text$(0))
+    DO
+        pressed$ = INKEY$
+    LOOP WHILE pressed$ = ""
+    menu_wait_key$ = pressed$
+END FUNCTION
+
+' The first row whose text starts with the letter pressed$, in either case; 0 when none does.
+FUNCTION menu_letter_row (pressed$)
+    DIM k AS INTEGER
+    menu_letter_row = 0
+    FOR k = 1 TO menu_item_count
+        IF UCASE$(LEFT$(LTRIM$(menu_text$(k)), 1)) = UCASE$(pressed$) THEN
+            menu_letter_row = k
+            EXIT FUNCTION
+        END IF
+    NEXT k
+END FUNCTION
+
+' Shows a row highlighted, with what the menu's kind shows beside it (menu_mark_row).
+SUB menu_show_selected (kind, row, menu_width)
+    DIM row_shown AS INTEGER
+    CALL menu_mark_row(kind, row, menu_width, row_shown)
+    IF row_shown = 0 THEN
+        COLOR menu_highlight
+        LOCATE menu_row + 2 + row, menu_col + 2
+        PRINT menu_text$(row)
+        IF opt_alt_colors > 0 THEN
+            LINE (8 * (menu_col + 1), 16 * (menu_row + row + 1))-(8 * (menu_col + LEN(menu_text$(row)) + 1) - 1, 16 * (menu_row + row + 2) - 1), menu_highlight, B
+        END IF
+    END IF
+END SUB
+
+' Shows a row plain again, and takes away what menu_show_selected showed beside it.
+SUB menu_show_plain (kind, row, menu_width)
+    IF kind = MENU_CITY_ARMY THEN
+        LOCATE menu_row + 2 + row, menu_col + 2
+        PRINT SPACE$(menu_width);
+    END IF
+    COLOR menu_color
+    LOCATE menu_row + 2 + row, menu_col + 2
+    PRINT menu_text$(row)
+
+    CALL menu_unmark_row(kind, row)
 END SUB
 
 ' Draws the screen again under an open menu: the map, the menu and the top bar.

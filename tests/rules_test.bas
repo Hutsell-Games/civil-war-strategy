@@ -504,6 +504,38 @@ SUB TestMxwIsTheLongestEntry
     AssertEqualInt 22, wide, "the title and one more"
 END SUB
 
+' ---------------------------------------------------- menu_select's parts
+
+SUB TestMenuStartRow
+    menu_item_count = 5
+    menu_choice = MENU_START + 3
+    AssertEqualInt 3, menu_start_row, "MENU_START + 3: row 3"
+    menu_choice = 4
+    AssertEqualInt 1, menu_start_row, "a number below MENU_START: row 1"
+    menu_choice = MENU_START + 6
+    AssertEqualInt 1, menu_start_row, "past the last row: row 1"
+    menu_choice = 2 * MENU_START + 1
+    AssertEqualInt 1, menu_start_row, "above 42: row 1"
+END SUB
+
+SUB TestMenuLetterRow
+    menu_text$(1) = "Side": menu_text$(2) = " sound": menu_text$(3) = "Graphics": menu_item_count = 3
+    AssertEqualInt 1, menu_letter_row("s"), "the first row with S, in either case"
+    AssertEqualInt 3, menu_letter_row("G"), "Graphics"
+    AssertEqualInt 0, menu_letter_row("x"), "no row starts with X"
+END SUB
+
+SUB TestMenuPlace
+    menu_item_count = 4
+    CALL menu_place(10)
+    AssertEqualInt 35, menu_col, "centered across"
+    AssertEqualInt 9, menu_row, "about the middle"
+    menu_col = 68: menu_row = 24
+    CALL menu_place(10)
+    AssertEqualInt 68, menu_col, "a column set stays"
+    AssertEqualInt 22, menu_row, "moved up off the bottom"
+END SUB
+
 ' ------------------------------------------- army_detach and army_drill
 
 SUB TestDetachTakesThreeTenths
