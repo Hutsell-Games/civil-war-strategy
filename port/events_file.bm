@@ -100,39 +100,56 @@ SUB load_events (file$)
     ' The events that "instead" and "then" name may come later in the file, so they are
     ' looked up when all are read.
     FOR row = 1 TO event_count
-        IF event_before(row) = 0 AND event_favors(row) = SIDE_NONE THEN
-            why$ = "has no favors line"
-        END IF
-        IF event_effect(row) <> EFFECT_NONE AND event_favors(row) = SIDE_NONE AND event_for(row) = SIDE_NONE THEN
-            why$ = "has an effect but no side: it needs a favors or a for line"
-        END IF
-        IF instead_name$(row) <> "" THEN
-            event_instead(row) = event_find(instead_name$(row))
-            IF event_instead(row) = 0 THEN
-                why$ = "names an event that is not there: " + instead_name$(row)
-            END IF
-        END IF
-        IF then_name$(row) <> "" THEN
-            event_then(row) = event_find(then_name$(row))
-            IF event_then(row) = 0 THEN
-                why$ = "names an event that is not there: " + then_name$(row)
-            END IF
-        END IF
+        why$ = event_row_problem$(row, instead_name$(row), then_name$(row))
         IF why$ <> "" THEN
             event_file_error$ = file$ + ", [" + event_name$(row) + "]: " + why$
             EXIT SUB
         END IF
     NEXT row
+    why$ = event_general_problem$(has_banner, has_chance)
+    IF why$ <> "" THEN
+        event_file_error$ = file$ + ": " + why$
+    END IF
+END SUB
+
+' The checks of one event once the whole file is read, which also look up the events that its
+' "instead" and "then" lines name. "" when the event is right; otherwise why it is not. When
+' several checks fail, the last one is given.
+FUNCTION event_row_problem$ (row, instead_name$, then_name$)
+    DIM why$
+    IF event_before(row) = 0 AND event_favors(row) = SIDE_NONE THEN
+        why$ = "has no favors line"
+    END IF
+    IF event_effect(row) <> EFFECT_NONE AND event_favors(row) = SIDE_NONE AND event_for(row) = SIDE_NONE THEN
+        why$ = "has an effect but no side: it needs a favors or a for line"
+    END IF
+    IF instead_name$ <> "" THEN
+        event_instead(row) = event_find(instead_name$)
+        IF event_instead(row) = 0 THEN
+            why$ = "names an event that is not there: " + instead_name$
+        END IF
+    END IF
+    IF then_name$ <> "" THEN
+        event_then(row) = event_find(then_name$)
+        IF event_then(row) = 0 THEN
+            why$ = "names an event that is not there: " + then_name$
+        END IF
+    END IF
+    event_row_problem$ = why$
+END FUNCTION
+
+' The checks of [events] once the whole file is read: "" when it has its banner and chance
+' lines; otherwise the last one missing.
+FUNCTION event_general_problem$ (has_banner, has_chance)
+    DIM why$
     IF has_banner = 0 THEN
         why$ = "[events] needs a banner line"
     END IF
     IF has_chance = 0 THEN
         why$ = "[events] needs a chance line"
     END IF
-    IF why$ <> "" THEN
-        event_file_error$ = file$ + ": " + why$
-    END IF
-END SUB
+    event_general_problem$ = why$
+END FUNCTION
 
 ' Empties a row of the events table before its lines are read.
 SUB event_clear_row (row)

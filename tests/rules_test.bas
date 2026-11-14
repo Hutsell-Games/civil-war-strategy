@@ -1336,6 +1336,24 @@ SUB TestLoadEventsChecksNamesAtTheEnd
     AssertEqualStr "[events] needs a chance line", events_why$, "the chance"
 END SUB
 
+' The last check that fails is the one given; the names are looked up.
+SUB TestEventRowProblemGivesTheLast
+    event_count = 2: event_name$(2) = "snow"
+    event_before(1) = 0: event_favors(1) = SIDE_NONE: event_for(1) = SIDE_NONE: event_effect(1) = EFFECT_NONE
+    AssertEqualStr "has no favors line", event_row_problem$(1, "", ""), "no favors"
+    AssertEqualStr "names an event that is not there: hail", event_row_problem$(1, "hail", ""), "the name wins"
+    event_favors(1) = SIDE_UNION
+    AssertEqualStr "", event_row_problem$(1, "snow", "snow"), "right"
+    AssertEqualInt 2, event_instead(1), "instead found"
+    AssertEqualInt 2, event_then(1), "then found"
+END SUB
+
+SUB TestEventGeneralProblem
+    AssertEqualStr "", event_general_problem$(1, 1), "both lines"
+    AssertEqualStr "[events] needs a banner line", event_general_problem$(0, 1), "no banner"
+    AssertEqualStr "[events] needs a chance line", event_general_problem$(0, 0), "neither: the chance, checked last"
+END SUB
+
 SUB TestLoadEventsStopsAtTheLimits
     many$ = ""
     FOR i = 1 TO MAX_EVENTS + 1: many$ = many$ + "[e" + LTRIM$(STR$(i)) + "]|": NEXT i

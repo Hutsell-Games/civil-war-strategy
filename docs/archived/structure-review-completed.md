@@ -318,6 +318,12 @@ Six unit tests are new: `TestAiStayWeight`, `TestAiMoveStrength`, `TestAiCityTar
    so the city just before the first with that letter is still never reached (`TODO.md`, "The
    game"). Up and down used to loop forever if the side held no city; they now give city 0,
    shown with no name. `TestSideCityStepWrapsBothWays` and `TestSideCityByLetter` are new.
+7. **`load_events`' checks at the end** (`port\events_file.bm`, 123 lines to 101).
+   `event_row_problem$` checks one event and looks up its "instead" and "then" names;
+   `event_general_problem$` checks that `[events]` has its banner and chance lines. Each gives
+   the last check that fails, as before. `TestEventRowProblemGivesTheLast` and
+   `TestEventGeneralProblem` are new. The reading loop stays as it is: its branches share the
+   state of the section being read.
 
 ## Questions for the user
 
