@@ -25,9 +25,11 @@ changes one thing. Blank lines and lines that start with "#" are skipped.
                                       blanks is written with "_" for each blank.
     noarmy <slots>                    empty slots: numbers and ranges
 
-The file has the 86 lines that save_game writes (port/files.bm): the scenario's folder, the date,
+The file has the first 86 lines that save_game writes (port/files.bm): the scenario's folder, the date,
 40 armies, 40 cities, and two lines for each side. A side's count of cities and its income are worked out from the
-owners, as the game does at each new month.
+owners, as the game does at each new month. save_game then writes the victory rules and the events that have
+happened; a file without them loads as a game saved before 2026-11-14, with the scenario's victory rules and no
+event done.
 """
 
 from __future__ import annotations

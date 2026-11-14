@@ -186,12 +186,26 @@ FUNCTION event_conditions_hold (first, count, row, good_side)
 END FUNCTION
 
 ' Whether an event's effect can be carried out. Ships need a fleet that is not full; ships
-' to a port also need the port. Every other effect can always be carried out.
+' to a port also need the port. Reinforcements need the side's capital, and an army there or
+' a free army slot to form one in. Every other effect can always be carried out.
 FUNCTION event_possible (row, good_side)
     DIM port AS INTEGER
     DIM found AS INTEGER
+    DIM i AS INTEGER
     event_possible = 1
     SELECT CASE event_effect(row)
+        CASE EFFECT_REINFORCE
+            event_possible = 0
+            IF side_capital(good_side) > 0 THEN
+                IF city_army(side_capital(good_side)) > 0 THEN
+                    event_possible = 1
+                END IF
+                FOR i = side_first_army(good_side) TO side_last_army(good_side)
+                    IF NOT army_exists(i) THEN
+                        event_possible = 1
+                    END IF
+                NEXT i
+            END IF
         CASE EFFECT_SHIPS
             IF NOT fleet_exists(good_side) OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN
                 event_possible = 0
@@ -263,11 +277,12 @@ SUB event_apply (row, good_side, weight)
             END IF
         CASE EFFECT_REINFORCE
             ' The men join the army in the side's capital, or else form a new army there under
-            ' the next commander. With neither they are lost (event_army is 0). The original
-            ' added them to army 0, which is no army.
+            ' the next commander. With neither, or with no capital, they are lost (event_army
+            ' is 0); event_possible skips the event then. The original added them to army 0,
+            ' which is no army.
             capital = side_capital(good_side)
             event_army = city_army(capital)
-            IF event_army = 0 THEN
+            IF event_army = 0 AND capital > 0 THEN
                 CALL event_new_army(good_side, capital, event_army)
             END IF
             IF event_army > 0 THEN

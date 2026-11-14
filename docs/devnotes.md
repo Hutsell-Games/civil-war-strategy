@@ -10,8 +10,12 @@ The branch `main` of this repo is an earlier port of 2024, made for QB64pe: one 
 programs and their features removed. This branch does not build on it. It takes four graphics lines from it
 (item 8) and the text of the help program (item 6).
 
-This file holds what was changed from `canonical-source` and why. What each step of the port found is in
+The permanent record of rule and observable behavior changes from `canonical-source` is
+[rule-changes.md](rule-changes.md). This file holds the port's technical changes and their reasons.
+What each step of the port found is in
 `archived\devnotes-completed.md`.
+The ongoing evidence for possible QB64Rust language and tooling improvements is in
+[qb64-friction.md](qb64-friction.md), phase 11 step 5 of the modernization plan.
 
 ## Build
 

@@ -30,7 +30,7 @@ SUB menu_victory_conditions
     DIM i AS INTEGER
     DIM start_option AS INTEGER
     cities_text$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Cities"
-    income_text$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Total Income"
+    income_text$ = STR$(ABS(victory_rule(VICTORY_INCOME))) + "% Total Income"
     menu_text$(8) = "Time: " + month_name$(victory_rule(VICTORY_MONTH)) + STR$(ABS(victory_rule(VICTORY_YEAR)))
     menu_text$(9) = RTRIM$(STR$(ABS(victory_rule(VICTORY_FORCE_RATIO)))) + ":1 Force Ratio"
     COLOR COLOR_WHITE
@@ -192,7 +192,7 @@ SUB report_armies (side)
         END IF
     NEXT i
     PRINT " "; STRING$(70, "Ä")
-    PRINT " Total Forces "; TAB(25); LTRIM$(STR$(total_troops)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(INT(ai_strength_ratio! * total_troops))); "00 ]"
+    PRINT " Total Forces "; TAB(25); LTRIM$(STR$(total_troops)); "00"; TAB(40); "[ Enemy Forces "; LTRIM$(STR$(side_troops(other_side(side)))); "00 ]"
     PRINT " "; STRING$(70, "Ä")
     PRINT " "; side_name$(side); " NAVY has "; fleet_size(side); " ship(s) ";
     ironclads = 0

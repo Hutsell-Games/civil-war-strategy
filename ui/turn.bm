@@ -185,7 +185,13 @@ SUB turn_attack (moving_army, city, fought, took)
             CALL clear_bottom_line
             message$ = army_name$(loser) + "'s army is crushed in " + city_name$(army_city(defender))
             CALL scribe_message(message$, SHOW_BOX)
-            CALL turn_army_surrenders(loser, moving_army)
+            ' The winner takes the points and the supplies: the defender when the attacker
+            ' is crushed.
+            IF loser = moving_army THEN
+                CALL turn_army_surrenders(loser, defender)
+            ELSE
+                CALL turn_army_surrenders(loser, moving_army)
+            END IF
             IF NOT army_exists(moving_army) THEN
                 EXIT SUB
             END IF
@@ -281,9 +287,9 @@ SUB turn_defender_retreats (moving_army, city, defender, gone)
     gone = 1
 END SUB
 
-' An army is crushed or surrenders to moving_army: its slot is cleared and the other
-' side of moving_army gets 25 victory points.
-SUB turn_army_surrenders (army, moving_army)
+' An army is crushed or surrenders to winner: its slot is cleared, and winner's side gets
+' 25 victory points and the army's supplies.
+SUB turn_army_surrenders (army, winner)
     DIM side AS INTEGER
     IF opt_graphics >= GRAPHICS_FULL THEN
         CALL draw_surrender(army)
@@ -300,7 +306,7 @@ SUB turn_army_surrenders (army, moving_army)
     IF army_has_move(army) THEN
         CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_ARMY)
     END IF
-    CALL turn_army_lost(army, moving_army)
+    CALL turn_army_lost(army, winner)
     CALL wait_seconds(PAUSE_LONG)
     CALL clear_right_panel
 END SUB

@@ -293,6 +293,22 @@ FUNCTION army_in_field (army)
     army_in_field = army_exists(army) OR (army > 0 AND train_army(army_side(army)) = army)
 END FUNCTION
 
+' A side's men in hundreds: the armies that hold a city, as the army report counts them. The
+' report's "Enemy Forces" is this for the other side. The original printed the computer's
+' strength ratio times the side's men, which turn_update_victory_points raises by .7 when the
+' computer holds few cities.
+FUNCTION side_troops (side)
+    DIM i AS INTEGER
+    DIM troops AS INTEGER
+    troops = 0
+    FOR i = side_first_army(side) TO side_last_army(side)
+        IF army_exists(i) THEN
+            troops = troops + army_size(i)
+        END IF
+    NEXT i
+    side_troops = troops
+END FUNCTION
+
 ' A side's strength in thousands of men: a tenth of each army's size in hundreds, rounded at
 ' each step as the sum is an INTEGER. The computer plays by it.
 FUNCTION side_strength (side)

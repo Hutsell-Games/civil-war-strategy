@@ -39,3 +39,5 @@ The tests are described in [tests/README.md](tests/README.md). Work still to do 
 
 The original documentation of the game is in `docs`: the manual `CWS.DOC`, `README.1ST` and `WRHGAMES.DOC`.
 The notes on the port are in [docs/devnotes.md](docs/devnotes.md).
+The permanent record of rule and behavior changes from the canonical DOS game is
+[docs/rule-changes.md](docs/rule-changes.md).

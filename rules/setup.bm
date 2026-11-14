@@ -156,15 +156,16 @@ SUB option_toggle_winter_campaigns
     opt_winter_campaigns = 1 - opt_winter_campaigns
 END SUB
 
-' Realism: off or on. When it goes on, the Union's extra income is worked out again.
+' Realism: off or on. Either way the Union's extra income is worked out again. The original
+' worked it out only when Realism went on, so turning it off kept the 70% of Realism.
 SUB option_toggle_realism
     opt_realism = 1 - opt_realism
     IF opt_realism <> REALISM_OFF THEN
         IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN
             opt_event_balance = opt_event_balance + 2
         END IF
-        CALL set_union_advantage
     END IF
+    CALL set_union_advantage
 END SUB
 
 SUB option_toggle_history
@@ -194,7 +195,8 @@ SUB game_new
     CALL load_cities
 END SUB
 
-' Clears the armies, the fleets, the trains and the victory points for a new game.
+' Clears the armies, the fleets, the trains, the city counts and the victory points for a new
+' game.
 SUB game_reset
     DIM k AS INTEGER
     game_over = 0
@@ -215,6 +217,7 @@ SUB game_reset
         fleet_city(k) = 0
         train_army(k) = 0
         side_victory_points(k) = 0
+        side_city_count(k) = 0
         train_city(k) = 0
     NEXT k
     saves_exist = 1

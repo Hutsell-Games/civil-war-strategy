@@ -61,6 +61,11 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
   already counted them in. The original did the same (`CWSTRAT2.BAS` line 811, with `vptotal` from
   `CWSTRAT.BAS` line 169). Found 2026-11-13. A fix changes the report's screen in the scripts that
   show it.
+- **Realism on gives a Rebel player's event balance of 1 two more, and Realism off does not take them back**
+  (`option_toggle_realism`, `rules\setup.bm`). The original did the same (`CWSTRAT.BAS` line 628). No menu
+  sets 1 (the Random Events menu sets 0, 3, 5 or 7), so only a `CWS.CFG` written by hand reaches it. Taking
+  2 off when Realism goes off would also change a 3 set in the menu, so a fix needs to remember the
+  change. Found 2026-11-14.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
@@ -70,6 +75,15 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
 Ideas that the original game did not have. Each one changes how the game plays, looks or sounds, or where
 it keeps its files, so each needs its own decision and its scripts recorded again.
 
+- **Battle odds that match the roll.** The battle screen's "Odds" is `a / (a + d)` (`battle_odds_text$`,
+  `ui\battle.bm`), as in DOS. `battle_fight` (`rules\battle.bm`) rolls differently: each side hits on an
+  INTEGER draw of `scale * RND` up to its strength, and a round where both or neither hit is rolled again. The
+  true chance is `p(1 - q) / (p(1 - q) + q(1 - p))`, with `p = (a + .5) / scale` and `q = (d + .5) / scale`.
+  The shown odds always name the right favorite but understate it, by far: 3 against 2 shows 60%, and the
+  attacker wins 81%; 2 against 1 shows 66%, true 83%; 4 against 7 shows 36%, true 8% (by the formula and by
+  a simulation of the roll, 2026-11-14). The manual (`docs\CWS.DOC`, section 7.3) calls the odds "A GUIDE
+  ONLY", calculated "separately" from the combat, so this is as designed. Showing the true chance changes the
+  screen of every battle, not the battles, and the manual's sentence would need rewording.
 - **Records for the armies.** Phase 10 closed with no records (`docs\archived\modernize-plan-completed.md`, "Phase 10:
   records"). Join copies some of an army's fields and four places clear a slot, each clearing different fields.
   If those clears and copies were made the same, an `armies(i)` record with one copy and one clear would be

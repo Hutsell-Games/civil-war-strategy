@@ -283,6 +283,10 @@ In the working tree on 2026-11-13, not committed. Each part passed the unit test
 
 ## The third review: the size of files and procedures
 
+Written 2026-11-14. It asked whether procedures should be broken up or filed elsewhere. Of 388
+procedures, 276 are 25 lines or fewer and 11 are over 100. The user took its order ("do file
+splits", then "continue", 2026-11-14). Every step is done or dropped.
+
 ### Done, keeping every screen
 
 1. **Three files split by topic** (`tools\refactor\split_files.py`, commit `1f3e52a`). `ai\ai.bm`
@@ -329,6 +333,16 @@ Six unit tests are new: `TestAiStayWeight`, `TestAiMoveStrength`, `TestAiCityTar
    now calls nothing in `ui\` but `ui\ai.bm`, so `tests\test_layers.py` has no exception left.
    `ai_fortify` sets the army busy before the fort is built rather than after; building a fort
    does not read the army's order.
+Dropped (user, 2026-11-14): **the computer's enemy as a parameter.** `ai_evaluate_move`,
+`ai_railroad_city`, `city_nearby_enemy_strength`, `ai_raise_forces` and `ai_fleet_orders` read
+the enemy from `current_side`. The computer's side is always `other_side(current_side)`
+(`ai_turn`, `ui\turn.bm`), so taking it from `side` would change nothing in play. The change
+was built and reverted: it put a new parameter on all 10 calls of
+`city_nearby_enemy_strength` for no need the game has today.
+
+Left alone: `battle_strengths` (see the second review's deferred items), `menu_utility`,
+`report_armies` and `end_game`, which are long but read top to bottom, and the four pictures
+drawn line by line (`draw_map`, `draw_schooner`, `draw_ironclad`, `draw_surrender`).
 
 ## Questions for the user
 

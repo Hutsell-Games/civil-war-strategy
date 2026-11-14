@@ -38,7 +38,7 @@ MAP
 You see a map of the eastern U.S. along with the Main Menu to the right.
 Above the menu is a flag showing the side currently selected.
 
-The Fcolored circles on the map display are cities.
+The colored circles on the map display are cities.
     - BLUE circles are Union controlled cities
     - GRAY circles are Confederate controlled cities
     - RED circles are neutral cities

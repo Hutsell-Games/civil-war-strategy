@@ -12,21 +12,6 @@ and `scenarios\` (phase 11 of `modernize-plan.md`). City 30 is still used in `ai
 The layer check, state predicates, single-value FUNCTIONs, removal of menu globals from the
 rules and computer, and shared victory-point calculation are completed in the archive.
 
-## The third review: the size of files and procedures
-
-Written 2026-11-14. It asked whether procedures should be broken up or filed elsewhere. Of 388
-procedures, 276 are 25 lines or fewer and 11 are over 100. The user took its order ("do file
-splits", then "continue", 2026-11-14). What is done is in `archived\structure-review-completed.md`.
-
-Still to do, each a commit that keeps every screen:
-
-1. **The computer's enemy as a parameter.** `ai_evaluate_move`, `ai_railroad_city` and
-   `city_nearby_enemy_strength` read the enemy from `current_side`; the other `ai_*` take `side`.
-
-Left alone: `battle_strengths` (see the deferred items below), `menu_utility`, `report_armies` and
-`end_game`, which are long but read top to bottom, and the four pictures drawn line by line
-(`draw_map`, `draw_schooner`, `draw_ironclad`, `draw_surrender`).
-
 ## Deliberately deferred from the second review
 
 The user accepted the pragmatic engineer's plan on 2026-11-13. These items were left out:

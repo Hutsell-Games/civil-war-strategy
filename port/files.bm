@@ -120,8 +120,9 @@ END SUB
 
 ' Reads the saved game cws<slot>.sav: the scenario, the date, the armies, the cities, the sides,
 ' and the side that plays. A save of another scenario than the one loaded reads that scenario's
-' leaders and map first. A leader who commands an army leaves the free leaders. Then it reads
-' the settings of cws.cfg. problem$ is "" when the game was loaded; otherwise it says why not,
+' leaders and map first. A leader who commands an army leaves the free leaders. The victory
+' rules and the events that have happened follow, in a game saved since 2026-11-14 (save_game).
+' Then it reads the settings of cws.cfg. problem$ is "" when the game was loaded; otherwise it says why not,
 ' and nothing was changed. The menu of saved games is menu_load_game (ui/files.bm).
 SUB load_game (slot, problem$)
     DIM last_army AS INTEGER
@@ -137,6 +138,7 @@ SUB load_game (slot, problem$)
     DIM text$
     DIM folder$
     DIM named AS INTEGER
+    DIM done_count AS INTEGER
     problem$ = ""
     file$ = save_file_name$(slot)
     ' The scenario first. The file is closed again, because load_scenario and load_cities read
@@ -192,6 +194,23 @@ SUB load_game (slot, problem$)
         INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
         fleet_size(i) = LEN(fleet_ships$(i))
     NEXT i
+    FOR i = 1 TO MAX_EVENTS
+        event_done(i) = 0
+    NEXT i
+    ' A game saved before saves held the victory rules and the events ends here. It keeps the
+    ' victory rules loaded now, and no event has happened.
+    IF NOT EOF(1) THEN
+        INPUT #1, victory_rule(1), victory_rule(2), victory_rule(3), victory_rule(4), victory_rule(5), victory_rule(6)
+        INPUT #1, done_count
+        FOR k = 1 TO done_count
+            INPUT #1, text$
+            ' A name that EVENTS.DAT no longer has is passed over.
+            row = event_find(text$)
+            IF row > 0 THEN
+                event_done(row) = 1
+            END IF
+        NEXT k
+    END IF
 
     CLOSE #1
     CALL config_read(config_side)
@@ -199,10 +218,14 @@ SUB load_game (slot, problem$)
 END SUB
 
 ' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The file's first line is the
-' scenario's folder. The menu of the slots is menu_save_game (ui/files.bm).
+' scenario's folder. After the sides come the six victory rules, as switched and as raised by
+' playing on, then the count of the events that have happened and their names in EVENTS.DAT.
+' The original saved neither, so a game loaded could have the Emancipation Proclamation again.
+' The menu of the slots is menu_save_game (ui/files.bm).
 SUB save_game (slot)
     DIM i AS INTEGER
     DIM config_side AS INTEGER
+    DIM done_count AS INTEGER
     OPEN "O", 1, save_file_name$(slot)
     WRITE #1, scenario_folder$(scenario_now)
     WRITE #1, turn_month, turn_year, union_income_bonus, current_side
@@ -215,6 +238,17 @@ SUB save_game (slot)
     FOR i = SIDE_UNION TO SIDE_REBEL
         WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
         WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
+    NEXT i
+    WRITE #1, victory_rule(1), victory_rule(2), victory_rule(3), victory_rule(4), victory_rule(5), victory_rule(6)
+    done_count = 0
+    FOR i = 1 TO event_count
+        done_count = done_count + event_done(i)
+    NEXT i
+    WRITE #1, done_count
+    FOR i = 1 TO event_count
+        IF event_done(i) THEN
+            WRITE #1, event_name$(i)
+        END IF
     NEXT i
     CLOSE #1
 

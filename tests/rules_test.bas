@@ -1534,6 +1534,34 @@ SUB TestEventMercenariesJoinTheCapitalsArmy
     army_size(23) = 0: army_city(23) = 0: city_army(25) = 0
 END SUB
 
+' With no capital the mercenaries cannot land: the event is skipped, no commander is used,
+' and the next event of the list comes.
+SUB TestEventMercenariesNeedTheCapital
+    CALL events_for_test
+    CALL mercenaries_for_test
+    side_capital(2) = 0
+    side_city_count(2) = 30
+    script_dice$ = "0,0,0,.5,0,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("loan"), event, "no capital: the loan comes instead"
+    AssertEqualInt 0, event_army, "no army reinforced"
+    AssertEqualStr "Longstreet", leader_name$(22), "the commander stays free"
+    AssertEqualInt 0, army_size(22), "and has no army"
+    AssertEqualInt 0, army_size(0), "no men go to army 0"
+END SUB
+
+' With the capital empty and every army slot of the side in use, the event is skipped too.
+SUB TestEventMercenariesNeedAnArmySlot
+    CALL events_for_test
+    CALL mercenaries_for_test
+    FOR i = 21 TO 40: army_size(i) = 10: army_city(i) = 1: NEXT i
+    side_city_count(2) = 30
+    script_dice$ = "0,0,0,.5,0,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("loan"), event, "no slot: the loan comes instead"
+    AssertEqualInt 0, city_army(25), "no army in the capital"
+END SUB
+
 ' The Rebels with no army, the capital 25 empty, and Longstreet the first free leader.
 SUB mercenaries_for_test
     DIM i AS INTEGER
@@ -1810,6 +1838,19 @@ SUB TestTurnStrengthRatio
     AssertTrue ai_strength_ratio! = .5, "the computer's 5,000 against the player's 10,000:" + STR$(ai_strength_ratio!)
 END SUB
 
+' The army report's Enemy Forces: the men of the armies that hold a city, whatever the
+' computer's strength ratio. An army on a train or an empty slot does not count.
+SUB TestSideTroops
+    army_size(21) = 50: army_city(21) = 7
+    army_size(22) = 120: army_city(22) = 9
+    army_size(23) = 80: train_army(SIDE_REBEL) = 23
+    army_size(24) = 30
+    army_size(1) = 100: army_city(1) = 3
+    ai_strength_ratio! = 2.7
+    AssertEqualInt 170, side_troops(SIDE_REBEL), "two armies in cities, in hundreds"
+    AssertEqualInt 100, side_troops(SIDE_UNION), "the other side's"
+END SUB
+
 SUB TestTurnArmyMarches
     army_supply(1) = 2
     CALL turn_army_marches(1, starved)
@@ -1967,8 +2008,8 @@ SUB TestOptionSetEventBalance
     CALL option_set_event_balance(1): AssertEqualInt 0, opt_event_balance, "off"
 END SUB
 
-' Realism on works the Union's extra income out again; realism off does not. From high
-' realism (2) the switch gives -1, which counts as on (as in the original).
+' Realism on and off both work the Union's extra income out again; the original did it only
+' for on. From high realism (2) the switch gives -1, which counts as on (as in the original).
 SUB TestOptionToggleRealism
     opt_players = PLAYERS_ONE: opt_difficulty = 3
     CALL option_toggle_realism
@@ -1976,7 +2017,7 @@ SUB TestOptionToggleRealism
     AssertEqualInt 252, union_income_bonus, "seven tenths of 360"
     CALL option_toggle_realism
     AssertEqualInt REALISM_OFF, opt_realism, "off"
-    AssertEqualInt 252, union_income_bonus, "not worked out again (as in the original)"
+    AssertEqualInt 360, union_income_bonus, "all of it again"
     opt_realism = REALISM_HIGH: union_income_bonus = 0
     CALL option_toggle_realism
     AssertEqualInt -1, opt_realism, "from high realism: -1 (as in the original)"
@@ -2362,6 +2403,85 @@ SUB TestSaveGameAndLoadItAgain
     AssertEqualInt 25, train_city(SIDE_REBEL), "where it goes"
     AssertEqualInt 4, opt_difficulty, "a setting, from cws.cfg"
     AssertEqualInt 1, opt_history, "another"
+END SUB
+
+' A saved game keeps the victory rules, as switched off (negative) and as raised by playing on,
+' and the events that have happened, by name. An event done in this session but not in the
+' saved game is not done after the load.
+SUB TestSaveGameKeepsVictoryRulesAndEvents
+    CHDIR TestTempDir$
+    event_count = 3: event_name$(1) = "emancipation": event_name$(2) = "riots": event_name$(3) = "reelection"
+    event_done(1) = 1: event_done(3) = 1
+    victory_rule(1) = 3: victory_rule(2) = 1865: victory_rule(3) = 34: victory_rule(4) = -60
+    victory_rule(5) = 0: victory_rule(6) = 4
+    CALL save_game(3)
+    event_done(1) = 0: event_done(2) = 1: event_done(3) = 0
+    FOR i = 1 TO 6: victory_rule(i) = 99: NEXT i
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt 1, event_done(1), "the Emancipation Proclamation has happened"
+    AssertEqualInt 0, event_done(2), "riots done since, not in the saved game"
+    AssertEqualInt 1, event_done(3), "the reelection has happened"
+    AssertEqualInt 3, victory_rule(1), "the month"
+    AssertEqualInt 1865, victory_rule(2), "the year"
+    AssertEqualInt 34, victory_rule(3), "the cities, raised by playing on"
+    AssertEqualInt -60, victory_rule(4), "the income, switched off"
+    AssertEqualInt 0, victory_rule(5), "the capital, off after playing on"
+    AssertEqualInt 4, victory_rule(6), "the force ratio"
+END SUB
+
+' The events are saved by name: a saved event loads into its row when EVENTS.DAT has moved
+' it, and a name that EVENTS.DAT no longer has is passed over.
+SUB TestSaveGameFindsEventsByName
+    CHDIR TestTempDir$
+    event_count = 2: event_name$(1) = "emancipation": event_name$(2) = "riots"
+    event_done(1) = 1: event_done(2) = 1
+    CALL save_game(3)
+    event_count = 2: event_name$(1) = "riots": event_name$(2) = "reelection"
+    event_done(1) = 0: event_done(2) = 0
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt 1, event_done(1), "riots, now row 1"
+    AssertEqualInt 0, event_done(2), "the reelection was not saved"
+END SUB
+
+' A game saved before saves held the victory rules and the events ends after the sides'
+' lines: 86 lines in all. It loads with the victory rules as they are, and no event done.
+SUB TestSaveGameWithoutVictoryRulesLoads
+    CHDIR TestTempDir$
+    event_count = 1: event_name$(1) = "emancipation": event_done(1) = 1
+    victory_rule(3) = 32: turn_year = 1863
+    CALL save_game(3)
+    f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f
+    g = FREEFILE: OPEN "cws4.sav" FOR OUTPUT AS #g
+    FOR i = 1 TO 86: LINE INPUT #f, text$: PRINT #g, text$: NEXT i
+    CLOSE #f, #g
+    victory_rule(3) = 30: turn_year = 0
+    CALL load_game(4, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt 1863, turn_year, "the year"
+    AssertEqualInt 30, victory_rule(3), "the victory rules stay as they were"
+    AssertEqualInt 0, event_done(1), "no event done"
+END SUB
+
+' A new game on another scenario counts only that scenario's cities, as the program does
+' when the player picks another map after Start NEW Game.
+SUB TestGameNewCountsOnlyItsScenariosCities
+    CHDIR _STARTDIR$ + "/.."
+    scenario_now = 0
+    CALL game_new
+    AssertEqualInt 11, side_city_count(SIDE_UNION), "the standard map: 11 Union cities"
+    scenario_now = 2
+    CALL game_new
+    AssertEqualStr "alternate", scenario_folder$(scenario_now), "the alternate map"
+    AssertEqualInt 10, side_city_count(SIDE_UNION), "10 Union cities, not 21"
+    union_cities = side_city_count(SIDE_UNION): rebel_cities = side_city_count(SIDE_REBEL)
+    scenario_now = 1
+    CALL game_new
+    scenario_now = 2
+    CALL game_new
+    AssertEqualInt union_cities, side_city_count(SIDE_UNION), "the same after switching back and again"
+    AssertEqualInt rebel_cities, side_city_count(SIDE_REBEL), "for both sides"
 END SUB
 
 ' A saved game's first line is its scenario's folder. Loaded on that scenario, it reads the
