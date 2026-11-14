@@ -306,6 +306,12 @@ Six unit tests are new: `TestAiStayWeight`, `TestAiMoveStrength`, `TestAiCityTar
    `menu_letter_row` finds the row of a letter, and `menu_show_selected` and `menu_show_plain`
    draw a row highlighted and plain. A test `IF menu_width = 0` that was always true went.
    `TestMenuStartRow`, `TestMenuLetterRow` and `TestMenuPlace` are new.
+5. **`calculate_battle` in parts** (`ui\battle.bm`, 179 lines to 33). `draw_battle_attacker`
+   and `draw_battle_defender` draw the two halves of the panel, `draw_battle_odds` the odds,
+   `draw_battle_fort` the fort, `draw_battle_winner` the winner and `draw_battle_losses` the
+   losses; `battle_cannon_sound` plays the rounds. `battle_history_line$` builds the history's
+   line in locals, so `menu_text$(1)` to `(4)` are no longer its scratch strings.
+   `TestBattleOddsText` and `TestBattleHistoryLine` are new.
 
 ## Questions for the user
 

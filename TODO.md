@@ -83,7 +83,7 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 
 ## The code
 
-Left alone by phase 3, group 1, of `docs\modernize-plan.md` (the sides and limits). None of these changes
+Left alone by phase 3, group 1, of `docs\archived\modernize-plan-completed.md` (the sides and limits). None of these changes
 how the game plays.
 
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 142 and 147).
@@ -132,7 +132,7 @@ Left alone by group 7 (the rule numbers):
 
 Left alone by group 8 (the colors):
 
-- **`COLOR 16 - side_color` shows the other side's color** (`calculate_battle`, `ui\battle.bm`): 16 - 9
+- **`COLOR 16 - side_color` shows the other side's color** (`draw_battle_defender` and `draw_battle_losses`, `ui\battle.bm`): 16 - 9
   is 7 and 16 - 7 is 9. It stays as written. `side_color_of` (`game\colors.bm`) gives the color.
 - **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 56, Chk Links;
   `ui\turn.bm` line 134, "There are still defenders"; left alone by group 9). It goes with phase 7's

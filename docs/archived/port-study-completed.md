@@ -1,7 +1,8 @@
 # 46. Porting Civil War Strategy to QB64Rust: what was done
 
-The finished parts of `port-study.md`, moved here on 2026-11-13, under the same headings. The study keeps
-the one question still open, D8.
+The finished parts of `port-study.md`, moved here on 2026-11-13, under the same headings. D8's remaining
+question was settled on 2026-11-14: `qb64rust` will eventually replace `main`, with its predecessor
+preserved as `old-main` (see `../port-study.md`). The account below retains the status when written.
 
 Written 2026-11-06. The user asked for the port the same day: "port Civil War Strategy from canonical-source on a
 qb64rust branch, use the processes we have established for civil war battleset and world-war-2 and in QB64Rust"

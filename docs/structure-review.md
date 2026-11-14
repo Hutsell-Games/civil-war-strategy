@@ -20,14 +20,12 @@ splits", then "continue", 2026-11-14). What is done is in `archived\structure-re
 
 Still to do, each a commit that keeps every screen:
 
-1. **`calculate_battle`** (`ui\battle.bm`, 179 lines): the panel of strengths, the result, the
-   history line. Its `menu_text$(1)` to `(4)` are scratch strings that locals would replace.
-2. **`menu_city_select`** (`ui\city.bm`, nesting 6 deep): three loops that step to the side's next
+1. **`menu_city_select`** (`ui\city.bm`, nesting 6 deep): three loops that step to the side's next
    city become one FUNCTION.
-3. **`load_events`** (`port\events_file.bm`, 123 lines): the checks after the file is read.
-4. **The fort command.** `ai_fortify` calls `draw_fort_built` (`ui\city.bm`), the one exception of
+2. **`load_events`** (`port\events_file.bm`, 123 lines): the checks after the file is read.
+3. **The fort command.** `ai_fortify` calls `draw_fort_built` (`ui\city.bm`), the one exception of
    `tests\test_layers.py`. A command `city_fortify` in `commands\city.bm` would remove it.
-5. **The computer's enemy as a parameter.** `ai_evaluate_move`, `ai_railroad_city` and
+4. **The computer's enemy as a parameter.** `ai_evaluate_move`, `ai_railroad_city` and
    `city_nearby_enemy_strength` read the enemy from `current_side`; the other `ai_*` take `side`.
 
 Left alone: `battle_strengths` (see the deferred items below), `menu_utility`, `report_armies` and

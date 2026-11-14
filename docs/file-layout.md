@@ -1,7 +1,7 @@
 # Where each SUB goes (phase 6)
 
-Phase 6 of `modernize-plan.md` moves every SUB whole into the file below. No line inside a SUB changes. Phase 6 is
-done, and the table is kept up to date as SUBs are added and moved. Its questions for the user, now
+Phase 6 moved every SUB whole into the files below, without changing lines inside a SUB
+(`archived\modernize-plan-completed.md`). This table stays current as SUBs are added and moved. Its questions for the user, now
 answered, are in `archived\file-layout-completed.md`. Names are the settled names.
 
 "Mixed" means the SUB both works out a rule and draws, prints or reads a key. It goes to the file of its topic
@@ -62,7 +62,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size`, `check_map_links` (from `ui\city.bm` in phase 9) |
 | `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn`, `draw_update_box` |
 | `messages.bm` | `show_message_box`, `scribe_message` |
-| `battle.bm` | `calculate_battle` (new in phase 8: the battle's screen) |
+| `battle.bm` | `calculate_battle` (new in phase 8: the battle's screen), `draw_battle_attacker`, `draw_battle_defender`, `battle_odds_text$`, `draw_battle_odds`, `draw_battle_fort`, `battle_cannon_sound`, `draw_battle_winner`, `draw_battle_losses`, `battle_history_line$` (new 2026-11-14: the parts of `calculate_battle`) |
 | `army.bm` | `menu_army_combine`, `menu_raze_fort` (new in phase 9: the player's Join and Raze menus; the file of phase 8 moved to `commands\army.bm`); `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `draw_recruit_funds`, `menu_recruit_cities`, `menu_army_cancel`, `menu_army_relieve`, `menu_army_retreat`, `menu_supply`, `menu_army_detach`, `menu_army_drill` (from `orders.bm`, 2026-11-14) |
 | `navy.bm` | `menu_navy_commands`, `menu_navy_build`, `menu_navy_attack`, `menu_navy_sail`, `menu_navy_raid`, `menu_navy_invade`, `menu_navy_combat` (new in phase 9: the player's half of the navy's commands; the file of phase 8 moved to `commands\navy.bm`); `menu_navy`, `menu_navy_items` (from `orders.bm`, 2026-11-14) |
 | `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city`, `ai_turn` (new in phase 8: the month's moves) |

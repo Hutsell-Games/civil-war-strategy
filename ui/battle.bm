@@ -8,19 +8,6 @@ SUB calculate_battle (attacker, defender, winner, loser)
     DIM rounds AS INTEGER
     DIM attacker_losses AS INTEGER
     DIM defender_losses AS INTEGER
-    DIM odds!
-    DIM fort_label$
-    DIM odds_text$
-    DIM winner_label$
-    DIM history_line$
-    DIM file$
-    DIM message$
-    DIM odds_pct AS INTEGER
-    DIM winner_side AS INTEGER
-    DIM fort_level AS INTEGER
-    DIM k AS INTEGER
-    DIM col AS INTEGER
-    DIM side_color AS INTEGER
     CALL battle_strengths(attacker, defender, attack_steps(), defend_steps())
     attack_strength = attack_steps(7)
     defend_strength = defend_steps(8)
@@ -29,6 +16,33 @@ SUB calculate_battle (attacker, defender, winner, loser)
     LOCATE 1, 1
     PRINT SPACE$(80)
     CALL clear_right_panel
+    CALL draw_battle_attacker(attacker, attack_steps())
+    CALL draw_battle_defender(attacker, defender, defend_steps())
+    CALL draw_battle_odds(attack_strength, defend_strength)
+    CALL wait_key("P")
+    CALL draw_battle_fort(defender)
+    CALL battle_fight(attack_strength, defend_strength, attacker, defender, winner, loser, rounds)
+    CALL battle_cannon_sound(rounds)
+    CALL draw_battle_winner(defender, winner, loser)
+    CALL battle_losses(attacker, defender, winner, attacker_losses, defender_losses)
+    CALL draw_battle_losses(attacker, defender, attacker_losses, defender_losses)
+    CALL scribe_message(battle_history_line$(attacker, defender, winner, loser, attacker_losses, defender_losses), SHOW_HISTORY_ONLY)
+
+    IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
+        COLOR COLOR_YELLOW
+        CALL clear_bottom_line
+        PRINT "hit any key to continue";
+        CALL wait_key("B")
+    END IF
+
+    CALL battle_apply_losses(attacker, defender, winner, attacker_losses, defender_losses)
+    CALL draw_map_marker(army_city(defender), 0, MARK_RESTORE)
+END SUB
+
+' The attacker's half of the right panel: its name, its size and each step of its strength.
+SUB draw_battle_attacker (attacker, attack_steps())
+    DIM col AS INTEGER
+    DIM side_color AS INTEGER
     col = 68
     COLOR COLOR_LIGHT_CYAN
     LOCATE 1, col
@@ -57,9 +71,18 @@ SUB calculate_battle (attacker, defender, winner, loser)
     PRINT "Difclt  "; attack_steps(6)
     COLOR COLOR_LIGHT_CYAN
     LOCATE 11, col
-    PRINT "Attack  "; attack_strength
+    PRINT "Attack  "; attack_steps(7)
     LINE (530, 155)-(635, 175), 11, B
+END SUB
 
+' The defender's half of the right panel, below the attacker's, in the other side's color.
+SUB draw_battle_defender (attacker, defender, defend_steps())
+    DIM col AS INTEGER
+    DIM side_color AS INTEGER
+    DIM fort_label$
+    col = 68
+    side_color = side_color_of(army_side(attacker))
+    COLOR COLOR_LIGHT_CYAN
     LOCATE 13, col
     PRINT "Defender"
     COLOR 16 - side_color
@@ -97,21 +120,37 @@ SUB calculate_battle (attacker, defender, winner, loser)
     PRINT fort_label$; TAB(76); defend_steps(7)
     COLOR COLOR_LIGHT_CYAN
     LOCATE 25, col
-    PRINT "Defend  "; defend_strength
+    PRINT "Defend  "; defend_steps(8)
     LINE (530, 380)-(635, 400), 11, B
+END SUB
 
+' The attacker's chance of winning, in whole percent and at least 1, such as "62%".
+FUNCTION battle_odds_text$ (attack_strength, defend_strength)
+    DIM odds!
+    DIM odds_pct AS INTEGER
     odds! = attack_strength / (attack_strength + defend_strength)
     odds_pct = INT(100 * odds!)
     IF odds_pct < 1 THEN
         odds_pct = 1
     END IF
-    odds_text$ = LTRIM$(RTRIM$(STR$(odds_pct))) + "%"
+    battle_odds_text$ = LTRIM$(RTRIM$(STR$(odds_pct))) + "%"
+END FUNCTION
+
+' The odds, boxed at the foot of the right panel.
+SUB draw_battle_odds (attack_strength, defend_strength)
+    DIM col AS INTEGER
+    col = 68
     COLOR COLOR_YELLOW
     LOCATE 27, col
-    PRINT "Odds:  "; odds_text$;
+    PRINT "Odds:  "; battle_odds_text$(attack_strength, defend_strength);
     LINE (530, 412)-(635, 435), 14, B
     LINE (528, 410)-(637, 437), 14, B
-    CALL wait_key("P")
+END SUB
+
+' The cannon and the defender's fort with full graphics; otherwise an empty right panel.
+SUB draw_battle_fort (defender)
+    DIM fort_level AS INTEGER
+    DIM file$
     IF opt_graphics >= GRAPHICS_FULL THEN
         CALL draw_cannon
         fort_level = city_fort(army_city(defender))
@@ -123,7 +162,11 @@ SUB calculate_battle (attacker, defender, winner, loser)
     ELSE
         CALL clear_right_panel
     END IF
-    CALL battle_fight(attack_strength, defend_strength, attacker, defender, winner, loser, rounds)
+END SUB
+
+' Two notes of cannon fire for each round of the battle, when sound effects are on.
+SUB battle_cannon_sound (rounds)
+    DIM k AS INTEGER
     FOR k = 1 TO rounds
         IF opt_sound >= SOUND_EFFECTS THEN
             SOUND 77, .5
@@ -131,7 +174,12 @@ SUB calculate_battle (attacker, defender, winner, loser)
             CALL wait_seconds(.1)
         END IF
     NEXT k
+END SUB
 
+' The winner's flag and name in the right panel, and who defeats whom on the bottom line.
+SUB draw_battle_winner (defender, winner, loser)
+    DIM winner_label$
+    DIM winner_side AS INTEGER
     winner_label$ = "UNION"
     IF army_side(winner) = SIDE_REBEL THEN
         winner_label$ = "REBEL"
@@ -149,8 +197,12 @@ SUB calculate_battle (attacker, defender, winner, loser)
     COLOR COLOR_LIGHT_CYAN
     PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender));
     CALL wait_seconds(PAUSE_LONG)
-    CALL battle_losses(attacker, defender, winner, attacker_losses, defender_losses)
+END SUB
 
+' Both sides' losses on the top line, in hundreds and as a percentage of each army.
+SUB draw_battle_losses (attacker, defender, attacker_losses, defender_losses)
+    DIM side_color AS INTEGER
+    side_color = side_color_of(army_side(attacker))
     COLOR side_color
     LOCATE 1, 1
     PRINT "Attack Loss: ";
@@ -162,30 +214,19 @@ SUB calculate_battle (attacker, defender, winner, loser)
     PRINT LTRIM$(RTRIM$(STR$(defender_losses)) + "00"); "/";
     CALL print_army_size(defender)
     PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defender_losses / army_size(defender)))))); "%)"
-
-    menu_text$(1) = " (" + LTRIM$(RTRIM$(STR$(attacker_losses) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
-    message$ = " (" + LTRIM$(RTRIM$(STR$(defender_losses) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
-    menu_text$(2) = message$
-    IF winner = defender THEN
-        menu_text$(2) = menu_text$(1)
-        menu_text$(1) = message$
-    END IF
-    menu_text$(3) = "*" + army_name$(winner)
-    menu_text$(4) = army_name$(loser)
-    IF winner = defender THEN
-        menu_text$(3) = army_name$(winner)
-        menu_text$(4) = "*" + army_name$(loser)
-    END IF
-    history_line$ = city_name$(army_city(defender)) + ": " + menu_text$(3) + menu_text$(1) + " defeats " + menu_text$(4) + menu_text$(2)
-    CALL scribe_message(history_line$, SHOW_HISTORY_ONLY)
-
-    IF opt_players = PLAYERS_ONE AND (current_side = SIDE_UNION AND army_side(attacker) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(attacker) = SIDE_UNION) THEN
-        COLOR COLOR_YELLOW
-        CALL clear_bottom_line
-        PRINT "hit any key to continue";
-        CALL wait_key("B")
-    END IF
-
-    CALL battle_apply_losses(attacker, defender, winner, attacker_losses, defender_losses)
-    CALL draw_map_marker(army_city(defender), 0, MARK_RESTORE)
 END SUB
+
+' The battle's line in the history, such as "Memphis: *Grant (1200/15000)  defeats Polk (3000/9000)".
+' The star marks the attacker. Each army shows its losses and its size before them, in men. The
+' attacker's text ends in a space, so a winning attacker's is followed by two.
+FUNCTION battle_history_line$ (attacker, defender, winner, loser, attacker_losses, defender_losses)
+    DIM attacker_text$
+    DIM defender_text$
+    attacker_text$ = " (" + LTRIM$(RTRIM$(STR$(attacker_losses) + "00")) + "/" + LTRIM$(STR$(army_size(attacker)) + "00") + ") "
+    defender_text$ = " (" + LTRIM$(RTRIM$(STR$(defender_losses) + "00")) + "/" + LTRIM$(STR$(army_size(defender)) + "00") + ")"
+    IF winner = defender THEN
+        battle_history_line$ = city_name$(army_city(defender)) + ": " + army_name$(winner) + defender_text$ + " defeats *" + army_name$(loser) + attacker_text$
+    ELSE
+        battle_history_line$ = city_name$(army_city(defender)) + ": *" + army_name$(winner) + attacker_text$ + " defeats " + army_name$(loser) + defender_text$
+    END IF
+END FUNCTION

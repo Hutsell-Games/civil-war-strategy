@@ -338,6 +338,19 @@ SUB TestBattleLeavesTheDefenderOne
     AssertEqualInt 5, side_casualties&(1), "army 1's losses count for the Union"
 END SUB
 
+SUB TestBattleOddsText
+    AssertEqualStr "33%", battle_odds_text$(3, 6), "3 against 6: 33.3 rounds down"
+    AssertEqualStr "1%", battle_odds_text$(1, 200), "under 1 shows 1"
+END SUB
+
+' The star marks the attacker, whether it wins or loses.
+SUB TestBattleHistoryLine
+    army_name$(1) = "Grant": army_size(1) = 150
+    army_name$(21) = "Polk": army_size(21) = 90: army_city(21) = 5: city_name$(5) = "Memphis"
+    AssertEqualStr "Memphis: *Grant (1200/15000)  defeats Polk (3000/9000)", battle_history_line$(1, 21, 1, 21, 12, 30), "the attacker wins"
+    AssertEqualStr "Memphis: Polk (3000/9000) defeats *Grant (1200/15000) ", battle_history_line$(1, 21, 21, 1, 12, 30), "the defender wins"
+END SUB
+
 ' ---------------------------------------------------------------- commander
 ' The next general of a side that has no army: one from the list of names,
 ' or a made-up one when the list is used up.
