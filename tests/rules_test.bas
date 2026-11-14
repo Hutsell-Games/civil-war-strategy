@@ -2132,6 +2132,22 @@ SUB TestAnySavedGameLooksAtTheSlots
     AssertEqualInt -1, any_saved_game, "the last slot"
 END SUB
 
+SUB TestSideAndCityColors
+    AssertEqualInt COLOR_LIGHT_BLUE, side_color_of(SIDE_UNION), "the Union"
+    AssertEqualInt COLOR_GRAY, side_color_of(SIDE_REBEL), "the Rebels"
+    city_owner(5) = SIDE_UNION
+    AssertEqualInt COLOR_LIGHT_BLUE, city_dot_color(5), "a Union city"
+    city_owner(5) = SIDE_REBEL
+    AssertEqualInt COLOR_GRAY, city_dot_color(5), "a Rebel city"
+    city_owner(5) = SIDE_NONE
+    AssertEqualInt COLOR_LIGHT_RED, city_dot_color(5), "a neutral city"
+END SUB
+
+SUB TestSaveFileNameOfEachSlot
+    AssertEqualStr "cws1.sav", save_file_name$(1), "the first slot"
+    AssertEqualStr "cws9.sav", save_file_name$(9), "the last slot"
+END SUB
+
 ' ------------------------------------------------------- SCRIPT.BM
 
 SUB TestScriptdateIsFixedUnderAScript
@@ -2188,5 +2204,6 @@ END SUB
 '$INCLUDE: '../draw/pictures.bm'
 '$INCLUDE: '../game/victory_screens.bm'
 '$INCLUDE: '../game/tunes.bm'
+'$INCLUDE: '../game/colors.bm'
 '$INCLUDE: '../port/files.bm'
 '$INCLUDE: '../port/script.bm'

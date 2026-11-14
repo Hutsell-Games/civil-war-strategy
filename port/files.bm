@@ -622,7 +622,7 @@ SUB load_game (slot, problem$)
     DIM folder$
     DIM named AS INTEGER
     problem$ = ""
-    file$ = "cws" + LTRIM$(STR$(slot)) + ".sav"
+    file$ = save_file_name$(slot)
     ' The scenario first. The file is closed again, because load_scenario and load_cities read
     ' their files as #1 too.
     OPEN "I", 1, file$
@@ -687,7 +687,7 @@ END SUB
 SUB save_game (slot)
     DIM i AS INTEGER
     DIM config_side AS INTEGER
-    OPEN "O", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
+    OPEN "O", 1, save_file_name$(slot)
     WRITE #1, scenario_folder$(scenario_now)
     WRITE #1, turn_month, turn_year, union_income_bonus, current_side
     FOR i = 1 TO MAX_ARMIES
@@ -722,11 +722,16 @@ END SUB
 FUNCTION any_saved_game
     DIM k AS INTEGER
     FOR k = 1 TO 9
-        IF _FILEEXISTS("cws" + LTRIM$(STR$(k)) + ".sav") THEN
+        IF _FILEEXISTS(save_file_name$(k)) THEN
             any_saved_game = -1
             EXIT FUNCTION
         END IF
     NEXT k
+END FUNCTION
+
+' The name of save slot slot's file: cws1.sav to cws9.sav.
+FUNCTION save_file_name$ (slot)
+    save_file_name$ = "cws" + LTRIM$(STR$(slot)) + ".sav"
 END FUNCTION
 
 SUB config_read (side)

@@ -174,5 +174,6 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'draw/pictures.bm'
 ' $INCLUDE: 'game/victory_screens.bm'
 ' $INCLUDE: 'game/tunes.bm'
+' $INCLUDE: 'game/colors.bm'
 ' $INCLUDE: 'port/files.bm'
 ' $INCLUDE: 'port/script.bm'

@@ -60,7 +60,7 @@ SUB menu_load_game
     menu_text$(0) = "Load"
     menu_item_count = 0
     FOR k = 1 TO 9
-        file$ = "cws" + LTRIM$(STR$(k)) + ".sav"
+        file$ = save_file_name$(k)
         IF _FILEEXISTS(file$) THEN
             menu_item_count = menu_item_count + 1
             menu_text$(menu_item_count) = file$
@@ -107,7 +107,7 @@ SUB menu_save_game
     DIM slot AS INTEGER
     menu_text$(0) = "Save Game"
     FOR k = 1 TO 9
-        menu_text$(k) = "cws" + LTRIM$(STR$(k)) + ".sav"
+        menu_text$(k) = save_file_name$(k)
         IF _FILEEXISTS(menu_text$(k)) THEN
             menu_text$(k) = menu_text$(k) + " û"
         END IF

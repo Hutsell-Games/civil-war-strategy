@@ -3,10 +3,7 @@ SUB draw_army_stats (army)
     COLOR COLOR_WHITE
     LOCATE 5, 68
     PRINT army_name$(army)
-    COLOR COLOR_LIGHT_BLUE
-    IF army_side(army) = SIDE_REBEL THEN
-        COLOR COLOR_GRAY
-    END IF
+    COLOR side_color_of(army_side(army))
     LOCATE 6, 68
     PRINT "Size:";
     CALL print_army_size(army)
@@ -270,9 +267,9 @@ SUB report_cities
     COLOR COLOR_LIGHT_BLUE
     LOCATE 24, 1
     PRINT "Side    No. Cities   Income    Cash"
-    COLOR COLOR_LIGHT_BLUE
+    COLOR side_color_of(SIDE_UNION)
     PRINT side_name$(SIDE_UNION); TAB(12); side_city_count(SIDE_UNION); TAB(23); side_income(SIDE_UNION); TAB(32); side_cash(SIDE_UNION)
-    COLOR COLOR_GRAY
+    COLOR side_color_of(SIDE_REBEL)
     PRINT side_name$(SIDE_REBEL); TAB(12); side_city_count(SIDE_REBEL); TAB(23); side_income(SIDE_REBEL); TAB(32); side_cash(SIDE_REBEL)
     COLOR COLOR_RED
     PRINT side_name$(SIDE_NONE); TAB(12); MAX_CITIES - side_city_count(SIDE_UNION) - side_city_count(SIDE_REBEL)
@@ -290,10 +287,7 @@ SUB report_intelligence
     DIM side_color AS INTEGER
     DIM x AS INTEGER
     DIM y AS INTEGER
-    side_color = 9
-    IF current_side = SIDE_REBEL THEN
-        side_color = 7
-    END IF
+    side_color = side_color_of(current_side)
     CALL draw_map
     first_army = side_first_army(current_side)
     last_army = side_last_army(current_side)
@@ -351,10 +345,7 @@ SUB report_force_summary
     CALL draw_map
     FOR k = 1 TO MAX_CITIES
         IF city_troops(k) > 0 THEN
-            side_color = 9
-            IF city_owner(k) = SIDE_REBEL THEN
-                side_color = 7
-            END IF
+            side_color = side_color_of(city_owner(k))
             COLOR side_color
             LOCATE INT(city_y(k) / 16 + 1), city_x(k) / 8
             PRINT city_troops(k)

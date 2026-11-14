@@ -77,6 +77,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 |------|------|
 | `victory_screens.bm` | `draw_union_victory`, `draw_rebel_victory`, `draw_surrender` |
 | `tunes.bm` | `play_shenandoah`, `play_title_music` |
+| `colors.bm` | `side_color_of`, `city_dot_color` (new after the plan: the sides' colors, once written out in 11 places) |
 
 ## port\
 

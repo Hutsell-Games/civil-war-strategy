@@ -66,10 +66,7 @@ SUB menu_main_railroad
         PRINT "RAILROAD MOVE"
         PSET (550, 20), 0
         DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
-        side_color = 9
-        IF current_side = SIDE_REBEL THEN
-            side_color = 7
-        END IF
+        side_color = side_color_of(current_side)
         x = POINT(0)
         y = POINT(1)
         PAINT (x, y), side_color, 15

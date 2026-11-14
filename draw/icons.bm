@@ -53,15 +53,7 @@ SUB animate_city (city)
         CALL draw_city_dot(city, dot_color)
         CALL wait_seconds(.1)
     NEXT dot_color
-    SELECT CASE city_owner(city)
-        CASE SIDE_REBEL
-            dot_color = 7
-        CASE SIDE_NONE
-            dot_color = 12
-        CASE ELSE
-            dot_color = 9
-    END SELECT
-    CALL draw_city_dot(city, dot_color)
+    CALL draw_city_dot(city, city_dot_color(city))
 END SUB
 
 SUB draw_army_flag (army)

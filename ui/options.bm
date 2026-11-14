@@ -119,10 +119,7 @@ SUB menu_option_side
         EXIT SUB
     END IF
     CALL option_swap_side
-    COLOR COLOR_LIGHT_BLUE
-    IF current_side = SIDE_REBEL THEN
-        COLOR COLOR_GRAY
-    END IF
+    COLOR side_color_of(current_side)
     CALL clear_bottom_line
     PRINT "Now playing "; side_name$(current_side); " side";
     IF opt_sound >= SOUND_EFFECTS THEN

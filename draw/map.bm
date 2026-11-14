@@ -104,14 +104,7 @@ SUB draw_cities
     DIM i AS INTEGER
     DIM dot_color AS INTEGER
     FOR i = 1 TO MAX_CITIES
-        SELECT CASE city_owner(i)
-            CASE SIDE_REBEL
-                dot_color = 7
-            CASE SIDE_NONE
-                dot_color = 12
-            CASE ELSE
-                dot_color = 9
-        END SELECT
+        dot_color = city_dot_color(i)
         x = city_x(i)
         y = city_y(i)
         IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN

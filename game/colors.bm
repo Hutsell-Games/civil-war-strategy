@@ -1,0 +1,18 @@
+' The colors of the Civil War's sides, in the reports, the top bar and the map.
+
+' The side's color: light blue for the Union, gray for the Rebels. Any other side gets the
+' Union's color, as each test of SIDE_REBEL that this replaced did.
+FUNCTION side_color_of (side)
+    side_color_of = COLOR_LIGHT_BLUE
+    IF side = SIDE_REBEL THEN
+        side_color_of = COLOR_GRAY
+    END IF
+END FUNCTION
+
+' The color of a city's dot on the map: its owner's, or light red for a neutral city.
+FUNCTION city_dot_color (city)
+    city_dot_color = side_color_of(city_owner(city))
+    IF city_owner(city) = SIDE_NONE THEN
+        city_dot_color = COLOR_LIGHT_RED
+    END IF
+END FUNCTION
