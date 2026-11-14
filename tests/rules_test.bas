@@ -522,6 +522,41 @@ SUB TestDetachTakesThreeTenths
     AssertEqualInt 0, army_order(22), "no order"
 END SUB
 
+' Drill and Detach: one rule for the player and the computer.
+SUB TestArmyCanDrillAndDetach
+    army_experience(3) = 5: army_leader_rating(3) = 7
+    AssertTrue army_can_drill(3), "below 6 and below the leader"
+    army_experience(3) = 6
+    AssertTrue NOT army_can_drill(3), "6 is the most drill gives"
+    army_experience(3) = 4: army_leader_rating(3) = 4
+    AssertTrue NOT army_can_drill(3), "not past the leader's rating"
+    AssertTrue side_can_detach(SIDE_REBEL), "the Rebels detach"
+    AssertTrue NOT side_can_detach(SIDE_UNION), "the Union does not"
+END SUB
+
+' A side's strength counts the army on its train, which holds no city while it rides.
+SUB TestSideStrengthCountsTheTrain
+    army_size(2) = 107: army_city(2) = 4: army_size(3) = 50: army_city(3) = 0
+    AssertEqualInt 11, side_strength(SIDE_UNION), "a tenth of 107, rounded"
+    train_army(SIDE_UNION) = 3
+    AssertTrue army_in_field(3), "the army on the train"
+    AssertEqualInt 16, side_strength(SIDE_UNION), "and its men"
+    AssertTrue NOT army_in_field(0), "slot 0 is no army"
+    CALL victory_forces(union_troops, rebel_troops)
+    AssertEqualInt 157, union_troops, "victory counts the train too"
+END SUB
+
+' A leader taken from the list, and one put back on it.
+SUB TestArmyAppointAndFreeLeader
+    leader_name$(5) = "Grant": leader_rating(5) = 8
+    CALL army_appoint(3, 5)
+    AssertEqualStr "Grant", army_name$(3), "the army takes the leader's name"
+    AssertEqualInt 8, army_leader_rating(3), "and his rating"
+    AssertEqualStr "", leader_name$(5), "he leaves the free leaders"
+    CALL army_free_leader(3)
+    AssertEqualStr "Grant", leader_name$(3), "freed into the army's own slot"
+END SUB
+
 SUB TestDrillAddsALevelAndBusiesTheArmy
     army_experience(3) = 2
     CALL army_drill(3)
@@ -541,6 +576,24 @@ SUB TestUnionAdvantageFollowsTheBalance
     opt_realism = 0: opt_players = PLAYERS_TWO
     CALL set_union_advantage
     AssertEqualInt 150, union_income_bonus, "two players"
+END SUB
+
+' The Balance setting helps only the computer's side, and only when it favors that side.
+SUB TestBalanceHelpGoesToTheComputer
+    current_side = SIDE_UNION: opt_difficulty = 1
+    AssertEqualInt 2, balance_help(SIDE_REBEL), "Rebel ++ against the Union player"
+    AssertEqualInt 0, balance_help(SIDE_UNION), "never the player's side"
+    opt_difficulty = 2
+    AssertEqualInt 1, balance_help(SIDE_REBEL), "Rebel +"
+    opt_difficulty = DIFFICULTY_EVEN
+    AssertEqualInt 0, balance_help(SIDE_REBEL), "Balanced"
+    opt_difficulty = 5
+    AssertEqualInt 0, balance_help(SIDE_REBEL), "Union ++ does not help the Rebels"
+    AssertEqualInt 0, balance_help(SIDE_UNION), "nor the Union player"
+    current_side = SIDE_REBEL
+    AssertEqualInt 2, balance_help(SIDE_UNION), "Union ++ against the Rebel player"
+    opt_difficulty = 4
+    AssertEqualInt 1, balance_help(SIDE_UNION), "Union +"
 END SUB
 
 SUB TestIncomeIsCitiesCapitalAndRaids
@@ -818,6 +871,52 @@ SUB TestNavyShipHits
     fleet_ships$(1) = "WI": fleet_ships$(2) = "IW"
     AssertEqualInt 20, navy_ship_hits(1), "the last ship is an ironclad"
     AssertEqualInt 10, navy_ship_hits(2), "the last ship is wooden"
+END SUB
+
+SUB TestNavyClearFleet
+    fleet_ships$(2) = "IW": fleet_size(2) = 2: fleet_city(2) = 27
+    CALL navy_clear_fleet(2)
+    AssertEqualStr "", fleet_ships$(2), "no ships"
+    AssertEqualInt 0, fleet_size(2), "none counted"
+    AssertEqualInt 0, fleet_city(2), "no port"
+END SUB
+
+' Build, Attack and Raid: one rule for the Ships menu, the player's actions and the computer.
+SUB TestNavyCanBuildAttackRaid
+    side_cash(1) = COST_SHIP: fleet_city(1) = 0: fleet_size(1) = 0
+    AssertTrue navy_can_build(1), "no fleet yet, the money for a ship"
+    side_cash(1) = COST_SHIP - 1
+    AssertTrue NOT navy_can_build(1), "not the money"
+    side_cash(1) = 500: fleet_city(1) = 30: fleet_size(1) = 3: city_owner(30) = 1: city_port_type(30) = PORT_SEA
+    AssertTrue navy_can_build(1), "in a sea port of its own"
+    city_port_type(30) = PORT_RIVER
+    AssertTrue NOT navy_can_build(1), "not in a river port, for the computer too"
+    city_port_type(30) = PORT_SEA: city_owner(30) = 2
+    AssertTrue NOT navy_can_build(1), "not off the enemy's port"
+    AssertTrue navy_can_attack(1), "but it can bombard it"
+    city_owner(30) = SIDE_NONE
+    AssertTrue NOT navy_can_attack(1), "not a neutral city"
+    city_owner(30) = 1: fleet_size(1) = MAX_FLEET_SHIPS
+    AssertTrue NOT navy_can_build(1), "a full fleet"
+    fleet_city(1) = FLEET_AT_SEA
+    AssertTrue NOT navy_can_build(1), "not at sea"
+    AssertTrue NOT navy_can_attack(1), "nor bombard"
+    raiding_side = 1
+    AssertTrue NOT navy_can_raid(1), "raiding already"
+    raiding_side = 0
+    AssertTrue navy_can_raid(1), "a fleet with ships can raid"
+    fleet_size(1) = 0
+    AssertTrue NOT navy_can_raid(1), "not without ships"
+END SUB
+
+' A ship's letter in fleet_ships$, its price and its picture.
+SUB TestShipKinds
+    AssertEqualStr "W", SHIP_WOODEN$, "the letter of a wooden ship"
+    AssertEqualStr "I", SHIP_IRONCLAD$, "the letter of an ironclad"
+    AssertEqualInt COST_SHIP, ship_cost(SHIP_WOODEN$), "a wooden ship"
+    AssertEqualInt 2 * COST_SHIP, ship_cost(SHIP_IRONCLAD$), "an ironclad costs two"
+    AssertEqualInt 1, ship_icon(SHIP_WOODEN$), "the wooden ship's picture"
+    AssertEqualInt 2, ship_icon(SHIP_IRONCLAD$), "the ironclad's picture"
 END SUB
 
 SUB TestNavyFleetDefeated
@@ -1555,7 +1654,7 @@ SUB TestTurnArmySupplyBlockaded
 END SUB
 
 SUB TestTurnStrengthRatio
-    current_side = 1: army_size(1) = 100: army_size(21) = 50
+    current_side = 1: army_size(1) = 100: army_size(21) = 50: army_city(1) = 3: army_city(21) = 7
     CALL turn_strength_ratio
     AssertTrue ai_strength_ratio! = .5, "the computer's 5,000 against the player's 10,000:" + STR$(ai_strength_ratio!)
 END SUB
@@ -1777,6 +1876,34 @@ SUB TestCapitalMove
     AssertEqualInt 33, side_capital(SIDE_REBEL), "the capital has not moved yet"
     CALL capital_move_to(SIDE_REBEL, 25)
     AssertEqualInt 25, side_capital(SIDE_REBEL), "moved"
+END SUB
+
+' Fortify and Capital: what the Commands menu and the computer ask before they act.
+SUB TestFortAndCapitalAffordable
+    side_cash(SIDE_REBEL) = COST_FORT: side_capital(SIDE_REBEL) = 33
+    AssertTrue fort_affordable(SIDE_REBEL), "the price of a fort"
+    AssertTrue NOT capital_can_move(SIDE_REBEL), "not the price of a move"
+    side_cash(SIDE_REBEL) = COST_MOVE_CAPITAL
+    AssertTrue capital_can_move(SIDE_REBEL), "the price, and a capital"
+    side_capital(SIDE_REBEL) = 0
+    AssertTrue NOT capital_can_move(SIDE_REBEL), "no capital left to move"
+    side_cash(SIDE_REBEL) = COST_FORT - 1
+    AssertTrue NOT fort_affordable(SIDE_REBEL), "short of a fort"
+END SUB
+
+' Winter stops a move into a city not the side's in January and February, for the player and
+' the computer alike. Before 2026-11-13 the computer's stopped in January only.
+SUB TestWinterStopsMove
+    opt_winter_campaigns = 0: city_owner(6) = SIDE_NONE: city_owner(7) = SIDE_REBEL
+    turn_month = 1
+    AssertTrue winter_stops_move(SIDE_REBEL, 6), "January, a neutral city"
+    AssertTrue NOT winter_stops_move(SIDE_REBEL, 7), "a city of its own"
+    turn_month = 2
+    AssertTrue winter_stops_move(SIDE_REBEL, 6), "February too"
+    turn_month = 3
+    AssertTrue NOT winter_stops_move(SIDE_REBEL, 6), "March"
+    turn_month = 1: opt_winter_campaigns = 1
+    AssertTrue NOT winter_stops_move(SIDE_REBEL, 6), "January Campaigns allowed"
 END SUB
 
 ' Relieve: the old leader goes back to his army's slot among the free leaders. The army
@@ -2160,6 +2287,10 @@ END SUB
 SUB TestSideAndCityColors
     AssertEqualInt COLOR_LIGHT_BLUE, side_color_of(SIDE_UNION), "the Union"
     AssertEqualInt COLOR_GRAY, side_color_of(SIDE_REBEL), "the Rebels"
+    AssertEqualInt COLOR_LIGHT_BLUE, side_bright_color(SIDE_UNION), "the Union's bright color"
+    AssertEqualInt COLOR_WHITE, side_bright_color(SIDE_REBEL), "the Rebels' bright color"
+    AssertEqualInt COLOR_BLUE, side_panel_color(SIDE_UNION), "the Union's panel"
+    AssertEqualInt COLOR_GRAY, side_panel_color(SIDE_REBEL), "the Rebels' panel"
     city_owner(5) = SIDE_UNION
     AssertEqualInt COLOR_LIGHT_BLUE, city_dot_color(5), "a Union city"
     city_owner(5) = SIDE_REBEL

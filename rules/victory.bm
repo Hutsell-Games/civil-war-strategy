@@ -1,18 +1,19 @@
 ' The rules of victory and of the Hall of Fame. They draw nothing; the screens are in
 ' ui/victory.bm.
 
-' The men in the field: union_men the Union's and rebel_men the Rebels', in hundreds.
+' The men in the field: union_troops the Union's and rebel_troops the Rebels', in hundreds.
+' An army on a train counts (army_in_field).
 SUB victory_forces (union_troops, rebel_troops)
     DIM j AS INTEGER
     union_troops = 0
     FOR j = 1 TO ARMIES_PER_SIDE
-        IF army_exists(j) THEN
+        IF army_in_field(j) THEN
             union_troops = union_troops + army_size(j)
         END IF
     NEXT j
     rebel_troops = 0
     FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES
-        IF army_exists(j) THEN
+        IF army_in_field(j) THEN
             rebel_troops = rebel_troops + army_size(j)
         END IF
     NEXT j

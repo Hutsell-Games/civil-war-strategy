@@ -70,12 +70,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
         attack_strength = 1
     END IF
     '                       Adjust attack advantage
-    IF army_side(attacker) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN
-        attack_strength = attack_strength + 2 * opt_difficulty - 6
-    END IF
-    IF army_side(attacker) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN
-        attack_strength = attack_strength + 6 - 2 * opt_difficulty
-    END IF
+    attack_strength = attack_strength + 2 * balance_help(army_side(attacker))
     attack_steps(6) = attack_strength
     IF attack_strength > rule_strength_cap THEN
         attack_strength = rule_strength_cap
@@ -135,12 +130,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
         defend_strength = 1
     END IF
     '                       Adjust defend advantage
-    IF army_side(defender) = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN
-        defend_strength = defend_strength + 2 * opt_difficulty - 6
-    END IF
-    IF army_side(defender) = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN
-        defend_strength = defend_strength + 6 - 2 * opt_difficulty
-    END IF
+    defend_strength = defend_strength + 2 * balance_help(army_side(defender))
     defend_steps(6) = defend_strength
 
     IF army_order(defender) = ORDER_NONE THEN

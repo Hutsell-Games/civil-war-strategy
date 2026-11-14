@@ -22,7 +22,7 @@ SUB ai_fortify (side)
     DIM side_cash AS INTEGER
     DIM city AS INTEGER
     DIM army AS INTEGER
-    IF COST_FORT > side_cash(side) THEN
+    IF NOT fort_affordable(side) THEN
         EXIT SUB
     END IF
 
@@ -38,15 +38,14 @@ SUB ai_fortify (side)
         IF city_fort(city) >= MAX_FORT THEN
             EXIT SUB
         END IF
-        city_fort(city) = city_fort(city) + 1
+        CALL city_build_fort(side, city)
         army = city_army(city)
         army_order(army) = ORDER_BUSY
-        side_cash(side) = side_cash(side) - COST_FORT
         CALL draw_fort_built(city)
         IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND RND > .5 AND side_cash < 222 THEN
             EXIT SUB
         END IF
-        IF 3 * RND <= 1 + ai_strength_ratio! OR side_cash(side) < COST_FORT THEN
+        IF 3 * RND <= 1 + ai_strength_ratio! OR NOT fort_affordable(side) THEN
             EXIT SUB
         END IF
         city = ai_fortify_pick(side)
@@ -110,29 +109,19 @@ SUB ai_raise_forces (side)
 END SUB
 
 ' How many armies the computer's side has. Two fewer when the other side has more men, and
-' none when it has more than twice as many, so that the computer recruits.
+' none when it has more than twice as many, so that the computer recruits. The men on a train
+' count (side_strength); the army on it does not count as one of its armies.
 FUNCTION ai_count_armies (side)
-    DIM first_army AS INTEGER
-    DIM last_army AS INTEGER
     DIM i AS INTEGER
     DIM army_count AS INTEGER
     DIM enemy_strength AS INTEGER
     DIM own_strength AS INTEGER
-    first_army = side_first_army(other_side(side))
-    last_army = side_last_army(other_side(side))
-    FOR i = first_army TO last_army
-        IF army_exists(i) THEN
-            enemy_strength = enemy_strength + .1 * army_size(i)
-        END IF
-    NEXT i
-    first_army = side_first_army(side)
-    last_army = side_last_army(side)
+    enemy_strength = side_strength(other_side(side))
+    own_strength = side_strength(side)
     army_count = 0
-    own_strength = 0
-    FOR i = first_army TO last_army
+    FOR i = side_first_army(side) TO side_last_army(side)
         IF army_exists(i) THEN
             army_count = army_count + 1
-            own_strength = own_strength + .1 * army_size(i)
         END IF
     NEXT i
     IF enemy_strength > own_strength THEN
@@ -156,15 +145,16 @@ SUB ai_fleet_orders (side)
             END IF
             EXIT SUB
         END IF
-        ' A side with no fleet builds its first ship. The original read the owner of city 0,
-        ' which is the side whose fleet had the last order (navy_mark_side).
-        IF side_cash(side) >= COST_SHIP AND fleet_size(side) < MAX_FLEET_SHIPS AND (NOT fleet_exists(side) OR city_owner(fleet_city(side)) = side) THEN
+        ' The computer builds by the player's rule. Before 2026-11-13 it did not ask for a sea
+        ' port, and with no fleet it read the owner of city 0, the side whose fleet had the last
+        ' order (navy_mark_side).
+        IF navy_can_build(side) THEN
             CALL ai_navy_orders(side, NAVY_BUILD)
         END IF
     END IF
 
     IF fleet_size(side) = 0 THEN
-        fleet_city(side) = 0
+        CALL navy_clear_fleet(side)
     END IF
     IF NOT fleet_exists(side) THEN
         EXIT SUB
@@ -267,7 +257,7 @@ SUB ai_army_order (side, army, ordered)
             END IF
         END IF
     END IF
-    IF turn_month = 1 AND opt_winter_campaigns = 0 AND city_owner(army_order(army)) <> side THEN
+    IF winter_stops_move(side, army_order(army)) THEN
         army_order(army) = ORDER_NONE
         EXIT SUB
     END IF
@@ -282,7 +272,7 @@ SUB ai_drill (side)
     first_army = side_first_army(side)
     last_army = side_last_army(side)
     FOR i = first_army TO last_army
-        IF army_order(i) = ORDER_NONE AND army_experience(i) < 6 AND army_experience(i) < army_leader_rating(i) THEN
+        IF army_order(i) = ORDER_NONE AND army_can_drill(i) THEN
             CALL army_drill(i)
             CALL draw_ai_drill(i)
         END IF
@@ -841,23 +831,17 @@ SUB ai_navy_build (side, again)
     DIM count AS INTEGER
     DIM choice AS INTEGER
     again = 0
-    IF side_cash(side) < COST_SHIP OR fleet_is_at_sea(side) THEN
-        again = 1
-        EXIT SUB
-    END IF
-    IF fleet_size(side) >= MAX_FLEET_SHIPS THEN
+    IF NOT navy_can_build(side) THEN
         EXIT SUB
     END IF
     IF RND < .07 * fleet_size(side) THEN
         EXIT SUB
     END IF
-    ship$ = "W"
-    cost = COST_SHIP
-
-    IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * COST_SHIP THEN
-        ship$ = "I"
-        cost = 2 * COST_SHIP
+    ship$ = SHIP_WOODEN$
+    IF navy_has_ironclads = 1 AND side_cash(side) >= ship_cost(SHIP_IRONCLAD$) THEN
+        ship$ = SHIP_IRONCLAD$
     END IF
+    cost = ship_cost(ship$)
 
     CALL navy_add_ship(side, ship$, cost)
     IF fleet_size(side) > 1 THEN
@@ -898,11 +882,10 @@ SUB ai_navy_attack (side, action, again)
             EXIT SUB
         END IF
     END IF
-    IF NOT fleet_exists(side) THEN
-        EXIT SUB
-    END IF
-    IF city_owner(fleet_city(side)) <> other_side(side) THEN
-        again = 1
+    IF NOT navy_can_attack(side) THEN
+        IF fleet_exists(side) THEN
+            again = 1
+        END IF
         EXIT SUB
     END IF
     CALL navy_bombard(side)
@@ -950,11 +933,10 @@ END SUB
 SUB ai_navy_raid (side, again)
     again = 0
     CALL navy_count_ships(side)
-    IF fleet_size(side) < 1 THEN
-        EXIT SUB
-    END IF
-    IF raiding_side = side THEN
-        again = 1
+    IF NOT navy_can_raid(side) THEN
+        IF fleet_size(side) >= 1 THEN
+            again = 1
+        END IF
         EXIT SUB
     END IF
 
@@ -997,15 +979,9 @@ END SUB
 ' money or the fleet's limit is reached (quit is 1). A fleet that is gone builds, not sails.
 ' It invades when the fleet can (navy_can_invade) and the enemy near the Union's fleet is weak.
 SUB ai_navy_adjust (side, action, quit)
-    IF action = NAVY_BUILD THEN
-        IF side_cash(side) < COST_SHIP THEN
-            quit = 1
-            EXIT SUB
-        END IF
-        IF fleet_size(side) >= MAX_FLEET_SHIPS THEN
-            quit = 1
-            EXIT SUB
-        END IF
+    IF action = NAVY_BUILD AND NOT navy_can_build(side) THEN
+        quit = 1
+        EXIT SUB
     END IF
     IF NOT fleet_exists(side) AND action = NAVY_SAIL THEN
         action = NAVY_BUILD

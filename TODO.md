@@ -1,7 +1,7 @@
 # To do
 
 Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. The plan is
-`docs\port-study.md`.
+`docs\modernize-plan.md`.
 
 ## The tests
 
@@ -21,10 +21,10 @@ Each of these is how the game behaves, in DOS too by its code. Decide whether to
 game plays changes the recorded screens.
 
 Ruled on 2026-11-13 (user): the other 22 bugs of this list, and the `SELECT CASE` branches that were never
-reached (`docs\sub-names.md`, "Found while reading"), were fixed in one batch. The pictures,
+reached (`docs\archived\sub-names.md`, "Found while reading"), were fixed in one batch. The pictures,
 `normal_random_number` and the train's pixels below are kept. Of four rows found afterward, three were
 settled on 2026-11-13 (user); the computer's fleet that "thinks of sailing" is kept. What each fix did
-is in `docs\modernize-completed.md`, "The kept bugs fixed" and "Three more".
+is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Three more".
 
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
   The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
@@ -35,6 +35,19 @@ is in `docs\modernize-completed.md`, "The kept bugs fixed" and "Three more".
 - **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
   (`ai\ai.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
   bombards the city anyway when it is the enemy's. The change of order does not stop this attack.
+- **The computer counts a fort of 2 as no fort** when it weighs an attack (`ai_evaluate_move`, `ai\ai.bm`
+  lines 396 to 401). The original's `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3` is
+  one `IF` line, so the second test runs only when the fort is 1. A fort of 0 gives 1, of 1 gives 2, and of
+  2 gives 1 again; a fort is never 3 (`MAX_FORT` is 2). It most likely meant the fort plus 1.
+- **The Union's computer skips fortifying half the time when it has no fleet** (`ai_fortify`, `ai\ai.bm`
+  line 46): `... AND RND > .5 AND side_cash < 222 THEN EXIT SUB`. `side_cash` there is a local scalar,
+  declared so that `OPTION _EXPLICIT` accepts it, and it is always 0, as the original's undeclared `cash`
+  was. So the cash test is always true. It most likely meant `side_cash(side) < 222`.
+- **The army report counts the capitals' income twice** (`report_armies`, `ui\reports.bm`). Its line
+  "income / all income" adds 100 for each capital to `total_income`, which `turn_collect_income` has
+  already counted them in. The original did the same (`CWSTRAT2.BAS` line 811, with `vptotal` from
+  `CWSTRAT.BAS` line 169). Found 2026-11-13. A fix changes the report's screen in the scripts that
+  show it.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
@@ -44,7 +57,7 @@ is in `docs\modernize-completed.md`, "The kept bugs fixed" and "Three more".
 Ideas that the original game did not have. Each one changes how the game plays, looks or sounds, or where
 it keeps its files, so each needs its own decision and its scripts recorded again.
 
-- **Records for the armies.** Phase 10 closed with no records (`docs\modernize-plan.md`, "Phase 10:
+- **Records for the armies.** Phase 10 closed with no records (`docs\archived\modernize-plan-completed.md`, "Phase 10:
   records"). Join copies some of an army's fields and four places clear a slot, each clearing different fields.
   If those clears and copies were made the same, an `armies(i)` record with one copy and one clear would be
   simpler code, not only a new spelling. Making them the same changes how the game plays.
@@ -78,20 +91,17 @@ Left alone by group 2 (the special values):
 
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** Its tests read `fleet_exists(side)`
   since 2026-11-13 (`docs\structure-review.md`, item 2); 7 assignments of 0 are left.
-  `docs\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
+  `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
 - **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 195). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
 - **`menu_select` treats a start above 42 as row 1**: `IF menu_choice > 21` (`ui\menu.bm` line 64) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
   `MENU_START`, so it stays.
 - **The Utility menu calls `menu_select(-1)`** (`menu_utility`, `ui\options.bm` line 31). No mode has that number, so it is a
-  plain menu without the F3, F4 and F7 keys. `docs\constants.md` has no row for it, so it keeps the -1
+  plain menu without the F3, F4 and F7 keys. `docs\archived\constants.md` has no row for it, so it keeps the -1
   (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
-- **`animate_army`'s parameter `background_saved` is misnamed** (`draw\icons.bm`). The `GET` it skips takes
-  the army's flag picture from its city, not the background; `ANIMATE_PICTURE_TAKEN` says so (group 5).
-  The parameter wants the name `picture_taken`.
 - **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
-  `docs\constants.md`, section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
+  `docs\archived\constants.md`, section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
   since 2026-11-13.
 
 Left alone by group 6 (the settings and victory rules):
@@ -111,20 +121,21 @@ Left alone by group 7 (the rule numbers):
 - **The Emancipation Proclamation comes after 1862** (`year above 1862`, `[emancipation]` in
   `scenarios\EVENTS.DAT`). That is the date of an event, not `IRONCLAD_YEAR`; phase 11 moved the
   events' dates to data (2026-11-13).
-- **`ai_fortify` compares `side_cash` with no index**: `side_cash < 222` (`ai\ai.bm` line 30). Every other use
-  is `side_cash(who)`. Here `side_cash` is a local scalar, declared so that `OPTION _EXPLICIT` accepts it,
-  and it is always 0, as the original's undeclared `cash` was. So the test is always true.
 
 Left alone by group 8 (the colors):
 
-- **A side's color is set as a number in a variable**, as in `c = 9: IF city_owner(i) = SIDE_REBEL THEN c = 7`
-  and then `COLOR c` or `LINE ..., c`. The table names colors in `COLOR` statements and the menu's variables
-  only, so these stay. A `side_color(side)` FUNCTION would be the next step.
-- **`COLOR 16 - c` shows the other side's color** (`ui\battle.bm` lines 27, 35 and 81): 16 - 9 is 7 and
-  16 - 7 is 9. It stays as written; it would go with `side_color`.
+- **`COLOR 16 - side_color` shows the other side's color** (`calculate_battle`, `ui\battle.bm`): 16 - 9
+  is 7 and 16 - 7 is 9. It stays as written. `side_color_of` (`game\colors.bm`) gives the color.
 - **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 56, Chk Links;
   `ui\turn.bm` line 134, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
 - **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 56): 0 there means "no color set",
   not black, so the test keeps its 0.
+
+Found while renaming the locals (`docs\archived\local-names.md`, part 4):
+
+- **`ai_army_order`'s capital check tests the loop counter** (`ai\ai.bm` lines 243 to 247):
+  `IF j = 0 THEN EXIT FOR`, after `neighbor = city_road(city, j)`. `j` runs from 1, so the test is never
+  true; it most likely meant `neighbor = 0`. A fix changes no play: past the last road the loop asks
+  `city_nearby_enemy_strength(0)`, and city 0 has no roads, so the answer is 0.

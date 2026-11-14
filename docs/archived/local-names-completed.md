@@ -1,7 +1,7 @@
 # Done: local variable, parameter and label names
 
-The finished parts of `local-names.md`, moved here on 2026-11-12. That document keeps the rules, the labels
-still left, the constants and the possible bugs. A section not found there is here.
+The finished parts of `local-names.md`, moved here on 2026-11-12. That document keeps the rules and the
+possible bugs; it is in `docs\archived\` too since 2026-11-13. A section not found there is here.
 
 ## Part 1: local variables and parameters
 
@@ -287,7 +287,7 @@ Three names the user asked about were not taken, each for a reason:
 There were about 90 labels. Most did nothing but skip to the next pass of a loop (`GOTO puter` landed on
 `puter: NEXT i`), leave a loop, or go to the end of a SUB. On 2026-11-12 those were replaced by `_CONTINUE`,
 `EXIT FOR`, `EXIT SUB`, an `IF` block or a `DO` loop, and their labels are gone
-(`modernize-completed.md`, "After the plan: the labels"). No `GOSUB` is left.
+(`modernize-plan-completed.md`, "After the plan: the labels"). No `GOSUB` is left.
 
 ## Part 3: constants that read unclearly
 

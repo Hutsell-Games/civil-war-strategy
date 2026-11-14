@@ -9,6 +9,20 @@ SUB set_union_advantage
     END IF
 END SUB
 
+' How many steps the Balance setting helps side: opt_difficulty's distance from DIFFICULTY_EVEN
+' when side is the computer's and the setting favors it, and 0 otherwise. Above DIFFICULTY_EVEN
+' it favors the Union, below it the Rebels. The extra recruits, the battle strengths and the
+' starting cash are multiples of it.
+FUNCTION balance_help (side)
+    balance_help = 0
+    IF side = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN
+        balance_help = opt_difficulty - DIFFICULTY_EVEN
+    END IF
+    IF side = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN
+        balance_help = DIFFICULTY_EVEN - opt_difficulty
+    END IF
+END FUNCTION
+
 ' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
 ' and the leaders' ratings at random. Each side may lose some of its first six armies.
 SUB vary_start_conditions
@@ -44,9 +58,9 @@ SUB vary_start_conditions
     FOR i = SIDE_UNION TO SIDE_REBEL
         fleet_ships$(i) = ""
         FOR j = 1 TO fleet_size(i)
-            ship$ = "W"
+            ship$ = SHIP_WOODEN$
             IF RND > .45 * current_side THEN
-                ship$ = "I"
+                ship$ = SHIP_IRONCLAD$
             END IF
             fleet_ships$(i) = fleet_ships$(i) + ship$
         NEXT j
@@ -217,7 +231,7 @@ SUB game_apply_settings
     DIM ships$
     IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
         FOR i = SIDE_UNION TO SIDE_REBEL
-            ships$ = STRING$(LEN(fleet_ships$(i)), "W")
+            ships$ = STRING$(LEN(fleet_ships$(i)), SHIP_WOODEN$)
             fleet_ships$(i) = ships$
         NEXT i
     END IF
@@ -231,12 +245,11 @@ SUB game_apply_settings
     IF opt_pause! < 1 THEN
         opt_pause! = 2
     END IF
-    IF current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN
-        side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
-    END IF
-    IF current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN
-        side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
-    END IF
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        IF balance_help(i) > 0 THEN
+            side_cash(i) = side_cash(i) + 100 * (DIFFICULTY_EVEN + balance_help(i))
+        END IF
+    NEXT i
     FOR i = SIDE_UNION TO SIDE_REBEL
         side_income(i) = side_cash(i)
         side_cash(i) = side_cash(i) + 50 * RND

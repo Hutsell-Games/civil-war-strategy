@@ -1,11 +1,14 @@
 SUB draw_fleet_ship (side, ship)
-    DIM ship_type AS INTEGER
-    ship_type = 1
-    IF MID$(fleet_ships$(side), ship, 1) = "I" THEN
-        ship_type = 2
-    END IF
-    CALL draw_ship_icon(side, ship_type)
+    CALL draw_ship_icon(side, ship_icon(MID$(fleet_ships$(side), ship, 1)))
 END SUB
+
+' The ship_type of draw_ship_icon for a ship of kind ship$: 1 wooden, 2 ironclad.
+FUNCTION ship_icon (ship$)
+    ship_icon = 1
+    IF ship$ = SHIP_IRONCLAD$ THEN
+        ship_icon = 2
+    END IF
+END FUNCTION
 
 SUB draw_ship_icon (side, ship_type)
     DIM x AS INTEGER

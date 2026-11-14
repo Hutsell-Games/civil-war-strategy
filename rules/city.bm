@@ -44,6 +44,16 @@ SUB city_take (city, side, weaken_fort)
     END IF
 END SUB
 
+' Whether the side has the money for a fort.
+FUNCTION fort_affordable (side)
+    fort_affordable = side_cash(side) >= COST_FORT
+END FUNCTION
+
+' Whether the side can move its capital: it has one, and the money.
+FUNCTION capital_can_move (side)
+    capital_can_move = side_capital(side) <> 0 AND side_cash(side) >= COST_MOVE_CAPITAL
+END FUNCTION
+
 ' Fortify: the city's fort grows a level, and the side pays for it.
 SUB city_build_fort (side, city)
     city_fort(city) = city_fort(city) + 1

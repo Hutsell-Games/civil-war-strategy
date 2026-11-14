@@ -112,8 +112,6 @@ END SUB
 SUB army_recruit (side, city, raised)
     DIM army_slot AS INTEGER
     DIM i AS INTEGER
-    DIM x AS INTEGER
-    DIM y AS INTEGER
     DIM from_city AS INTEGER
     DIM isolated AS INTEGER
     raised = 1
@@ -132,9 +130,7 @@ SUB army_recruit (side, city, raised)
     i = city_army(city)
     CALL army_add_recruits(side, i, isolated)
     from_city = army_city(i)
-    x = city_x(from_city) - 12
-    y = city_y(from_city) - 11
-    GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army()
+    CALL flag_picture_save(from_city)
     CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
     IF opt_sound >= SOUND_EFFECTS THEN
         SOUND 2222, 1
@@ -146,6 +142,6 @@ SUB army_recruit (side, city, raised)
     IF isolated = 1 THEN
         PRINT " ISOLATED !";
     END IF
-    PUT (x - 9, y - 7), saved_under_army(), PSET
+    CALL flag_picture_restore(from_city)
     CALL wait_seconds(opt_pause! - .5)
 END SUB

@@ -257,7 +257,7 @@ SUB event_apply (row, good_side, weight)
                 fleet_size(good_side) = MAX_FLEET_SHIPS
             END IF
             new_ships = fleet_size(good_side) - LEN(fleet_ships$(good_side))
-            fleet_ships$(good_side) = fleet_ships$(good_side) + STRING$(new_ships, "W")
+            fleet_ships$(good_side) = fleet_ships$(good_side) + STRING$(new_ships, SHIP_WOODEN$)
             IF event_effect(row) = EFFECT_SHIPS_TO_PORT THEN
                 fleet_city(good_side) = port
             END IF
@@ -304,9 +304,7 @@ SUB event_new_army (side, city, army)
     IF army = 0 THEN
         EXIT SUB
     END IF
-    army_leader_rating(army) = leader_rating(army)
-    army_name$(army) = leader_name$(army)
-    leader_name$(army) = ""
+    CALL army_appoint(army, army)
     army_size(army) = 0
     army_city(army) = city
     city_army(city) = army

@@ -51,6 +51,12 @@ SUB turn_next_player (month_over)
     END IF
 END SUB
 
+' Whether winter stops a move into city: in January and February, without the January
+' Campaigns setting, an army may not move into a city that is not its side's.
+FUNCTION winter_stops_move (side, city)
+    winter_stops_move = turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(city) <> side
+END FUNCTION
+
 ' Two months pass.
 SUB turn_advance_month
     turn_month = turn_month + MONTHS_PER_TURN
@@ -98,17 +104,10 @@ END SUB
 
 ' The strength ratio the computer plays by: the player's men against the computer's.
 SUB turn_strength_ratio
-    DIM i AS INTEGER
     DIM union_strength AS INTEGER
     DIM rebel_strength AS INTEGER
-    union_strength = 0
-    FOR i = 1 TO ARMIES_PER_SIDE
-        union_strength = union_strength + .1 * army_size(i)
-    NEXT i
-    rebel_strength = 0
-    FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES
-        rebel_strength = rebel_strength + .1 * army_size(i)
-    NEXT i
+    union_strength = side_strength(SIDE_UNION)
+    rebel_strength = side_strength(SIDE_REBEL)
     IF current_side = SIDE_REBEL AND rebel_strength > 0 THEN
         ai_strength_ratio! = union_strength / rebel_strength
     ELSE

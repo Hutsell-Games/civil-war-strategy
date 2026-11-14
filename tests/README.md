@@ -212,7 +212,7 @@ on a desktop nobody sees.
 
 All but `title` and `files` are the scripts that QB64Rust's test corpus plays on its copy of this repo's
 `main` (`tests\corpus\screen\g12_game.*.keys` there), with this port's places. `files` was written again for
-this port, which can load a saved game (`docs\devnotes.md`, "Found").
+this port, which can load a saved game (`docs\archived\devnotes-completed.md`, "Found").
 
 ### Generated scripts
 

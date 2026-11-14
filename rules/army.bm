@@ -48,7 +48,7 @@ SUB army_combine_absorb (army)
         army_supply(0) = MAX_SUPPLY
     END IF
     CALL army_clear(army)
-    leader_name$(army) = army_name$(army)
+    CALL army_free_leader(army)
     army_name$(army) = ""
 END SUB
 
@@ -80,9 +80,7 @@ SUB army_raise (side, army_slot, city)
     IF side = SIDE_REBEL THEN
         army_experience(army_slot) = 2
     END IF
-    army_leader_rating(army_slot) = leader_rating(army_slot)
-    army_name$(army_slot) = leader_name$(army_slot)
-    leader_name$(army_slot) = ""
+    CALL army_appoint(army_slot, army_slot)
 
     troops = 70
     IF opt_realism >= REALISM_ON THEN
@@ -276,10 +274,38 @@ SUB army_detach (army, city, army_slot)
     army_city(army_slot) = city
     army_experience(army_slot) = army_experience(army)
     army_order(army_slot) = ORDER_NONE
-    army_leader_rating(army_slot) = leader_rating(army_slot)
-    army_name$(army_slot) = leader_name$(army_slot)
-    leader_name$(army_slot) = ""
+    CALL army_appoint(army_slot, army_slot)
 END SUB
+
+' Whether drill can still improve the army: its experience is below 6 and below its leader's
+' rating. -1 or 0, as a comparison gives.
+FUNCTION army_can_drill (army)
+    army_can_drill = army_experience(army) < 6 AND army_experience(army) < army_leader_rating(army)
+END FUNCTION
+
+' Whether a side may detach part of an army: the Rebels only.
+FUNCTION side_can_detach (side)
+    side_can_detach = side = SIDE_REBEL
+END FUNCTION
+
+' Whether an army counts in its side's strength: it holds a city, or rides its side's train.
+FUNCTION army_in_field (army)
+    army_in_field = army_exists(army) OR (army > 0 AND train_army(army_side(army)) = army)
+END FUNCTION
+
+' A side's strength in thousands of men: a tenth of each army's size in hundreds, rounded at
+' each step as the sum is an INTEGER. The computer plays by it.
+FUNCTION side_strength (side)
+    DIM i AS INTEGER
+    DIM strength AS INTEGER
+    strength = 0
+    FOR i = side_first_army(side) TO side_last_army(side)
+        IF army_in_field(i) THEN
+            strength = strength + .1 * army_size(i)
+        END IF
+    NEXT i
+    side_strength = strength
+END FUNCTION
 
 ' A month of drill: one more level of experience, and the army is busy for the month.
 SUB army_drill (army)
@@ -320,24 +346,31 @@ SUB army_set_order (army, order)
     army_order(army) = order
 END SUB
 
-' Relieve, first half: the army's leader goes back among the free leaders, in the army's slot.
+' The army's leader goes back among the free leaders, in the army's slot. Relieve calls it
+' first; a combine calls it for each army that joins.
 SUB army_free_leader (army)
     leader_name$(army) = army_name$(army)
+END SUB
+
+' The army takes the free leader of slot leader: his name and rating, and he leaves the free
+' leaders. A new army takes the leader of its own slot.
+SUB army_appoint (army, leader)
+    army_leader_rating(army) = leader_rating(leader)
+    army_name$(army) = leader_name$(leader)
+    leader_name$(leader) = ""
 END SUB
 
 ' Relieve, second half: the army takes the free leader of a slot, with a point less than his
 ' rating. It loses a level of experience and is busy for the month.
 SUB army_take_leader (army, leader)
     army_order(army) = ORDER_BUSY
-    army_leader_rating(army) = leader_rating(leader)
+    CALL army_appoint(army, leader)
     IF army_leader_rating(army) > 0 THEN
         army_leader_rating(army) = army_leader_rating(army) - 1
     END IF
     IF army_experience(army) > 0 THEN
         army_experience(army) = army_experience(army) - 1
     END IF
-    army_name$(army) = leader_name$(leader)
-    leader_name$(leader) = ""
 END SUB
 
 ' More men for the army in a city: 4,500, or under the Realism setting a number from the
@@ -382,12 +415,7 @@ END FUNCTION
 ' they go to the computer's side when the setting favors it. The original added them to army 0,
 ' or to a new army just before its size was set, so they were never seen.
 SUB army_recruit_bonus (side, army_slot)
-    IF side = SIDE_REBEL AND current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN
-        army_size(army_slot) = army_size(army_slot) + 15 - 5 * opt_difficulty
-    END IF
-    IF side = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN
-        army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
-    END IF
+    army_size(army_slot) = army_size(army_slot) + 5 * balance_help(side)
 END SUB
 
 ' The cities where a side may recruit this month, sorted by name. They are drawn at random;

@@ -128,17 +128,12 @@ SUB report_armies (side)
     last_army = side_last_army(side)
     CLS
     LOCATE 1, 1
-    side_color = 9
-    IF side = SIDE_REBEL THEN
-        side_color = 15
-    END IF
+    side_color = side_bright_color(side)
     COLOR side_color
     PRINT " Report for "; side_name$(side); " Forces"; TAB(30); month_name$(turn_month); ","; turn_year; TAB(49);
     COLOR COLOR_YELLOW
     PRINT " Victory Points "; side_victory_points(side);
-    IF side_color = 15 THEN
-        side_color = 7
-    END IF
+    side_color = side_color_of(side)
     total_points = side_victory_points(side) + side_victory_points(other_side(side))
     IF total_points = 0 THEN
         PRINT
@@ -202,7 +197,7 @@ SUB report_armies (side)
     PRINT " "; side_name$(side); " NAVY has "; fleet_size(side); " ship(s) ";
     ironclads = 0
     FOR k = 1 TO fleet_size(side)
-        IF MID$(fleet_ships$(side), k, 1) = "I" THEN
+        IF MID$(fleet_ships$(side), k, 1) = SHIP_IRONCLAD$ THEN
             ironclads = ironclads + 1
         END IF
     NEXT k

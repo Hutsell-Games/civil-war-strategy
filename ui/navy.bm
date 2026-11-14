@@ -41,25 +41,13 @@ SUB menu_navy_build (side, again)
     DIM cities(MAX_CITIES) AS INTEGER
     DIM count AS INTEGER
     again = 1
-    cost = COST_SHIP
-    IF side_cash(side) < cost OR fleet_is_at_sea(side) THEN
+    cost = ship_cost(SHIP_WOODEN$)
+    IF NOT navy_can_build(side) THEN
         EXIT SUB
     END IF
-    IF fleet_size(side) >= MAX_FLEET_SHIPS THEN
-        EXIT SUB
-    END IF
+    ship$ = SHIP_WOODEN$
 
-    IF fleet_exists(side) THEN
-        IF city_owner(fleet_city(side)) <> side THEN
-            EXIT SUB
-        END IF
-        IF city_port_type(fleet_city(side)) < PORT_SEA THEN
-            EXIT SUB
-        END IF
-    END IF
-    ship$ = "W"
-
-    IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * cost THEN
+    IF navy_has_ironclads = 1 AND side_cash(side) >= ship_cost(SHIP_IRONCLAD$) THEN
         menu_col = PANEL_COL
         menu_row = 12
         menu_color = COLOR_LIGHT_BLUE
@@ -73,8 +61,8 @@ SUB menu_navy_build (side, again)
             EXIT SUB
         END IF
         IF menu_choice = 2 THEN
-            ship$ = "I"
-            cost = 2 * cost
+            ship$ = SHIP_IRONCLAD$
+            cost = ship_cost(ship$)
         END IF
     END IF
 
@@ -106,15 +94,10 @@ END SUB
 ' fleet acted this month.
 SUB menu_navy_attack (side, again)
     again = 0
-    IF fleet_is_at_sea(side) THEN
-        again = 1
-        EXIT SUB
-    END IF
-    IF NOT fleet_exists(side) THEN
-        EXIT SUB
-    END IF
-    IF city_owner(fleet_city(side)) <> other_side(side) THEN
-        again = 1
+    IF NOT navy_can_attack(side) THEN
+        IF fleet_exists(side) THEN
+            again = 1
+        END IF
         EXIT SUB
     END IF
     CALL turn_set_navy_done(1)
@@ -170,7 +153,7 @@ END SUB
 SUB menu_navy_raid (side, again)
     again = 0
     CALL navy_count_ships(side)
-    IF fleet_size(side) < 1 OR raiding_side = side THEN
+    IF NOT navy_can_raid(side) THEN
         again = 1
         EXIT SUB
     END IF

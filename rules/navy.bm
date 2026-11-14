@@ -57,6 +57,35 @@ SUB navy_list_ports (side, cities(), count)
     NEXT i
 END SUB
 
+' Whether the side can build a ship: it has the money for a wooden one and room in its fleet,
+' and its fleet is not at sea. A fleet in port must lie off a sea port of its own. -1 or 0, as
+' a comparison gives.
+FUNCTION navy_can_build (side)
+    navy_can_build = 0
+    IF fleet_is_at_sea(side) OR side_cash(side) < COST_SHIP OR fleet_size(side) >= MAX_FLEET_SHIPS THEN
+        EXIT FUNCTION
+    END IF
+    IF fleet_exists(side) THEN
+        IF city_owner(fleet_city(side)) <> side OR city_port_type(fleet_city(side)) < PORT_SEA THEN
+            EXIT FUNCTION
+        END IF
+    END IF
+    navy_can_build = -1
+END FUNCTION
+
+' Whether the side's fleet can bombard: it lies off a city of the other side.
+FUNCTION navy_can_attack (side)
+    navy_can_attack = 0
+    IF fleet_exists(side) AND NOT fleet_is_at_sea(side) THEN
+        navy_can_attack = city_owner(fleet_city(side)) = other_side(side)
+    END IF
+END FUNCTION
+
+' Whether the side's fleet can go raiding: it has a ship and is not raiding already.
+FUNCTION navy_can_raid (side)
+    navy_can_raid = fleet_size(side) >= 1 AND raiding_side <> side
+END FUNCTION
+
 ' Whether the side's fleet can land an army: two ships or more, in port off a neutral city.
 ' The Rebels can only without the Realism setting. -1 or 0, as a comparison gives.
 FUNCTION navy_can_invade (side)
@@ -79,23 +108,36 @@ SUB random_discard
     unused! = RND
 END SUB
 
+' The side has no fleet: no ships and no port.
+SUB navy_clear_fleet (side)
+    fleet_ships$(side) = ""
+    fleet_city(side) = 0
+    fleet_size(side) = 0
+END SUB
+
 SUB navy_remove_ship (side)
     fleet_size(side) = fleet_size(side) - 1
     IF fleet_size(side) > 0 THEN
         fleet_ships$(side) = LEFT$(fleet_ships$(side), fleet_size(side))
     ELSE
-        fleet_ships$(side) = ""
-        fleet_city(side) = 0
-        fleet_size(side) = 0
+        CALL navy_clear_fleet(side)
     END IF
 END SUB
 
-' Build: a ship of kind ship$ ("W" wooden, "I" ironclad) joins the side's fleet. Ironclads go
+' The price of a ship of kind ship$: an ironclad costs two wooden ships.
+FUNCTION ship_cost (ship$)
+    ship_cost = COST_SHIP
+    IF ship$ = SHIP_IRONCLAD$ THEN
+        ship_cost = 2 * COST_SHIP
+    END IF
+END FUNCTION
+
+' Build: a ship of kind ship$ (SHIP_WOODEN$ or SHIP_IRONCLAD$) joins the side's fleet. Ironclads go
 ' first in fleet_ships$. A fleet that had ships pays cost now; a new one pays in
 ' navy_found_fleet, when its port is known.
 SUB navy_add_ship (side, ship$, cost)
     fleet_size(side) = fleet_size(side) + 1
-    IF ship$ = "W" THEN
+    IF ship$ = SHIP_WOODEN$ THEN
         fleet_ships$(side) = fleet_ships$(side) + ship$
     ELSE
         fleet_ships$(side) = ship$ + fleet_ships$(side)
@@ -112,7 +154,8 @@ SUB navy_found_fleet (side, city, cost)
     fleet_size(side) = 1
 END SUB
 
-' A new fleet has no port to start in: the ship is not built.
+' A new fleet has no port to start in: the ship is not built. fleet_city() stays as it was,
+' unlike navy_clear_fleet: the computer's first Union ship is offered city 30 before it is built.
 SUB navy_cancel_new_fleet (side)
     fleet_size(side) = 0
     fleet_ships$(side) = ""
@@ -153,8 +196,7 @@ END SUB
 
 ' The shore battery sank the fleet's last ship. The other side gets 5 victory points.
 SUB navy_fleet_lost (side)
-    fleet_city(side) = 0
-    fleet_ships$(side) = ""
+    CALL navy_clear_fleet(side)
     side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 5
     IF side = current_side THEN
         fleet_pursuit = 0
@@ -244,7 +286,7 @@ END SUB
 ' Naval combat: the hits the side's last ship can take, 20 for an ironclad and 10 for a wooden ship.
 FUNCTION navy_ship_hits (side)
     navy_ship_hits = 10
-    IF RIGHT$(fleet_ships$(side), 1) = "I" THEN
+    IF RIGHT$(fleet_ships$(side), 1) = SHIP_IRONCLAD$ THEN
         navy_ship_hits = 20
     END IF
 END FUNCTION
@@ -257,7 +299,7 @@ FUNCTION navy_shot_hits (side)
     ironclad_bonus! = 0
     ship$ = RIGHT$(fleet_ships$(side), 1)
     IF ship$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
-        IF ship$ = "I" THEN
+        IF ship$ = SHIP_IRONCLAD$ THEN
             ironclad_bonus! = .1
         ELSE
             ironclad_bonus! = -.1
@@ -272,8 +314,7 @@ END FUNCTION
 ' Naval combat: the loser's fleet is sunk, and the winner's side gets 10 victory points (the
 ' original gave them to the loser). The winner pursues when it is the side whose turn it is.
 SUB navy_fleet_defeated (loser)
-    fleet_city(loser) = 0
-    fleet_ships$(loser) = ""
+    CALL navy_clear_fleet(loser)
     side_victory_points(other_side(loser)) = side_victory_points(other_side(loser)) + 10
     IF other_side(loser) = current_side THEN
         fleet_pursuit = 1

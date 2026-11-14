@@ -32,8 +32,6 @@ END SUB
 ' The train arrives: its army gets off, and takes the city if it is not the side's.
 SUB railroad_arrive (side)
     DIM army AS INTEGER
-    DIM x AS INTEGER
-    DIM y AS INTEGER
     CALL draw_train(side, DRAW_ERASE)
     army = train_army(side)
     CALL railroad_unload(side)
@@ -49,9 +47,7 @@ SUB railroad_arrive (side)
         SOUND 1200, 2
     END IF
     CALL wait_seconds(opt_pause!)
-    x = city_x(army_city(army)) - 12
-    y = city_y(army_city(army)) - 11
-    LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+    CALL draw_erase_flag(army_city(army))
     IF city_owner(army_city(army)) <> side THEN
         CALL city_capture(army, army_city(army), side, 0)
     END IF

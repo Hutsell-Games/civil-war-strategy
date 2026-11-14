@@ -4,7 +4,8 @@ Written 2026-11-13, after phase 9 of `modernize-plan.md` and phase 11's step 2. 
 structured the best way, and which patterns would make it easier to read and change. It started from the
 nested `IF`s of `ai\ai.bm`.
 
-Nothing here is decided. The questions for the user are at the end.
+Nothing here is decided. The questions for the user are at the end. What was built from it is in
+`archived\structure-review-completed.md`.
 
 ## How it was measured
 
@@ -81,7 +82,7 @@ menu or the computer chooses; then the command in `commands\` runs.
 - **Compiler/languages engineer:** This is evidence for phase 11's step 5, the list of what QB64 made
   awkward. Three things stand out: a FUNCTION returns one value, there is no `ENUM` (`cws.bi` has 179 `CONST`
   lines, in groups), and there are no modules (126 shared names, all global).
-- **Rust engineer:** Do not reopen records. The ruling of 2026-11-12 (`modernize-plan.md`, "Phase 10:
+- **Rust engineer:** Do not reopen records. The ruling of 2026-11-12 (`archived\modernize-plan-completed.md`, "Phase 10:
   records") still fits: the predicates of cause 1 give most of the readability without them.
 - **Test engineer:** Commit the layer check first. Add a unit test for each new predicate.
 - **Game-AI engineer** (added because the computer's move scoring is a utility AI): The merge of the
@@ -99,117 +100,65 @@ In this order, each a commit that keeps the recorded screens identical:
 5. The identical halves for each side become one SUB (cause 4, first part).
 6. The city numbers move into the scenario's data.
 
-The earlier plan for `ai\ai.bm` alone was four steps. Its step 1 (below) is done. Its steps 2 to 4
+The earlier plan for `ai\ai.bm` alone was four steps. Its step 1 is done (`archived\structure-review-completed.md`). Its steps 2 to 4
 (`SELECT CASE` and `_ANDALSO` for nested `IF`s, named predicates, splitting `ai_evaluate_move`) are dropped
 as separate work: the predicates and FUNCTIONs above cover most of them. The split of `ai_evaluate_move`
 can follow item 4, once its scores no longer live in `menu_value()`.
 
-## Already done
+## The second review: one idea written in several places
 
-**Step 1 of the `ai\ai.bm` plan**, in the working tree on 2026-11-13, not committed. Six procedures read
-names in place of repeated lookups. In `ai_evaluate_move`, `city_nearby_enemy_strength` and `ai_railroad`,
-`current_side` is the player, so the local `enemy_side` says so. `own_side` replaces
-`other_side(current_side)`. `ai_pick_port` gets `enemy_side` for `other_side(side)`. The 40 scripts
-passed `play.py check` and `play.py compare` on unchanged recordings, and the 152 unit tests passed.
+Written 2026-11-13, after the merges of the literal copies (`army_clear`, `load_scenario_armies`,
+`battle_size_rate!`, `save_file_name$`, `side_color_of`). It looked for a rule or a fact that the code
+states in several places in different words. Read in full: `ai\`, `rules\`, `commands\`, and in `ui\`
+the orders, navy, army, turn, battle, menu, report and option menus. Skimmed: `draw\map.bm`,
+`draw\ships.bm`, `draw\pictures.bm`, `game\`, and `ui\screen.bm`, `files.bm`, `victory.bm` and
+`events.bm`.
 
-Two of step 1's names were taken back after item 2 (user, 2026-11-13). `army_troops` in
-`ai_evaluate_move` only renamed `army_size(army)`, made the odds lines lopsided beside
-`army_size(occupant)`, and shared its name with `ai_army_order`'s local of another use. `port` and
-`port_owner` in `ai_fleet_orders` and `ai_navy_attack` hid two tests of `fleet_city()` from item 2's
-rewrite; those now read `fleet_is_at_sea(side)` and `NOT fleet_exists(side)`. With `own_side` in place,
-`ai_evaluate_move`'s `enemy_bound` read wrong: its loop walks the computer's own armies, so it is
-`ally_bound` now. Step 1 also brought out a kept bug, the test for crossing moves (`TODO.md`).
+The user took the pragmatic engineer's plan ("do as recommended", 2026-11-13). Items 4 and 9 and
+the small items below were left out.
 
-**Item 1 of the recommendation, the layer check**, in the working tree on 2026-11-13, not committed.
-`tests\test_layers.py` reads the source and fails when `rules\` or `ai\` uses the screen, the speaker or
-the keyboard, when `rules\` calls into `ui\`, `draw\`, `game\` or `commands\`, when `ai\` calls into them
-other than `ui\ai.bm` and `commands\`, or when `commands\` opens a menu or reads a key. It runs with the
-other Python tests. Five calls break a rule today and are listed in its `ALLOWED`, each with its reason:
+### Left out, and why
 
-- `army_list_combine_cities` and `army_recruit_cities` (`rules\army.bm`) call `menu_bubble_sort`
-  (`ui\menu.bm`), which sorts the menu's arrays and draws nothing (cause 2).
-- `ai_navy_adjust` calls `menu_navy_items` (`ui\orders.bm`), which fills the Ships menu's texts (cause 2).
-- `ai_recruit` calls `menu_recruit_cities` (`ui\orders.bm`), which sets the `COLOR` that `draw_ai_funds`
-  prints in.
-- `ai_fortify` calls `draw_fort_built` (`ui\orders.bm`), the fort's message shared with the player's
-  Fortify.
+- **The two halves of `battle_strengths`** share three steps. It is one SUB read top to bottom, in the
+  order of the right panel; helpers would make one battle harder to follow and risk its rounding.
+- **The sea ports of a side** (`navy_list_shipyards`, `event_delivery_port`, `navy_retreat_port`): their
+  tests differ in three ways, so one FUNCTION would need a parameter for each.
+- **Small repeats**: the menus' lists in `ui\orders.bm`, the three ways of shortening an army's name,
+  the two-row menus, the road loops' three ways of stopping, the cannon's sound and the `"00"` texts.
+  Each is done when its SUB is next changed for another reason.
 
-A row whose call is gone fails the test too, so the list cannot go stale.
+### The rules that the player's menus and the computer each checked
 
-**Item 2, the state predicates**, in the working tree on 2026-11-13, not committed. Five FUNCTIONs name
-what the arrays hold. Each gives -1 or 0, as the comparison it replaces, so `AND` and `OR` work as before:
+This is cause 4's second part. Each rule is now one FUNCTION in `rules\`, called by the menu's "-"
+row, by the menu's action and by `ai\`: `army_can_drill`, `capital_can_move`, `fort_affordable`,
+`side_can_detach`, `winter_stops_move`, `navy_can_build`, `navy_can_attack`, `navy_can_raid`, and
+`side_strength` with `army_in_field`. `ai_fortify` builds through `city_build_fort`.
 
-| FUNCTION | File | Replaces |
-|----------|------|----------|
-| `army_exists(army)` | `rules\army.bm` | `army_city() > 0`; with `NOT`, `= 0` and `< 1` |
-| `army_has_move(army)` | `rules\army.bm` | `army_order() > 0`; with `NOT`, `< 1` |
-| `army_has_acted(army)` | `rules\army.bm` | `army_order() < 0`; with `NOT`, `> -1` |
-| `fleet_exists(side)` | `rules\navy.bm` | `fleet_city() > 0`; with `NOT`, `= 0`, `< 1` and `<= 0` |
-| `fleet_is_at_sea(side)` | `rules\navy.bm` | `= FLEET_AT_SEA`; with `NOT`, `<> FLEET_AT_SEA`, `< 41` and `<= MAX_CITIES` |
+Where the copies differed, the user ruled (2026-11-13):
 
-A script rewrote 70 comparisons on 64 lines in 14 files, and one more by hand in `ui\reports.bm`. It left
-assignments alone, such as `fleet_city(side) = 0`. It also left the tests of city numbers (30, 27, 24),
-which are item 6. The rewrite is the same only while neither array is negative. Nothing sets a negative
-value: the train sets `army_city()` from an order that is a city. Both compilers read `NOT f(x) AND y` as
-`(NOT f(x)) AND y` (checked with a small program). Every changed line runs under the tests
-(`play.py coverage`). `TestArmyStateByName` and `TestFleetStateByName` in `tests\rules_test.bas` pin the
-values. The 40 scripts passed `check` and `compare` on unchanged recordings, and the 154 unit tests
-passed.
+1. **Build: one rule for both**, the player's. The computer now needs a sea port of its own too.
+2. **Attack: keep the difference.** Only the test is shared. The computer's Attack still turns to Sail
+   off a neutral city: that is its choice, not a rule.
+3. **Winter: January and February for both** (`turn_month < 3`), as the option's text says.
+4. **Strength: the army on a train counts** everywhere. The rounding of each sum is kept.
+   `ai_count_armies` still counts only the armies that hold a city as its armies.
 
-For phase 11's list of what QB64 made awkward: the FUNCTION was first named `fleet_at_sea`, and neither
-compiler accepted it. Names ignore case, so it is the same name as the constant `FLEET_AT_SEA`.
+`turn_check_commands` keeps its own test: it closes Ships for a side with no fleet and not the price
+of a ship, which is not the Build rule. The 40 scripts passed `check` and `compare` on unchanged
+recordings: none reached a case where the copies differed. 175 unit tests passed, 5 of them new
+for these rules. `TestTurnStrengthRatio` now gives its two armies a city, as every army in a game has.
 
-**Item 5, one SUB for both sides**, in the working tree on 2026-11-13, not committed.
-`turn_update_victory_points (side)` (`rules\turn.bm`) does one side's month; `turn_resolve` (`ui\turn.bm`)
-and the unit test call it for the Union, then the Rebels. The two halves differed in one line: only the
-Union's points stop at 0. That line is kept behind `side = SIDE_UNION`, and `TODO.md` has a row for it.
-A new unit test, `TestOnlyUnionVictoryPointsStopAtZero`, pins it and the strength ratio. The 40 scripts
-passed `check` and `compare` on unchanged recordings, and the 158 unit tests passed.
-
-**Item 3, SUBs that return one value**, in the working tree on 2026-11-13, not committed. 76 SUBs assign
-to a parameter, and 55 to exactly one. Four became FUNCTIONs: `ai_fortify_pick (side)`,
-`normal_random_number (mean, variance)`, `turn_retreat_city (city, attacker_side)` and
-`text_replace$ (text$, find$, with$)`. Each only picks, draws a number or builds a text.
-The others stay SUBs, for these reasons:
-
-- Most change the game as their main work (buy supply, bombard, move a fleet, set an order) and return
-  only a flag such as `again`, `raised` or `sailed`. A FUNCTION would hide that work.
-- The menus draw and read keys.
-- `ai_navy` leaves `action` as it was when no rule applies, so it is an input too.
-- `victory_rule_met` also gives 300 victory points, and `army_pick_commander` also writes a made-up name.
-- `ai_evaluate_move` keeps its scores in `menu_value()`, so it waits for item 4.
-
-`TestTextReplaceEveryPlace` is new. The 40 scripts passed `check` and `compare` on unchanged
-recordings, and the 159 unit tests passed.
-
-**Item 4, the menu's globals out of `rules\` and `ai\`**, in the working tree on 2026-11-13, not
-committed. Neither folder names a menu variable any more, and `tests\test_layers.py` checks it
-(`test_rules_and_ai_leave_the_menu_alone`). Four rows of its `ALLOWED` are gone; `ai_fortify`'s call
-of `draw_fort_built` is the one left.
-
-- **Lists.** `army_list_combine_cities`, `army_recruit_cities`, `navy_list_shipyards` and
-  `navy_list_ports` fill an array the caller passes, with a count. `city_list_sort` (`rules\city.bm`)
-  sorts by name as `menu_bubble_sort` did, so the lists keep their order. The player's menus copy a
-  list into the menu with `menu_set_cities` (`ui\menu.bm`), and set the menu's place and colors
-  that the rules set before.
-- **Picks.** `ai_recruit_pick` and `ai_pick_port` are FUNCTIONs that give a city. `ai_navy_orders`
-  chooses by its `action`, not `menu_choice`. `ai_army_order` lost a line that never ran.
-- **Scores.** `ai_evaluate_move` keeps its scores in a local `road_score()`.
-- **Invasion.** `navy_can_invade` (`rules\navy.bm`) is the test that the Ships menu and
-  `ai_navy_adjust` share. The computer filled the Ships menu to read its row count.
-- **The computer's screen.** `draw_ai_funds` takes the list's count. `draw_ai_recruit_color`
-  (`ui\ai.bm`) sets the color the player's list set for the computer before.
-
-What the computer left in the menu's variables could change no screen. The menus that open in its
-turn, Retreat and End Game, set their own place and colors. The values it left in `menu_choice` give
-row 1, as the player's End Turn does. One read was a bug: `ai_pick_port` set the row to 30, and
-`menu_value(30)` was always 0, so the fleet stayed in port. It returns 0 now (`TODO.md`). The 40
-scripts passed `check` and `compare` on unchanged recordings, the 161 unit tests passed, and every
-changed line runs under the tests.
+| Rule | Checked in, before | How the copies differed |
+|------|------------|-----------------------|
+| Can drill | `ai_drill`, `menu_army_drill` | not at all |
+| The capital can move | `menu_commands`, `menu_move_capital` | not at all |
+| A fort is affordable | `menu_commands` (twice), `menu_city_fortify`; `ai_fortify` adds the fort without `city_build_fort` | not at all |
+| Detach is the Rebels' only | `menu_commands`, `menu_army_detach` | not at all |
+| Winter stops a move into a city not the side's | `ai_army_order` (`turn_month = 1`), `menu_army_move` (`turn_month < 3`) | only in a scenario that starts in an even month |
+| A ship can be built | the Ships menu's row, `menu_navy_build`, `ai_navy_build`, `ai_navy_adjust`, `ai_fleet_orders`, `turn_check_commands` | only the player's Build asks for a sea port, and the computer's does not test the port's owner |
+| Attack and Raid | the Ships menu's rows, the player's and the computer's action | the computer's Attack also sails off a neutral city |
+| A side's strength | `turn_strength_ratio`, `ai_count_armies`, `victory_forces` | only the first counts the army on a train; two of them add tenths, rounded at each step |
 
 ## Questions for the user
 
 1. **The order above:** go ahead with it, or keep to the `ai\ai.bm` steps?
-2. **The kept bugs:** rule on `TODO.md`'s "The game" rows in one batch now, or leave them until after
-   this work? The merge of the player's and the computer's commands waits on that. Answered 2026-11-13
-   (user): now. All but three are fixed (`TODO.md`, "The game").

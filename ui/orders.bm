@@ -34,7 +34,7 @@ SUB menu_army_move
     IF menu_choice < 0 THEN
         EXIT SUB
     END IF
-    IF turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(menu_value(menu_choice)) <> current_side THEN
+    IF winter_stops_move(current_side, menu_value(menu_choice)) THEN
         COLOR COLOR_LIGHT_CYAN
         CALL clear_bottom_line
         PRINT "No campaigns in January";
@@ -97,7 +97,7 @@ SUB menu_city_fortify (city)
         CALL wait_seconds(4)
         EXIT SUB
     END IF
-    IF side_cash(current_side) < COST_FORT THEN
+    IF NOT fort_affordable(current_side) THEN
         CALL clear_bottom_line
         PRINT "Fortifications for "; city_name$(city); " cost "; COST_FORT; " and you only have "; side_cash(current_side);
         CALL wait_seconds(4)
@@ -544,7 +544,7 @@ END SUB
 SUB menu_move_capital (city)
     DIM old_capital$
     city = 0
-    IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN
+    IF NOT capital_can_move(current_side) THEN
         CALL clear_bottom_line
         COLOR COLOR_LIGHT_CYAN
         PRINT "Cannot move capital";
@@ -646,14 +646,14 @@ SUB menu_navy_items (side)
     menu_text$(0) = "Ships"
     menu_text$(1) = "Build"
     IF NOT fleet_is_at_sea(side) THEN
-        IF side_cash(side) < COST_SHIP OR fleet_size(side) >= MAX_FLEET_SHIPS OR city_owner(fleet_city(side)) <> side THEN
+        IF NOT navy_can_build(side) THEN
             menu_text$(1) = "-"
             menu_choice = MENU_START + 2
         END IF
     END IF
     menu_text$(2) = "Attack"
     IF NOT fleet_is_at_sea(side) THEN
-        IF city_owner(fleet_city(side)) <> other_side(side) THEN
+        IF NOT navy_can_attack(side) THEN
             menu_text$(2) = "-"
             menu_choice = MENU_START + 1
         END IF
@@ -667,7 +667,7 @@ SUB menu_navy_items (side)
         menu_text$(3) = "-"
     END IF
     menu_text$(4) = "Raid"
-    IF fleet_size(side) < 1 OR raiding_side = side THEN
+    IF NOT navy_can_raid(side) THEN
         menu_text$(4) = "-"
     END IF
     menu_col = PANEL_COL
@@ -699,17 +699,17 @@ SUB menu_commands
         menu_text$(0) = "Commands"
         menu_text$(1) = "Cancel"
         menu_text$(2) = "Fortify"
-        IF side_cash(current_side) < COST_FORT THEN
+        IF NOT fort_affordable(current_side) THEN
             menu_text$(2) = "-"
         END IF
         menu_text$(3) = "Join"
         menu_text$(4) = "Supply"
         menu_text$(5) = "Capital"
-        IF side_capital(current_side) = 0 OR side_cash(current_side) < COST_MOVE_CAPITAL THEN
+        IF NOT capital_can_move(current_side) THEN
             menu_text$(5) = "-"
         END IF
         menu_text$(6) = "Detach"
-        IF current_side = SIDE_UNION THEN
+        IF NOT side_can_detach(current_side) THEN
             menu_text$(6) = "-"
         END IF
         menu_text$(7) = "Army Drill"
@@ -725,14 +725,14 @@ SUB menu_commands
                 CALL menu_army_cancel(current_side)
                 CALL turn_set_moves_done(0)
             CASE 2
-                IF side_cash(current_side) < COST_FORT THEN
+                IF NOT fort_affordable(current_side) THEN
                     COLOR COLOR_LIGHT_CYAN
                     CALL clear_bottom_line
                     PRINT "Not enough money for fort";
                     EXIT SUB
                 END IF
                 CALL menu_city_fortify(picked)
-                IF side_cash(current_side) < COST_FORT THEN
+                IF NOT fort_affordable(current_side) THEN
                     EXIT SUB
                 END IF
             CASE 3
@@ -786,7 +786,7 @@ SUB menu_army_detach (again)
     DIM city AS INTEGER
     DIM army_slot AS INTEGER
     again = 0
-    IF current_side = SIDE_UNION THEN
+    IF NOT side_can_detach(current_side) THEN
         CALL clear_bottom_line
         COLOR COLOR_LIGHT_CYAN
         PRINT "Option not available to Union";
@@ -841,7 +841,7 @@ SUB menu_army_drill (again, drilled)
         EXIT SUB
     END IF
     again = 1
-    IF army_experience(army) > 5 OR army_experience(army) >= army_leader_rating(army) THEN
+    IF NOT army_can_drill(army) THEN
         COLOR COLOR_LIGHT_RED
         CALL clear_bottom_line
         PRINT army_name$(army); ": Army has reached maximum improvement through drilling";

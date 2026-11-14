@@ -346,10 +346,7 @@ SUB ai_turn
     DIM side_color AS INTEGER
     CALL special_events
     ai_side = other_side(current_side)
-    side_color = 9
-    IF current_side = SIDE_UNION THEN
-        side_color = 15
-    END IF
+    side_color = side_bright_color(ai_side)
     LOCATE 1, 1
     PRINT SPACE$(80);
     COLOR side_color

@@ -11,8 +11,8 @@ SUB draw_map_marker (from_city, to_city, mark)
     IF to_city < 0 THEN
         EXIT SUB
     END IF
-    x = city_x(from_city) - 12
-    y = city_y(from_city) - 11
+    x = flag_x(from_city)
+    y = flag_y(from_city)
     x1 = city_x(to_city)
     y1 = city_y(to_city)
     SELECT CASE mark
@@ -189,7 +189,6 @@ SUB draw_fleets
     DIM side AS INTEGER
     DIM x AS INTEGER
     DIM y AS INTEGER
-    DIM ship_type AS INTEGER
     FOR side = SIDE_UNION TO SIDE_REBEL
         IF fleet_size(side) = 0 OR NOT fleet_exists(side) THEN
             fleet_city(side) = 0
@@ -217,11 +216,7 @@ SUB draw_fleets
                 END IF
         END SELECT
         PSET (x, y), 1
-        ship_type = 1
-        IF LEFT$(fleet_ships$(side), 1) = "I" THEN
-            ship_type = 2
-        END IF
-        CALL draw_ship_icon(side, ship_type)
+        CALL draw_ship_icon(side, ship_icon(LEFT$(fleet_ships$(side), 1)))
     NEXT side
 END SUB
 

@@ -140,10 +140,7 @@ SUB end_game (side, rule)
             reason$ = "ENEMY ANNIHILATED"
     END SELECT
     CLS
-    side_color = 1
-    IF side = 2 THEN
-        side_color = 7
-    END IF
+    side_color = side_panel_color(side)
     LINE (0, 0)-(639, 479), 4, BF
     LINE (0, 40)-(550, 460), 0, BF
     CALL draw_map

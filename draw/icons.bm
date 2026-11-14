@@ -1,17 +1,37 @@
+' Where an army's or a train's flag stands beside a city: its center, left of the city's dot
+' and above it.
+FUNCTION flag_x (city)
+    flag_x = city_x(city) - 12
+END FUNCTION
+
+FUNCTION flag_y (city)
+    flag_y = city_y(city) - 11
+END FUNCTION
+
+' Paints over the flag beside a city with the map's green.
+SUB draw_erase_flag (city)
+    LINE (flag_x(city) - 9, flag_y(city) - 8)-(flag_x(city) + 10, flag_y(city) + 8), 2, BF
+END SUB
+
+' Keeps the picture of the flag beside a city in saved_under_army(), or puts it back.
+SUB flag_picture_save (city)
+    GET (flag_x(city) - 9, flag_y(city) - 7)-(flag_x(city) + 9, flag_y(city) + 6), saved_under_army()
+END SUB
+
+SUB flag_picture_restore (city)
+    PUT (flag_x(city) - 9, flag_y(city) - 7), saved_under_army(), PSET
+END SUB
+
 ' Animate the army flag icon as it moves between locations.
 SUB animate_army (army, picture_taken)
-    DIM y AS INTEGER
     DIM step_y AS INTEGER
     DIM from_city AS INTEGER
     DIM to_city AS INTEGER
-    DIM x AS INTEGER
     DIM i AS INTEGER
     DIM step_x AS INTEGER
     from_city = army_city(army)
     to_city = army_order(army)
     army_city(army) = 0
-    x = city_x(from_city) - 12
-    y = city_y(from_city) - 11
     step_x = .5 * (city_x(to_city) + city_x(from_city))
     step_y = .5 * (city_y(to_city) + city_y(from_city))
 
@@ -21,9 +41,9 @@ SUB animate_army (army, picture_taken)
     END IF
 
     IF picture_taken <= 0 THEN
-        GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army()
+        CALL flag_picture_save(from_city)
         IF city_army(from_city) = 0 THEN
-            LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+            CALL draw_erase_flag(from_city)
         END IF
     END IF
 
@@ -61,8 +81,8 @@ SUB draw_army_flag (army)
     DIM x AS INTEGER
     DIM y AS INTEGER
     side = army_side(army)
-    x = city_x(army_city(army)) - 12
-    y = city_y(army_city(army)) - 11
+    x = flag_x(army_city(army))
+    y = flag_y(army_city(army))
     CALL draw_flag_icon(x, y, side)
     IF army_supply(army) < 1 THEN
         x = x - 3
@@ -83,22 +103,19 @@ SUB draw_train (side, show)
         EXIT SUB
     END IF
     city = train_city(side)
-    x = city_x(city) - 12
-    y = city_y(city) - 11
+    x = flag_x(city)
+    y = flag_y(city)
     SELECT CASE show
         CASE IS > 0
             LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
             PSET (x - 6, y - 2), 3
-            side_color = 9
-            IF side = SIDE_REBEL THEN
-                side_color = 15
-            END IF
+            side_color = side_bright_color(side)
             DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
             x = POINT(0)
             y = POINT(1)
             PAINT (x, y), side_color, 0
         CASE ELSE
-            LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+            CALL draw_erase_flag(city)
     END SELECT
 END SUB
 

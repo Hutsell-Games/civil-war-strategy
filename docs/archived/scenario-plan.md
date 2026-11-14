@@ -1,7 +1,7 @@
 # Plan: scenarios in folders, picked in the game
 
 Drafted 2026-11-13. Done: steps 1 to 3 are committed (`2ba37f5`, `f97722d`, `fe4d78d`), and step 4
-is the commit that adds this line. What each step did is in `modernize-completed.md`.
+is the commit that adds this line. What each step did is in `modernize-plan-completed.md`.
 
 ## Goal
 
@@ -123,7 +123,7 @@ compilers, as in the modernize plan.
   (`#! altmap`, the script table).
 - `TODO.md`: the row "`ALTMAP.BAT` itself" goes.
 - Comments: `port\folders.bi` (the `SCNDIR` line) and `port\files.bm` ("ALTMAP does not swap this file").
-- `modernize-plan.md`: decisions 3 and 6 as P1 is answered. `modernize-completed.md`: what each step did.
+- `modernize-plan.md`: decisions 3 and 6 as P1 is answered. `modernize-plan-completed.md`: what each step did.
 
 ## Not in this plan
 

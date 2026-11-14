@@ -4,15 +4,10 @@
 
 ' Build: a ship has joined a fleet that had ships.
 SUB navy_ship_joins (side, ship$)
-    DIM ship_type AS INTEGER
-    ship_type = 1
-    IF ship$ <> "W" THEN
-        ship_type = 2
-    END IF
     CALL clear_bottom_line
     PRINT side_name$(side); " navy increased to "; fleet_size(side);
     PSET (400, 465), 0
-    CALL draw_ship_icon(side, ship_type)
+    CALL draw_ship_icon(side, ship_icon(ship$))
     CALL draw_fleets
     IF opt_sound >= SOUND_EFFECTS THEN
         SOUND 3000, 1
@@ -22,18 +17,13 @@ END SUB
 
 ' Build: the side's first ship starts a new fleet in a port, for cost.
 SUB navy_fleet_founded (side, city, ship$, cost)
-    DIM ship_type AS INTEGER
-    ship_type = 1
-    IF ship$ <> "W" THEN
-        ship_type = 2
-    END IF
     CALL navy_found_fleet(side, city, cost)
     CALL draw_fleets
     CALL clear_bottom_line
     COLOR COLOR_LIGHT_CYAN
     PRINT side_name$(side); " is building NEW fleet in "; city_name$(city);
     PSET (400, 465), 0
-    CALL draw_ship_icon(side, ship_type)
+    CALL draw_ship_icon(side, ship_icon(ship$))
     IF opt_sound >= SOUND_EFFECTS THEN
         SOUND 3000, 1
     END IF
@@ -187,7 +177,6 @@ END SUB
 ' The fleet that raids commerce: it sinks part of the other side's income, or loses a ship
 ' and tries again while it has one.
 SUB navy_commerce_raid
-    DIM ship_type AS INTEGER
     DIM k AS INTEGER
     DIM raider AS INTEGER
     DIM sank AS INTEGER
@@ -200,12 +189,8 @@ SUB navy_commerce_raid
             IF sank = 1 THEN
                 COLOR COLOR_WHITE
                 PRINT side_name$(raider); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raider)); " commerce";
-                ship_type = 1
-                IF LEFT$(fleet_ships$(raider), 1) = "I" THEN
-                    ship_type = 2
-                END IF
                 PSET (500, 465), 0
-                CALL draw_ship_icon(raider, ship_type)
+                CALL draw_ship_icon(raider, ship_icon(LEFT$(fleet_ships$(raider), 1)))
                 IF opt_sound >= SOUND_EFFECTS THEN
                     PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
                 END IF

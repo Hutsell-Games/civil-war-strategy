@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rename SUBs and FUNCTIONs from the "Settled names" table of docs/sub-names.md.
+"""Rename SUBs and FUNCTIONs from the "Settled names" table of docs/archived/sub-names.md.
 
 Works on tokens, so strings and comments are left alone. Case is ignored, as in BASIC.
 
@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TABLE = ROOT / "docs" / "sub-names.md"
+TABLE = ROOT / "docs" / "archived" / "sub-names.md"
 FILES = ["CWSTRAT.BAS", "CWSTRAT1.BM", "CWSTRAT2.BM", "CWSMENU.BM", "CWS14.BI",
          "QB64.BM", "SCRIPT.BM", "FOLDERS.BI", "tests/rules_test.bas"]
 FUNCTIONS = {"dir$", "scriptdate$", "scripttick%"}

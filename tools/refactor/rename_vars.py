@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rename shared variables from the tables of docs/variable-names.md (phase 4 of docs/modernize-plan.md).
+"""Rename shared variables from the tables of docs/archived/variable-names.md (phase 4 of docs/modernize-plan.md).
 
     python tools/refactor/rename_vars.py report   # counts, shadowed names, collisions; changes nothing
     python tools/refactor/rename_vars.py apply    # rewrite the sources
@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TABLE = ROOT / "docs" / "variable-names.md"
+TABLE = ROOT / "docs" / "archived" / "variable-names.md"
 FILES = ["CWSTRAT.BAS", "CWSTRAT1.BM", "CWSTRAT2.BM", "CWSMENU.BM", "CWS14.BI",
          "QB64.BM", "SCRIPT.BM", "FOLDERS.BI", "tests/rules_test.bas"]
 SKIP = {"side", "matrix", "navymove", "scripted", "price"}

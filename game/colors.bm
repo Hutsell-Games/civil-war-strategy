@@ -9,6 +9,24 @@ FUNCTION side_color_of (side)
     END IF
 END FUNCTION
 
+' The side's bright color: light blue for the Union, white for the Rebels. The trains are
+' painted in it, and the headings of the army report and of the computer's turn print in it.
+FUNCTION side_bright_color (side)
+    side_bright_color = COLOR_LIGHT_BLUE
+    IF side = SIDE_REBEL THEN
+        side_bright_color = COLOR_WHITE
+    END IF
+END FUNCTION
+
+' The side's panel color: blue for the Union, gray for the Rebels. It fills the box of a
+' player's turn and of a victory, and frames a surrender. 8 minus it is the other side's.
+FUNCTION side_panel_color (side)
+    side_panel_color = COLOR_BLUE
+    IF side = SIDE_REBEL THEN
+        side_panel_color = COLOR_GRAY
+    END IF
+END FUNCTION
+
 ' The color of a city's dot on the map: its owner's, or light red for a neutral city.
 FUNCTION city_dot_color (city)
     city_dot_color = side_color_of(city_owner(city))

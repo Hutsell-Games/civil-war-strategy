@@ -1,7 +1,8 @@
 # Where each SUB goes (phase 6)
 
-Phase 6 of `modernize-plan.md` moves every SUB whole into the file below. No line inside a SUB changes. This is
-the draft for the user to check before anything moves. Names are the settled names.
+Phase 6 of `modernize-plan.md` moves every SUB whole into the file below. No line inside a SUB changes. Phase 6 is
+done, and the table is kept up to date as SUBs are added and moved. Its questions for the user, now
+answered, are in `archived\file-layout-completed.md`. Names are the settled names.
 
 "Mixed" means the SUB both works out a rule and draws, prints or reads a key. It goes to the file of its topic
 now and is split in phase 8. Since phase 8 the folder rule holds: nothing in `rules\` or `ai\` draws.
@@ -14,13 +15,13 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) became `cws.bas` in 
 
 | File | SUBs |
 |------|------|
-| `army.bm` | `army_list_combine_cities`, `army_set_order`, `army_free_leader`, `army_take_leader` (new in phase 9), `army_combine_start`, `army_combine_add`, `army_combine_absorb`, `army_combine_finish`, `army_raise`, `army_pick_commander`, `army_buy_supply`, `army_add_recruits`, `army_recruit_cities`, `army_detach`, `army_drill`, `army_recruit_bonus`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side`, `recruit_troops`, `recruits_cut_off` (new after the plan), `army_exists`, `army_has_move`, `army_has_acted` (new 2026-11-13, `structure-review.md` item 2), `army_clear` (new 2026-11-13: the six fields that five SUBs cleared) (`army_combine`, `army_new`, `army_get_commander`, `army_resupply` and `army_recruit` until phase 8 moved them to `ui\army.bm`) |
-| `city.bm` | `city_build_fort`, `capital_move_pay`, `capital_move_to` (new in phase 9), `city_take`, `city_is_connected`, `city_fix_return_routes`, `city_update_occupier`, `city_list_sort` (new 2026-11-13, `structure-review.md` item 4) (`city_capture` and `check_map_links` until phase 8 moved them to `ui\city.bm`) |
+| `army.bm` | `army_list_combine_cities`, `army_set_order`, `army_free_leader`, `army_take_leader` (new in phase 9), `army_appoint` (new 2026-11-13: a slot takes a free leader, once written in five places), `army_can_drill`, `side_can_detach`, `army_in_field`, `side_strength` (new 2026-11-13: rules the player and the computer checked each in their own code), `army_combine_start`, `army_combine_add`, `army_combine_absorb`, `army_combine_finish`, `army_raise`, `army_pick_commander`, `army_buy_supply`, `army_add_recruits`, `army_recruit_cities`, `army_detach`, `army_drill`, `army_recruit_bonus`, `army_generate_name`, `side_first_army`, `side_last_army`, `sort_move_order`, `army_side`, `other_side`, `recruit_troops`, `recruits_cut_off` (new after the plan), `army_exists`, `army_has_move`, `army_has_acted` (new 2026-11-13, `structure-review.md` item 2), `army_clear` (new 2026-11-13: the six fields that five SUBs cleared) (`army_combine`, `army_new`, `army_get_commander`, `army_resupply` and `army_recruit` until phase 8 moved them to `ui\army.bm`) |
+| `city.bm` | `city_build_fort`, `capital_move_pay`, `capital_move_to` (new in phase 9), `fort_affordable`, `capital_can_move` (new 2026-11-13), `city_take`, `city_is_connected`, `city_fix_return_routes`, `city_update_occupier`, `city_list_sort` (new 2026-11-13, `structure-review.md` item 4) (`city_capture` and `check_map_links` until phase 8 moved them to `ui\city.bm`) |
 | `battle.bm` | `battle_strengths`, `battle_fight`, `battle_size_rate!` (new 2026-11-13), `battle_losses`, `battle_apply_losses`, `normal_random_number` (`calculate_battle` until phase 8 split it) |
-| `navy.bm` | `fleet_exists`, `fleet_is_at_sea` (new 2026-11-13, `structure-review.md` item 2), `navy_mark_side`, `navy_count_ships`, `navy_has_ironclads`, `navy_list_shipyards`, `navy_list_ports`, `navy_can_invade` (new 2026-11-13, item 4), `random_discard` (new in phase 9), `navy_remove_ship`, `navy_add_ship`, `navy_found_fleet`, `navy_cancel_new_fleet`, `navy_bombard_army`, `navy_shore_battery`, `navy_fleet_lost`, `navy_blast`, `navy_move_fleet`, `navy_go_raiding`, `navy_landed`, `navy_note_raiding_side`, `navy_raid_round`, `navy_ship_hits`, `navy_shot_hits`, `navy_fleet_defeated`, `navy_retreat_port` (the rest until phase 8 moved them to `ui\navy.bm`) |
+| `navy.bm` | `fleet_exists`, `fleet_is_at_sea` (new 2026-11-13, `structure-review.md` item 2), `navy_mark_side`, `navy_count_ships`, `navy_has_ironclads`, `navy_list_shipyards`, `navy_list_ports`, `navy_can_invade` (new 2026-11-13, item 4), `random_discard` (new in phase 9), `navy_clear_fleet` (new 2026-11-13: the fleet is gone, once written in four places), `ship_cost`, `navy_can_build`, `navy_can_attack`, `navy_can_raid` (new 2026-11-13), `navy_remove_ship`, `navy_add_ship`, `navy_found_fleet`, `navy_cancel_new_fleet`, `navy_bombard_army`, `navy_shore_battery`, `navy_fleet_lost`, `navy_blast`, `navy_move_fleet`, `navy_go_raiding`, `navy_landed`, `navy_note_raiding_side`, `navy_raid_round`, `navy_ship_hits`, `navy_shot_hits`, `navy_fleet_defeated`, `navy_retreat_port` (the rest until phase 8 moved them to `ui\navy.bm`) |
 | `railroad.bm` | `railroad_board`, `railroad_unload`, `railroad_route_count`, `railroad_capacity` (`railroad_move`, `railroad_start` and `railroad_arrive` until phase 8 moved them to `ui\railroad.bm`) |
-| `turn.bm` | `turn_set_moves_done`, `turn_set_navy_done`, `turn_reset_commands`, `turn_check_commands`, `turn_close_recruiting`, `turn_next_player` (new in phase 9), `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
-| `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7); the Utility menu's settings (new in phase 9): `option_swap_side`, `option_toggle_players`, `option_next_graphics`, `option_set_sound`, `option_set_display_speed`, `option_toggle_alt_colors`, `option_set_balance`, `option_set_event_balance`, `option_toggle_winter_campaigns`, `option_toggle_realism`, `option_toggle_history`, `option_next_aggression`, `option_events_favor_computer` (new after the plan); the start of a game (new in phase 9, out of the main module): `game_new`, `game_reset`, `game_apply_settings` |
+| `turn.bm` | `turn_set_moves_done`, `turn_set_navy_done`, `turn_reset_commands`, `turn_check_commands`, `turn_close_recruiting`, `turn_next_player` (new in phase 9), `winter_stops_move` (new 2026-11-13), `turn_advance_month`, `turn_army_supply`, `turn_strength_ratio`, `turn_army_marches`, `turn_battle_experience`, `turn_withdraw`, `turn_defender_halts`, `turn_retreat_city`, `turn_retreat_to`, `turn_army_lost`, `turn_occupy`, `turn_raze_fort`, `turn_army_forages`, `turn_collect_income`, `turn_set_move_order`, `turn_update_victory_points` (the eight others until phase 8 moved them to `ui\turn.bm`) |
+| `setup.bm` | `set_union_advantage`, `vary_start_conditions` (new in phase 7), `balance_help` (new 2026-11-13: the Balance setting's help for the computer, once worked out four times); the Utility menu's settings (new in phase 9): `option_swap_side`, `option_toggle_players`, `option_next_graphics`, `option_set_sound`, `option_set_display_speed`, `option_toggle_alt_colors`, `option_set_balance`, `option_set_event_balance`, `option_toggle_winter_campaigns`, `option_toggle_realism`, `option_toggle_history`, `option_next_aggression`, `option_events_favor_computer` (new after the plan); the start of a game (new in phase 9, out of the main module): `game_new`, `game_reset`, `game_apply_settings` |
 | `victory.bm` | `victory_toggle_rule` (new in phase 9), `victory_forces`, `victory_time_near`, `victory_rule_met`, `victory_near_cities`, `victory_near_income`, `victory_near_force`, `victory_play_on`, `victory_won`, `victory_technical_points`, `hall_of_fame_place`, `hall_of_fame_insert` (`check_victory_conditions`, `victory_warnings`, `end_game` and `hall_of_fame` until phase 8 moved them to `ui\victory.bm`) |
 | `events.bm` | `event_roll`, `event_pick`, `event_target`, `event_chance!`, `event_conditions_hold`, `event_possible`, `event_delivery_port`, `event_apply`, `event_riot_city`, `event_find` (in `game\` until phase 11 made the events data: `scenarios\EVENTS.DAT`) |
 
@@ -67,8 +68,8 @@ and shows what happened. Nothing here opens a menu or reads a key.
 | File | SUBs |
 |------|------|
 | `map.bm` | `draw_map`, `draw_map_touchup`, `draw_cities`, `draw_city_names`, `draw_map_marker`, `draw_stack_markers`, `draw_fleets` |
-| `icons.bm` | `draw_flag_icon`, `draw_large_flag`, `draw_army_flag`, `draw_train`, `animate_army`, `animate_city` |
-| `ships.bm` | `draw_fleet_ship`, `draw_ship_icon`, `draw_ironclad`, `draw_schooner`, `draw_fleet_sailing`, `draw_navy_box`, `draw_ship_sunk` |
+| `icons.bm` | `draw_flag_icon`, `draw_large_flag`, `draw_army_flag`, `draw_train`, `animate_army`, `animate_city`; `flag_x`, `flag_y`, `draw_erase_flag`, `flag_picture_save`, `flag_picture_restore` (new 2026-11-13: the flag's place beside a city, once worked out in six places, two of them in `commands\`) |
+| `ships.bm` | `draw_fleet_ship`, `draw_ship_icon`, `ship_icon` (new 2026-11-13), `draw_ironclad`, `draw_schooner`, `draw_fleet_sailing`, `draw_navy_box`, `draw_ship_sunk` |
 | `pictures.bm` | `draw_cannon`, `draw_chesapeake`, `draw_title` |
 
 ## game\ (what another war replaces)
@@ -77,7 +78,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 |------|------|
 | `victory_screens.bm` | `draw_union_victory`, `draw_rebel_victory`, `draw_surrender` |
 | `tunes.bm` | `play_shenandoah`, `play_title_music` |
-| `colors.bm` | `side_color_of`, `city_dot_color` (new after the plan: the sides' colors, once written out in 11 places) |
+| `colors.bm` | `side_color_of`, `city_dot_color` (new after the plan: the sides' colors, once written out in 11 places), `side_bright_color`, `side_panel_color` (new 2026-11-13: the two other pairs, once written out in 7 places) |
 
 ## port\
 
@@ -85,12 +86,3 @@ and shows what happened. Nothing here opens a menu or reads a key.
 |------|------|
 | `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_scenario_armies` (new 2026-11-13: one side's armies, once written twice), `load_events` (with `event_clear_row`, `event_read_line`, `event_read_side`, `event_read_conditions`, `event_read_effect`, `event_read_chance`, `text_is_number`, `text_last_space`), `load_cities`, `load_game`, `save_game`, `saved_games_check`, `any_saved_game`, `save_file_name$` (new 2026-11-13), `history_start`, `config_read`, `config_write`, `save_battle_summary` (`file_management` until phase 7 split it; the menus of `load_game` and `save_game` until phase 9 moved them to `ui\files.bm`) |
 | `script.bm` | `script_start`, `script_date$`, `script_tick%`, `script_shell`, `script_mark_key_wait` (from `SCRIPT.BM`) |
-
-## Questions for the user
-
-1. `file_management` is saved-game work, not a port of QB64. `port\files.bm` is my pick. Phase 7 splits it
-   into the file work and the screen work; the file part could then go to `rules\save.bm`.
-2. `draw_cannon` and `draw_chesapeake` are Civil War pictures. They could go to `game\` with the victory
-   screens. I put them in `draw\pictures.bm` because the plan names that file; say if you prefer `game\`.
-3. `draw_ironclad` and `draw_schooner` are the same: ship pictures of this war, kept in `draw\ships.bm`.
-4. 80 SUBs and FUNCTIONs, 11 of them marked mixed. The count per file runs from 1 to 8.

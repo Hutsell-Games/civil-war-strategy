@@ -83,9 +83,7 @@ SUB load_scenario_armies (side)
     FOR i = first_army TO first_army + army_count - 1
         INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
         city_army(army_city(i)) = i
-        army_name$(i) = leader_name$(i)
-        army_leader_rating(i) = leader_rating(i)
-        leader_name$(i) = ""
+        CALL army_appoint(i, i)
     NEXT i
 END SUB
 

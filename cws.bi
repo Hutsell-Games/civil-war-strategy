@@ -22,6 +22,9 @@ CONST MAX_CASH = 19999
 CONST MAX_SCENARIOS = 9
 ' fleet_city(): the fleet is at sea, raiding commerce.
 CONST FLEET_AT_SEA = 99
+' fleet_ships$(): a letter for each ship of the fleet.
+CONST SHIP_WOODEN$ = "W"
+CONST SHIP_IRONCLAD$ = "I"
 ' city_port_type(): 0 for no port.
 CONST PORT_RIVER = 90
 CONST PORT_SEA = 99

@@ -242,6 +242,58 @@ Notes from the start of the work:
 
 Answered: the table of variable names in `variable-names.md` (phase 4) was settled, and phase 4 is done.
 
+### Phases 8 to 10, commit by commit
+
+Moved from the plan's "Where to resume" on 2026-11-13.
+
+Phases 0 to 7 are done and committed. Phase 8's steps 1 and 2 are committed (`6eda547`, `013b8d0`).
+Step 3 is committed in two parts (`70692b3`, `77ee9a6`), step 4 as `9e038a4` and step 5 as
+`b67f89e`. Step 6, the computer's turn, is committed as `ae48902`, and the cleanup after it, from
+the review of steps 1 to 6, as `5e27bf8`. Step 7, the special events, is committed as `c298f3a`,
+and step 8, victory, as `f5ee0f0`. That ends phase 8.
+
+Phase 9's step 1, the Utility menu, is committed as `693c078`, step 2, the Commands menu, as
+`10056a5`, step 3, the Files menu, as `f831801`, step 4, the main menu, as `653e218`, and step 5,
+the main module as a loop, as `83c34c8`. Step 6, the navy's commands, is committed as `aa2f80b`.
+That commit does not build: it also holds the three `git mv` renames of step 7, without step 7's
+`$INCLUDE` lines. Step 7, the other commands, is committed as `77e3024` and puts that right. Step
+8, `menu_select` and the file renames, is committed as `4fa959d`. That ends phase 9.
+
+Phase 10's step 1, the script and `sides`, was committed as `3043c01`, and step 2, `fleets` and
+`trains`, as `ae6da81`. Both were taken back in `a04672d`, and phase 10 is closed with no records
+(2026-11-12; "Why no records", under phase 10).
+
+## Which model did which phase
+
+Moved from the plan on 2026-11-13; only phase 11 is left of it.
+
+Decided 2026-11-11: work starts with Sonnet. The scripts are the safety net (25 whole-game scripts on
+unchanged recordings, two compilers), so a mistake shows as a failed script. But a script passes on what it
+reaches, so the harder the phase, the more it matters that the model reads the code well.
+
+| Phase | Model | Why |
+|-------|-------|-----|
+| 1 Delete dead code | Sonnet | Small, listed deletions. |
+| 2 Rename SUBs | Sonnet | A script run from a settled table. |
+| 4 Rename variables | Sonnet | A script from a table. If scope cases or `OPTION _EXPLICIT` errors stall it, Opus. |
+| 6 Move SUBs into files | Sonnet | Whole SUBs move; no line changes. |
+| 0 Coverage | Opus | Prepared saves and scripts that reach one rare branch each need the game's rules understood. |
+| 3 Constants | Opus | Each number is read in place: is this `40` cities, armies or 4,000 men? |
+| 5 FUNCTIONs | Opus | Call sites pass results by reference. |
+| 10 Records | Opus | Wide but regular. |
+| 7 Break up the big SUBs | Fable | Untangling the `GOTO` knots in `navy`, `tupdate` and the main module. |
+| 8 Split rules from screen | Fable | Every `RND` draw and every pixel must stay in order. |
+| 9 Menus | Fable | The main module's `GOTO menu0` web becomes a loop. |
+| 11 Map lines into data | Fable | `DRAW` and `PAINT` depend on order; expect several tries. |
+
+**Phase order is not model order.** Phase 0 (Opus) comes before phase 2 in the plan, but phase 0's first
+step is phase 1's deletions, which Sonnet can do. Work in this order with Sonnet: phase 1, then phases 2
+and 4's scripts, then 6. **When the next step is one marked Opus or Fable, stop and tell the user to switch
+model** before starting it. Do not carry on with a weaker model because it is nearly the same size of step.
+
+A step handed to Sonnet names its plan section and the table it works from, and the hand-over shows the
+output of `play.py check` and `play.py compare` (decision 15).
+
 ## Phase 0: coverage
 
 Measured on `8c3b185` (2026-11-11, `python tests\play.py coverage`): the 25 scripts and the unit tests run
@@ -557,7 +609,55 @@ The rule for lines that no test runs is in `modernize-plan.md`, "Lines that no t
     - `menu_unmark_row` replaces two blocks. One of them skipped a row whose text is "EXIT". No
       menu of the game has such a row, so the test is gone.
 
+### What it left for later phases
+
+- **Six `GOSUB` routines** that only their own SUB uses: `crsr`, `limits` and `noadjust` in
+  `menu_select` (the key loop, which phase 9 reworks), `add1s` in `army_generate_name`, `jack` in
+  `draw\ships.bm` and `stars` in `game\victory_screens.bm`. Phase 9 step 8 removed the three of
+  `menu_select`. The other three went with the labels on 2026-11-12 ("After the plan: the labels").
+- **The main module's menus**, a web of `GOTO menu0`, `GOTO optmen` and `GOTO utile` (phase 9).
+- **`calculate_battle`**, whose split parts a rule from its screen (phase 8).
+- **`army_clear`** (step 4): it waited for phase 10 and stayed undone ("Phase 10" below). It was
+  built on 2026-11-13 (`1f3295b`): `army_clear (army)` sets the six fields that five SUBs cleared,
+  and `game_reset` keeps its own loop.
+
+The splits of `calculate_battle` (losses, strengths) are phase 8's: they part a rule from its screen.
+
 ## Phase 8: split rules from screen, the steps done
+
+Started 2026-11-11. Each step is one commit (decision 15), and each ends with `play.py check`,
+`play.py compare` and the unit tests passing on unchanged recordings. Phase 7's rule for lines that no
+test runs still holds.
+
+### How a SUB is split
+
+Moved to `modernize-plan.md`, "How a SUB is split", on 2026-11-13, because it still holds for new code.
+
+### The list
+
+Measured on 2026-11-11, before step 1, with `tests\out\scratch\p8_mixed.py` (not committed). 41 SUBs in
+`rules\`, `ai\` and `game\events.bm` print, draw, play a sound, read a key, or call a SUB of `ui\` or
+`draw\` that does. `file-layout.md` marked 11 of them. One more, `ai_navy_adjust`, only calls
+`menu_navy_items`, which fills the menu's texts and draws nothing. That leaves 40 to split.
+
+| File | SUBs |
+|------|------|
+| `rules\battle.bm` | `calculate_battle` (step 1, done) |
+| `rules\railroad.bm` | `railroad_move`, `railroad_start`, `railroad_arrive` |
+| `rules\city.bm` | `city_capture`, `check_map_links` (the Utility menu's Chk Links, a printed report) |
+| `rules\army.bm` | `army_new`, `army_get_commander`, `army_resupply`, `army_recruit`, `army_combine` (asks for a city with `menu_select`) |
+| `rules\navy.bm` | `navy_commands` (one `COLOR`), `navy_build_ship`, `navy_bombard`, `navy_sail_to_port`, `navy_raid_commerce`, `navy_finish_move`, `navy_commerce_raid`, `navy_combat`, `navy_show_hits` |
+| `rules\turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city` |
+| `ai\ai.bm` | `ai_turn`, `ai_fortify`, `ai_army_orders`, `ai_drill`, `ai_recruit`, `ai_recruit_pick` (one `LOCATE`) |
+| `game\events.bm` | `special_events`, `event_riot` |
+| `rules\victory.bm` | `check_victory_conditions`, `victory_warnings`, `end_game`, `hall_of_fame` (reads the commander's name) |
+
+Not in phase 8: `load_game` and `save_game` (`port\files.bm`). The folder rule does not cover `port\`, and
+their screen is the menu of saved games, which phase 9 reworks.
+
+### Steps
+
+The order takes the SUBs that others call first, so that a caller's split finds its callees split.
 
 1. **Done: `calculate_battle`.** `rules\battle.bm` holds four rule SUBs, called in this order:
    - `battle_strengths (attacker, defender, attack_steps(), defend_steps())`: each value the right panel
@@ -727,7 +827,7 @@ The rule for lines that no test runs is in `modernize-plan.md`, "Lines that no t
 
 **Done: the cleanup after step 6.** A review of steps 1 to 6 (2026-11-12) found no change of behavior,
 but four things to make even. The user took the pragmatic engineer's plan: one commit, before step 7.
-- **Game state in the screen parts.** The rule is now in `modernize-plan.md`, "How a SUB is split": a
+- **Game state in the screen parts.** The rule is now in "How a SUB is split" (`modernize-plan.md`): a
   screen part changes no game state, except the menu's variables, the lines tangled with phase 9's
   menus, and the inputs of `animate_army`. A scan of the eight `ui\` files that phase 8 made
   (`tests\out\scratch\p8_state_in_ui.py`) found only those, so no code moved.
@@ -791,13 +891,25 @@ but four things to make even. The user took the pragmatic engineer's plan: one c
 
 **Phase 8 is done.** Nothing in `rules\`, `ai\` or `game\events.bm` draws, prints, plays or reads a key
 itself (`tests\out\scratch\p8_mixed.py`). What it left for phase 9: the commands that sit in `ui\`, the
-lines tangled with the menus ("How a SUB is split" in `modernize-plan.md`), `load_game` and `save_game`
+lines tangled with the menus ("How a SUB is split", `modernize-plan.md`), `load_game` and `save_game`
 in `port\`, and the computer's one-line choices in the screens. The scripts pass on the recordings of
 phase 7, with both compilers, and the unit tests went from 33 to 95.
 
 ## Phase 9: the menus, the steps done
 
-The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
+Started 2026-11-12. Each step is one commit (decision 15), and each ends with `play.py check`,
+`play.py compare` and the unit tests passing on unchanged recordings. Phase 7's rule for lines that no
+test runs still holds.
+
+### How a menu is split
+
+Moved to `modernize-plan.md`, "How a menu is split", on 2026-11-13, because it still holds for new code.
+
+### Steps
+
+The menus come first, from the simplest. The main module's loop follows, when no menu is left in
+it. The commands that both the player and the computer give come last. They are the hardest:
+their random numbers must stay in order.
 
 1. **Done: the Utility menu.** The 229 lines from `utile:` to its `END SELECT` left the main module
    for the new `ui\options.bm`. The main module's `CASE 8` is now `chosit = 29` and
@@ -1019,6 +1131,62 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
 
 ## Phase 10: records, the steps done
 
+Closed on 2026-11-12 with no records: every shared array stays an array (user, 2026-11-12). This
+overtakes the second half of decision 6.
+
+### Why no records
+
+The first plan made six records: armies, leaders, cities, sides, fleets and trains. `sides`
+(`3043c01`) and `fleets` and `trains` (`ae6da81`) were built and committed, and `cities` and
+`leaders` were built. The user then asked whether the code was better for it. It was not, so all
+of them were taken back (`a04672d`), and the army record was not built:
+
+- **A record pays where the code handles a whole thing at once.** Nothing copies or clears a
+  whole city, side, fleet or train. For them a record only changed the spelling, and made lines
+  longer: `side_cash(city_owner(i))` became `sides(cities(i).owner).cash`.
+- **`leaders(i)` misled.** It is the pool of leaders not yet used, by army slot, not "the leader
+  of army i".
+- **Armies are not handled whole either.** No line copies a whole army: Join
+  (`rules\army.bm`, lines 48 to 51) copies the size, leader rating, experience, supply and name,
+  and leaves the city and the order. Four places clear a slot, each with other fields; the
+  fullest (`rules\setup.bm`, line 137) leaves the experience and the supply. No `SWAP` of armies
+  exists. A whole-record copy or clear would change fields the original leaves alone, so the
+  screens-identical rule (decision 3) allows it in one or two lines at most, out of 842 uses.
+
+Records become worth it when the clears and copies are made the same. That changes behavior, so
+it belongs with the known bugs after the plan, each with its own new recording.
+
+### What both compilers do with records
+
+Measured on 2026-11-12 with two small programs, built by QB64Rust and by QB64pe (the reference
+clone). Both printed the same for every line:
+
+- a variable-length `STRING` field starts empty, and `LEN` and `= ""` work on it;
+- a field, and an element of a field array, is passed by reference: a SUB that changes its
+  parameter changes the field;
+- `SWAP` of two fields and of two whole records, and a whole record copied with `=`;
+- `WRITE #` and `INPUT #` into fields, with a name that holds a comma;
+- an INTEGER field that overflows wraps with no error, as an INTEGER array does;
+- a field array with a `CONST` bound (`road(0 TO MAX_ROADS)`), and a `TYPE` in an included `.bi`.
+
+So a record needs no more than the new name on each line, should records be taken up again.
+
+### The script
+
+`tools\refactor\make_records.py` is kept with the others (decision 16), for a later change or
+another port. It reads the "Record field" column of `variable-names.md`, where every row now says
+"(stays an array)", and turns `army_size(expr)` into `armies(expr).size`. It uses the tokens of
+`rename_vars.py`, so strings and comments stay as they are, and it skips an array that a SUB
+declares for itself. The declarations in `cws.bi` are written by hand. It rewrote 437 uses for
+`sides`, 370 for `fleets` and `trains` and 578 for `cities` and `leaders`, each with all tests
+passing, before they were taken back.
+
+`army_clear` (phase 7, step 4) waited for this phase. It stayed undone, for the reason above: the
+places that clear an army did not clear the same fields. It was built on 2026-11-13 (`1f3295b`)
+for the six fields they share ("What it left for later phases", under phase 7).
+
+### Steps
+
 1. **Done: the script, and `sides`.** The eight arrays of a side are one record:
    `sides(s).name`, `.capital`, `.cash`, `.income`, `.city_count`, `.victory_points`,
    `.battles_won` and `.casualties` (a LONG). `cws.bi` has the `TYPE side_type` block and
@@ -1053,7 +1221,7 @@ The plan of the steps and "How a menu is split" are in `modernize-plan.md`.
    - Unit tests: 123. 38 scripts, unchanged recordings, both compilers.
 4. **Closed with no records** (user, 2026-11-12). The army record was not built. No line copies
    or clears a whole army, so it too would only change the spelling of 842 uses ("Why no
-   records" in `modernize-plan.md`). The seven army rows of `variable-names.md` now say
+   records" above). The seven army rows of `variable-names.md` now say
    "(stays an array)" as well, and `make_records.py` stays for a later change or another port.
    `army_clear` (phase 7, step 4) stays undone. No code changed.
 
@@ -1138,3 +1306,18 @@ Both steps:
 - Lines that no test runs: 17. The give-up after 39 cities was a line of its own and is now the end
   of the line that counts the steps. It still never runs. 126 unit tests and 38 scripts pass, with
   unchanged recordings and both compilers.
+
+## Open questions
+
+Answered: the commands get a folder of their own, `commands\` (user, 2026-11-12). A command carries
+out one order for either side: it calls rules and shows what happened. Examples are
+`navy_build_ship`, `army_combine`, `army_recruit` and `railroad_move`, which phase 8 filed in `ui\`.
+Nothing in `commands\` opens a menu or reads a key. Phase 9 steps 6 and 7 move them.
+
+## Phase 11: the war's own content
+
+### Open questions
+
+1. **Texts: code in `game\`, or a data file?** **Data files** (user, 2026-11-13). The events
+   are in `scenarios\EVENTS.DAT`, with their rules: the user asked that the code not know which war
+   is fought. The other 24 war-naming strings follow the same rule in step 3.

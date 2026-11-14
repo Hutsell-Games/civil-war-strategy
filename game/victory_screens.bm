@@ -185,14 +185,10 @@ SUB draw_surrender (army)
     DIM x AS INTEGER
     DIM y AS INTEGER
     SCREEN 12
-    side = SIDE_UNION
-    side_color = 1
+    side = army_side(army)
+    side_color = side_panel_color(side)
     COLOR COLOR_BLACK
     panel_left = 514
-    IF army_side(army) = SIDE_REBEL THEN
-        side_color = 7
-        side = SIDE_REBEL
-    END IF
     '               background
     LINE (panel_left + 15, 440)-(panel_left + 125, 16), 2, BF
     LINE (panel_left + 15, 16)-(panel_left + 125, 290), 3, BF
