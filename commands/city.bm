@@ -37,3 +37,14 @@ SUB city_capture (moving_army, city, side, weaken_fort)
         CALL city_redraw_fort(city)
     END IF
 END SUB
+
+' Fortify, by the player (menu_city_fortify, ui/city.bm) or the computer (ai_fortify): the
+' rule (city_build_fort, rules/city.bm), then the message, a flash at the city and the cities
+' drawn again.
+SUB city_fortify (side, city)
+    CALL city_build_fort(side, city)
+    CALL clear_bottom_line
+    PRINT city_name$(city); " fortifications increased to "; city_fort(city);
+    CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
+    CALL draw_cities
+END SUB

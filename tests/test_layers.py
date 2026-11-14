@@ -31,8 +31,6 @@ KEYS = {"inkey$", "input", "_keyhit", "_keydown", "sleep"}
 
 # (folder of the caller, caller, callee): why the call stays for now.
 ALLOWED = {
-    ("ai", "ai_fortify", "draw_fort_built"):
-        "the fort's message and flash, shared with the player's Fortify (ui/city.bm)",
 }
 
 # The menu's shared variables (cws.bi).

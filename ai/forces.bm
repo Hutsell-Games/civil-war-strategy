@@ -37,10 +37,9 @@ SUB ai_fortify (side)
         IF city_fort(city) >= MAX_FORT THEN
             EXIT SUB
         END IF
-        CALL city_build_fort(side, city)
         army = city_army(city)
         army_order(army) = ORDER_BUSY
-        CALL draw_fort_built(city)
+        CALL city_fortify(side, city)
         IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND RND > .5 AND side_cash < 222 THEN
             EXIT SUB
         END IF

@@ -49,23 +49,13 @@ SUB menu_city_fortify (city)
         EXIT SUB
     END IF
     COLOR COLOR_CYAN
-    CALL city_build_fort(current_side, city)
-    CALL draw_fort_built(city)
+    CALL city_fortify(current_side, city)
     IF army_has_move(army) THEN
         CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_LINE)
     END IF
     CALL army_set_order(army, ORDER_BUSY)
     CALL draw_army_flag(army)
     CALL draw_stack_markers(current_side)
-END SUB
-
-' A fort built, by the player's Fortify or by the computer (ai_fortify): the message, a flash
-' at the city and the cities drawn again.
-SUB draw_fort_built (city)
-    CALL clear_bottom_line
-    PRINT city_name$(city); " fortifications increased to "; city_fort(city);
-    CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
-    CALL draw_cities
 END SUB
 
 SUB menu_city_select (city)

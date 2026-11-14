@@ -324,6 +324,11 @@ Six unit tests are new: `TestAiStayWeight`, `TestAiMoveStrength`, `TestAiCityTar
    the last check that fails, as before. `TestEventRowProblemGivesTheLast` and
    `TestEventGeneralProblem` are new. The reading loop stays as it is: its branches share the
    state of the section being read.
+8. **The fort command** (`commands\city.bm`). `city_fortify` builds the fort and shows it,
+   for the player's Fortify and for `ai_fortify`; `draw_fort_built` is gone into it. `ai\`
+   now calls nothing in `ui\` but `ui\ai.bm`, so `tests\test_layers.py` has no exception left.
+   `ai_fortify` sets the army busy before the fort is built rather than after; building a fort
+   does not read the army's order.
 
 ## Questions for the user
 

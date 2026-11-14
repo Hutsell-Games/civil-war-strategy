@@ -44,7 +44,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 | File | SUBs |
 |------|------|
 | `army.bm` | `army_combine_gather`, `army_combine_done`, `army_combine_redraw`, `army_new`, `army_get_commander`, `army_resupply`, `army_recruit` (from `ui\army.bm`; `army_combine` until phase 9 split it) |
-| `city.bm` | `city_capture` (from `ui\city.bm`) |
+| `city.bm` | `city_capture` (from `ui\city.bm`), `city_fortify` (new 2026-11-14: the fort and its message, for the player and the computer) |
 | `railroad.bm` | `railroad_finish`, `railroad_start`, `railroad_arrive` (from `ui\railroad.bm`; `railroad_move` until phase 9 split it) |
 | `navy.bm` | `navy_ship_joins`, `navy_fleet_founded`, `navy_bombard`, `navy_say_no_ships`, `navy_sail_to`, `navy_start_raid`, `navy_land_army`, `navy_finish_move`, `navy_redraw_map`, `navy_commerce_raid`, `navy_combat_begin`, `navy_combat_draw`, `navy_combat_volley`, `navy_combat_retreat`, `navy_combat_auto`, `navy_show_hits` (from `ui\navy.bm`) |
 
@@ -55,7 +55,7 @@ and shows what happened. Nothing here opens a menu or reads a key.
 | `menu.bm` | `menu_select`, `menu_place`, `menu_start_row`, `menu_wait_key$`, `menu_letter_row`, `menu_show_selected`, `menu_show_plain` (new 2026-11-14: the parts of `menu_select`), `menu_arrow_key` (new in phase 9), `menu_redraw` (new 2026-11-13), `menu_mark_row`, `menu_unmark_row`, `menu_measure_width`, `menu_bubble_sort`, `menu_set_cities` (new 2026-11-13), `draw_menu` |
 | `main_menu.bm` | `menu_main`, `menu_main_railroad`, `menu_main_end_turn`, `menu_main_inform`, `show_title`, `menu_title`, `show_new_game` (new in phase 9: the main menu and the title, out of the main module) |
 | `orders.bm` | `menu_commands` (new in phase 9: the Commands menu, out of the main module). The menus of its entries moved to `army.bm`, `city.bm`, `railroad.bm` and `navy.bm` on 2026-11-14 |
-| `city.bm` | `menu_city_fortify`, `draw_fort_built` (`draw_ai_fort` of `ui\ai.bm` until after the plan), `menu_city_select`, `menu_move_capital` (from `orders.bm`, 2026-11-14) |
+| `city.bm` | `menu_city_fortify`, `menu_city_select`, `menu_move_capital` (from `orders.bm`, 2026-11-14). `draw_fort_built` became part of `city_fortify` (`commands\city.bm`) on 2026-11-14 |
 | `railroad.bm` | `menu_railroad` (from `orders.bm`, 2026-11-14) |
 | `options.bm` | `menu_utility`, `menu_option_side`, `menu_option_players`, `menu_option_graphics`, `menu_option_sound`, `menu_option_display`, `menu_option_balance`, `menu_option_events`, `menu_option_january`, `menu_option_realism`, `menu_option_history`, `menu_option_aggression` (new in phase 9: the Utility menu, out of the main module) |
 | `files.bm` | `menu_files`, `menu_load_game`, `menu_save_game`, `menu_quit` (new in phase 9: the Files menu, out of the main module and `port\files.bm`) |
