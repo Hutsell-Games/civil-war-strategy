@@ -223,10 +223,27 @@ SUB report_armies (side)
     CALL report_wait_key
 END SUB
 
+' One city's line of the city report, at the row and in the column given (1 or 41): its
+' number, name, owner and value, in the owner's color.
+SUB report_city_line (city, row, col)
+    DIM owner$
+    COLOR COLOR_RED
+    owner$ = "neutral"
+    IF city_owner(city) = SIDE_UNION THEN
+        COLOR side_color_of(SIDE_UNION)
+        owner$ = "UNION"
+    END IF
+    IF city_owner(city) = SIDE_REBEL THEN
+        COLOR side_color_of(SIDE_REBEL)
+        owner$ = "REBEL"
+    END IF
+    LOCATE row, col
+    PRINT city; TAB(col + 5); city_name$(city); TAB(col + 17); owner$; TAB(col + 28); city_value(city)
+END SUB
+
 '                               City Report
 SUB report_cities
     DIM i AS INTEGER
-    DIM owner$
     CLS
     LOCATE 1, 1
     COLOR COLOR_YELLOW
@@ -235,33 +252,11 @@ SUB report_cities
     PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
     LINE (1, 30)-(630, 30), 15
     FOR i = 1 TO 20
-        COLOR COLOR_RED
-        owner$ = "neutral"
-        IF city_owner(i) = SIDE_UNION THEN
-            COLOR COLOR_LIGHT_BLUE
-            owner$ = "UNION"
-        END IF
-        IF city_owner(i) = SIDE_REBEL THEN
-            COLOR COLOR_GRAY
-            owner$ = "REBEL"
-        END IF
-        LOCATE 2 + i, 1
-        PRINT i; TAB(6); city_name$(i); TAB(18); owner$; TAB(29); city_value(i)
+        CALL report_city_line(i, 2 + i, 1)
     NEXT i
 
     FOR i = 21 TO 40
-        COLOR COLOR_RED
-        owner$ = "neutral"
-        IF city_owner(i) = SIDE_UNION THEN
-            COLOR COLOR_LIGHT_BLUE
-            owner$ = "UNION"
-        END IF
-        IF city_owner(i) = SIDE_REBEL THEN
-            COLOR COLOR_GRAY
-            owner$ = "REBEL"
-        END IF
-        LOCATE i - 18, 41
-        PRINT i; TAB(46); city_name$(i); TAB(58); owner$; TAB(69); city_value(i)
+        CALL report_city_line(i, i - 18, 41)
     NEXT i
     LINE (1, 360)-(630, 360), 15
     COLOR COLOR_LIGHT_BLUE

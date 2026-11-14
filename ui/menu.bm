@@ -205,6 +205,14 @@ SUB menu_select (menu_item_show_beside%)
     VIEW
 END SUB
 
+' Draws the screen again under an open menu: the map, the menu and the top bar.
+SUB menu_redraw (title_col, menu_width)
+    CLS
+    CALL draw_map
+    CALL draw_menu(title_col, menu_width)
+    CALL draw_top_bar
+END SUB
+
 ' A key of two bytes at a menu, given by its second byte. Up, Down, PgUp and PgDn move the row,
 ' round from one end to the other. At a plain menu (MENU_PLAIN) and the main menu
 ' (MENU_MAIN_KEYS), F3 draws the screen again and F4 shows the force report. F7 ends the turn
@@ -222,10 +230,7 @@ SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
             row = menu_item_count
         CASE KEY_F3$
             IF kind = MENU_PLAIN OR kind = MENU_MAIN_KEYS THEN
-                CLS
-                CALL draw_map
-                CALL draw_menu(title_col, menu_width)
-                CALL draw_top_bar
+                CALL menu_redraw(title_col, menu_width)
             END IF
         CASE KEY_F7$
             IF kind = MENU_MAIN_KEYS THEN
@@ -235,10 +240,7 @@ SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
         CASE KEY_F4$
             IF kind = MENU_PLAIN OR kind = MENU_MAIN_KEYS THEN
                 CALL report_force_summary
-                CLS
-                CALL draw_map
-                CALL draw_menu(title_col, menu_width)
-                CALL draw_top_bar
+                CALL menu_redraw(title_col, menu_width)
             END IF
     END SELECT
     IF row > menu_item_count THEN
