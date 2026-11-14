@@ -35,7 +35,6 @@ END FUNCTION
 SUB load_scenario
     DIM k AS INTEGER
     DIM i AS INTEGER
-    DIM army_count AS INTEGER
     OPEN "I", 1, scenario_file$("cwslead.dat")
     FOR i = 1 TO MAX_LEADERS
         INPUT #1, leader_name$(i), leader_rating(i)
@@ -54,22 +53,8 @@ SUB load_scenario
         INPUT #1, victory_rule(i)
     NEXT i
     victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
-    INPUT #1, army_count ' number of Yankee armies
-    FOR i = 1 TO army_count
-        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
-        city_army(army_city(i)) = i
-        army_name$(i) = leader_name$(i)
-        army_leader_rating(i) = leader_rating(i)
-        leader_name$(i) = ""
-    NEXT i
-    INPUT #1, army_count ' number of Rebel armies
-    FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + army_count
-        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
-        city_army(army_city(i)) = i
-        army_name$(i) = leader_name$(i)
-        army_leader_rating(i) = leader_rating(i)
-        leader_name$(i) = ""
-    NEXT i
+    CALL load_scenario_armies(SIDE_UNION)
+    CALL load_scenario_armies(SIDE_REBEL)
     FOR i = SIDE_UNION TO SIDE_REBEL
         INPUT #1, side_cash(i)
     NEXT i
@@ -85,6 +70,23 @@ SUB load_scenario
     NEXT i ' star locations on flag
     CLOSE #1
     CALL config_read(current_side)
+END SUB
+
+' Reads one side's armies from cws.ini, open as #1: their count, then each army's city, men,
+' experience and supplies. Army i takes leader i of cwslead.dat, who leaves the free leaders.
+SUB load_scenario_armies (side)
+    DIM army_count AS INTEGER
+    DIM first_army AS INTEGER
+    DIM i AS INTEGER
+    INPUT #1, army_count
+    first_army = side_first_army(side)
+    FOR i = first_army TO first_army + army_count - 1
+        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
+        city_army(army_city(i)) = i
+        army_name$(i) = leader_name$(i)
+        army_leader_rating(i) = leader_rating(i)
+        leader_name$(i) = ""
+    NEXT i
 END SUB
 
 ' Reads the events table from a file written like scenarios/EVENTS.DAT, whose head says what
