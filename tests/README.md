@@ -193,7 +193,7 @@ on a desktop nobody sees.
 | `two-player` | Two players: the blank screen between their turns, Detach (the Rebels' own command), and 47 main menus to the time limit |
 | `union-events` | A whole game as the Union with many random events, a capital moved, commerce raided, and recruits each month until the named leaders run out |
 | `union-time` | A whole game as the Union to the time limit in March 1865, with the keys F3, F4 and F7 |
-| `endings` | Three games in one run, each to another ending: income, a captured capital, and the time limit |
+| `endings` | Three games in one run, each to another ending: income, a captured capital, and an army annihilated |
 | `events-south` | From a prepared save of November 1863, the events that favor the South, by forced dice: riots in a city the Union took, England's ships, mercenaries, furloughs for the 1864 election, a loan, and the victory points of January 1864 and 1865 |
 | `events-union` | From a prepared save of May 1864, the events that favor the Union: riots in a city the Rebels took, extra ships up to the fleet's limit, the Emancipation Proclamation, and Lincoln reelected. The Rebel fleet starts at sea, so the computer sails it home |
 | `refusals` | From a prepared save, one month of commands that the game refuses or that need a certain state: no commander left for a new army, a blocked track, an army too large for the train, the Which menu, a train's destination with no track, "Railroad is already carrying", the Supply menu with an army cut off, armies too large to combine, the Cancel menu, and an ironclad from the Type menu |
@@ -221,7 +221,7 @@ it recruits, moves, builds ships, fights and wins.
 | Script | How the game goes |
 |---|---|
 | `pass-<side>-<seed>` | The game ends at the first victory condition the computer reaches, after 1 to 14 turns. Eight games: the seeds 1861 to 1864 as each side, each seed with settings of its own (the map's detail, the play balance, the computer's aggression, random events, realism). `pass-<side>-altmap`: two more on the alternate map |
-| `war-<side>-<seed>` | The player first turns off every victory condition but the time limit (Utility, End Cond). The game lasts 9 to 24 turns, until the player's side has no army left. `war-union-1866`, `war-rebel-1867`, and `war-union-altmap` and `war-rebel-altmap` on the alternate map |
+| `war-<side>-<seed>` | The player first turns off every victory condition but the time limit (Utility, End Cond). The game lasts 9 to 20 turns, until the player's side has no army left. `war-union-1866`, `war-rebel-1867`, and `war-union-altmap` and `war-rebel-altmap` on the alternate map |
 
 Each takes a digest at every main menu, names the commander "Tester" when the Hall of Fame asks, and quits.
 Each runs with history on and checks the history file `cws.his` and `HISCORE.CWS` after the run. The history

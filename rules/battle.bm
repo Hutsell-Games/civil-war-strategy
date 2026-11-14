@@ -48,10 +48,10 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
             defend_strength = rule_strength_cap
         CASE IS > 1.5
             defend_strength = defend_strength + 2
-        CASE IS < .5
-            defend_strength = .8 * defend_strength
         CASE IS < .2
             defend_strength = .5 * defend_strength
+        CASE IS < .5
+            defend_strength = .8 * defend_strength
     END SELECT
     IF defend_strength < 1 THEN defend_strength = 1
     IF defend_strength > rule_strength_cap THEN defend_strength = rule_strength_cap

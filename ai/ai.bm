@@ -542,10 +542,10 @@ FUNCTION ai_pick_port (side, ports(), count)
         ai_pick_port = ports(best)
     END IF
 
-    ' A Rebel fleet at city 30 picks port 0 half the time, and stays (TODO.md). The original
-    ' set the menu's row to 30, which read menu_value(30): a list never reaches 30 rows, and
-    ' only the recruiting list's clearing wrote there, a 0.
-    IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = 30 THEN IF RND > .5 THEN ai_pick_port = 0
+    ' A Rebel fleet off city 30 holds its place half the time: its own port, so it does not
+    ' sail (navy_sail_to). The original set the menu's row to 30, which read a 0, and city 0
+    ' does not sail either.
+    IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = 30 THEN IF RND > .5 THEN ai_pick_port = 30
 END FUNCTION
 
 ' The computer's fleet carries out an order: NAVY_BUILD, NAVY_ATTACK or NAVY_SAIL. The order

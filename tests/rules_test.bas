@@ -264,6 +264,20 @@ SUB TestBattleCountsAnEmptyArmyAsOne
     AssertEqualInt 20, defend_steps(4), "50 to 1: the cap"
 END SUB
 
+' A defender with less than a fifth of the attacker's men has half its strength; with less
+' than half, eight tenths.
+SUB TestBattleOutnumberedDefender
+    DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
+    rule_strength_cap = 20: opt_difficulty = 3
+    army_size(21) = 538: army_size(1) = 3000
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 8, defend_steps(3), "defense: .013 * 538 + 1"
+    AssertEqualInt 4, defend_steps(4), "538 against 3000, under a fifth: halved"
+    army_size(1) = 1800
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 6, defend_steps(4), "538 against 1800, under a half: 6.4"
+END SUB
+
 SUB TestBattleFightTakesSupplyFromTheArmies
     RANDOMIZE 1
     army_supply(1) = 2: army_supply(2) = 1: army_supply(21) = 3: army_supply(22) = 0
@@ -556,14 +570,14 @@ SUB TestVictoryPointsKeepEightTenths
     AssertEqualInt 170, side_victory_points(2), "8, 12 for income and cities, 50 for 30 cities and 100 for 35"
 END SUB
 
-SUB TestOnlyUnionVictoryPointsStopAtZero
+SUB TestVictoryPointsStopAtZero
     side_victory_points(1) = -50: side_victory_points(2) = -50
     side_city_count(1) = 5: side_city_count(2) = 20
     current_side = SIDE_REBEL
     CALL turn_update_victory_points(SIDE_UNION)
     CALL turn_update_victory_points(SIDE_REBEL)
     AssertEqualInt 0, side_victory_points(1), "the Union's -38 stops at 0"
-    AssertEqualInt -34, side_victory_points(2), "the Rebels' -40 and 6 for their cities stays below 0"
+    AssertEqualInt 0, side_victory_points(2), "the Rebels' -40 and 6 for their cities stops at 0 too"
     AssertTrue ai_strength_ratio! = .7, "the Union holds 5 cities: the Rebel computer gains .7"
 END SUB
 

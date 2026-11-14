@@ -204,8 +204,9 @@ Phase 7's rule for these lines still holds:
 - A step that must rewrite lines no test runs (the `GOTO` knots of `navy_commands` and `turn_resolve`)
   waits for its tests.
 
-The 12 lines that no test runs (20 before phase 9 step 6, 18 before the last labels went, 17 before
-`DIR$` went on 2026-11-13, 15 before the kept bugs were fixed the same day). The table names the SUB, not the line
+The 11 lines that no test runs (20 before phase 9 step 6, 18 before the last labels went, 17 before
+`DIR$` went on 2026-11-13, 15 before the kept bugs were fixed the same day, 12 before `battle_strengths`'
+cases were put in order). The table names the SUB, not the line
 numbers, because each step moves the lines; `report.txt` has the numbers of the day.
 
 | File | SUB | Lines | Why |
@@ -214,7 +215,6 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `ai\ai.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
 | `ai\ai.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. `ai_raise_forces` builds the first ship before it. It was the `THEN` part of a one-line `IF` until 2026-11-12 |
 | `ai\ai.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
-| `rules\battle.bm` | `battle_strengths` | 1 | `CASE IS < .2` comes after `CASE IS < .5`, which takes it |
 | `rules\battle.bm` | `battle_losses` | 1 | The losses of a defender of more than 80,000 men; no script has one. The case came after `CASE IS > 300` until 2026-11-13 |
 | `ai\ai.bm` | `ai_fortify` | 1 | The Union computer stops fortifying when it has no fleet. Since 2026-11-13 a computer without a fleet builds one in the same turn (`ai_fleet_orders`), so no script's computer fortifies without one. A game can still reach it: the Union's fleet sunk in the player's turn, before the computer fortifies |
 | `ai\ai.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |

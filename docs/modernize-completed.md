@@ -80,13 +80,33 @@ The tests:
   again; the games now last 1 to 14 turns (`pass`) and 9 to 24 (`war`).
 - Scripts written by hand that changed their steps: `options` (Esc in Rndom Evt, with a state),
   `files` (Resume with no saved game returns to the title menu; Load is offered after the first save),
-  `endings` (game 3 now ends at the time limit; the `war` games still end with an army annihilated),
+  `endings` (game 3 ended at the time limit until "Three more" below; the `war` games still end with
+  an army annihilated),
   `union-manassas` (the computer's second turn by rules; the Files menu opens on Load once a game is
   saved) and `navy-losses` (seed 2 for 6, so that the shore battery still sinks the ship at the first
   shot).
 - Every changed line runs under the tests (`play.py coverage`). One line that ran before does not:
   `ai_fortify`'s stop for a Union computer without a fleet (`modernize-plan.md`, "Lines that no test
   runs"). 12 lines are not run, 15 before. 40 scripts pass `check` and `compare` with both compilers.
+
+### Three more (2026-11-13)
+
+Found after the batch; the user ruled on them the same day.
+
+- **An outnumbered defender is halved.** `battle_strengths` tests `CASE IS < .2` before
+  `CASE IS < .5`, so a defender with less than a fifth of the attacker's men has half its strength.
+  The `.2` case was never reached. New test: `TestBattleOutnumberedDefender`.
+- **Both sides' victory points stop at 0** (`turn_update_victory_points`). Only the Union's did, so
+  the Rebels' went below 0 when they lost their capital with fewer than 100 points.
+  `TestOnlyUnionVictoryPointsStopAtZero` became `TestVictoryPointsStopAtZero`.
+- **The Rebel fleet off Philadelphia** holds its place half the time (`ai_pick_port`). Looked into,
+  this was not a bug: the original's row 30 read a 0, and city 0 does not sail; read as city 30, the
+  fleet's own port, it does not sail either. The FUNCTION now returns 30 and says so. No game changes.
+
+Four scripts were recorded again: `navy`, `war-rebel-altmap`, `war-union-1866` (`make_scripts.py`
+wrote it again: 20 turns) and `endings`, whose game 3 again ends with the Union annihilated, as it
+did before the batch; its keys are back to that. 162 unit tests; 40 scripts pass `check` and
+`compare`; every changed line runs, and no line stopped running.
 
 ## Scenarios in folders (2026-11-13)
 

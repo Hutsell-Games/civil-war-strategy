@@ -9,7 +9,7 @@ Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. 
   `SHELL` opens a console window on the user's desktop. A test of the real one must run where a window does no
   harm: in QB64Rust's suites VM, or by hand.
 - **A game that reaches March 1865 with the computer active.** The generated games end sooner, because a
-  player who only ends turns is beaten in 1 to 24 turns. `union-time` and `two-player` reach the time limit
+  player who only ends turns is beaten in 1 to 20 turns. `union-time` and `two-player` reach the time limit
   with a passive computer or none.
 - **Linux.** The game opens lower-case names of upper-case files (`"cities.grd"`, `"cws.cfg"`),
   and copies its history with `SHELL "copy ..."`, a Windows command. Then `play.py` would need its Linux
@@ -22,8 +22,9 @@ game plays changes the recorded screens.
 
 Ruled on 2026-11-13 (user): the other 22 bugs of this list, and the `SELECT CASE` branches that were never
 reached (`docs\sub-names.md`, "Found while reading"), were fixed in one batch. The pictures,
-`normal_random_number` and the train's pixels below are kept; the other rows were found afterward.
-What each fix did is in `docs\modernize-completed.md`, "The kept bugs fixed".
+`normal_random_number` and the train's pixels below are kept. Of four rows found afterward, three were
+settled on 2026-11-13 (user); the computer's fleet that "thinks of sailing" is kept. What each fix did
+is in `docs\modernize-completed.md`, "The kept bugs fixed" and "Three more".
 
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
   The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
@@ -31,22 +32,9 @@ What each fix did is in `docs\modernize-completed.md`, "The kept bugs fixed".
 - **`normal_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
   on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
-- **A defender with very few men against the attacker is never halved.** `battle_strengths`
-  (`rules\battle.bm`) tests the ratio `CASE IS < .5` before `CASE IS < .2`, so the second case, which
-  halves the defender's strength, is never reached. The same kind as the `SELECT CASE` fixes of
-  2026-11-13, found after the ruling.
-- **Only the Union's victory points stop at 0.** `turn_update_victory_points` (`rules\turn.bm`) sets the
-  Union's points to 0 when they fall below 1, and leaves the Rebels' alone. The Rebels' points go below 0
-  when they lose their capital with fewer than 100 points (`city_take`, `rules\city.bm`), and stay there
-  until their income brings them back. `TestOnlyUnionVictoryPointsStopAtZero` pins it.
 - **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
   (`ai\ai.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
   bombards the city anyway when it is the enemy's. The change of order does not stop this attack.
-- **A Rebel fleet at Philadelphia stays there half the time it would sail.** `ai_pick_port`
-  (`ai\ai.bm`) ends with a test for the Rebel fleet at city 30, with a chance of 1 in 2. The
-  original set the menu's row to 30 there, most likely meant as the city. Row 30 of the menu's
-  values was always 0, and `navy_sail_to` does nothing for city 0. The FUNCTION returns 0 to keep
-  it.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
@@ -56,8 +44,6 @@ What each fix did is in `docs\modernize-completed.md`, "The kept bugs fixed".
 Left alone by phase 3, group 1, of `docs\modernize-plan.md` (the sides and limits). None of these changes
 how the game plays.
 
-- **`draw_surrender (side)` is passed an army, not a side** (`game\victory_screens.bm`, called from
-  `turn_resolve`). Its test now reads `army_side(side)`. The parameter wants the name `army`.
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 142 and 147).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
   report needs laying out again.
