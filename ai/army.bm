@@ -1,0 +1,368 @@
+' The computer's decisions for its armies: where each one moves, drill, Join, and razing a
+' fort. Like every file of ai/, they draw nothing themselves: their messages are SUBs of
+' ui/ai.bm, and they carry out an order through the commands of commands/, as the player's
+' menus do.
+
+' The computer gives each of its armies a move order, or leaves it where it is. text_color is
+' the color of its messages.
+SUB ai_army_orders (side, text_color)
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
+    DIM i AS INTEGER
+    DIM ordered AS INTEGER
+    first_army = side_first_army(side)
+    last_army = side_last_army(side)
+    FOR i = first_army TO last_army
+        CALL ai_army_order(side, i, ordered)
+        IF ordered <> 0 THEN
+            CALL draw_ai_plan(i, text_color)
+        END IF
+    NEXT i
+END SUB
+
+' The computer's move order for an army, or none (ordered is 0).
+SUB ai_army_order (side, army, ordered)
+    DIM city AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM j AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM neighbor_strength AS INTEGER
+    DIM best_road AS INTEGER
+    DIM other_army AS INTEGER
+    ordered = 0
+    city = army_city(army)
+    IF NOT army_exists(army) OR army_has_acted(army) THEN
+        EXIT SUB
+    END IF
+    IF army_supply(army) < 1 AND RND > .1 THEN
+        EXIT SUB
+    END IF
+
+    enemy_strength = city_nearby_enemy_strength(city)
+
+    'hold capital
+    IF enemy_strength > 0 AND city = side_capital(side) AND city_army(city) = army THEN
+        EXIT SUB
+    END IF
+    IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) <> 0 THEN
+        FOR j = 1 TO MAX_ROADS
+            neighbor = city_road(city, j)
+            IF j = 0 THEN
+                EXIT FOR
+            END IF
+            neighbor_strength = city_nearby_enemy_strength(neighbor)
+            IF neighbor_strength > 0 THEN
+                EXIT SUB
+            END IF
+        NEXT j
+    END IF
+    CALL ai_evaluate_move(army, best_road)
+    IF best_road = 0 THEN
+        EXIT SUB
+    END IF
+    army_order(army) = city_road(city, best_road)
+
+    IF city_owner(army_order(army)) = side THEN
+        other_army = city_army(army_order(army))
+        IF other_army > 0 THEN
+            ' Two armies of the side that would trade cities stay where they are. The original
+            ' compared the other army's order with this army's size.
+            IF army_order(other_army) = city THEN
+                army_order(army) = ORDER_NONE
+                EXIT SUB
+            END IF
+        END IF
+    END IF
+    IF winter_stops_move(side, army_order(army)) THEN
+        army_order(army) = ORDER_NONE
+        EXIT SUB
+    END IF
+    ordered = 1
+END SUB
+
+' The computer drills each army that has no order and can still improve.
+SUB ai_drill (side)
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
+    DIM i AS INTEGER
+    first_army = side_first_army(side)
+    last_army = side_last_army(side)
+    FOR i = first_army TO last_army
+        IF army_order(i) = ORDER_NONE AND army_can_drill(i) THEN
+            CALL army_drill(i)
+            CALL draw_ai_drill(i)
+        END IF
+    NEXT i
+END SUB
+
+SUB ai_evaluate_move (army, best_road)
+    DIM road_count AS INTEGER
+    DIM far_city AS INTEGER
+    DIM stay_weight AS INTEGER
+    DIM best_score AS INTEGER
+    DIM from_city AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM own_strength AS INTEGER
+    DIM j AS INTEGER
+    DIM to_city AS INTEGER
+    DIM score AS INTEGER
+    DIM k AS INTEGER
+    DIM occupant AS INTEGER
+    DIM fort_factor AS INTEGER
+    DIM odds!
+    DIM ally_bound AS INTEGER
+    DIM own_side AS INTEGER
+    DIM enemy_side AS INTEGER
+    ' Each road's score; -1 for a road not scored. Entry 0, for no road, stays 0.
+    DIM road_score(MAX_ROADS) AS INTEGER
+    enemy_side = current_side
+    own_side = other_side(enemy_side)
+    from_city = army_city(army)
+    stay_weight = 200
+    IF ai_strength_ratio! > 1.5 THEN
+        stay_weight = 80
+        IF ai_strength_ratio! > 2 THEN
+            stay_weight = 20
+            IF ai_strength_ratio! > 3 THEN
+                stay_weight = 5
+            END IF
+        END IF
+    END IF
+    enemy_strength = city_nearby_enemy_strength(from_city)
+    IF enemy_strength = 0 THEN
+        stay_weight = 0
+    END IF
+    IF opt_ai_aggression > 1 THEN
+        stay_weight = .5 * stay_weight
+    END IF
+
+    own_strength = army_size(army)
+
+    FOR j = 1 TO MAX_ROADS
+        road_score(j) = -1
+        to_city = city_road(from_city, j)
+        IF to_city > 0 THEN
+            IF city_army(to_city) > 0 THEN
+                own_strength = own_strength - army_size(city_army(to_city))
+                score = 1
+            END IF
+        END IF
+    NEXT j
+    own_strength = .01 * own_strength
+    IF opt_ai_aggression > 0 THEN
+        own_strength = own_strength + 20 * opt_ai_aggression
+    END IF
+
+
+    road_count = 6
+    FOR j = 1 TO MAX_ROADS
+        score = -1
+        to_city = city_road(from_city, j)
+        IF to_city = 0 THEN
+            road_count = j - 1
+            EXIT FOR
+        END IF
+
+        occupant = city_army(to_city)
+        ' An empty city that another of the computer's armies already marches to is left to it.
+        ally_bound = 0
+        FOR k = side_first_army(own_side) TO side_last_army(own_side)
+            IF army_exists(k) THEN
+                IF army_order(k) = to_city AND occupant = 0 THEN
+                    ally_bound = 1
+                    EXIT FOR
+                END IF
+            END IF
+        NEXT k
+        IF ally_bound = 1 THEN
+            _CONTINUE
+        END IF
+
+        score = own_strength - stay_weight * city_fort(from_city) - city_value(from_city) + 30 * RND
+        IF city_fort(from_city) > 0 THEN
+            IF army = city_army(from_city) THEN
+                score = score - 25
+                IF opt_realism >= REALISM_ON THEN
+                    score = score - 50
+                END IF
+            END IF
+        END IF
+        IF to_city = side_capital(enemy_side) THEN
+            IF victory_rule(VICTORY_CAPITAL) > 0 THEN
+                score = score + 200
+            END IF
+        END IF
+        IF city_owner(to_city) <> own_side THEN
+            score = score + 5 * city_value(to_city) + 10 * city_fort(to_city)
+        END IF
+        IF city_owner(to_city) = enemy_side AND occupant = 0 THEN
+            score = score + 10 * city_value(to_city)
+        END IF
+        IF city_owner(to_city) = enemy_side AND occupant <> 0 THEN
+            fort_factor = 1
+            IF city_fort(to_city) = 1 THEN
+                fort_factor = 2
+                IF city_fort(to_city) = 3 THEN
+                    fort_factor = 3
+                END IF
+            END IF
+
+            IF army_size(occupant) > 0 THEN
+                odds! = army_size(army) / (fort_factor * army_size(occupant))
+                IF opt_realism >= REALISM_HIGH THEN
+                    odds! = .8 * odds!
+                END IF
+            ELSE
+                odds! = 5
+            END IF
+
+            IF army_size(army) < SMALL_ARMY_SIZE THEN
+                score = score - 300
+                odds! = .1
+            END IF
+            IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN
+                score = 0
+            END IF
+            IF opt_realism >= REALISM_ON THEN
+                score = score - 15
+            END IF
+            IF odds! < .5 THEN
+                score = score - 200
+            END IF
+            IF opt_ai_aggression = 0 AND RND > .9 THEN
+                score = score + 10 * (army_leader_rating(army) - army_leader_rating(occupant) + army_experience(army) - army_leader_rating(army))
+            END IF
+            IF army_supply(army) < 1 THEN
+                score = score - 100
+            END IF
+            SELECT CASE odds! + .5 * opt_ai_aggression
+                CASE IS < .3
+                    score = -9999
+                CASE IS < .5
+                    score = score - 300
+                CASE IS <= .8
+                    score = score - 20
+                CASE .8 TO 1.2
+                    score = score - 5
+                CASE 1.2 TO 1.5
+                    score = score + 10
+                CASE ELSE
+                    score = score + .5 * (army_size(army) - army_size(occupant)) + 50 * RND
+            END SELECT
+        END IF
+        IF city_owner(to_city) = own_side AND occupant > 0 AND army_order(occupant) = ORDER_NONE THEN
+            score = score - army_size(occupant)
+        END IF
+        IF enemy_side = SIDE_UNION AND city_y(to_city) < city_y(from_city) THEN
+            score = score + 2
+        END IF
+        IF enemy_side = SIDE_REBEL AND city_y(to_city) > city_y(from_city) THEN
+            score = score + 2
+        END IF
+
+        FOR k = 1 TO MAX_ROADS
+            far_city = city_road(to_city, k)
+            IF far_city = 0 THEN
+                _CONTINUE
+            END IF
+            IF city_owner(far_city) = SIDE_NONE THEN
+                score = score + 3 * city_value(far_city) + 4 * city_fort(far_city)
+            END IF
+            IF city_owner(far_city) = enemy_side THEN
+                score = score + 3 * city_value(far_city) + 4 * city_fort(far_city)
+            END IF
+            IF city_owner(far_city) = enemy_side AND occupant > 0 THEN
+                odds! = 5 - 4 * RND
+                IF army_size(occupant) > 0 THEN
+                    odds! = army_size(army) / army_size(occupant)
+                ELSE
+                    odds! = 5
+                END IF
+                IF odds! < 1 THEN
+                    score = score - 2
+                END IF
+            END IF
+            IF city_owner(far_city) = side_capital(enemy_side) THEN
+                score = score + 50
+            END IF
+        NEXT k
+
+        road_score(j) = score
+    NEXT j
+    best_score = 0
+    best_road = 0
+    FOR j = 1 TO road_count
+        IF road_score(j) < 0 THEN
+            _CONTINUE
+        END IF
+        IF road_score(j) > best_score THEN
+            best_score = road_score(j)
+            best_road = j
+        END IF
+    NEXT j
+    IF enemy_strength > army_size(army) AND road_score(best_road) < 50 THEN
+        best_road = 0
+    END IF
+END SUB
+
+' The player's strength near a city: in full in the cities next to it, a tenth two roads away. The sum is an
+' INTEGER, rounded at each step, as it was when it was a SUB's parameter.
+FUNCTION city_nearby_enemy_strength (city)
+    DIM j AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM k AS INTEGER
+    DIM far_city AS INTEGER
+    DIM strength AS INTEGER
+    DIM enemy_side AS INTEGER
+    enemy_side = current_side
+    strength = 0
+    FOR j = 1 TO MAX_ROADS
+        neighbor = city_road(city, j)
+        IF neighbor = 0 THEN
+            EXIT FOR
+        END IF
+        IF city_owner(neighbor) = enemy_side AND city_army(neighbor) > 0 THEN
+            strength = strength + army_size(city_army(neighbor))
+        END IF
+        FOR k = 1 TO MAX_ROADS
+            far_city = city_road(neighbor, k)
+            IF far_city = 0 OR far_city = city THEN
+                _CONTINUE
+            END IF
+            IF city_owner(far_city) = enemy_side AND city_army(far_city) > 0 THEN
+                strength = strength + .1 * army_size(city_army(far_city))
+            END IF
+        NEXT k
+    NEXT j
+    city_nearby_enemy_strength = strength
+END FUNCTION
+
+' The computer combines the armies in one of the cities where armies can combine, picked at
+' random.
+SUB ai_combine (side)
+    DIM city AS INTEGER
+    DIM best AS INTEGER
+    DIM joined AS INTEGER
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
+    CALL army_list_combine_cities(side, cities(), count)
+    IF count = 0 THEN
+        EXIT SUB
+    END IF
+    city = cities(1 + INT(count * RND))
+    CALL army_combine_gather(side, city, best, joined)
+    IF joined = 0 THEN
+        EXIT SUB
+    END IF
+    CALL army_combine_done(city, best, joined)
+    CALL army_combine_redraw(side, city, best)
+END SUB
+
+' 1 when the computer's army razes the fort of a city it takes without a battle: under the
+' Realism setting, in the lower part of the map.
+FUNCTION ai_razes_fort (city)
+    ai_razes_fort = 0
+    IF opt_realism >= REALISM_ON AND city_y(city) > 150 THEN
+        ai_razes_fort = 1
+    END IF
+END FUNCTION

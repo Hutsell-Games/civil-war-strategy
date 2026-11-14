@@ -58,7 +58,7 @@ better than a third parameter.
 
 - `turn_update_victory_points` (`rules\turn.bm`) is the same four lines for each side, except for one kept
   bug (`TODO.md`, the Rebels' bonus built on the Union's points).
-- `menu_navy_commands` (`ui\navy.bm`) and `ai_navy_orders` (`ai\ai.bm`) are the same loop. Their Build
+- `menu_navy_commands` (`ui\navy.bm`) and `ai_navy_orders` (`ai\navy.bm`) are the same loop. Their Build
   checks differ slightly. Three `random_discard` calls keep the random numbers in step between them.
 
 **Fix:** one SUB that takes `side`. For a command: one shared rule such as `navy_can_build(side)`; then the
@@ -66,7 +66,7 @@ menu or the computer chooses; then the command in `commands\` runs.
 
 ## Two findings for the second-war goal
 
-- **City numbers are in the code.** City 30 is in `ai\ai.bm` (lines 127, 128 and 546) and `draw\map.bm`
+- **City numbers are in the code.** City 30 is in `ai\navy.bm` (lines 6, 7, 98 and 100) and `draw\map.bm`
   (line 519). City 27 is in `rules\setup.bm` (line 34), and city 24 in `draw\map.bm` (line 148). These fail
   phase 11's test that a second war replaces only `game\` and `scenarios\`.
 - **The folder rules are kept only by convention.** Phase 8's script that found the mixed SUBs
@@ -123,7 +123,7 @@ the small items below were left out.
   order of the right panel; helpers would make one battle harder to follow and risk its rounding.
 - **The sea ports of a side** (`navy_list_shipyards`, `event_delivery_port`, `navy_retreat_port`): their
   tests differ in three ways, so one FUNCTION would need a parameter for each.
-- **Small repeats**: the menus' lists in `ui\orders.bm`, the three ways of shortening an army's name,
+- **Small repeats**: the menus' lists in `ui\army.bm` and `ui\city.bm`, the three ways of shortening an army's name,
   the two-row menus, the road loops' three ways of stopping, the cannon's sound and the `"00"` texts.
   Each is done when its SUB is next changed for another reason.
 

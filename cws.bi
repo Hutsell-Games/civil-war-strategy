@@ -110,7 +110,7 @@ CONST FILES_NEW_GAME = 1
 CONST FILES_QUIT = 2
 ' event_roll's event: a row of the events table (1 to event_count), or this.
 CONST EVENT_NONE = 0
-' The events table, read from scenarios/EVENTS.DAT (load_events, port/files.bm).
+' The events table, read from scenarios/EVENTS.DAT (load_events, port/events_file.bm).
 CONST MAX_EVENTS = 40
 CONST MAX_EVENT_TEXTS = 4
 CONST MAX_EVENT_CONDITIONS = 120

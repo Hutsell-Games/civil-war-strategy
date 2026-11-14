@@ -1,0 +1,203 @@
+' The computer's first decisions of its turn: supply for its armies, forts, recruits and
+' new armies.
+
+' The computer supplies each of its armies that has none.
+SUB ai_resupply (side)
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
+    DIM i AS INTEGER
+    first_army = side_first_army(side)
+    last_army = side_last_army(side)
+    FOR i = first_army TO last_army
+        IF army_exists(i) AND army_supply(i) < 1 THEN
+            CALL army_resupply(i)
+        END IF
+    NEXT i
+END SUB
+
+' The computer fortifies its capital, or a city of its own that the enemy near it outnumbers.
+' side_cash without an index is a local that is always 0, as in the original.
+SUB ai_fortify (side)
+    DIM side_cash AS INTEGER
+    DIM city AS INTEGER
+    DIM army AS INTEGER
+    IF NOT fort_affordable(side) THEN
+        EXIT SUB
+    END IF
+
+    city = side_capital(side)
+    IF city_army(city) = 0 OR city_fort(city) > 1 OR city_owner(city) <> side THEN
+        city = ai_fortify_pick(side)
+    END IF
+
+    DO
+        IF city = 0 THEN
+            EXIT SUB
+        END IF
+        IF city_fort(city) >= MAX_FORT THEN
+            EXIT SUB
+        END IF
+        CALL city_build_fort(side, city)
+        army = city_army(city)
+        army_order(army) = ORDER_BUSY
+        CALL draw_fort_built(city)
+        IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND RND > .5 AND side_cash < 222 THEN
+            EXIT SUB
+        END IF
+        IF 3 * RND <= 1 + ai_strength_ratio! OR NOT fort_affordable(side) THEN
+            EXIT SUB
+        END IF
+        city = ai_fortify_pick(side)
+    LOOP
+END SUB
+
+' The computer's choice of a city to fortify: one of its armies' cities whose enemy near it
+' outnumbers the army. 0 when it fortifies none.
+FUNCTION ai_fortify_pick (side)
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
+    DIM i AS INTEGER
+    DIM candidate_city AS INTEGER
+    DIM enemy_strength AS INTEGER
+    first_army = side_first_army(side)
+    last_army = side_last_army(side)
+    ai_fortify_pick = 0
+    IF 1 + RND < opt_ai_aggression + ai_strength_ratio! THEN
+        EXIT FUNCTION
+    END IF
+    FOR i = first_army TO last_army
+        candidate_city = army_city(i)
+        IF candidate_city = 0 OR army_has_acted(city_army(candidate_city)) OR army_has_acted(i) THEN
+            _CONTINUE
+        END IF
+        IF city_fort(candidate_city) >= MAX_FORT THEN
+            _CONTINUE
+        END IF
+        enemy_strength = city_nearby_enemy_strength(candidate_city)
+        IF enemy_strength > army_size(i) THEN
+            ai_fortify_pick = army_city(i)
+            EXIT FUNCTION
+        END IF
+    NEXT i
+END FUNCTION
+
+' The computer builds the Union's first ship, then recruits unless it has armies enough. It
+' keeps the price of a ship back from the recruiting when its fleet is small and in port.
+SUB ai_raise_forces (side)
+    DIM ship_reserve AS INTEGER
+    DIM army_count AS INTEGER
+    IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > COST_SHIP THEN
+        CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD)
+        IF side_cash(side) < COST_RECRUIT THEN
+            EXIT SUB
+        END IF
+    END IF
+    army_count = ai_count_armies(side)
+    IF army_count > 2 + 3 * current_side + 3 * RND THEN
+        EXIT SUB
+    END IF
+    IF fleet_size(side) < 5 AND side_cash(side) > COST_SHIP AND NOT fleet_is_at_sea(side) THEN
+        IF city_owner(fleet_city(side)) = side THEN
+            ship_reserve = ship_reserve + COST_SHIP
+            side_cash(side) = side_cash(side) - COST_SHIP
+        END IF
+    END IF
+    ' ai_recruit does nothing when the cash left is less than COST_RECRUIT.
+    CALL ai_recruit(side)
+    side_cash(side) = side_cash(side) + ship_reserve
+END SUB
+
+' How many armies the computer's side has. Two fewer when the other side has more men, and
+' none when it has more than twice as many, so that the computer recruits. The men on a train
+' count (side_strength); the army on it does not count as one of its armies.
+FUNCTION ai_count_armies (side)
+    DIM i AS INTEGER
+    DIM army_count AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM own_strength AS INTEGER
+    enemy_strength = side_strength(other_side(side))
+    own_strength = side_strength(side)
+    army_count = 0
+    FOR i = side_first_army(side) TO side_last_army(side)
+        IF army_exists(i) THEN
+            army_count = army_count + 1
+        END IF
+    NEXT i
+    IF enemy_strength > own_strength THEN
+        army_count = army_count - 2
+    END IF
+    IF enemy_strength > 2 * own_strength THEN
+        army_count = 0
+    END IF
+    ai_count_armies = army_count
+END FUNCTION
+
+' The computer recruits: it picks a city from its list and raises men there, while the money
+' lasts and it has a commander for a new army.
+SUB ai_recruit (side)
+    DIM city AS INTEGER
+    DIM raised AS INTEGER
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
+    IF side_cash(side) < COST_RECRUIT THEN
+        EXIT SUB
+    END IF
+    CALL draw_ai_recruit_color
+    CALL army_recruit_cities(side, cities(), count)
+    IF count = 0 THEN
+        EXIT SUB
+    END IF
+    DO
+        IF side_cash(side) < COST_RECRUIT THEN
+            EXIT SUB
+        END IF
+        CALL draw_ai_funds(side, count)
+        city = ai_recruit_pick(side, cities(), count)
+        CALL army_recruit(side, city, raised)
+        IF raised = 0 THEN
+            EXIT SUB
+        END IF
+    LOOP
+END SUB
+
+' The computer's pick from its list of count cities to recruit in.
+FUNCTION ai_recruit_pick (side, cities(), count)
+    DIM army AS INTEGER
+    DIM best_score AS INTEGER
+    DIM i AS INTEGER
+    DIM city AS INTEGER
+    DIM score AS INTEGER
+    DIM choice AS INTEGER
+    choice = 0
+    army = 0
+    FOR i = 1 TO count
+        city = cities(i)
+        army = city_army(city)
+        IF army = 0 XOR army_size(army) < 155 THEN
+            choice = i
+        END IF
+    NEXT i
+
+    IF choice = 0 THEN
+        choice = 1 + INT(RND * count)
+    END IF
+    IF opt_realism >= REALISM_ON THEN
+        best_score = 0
+        FOR i = 1 TO count
+            city = cities(i)
+            IF city_army(city) = 0 THEN
+                score = recruit_troops(side, city, 0)
+            ELSE
+                score = recruit_troops(side, city, 1)
+            END IF
+            IF score > best_score AND RND > .5 THEN
+                best_score = score
+                choice = i
+            END IF
+        NEXT i
+    END IF
+    IF side_cash(side) < COST_RECRUIT THEN
+        choice = count
+    END IF
+    ai_recruit_pick = cities(choice)
+END FUNCTION

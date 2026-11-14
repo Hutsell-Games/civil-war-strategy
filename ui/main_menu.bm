@@ -1,6 +1,6 @@
 ' The main menu and its own entries: Railroad, End Turn and Inform. The menus of the other
-' entries are in ui/orders.bm, ui/options.bm and ui/files.bm. At the end: the title screen,
-' the title menu and the start of a new game.
+' entries are in ui/army.bm, ui/navy.bm, ui/orders.bm, ui/options.bm and ui/files.bm. At the
+' end: the title screen, the title menu and the start of a new game.
 
 ' Shows the main menu and leaves the choice in menu_choice. start is the row it starts on, as
 ' MENU_START + row. An entry that cannot be chosen shows as "-". Troops as "-" sets the start
@@ -51,7 +51,7 @@ SUB menu_main (start)
 END SUB
 
 ' Railroad: the train's picture and its capacity. Then the player picks an army and where its
-' train goes (menu_railroad, ui/orders.bm), and the train leaves (commands/railroad.bm). With
+' train goes (menu_railroad, ui/railroad.bm), and the train leaves (commands/railroad.bm). With
 ' an army on the train already, it says so.
 SUB menu_main_railroad
     DIM x AS INTEGER

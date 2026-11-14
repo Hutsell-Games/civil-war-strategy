@@ -1,7 +1,7 @@
 ' A side's train as its orders are carried out. Each calls the rules (rules/railroad.bm) and
 ' shows what happened. Nothing here opens a menu or reads a key. The player sends a train from
 ' the main menu (menu_main_railroad, ui/main_menu.bm) and the computer in ai_railroad_orders
-' (ai/ai.bm); a train with an army aboard arrives at the start of the month's moves
+' (ai/railroad.bm); a train with an army aboard arrives at the start of the month's moves
 ' (turn_resolve, ui/turn.bm).
 
 ' After a train was sent, was refused or arrived: clears the right panel and the bottom line.

@@ -1,6 +1,6 @@
-' The player's menus for the armies' orders that the computer gives too. Each asks the
-' player, then gives the order (commands/army.bm). The computer's are ai_combine and
-' ai_razes_fort (ai/ai.bm). The other menus for armies are in ui/orders.bm.
+' The player's menus for the armies. A menu for an order that the computer gives too asks the
+' player, then gives the order (commands/army.bm). The computer's are in ai/army.bm and
+' ai/forces.bm.
 
 ' Commands, Join: the player picks a city where armies can combine, and they become one.
 ' found is 0 when there is no such city.
@@ -57,4 +57,492 @@ SUB menu_raze_fort (raze)
     IF menu_choice = 2 THEN
         raze = 1
     END IF
+END SUB
+
+SUB menu_army_move
+    DIM army AS INTEGER
+    DIM city AS INTEGER
+    DIM i AS INTEGER
+    CALL menu_army_select(army, city)
+    IF city <= 0 OR army <= 0 THEN
+        IF army = -1 THEN
+            CALL turn_set_moves_done(1)
+        END IF
+        EXIT SUB
+    END IF
+    menu_col = PANEL_COL
+    menu_row = 12
+
+    CALL draw_army_stats(army)
+    COLOR COLOR_LIGHT_CYAN
+    LOCATE 11, 68
+    PRINT city_name$(city)
+    menu_item_count = 0
+    menu_text$(0) = "To"
+    FOR i = 1 TO MAX_ROADS
+        IF city_road(city, i) > 0 THEN
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = city_name$(city_road(city, i))
+            menu_value(menu_item_count) = city_road(city, i)
+        END IF
+    NEXT i
+    CALL menu_bubble_sort(menu_item_count)
+
+    menu_highlight = COLOR_LIGHT_GREEN
+    menu_color = COLOR_CYAN
+    CALL menu_select(MENU_CITY_ARMY)
+    CALL clear_right_panel
+    IF menu_choice < 0 THEN
+        EXIT SUB
+    END IF
+    IF winter_stops_move(current_side, menu_value(menu_choice)) THEN
+        COLOR COLOR_LIGHT_CYAN
+        CALL clear_bottom_line
+        PRINT "No campaigns in January";
+        CALL wait_seconds(PAUSE_LONG)
+        CALL clear_bottom_line
+        EXIT SUB
+    END IF
+
+    CALL clear_bottom_line
+    PRINT "Army "; army; " "; army_name$(army); " is moving from "; city_name$(city); " to "; city_name$(menu_value(menu_choice));
+    IF opt_sound >= SOUND_EFFECTS THEN
+        SOUND 2200, .5
+        SOUND 2900, .7
+    END IF
+    CALL draw_map_marker(city, menu_value(menu_choice), MARK_MOVE_LINE)
+    CALL army_set_order(army, menu_value(menu_choice))
+    CALL wait_seconds(opt_pause!)
+    CALL clear_bottom_line
+    CALL clear_right_panel
+END SUB
+
+SUB menu_army_select (army, city)
+    DIM last_army AS INTEGER
+    DIM first_army AS INTEGER
+    DIM i AS INTEGER
+    menu_color = COLOR_CYAN
+    menu_col = PANEL_COL
+    menu_row = 5
+    army = 0
+    menu_item_count = 0
+    city = 0
+    first_army = side_first_army(current_side)
+    last_army = side_last_army(current_side)
+    FOR i = first_army TO last_army
+        IF army_exists(i) AND army_order(i) = ORDER_NONE THEN
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = city_name$(army_city(i))
+            menu_value(menu_item_count) = army_city(i)
+        END IF
+    NEXT i
+    IF menu_item_count = 0 THEN
+        army = -1
+        EXIT SUB
+    END IF
+    menu_text$(0) = "From"
+    CALL menu_bubble_sort(menu_item_count)
+    menu_col = PANEL_COL
+    menu_row = 5
+    menu_highlight = COLOR_WHITE
+    CALL menu_select(MENU_CITY_BOX)
+    CALL clear_right_panel
+    IF menu_choice < 0 THEN
+        city = 0
+        EXIT SUB
+    END IF
+    city = menu_value(menu_choice)
+
+    menu_item_count = 0
+    FOR i = first_army TO last_army
+        IF army_city(i) = city AND army_order(i) = ORDER_NONE THEN
+            army = i
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = "Army" + STR$(i)
+            menu_value(menu_item_count) = i
+        END IF
+    NEXT i
+    IF menu_item_count = 1 THEN
+        EXIT SUB
+    END IF
+    menu_text$(0) = "Which"
+    CALL menu_bubble_sort(menu_item_count)
+    menu_col = PANEL_COL
+    menu_row = 15
+    CALL menu_select(MENU_ARMY_STATS)
+    CALL clear_right_panel
+    IF menu_choice < 0 THEN
+        army = 0
+        EXIT SUB
+    END IF
+    army = menu_value(menu_choice)
+END SUB
+
+' The Troops command: the player picks a city from the month's list and raises men there,
+' again and again while the money lasts.
+SUB menu_army_recruit (side)
+    DIM city AS INTEGER
+    DIM raised AS INTEGER
+    IF side_cash(side) < COST_RECRUIT THEN
+        EXIT SUB
+    END IF
+    CALL menu_recruit_cities(side)
+    IF menu_item_count = 0 THEN
+        EXIT SUB
+    END IF
+    DO
+        IF side_cash(side) < COST_RECRUIT THEN
+            EXIT SUB
+        END IF
+        CALL draw_recruit_funds(side)
+        IF menu_choice > 0 THEN
+            menu_choice = MENU_START + menu_choice
+        END IF
+        CALL menu_select(MENU_CITY_ARMY)
+        CALL clear_right_panel
+        IF menu_choice < 1 THEN
+            EXIT SUB
+        END IF
+        city = menu_value(menu_choice)
+        CALL army_recruit(side, city, raised)
+    LOOP
+END SUB
+
+' Before each pick of a city to recruit in, by the player or the computer (draw_ai_funds):
+' the side's funds, when the player may see them, and the menu's place.
+SUB draw_recruit_funds (side)
+    IF (side = current_side) OR (opt_players = PLAYERS_TWO) THEN
+        CALL clear_bottom_line
+        PRINT side_name$(side); " funds available "; side_cash(side);
+    END IF
+    menu_col = PANEL_COL
+    menu_row = 12
+    menu_color = COLOR_CYAN
+END SUB
+
+' The cities where a side may recruit (rules/army.bm), in the menu's color.
+SUB menu_recruit_cities (side)
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
+    COLOR COLOR_LIGHT_RED
+    CALL army_recruit_cities(side, cities(), count)
+    menu_text$(0) = "Recruit"
+    CALL menu_set_cities(cities(), count)
+END SUB
+
+SUB menu_army_cancel (side)
+    DIM last_army AS INTEGER
+    DIM first_army AS INTEGER
+    DIM j AS INTEGER
+    DIM short_name$
+    DIM city AS INTEGER
+    DIM i AS INTEGER
+    DIM found_at AS INTEGER
+    DIM army AS INTEGER
+    first_army = side_first_army((side))
+    last_army = side_last_army((side))
+    CALL clear_right_panel
+    menu_item_count = 0
+    FOR j = first_army TO last_army
+        short_name$ = army_name$(j)
+        IF LEN(short_name$) > 10 THEN
+            found_at = INSTR(short_name$, " ")
+            short_name$ = RIGHT$(short_name$, LEN(short_name$) - found_at)
+        END IF
+        IF army_exists(j) AND army_has_move(j) THEN
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = short_name$
+            menu_value(menu_item_count) = army_city(j)
+        END IF
+    NEXT j
+    CALL menu_bubble_sort(menu_item_count)
+    menu_col = PANEL_COL
+    menu_row = 2
+    menu_box_type = BOX_DOUBLE
+    menu_text$(0) = "Cancel"
+    IF menu_item_count < 1 THEN
+        CALL clear_bottom_line
+        COLOR COLOR_LIGHT_CYAN
+        PRINT "No units have orders to cancel";
+        EXIT SUB
+    END IF
+    CALL menu_select(MENU_CITY_BOX)
+    SELECT CASE menu_choice
+        CASE 1 TO menu_item_count
+            city = menu_value(menu_choice)
+
+            FOR i = first_army TO last_army
+                IF army_city(i) = city THEN
+                    found_at = INSTR(army_name$(i), menu_text$(menu_choice))
+                    IF found_at > 0 AND army_has_move(i) THEN
+                        army = i
+                    END IF
+                END IF
+            NEXT i
+
+            CALL clear_bottom_line
+            COLOR COLOR_LIGHT_CYAN
+            PRINT army_name$(army); " has cancelled move to "; city_name$(army_order(army));
+            CALL wait_seconds(1)
+            CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_ARMY)
+            CALL army_set_order(army, ORDER_NONE)
+            IF opt_sound >= SOUND_EFFECTS THEN
+                SOUND 2999, .5
+            END IF
+            CALL draw_stack_markers(side)
+        CASE ELSE
+    END SELECT
+    CALL clear_right_panel
+END SUB
+
+SUB menu_army_relieve (side)
+    DIM last_army AS INTEGER
+    DIM first_army AS INTEGER
+    DIM i AS INTEGER
+    DIM army AS INTEGER
+    DIM old_name$
+    DIM new_name$
+    menu_color = COLOR_CYAN
+    menu_highlight = COLOR_CYAN
+    menu_col = PANEL_COL
+    menu_row = 2
+    first_army = side_first_army(side)
+    last_army = side_last_army(side)
+    menu_item_count = 0
+    FOR i = first_army TO last_army
+        IF army_size(i) > 0 AND army_exists(i) AND army_order(i) = ORDER_NONE THEN
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = army_name$(i)
+            IF LEN(menu_text$(menu_item_count)) > 11 THEN
+                menu_text$(menu_item_count) = LEFT$(menu_text$(menu_item_count), 11)
+            END IF
+            menu_value(menu_item_count) = i
+        END IF
+    NEXT i
+
+    IF menu_item_count = 0 THEN
+        EXIT SUB
+    END IF
+    CALL menu_bubble_sort(menu_item_count)
+    menu_text$(0) = "Relieve"
+    menu_choice = MENU_START + 10
+    menu_highlight = COLOR_LIGHT_CYAN
+    CALL menu_select(MENU_ARMY_POINTER)
+    CALL clear_right_panel
+
+    IF menu_choice < 1 THEN
+        EXIT SUB
+    END IF
+    army = menu_value(menu_choice)
+    CALL draw_map_marker(army_city(army), 0, MARK_POINTER)
+
+    old_name$ = army_name$(army)
+    CALL army_free_leader(army)
+
+    menu_item_count = 0
+    FOR i = first_army TO last_army
+        IF leader_name$(i) <> "" THEN
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = leader_name$(i)
+            IF LEN(menu_text$(menu_item_count)) > 11 THEN
+                menu_text$(menu_item_count) = LEFT$(menu_text$(menu_item_count), 11)
+            END IF
+            menu_value(menu_item_count) = i
+        END IF
+    NEXT i
+    CALL menu_bubble_sort(menu_item_count)
+
+    DO
+        menu_text$(0) = "New Leader"
+        menu_col = PANEL_COL
+        menu_row = 2
+        CALL menu_select(MENU_PLAIN)
+        CALL clear_right_panel
+    LOOP WHILE menu_choice < 1
+    new_name$ = leader_name$(menu_value(menu_choice))
+    CALL army_take_leader(army, menu_value(menu_choice))
+    COLOR COLOR_WHITE
+    CALL clear_bottom_line
+    PRINT new_name$; " has replaced "; old_name$; " in "; city_name$(army_city(army));
+    wait_seconds PAUSE_LONG
+    CALL draw_map_marker(army_city(army), 0, MARK_RESTORE)
+    CALL clear_bottom_line
+END SUB
+
+SUB menu_army_retreat (defender, retreat_city)
+    DIM city AS INTEGER
+    DIM side AS INTEGER
+    DIM k AS INTEGER
+    retreat_city = 0
+    IF opt_players = PLAYERS_ONE THEN
+        IF (current_side = SIDE_UNION AND army_side(defender) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(defender) = SIDE_UNION) THEN
+            EXIT SUB
+        END IF
+    END IF
+
+    menu_highlight = COLOR_LIGHT_MAGENTA
+    menu_color = COLOR_CYAN
+    menu_col = PANEL_COL
+    menu_row = 5
+    menu_item_count = 0
+    city = army_city(defender)
+    side = army_side(defender)
+    FOR k = 1 TO MAX_ROADS
+        IF city_road(city, k) > 0 AND city_owner(city_road(city, k)) = side THEN
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = city_name$(city_road(city, k))
+            menu_value(menu_item_count) = city_road(city, k)
+        END IF
+    NEXT k
+    IF menu_item_count = 0 THEN
+        EXIT SUB
+    END IF
+    IF menu_item_count = 1 THEN
+        retreat_city = menu_value(1)
+        EXIT SUB
+    END IF
+    menu_text$(0) = "Retreat"
+    CALL menu_bubble_sort(menu_item_count)
+    CALL menu_select(MENU_CITY_POINTER)
+    CALL clear_right_panel
+    IF menu_choice < 0 OR menu_choice > menu_item_count THEN
+        retreat_city = 0
+        EXIT SUB
+    END IF
+    retreat_city = menu_value(menu_choice)
+END SUB
+
+' The Supply menu: the player's armies that are short of supplies and not cut off. The one
+' picked gets supplies. picked is that army, or 0 when there is none or the player gave up.
+SUB menu_supply (picked)
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
+    DIM i AS INTEGER
+    DIM friendly_neighbors AS INTEGER
+    DIM name_width AS INTEGER
+    picked = 0
+    first_army = side_first_army((current_side))
+    last_army = side_last_army((current_side))
+    menu_text$(0) = "Supply"
+    menu_col = PANEL_COL
+    menu_row = 5
+    menu_color = COLOR_MAGENTA
+    menu_item_count = 0
+    FOR i = first_army TO last_army
+        IF NOT army_exists(i) OR army_supply(i) > 1 THEN
+            _CONTINUE
+        END IF
+        IF opt_realism >= REALISM_ON THEN
+            friendly_neighbors = city_is_connected(current_side, army_city(i))
+            IF friendly_neighbors < 1 THEN
+                CALL clear_bottom_line
+                COLOR COLOR_WHITE
+                PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !";
+                wait_seconds opt_pause!
+                _CONTINUE
+            END IF
+        END IF
+        menu_item_count = menu_item_count + 1
+        name_width = 11
+        IF LEN(army_name$(i)) < 11 THEN
+            name_width = LEN(army_name$(i))
+        END IF
+        menu_text$(menu_item_count) = LEFT$(army_name$(i), name_width)
+        menu_value(menu_item_count) = i
+    NEXT i
+    IF menu_item_count = 0 THEN
+        COLOR COLOR_LIGHT_CYAN
+        CALL clear_bottom_line
+        PRINT "All eligible "; side_name$(current_side); " armies have supplies";
+        EXIT SUB
+    END IF
+    CALL menu_select(MENU_ARMY_POINTER)
+    CALL clear_right_panel
+    IF menu_choice < 0 THEN
+        EXIT SUB
+    END IF
+    picked = menu_value(menu_choice)
+    IF army_supply(picked) < 2 THEN
+        CALL army_resupply(picked)
+        CALL draw_army_flag(picked)
+    END IF
+END SUB
+
+' Commands, Detach: three tenths of a Rebel army become a new army in the same city. again
+' is 1 when an army was detached.
+SUB menu_army_detach (again)
+    DIM army AS INTEGER
+    DIM city AS INTEGER
+    DIM army_slot AS INTEGER
+    again = 0
+    IF NOT side_can_detach(current_side) THEN
+        CALL clear_bottom_line
+        COLOR COLOR_LIGHT_CYAN
+        PRINT "Option not available to Union";
+        EXIT SUB
+    END IF
+    COLOR COLOR_YELLOW
+    LOCATE 4, 68
+    PRINT "DETACH UNIT"
+    CALL menu_army_select(army, city)
+    IF city < 1 OR army < 1 THEN
+        EXIT SUB
+    END IF
+    IF army_size(army) < MIN_DETACH_SIZE THEN
+        CALL clear_bottom_line
+        PRINT "Too small to detach";
+        CALL wait_seconds(opt_pause!)
+        EXIT SUB
+    END IF
+    CALL army_get_commander(2, army_slot)
+    IF army_slot = 0 THEN
+        EXIT SUB
+    END IF
+    CALL army_detach(army, city, army_slot)
+    COLOR COLOR_LIGHT_CYAN
+    CALL clear_bottom_line
+    PRINT "Unit #"; army_slot; " with ";
+    CALL print_army_size(army_slot)
+    PRINT " men detached under "; army_name$(army_slot);
+    CALL wait_seconds(opt_pause!)
+    IF opt_sound >= SOUND_EFFECTS THEN
+        SOUND 2222, 1
+    END IF
+    CALL draw_stack_markers(current_side)
+    again = 1
+END SUB
+
+' Commands, Army Drill: an army gains a level of experience. again is 0 when no army is
+' free to drill. drilled is 0 when the army picked cannot drill further.
+SUB menu_army_drill (again, drilled)
+    DIM army AS INTEGER
+    DIM city AS INTEGER
+    again = 0
+    drilled = 0
+    COLOR COLOR_YELLOW
+    LOCATE 4, 68
+    PRINT "DRILL ARMY"
+    CALL menu_army_select(army, city)
+    IF city < 1 OR army < 1 THEN
+        COLOR COLOR_LIGHT_CYAN
+        CALL clear_bottom_line
+        PRINT "No armies remain eligible for drills in "; month_name$(turn_month);
+        EXIT SUB
+    END IF
+    again = 1
+    IF NOT army_can_drill(army) THEN
+        COLOR COLOR_LIGHT_RED
+        CALL clear_bottom_line
+        PRINT army_name$(army); ": Army has reached maximum improvement through drilling";
+        EXIT SUB
+    END IF
+    CALL army_drill(army)
+    CALL clear_bottom_line
+    PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
+    IF opt_sound >= SOUND_EFFECTS THEN
+        SOUND 2222, 1
+    END IF
+    CALL wait_seconds(opt_pause!)
+    clear_bottom_line
+    drilled = 1
 END SUB

@@ -130,7 +130,7 @@ Tools for reading the code are in the ignored folder `tests\out\scratch\` (`show
 cws.bas              the main loop only
 cws.bi               types, constants, shared variables
 rules\               army.bm city.bm battle.bm navy.bm railroad.bm setup.bm turn.bm victory.bm
-ai\                  ai.bm
+ai\                  army.bm forces.bm navy.bm railroad.bm
 ui\                  menu.bm orders.bm reports.bm screen.bm messages.bm
 commands\            the orders that the player's menus and the computer both give
 draw\                map.bm icons.bm ships.bm pictures.bm
@@ -166,13 +166,13 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | File | SUB | Lines | Why |
 |------|-----|-------|-----|
 | `rules\setup.bm` | `vary_start_conditions` | 2 | The Rebels' army removed by Vary Start; no script's draw removes one. The loop never ran until 2026-11-13 (`FOR k = 21 TO 6`) |
-| `ai\ai.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
-| `ai\ai.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. `ai_raise_forces` builds the first ship before it. It was the `THEN` part of a one-line `IF` until 2026-11-12 |
-| `ai\ai.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
+| `ai\navy.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
+| `ai\navy.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. `ai_raise_forces` builds the first ship before it. It was the `THEN` part of a one-line `IF` until 2026-11-12 |
+| `ai\army.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
 | `rules\battle.bm` | `battle_losses` | 1 | The losses of a defender of more than 80,000 men; no script has one. The case came after `CASE IS > 300` until 2026-11-13 |
-| `ai\ai.bm` | `ai_fortify` | 1 | The Union computer stops fortifying when it has no fleet. Since 2026-11-13 a computer without a fleet builds one in the same turn (`ai_fleet_orders`), so no script's computer fortifies without one. A game can still reach it: the Union's fleet sunk in the player's turn, before the computer fortifies |
-| `ai\ai.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
-| `ui\orders.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
+| `ai\forces.bm` | `ai_fortify` | 1 | The Union computer stops fortifying when it has no fleet. Since 2026-11-13 a computer without a fleet builds one in the same turn (`ai_fleet_orders`), so no script's computer fortifies without one. A game can still reach it: the Union's fleet sunk in the player's turn, before the computer fortifies |
+| `ai\navy.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
+| `ui\city.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 
 Of the 178 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
@@ -216,7 +216,7 @@ Claude's choice on 2026-11-11, made while carrying out step 1. Check it before s
 - **Random numbers.** Two pieces of drawing code draw random numbers: the explosion marker
   (`draw_map_marker` with `MARK_EXPLOSION`, one draw for each circle when the sound is on) and
   `draw_schooner` (four). Where a show part calls them, it must stay between the same draws of the rule
-  parts. `menu_recruit_cities` (`ui\orders.bm`) is the other way round: a rule that draws random numbers
+  parts. `menu_recruit_cities` (`ui\army.bm`) is the other way round: a rule that draws random numbers
   and picks the recruiting cities. It moves to `rules\` in step 6.
 - **The cursor and the color.** A `LOCATE` or `COLOR` in a rule SUB decides where and how the next `PRINT`
   shows. Examples are `LOCATE 14 + i, 69` in `ai_recruit_pick` and the `COLOR` at the top of

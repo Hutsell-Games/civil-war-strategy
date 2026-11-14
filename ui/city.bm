@@ -1,0 +1,163 @@
+' The player's menus for cities: Fortify, Move Capital, and the picker of a city of the
+' player's side.
+
+SUB menu_city_fortify (city)
+    DIM i AS INTEGER
+    DIM army AS INTEGER
+    city = 0
+    menu_highlight = COLOR_LIGHT_CYAN
+    menu_col = PANEL_COL
+    menu_row = 2
+    menu_item_count = 0
+    FOR i = side_first_army(current_side) TO side_last_army(current_side)
+        IF army_exists(i) AND city_fort(army_city(i)) < MAX_FORT THEN
+            menu_item_count = menu_item_count + 1
+            menu_text$(menu_item_count) = city_name$(army_city(i))
+            menu_value(menu_item_count) = army_city(i)
+        END IF
+    NEXT i
+    IF menu_item_count = 0 THEN
+        CALL clear_bottom_line
+        COLOR COLOR_LIGHT_CYAN
+        PRINT "No cities eligible to fortify";
+        EXIT SUB
+    END IF
+    CALL menu_bubble_sort(menu_item_count)
+    menu_text$(0) = "Fortify"
+    menu_choice = MENU_START + 10
+    CALL menu_select(MENU_CITY_POINTER)
+    CALL clear_right_panel
+    IF menu_choice < 0 THEN
+        EXIT SUB
+    END IF
+    city = menu_value(menu_choice)
+    CALL city_update_occupier(city)
+    army = city_army(city)
+    IF army < 0 THEN
+        EXIT SUB
+    END IF
+    IF city_fort(city) >= MAX_FORT THEN
+        CALL clear_bottom_line
+        PRINT city_name$(city); " at MAXIMUM fortification level of 2";
+        CALL wait_seconds(4)
+        EXIT SUB
+    END IF
+    IF NOT fort_affordable(current_side) THEN
+        CALL clear_bottom_line
+        PRINT "Fortifications for "; city_name$(city); " cost "; COST_FORT; " and you only have "; side_cash(current_side);
+        CALL wait_seconds(4)
+        EXIT SUB
+    END IF
+    COLOR COLOR_CYAN
+    CALL city_build_fort(current_side, city)
+    CALL draw_fort_built(city)
+    IF army_has_move(army) THEN
+        CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_LINE)
+    END IF
+    CALL army_set_order(army, ORDER_BUSY)
+    CALL draw_army_flag(army)
+    CALL draw_stack_markers(current_side)
+END SUB
+
+' A fort built, by the player's Fortify or by the computer (ai_fortify): the message, a flash
+' at the city and the cities drawn again.
+SUB draw_fort_built (city)
+    CALL clear_bottom_line
+    PRINT city_name$(city); " fortifications increased to "; city_fort(city);
+    CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
+    CALL draw_cities
+END SUB
+
+SUB menu_city_select (city)
+    DIM letter$
+    DIM tries AS INTEGER
+    DIM k AS INTEGER
+    DIM start_city AS INTEGER
+    menu_text$(1) = "  "
+    menu_text$(3) = "  "
+    menu_item_count = 3
+    letter$ = city_name$(city)
+    DO
+        menu_col = 68
+        menu_row = 15
+        menu_color = COLOR_CYAN
+        menu_choice = MENU_START + 2
+        menu_text$(2) = city_name$(city)
+        CALL menu_select(MENU_RAW_KEYS)
+        CALL clear_right_panel
+        SELECT CASE menu_choice
+            CASE IS = -27
+                city = 0
+                EXIT SUB
+            CASE IS < 1
+                letter$ = CHR$(ABS(menu_choice))
+                tries = 0
+                FOR k = 1 TO MAX_CITIES
+                    IF LEFT$(city_name$(k), 1) = letter$ THEN
+                        start_city = city
+                        city = k
+                        DO WHILE city_owner(city) <> current_side
+                            city = city + 1
+                            IF city > MAX_CITIES THEN
+                                city = 1
+                            END IF
+                            tries = tries + 1
+                            IF tries >= 39 THEN
+                                city = start_city
+                                EXIT DO
+                            END IF
+                        LOOP
+                        EXIT FOR
+                    END IF
+                NEXT k
+            CASE 1
+                DO
+                    city = city - 1
+                    IF city < 1 THEN
+                        city = MAX_CITIES
+                    END IF
+                LOOP UNTIL city_owner(city) = current_side
+            CASE 2
+                EXIT SUB
+            CASE 3
+                DO
+                    city = city + 1
+                    IF city > MAX_CITIES THEN
+                        city = 1
+                    END IF
+                LOOP UNTIL city_owner(city) = current_side
+            CASE ELSE
+                city = 0
+                EXIT SUB
+        END SELECT
+    LOOP
+END SUB
+
+' Commands, Capital: the player pays, then picks the new capital. city is the city picked,
+' or 0 when the capital cannot move or the player gave up (the money stays paid).
+SUB menu_move_capital (city)
+    DIM old_capital$
+    city = 0
+    IF NOT capital_can_move(current_side) THEN
+        CALL clear_bottom_line
+        COLOR COLOR_LIGHT_CYAN
+        PRINT "Cannot move capital";
+        EXIT SUB
+    END IF
+    CALL capital_move_pay(current_side)
+    CALL clear_right_panel
+    menu_text$(0) = "Capital"
+    old_capital$ = city_name$(side_capital(current_side))
+    city = side_capital(current_side)
+    CALL menu_city_select(city)
+    IF city = 0 THEN
+        EXIT SUB
+    END IF
+    CALL capital_move_to(current_side, city)
+    CALL clear_bottom_line
+    PRINT side_name$(current_side); " capital moved from "; old_capital$; " to "; city_name$(side_capital(current_side));
+    CALL clear_right_panel
+    CALL draw_cities
+    CALL wait_seconds(PAUSE_LONG)
+    CALL clear_bottom_line
+END SUB

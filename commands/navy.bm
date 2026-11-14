@@ -1,6 +1,6 @@
 ' The fleets' orders as they are carried out. Each calls the rules (rules/navy.bm) and shows
 ' what happened. Nothing here opens a menu or reads a key. The player's menus (ui/navy.bm)
-' and the computer (ai/ai.bm) give these orders.
+' and the computer (ai/navy.bm) give these orders.
 
 ' Build: a ship has joined a fleet that had ships.
 SUB navy_ship_joins (side, ship$)

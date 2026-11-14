@@ -1,7 +1,7 @@
 ' The player's Ships command: the Ships menu and a menu SUB for each of its actions. Each
 ' asks the player what the action needs, then gives the order (commands/navy.bm). The
-' computer's fleet is ai_navy_orders (ai/ai.bm). The Ships menu itself is menu_navy
-' (ui/orders.bm).
+' computer's fleet is ai_navy_orders (ai/navy.bm). The Ships menu itself is menu_navy, at
+' the end of this file.
 
 ' The Ships command. The menu shows again while an action asks for it, for example after a
 ' ship is built.
@@ -205,4 +205,57 @@ SUB menu_navy_combat (side)
         END IF
         CALL navy_combat_volley(side, hits(), combat_over)
     LOOP UNTIL combat_over = 1
+END SUB
+
+' The Ships menu for the player. quit is 1 when the fleet has acted this month and the menu
+' has nothing left to offer.
+SUB menu_navy (side, quit)
+    CALL clear_bottom_line
+    PRINT "Funds available "; side_cash(side);
+    CALL menu_navy_items(side)
+    IF turn_navy_done > 0 AND menu_choice <> 1 THEN
+        quit = 1
+        EXIT SUB
+    END IF
+    CALL menu_select(MENU_PLAIN)
+    CALL clear_right_panel
+END SUB
+
+' Fills the Ships menu: Build, Attack, Sail and Raid, each "-" when the fleet cannot do it,
+' and Invasion when the fleet lies off a neutral city. Sets the row the menu starts on.
+SUB menu_navy_items (side)
+    menu_text$(0) = "Ships"
+    menu_text$(1) = "Build"
+    IF NOT fleet_is_at_sea(side) THEN
+        IF NOT navy_can_build(side) THEN
+            menu_text$(1) = "-"
+            menu_choice = MENU_START + 2
+        END IF
+    END IF
+    menu_text$(2) = "Attack"
+    IF NOT fleet_is_at_sea(side) THEN
+        IF NOT navy_can_attack(side) THEN
+            menu_text$(2) = "-"
+            menu_choice = MENU_START + 1
+        END IF
+    ELSE
+        menu_text$(1) = "-"
+        menu_text$(2) = "-"
+        menu_choice = MENU_START + 3
+    END IF
+    menu_text$(3) = "Sail"
+    IF NOT fleet_exists(side) THEN
+        menu_text$(3) = "-"
+    END IF
+    menu_text$(4) = "Raid"
+    IF NOT navy_can_raid(side) THEN
+        menu_text$(4) = "-"
+    END IF
+    menu_col = PANEL_COL
+    menu_row = 12
+    menu_item_count = 4
+    IF navy_can_invade(side) THEN
+        menu_item_count = 5
+        menu_text$(5) = "Invasion"
+    END IF
 END SUB

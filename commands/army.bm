@@ -1,6 +1,6 @@
 ' The armies' orders as they are carried out: combining, raising and supplying. Each calls
 ' the rules (rules/army.bm) and shows what happened. Nothing here opens a menu or reads a
-' key. The player's menus (ui/army.bm, ui/orders.bm) and the computer (ai/ai.bm) give them.
+' key. The player's menus (ui/army.bm) and the computer (ai/army.bm, ai/forces.bm) give them.
 
 ' Join, first part: each army in the city that can join the one that holds it does so. best
 ' is the army that will command, and joined the number that joined. The caller stops when

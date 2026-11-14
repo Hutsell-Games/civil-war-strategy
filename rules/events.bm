@@ -1,5 +1,5 @@
 ' The special events: which one happens in a month and what it does. The events themselves
-' are rows of the events table, read from scenarios/EVENTS.DAT (load_events, port/files.bm).
+' are rows of the events table, read from scenarios/EVENTS.DAT (load_events, port/events_file.bm).
 ' Nothing here draws; the messages are special_events and event_show_city (ui/events.bm).
 
 ' Rolls the month's special event and carries out what it does. event is a row of the events

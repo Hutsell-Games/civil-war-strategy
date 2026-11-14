@@ -29,7 +29,12 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) became `cws.bas` in 
 
 | File | SUBs |
 |------|------|
-| `ai.bm` | `ai_combine`, `ai_razes_fort`, `ai_railroad_orders`, `ai_navy_orders`, `ai_navy_build`, `ai_navy_attack`, `ai_navy_sail`, `ai_navy_raid`, `ai_navy_invade` (new in phase 9: the computer's half of the navy's commands), `ai_resupply`, `ai_fortify`, `ai_fortify_pick`, `ai_raise_forces`, `ai_count_armies`, `ai_fleet_orders`, `ai_army_orders`, `ai_army_order`, `ai_drill`, `ai_recruit`, `ai_recruit_pick`, `ai_railroad`, `ai_pick_port`, `ai_navy`, `ai_navy_adjust`, `ai_evaluate_move`, `city_nearby_enemy_strength` (`ai_turn` until phase 8 moved it to `ui\turn.bm`) |
+| `army.bm` | `ai_army_orders`, `ai_army_order`, `ai_drill`, `ai_evaluate_move`, `city_nearby_enemy_strength`, `ai_combine`, `ai_razes_fort` (`ai_turn` until phase 8 moved it to `ui\turn.bm`) |
+| `forces.bm` | `ai_resupply`, `ai_fortify`, `ai_fortify_pick`, `ai_raise_forces`, `ai_count_armies`, `ai_recruit`, `ai_recruit_pick` |
+| `navy.bm` | `ai_fleet_orders`, `ai_pick_port`, `ai_navy_orders`, `ai_navy_build`, `ai_navy_attack`, `ai_navy_sail`, `ai_navy_raid`, `ai_navy_invade` (new in phase 9: the computer's half of the navy's commands), `ai_navy`, `ai_navy_adjust` |
+| `railroad.bm` | `ai_railroad_orders`, `ai_railroad` |
+
+The four files were one, `ai.bm`, until 2026-11-14 (`tools\refactor\split_files.py`).
 
 ## commands\
 
@@ -49,15 +54,17 @@ and shows what happened. Nothing here opens a menu or reads a key.
 |------|------|
 | `menu.bm` | `menu_select`, `menu_arrow_key` (new in phase 9), `menu_redraw` (new 2026-11-13), `menu_mark_row`, `menu_unmark_row`, `menu_measure_width`, `menu_bubble_sort`, `menu_set_cities` (new 2026-11-13), `draw_menu` |
 | `main_menu.bm` | `menu_main`, `menu_main_railroad`, `menu_main_end_turn`, `menu_main_inform`, `show_title`, `menu_title`, `show_new_game` (new in phase 9: the main menu and the title, out of the main module) |
-| `orders.bm` | `menu_commands`, `menu_army_detach`, `menu_army_drill` (new in phase 9: the Commands menu, out of the main module), `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `menu_army_relieve`, `menu_army_retreat`, `menu_army_cancel`, `menu_city_select`, `menu_city_fortify`, `menu_supply`, `menu_move_capital`, `menu_recruit_cities`, `menu_railroad`, `menu_navy`, `menu_navy_items`, `draw_fort_built` (`draw_ai_fort` of `ui\ai.bm` until after the plan), `draw_recruit_funds` (new after the plan) |
+| `orders.bm` | `menu_commands` (new in phase 9: the Commands menu, out of the main module). The menus of its entries moved to `army.bm`, `city.bm`, `railroad.bm` and `navy.bm` on 2026-11-14 |
+| `city.bm` | `menu_city_fortify`, `draw_fort_built` (`draw_ai_fort` of `ui\ai.bm` until after the plan), `menu_city_select`, `menu_move_capital` (from `orders.bm`, 2026-11-14) |
+| `railroad.bm` | `menu_railroad` (from `orders.bm`, 2026-11-14) |
 | `options.bm` | `menu_utility`, `menu_option_side`, `menu_option_players`, `menu_option_graphics`, `menu_option_sound`, `menu_option_display`, `menu_option_balance`, `menu_option_events`, `menu_option_january`, `menu_option_realism`, `menu_option_history`, `menu_option_aggression` (new in phase 9: the Utility menu, out of the main module) |
 | `files.bm` | `menu_files`, `menu_load_game`, `menu_save_game`, `menu_quit` (new in phase 9: the Files menu, out of the main module and `port\files.bm`) |
 | `reports.bm` | `menu_report`, `menu_victory_conditions`, `draw_army_stats`, `print_army_size`, `check_map_links` (from `ui\city.bm` in phase 9) |
 | `screen.bm` | `clear_bottom_line`, `clear_right_panel`, `screen_snapshot`, `wait_seconds`, `print_centered`, `draw_top_bar`, `draw_train_box`, `draw_player_turn`, `draw_update_box` |
 | `messages.bm` | `show_message_box`, `scribe_message` |
 | `battle.bm` | `calculate_battle` (new in phase 8: the battle's screen) |
-| `army.bm` | `menu_army_combine`, `menu_raze_fort` (new in phase 9: the player's Join and Raze menus; the file of phase 8 moved to `commands\army.bm`) |
-| `navy.bm` | `menu_navy_commands`, `menu_navy_build`, `menu_navy_attack`, `menu_navy_sail`, `menu_navy_raid`, `menu_navy_invade`, `menu_navy_combat` (new in phase 9: the player's half of the navy's commands; the file of phase 8 moved to `commands\navy.bm`) |
+| `army.bm` | `menu_army_combine`, `menu_raze_fort` (new in phase 9: the player's Join and Raze menus; the file of phase 8 moved to `commands\army.bm`); `menu_army_move`, `menu_army_select`, `menu_army_recruit`, `draw_recruit_funds`, `menu_recruit_cities`, `menu_army_cancel`, `menu_army_relieve`, `menu_army_retreat`, `menu_supply`, `menu_army_detach`, `menu_army_drill` (from `orders.bm`, 2026-11-14) |
+| `navy.bm` | `menu_navy_commands`, `menu_navy_build`, `menu_navy_attack`, `menu_navy_sail`, `menu_navy_raid`, `menu_navy_invade`, `menu_navy_combat` (new in phase 9: the player's half of the navy's commands; the file of phase 8 moved to `commands\navy.bm`); `menu_navy`, `menu_navy_items` (from `orders.bm`, 2026-11-14) |
 | `turn.bm` | `turn_date_and_supply`, `turn_resolve`, `turn_move_army`, `turn_attack`, `turn_attacker_withdraws`, `turn_defender_retreats`, `turn_army_surrenders`, `turn_enter_city`, `ai_turn` (new in phase 8: the month's moves) |
 | `ai.bm` | `draw_ai_plan`, `draw_ai_drill`, `draw_ai_funds`, `draw_ai_navy_color` (new in phase 8: the computer's messages), `draw_ai_recruit_color` (new 2026-11-13) |
 | `events.bm` | `special_events`, `event_show_city` (`event_riot` until phase 11), `event_message$`, `text_replace` (new in phase 8: the special events' messages and tunes) |
@@ -84,5 +91,6 @@ and shows what happened. Nothing here opens a menu or reads a key.
 
 | File | SUBs |
 |------|------|
-| `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_scenario_armies` (new 2026-11-13: one side's armies, once written twice), `load_events` (with `event_clear_row`, `event_read_line`, `event_read_side`, `event_read_conditions`, `event_read_effect`, `event_read_chance`, `text_is_number`, `text_last_space`), `load_cities`, `load_game`, `save_game`, `saved_games_check`, `any_saved_game`, `save_file_name$` (new 2026-11-13), `history_start`, `config_read`, `config_write`, `save_battle_summary` (`file_management` until phase 7 split it; the menus of `load_game` and `save_game` until phase 9 moved them to `ui\files.bm`) |
+| `files.bm` | `hall_of_fame_load`, `hall_of_fame_save`, `load_scenario`, `load_scenario_armies` (new 2026-11-13: one side's armies, once written twice), `load_cities`, `load_game`, `save_game`, `saved_games_check`, `any_saved_game`, `save_file_name$` (new 2026-11-13), `history_start`, `config_read`, `config_write`, `save_battle_summary` (`file_management` until phase 7 split it; the menus of `load_game` and `save_game` until phase 9 moved them to `ui\files.bm`) |
+| `events_file.bm` | `load_events`, `event_clear_row`, `event_read_line`, `event_read_side`, `event_read_conditions`, `event_read_effect`, `event_read_chance`, `text_is_number`, `text_last_space` (from `files.bm`, 2026-11-14) |
 | `script.bm` | `script_start`, `script_date$`, `script_tick%`, `script_shell`, `script_mark_key_wait` (from `SCRIPT.BM`) |

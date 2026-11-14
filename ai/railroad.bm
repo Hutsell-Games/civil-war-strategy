@@ -1,0 +1,119 @@
+' The computer's train: which army it sends by rail, and where to.
+
+' The computer's train. With an army aboard, it arrives. With none, the computer may send one
+' (ai_railroad).
+SUB ai_railroad_orders (side)
+    DIM army AS INTEGER
+    DIM city AS INTEGER
+    SELECT CASE train_army(side)
+        CASE 0
+            CALL ai_railroad(side, army, city)
+            IF army > 0 THEN
+                CALL railroad_start(side, army, city)
+            END IF
+        CASE IS > 0
+            CALL railroad_arrive(side)
+    END SELECT
+    CALL railroad_finish
+END SUB
+
+' The computer's train: an army that is far from the enemy, and a city of its own that the
+' enemy threatens. army and city are 0 when it sends no train.
+SUB ai_railroad (side, army, city)
+    DIM least_threat AS INTEGER
+    DIM spare_army AS INTEGER
+    DIM i AS INTEGER
+    DIM enemy_neighbors AS INTEGER
+    DIM routes AS INTEGER
+    DIM j AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM from_city AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM capacity AS INTEGER
+    DIM to_city AS INTEGER
+    DIM candidate_city AS INTEGER
+    DIM enemy_side AS INTEGER
+    enemy_side = current_side
+    army = 0
+    city = 0
+    least_threat = 32767
+    spare_army = 0
+    FOR i = side_first_army(side) TO side_last_army(side)
+        IF NOT army_exists(i) OR army_order(i) <> ORDER_NONE THEN
+            _CONTINUE
+        END IF
+        enemy_neighbors = 0
+        FOR j = 1 TO MAX_ROADS
+            neighbor = city_road(army_city(i), j)
+            IF neighbor > 0 AND city_owner(neighbor) <> side THEN
+                enemy_neighbors = enemy_neighbors + 1
+            END IF
+        NEXT j
+        IF city_army(side_capital(side)) > 0 AND enemy_neighbors > 1 THEN
+            _CONTINUE
+        END IF
+        enemy_strength = city_nearby_enemy_strength(army_city(i))
+        IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN
+            IF enemy_strength > least_threat THEN
+                enemy_strength = least_threat - 1
+            END IF
+        END IF
+        IF enemy_strength < least_threat THEN
+            candidate_city = army_city(i)
+            routes = railroad_route_count(side, candidate_city)
+            IF routes > 1 THEN
+                least_threat = enemy_strength
+                spare_army = i
+            END IF
+        END IF
+    NEXT i
+    IF spare_army = 0 OR least_threat > .3 * army_size(spare_army) THEN
+        EXIT SUB
+    END IF
+    capacity = railroad_capacity(side)
+    IF army_size(spare_army) > capacity THEN
+        EXIT SUB
+    END IF
+    from_city = army_city(spare_army)
+    to_city = 0
+    FOR i = 1 TO MAX_CITIES
+        IF city_owner(i) <> side THEN
+            _CONTINUE
+        END IF
+        enemy_strength = city_nearby_enemy_strength(i)
+        IF enemy_strength = 0 OR enemy_strength > 3 * army_size(spare_army) THEN
+            _CONTINUE
+        END IF
+        IF city_army(i) > 0 THEN
+            _CONTINUE
+        END IF
+        candidate_city = i
+        routes = railroad_route_count(side, candidate_city)
+        IF routes = 0 THEN
+            _CONTINUE
+        END IF
+        IF enemy_side = SIDE_UNION AND city_y(i) < city_y(from_city) THEN
+            to_city = i
+        END IF
+        IF enemy_side = SIDE_REBEL AND city_y(i) > city_y(from_city) THEN
+            to_city = i
+        END IF
+        IF city_fort(i) > 0 AND city_army(i) = 0 THEN
+            to_city = i
+            EXIT FOR
+        END IF
+    NEXT i
+    IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN
+        routes = railroad_route_count(side, side_capital(side))
+        IF routes > 0 THEN
+            enemy_strength = city_nearby_enemy_strength(side_capital(side))
+            IF enemy_strength > 0 THEN
+                to_city = side_capital(side)
+            END IF
+        END IF
+    END IF
+    IF to_city > 0 THEN
+        army = spare_army
+        city = to_city
+    END IF
+END SUB

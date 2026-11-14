@@ -33,14 +33,14 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
   on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
 - **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
-  (`ai\ai.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
+  (`ai\navy.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
   bombards the city anyway when it is the enemy's. The change of order does not stop this attack.
-- **The computer counts a fort of 2 as no fort** when it weighs an attack (`ai_evaluate_move`, `ai\ai.bm`
-  lines 396 to 401). The original's `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3` is
+- **The computer counts a fort of 2 as no fort** when it weighs an attack (`ai_evaluate_move`, `ai\army.bm`
+  lines 202 to 207). The original's `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3` is
   one `IF` line, so the second test runs only when the fort is 1. A fort of 0 gives 1, of 1 gives 2, and of
   2 gives 1 again; a fort is never 3 (`MAX_FORT` is 2). It most likely meant the fort plus 1.
-- **The Union's computer skips fortifying half the time when it has no fleet** (`ai_fortify`, `ai\ai.bm`
-  line 46): `... AND RND > .5 AND side_cash < 222 THEN EXIT SUB`. `side_cash` there is a local scalar,
+- **The Union's computer skips fortifying half the time when it has no fleet** (`ai_fortify`, `ai\forces.bm`
+  line 44): `... AND RND > .5 AND side_cash < 222 THEN EXIT SUB`. `side_cash` there is a local scalar,
   declared so that `OPTION _EXPLICIT` accepts it, and it is always 0, as the original's undeclared `cash`
   was. So the cash test is always true. It most likely meant `side_cash(side) < 222`.
 - **The army report counts the capitals' income twice** (`report_armies`, `ui\reports.bm`). Its line
@@ -110,12 +110,12 @@ Left alone by group 6 (the settings and victory rules):
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
-  (`port\files.bm` line 17) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which
+  (`port\files.bm` line 52) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which
   also maps a rule to a menu row (`i - 1`).
 
 Left alone by group 7 (the rule numbers):
 
-- **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 49), where the cities are read. The 200
+- **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 99), where the cities are read. The 200
   may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`year above 1862`, `[emancipation]` in
@@ -135,7 +135,7 @@ Left alone by group 8 (the colors):
 
 Found while renaming the locals (`docs\archived\local-names.md`, part 4):
 
-- **`ai_army_order`'s capital check tests the loop counter** (`ai\ai.bm` lines 243 to 247):
+- **`ai_army_order`'s capital check tests the loop counter** (`ai\army.bm` lines 49 to 52):
   `IF j = 0 THEN EXIT FOR`, after `neighbor = city_road(city, j)`. `j` runs from 1, so the test is never
   true; it most likely meant `neighbor = 0`. A fix changes no play: past the last road the loop asks
   `city_nearby_enemy_strength(0)`, and city 0 has no roads, so the answer is 0.

@@ -1,0 +1,60 @@
+' The player's Railroad menu. The main menu's Railroad entry is menu_main_railroad
+' (ui/main_menu.bm).
+
+' The Railroad command: the player picks an army and the city its train goes to. army and
+' city are 0 when the move is refused or given up.
+SUB menu_railroad (side, army, city)
+    DIM chosen_army AS INTEGER
+    DIM chosen_city AS INTEGER
+    DIM routes AS INTEGER
+    DIM capacity AS INTEGER
+    DIM route_city AS INTEGER
+    DIM to_city AS INTEGER
+    army = 0
+    city = 0
+    CALL menu_army_select(chosen_army, chosen_city)
+    IF chosen_city < 1 OR chosen_army < 1 THEN
+        COLOR COLOR_LIGHT_CYAN
+        CALL clear_bottom_line
+        PRINT "Railroad move not allowed";
+        EXIT SUB
+    END IF
+    capacity = railroad_capacity(side)
+    IF army_size(chosen_army) > capacity THEN
+        CALL clear_bottom_line
+        PRINT "Too many troops for railroad capacity";
+        EXIT SUB
+    END IF
+
+    route_city = army_city(chosen_army)
+    routes = railroad_route_count(side, route_city)
+    IF routes <= 1 THEN
+        CALL clear_bottom_line
+        PRINT "Track from "; city_name$(route_city); " is blocked";
+        EXIT SUB
+    END IF
+    DO
+        CALL clear_bottom_line
+        PRINT "Select destination for "; army_name$(chosen_army); " from "; city_name$(route_city);
+        menu_text$(0) = "To"
+        to_city = route_city
+        IF route_city = 0 THEN
+            EXIT SUB
+        END IF
+        CALL menu_city_select(to_city)
+        IF to_city = route_city OR to_city = 0 THEN
+            EXIT SUB
+        END IF
+
+        route_city = to_city
+        routes = railroad_route_count(side, route_city)
+        IF routes > 1 THEN
+            army = chosen_army
+            city = to_city
+            EXIT SUB
+        END IF
+        CALL clear_bottom_line
+        PRINT army_name$(chosen_army); "'s train cannot go to "; city_name$(to_city); " - select another city";
+        CALL wait_seconds(PAUSE_LONG)
+    LOOP
+END SUB
