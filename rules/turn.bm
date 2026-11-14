@@ -106,11 +106,11 @@ SUB turn_defender_halts (army, halted, old_order)
     IF 11 * RND > army_leader_rating(army) THEN halted = 1: IF army_has_move(army) THEN army_order(army) = ORDER_DONE
 END SUB
 
-' refuge is the city the defender of city retreats to: the richest city of its side next to
-' city, and after the first one found only an empty one. refuge is 0 when there is none.
-SUB turn_retreat_city (city, attacker_side, refuge)
+' The city the defender of city retreats to: the richest city of its side next to city, and
+' after the first one found only an empty one. 0 when there is none.
+FUNCTION turn_retreat_city (city, attacker_side)
     DIM best_road AS INTEGER: DIM best AS INTEGER: DIM i AS INTEGER: DIM neighbor AS INTEGER
-    refuge = 0
+    turn_retreat_city = 0
     best = 0: best_road = 0
     FOR i = 1 TO MAX_ROADS
         neighbor = city_road(city, i)
@@ -123,9 +123,9 @@ SUB turn_retreat_city (city, attacker_side, refuge)
             END IF
         END IF
     NEXT i
-    IF best_road = 0 THEN EXIT SUB
-    refuge = city_road(city, best_road)
-END SUB
+    IF best_road = 0 THEN EXIT FUNCTION
+    turn_retreat_city = city_road(city, best_road)
+END FUNCTION
 
 ' The defender is in the city it retreated to, and done for the month.
 SUB turn_retreat_to (army, city)

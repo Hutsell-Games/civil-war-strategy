@@ -25,8 +25,8 @@ SUB ai_fortify (side)
     IF COST_FORT > side_cash(side) THEN EXIT SUB
 
     city = side_capital(side)
-    IF city_army(city) = 0 OR city_fort(city) > 1 OR city_owner(city) <> side THEN 
-        CALL ai_fortify_pick(side, city)
+    IF city_army(city) = 0 OR city_fort(city) > 1 OR city_owner(city) <> side THEN
+        city = ai_fortify_pick(side)
     END IF
 
     DO
@@ -43,13 +43,13 @@ SUB ai_fortify (side)
         IF 3 * RND <= 1 + ai_strength_ratio! OR side_cash(side) < COST_FORT THEN 
             EXIT SUB
         END IF
-        CALL ai_fortify_pick(side, city)
+        city = ai_fortify_pick(side)
     LOOP
 END SUB
 
 ' The computer's choice of a city to fortify: one of its armies' cities whose enemy near it
-' outnumbers the army. city is 0 when it fortifies none.
-SUB ai_fortify_pick (side, city)
+' outnumbers the army. 0 when it fortifies none.
+FUNCTION ai_fortify_pick (side)
     DIM first_army AS INTEGER
     DIM last_army AS INTEGER
     DIM i AS INTEGER
@@ -57,9 +57,8 @@ SUB ai_fortify_pick (side, city)
     DIM enemy_strength AS INTEGER
     first_army = side_first_army(side)
     last_army = side_last_army(side)
-    city = 0
-    IF 1 + RND < opt_ai_aggression + ai_strength_ratio! THEN EXIT SUB
-    city = 0
+    ai_fortify_pick = 0
+    IF 1 + RND < opt_ai_aggression + ai_strength_ratio! THEN EXIT FUNCTION
     FOR i = first_army TO last_army
         candidate_city = army_city(i)
         IF candidate_city = 0 OR army_has_acted(city_army(candidate_city)) OR army_has_acted(i) THEN
@@ -68,11 +67,11 @@ SUB ai_fortify_pick (side, city)
         IF city_fort(candidate_city) >= MAX_FORT THEN _CONTINUE
         enemy_strength = city_nearby_enemy_strength(candidate_city)
         IF enemy_strength > army_size(i) THEN 
-            city = army_city(i)
-            EXIT SUB
+            ai_fortify_pick = army_city(i)
+            EXIT FUNCTION
         END IF
     NEXT i
-END SUB
+END FUNCTION
 
 ' The computer builds the Union's first ship, then recruits unless it has armies enough. It
 ' keeps the price of a ship back from the recruiting when its fleet is small and in port.

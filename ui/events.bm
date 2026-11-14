@@ -49,18 +49,20 @@ END SUB
 FUNCTION event_message$ (text$)
     DIM message$
     message$ = text$
-    CALL text_replace(message$, "{city}", city_name$(event_city))
-    CALL text_replace(message$, "{army}", army_name$(event_army))
-    CALL text_replace(message$, "{side}", side_name$(event_target_side))
+    message$ = text_replace$(message$, "{city}", city_name$(event_city))
+    message$ = text_replace$(message$, "{army}", army_name$(event_army))
+    message$ = text_replace$(message$, "{side}", side_name$(event_target_side))
     event_message$ = message$
 END FUNCTION
 
-' Puts with$ in place of every find$ in text$.
-SUB text_replace (text$, find$, with$)
-    DIM at AS INTEGER
-    at = INSTR(text$, find$)
+' text$ with with$ in place of every find$.
+FUNCTION text_replace$ (text$, find$, with$)
+    DIM at AS INTEGER: DIM result$
+    result$ = text$
+    at = INSTR(result$, find$)
     DO WHILE at > 0
-        text$ = LEFT$(text$, at - 1) + with$ + MID$(text$, at + LEN(find$))
-        at = INSTR(at + LEN(with$), text$, find$)
+        result$ = LEFT$(result$, at - 1) + with$ + MID$(result$, at + LEN(find$))
+        at = INSTR(at + LEN(with$), result$, find$)
     LOOP
-END SUB
+    text_replace$ = result$
+END FUNCTION

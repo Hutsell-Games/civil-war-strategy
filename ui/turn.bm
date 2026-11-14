@@ -178,7 +178,7 @@ SUB turn_defender_retreats (moving_army, city, defender, gone)
     IF chosen_city > 0 THEN
         retreat_city = chosen_city
     ELSE
-        CALL turn_retreat_city(city, attacker_side, retreat_city)
+        retreat_city = turn_retreat_city(city, attacker_side)
         IF retreat_city = 0 THEN EXIT SUB
     END IF
     CALL draw_army_flag(defender)                  ' in old city

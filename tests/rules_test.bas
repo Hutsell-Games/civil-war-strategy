@@ -212,16 +212,24 @@ SUB TestNormalDrawsHigh
     RANDOMIZE 1
     total& = 0
     FOR i = 1 TO 2000
-        CALL normal_random_number(100, 100, r)
-        total& = total& + r
+        total& = total& + normal_random_number(100, 100)
     NEXT i
     avg! = total& / 2000
     AssertTrue avg! > 103 AND avg! < 107, "the average of 2000 draws is near 105, not 100:" + STR$(avg!)
 END SUB
 
 SUB TestNormalWithNoVarianceIsTheMean
-    CALL normal_random_number(70, 0, r)
-    AssertEqualInt 70, r, "variance 0"
+    AssertEqualInt 70, normal_random_number(70, 0), "variance 0"
+END SUB
+
+' ------------------------------------------------------------- text_replace$
+
+SUB TestTextReplaceEveryPlace
+    t$ = "{city} and {city}"
+    AssertEqualStr "Atlanta and Atlanta", text_replace$(t$, "{city}", "Atlanta"), "both places"
+    AssertEqualStr "{city} and {city}", t$, "the text passed in is unchanged"
+    AssertEqualStr "a{a}b", text_replace$("ab", "a", "a{a}"), "the new text is not searched again"
+    AssertEqualStr "none here", text_replace$("none here", "{side}", "Union"), "nothing to replace"
 END SUB
 
 ' ------------------------------------------------------------------- battle
@@ -816,11 +824,9 @@ SUB TestAiFortifyPickOutnumbered
     current_side = 1: opt_ai_aggression = 0: ai_strength_ratio! = 0
     army_city(21) = 5: army_size(21) = 50: city_army(5) = 21
     city_road(5, 1) = 6: city_owner(6) = 1: city_army(6) = 1: army_size(1) = 100
-    CALL ai_fortify_pick(2, target)
-    AssertEqualInt 5, target, "10,000 of the player's men next to 5,000"
+    AssertEqualInt 5, ai_fortify_pick(2), "10,000 of the player's men next to 5,000"
     opt_ai_aggression = 3
-    CALL ai_fortify_pick(2, target)
-    AssertEqualInt 0, target, "an aggressive computer does not fortify"
+    AssertEqualInt 0, ai_fortify_pick(2), "an aggressive computer does not fortify"
 END SUB
 
 SUB TestAiArmyOrderAndWinter
@@ -1555,16 +1561,12 @@ SUB TestTurnRetreatCity
     city_owner(2) = 2: city_value(2) = 5
     city_owner(3) = 2: city_value(3) = 9: city_army(3) = 30
     city_owner(4) = 1: city_value(4) = 20
-    CALL turn_retreat_city(1, 1, move2)
-    AssertEqualInt 2, move2, "the richer city 3 has an army"
+    AssertEqualInt 2, turn_retreat_city(1, 1), "the richer city 3 has an army"
     city_army(3) = 0
-    CALL turn_retreat_city(1, 1, move2)
-    AssertEqualInt 3, move2, "now city 3, the richest of the Rebels'"
-    CALL turn_retreat_city(1, 2, move2)
-    AssertEqualInt 4, move2, "a Union defender goes to the Union's city"
+    AssertEqualInt 3, turn_retreat_city(1, 1), "now city 3, the richest of the Rebels'"
+    AssertEqualInt 4, turn_retreat_city(1, 2), "a Union defender goes to the Union's city"
     city_owner(4) = 2
-    CALL turn_retreat_city(1, 2, move2)
-    AssertEqualInt 0, move2, "no Union city next to it"
+    AssertEqualInt 0, turn_retreat_city(1, 2), "no Union city next to it"
     CALL turn_retreat_to(25, 3)
     AssertEqualInt 3, army_city(25), "in city 3"
     AssertEqualInt 25, city_army(3), "which it holds"

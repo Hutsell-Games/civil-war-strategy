@@ -166,6 +166,22 @@ Union's points stop at 0. That line is kept behind `side = SIDE_UNION`, and `TOD
 A new unit test, `TestOnlyUnionVictoryPointsStopAtZero`, pins it and the strength ratio. The 40 scripts
 passed `check` and `compare` on unchanged recordings, and the 158 unit tests passed.
 
+**Item 3, SUBs that return one value**, in the working tree on 2026-11-13, not committed. 76 SUBs assign
+to a parameter, and 55 to exactly one. Four became FUNCTIONs: `ai_fortify_pick (side)`,
+`normal_random_number (mean, variance)`, `turn_retreat_city (city, attacker_side)` and
+`text_replace$ (text$, find$, with$)`. Each only picks, draws a number or builds a text.
+The others stay SUBs, for these reasons:
+
+- Most change the game as their main work (buy supply, bombard, move a fleet, set an order) and return
+  only a flag such as `again`, `raised` or `sailed`. A FUNCTION would hide that work.
+- The menus draw and read keys.
+- `ai_navy` leaves `action` as it was when no rule applies, so it is an input too.
+- `victory_rule_met` also gives 300 victory points, and `army_pick_commander` also writes a made-up name.
+- `ai_evaluate_move` keeps its scores in `menu_value()`, so it waits for item 4.
+
+`TestTextReplaceEveryPlace` is new. The 40 scripts passed `check` and `compare` on unchanged
+recordings, and the 159 unit tests passed.
+
 ## Questions for the user
 
 1. **The order above:** go ahead with it, or keep to the `ai\ai.bm` steps?
