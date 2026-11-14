@@ -1,7 +1,12 @@
 ' Animate the army flag icon as it moves between locations.
 SUB animate_army (army, picture_taken)
-    DIM y AS INTEGER: DIM step_y AS INTEGER
-    DIM from_city AS INTEGER: DIM to_city AS INTEGER: DIM x AS INTEGER: DIM i AS INTEGER: DIM step_x AS INTEGER
+    DIM y AS INTEGER
+    DIM step_y AS INTEGER
+    DIM from_city AS INTEGER
+    DIM to_city AS INTEGER
+    DIM x AS INTEGER
+    DIM i AS INTEGER
+    DIM step_x AS INTEGER
     from_city = army_city(army)
     to_city = army_order(army)
     army_city(army) = 0
@@ -33,7 +38,8 @@ SUB animate_army (army, picture_taken)
             CALL wait_seconds(.02)
         END IF
         IF opt_sound >= SOUND_EFFECTS THEN
-            SOUND 200, .1: SOUND 50, .1
+            SOUND 200, .1
+            SOUND 50, .1
         END IF
         PUT (step_x - 10, step_y - 10), saved_under_marker(), PSET
     NEXT i
@@ -58,21 +64,28 @@ SUB animate_city (city)
 END SUB
 
 SUB draw_army_flag (army)
-    DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+    DIM side AS INTEGER
+    DIM x AS INTEGER
+    DIM y AS INTEGER
     side = army_side(army)
     x = city_x(army_city(army)) - 12
     y = city_y(army_city(army)) - 11
     CALL draw_flag_icon(x, y, side)
     IF army_supply(army) < 1 THEN
-        x = x - 3: y = y + 4
-        PSET (x, y), 13: DRAW "C11S8"
+        x = x - 3
+        y = y + 4
+        PSET (x, y), 13
+        DRAW "C11S8"
         DRAW map_font$(19)
         DRAW "S4"
     END IF
 END SUB
 
 SUB draw_train (side, show)
-    DIM city AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
+    DIM city AS INTEGER
+    DIM x AS INTEGER
+    DIM side_color AS INTEGER
+    DIM y AS INTEGER
     IF train_city(side) = 0 THEN
         EXIT SUB
     END IF
@@ -88,7 +101,9 @@ SUB draw_train (side, show)
                 side_color = 15
             END IF
             DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
-            x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
+            x = POINT(0)
+            y = POINT(1)
+            PAINT (x, y), side_color, 0
         CASE ELSE
             LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
     END SELECT
@@ -115,7 +130,10 @@ SUB draw_flag_icon (x, y, side)
 END SUB
 
 SUB draw_large_flag (side, x_offset, top_y)
-    DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
+    DIM x AS INTEGER
+    DIM y AS INTEGER
+    DIM i AS INTEGER
+    DIM j AS INTEGER
     x = 585 + x_offset
     y = 200
     IF x_offset = 0 THEN
@@ -132,10 +150,14 @@ SUB draw_large_flag (side, x_offset, top_y)
             NEXT i
             LINE (x - 17, y - 15)-(x, y), 1, BF
             IF x_offset = 0 THEN
-                COLOR COLOR_LIGHT_BLUE: LOCATE 10, 70: PRINT "U N I O N"
+                COLOR COLOR_LIGHT_BLUE
+                LOCATE 10, 70
+                PRINT "U N I O N"
             END IF
             FOR i = -16 TO -1 STEP 3
-                FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
+                FOR j = -14 TO -1 STEP 4
+                    PSET (x + i, y + j), 7
+                NEXT j
             NEXT i
         CASE 2
             LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
@@ -154,7 +176,9 @@ SUB draw_large_flag (side, x_offset, top_y)
             LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
 
             IF x_offset = 0 THEN
-                COLOR COLOR_RED: LOCATE 10, 70: PRINT "R E B E L"
+                COLOR COLOR_RED
+                LOCATE 10, 70
+                PRINT "R E B E L"
             END IF
         CASE ELSE
     END SELECT

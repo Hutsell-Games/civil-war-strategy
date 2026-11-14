@@ -2,26 +2,39 @@
 ' Fame. The rules are in rules/victory.bm.
 
 SUB hall_of_fame
-    DIM i AS INTEGER: DIM side AS INTEGER: DIM k AS INTEGER: DIM commander$
+    DIM i AS INTEGER
+    DIM side AS INTEGER
+    DIM k AS INTEGER
+    DIM commander$
     DIM hall_name$(2, 5)
     DIM hall_score(2, 5)
     COLOR COLOR_YELLOW
-    LOCATE 28, 1: PRINT "press a key";: CALL wait_key("H")
-    SCREEN 0: COLOR COLOR_YELLOW, COLOR_MAGENTA: CLS: COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
+    LOCATE 28, 1
+    PRINT "press a key";
+    CALL wait_key("H")
+    SCREEN 0
+    COLOR COLOR_YELLOW, COLOR_MAGENTA
+    CLS
+    COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
 
-    LOCATE 2, 7: PRINT STRING$(57, "²")
-    LOCATE 9, 7: PRINT STRING$(57, "²")
+    LOCATE 2, 7
+    PRINT STRING$(57, "²")
+    LOCATE 9, 7
+    PRINT STRING$(57, "²")
     FOR i = 1 TO 6
-        LOCATE 2 + i, 7: PRINT "²"; SPACE$(55); "²"
+        LOCATE 2 + i, 7
+        PRINT "²"; SPACE$(55); "²"
     NEXT i
 
     CALL hall_of_fame_load(hall_name$(), hall_score())
     FOR side = SIDE_UNION TO SIDE_REBEL
         COLOR COLOR_YELLOW, COLOR_RED
-        LOCATE 3, 30 * (side - 1) + 10: PRINT side_name$(side); " HALL of FAME"
+        LOCATE 3, 30 * (side - 1) + 10
+        PRINT side_name$(side); " HALL of FAME"
         COLOR COLOR_WHITE, COLOR_BLACK
         FOR i = 1 TO 5
-            LOCATE 3 + i, 30 * (side - 1) + 8: PRINT i, hall_name$(side, i), hall_score(side, i)
+            LOCATE 3 + i, 30 * (side - 1) + 8
+            PRINT i, hall_name$(side, i), hall_score(side, i)
         NEXT i
     NEXT side
 
@@ -30,33 +43,45 @@ SUB hall_of_fame
         IF i = 0 THEN
             _CONTINUE
         END IF
-        COLOR COLOR_WHITE, COLOR_BLUE: IF side = SIDE_REBEL THEN
+        COLOR COLOR_WHITE, COLOR_BLUE
+        IF side = SIDE_REBEL THEN
             COLOR COLOR_RED, COLOR_GRAY
         END IF
         FOR k = 12 TO 14
-            LOCATE k, 1: PRINT SPACE$(80);
+            LOCATE k, 1
+            PRINT SPACE$(80);
         NEXT k
-        LOCATE 12, 1: PRINT "Congratulations ! Score of"; side_victory_points(side)
+        LOCATE 12, 1
+        PRINT "Congratulations ! Score of"; side_victory_points(side)
         PRINT "New Entry into "; side_name$(side); " HALL of FAME in place "; i
         IF opt_players = PLAYERS_ONE AND side <> current_side THEN
-            commander$ = "COMPUTER": PRINT commander$; " was "; side_name$(side); " commander"
+            commander$ = "COMPUTER"
+            PRINT commander$; " was "; side_name$(side); " commander"
         ELSE
             DO
-                PRINT "What is name of "; side_name$(side); " commander";: CALL script_mark_key_wait(4, ""): INPUT commander$
+                PRINT "What is name of "; side_name$(side); " commander";
+                CALL script_mark_key_wait(4, "")
+                INPUT commander$
             LOOP WHILE commander$ = ""
         END IF
         CALL hall_of_fame_insert(side, i, commander$, hall_name$(), hall_score())
     NEXT side
 
     CALL hall_of_fame_save(hall_name$(), hall_score())
-    PRINT "Game Over": CALL wait_key("G")
+    PRINT "Game Over"
+    CALL wait_key("G")
 END SUB
 
 SUB check_victory_conditions
-    DIM union_troops AS INTEGER: DIM rule AS INTEGER: DIM rebel_troops AS INTEGER: DIM message$: DIM side AS INTEGER
+    DIM union_troops AS INTEGER
+    DIM rule AS INTEGER
+    DIM rebel_troops AS INTEGER
+    DIM message$
+    DIM side AS INTEGER
     CALL victory_forces(union_troops, rebel_troops)
 
-    CALL clear_bottom_line: COLOR COLOR_YELLOW
+    CALL clear_bottom_line
+    COLOR COLOR_YELLOW
     IF victory_time_near = 1 THEN
         message$ = "Time almost expired (" + month_name$(victory_rule(VICTORY_MONTH)) + "," + STR$(victory_rule(VICTORY_YEAR)) + ")"
         CALL show_message_box(message$, COLOR_RED)
@@ -64,7 +89,8 @@ SUB check_victory_conditions
     FOR side = SIDE_UNION TO SIDE_REBEL
         CALL victory_rule_met(side, union_troops, rebel_troops, rule)
         IF rule > 0 THEN
-            CALL end_game(side, rule): EXIT SUB
+            CALL end_game(side, rule)
+            EXIT SUB
         END IF
         CALL victory_warnings(side, union_troops, rebel_troops)
     NEXT side
@@ -96,7 +122,9 @@ END SUB
 ' on, which raises the rule's number or turns the capital rule off. Otherwise the game ends:
 ' the battle summary, the victory screen and the Hall of Fame.
 SUB end_game (side, rule)
-    DIM reason$: DIM message$: DIM side_color AS INTEGER
+    DIM reason$
+    DIM message$
+    DIM side_color AS INTEGER
     SELECT CASE rule
         CASE IS < VICTORY_CITIES
             reason$ = "TIME EXPIRED"
@@ -149,7 +177,8 @@ SUB end_game (side, rule)
     CALL menu_select(MENU_PLAIN)
 
     IF menu_choice <> 1 AND rule < VICTORY_WIPED_OUT THEN
-        CALL end_game_play_on(rule): EXIT SUB
+        CALL end_game_play_on(rule)
+        EXIT SUB
     END IF
     menu_text$(0) = "Options"
     menu_text$(1) = "Quit this Game"
@@ -164,24 +193,33 @@ SUB end_game (side, rule)
     IF rule <> VICTORY_WIPED_OUT THEN
         CALL menu_select(MENU_PLAIN)
         IF menu_choice <> 1 THEN
-            CALL end_game_play_on(rule): EXIT SUB
+            CALL end_game_play_on(rule)
+            EXIT SUB
         END IF
     END IF
 
     CALL victory_won(side, rule)
-    CALL draw_map: CALL save_battle_summary: CALL report_battle_summary
+    CALL draw_map
+    CALL save_battle_summary
+    CALL report_battle_summary
     IF rule = VICTORY_YEAR THEN
-        CALL victory_technical_points: CALL draw_rebel_victory
+        CALL victory_technical_points
+        CALL draw_rebel_victory
     ELSEIF side = SIDE_UNION THEN
         CALL draw_union_victory
         COLOR COLOR_WHITE
-        LOCATE 2, 27: message$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(SIDE_UNION)): PRINT message$
+        LOCATE 2, 27
+        message$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(SIDE_UNION))
+        PRINT message$
     ELSEIF side = SIDE_REBEL THEN
         CALL draw_rebel_victory
         COLOR COLOR_WHITE
-        LOCATE 2, 27: message$ = "REBEL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL)): PRINT message$
+        LOCATE 2, 27
+        message$ = "REBEL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL))
+        PRINT message$
     END IF
-    COLOR COLOR_YELLOW: LOCATE 4, 40 - .5 * LEN(reason$)
+    COLOR COLOR_YELLOW
+    LOCATE 4, 40 - .5 * LEN(reason$)
     IF opt_history > 0 THEN
         CALL scribe_message(message$, SHOW_HISTORY_ONLY)
         CALL scribe_message(reason$, SHOW_HISTORY_ONLY)

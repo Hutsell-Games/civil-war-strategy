@@ -84,7 +84,9 @@ SUB navy_remove_ship (side)
     IF fleet_size(side) > 0 THEN
         fleet_ships$(side) = LEFT$(fleet_ships$(side), fleet_size(side))
     ELSE
-        fleet_ships$(side) = "": fleet_city(side) = 0: fleet_size(side) = 0
+        fleet_ships$(side) = ""
+        fleet_city(side) = 0
+        fleet_size(side) = 0
     END IF
 END SUB
 
@@ -106,7 +108,8 @@ END SUB
 ' A new fleet of one ship in port city, for cost.
 SUB navy_found_fleet (side, city, cost)
     fleet_city(side) = city
-    side_cash(side) = side_cash(side) - cost: fleet_size(side) = 1
+    side_cash(side) = side_cash(side) - cost
+    fleet_size(side) = 1
 END SUB
 
 ' A new fleet has no port to start in: the ship is not built.
@@ -118,7 +121,8 @@ END SUB
 ' Attack on the army in the city the fleet lies off: losses of its men, in hundreds, and some
 ' of its supplies. The army keeps at least 100 men.
 SUB navy_bombard_army (side, army, losses)
-    DIM loss_rate!: DIM supply_loss AS INTEGER
+    DIM loss_rate!
+    DIM supply_loss AS INTEGER
     loss_rate! = .005 * fleet_size(side) + .02 * RND
     losses = army_size(army) * loss_rate!
     IF losses < 1 THEN
@@ -140,7 +144,9 @@ END SUB
 SUB navy_shore_battery (side, city, damaged)
     damaged = 0
     IF RND < .7 + .03 * (fleet_size(side) - city_fort(city)) THEN
-        damaged = 1: city_fort(city) = city_fort(city) - 1: EXIT SUB
+        damaged = 1
+        city_fort(city) = city_fort(city) - 1
+        EXIT SUB
     END IF
     CALL navy_remove_ship(side)
 END SUB
@@ -180,7 +186,8 @@ END SUB
 
 ' Raid: the fleet is at sea, raiding the other side's commerce.
 SUB navy_go_raiding (side)
-    fleet_city(side) = FLEET_AT_SEA: raiding_side = side
+    fleet_city(side) = FLEET_AT_SEA
+    raiding_side = side
 END SUB
 
 ' Invasion: the new army that the ship landed is 3,500 men, and its side gets back the 100
@@ -245,7 +252,8 @@ END FUNCTION
 ' Naval combat: 1 when the side's shot hits. An ironclad against a wooden ship has a better
 ' chance, and a wooden ship against an ironclad a worse one.
 FUNCTION navy_shot_hits (side)
-    DIM ironclad_bonus!: DIM ship$
+    DIM ironclad_bonus!
+    DIM ship$
     ironclad_bonus! = 0
     ship$ = RIGHT$(fleet_ships$(side), 1)
     IF ship$ <> RIGHT$(fleet_ships$(other_side(side)), 1) THEN
@@ -264,7 +272,8 @@ END FUNCTION
 ' Naval combat: the loser's fleet is sunk, and the winner's side gets 10 victory points (the
 ' original gave them to the loser). The winner pursues when it is the side whose turn it is.
 SUB navy_fleet_defeated (loser)
-    fleet_city(loser) = 0: fleet_ships$(loser) = ""
+    fleet_city(loser) = 0
+    fleet_ships$(loser) = ""
     side_victory_points(other_side(loser)) = side_victory_points(other_side(loser)) + 10
     IF other_side(loser) = current_side THEN
         fleet_pursuit = 1
@@ -281,7 +290,8 @@ SUB navy_retreat_port (side, port)
     FOR i = 1 TO MAX_CITIES
         IF city_owner(i) = side THEN
             IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN
-                port = i: IF RND > .3 THEN
+                port = i
+                IF RND > .3 THEN
                     EXIT FOR
                 END IF
             END IF

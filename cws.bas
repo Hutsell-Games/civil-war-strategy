@@ -1,8 +1,15 @@
 OPTION _EXPLICIT
 DEFINT A-Z
 ' $INCLUDE: 'cws.bi'
-DIM replay AS INTEGER: DIM message$: DIM main_menu_start AS INTEGER: DIM action AS INTEGER: DIM ended AS INTEGER
-DIM new_game AS INTEGER: DIM month_over AS INTEGER: DIM title_choice AS INTEGER: DIM picked AS INTEGER
+DIM replay AS INTEGER
+DIM message$
+DIM main_menu_start AS INTEGER
+DIM action AS INTEGER
+DIM ended AS INTEGER
+DIM new_game AS INTEGER
+DIM month_over AS INTEGER
+DIM title_choice AS INTEGER
+DIM picked AS INTEGER
 
 CALL script_mute
 replay = 0
@@ -14,7 +21,8 @@ DO
         PRINT event_file_error$
         END
     END IF
-    CALL show_title(replay): replay = 1
+    CALL show_title(replay)
+    replay = 1
     CALL script_start
     ' The title menu, and for a new game the scenario menu. Esc there goes back to the title menu,
     ' and so does Resume Saved Game when no game is loaded.
@@ -56,7 +64,8 @@ DO
                 IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN
                     CALL turn_close_recruiting
                 ELSE
-                    CALL menu_army_recruit((current_side)): main_menu_start = MENU_START + MAIN_MOVES
+                    CALL menu_army_recruit((current_side))
+                    main_menu_start = MENU_START + MAIN_MOVES
                 END IF
             CASE MAIN_MOVES
                 CALL menu_army_move
@@ -69,11 +78,13 @@ DO
             CASE MAIN_RAILROAD
                 CALL menu_main_railroad
             CASE MAIN_END_TURN
-                CALL menu_main_end_turn(ended): IF ended = 0 THEN
+                CALL menu_main_end_turn(ended)
+                IF ended = 0 THEN
                     main_menu_start = MENU_START + MAIN_SHIPS
                 END IF
             CASE MAIN_INFORM
-                CALL menu_main_inform: main_menu_start = MENU_START + MAIN_INFORM
+                CALL menu_main_inform
+                main_menu_start = MENU_START + MAIN_INFORM
             CASE MAIN_COMMANDS
                 main_menu_start = MENU_START + MAIN_COMMANDS
                 CALL menu_commands
@@ -98,7 +109,8 @@ DO
             CALL turn_reset_commands
             CALL turn_next_player(month_over)
             IF month_over = 0 THEN
-                CALL draw_player_turn: CALL draw_map
+                CALL draw_player_turn
+                CALL draw_map
             ELSE
                 message$ = "--------> EVENTS FOR " + month_name$(turn_month) + " " + STR$(turn_year) + " --------"
                 CALL scribe_message(message$, SHOW_HISTORY_ONLY)
@@ -106,7 +118,8 @@ DO
                 CALL turn_collect_income
                 main_menu_start = MENU_START + MAIN_TROOPS
                 IF opt_players = PLAYERS_TWO THEN
-                    CALL draw_player_turn: CALL draw_map
+                    CALL draw_player_turn
+                    CALL draw_map
                 END IF
                 CALL check_victory_conditions
                 IF game_over > 0 THEN

@@ -38,37 +38,47 @@ END FUNCTION
 SUB victory_rule_met (side, union_troops, rebel_troops, rule)
     rule = 0
     IF (side = SIDE_UNION AND rebel_troops = 0) OR (side = SIDE_REBEL AND union_troops = 0) THEN
-        rule = VICTORY_WIPED_OUT: side_victory_points(side) = side_victory_points(side) + 300: EXIT SUB
+        rule = VICTORY_WIPED_OUT
+        side_victory_points(side) = side_victory_points(side) + 300
+        EXIT SUB
     END IF
 
     IF turn_year >= victory_rule(VICTORY_YEAR) AND turn_month >= victory_rule(VICTORY_MONTH) AND victory_rule(VICTORY_YEAR) > 0 THEN
-        rule = VICTORY_YEAR: EXIT SUB
+        rule = VICTORY_YEAR
+        EXIT SUB
     END IF
     IF side_city_count(side) >= victory_rule(VICTORY_CITIES) AND victory_rule(VICTORY_CITIES) > 0 THEN
-        rule = VICTORY_CITIES: EXIT SUB
+        rule = VICTORY_CITIES
+        EXIT SUB
     END IF
     IF side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN
-        rule = VICTORY_INCOME: EXIT SUB
+        rule = VICTORY_INCOME
+        EXIT SUB
     END IF
     IF victory_rule(VICTORY_CAPITAL) > 0 AND side_capital(other_side(side)) = 0 AND side_capital(side) > 0 THEN
-        rule = VICTORY_CAPITAL: EXIT SUB
+        rule = VICTORY_CAPITAL
+        EXIT SUB
     END IF
 
     IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
         IF side = SIDE_UNION THEN
             IF rebel_troops = 0 THEN
-                rule = VICTORY_WIPED_OUT: EXIT SUB
+                rule = VICTORY_WIPED_OUT
+                EXIT SUB
             END IF
             IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN
-                rule = VICTORY_FORCE_RATIO: EXIT SUB
+                rule = VICTORY_FORCE_RATIO
+                EXIT SUB
             END IF
         END IF
         IF side = SIDE_REBEL THEN
             IF union_troops = 0 THEN
-                rule = VICTORY_WIPED_OUT: EXIT SUB
+                rule = VICTORY_WIPED_OUT
+                EXIT SUB
             END IF
             IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN
-                rule = VICTORY_FORCE_RATIO: EXIT SUB
+                rule = VICTORY_FORCE_RATIO
+                EXIT SUB
             END IF
         END IF
     END IF
@@ -135,7 +145,8 @@ FUNCTION hall_of_fame_place (side, hall_score())
     hall_of_fame_place = 0
     FOR i = 1 TO 5
         IF side_victory_points(side) >= hall_score(side, i) THEN
-            hall_of_fame_place = i: EXIT FUNCTION
+            hall_of_fame_place = i
+            EXIT FUNCTION
         END IF
     NEXT i
 END FUNCTION

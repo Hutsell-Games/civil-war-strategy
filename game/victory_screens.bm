@@ -1,5 +1,6 @@
 SUB draw_union_victory
-    DIM capitol_wing AS INTEGER: DIM i AS INTEGER
+    DIM capitol_wing AS INTEGER
+    DIM i AS INTEGER
     SCREEN 12
     CLS
     LINE (1, 1)-(639, 150), 4, BF
@@ -17,18 +18,30 @@ SUB draw_union_victory
 
         DRAW "C7ER1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1E1R1F1R1F1R1F1"
         DRAW "R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1R1F1L47D4R48U3D51L4U17L41D17L3U47"
-        FOR i = 1 TO 7: DRAW "BR6R2D25L2U25": NEXT i
+        FOR i = 1 TO 7
+            DRAW "BR6R2D25L2U25"
+        NEXT i
         DRAW "BD33R2"
-        FOR i = 1 TO 5: DRAW "L40BR40D3": NEXT i
+        FOR i = 1 TO 5
+            DRAW "L40BR40D3"
+        NEXT i
     NEXT capitol_wing
     PSET (270, 190), 0
-    FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
+    FOR i = 1 TO 3
+        DRAW "C7BR6R2D45L2U45"
+    NEXT i
     PSET (344, 190), 0
-    FOR i = 1 TO 3: DRAW "C7BR6R2D45L2U45": NEXT i
+    FOR i = 1 TO 3
+        DRAW "C7BR6R2D45L2U45"
+    NEXT i
     PSET (283, 140), 0
-    FOR i = 1 TO 11: DRAW "C7BR6R2D25L2U25": NEXT i
+    FOR i = 1 TO 11
+        DRAW "C7BR6R2D25L2U25"
+    NEXT i
     PSET (283, 120), 0
-    FOR i = 1 TO 11: DRAW "C7BR6R2D15L2U15": NEXT i
+    FOR i = 1 TO 11
+        DRAW "C7BR6R2D15L2U15"
+    NEXT i
     LINE (315, 55)-(325, 77), 7, B
     LINE (318, 57)-(322, 75), 7, B
     PSET (315, 53), 0
@@ -38,41 +51,67 @@ SUB draw_union_victory
     IF opt_sound = SOUND_MUSIC THEN
         PLAY "T130MFMSO2f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4"
     END IF
-    LOCATE 20, 20: PRINT CHR$(34); "... and that the government of the people,"
+    LOCATE 20, 20
+    PRINT CHR$(34); "... and that the government of the people,"
     IF opt_sound = SOUND_MUSIC THEN
         PLAY "o2b-8.a16g8.g16g8.a16b-8.a16b-8.g16f8.g16f8.d16f4"
     END IF
-    LOCATE 21, 20: PRINT "by the people, for the people,"
+    LOCATE 21, 20
+    PRINT "by the people, for the people,"
     IF opt_sound = SOUND_MUSIC THEN
         PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
     END IF
-    LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
-    LOCATE 25, 40: PRINT "- Abraham Lincoln"
-    FOR i = -565 TO 50 STEP 50: CALL draw_large_flag(SIDE_UNION, i, 0): NEXT i
+    LOCATE 22, 20
+    PRINT "shall not perish from the earth."; CHR$(34)
+    LOCATE 25, 40
+    PRINT "- Abraham Lincoln"
+    FOR i = -565 TO 50 STEP 50
+        CALL draw_large_flag(SIDE_UNION, i, 0)
+    NEXT i
     IF opt_sound = SOUND_MUSIC THEN
-        PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
+        PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2"
+        PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
     END IF
 END SUB
 
 SUB draw_rebel_victory
     DIM i AS INTEGER
-    DIM x AS INTEGER: DIM y AS INTEGER
+    DIM x AS INTEGER
+    DIM y AS INTEGER
     LINE (2, 2)-(637, 239), 4, BF
-    COLOR COLOR_WHITE: LINE (2, 40)-(597, 239): LINE -(637, 239): LINE -(637, 199): LINE -(40, 2): LINE -(2, 2): LINE -(2, 40)
-    COLOR COLOR_WHITE: LINE (2, 199)-(2, 239): LINE -(40, 239): LINE -(637, 40): LINE -(637, 2): LINE -(597, 2): LINE -(2, 199)
+    COLOR COLOR_WHITE
+    LINE (2, 40)-(597, 239)
+    LINE -(637, 239)
+    LINE -(637, 199)
+    LINE -(40, 2)
+    LINE -(2, 2)
+    LINE -(2, 40)
+    COLOR COLOR_WHITE
+    LINE (2, 199)-(2, 239)
+    LINE -(40, 239)
+    LINE -(637, 40)
+    LINE -(637, 2)
+    LINE -(597, 2)
+    LINE -(2, 199)
     LINE (242, 95)-(395, 145), 4, BF
     PAINT (4, 20), 1, 15
 
     LINE (2, 239)-(637, 438), 2, BF
     FOR i = 1 TO 8
-        x = flag_star_x(i): y = flag_star_y(i)
+        x = flag_star_x(i)
+        y = flag_star_y(i)
         PSET (x, y), 0
         LINE (x + 2, y - 1)-(x + 8, y + 16), 15
-        LINE -(x - 6, y + 2): LINE -(x - 20, y + 16)
-        LINE -(x - 14, y - 1): LINE -(x - 30, y - 9)
-        LINE -(x - 12, y - 9): LINE -(x - 6, y - 25)
-        LINE -(x, y - 9): LINE -(x + 16, y - 9)
-        LINE -(x + 2, y - 1): PAINT (x, y), 15
+        LINE -(x - 6, y + 2)
+        LINE -(x - 20, y + 16)
+        LINE -(x - 14, y - 1)
+        LINE -(x - 30, y - 9)
+        LINE -(x - 12, y - 9)
+        LINE -(x - 6, y - 25)
+        LINE -(x, y - 9)
+        LINE -(x + 16, y - 9)
+        LINE -(x + 2, y - 1)
+        PAINT (x, y), 15
     NEXT i
 
     '                               landscape
@@ -83,32 +122,47 @@ SUB draw_rebel_victory
     PSET (2, 330)
     DRAW "C0D18U1R32E4R26E2R27E5R20E2R1E2U1E2U2E4H4L5H2L9H1L5H3L4H2L5H1L3H2L12H4"
     DRAW "C0D1F4R5F2R3F2R4F5R5F3L13G1L8G2L24G1L30G1L18D21"
-    DRAW "BE5": x = POINT(0): y = POINT(1) + 5: PAINT (x, y), 9, 0
+    DRAW "BE5"
+    x = POINT(0)
+    y = POINT(1) + 5
+    PAINT (x, y), 9, 0
     DRAW "BU12C11R21F1R2BR2BD6C11R9E1R9E1R6BH7C11R9E1R9BF5C11R9E1R1E1R10"
     LINE (1, 1)-(638, 440), 14, B
     LINE (2, 2)-(637, 439), 14, B
 
     '                               mansion
-    x = 100: y = 240
+    x = 100
+    y = 240
     CIRCLE (x + 50, y + 40), 80, 0, , , .2
     PAINT (x + 50, y + 40), 6, 0
     LINE (x + 95, y - 14)-(x + 102, y + 8), 8, BF
     LINE (x + 100, y - 14)-(x + 102, y + 8), 7, BF
     LINE (x, y)-(x + 100, y + 36), 7, BF
-    FOR i = 1 TO 6: LINE (x + 17 * i, y + 6)-(x + 17 * i + 4, y + 32), 0, BF: NEXT i
+    FOR i = 1 TO 6
+        LINE (x + 17 * i, y + 6)-(x + 17 * i + 4, y + 32), 0, BF
+    NEXT i
     LINE (x + 12, y + 18)-(x + 98, y + 22), 7, BF
     LINE (x + 50, y + 20)-(x + 57, y + 36), 8, BF
     LINE (x + 100, y + 36)-(x + 105, y + 39), 7
-    LINE -(x + 5, y + 39), 7: LINE -(x, y + 38), 7
+    LINE -(x + 5, y + 39), 7
+    LINE -(x, y + 38), 7
 
-    LINE (x, y)-(x - 7, y - 7), 8: LINE -(x - 14, y + 5), 8
-    LINE -(x - 14, y + 33), 8: LINE -(x, y + 36), 8: LINE -(x, y), 8
-    COLOR COLOR_LIGHT_GREEN: LINE (x - 5, y - 7)-(x + 95, y - 7): LINE -(x + 107, y + 7)
-    LINE -(x + 7, y + 7): LINE -(x - 5, y - 7)
+    LINE (x, y)-(x - 7, y - 7), 8
+    LINE -(x - 14, y + 5), 8
+    LINE -(x - 14, y + 33), 8
+    LINE -(x, y + 36), 8
+    LINE -(x, y), 8
+    COLOR COLOR_LIGHT_GREEN
+    LINE (x - 5, y - 7)-(x + 95, y - 7)
+    LINE -(x + 107, y + 7)
+    LINE -(x + 7, y + 7)
+    LINE -(x - 5, y - 7)
     PAINT (x, y - 3), 10
     PAINT (x - 5, y + 15), 8
 
-    FOR i = 1 TO 6: LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF: NEXT i
+    FOR i = 1 TO 6
+        LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF
+    NEXT i
 
     IF opt_sound < SOUND_MUSIC THEN
         EXIT SUB
@@ -125,39 +179,65 @@ SUB draw_rebel_victory
 END SUB
 
 SUB draw_surrender (army)
-    DIM side AS INTEGER: DIM side_color AS INTEGER: DIM panel_left AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
+    DIM side AS INTEGER
+    DIM side_color AS INTEGER
+    DIM panel_left AS INTEGER
+    DIM x AS INTEGER
+    DIM y AS INTEGER
     SCREEN 12
-    side = SIDE_UNION: side_color = 1: COLOR COLOR_BLACK: panel_left = 514
+    side = SIDE_UNION
+    side_color = 1
+    COLOR COLOR_BLACK
+    panel_left = 514
     IF army_side(army) = SIDE_REBEL THEN
-        side_color = 7: side = SIDE_REBEL
+        side_color = 7
+        side = SIDE_REBEL
     END IF
     '               background
     LINE (panel_left + 15, 440)-(panel_left + 125, 16), 2, BF
     LINE (panel_left + 15, 16)-(panel_left + 125, 290), 3, BF
     LINE (panel_left + 14, 16)-(panel_left + 125, 440), side_color, B
-    x = 77: y = 280
+    x = 77
+    y = 280
     CIRCLE (panel_left + x + 10, y + 30), 30, 4, , , .1
     PAINT (panel_left + x + 10, y + 30), 6, 4
-    LINE (panel_left + x, y + 28)-(panel_left + x + 6, y + 28): LINE -(panel_left + x + 6, y + 8)
-    LINE -(panel_left + x + 8, y + 8): LINE -(panel_left + x + 8, y + 28)
-    LINE -(panel_left + x + 12, y + 28): LINE -(panel_left + x + 12, y + 12)
-    LINE -(panel_left + x + 15, y + 12): LINE -(panel_left + x + 15, y + 30)
-    LINE -(panel_left + x + 18, y + 30): LINE -(panel_left + x + 18, y + 20)
-    LINE -(panel_left + x + 21, y + 21): LINE -(panel_left + x + 21, y + 32)
-    LINE -(panel_left + x + 25, y + 32): LINE -(panel_left + x + 25, y + 17)
-    LINE -(panel_left + x + 27, y + 17): LINE -(panel_left + x + 25, y - 10)
-    LINE -(panel_left + x + 19, y - 14): LINE -(panel_left + x + 15, y - 5)
-    LINE -(panel_left + x + 12, y - 12): LINE -(panel_left + x + 8, y - 15)
-    LINE -(panel_left + x + 6, y - 15): LINE -(panel_left + x + 6, y - 11)
-    LINE -(panel_left + x + 3, y - 14): LINE -(panel_left + x + 2, y - 14)
-    LINE -(panel_left + x + 1, y - 10): LINE -(panel_left + x - 3, y - 11)
-    LINE -(panel_left + x - 3, y + 15): LINE -(panel_left + x, y + 15)
-    LINE -(panel_left + x, y - 3): LINE -(panel_left + x + 2, y - 3)
+    LINE (panel_left + x, y + 28)-(panel_left + x + 6, y + 28)
+    LINE -(panel_left + x + 6, y + 8)
+    LINE -(panel_left + x + 8, y + 8)
+    LINE -(panel_left + x + 8, y + 28)
+    LINE -(panel_left + x + 12, y + 28)
+    LINE -(panel_left + x + 12, y + 12)
+    LINE -(panel_left + x + 15, y + 12)
+    LINE -(panel_left + x + 15, y + 30)
+    LINE -(panel_left + x + 18, y + 30)
+    LINE -(panel_left + x + 18, y + 20)
+    LINE -(panel_left + x + 21, y + 21)
+    LINE -(panel_left + x + 21, y + 32)
+    LINE -(panel_left + x + 25, y + 32)
+    LINE -(panel_left + x + 25, y + 17)
+    LINE -(panel_left + x + 27, y + 17)
+    LINE -(panel_left + x + 25, y - 10)
+    LINE -(panel_left + x + 19, y - 14)
+    LINE -(panel_left + x + 15, y - 5)
+    LINE -(panel_left + x + 12, y - 12)
+    LINE -(panel_left + x + 8, y - 15)
+    LINE -(panel_left + x + 6, y - 15)
+    LINE -(panel_left + x + 6, y - 11)
+    LINE -(panel_left + x + 3, y - 14)
+    LINE -(panel_left + x + 2, y - 14)
+    LINE -(panel_left + x + 1, y - 10)
+    LINE -(panel_left + x - 3, y - 11)
+    LINE -(panel_left + x - 3, y + 15)
+    LINE -(panel_left + x, y + 15)
+    LINE -(panel_left + x, y - 3)
+    LINE -(panel_left + x + 2, y - 3)
     LINE -(panel_left + x, y + 28)
     PAINT (panel_left + x + 10, y), 8 - side_color, 0
 
-    CIRCLE (panel_left + x + 7, y - 10), 3, 0: PAINT (panel_left + x + 7, y - 10), 0, 0
-    CIRCLE (panel_left + x + 20, y - 8), 3, 0: PAINT (panel_left + x + 20, y - 8), 0, 0
+    CIRCLE (panel_left + x + 7, y - 10), 3, 0
+    PAINT (panel_left + x + 7, y - 10), 0, 0
+    CIRCLE (panel_left + x + 20, y - 8), 3, 0
+    PAINT (panel_left + x + 20, y - 8), 0, 0
 
     LINE (panel_left + x + 5, y - 30)-(panel_left + x + 6, y - 9)
     LINE (panel_left + x + 20, y)-(panel_left + x + 35, y + 30)
@@ -168,15 +248,21 @@ SUB draw_surrender (army)
     CIRCLE (panel_left + 37, 425), 22, 8, , , .3
     PAINT (panel_left + 37, 430), 8, 8
     LINE (panel_left + 26, 426)-(panel_left + 46, 426)
-    LINE -(panel_left + 46, 423): LINE -(panel_left + 36, 419)
-    LINE -(panel_left + 36, 397): LINE -(panel_left + 26, 397)
+    LINE -(panel_left + 46, 423)
+    LINE -(panel_left + 36, 419)
+    LINE -(panel_left + 36, 397)
+    LINE -(panel_left + 26, 397)
     LINE -(panel_left + 26, 426)
     PAINT (panel_left + 27, 399), 0, 0
     '                       arm
-    LINE (panel_left + 26, 397)-(panel_left + 25, 396): LINE -(panel_left + 24, 374)
-    LINE -(panel_left + 25, 346): LINE (panel_left + 25, 346)-(panel_left + 22, 341)
-    LINE -(panel_left + 46, 341): LINE -(panel_left + 46, 349)
-    LINE -(panel_left + 41, 365): LINE -(panel_left + 41, 380)
+    LINE (panel_left + 26, 397)-(panel_left + 25, 396)
+    LINE -(panel_left + 24, 374)
+    LINE -(panel_left + 25, 346)
+    LINE (panel_left + 25, 346)-(panel_left + 22, 341)
+    LINE -(panel_left + 46, 341)
+    LINE -(panel_left + 46, 349)
+    LINE -(panel_left + 41, 365)
+    LINE -(panel_left + 41, 380)
     LINE -(panel_left + 36, 398)
     PAINT (panel_left + 30, 350), side_color, 0
     '                       saber
@@ -198,12 +284,17 @@ SUB draw_surrender (army)
     LINE (panel_left + 25, 365)-(panel_left + 34, 366)
     '                       shoulder
     COLOR COLOR_BLACK
-    LINE (panel_left + 53, 297)-(panel_left + 31, 305): LINE -(panel_left + 25, 270)
-    LINE -(panel_left + 18, 270): LINE -(panel_left + 16, 275)
-    LINE -(panel_left + 21, 309): LINE -(panel_left + 28, 316)
-    LINE -(panel_left + 52, 306): LINE -(panel_left + 53, 298)
+    LINE (panel_left + 53, 297)-(panel_left + 31, 305)
+    LINE -(panel_left + 25, 270)
+    LINE -(panel_left + 18, 270)
+    LINE -(panel_left + 16, 275)
+    LINE -(panel_left + 21, 309)
+    LINE -(panel_left + 28, 316)
+    LINE -(panel_left + 52, 306)
+    LINE -(panel_left + 53, 298)
     PAINT (panel_left + 20, 280), side_color, 0
-    LINE (panel_left + 30, 310)-(panel_left + 32, 305): LINE -(panel_left + 25, 307)
+    LINE (panel_left + 30, 310)-(panel_left + 32, 305)
+    LINE -(panel_left + 25, 307)
     LINE (panel_left + 46, 298)-(panel_left + 47, 275)
     LINE (panel_left + 47, 275)-(panel_left + 41, 269)
     LINE (panel_left + 41, 269)-(panel_left + 25, 269)
@@ -221,17 +312,24 @@ SUB draw_surrender (army)
 
     LINE (panel_left + 30, 268)-(panel_left + 41, 264), 12, BF
     LINE (panel_left + 30, 263)-(panel_left + 41, 263), 0
-    LINE (panel_left + 30, 264)-(panel_left + 26, 260): LINE -(panel_left + 25, 248)
-    LINE -(panel_left + 28, 243): LINE -(panel_left + 46, 243)
-    LINE -(panel_left + 48, 245): LINE -(panel_left + 48, 248)
-    LINE -(panel_left + 51, 254): LINE -(panel_left + 51, 255)
-    LINE -(panel_left + 48, 256): LINE -(panel_left + 48, 261)
-    LINE -(panel_left + 46, 263): LINE -(panel_left + 39, 263)
+    LINE (panel_left + 30, 264)-(panel_left + 26, 260)
+    LINE -(panel_left + 25, 248)
+    LINE -(panel_left + 28, 243)
+    LINE -(panel_left + 46, 243)
+    LINE -(panel_left + 48, 245)
+    LINE -(panel_left + 48, 248)
+    LINE -(panel_left + 51, 254)
+    LINE -(panel_left + 51, 255)
+    LINE -(panel_left + 48, 256)
+    LINE -(panel_left + 48, 261)
+    LINE -(panel_left + 46, 263)
+    LINE -(panel_left + 39, 263)
     PAINT (panel_left + 40, 250), 12, 0
 
     LINE (panel_left + 16, 242)-(panel_left + 57, 241), 0, BF
     LINE (panel_left + 45, 240)-(panel_left + 28, 240)
-    LINE -(panel_left + 31, 232): LINE -(panel_left + 45, 232)
+    LINE -(panel_left + 31, 232)
+    LINE -(panel_left + 45, 232)
     LINE -(panel_left + 48, 240)
     PAINT (panel_left + 40, 235), side_color, 0
 
@@ -239,12 +337,18 @@ SUB draw_surrender (army)
 
     LINE (panel_left + 48, 251)-(panel_left + 44, 250), 0, B
     LINE (panel_left + 29, 263)-(panel_left + 43, 266)
-    LINE -(panel_left + 46, 266): LINE -(panel_left + 48, 263)
-    LINE -(panel_left + 48, 260): LINE -(panel_left + 37, 258)
-    LINE -(panel_left + 36, 255): LINE -(panel_left + 37, 250)
-    LINE -(panel_left + 39, 246): LINE -(panel_left + 40, 243)
-    side_color = 0: IF side = SIDE_REBEL THEN
-        side_color = 15: LINE (547, 263)-(558, 263), 15
+    LINE -(panel_left + 46, 266)
+    LINE -(panel_left + 48, 263)
+    LINE -(panel_left + 48, 260)
+    LINE -(panel_left + 37, 258)
+    LINE -(panel_left + 36, 255)
+    LINE -(panel_left + 37, 250)
+    LINE -(panel_left + 39, 246)
+    LINE -(panel_left + 40, 243)
+    side_color = 0
+    IF side = SIDE_REBEL THEN
+        side_color = 15
+        LINE (547, 263)-(558, 263), 15
     END IF
     PAINT (panel_left + 33, 250), side_color, 0
     PAINT (panel_left + 42, 264), side_color, 0

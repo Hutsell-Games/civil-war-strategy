@@ -12,21 +12,32 @@ END SUB
 ' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
 ' and the leaders' ratings at random. Each side may lose some of its first six armies.
 SUB vary_start_conditions
-    DIM k AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER: DIM ship$
+    DIM k AS INTEGER
+    DIM i AS INTEGER
+    DIM j AS INTEGER
+    DIM ship$
     CALL load_scenario
     side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
     side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
     opt_ai_aggression = 5 * RND
     FOR k = 1 TO 6
         IF RND > .6 THEN
-            army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-            army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
+            army_city(k) = 0
+            army_size(k) = 0
+            army_leader_rating(k) = 0
+            army_experience(k) = 0
+            army_order(k) = ORDER_NONE
+            army_supply(k) = 0
         END IF
     NEXT k
     FOR k = 21 TO 26
         IF RND > .6 THEN
-            army_city(k) = 0: army_size(k) = 0: army_leader_rating(k) = 0
-            army_experience(k) = 0: army_order(k) = ORDER_NONE: army_supply(k) = 0
+            army_city(k) = 0
+            army_size(k) = 0
+            army_leader_rating(k) = 0
+            army_experience(k) = 0
+            army_order(k) = ORDER_NONE
+            army_supply(k) = 0
         END IF
     NEXT k
     FOR k = 1 TO MAX_CITIES
@@ -56,7 +67,8 @@ SUB vary_start_conditions
 
     FOR k = 1 TO MAX_LEADERS
         IF RND > .8 THEN
-            leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN
+            leader_rating(k) = leader_rating(k) - 3 + 6 * RND
+            IF leader_rating(k) > MAX_LEADER_RATING THEN
                 leader_rating(k) = MAX_LEADER_RATING
             END IF
         END IF
@@ -167,7 +179,8 @@ END SUB
 ' reads the list of scenarios and starts on its first.
 SUB game_new
     IF scenario_now = 0 THEN
-        CALL load_scenario_list: scenario_now = 1
+        CALL load_scenario_list
+        scenario_now = 1
     END IF
     CALL game_reset
     CALL load_scenario
@@ -190,7 +203,9 @@ SUB game_reset
         army_name$(k) = ""
     NEXT k
     union_income_bonus = 0
-    FOR k = 1 TO MAX_EVENTS: event_done(k) = 0: NEXT k
+    FOR k = 1 TO MAX_EVENTS
+        event_done(k) = 0
+    NEXT k
     FOR k = SIDE_UNION TO SIDE_REBEL
         fleet_size(k) = 0
         fleet_city(k) = 0
@@ -208,7 +223,8 @@ END SUB
 ' gives the computer's side cash. Each side's cash becomes its income, and it gets up to 50
 ' more.
 SUB game_apply_settings
-    DIM i AS INTEGER: DIM ships$
+    DIM i AS INTEGER
+    DIM ships$
     IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
         FOR i = SIDE_UNION TO SIDE_REBEL
             ships$ = STRING$(LEN(fleet_ships$(i)), "W")

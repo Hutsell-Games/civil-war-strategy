@@ -10,23 +10,32 @@ SUB menu_main (start)
     CALL turn_check_commands
     menu_highlight = COLOR_LIGHT_CYAN
     menu_color = COLOR_RED
-    menu_col = PANEL_COL: menu_row = 13
+    menu_col = PANEL_COL
+    menu_row = 13
     menu_text$(0) = "Main"
-    menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN
-        menu_text$(1) = "-": start = MENU_START + MAIN_MOVES
+    menu_text$(1) = "Troops"
+    IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN
+        menu_text$(1) = "-"
+        start = MENU_START + MAIN_MOVES
     END IF
-    menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN
-        menu_text$(2) = "-": IF start = MENU_START + MAIN_MOVES THEN
+    menu_text$(2) = "Moves"
+    IF turn_moves_done > 0 THEN
+        menu_text$(2) = "-"
+        IF start = MENU_START + MAIN_MOVES THEN
             start = MENU_START + MAIN_SHIPS
         END IF
     END IF
-    menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN
-        menu_text$(3) = "-": IF start = MENU_START + MAIN_SHIPS THEN
+    menu_text$(3) = "Ships"
+    IF turn_navy_done > 0 THEN
+        menu_text$(3) = "-"
+        IF start = MENU_START + MAIN_SHIPS THEN
             start = MENU_START + MAIN_RAILROAD
         END IF
     END IF
-    menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN
-        menu_text$(4) = "-": IF start = MENU_START + MAIN_RAILROAD THEN
+    menu_text$(4) = "Railroad"
+    IF train_army(current_side) > 0 THEN
+        menu_text$(4) = "-"
+        IF start = MENU_START + MAIN_RAILROAD THEN
             start = MENU_START + MAIN_END_TURN
         END IF
     END IF
@@ -37,29 +46,40 @@ SUB menu_main (start)
     menu_text$(9) = "Files"
     menu_item_count = 9
     menu_choice = start
-    CALL menu_select(MENU_MAIN_KEYS): CALL clear_right_panel
+    CALL menu_select(MENU_MAIN_KEYS)
+    CALL clear_right_panel
 END SUB
 
 ' Railroad: the train's picture and its capacity. Then the player picks an army and where its
 ' train goes (menu_railroad, ui/orders.bm), and the train leaves (commands/railroad.bm). With
 ' an army on the train already, it says so.
 SUB menu_main_railroad
-    DIM x AS INTEGER: DIM y AS INTEGER: DIM side_color AS INTEGER: DIM capacity AS INTEGER
-    DIM army AS INTEGER: DIM city AS INTEGER
+    DIM x AS INTEGER
+    DIM y AS INTEGER
+    DIM side_color AS INTEGER
+    DIM capacity AS INTEGER
+    DIM army AS INTEGER
+    DIM city AS INTEGER
     IF train_army(current_side) = 0 THEN
-        COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
+        COLOR COLOR_WHITE
+        LOCATE 4, 68
+        PRINT "RAILROAD MOVE"
         PSET (550, 20), 0
         DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
-        side_color = 9: IF current_side = SIDE_REBEL THEN
+        side_color = 9
+        IF current_side = SIDE_REBEL THEN
             side_color = 7
         END IF
-        x = POINT(0): y = POINT(1)
+        x = POINT(0)
+        y = POINT(1)
         PAINT (x, y), side_color, 15
-        COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN
+        COLOR COLOR_WHITE
+        IF current_side = SIDE_UNION THEN
             COLOR COLOR_LIGHT_CYAN
         END IF
         capacity = railroad_capacity(current_side)
-        CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(capacity)); "00";
+        CALL clear_bottom_line
+        PRINT "Railroad capacity ="; RTRIM$(STR$(capacity)); "00";
         CALL menu_railroad(current_side, army, city)
         IF army > 0 THEN
             CALL railroad_start(current_side, army, city)
@@ -67,28 +87,39 @@ SUB menu_main_railroad
         CALL wait_seconds(PAUSE_LONG)
         CALL railroad_finish
     ELSE
-        CALL clear_bottom_line: COLOR COLOR_LIGHT_CYAN: PRINT "Railroad is already carrying "; army_name$(train_army(current_side)); " to "; city_name$(army_order(train_army(current_side)));
+        CALL clear_bottom_line
+        COLOR COLOR_LIGHT_CYAN
+        PRINT "Railroad is already carrying "; army_name$(train_army(current_side)); " to "; city_name$(army_order(train_army(current_side)));
     END IF
 END SUB
 
 ' END TURN: Yes or NOT YET. ended is 1 on Yes.
 SUB menu_main_end_turn (ended)
-    menu_col = PANEL_COL: menu_row = 15
-    menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN: menu_choice = MENU_START + 2
+    menu_col = PANEL_COL
+    menu_row = 15
+    menu_highlight = COLOR_WHITE
+    menu_color = COLOR_CYAN
+    menu_choice = MENU_START + 2
     menu_text$(0) = "End Turn"
     menu_text$(1) = "Yes"
     menu_text$(2) = "NOT YET"
-    menu_item_count = 2: CALL menu_select(MENU_PLAIN): CALL clear_right_panel
-    ended = 0: IF menu_choice = 1 THEN
+    menu_item_count = 2
+    CALL menu_select(MENU_PLAIN)
+    CALL clear_right_panel
+    ended = 0
+    IF menu_choice = 1 THEN
         ended = 1
     END IF
 END SUB
 
 ' Inform: the reports, then the lines of the armies' moves drawn again on the map.
 SUB menu_main_inform
-    DIM i AS INTEGER: DIM first_army AS INTEGER: DIM last_army AS INTEGER
+    DIM i AS INTEGER
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
     CALL menu_report((current_side))
-    first_army = side_first_army(current_side): last_army = side_last_army(current_side)
+    first_army = side_first_army(current_side)
+    last_army = side_last_army(current_side)
     FOR i = first_army TO last_army
         IF army_has_move(i) THEN
             CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
@@ -103,10 +134,15 @@ SUB show_title (replay)
     IF _FILEEXISTS(GFXDIR + "mtn.vga") THEN
         CALL load_picture(GFXDIR + "mtn.vga", pic_mountain())
     ELSE
-        COLOR COLOR_WHITE: BEEP: PRINT "ERROR: Missing File  'MTN.VGA'": wait_seconds PAUSE_LONG
+        COLOR COLOR_WHITE
+        BEEP
+        PRINT "ERROR: Missing File  'MTN.VGA'"
+        wait_seconds PAUSE_LONG
     END IF
     RESTORE
-    FOR k = 1 TO 26: READ map_font$(k): NEXT k
+    FOR k = 1 TO 26
+        READ map_font$(k)
+    NEXT k
     CALL draw_title
     IF replay = 0 AND opt_sound = SOUND_MUSIC THEN
         CALL play_title_music
@@ -127,7 +163,10 @@ SUB menu_title
     menu_text$(1) = "Resume Saved Game"
     menu_text$(2) = "Start NEW Game"
     menu_text$(3) = "Quit to DOS"
-    menu_col = 33: menu_row = 20: menu_color = COLOR_MAGENTA: menu_item_count = 3
+    menu_col = 33
+    menu_row = 20
+    menu_color = COLOR_MAGENTA
+    menu_item_count = 3
     menu_choice = MENU_START + TITLE_NEW_GAME
     CALL menu_select(MENU_PLAIN)
 END SUB
@@ -146,7 +185,10 @@ SUB menu_scenario (picked)
     FOR k = 1 TO scenario_count
         menu_text$(k) = scenario_title$(k)
     NEXT k
-    menu_col = 58: menu_row = 20: menu_color = COLOR_MAGENTA: menu_item_count = scenario_count
+    menu_col = 58
+    menu_row = 20
+    menu_color = COLOR_MAGENTA
+    menu_item_count = scenario_count
     menu_choice = MENU_START + scenario_now
     CALL menu_select(MENU_PLAIN)
     picked = 0
@@ -161,7 +203,8 @@ SUB show_new_game
         CLS
         CALL history_start
     ELSE
-        SCREEN 12: CLS
+        SCREEN 12
+        CLS
     END IF
     CALL draw_map
 END SUB

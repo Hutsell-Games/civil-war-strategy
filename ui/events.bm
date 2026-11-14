@@ -2,24 +2,34 @@
 ' in rules/events.bm. The events and their texts come from scenarios/EVENTS.DAT (load_events).
 
 SUB special_events
-    DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER
+    DIM event AS INTEGER
+    DIM variant AS INTEGER
+    DIM event_side AS INTEGER
+    DIM k AS INTEGER
     CALL event_roll(event, variant, event_side)
     IF event = EVENT_NONE THEN
         EXIT SUB
     END IF
     ' An announcement: its text on the bottom line, and an alarm.
     IF event_before(event) <> 0 THEN
-        COLOR COLOR_YELLOW: CALL clear_bottom_line
+        COLOR COLOR_YELLOW
+        CALL clear_bottom_line
         PRINT event_message$(event_text$(event, variant));
         IF opt_sound >= SOUND_EFFECTS THEN
-            FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
+            FOR k = 1 TO 5
+                SOUND 140, 1
+                SOUND 37, 1
+            NEXT k
         END IF
         CALL wait_key("I")
         EXIT SUB
     END IF
-    CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT event_banner$;
+    CALL clear_bottom_line
+    COLOR COLOR_YELLOW
+    PRINT event_banner$;
     IF event_effect(event) = EFFECT_CITY_NEUTRAL THEN
-        CALL event_show_city(event): EXIT SUB
+        CALL event_show_city(event)
+        EXIT SUB
     END IF
     IF event_side = SIDE_UNION THEN
         CALL clear_bottom_line
@@ -54,7 +64,8 @@ SUB event_show_city (event)
     IF event_city = 0 THEN
         EXIT SUB
     END IF
-    CALL clear_bottom_line: COLOR COLOR_WHITE
+    CALL clear_bottom_line
+    COLOR COLOR_WHITE
     PRINT event_message$(event_text$(event, 0));
     CALL draw_cities
     wait_seconds opt_pause!
@@ -77,7 +88,8 @@ END FUNCTION
 
 ' text$ with with$ in place of every find$.
 FUNCTION text_replace$ (text$, find$, with$)
-    DIM at AS INTEGER: DIM result$
+    DIM at AS INTEGER
+    DIM result$
     result$ = text$
     at = INSTR(result$, find$)
     DO WHILE at > 0

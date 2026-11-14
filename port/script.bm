@@ -22,7 +22,8 @@ SUB script_start
     DIM seed$
     seed$ = ENVIRON$("CWS_SEED")
     IF seed$ = "" THEN
-        RANDOMIZE TIMER: EXIT SUB
+        RANDOMIZE TIMER
+        EXIT SUB
     END IF
     scripted = 1
     RANDOMIZE VAL(seed$)
@@ -52,21 +53,28 @@ SUB script_dice_next
     END IF
     cut = INSTR(script_dice$, ";")
     IF cut = 0 THEN
-        script_dice_now$ = script_dice$: script_dice$ = "": EXIT SUB
+        script_dice_now$ = script_dice$
+        script_dice$ = ""
+        EXIT SUB
     END IF
-    script_dice_now$ = LEFT$(script_dice$, cut - 1): script_dice$ = MID$(script_dice$, cut + 1)
+    script_dice_now$ = LEFT$(script_dice$, cut - 1)
+    script_dice$ = MID$(script_dice$, cut + 1)
 END SUB
 
 FUNCTION script_rnd!
-    DIM cut AS INTEGER: DIM item$
+    DIM cut AS INTEGER
+    DIM item$
     IF script_dice_now$ = "" THEN
-        script_rnd! = RND: EXIT FUNCTION
+        script_rnd! = RND
+        EXIT FUNCTION
     END IF
     cut = INSTR(script_dice_now$, ",")
     IF cut = 0 THEN
-        item$ = script_dice_now$: script_dice_now$ = ""
+        item$ = script_dice_now$
+        script_dice_now$ = ""
     ELSE
-        item$ = LEFT$(script_dice_now$, cut - 1): script_dice_now$ = MID$(script_dice_now$, cut + 1)
+        item$ = LEFT$(script_dice_now$, cut - 1)
+        script_dice_now$ = MID$(script_dice_now$, cut + 1)
     END IF
     IF item$ = "r" THEN
         script_rnd! = RND
@@ -99,7 +107,8 @@ FUNCTION script_tick% (seconds!)
         EXIT FUNCTION
     END IF
     CALL script_mark_key_wait(1, "L")
-    DO WHILE INKEY$ = "": LOOP
+    DO WHILE INKEY$ = ""
+    LOOP
 END FUNCTION
 
 ' SHELL cmd$, or under a script the same work done in BASIC. The game runs
@@ -108,26 +117,44 @@ END FUNCTION
 ' program runs on a hidden one, so the scripts must not run it. Copy
 ' replaces <to>, as copy does.
 SUB script_shell (cmd$)
-    DIM space_at AS INTEGER: DIM contents$
-    DIM trimmed$: DIM args$: DIM verb$: DIM from$: DIM file_num AS INTEGER: DIM into$
+    DIM space_at AS INTEGER
+    DIM contents$
+    DIM trimmed$
+    DIM args$
+    DIM verb$
+    DIM from$
+    DIM file_num AS INTEGER
+    DIM into$
     IF scripted = 0 THEN
-        SHELL cmd$: EXIT SUB
+        SHELL cmd$
+        EXIT SUB
     END IF
     trimmed$ = LTRIM$(RTRIM$(cmd$))
-    space_at = INSTR(trimmed$, " "): verb$ = LCASE$(LEFT$(trimmed$, space_at - 1)): args$ = LTRIM$(MID$(trimmed$, space_at + 1))
-    space_at = INSTR(args$, " "): from$ = LEFT$(args$, space_at - 1): into$ = LTRIM$(MID$(args$, space_at + 1))
+    space_at = INSTR(trimmed$, " ")
+    verb$ = LCASE$(LEFT$(trimmed$, space_at - 1))
+    args$ = LTRIM$(MID$(trimmed$, space_at + 1))
+    space_at = INSTR(args$, " ")
+    from$ = LEFT$(args$, space_at - 1)
+    into$ = LTRIM$(MID$(args$, space_at + 1))
     IF verb$ <> "copy" THEN
-        SHELL cmd$: EXIT SUB
+        SHELL cmd$
+        EXIT SUB
     END IF
     IF NOT _FILEEXISTS(from$) THEN
         EXIT SUB
     END IF
-    file_num = FREEFILE: OPEN from$ FOR BINARY AS #file_num
-    contents$ = SPACE$(LOF(file_num)): GET #file_num, , contents$: CLOSE #file_num
+    file_num = FREEFILE
+    OPEN from$ FOR BINARY AS #file_num
+    contents$ = SPACE$(LOF(file_num))
+    GET #file_num, , contents$
+    CLOSE #file_num
     IF _FILEEXISTS(into$) THEN
         KILL into$
     END IF
-    file_num = FREEFILE: OPEN into$ FOR BINARY AS #file_num: PUT #file_num, , contents$: CLOSE #file_num
+    file_num = FREEFILE
+    OPEN into$ FOR BINARY AS #file_num
+    PUT #file_num, , contents$
+    CLOSE #file_num
 END SUB
 
 ' Says that the program is about to wait for a key. place names the kind of

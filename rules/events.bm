@@ -10,9 +10,15 @@
 ' the month's chance passes, a side is drawn and its events are tried.
 SUB event_roll (event, variant, event_side)
     DIM event_weight AS INTEGER
-    event = EVENT_NONE: variant = 0: event_side = 0: event_city = 0: event_army = 0: event_target_side = SIDE_NONE
+    event = EVENT_NONE
+    variant = 0
+    event_side = 0
+    event_city = 0
+    event_army = 0
+    event_target_side = SIDE_NONE
     CALL script_dice_next
-    event_weight = opt_difficulty: IF current_side = SIDE_UNION THEN
+    event_weight = opt_difficulty
+    IF current_side = SIDE_UNION THEN
         event_weight = 6 - opt_difficulty
     END IF
     CALL event_pick(1, SIDE_NONE, event_weight, event, variant)
@@ -26,7 +32,8 @@ SUB event_roll (event, variant, event_side)
         EXIT SUB
     END IF
 
-    event_side = SIDE_UNION: IF script_rnd! > .1 * opt_event_balance THEN
+    event_side = SIDE_UNION
+    IF script_rnd! > .1 * opt_event_balance THEN
         event_side = SIDE_REBEL
     END IF
     CALL event_pick(0, other_side(event_side), event_weight, event, variant)
@@ -38,10 +45,15 @@ END SUB
 ' The numbers are drawn in a fixed order: those of the "if" line, then one to pick a text
 ' when the event has several, then those of the "instead" line, then those of the effect.
 SUB event_pick (before, good_side, weight, event, variant)
-    DIM row AS INTEGER: DIM chosen AS INTEGER: DIM side AS INTEGER: DIM holds AS INTEGER: DIM k AS INTEGER
+    DIM row AS INTEGER
+    DIM chosen AS INTEGER
+    DIM side AS INTEGER
+    DIM holds AS INTEGER
+    DIM k AS INTEGER
     DIM rolled!
     FOR row = 1 TO event_count
-        side = good_side: IF before <> 0 THEN
+        side = good_side
+        IF before <> 0 THEN
             side = event_favors(row)
         END IF
         IF event_before(row) = before AND event_listed(row) <> 0 AND event_favors(row) = side THEN
@@ -50,7 +62,8 @@ SUB event_pick (before, good_side, weight, event, variant)
                 holds = event_possible(row, event_target(row, side))
             END IF
             IF holds THEN
-                chosen = row: variant = 0
+                chosen = row
+                variant = 0
                 IF event_text_count(row) > 1 THEN
                     rolled! = script_rnd!
                     FOR k = 1 TO event_text_count(row) - 1
@@ -62,7 +75,8 @@ SUB event_pick (before, good_side, weight, event, variant)
                 IF event_instead(row) <> 0 THEN
                     IF event_conditions_hold(event_instead_first(row), event_instead_count(row), row, side) THEN
                         IF event_possible(event_instead(row), event_target(event_instead(row), side)) THEN
-                            chosen = event_instead(row): variant = 0
+                            chosen = event_instead(row)
+                            variant = 0
                         END IF
                     END IF
                 END IF
@@ -84,7 +98,8 @@ END SUB
 
 ' The side an event's effect is for: its "for" line, else the side it favors.
 FUNCTION event_target (row, side)
-    event_target = side: IF event_for(row) <> SIDE_NONE THEN
+    event_target = side
+    IF event_for(row) <> SIDE_NONE THEN
         event_target = event_for(row)
     END IF
 END FUNCTION
@@ -94,14 +109,20 @@ END FUNCTION
 ' and the sum is rounded to single precision once, as the line it replaced was:
 ' .005 * (turn_year - 1860) * weight * weight (TestEventChanceAsBefore).
 FUNCTION event_chance! (weight)
-    DIM k AS INTEGER: DIM product#: DIM chance!
+    DIM k AS INTEGER
+    DIM product#
+    DIM chance!
     product# = 1
     FOR k = 1 TO chance_count
         SELECT CASE chance_kind(k)
-            CASE CHANCE_NUMBER: product# = product# * chance_value#(k)
-            CASE CHANCE_WEIGHT: product# = product# * weight
-            CASE CHANCE_YEAR: product# = product# * (turn_year - chance_value#(k))
-            CASE CHANCE_DIFFICULTY: product# = product# * (opt_difficulty - chance_value#(k))
+            CASE CHANCE_NUMBER
+                product# = product# * chance_value#(k)
+            CASE CHANCE_WEIGHT
+                product# = product# * weight
+            CASE CHANCE_YEAR
+                product# = product# * (turn_year - chance_value#(k))
+            CASE CHANCE_DIFFICULTY
+                product# = product# * (opt_difficulty - chance_value#(k))
         END SELECT
     NEXT k
     chance! = product# + chance_plus#
@@ -115,31 +136,43 @@ END FUNCTION
 ' condition is looked at, also after one has failed, so a "roll" always draws its number.
 ' good_side is the side the event favors; "cities" counts its cities.
 FUNCTION event_conditions_hold (first, count, row, good_side)
-    DIM k AS INTEGER: DIM amount!: DIM met AS INTEGER
+    DIM k AS INTEGER
+    DIM amount!
+    DIM met AS INTEGER
     event_conditions_hold = 1
     FOR k = first TO first + count - 1
         SELECT CASE condition_subject(k)
-            CASE SUBJECT_ROLL: amount! = script_rnd!
-            CASE SUBJECT_YEAR: amount! = turn_year
-            CASE SUBJECT_MONTH: amount! = turn_month
-            CASE SUBJECT_CITIES: amount! = side_city_count(good_side)
-            CASE SUBJECT_REALISM: amount! = opt_realism
+            CASE SUBJECT_ROLL
+                amount! = script_rnd!
+            CASE SUBJECT_YEAR
+                amount! = turn_year
+            CASE SUBJECT_MONTH
+                amount! = turn_month
+            CASE SUBJECT_CITIES
+                amount! = side_city_count(good_side)
+            CASE SUBJECT_REALISM
+                amount! = opt_realism
         END SELECT
         met = 0
         SELECT CASE condition_relation(k)
-            CASE RELATION_IS: IF amount! = condition_value!(k) THEN
+            CASE RELATION_IS
+                IF amount! = condition_value!(k) THEN
                     met = 1
                 END IF
-            CASE RELATION_ABOVE: IF amount! > condition_value!(k) THEN
+            CASE RELATION_ABOVE
+                IF amount! > condition_value!(k) THEN
                     met = 1
                 END IF
-            CASE RELATION_BELOW: IF amount! < condition_value!(k) THEN
+            CASE RELATION_BELOW
+                IF amount! < condition_value!(k) THEN
                     met = 1
                 END IF
-            CASE RELATION_AT_LEAST: IF amount! >= condition_value!(k) THEN
+            CASE RELATION_AT_LEAST
+                IF amount! >= condition_value!(k) THEN
                     met = 1
                 END IF
-            CASE RELATION_AT_MOST: IF amount! <= condition_value!(k) THEN
+            CASE RELATION_AT_MOST
+                IF amount! <= condition_value!(k) THEN
                     met = 1
                 END IF
         END SELECT
@@ -155,7 +188,8 @@ END FUNCTION
 ' Whether an event's effect can be carried out. Ships need a fleet that is not full; ships
 ' to a port also need the port. Every other effect can always be carried out.
 FUNCTION event_possible (row, good_side)
-    DIM port AS INTEGER: DIM found AS INTEGER
+    DIM port AS INTEGER
+    DIM found AS INTEGER
     event_possible = 1
     SELECT CASE event_effect(row)
         CASE EFFECT_SHIPS
@@ -175,14 +209,18 @@ END FUNCTION
 ' there is none.
 SUB event_delivery_port (side, port, found)
     DIM i AS INTEGER
-    port = 0: found = 0
+    port = 0
+    found = 0
     IF fleet_size(side) > 0 AND NOT fleet_is_at_sea(side) THEN
-        port = fleet_city(side): found = 1
+        port = fleet_city(side)
+        found = 1
         EXIT SUB
     END IF
     FOR i = 1 TO MAX_CITIES
         IF city_owner(i) = side AND city_port_type(i) = PORT_SEA AND fleet_city(other_side(side)) <> i THEN
-            port = i: found = 1: EXIT FOR
+            port = i
+            found = 1
+            EXIT FOR
         END IF
     NEXT i
 END SUB
@@ -190,10 +228,18 @@ END SUB
 ' Carries out an event's effect for the side it is good for. weight is 1 to 5, from the
 ' Balance setting. It sets event_city for a riot and event_army for a reinforcement.
 SUB event_apply (row, good_side, weight)
-    DIM bad_side AS INTEGER: DIM i AS INTEGER: DIM first AS INTEGER: DIM new_ships AS INTEGER: DIM port AS INTEGER: DIM found AS INTEGER
-    DIM amount!: DIM second!: DIM capital AS INTEGER
+    DIM bad_side AS INTEGER
+    DIM i AS INTEGER
+    DIM first AS INTEGER
+    DIM new_ships AS INTEGER
+    DIM port AS INTEGER
+    DIM found AS INTEGER
+    DIM amount!
+    DIM second!
+    DIM capital AS INTEGER
     bad_side = other_side(good_side)
-    amount! = event_amount!(row, 0): second! = event_amount!(row, 1)
+    amount! = event_amount!(row, 0)
+    second! = event_amount!(row, 1)
     SELECT CASE event_effect(row)
         CASE EFFECT_POINTS
             side_victory_points(good_side) = side_victory_points(good_side) + amount!
@@ -226,7 +272,8 @@ SUB event_apply (row, good_side, weight)
             END IF
             IF event_army > 0 THEN
                 army_size(event_army) = army_size(event_army) + amount! * weight
-                army_experience(event_army) = MAX_EXPERIENCE: army_supply(event_army) = MAX_SUPPLY
+                army_experience(event_army) = MAX_EXPERIENCE
+                army_supply(event_army) = MAX_SUPPLY
             END IF
         CASE EFFECT_ARMIES_GROW
             first = side_first_army(good_side)
@@ -258,16 +305,19 @@ SUB event_new_army (side, city, army)
         EXIT SUB
     END IF
     army_leader_rating(army) = leader_rating(army)
-    army_name$(army) = leader_name$(army): leader_name$(army) = ""
+    army_name$(army) = leader_name$(army)
+    leader_name$(army) = ""
     army_size(army) = 0
-    army_city(army) = city: city_army(city) = army
+    army_city(army) = city
+    city_army(city) = army
     army_order(army) = ORDER_BUSY
 END SUB
 
 ' A riot: a city that the side took from the other side, with no army in it, turns neutral.
 ' city is 0 when no such city is found.
 SUB event_riot_city (side, city)
-    DIM k AS INTEGER: DIM candidate_city AS INTEGER
+    DIM k AS INTEGER
+    DIM candidate_city AS INTEGER
     city = 0
     IF opt_realism = REALISM_OFF THEN
         EXIT SUB
@@ -278,7 +328,9 @@ SUB event_riot_city (side, city)
     FOR k = 1 TO 99
         candidate_city = 1 + INT(MAX_CITIES * script_rnd!)
         IF city_first_owner(candidate_city) <> side AND city_owner(candidate_city) = side AND city_army(candidate_city) = 0 THEN
-            city = candidate_city: city_owner(candidate_city) = SIDE_NONE: EXIT SUB
+            city = candidate_city
+            city_owner(candidate_city) = SIDE_NONE
+            EXIT SUB
         END IF
     NEXT k
 END SUB
@@ -289,7 +341,8 @@ FUNCTION event_find (name$)
     event_find = 0
     FOR row = 1 TO event_count
         IF event_name$(row) = name$ THEN
-            event_find = row: EXIT FUNCTION
+            event_find = row
+            EXIT FUNCTION
         END IF
     NEXT row
 END FUNCTION

@@ -1,5 +1,6 @@
 SUB menu_bubble_sort (limit)
-    DIM i AS INTEGER: DIM swaps%
+    DIM i AS INTEGER
+    DIM swaps%
     DO
         swaps% = FALSE
         FOR i = 1 TO limit - 1
@@ -17,7 +18,8 @@ SUB menu_set_cities (cities(), count)
     DIM i AS INTEGER
     menu_item_count = count
     FOR i = 1 TO count
-        menu_text$(i) = city_name$(cities(i)): menu_value(i) = cities(i)
+        menu_text$(i) = city_name$(cities(i))
+        menu_value(i) = cities(i)
     NEXT i
 END SUB
 
@@ -49,15 +51,24 @@ SUB draw_menu (title_col, menu_width)
     END IF
     COLOR menu_color
 
-    LOCATE menu_row + 1, menu_col + title_col: PRINT menu_text$(0)
+    LOCATE menu_row + 1, menu_col + title_col
+    PRINT menu_text$(0)
     FOR i = 1 TO menu_item_count
-        LOCATE menu_row + 2 + i, menu_col + 2: PRINT menu_text$(i);
+        LOCATE menu_row + 2 + i, menu_col + 2
+        PRINT menu_text$(i);
     NEXT i
 END SUB
 
 SUB menu_select (menu_item_show_beside%)
-    DIM previous_row AS INTEGER: DIM done AS INTEGER: DIM pressed$: DIM k AS INTEGER: DIM menu_initial_letter$
-    DIM menu_width AS INTEGER: DIM row AS INTEGER: DIM title_col AS INTEGER: DIM row_shown AS INTEGER
+    DIM previous_row AS INTEGER
+    DIM done AS INTEGER
+    DIM pressed$
+    DIM k AS INTEGER
+    DIM menu_initial_letter$
+    DIM menu_width AS INTEGER
+    DIM row AS INTEGER
+    DIM title_col AS INTEGER
+    DIM row_shown AS INTEGER
     IF menu_color = 0 THEN
         menu_color = COLOR_GRAY
     END IF
@@ -115,7 +126,10 @@ SUB menu_select (menu_item_show_beside%)
         ' Wait for a key that does something. A letter that starts no row is ignored.
         done = 0
         DO
-            CALL script_mark_key_wait(2, menu_text$(0)): DO: pressed$ = INKEY$: LOOP WHILE pressed$ = ""
+            CALL script_mark_key_wait(2, menu_text$(0))
+            DO
+                pressed$ = INKEY$
+            LOOP WHILE pressed$ = ""
             IF ASC(pressed$) = KEY_ENTER THEN
                 EXIT DO
             END IF
@@ -126,16 +140,22 @@ SUB menu_select (menu_item_show_beside%)
                 EXIT DO
             END IF
             IF menu_item_show_beside = MENU_RAW_KEYS THEN
-                menu_choice = -ASC(UCASE$(pressed$)): done = 1: EXIT DO
+                menu_choice = -ASC(UCASE$(pressed$))
+                done = 1
+                EXIT DO
             END IF
             IF ASC(pressed$) = KEY_ESC THEN
-                menu_choice = MENU_ESCAPED: done = 1: EXIT DO
+                menu_choice = MENU_ESCAPED
+                done = 1
+                EXIT DO
             END IF
             previous_row = row
             FOR k = 1 TO menu_item_count
                 menu_initial_letter$ = UCASE$(LEFT$(LTRIM$(menu_text$(k)), 1))
                 IF menu_initial_letter$ = UCASE$(pressed$) THEN
-                    menu_choice = k: done = 1: EXIT FOR
+                    menu_choice = k
+                    done = 1
+                    EXIT FOR
                 END IF
             NEXT k
         LOOP UNTIL done = 1
@@ -145,13 +165,16 @@ SUB menu_select (menu_item_show_beside%)
 
         IF menu_item_show_beside = MENU_RAW_KEYS THEN
             IF pressed$ = KEY_UP$ THEN
-                menu_choice = 1: EXIT DO
+                menu_choice = 1
+                EXIT DO
             END IF
             IF ASC(pressed$) = KEY_ENTER THEN
-                menu_choice = 2: EXIT DO
+                menu_choice = 2
+                EXIT DO
             END IF
             IF pressed$ = KEY_DOWN$ THEN
-                menu_choice = 3: EXIT DO
+                menu_choice = 3
+                EXIT DO
             END IF
         END IF
         IF ASC(pressed$) = KEY_ENTER THEN
@@ -160,10 +183,12 @@ SUB menu_select (menu_item_show_beside%)
 
         ' Another row: the old one is shown plain again.
         IF menu_item_show_beside = MENU_CITY_ARMY THEN
-            LOCATE menu_row + 2 + previous_row, menu_col + 2: PRINT SPACE$(menu_width);
+            LOCATE menu_row + 2 + previous_row, menu_col + 2
+            PRINT SPACE$(menu_width);
         END IF
         COLOR menu_color
-        LOCATE menu_row + 2 + previous_row, menu_col + 2: PRINT menu_text$(previous_row)
+        LOCATE menu_row + 2 + previous_row, menu_col + 2
+        PRINT menu_text$(previous_row)
 
         CALL menu_unmark_row(menu_item_show_beside, previous_row)
 
@@ -174,7 +199,8 @@ SUB menu_select (menu_item_show_beside%)
         SOUND 700, .5
     END IF
     COLOR menu_color
-    menu_col = 0: menu_row = 0
+    menu_col = 0
+    menu_row = 0
     CALL menu_unmark_row(menu_item_show_beside, row)
     VIEW
 END SUB
@@ -186,10 +212,14 @@ END SUB
 ' it gives back was read as a row.
 SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
     SELECT CASE pressed$
-        CASE KEY_UP$: row = row - 1
-        CASE KEY_PAGE_UP$: row = 1
-        CASE KEY_DOWN$: row = row + 1
-        CASE KEY_PAGE_DOWN$: row = menu_item_count
+        CASE KEY_UP$
+            row = row - 1
+        CASE KEY_PAGE_UP$
+            row = 1
+        CASE KEY_DOWN$
+            row = row + 1
+        CASE KEY_PAGE_DOWN$
+            row = menu_item_count
         CASE KEY_F3$
             IF kind = MENU_PLAIN OR kind = MENU_MAIN_KEYS THEN
                 CLS
@@ -199,7 +229,8 @@ SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
             END IF
         CASE KEY_F7$
             IF kind = MENU_MAIN_KEYS THEN
-                menu_choice = MENU_END_TURN_KEY: done = 1
+                menu_choice = MENU_END_TURN_KEY
+                done = 1
             END IF
         CASE KEY_F4$
             IF kind = MENU_PLAIN OR kind = MENU_MAIN_KEYS THEN
@@ -222,10 +253,17 @@ END SUB
 ' the row's city or army, the army's numbers, or a face. For a city with an army, the row
 ' shows the army's name and row_shown is 1, so that menu_select does not print the row again.
 SUB menu_mark_row (kind, row, menu_width, row_shown)
-    DIM army AS INTEGER: DIM short_name$: DIM file$: DIM x AS INTEGER: DIM y AS INTEGER: DIM face_pic AS INTEGER
+    DIM army AS INTEGER
+    DIM short_name$
+    DIM file$
+    DIM x AS INTEGER
+    DIM y AS INTEGER
+    DIM face_pic AS INTEGER
     SELECT CASE kind
-        CASE MENU_CITY_BOX: CALL draw_map_marker(menu_value(row), 0, MARK_BOX)
-        CASE MENU_CITY_ARMY: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
+        CASE MENU_CITY_BOX
+            CALL draw_map_marker(menu_value(row), 0, MARK_BOX)
+        CASE MENU_CITY_ARMY
+            CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
             army = city_army(menu_value(row))
             IF army > 0 THEN
                 row_shown = 1
@@ -234,21 +272,32 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
                     short_name$ = LEFT$(short_name$, menu_width)
                 END IF
                 COLOR COLOR_LIGHT_RED
-                LOCATE menu_row + 2 + row, menu_col + 2: PRINT SPACE$(menu_width);
-                LOCATE menu_row + 2 + row, menu_col + 2: PRINT short_name$;
-                LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
-                LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT "Size"; army_size(army);
-                x = POS(0): y = CSRLIN: LOCATE y, x - 1: PRINT "00";
+                LOCATE menu_row + 2 + row, menu_col + 2
+                PRINT SPACE$(menu_width);
+                LOCATE menu_row + 2 + row, menu_col + 2
+                PRINT short_name$;
+                LOCATE menu_row + 4 + menu_item_count, menu_col + 1
+                PRINT SPACE$(12);
+                LOCATE menu_row + 4 + menu_item_count, menu_col + 1
+                PRINT "Size"; army_size(army);
+                x = POS(0)
+                y = CSRLIN
+                LOCATE y, x - 1
+                PRINT "00";
             ELSE
                 row_shown = 0
-                LOCATE menu_row + 4 + menu_item_count, menu_col + 1: PRINT SPACE$(12);
+                LOCATE menu_row + 4 + menu_item_count, menu_col + 1
+                PRINT SPACE$(12);
             END IF
-        CASE MENU_ARMY_STATS: CALL draw_army_stats(menu_value(row))
-        CASE MENU_ARMY_POINTER: CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_POINTER)
+        CASE MENU_ARMY_STATS
+            CALL draw_army_stats(menu_value(row))
+        CASE MENU_ARMY_POINTER
+            CALL draw_map_marker(army_city(menu_value(row)), 0, MARK_POINTER)
         CASE MENU_FACES
             IF opt_graphics >= GRAPHICS_FULL AND row > 0 THEN
                 LINE (548, 148)-(592, 216), 15, B
-                face_pic = row: IF current_side = SIDE_UNION THEN
+                face_pic = row
+                IF current_side = SIDE_UNION THEN
                     face_pic = 6 - row
                 END IF
                 file$ = GFXDIR + "face" + LTRIM$(STR$(face_pic)) + ".vga"
@@ -261,7 +310,8 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
                     END IF
                 END IF
             END IF
-        CASE MENU_CITY_POINTER: CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
+        CASE MENU_CITY_POINTER
+            CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
     END SELECT
 END SUB
 
@@ -277,7 +327,9 @@ END SUB
 
 ' The width a menu needs: its longest option, or its title and a space.
 FUNCTION menu_measure_width
-    DIM i AS INTEGER: DIM menu_option_length AS INTEGER: DIM menu_width AS INTEGER
+    DIM i AS INTEGER
+    DIM menu_option_length AS INTEGER
+    DIM menu_width AS INTEGER
     menu_width = LEN(menu_text$(0)) + 1
     FOR i = 1 TO menu_item_count
         menu_option_length = LEN(menu_text$(i))

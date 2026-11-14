@@ -16,11 +16,13 @@ FUNCTION scenario_find (folder$)
     DIM k AS INTEGER
     scenario_find = -1
     IF LCASE$(folder$) = LCASE$(scenario_folder$(scenario_now)) THEN
-        scenario_find = scenario_now: EXIT FUNCTION
+        scenario_find = scenario_now
+        EXIT FUNCTION
     END IF
     FOR k = 1 TO scenario_count
         IF LCASE$(folder$) = LCASE$(scenario_folder$(k)) THEN
-            scenario_find = k: EXIT FUNCTION
+            scenario_find = k
+            EXIT FUNCTION
         END IF
     NEXT k
 END FUNCTION
@@ -31,7 +33,9 @@ FUNCTION scenario_file$ (name$)
 END FUNCTION
 
 SUB load_scenario
-    DIM k AS INTEGER: DIM i AS INTEGER: DIM army_count AS INTEGER
+    DIM k AS INTEGER
+    DIM i AS INTEGER
+    DIM army_count AS INTEGER
     OPEN "I", 1, scenario_file$("cwslead.dat")
     FOR i = 1 TO MAX_LEADERS
         INPUT #1, leader_name$(i), leader_rating(i)
@@ -52,17 +56,28 @@ SUB load_scenario
     victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
     INPUT #1, army_count ' number of Yankee armies
     FOR i = 1 TO army_count
-        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
+        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
+        city_army(army_city(i)) = i
+        army_name$(i) = leader_name$(i)
+        army_leader_rating(i) = leader_rating(i)
+        leader_name$(i) = ""
     NEXT i
     INPUT #1, army_count ' number of Rebel armies
     FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + army_count
         INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
-        city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
+        city_army(army_city(i)) = i
+        army_name$(i) = leader_name$(i)
+        army_leader_rating(i) = leader_rating(i)
+        leader_name$(i) = ""
     NEXT i
-    FOR i = SIDE_UNION TO SIDE_REBEL: INPUT #1, side_cash(i): NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        INPUT #1, side_cash(i)
+    NEXT i
     INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
     INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
-    FOR k = SIDE_UNION TO SIDE_REBEL: fleet_size(k) = LEN(fleet_ships$(k)): NEXT k
+    FOR k = SIDE_UNION TO SIDE_REBEL
+        fleet_size(k) = LEN(fleet_ships$(k))
+    NEXT k
     INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
 
     FOR i = 1 TO 8
@@ -77,37 +92,61 @@ END SUB
 ' the same file. A line that cannot be read ends the reading: event_file_error$ then names the
 ' file and the line and says why. It is "" when the whole file was read.
 SUB load_events (file$)
-    DIM file_num AS INTEGER: DIM line_num AS INTEGER: DIM row AS INTEGER: DIM cut AS INTEGER
-    DIM in_general AS INTEGER: DIM general_read AS INTEGER: DIM has_banner AS INTEGER: DIM has_chance AS INTEGER
-    DIM text$: DIM key$: DIM value$: DIM why$: DIM seen$
+    DIM file_num AS INTEGER
+    DIM line_num AS INTEGER
+    DIM row AS INTEGER
+    DIM cut AS INTEGER
+    DIM in_general AS INTEGER
+    DIM general_read AS INTEGER
+    DIM has_banner AS INTEGER
+    DIM has_chance AS INTEGER
+    DIM text$
+    DIM key$
+    DIM value$
+    DIM why$
+    DIM seen$
     DIM instead_name$(MAX_EVENTS), then_name$(MAX_EVENTS)
-    event_count = 0: condition_count = 0: event_file_error$ = "": event_banner$ = ""
-    chance_count = 0: chance_plus# = 0: chance_most# = 0: chance_has_most = 0
-    file_num = FREEFILE: OPEN file$ FOR INPUT AS #file_num
+    event_count = 0
+    condition_count = 0
+    event_file_error$ = ""
+    event_banner$ = ""
+    chance_count = 0
+    chance_plus# = 0
+    chance_most# = 0
+    chance_has_most = 0
+    file_num = FREEFILE
+    OPEN file$ FOR INPUT AS #file_num
     DO WHILE NOT EOF(file_num) AND why$ = ""
-        LINE INPUT #file_num, text$: line_num = line_num + 1
+        LINE INPUT #file_num, text$
+        line_num = line_num + 1
         text$ = LTRIM$(RTRIM$(text$))
         cut = INSTR(text$, "=")
         IF text$ = "" OR LEFT$(text$, 1) = ";" THEN
             ' A blank line or a comment.
         ELSEIF LEFT$(text$, 1) = "[" THEN
             key$ = LCASE$(LTRIM$(RTRIM$(MID$(text$, 2, LEN(text$) - 2))))
-            in_general = 0: row = 0: seen$ = ""
+            in_general = 0
+            row = 0
+            seen$ = ""
             IF RIGHT$(text$, 1) <> "]" THEN
                 why$ = "a name in brackets needs its ]"
             ELSEIF key$ = "events" THEN
                 IF general_read <> 0 THEN
                     why$ = "a second [events]"
                 END IF
-                in_general = 1: general_read = 1
+                in_general = 1
+                general_read = 1
             ELSEIF event_find(key$) > 0 THEN
                 why$ = "a second event named " + key$
             ELSEIF event_count = MAX_EVENTS THEN
                 why$ = "too many events"
             ELSE
-                event_count = event_count + 1: row = event_count
+                event_count = event_count + 1
+                row = event_count
                 CALL event_clear_row(row)
-                event_name$(row) = key$: instead_name$(row) = "": then_name$(row) = ""
+                event_name$(row) = key$
+                instead_name$(row) = ""
+                then_name$(row) = ""
             END IF
         ELSEIF cut = 0 THEN
             why$ = "the line has no ="
@@ -122,9 +161,14 @@ SUB load_events (file$)
             ELSEIF in_general <> 0 THEN
                 seen$ = seen$ + "|" + key$ + "|"
                 SELECT CASE key$
-                    CASE "banner": event_banner$ = value$: has_banner = 1
-                    CASE "chance": CALL event_read_chance(value$, why$): has_chance = 1
-                    CASE ELSE: why$ = "unknown line in [events]: " + key$
+                    CASE "banner"
+                        event_banner$ = value$
+                        has_banner = 1
+                    CASE "chance"
+                        CALL event_read_chance(value$, why$)
+                        has_chance = 1
+                    CASE ELSE
+                        why$ = "unknown line in [events]: " + key$
                 END SELECT
             ELSEIF row = 0 THEN
                 why$ = "the line belongs to no event: " + key$
@@ -136,7 +180,8 @@ SUB load_events (file$)
     LOOP
     CLOSE #file_num
     IF why$ <> "" THEN
-        event_file_error$ = file$ + ", line" + STR$(line_num) + ": " + why$: EXIT SUB
+        event_file_error$ = file$ + ", line" + STR$(line_num) + ": " + why$
+        EXIT SUB
     END IF
     ' The events that "instead" and "then" name may come later in the file, so they are
     ' looked up when all are read.
@@ -160,7 +205,8 @@ SUB load_events (file$)
             END IF
         END IF
         IF why$ <> "" THEN
-            event_file_error$ = file$ + ", [" + event_name$(row) + "]: " + why$: EXIT SUB
+            event_file_error$ = file$ + ", [" + event_name$(row) + "]: " + why$
+            EXIT SUB
         END IF
     NEXT row
     IF has_banner = 0 THEN
@@ -177,12 +223,26 @@ END SUB
 ' Empties a row of the events table before its lines are read.
 SUB event_clear_row (row)
     DIM k AS INTEGER
-    event_favors(row) = SIDE_NONE: event_for(row) = SIDE_NONE: event_listed(row) = 1: event_done(row) = 0: event_before(row) = 0
-    event_effect(row) = EFFECT_NONE: event_amount!(row, 0) = 0: event_amount!(row, 1) = 0: event_redraw(row) = REDRAW_NONE
-    event_text_count(row) = 0: event_outcome$(row) = ""
-    FOR k = 0 TO MAX_EVENT_TEXTS: event_text$(row, k) = "": NEXT k
-    event_instead(row) = 0: event_then(row) = 0
-    event_if_first(row) = 0: event_if_count(row) = 0: event_instead_first(row) = 0: event_instead_count(row) = 0
+    event_favors(row) = SIDE_NONE
+    event_for(row) = SIDE_NONE
+    event_listed(row) = 1
+    event_done(row) = 0
+    event_before(row) = 0
+    event_effect(row) = EFFECT_NONE
+    event_amount!(row, 0) = 0
+    event_amount!(row, 1) = 0
+    event_redraw(row) = REDRAW_NONE
+    event_text_count(row) = 0
+    event_outcome$(row) = ""
+    FOR k = 0 TO MAX_EVENT_TEXTS
+        event_text$(row, k) = ""
+    NEXT k
+    event_instead(row) = 0
+    event_then(row) = 0
+    event_if_first(row) = 0
+    event_if_count(row) = 0
+    event_instead_first(row) = 0
+    event_instead_count(row) = 0
 END SUB
 
 ' Reads one "key = value" line of an event into its row. The names of an "instead" and a
@@ -203,15 +263,21 @@ SUB event_read_line (row, key$, value$, instead_name$, then_name$, why$)
             END IF
         CASE "when"
             SELECT CASE LCASE$(value$)
-                CASE "before": event_before(row) = 1
-                CASE "roll": event_before(row) = 0
-                CASE ELSE: why$ = "when needs before or roll"
+                CASE "before"
+                    event_before(row) = 1
+                CASE "roll"
+                    event_before(row) = 0
+                CASE ELSE
+                    why$ = "when needs before or roll"
             END SELECT
         CASE "listed"
             SELECT CASE LCASE$(value$)
-                CASE "yes": event_listed(row) = 1
-                CASE "no": event_listed(row) = 0
-                CASE ELSE: why$ = "listed needs yes or no"
+                CASE "yes"
+                    event_listed(row) = 1
+                CASE "no"
+                    event_listed(row) = 0
+                CASE ELSE
+                    why$ = "listed needs yes or no"
             END SELECT
         CASE "if"
             event_if_first(row) = condition_count + 1
@@ -242,9 +308,12 @@ SUB event_read_line (row, key$, value$, instead_name$, then_name$, why$)
             then_name$ = LCASE$(value$)
         CASE "redraw"
             SELECT CASE LCASE$(value$)
-                CASE "fleets": event_redraw(row) = REDRAW_FLEETS
-                CASE "map": event_redraw(row) = REDRAW_MAP
-                CASE ELSE: why$ = "redraw needs fleets or map"
+                CASE "fleets"
+                    event_redraw(row) = REDRAW_FLEETS
+                CASE "map"
+                    event_redraw(row) = REDRAW_MAP
+                CASE ELSE
+                    why$ = "redraw needs fleets or map"
             END SELECT
         CASE ELSE
             why$ = "unknown line: " + key$
@@ -266,23 +335,31 @@ END FUNCTION
 ' Reads conditions parted by commas, as in "roll at most .1, cities at least 30", onto the
 ' end of the condition arrays.
 SUB event_read_conditions (list$, why$)
-    DIM cut AS INTEGER: DIM first_space AS INTEGER: DIM last_space AS INTEGER
-    DIM rest$: DIM item$
+    DIM cut AS INTEGER
+    DIM first_space AS INTEGER
+    DIM last_space AS INTEGER
+    DIM rest$
+    DIM item$
     rest$ = LCASE$(list$)
     DO WHILE rest$ <> "" AND why$ = ""
         cut = INSTR(rest$, ",")
         IF cut = 0 THEN
-            item$ = rest$: rest$ = ""
+            item$ = rest$
+            rest$ = ""
         ELSE
-            item$ = LEFT$(rest$, cut - 1): rest$ = MID$(rest$, cut + 1)
+            item$ = LEFT$(rest$, cut - 1)
+            rest$ = MID$(rest$, cut + 1)
         END IF
         item$ = LTRIM$(RTRIM$(item$))
-        first_space = INSTR(item$, " "): last_space = text_last_space(item$)
+        first_space = INSTR(item$, " ")
+        last_space = text_last_space(item$)
         IF condition_count = MAX_EVENT_CONDITIONS THEN
             why$ = "too many conditions"
         ELSEIF item$ = "once" THEN
             condition_count = condition_count + 1
-            condition_subject(condition_count) = SUBJECT_ONCE: condition_relation(condition_count) = 0: condition_value!(condition_count) = 0
+            condition_subject(condition_count) = SUBJECT_ONCE
+            condition_relation(condition_count) = 0
+            condition_value!(condition_count) = 0
         ELSEIF first_space = last_space THEN
             why$ = "cannot read the condition: " + item$
         ELSEIF text_is_number(MID$(item$, last_space + 1)) = 0 THEN
@@ -291,20 +368,32 @@ SUB event_read_conditions (list$, why$)
             condition_count = condition_count + 1
             condition_value!(condition_count) = VAL(MID$(item$, last_space + 1))
             SELECT CASE LEFT$(item$, first_space - 1)
-                CASE "roll": condition_subject(condition_count) = SUBJECT_ROLL
-                CASE "year": condition_subject(condition_count) = SUBJECT_YEAR
-                CASE "month": condition_subject(condition_count) = SUBJECT_MONTH
-                CASE "cities": condition_subject(condition_count) = SUBJECT_CITIES
-                CASE "realism": condition_subject(condition_count) = SUBJECT_REALISM
-                CASE ELSE: why$ = "cannot read the condition: " + item$
+                CASE "roll"
+                    condition_subject(condition_count) = SUBJECT_ROLL
+                CASE "year"
+                    condition_subject(condition_count) = SUBJECT_YEAR
+                CASE "month"
+                    condition_subject(condition_count) = SUBJECT_MONTH
+                CASE "cities"
+                    condition_subject(condition_count) = SUBJECT_CITIES
+                CASE "realism"
+                    condition_subject(condition_count) = SUBJECT_REALISM
+                CASE ELSE
+                    why$ = "cannot read the condition: " + item$
             END SELECT
             SELECT CASE LTRIM$(RTRIM$(MID$(item$, first_space + 1, last_space - first_space - 1)))
-                CASE "is": condition_relation(condition_count) = RELATION_IS
-                CASE "above": condition_relation(condition_count) = RELATION_ABOVE
-                CASE "below": condition_relation(condition_count) = RELATION_BELOW
-                CASE "at least": condition_relation(condition_count) = RELATION_AT_LEAST
-                CASE "at most": condition_relation(condition_count) = RELATION_AT_MOST
-                CASE ELSE: why$ = "cannot read the condition: " + item$
+                CASE "is"
+                    condition_relation(condition_count) = RELATION_IS
+                CASE "above"
+                    condition_relation(condition_count) = RELATION_ABOVE
+                CASE "below"
+                    condition_relation(condition_count) = RELATION_BELOW
+                CASE "at least"
+                    condition_relation(condition_count) = RELATION_AT_LEAST
+                CASE "at most"
+                    condition_relation(condition_count) = RELATION_AT_MOST
+                CASE ELSE
+                    why$ = "cannot read the condition: " + item$
             END SELECT
         END IF
     LOOP
@@ -312,8 +401,13 @@ END SUB
 
 ' Reads an effect, as in "enemy armies times .9": its name, then the numbers it needs.
 SUB event_read_effect (row, value$, why$)
-    DIM last_space AS INTEGER: DIM numbers AS INTEGER: DIM least AS INTEGER: DIM most AS INTEGER
-    DIM rest$: DIM word$: DIM need$
+    DIM last_space AS INTEGER
+    DIM numbers AS INTEGER
+    DIM least AS INTEGER
+    DIM most AS INTEGER
+    DIM rest$
+    DIM word$
+    DIM need$
     rest$ = LCASE$(LTRIM$(RTRIM$(value$)))
     DO
         last_space = text_last_space(rest$)
@@ -322,33 +416,53 @@ SUB event_read_effect (row, value$, why$)
             EXIT DO
         END IF
         IF numbers = 2 THEN
-            why$ = "too many numbers in the effect": EXIT SUB
+            why$ = "too many numbers in the effect"
+            EXIT SUB
         END IF
         event_amount!(row, 1) = event_amount!(row, 0)
         event_amount!(row, 0) = VAL(word$)
         numbers = numbers + 1
         rest$ = RTRIM$(LEFT$(rest$, last_space))
     LOOP
-    least = 1: most = 1
+    least = 1
+    most = 1
     SELECT CASE rest$
-        CASE "points": event_effect(row) = EFFECT_POINTS: most = 2
-        CASE "enemy points times": event_effect(row) = EFFECT_ENEMY_POINTS_TIMES
-        CASE "cash": event_effect(row) = EFFECT_CASH
-        CASE "ships": event_effect(row) = EFFECT_SHIPS
-        CASE "ships to port": event_effect(row) = EFFECT_SHIPS_TO_PORT
-        CASE "reinforce": event_effect(row) = EFFECT_REINFORCE
-        CASE "armies grow": event_effect(row) = EFFECT_ARMIES_GROW: least = 2: most = 2
-        CASE "enemy armies times": event_effect(row) = EFFECT_ENEMY_ARMIES_TIMES
-        CASE "experience": event_effect(row) = EFFECT_EXPERIENCE
-        CASE "city neutral": event_effect(row) = EFFECT_CITY_NEUTRAL: least = 0: most = 0
-        CASE ELSE: why$ = "unknown effect: " + rest$: EXIT SUB
+        CASE "points"
+            event_effect(row) = EFFECT_POINTS
+            most = 2
+        CASE "enemy points times"
+            event_effect(row) = EFFECT_ENEMY_POINTS_TIMES
+        CASE "cash"
+            event_effect(row) = EFFECT_CASH
+        CASE "ships"
+            event_effect(row) = EFFECT_SHIPS
+        CASE "ships to port"
+            event_effect(row) = EFFECT_SHIPS_TO_PORT
+        CASE "reinforce"
+            event_effect(row) = EFFECT_REINFORCE
+        CASE "armies grow"
+            event_effect(row) = EFFECT_ARMIES_GROW
+            least = 2
+            most = 2
+        CASE "enemy armies times"
+            event_effect(row) = EFFECT_ENEMY_ARMIES_TIMES
+        CASE "experience"
+            event_effect(row) = EFFECT_EXPERIENCE
+        CASE "city neutral"
+            event_effect(row) = EFFECT_CITY_NEUTRAL
+            least = 0
+            most = 0
+        CASE ELSE
+            why$ = "unknown effect: " + rest$
+            EXIT SUB
     END SELECT
     IF numbers < least OR numbers > most THEN
         need$ = LTRIM$(STR$(least))
         IF most > least THEN
             need$ = need$ + " or " + LTRIM$(STR$(most))
         END IF
-        need$ = need$ + " number": IF most > 1 THEN
+        need$ = need$ + " number"
+        IF most > 1 THEN
             need$ = need$ + "s"
         END IF
         IF most = 0 THEN
@@ -362,18 +476,28 @@ END SUB
 ' parted by " x ", then "plus" a number and "at most" a number, parted by commas.
 SUB event_read_chance (value$, why$)
     DIM cut AS INTEGER
-    DIM rest$: DIM factors$: DIM item$: DIM inner$: DIM name$: DIM number$
+    DIM rest$
+    DIM factors$
+    DIM item$
+    DIM inner$
+    DIM name$
+    DIM number$
     rest$ = LCASE$(value$) + ","
     cut = INSTR(rest$, ",")
-    factors$ = LEFT$(rest$, cut - 1) + " x ": rest$ = MID$(rest$, cut + 1)
+    factors$ = LEFT$(rest$, cut - 1) + " x "
+    rest$ = MID$(rest$, cut + 1)
     DO WHILE factors$ <> "" AND why$ = ""
         cut = INSTR(factors$, " x ")
-        item$ = LTRIM$(RTRIM$(LEFT$(factors$, cut - 1))): factors$ = MID$(factors$, cut + 3)
+        item$ = LTRIM$(RTRIM$(LEFT$(factors$, cut - 1)))
+        factors$ = MID$(factors$, cut + 3)
         IF chance_count = MAX_CHANCE_FACTORS THEN
-            why$ = "too many factors in the chance": EXIT SUB
+            why$ = "too many factors in the chance"
+            EXIT SUB
         END IF
-        chance_count = chance_count + 1: chance_value#(chance_count) = 0
-        name$ = item$: number$ = "0"
+        chance_count = chance_count + 1
+        chance_value#(chance_count) = 0
+        name$ = item$
+        number$ = "0"
         IF LEFT$(item$, 1) = "(" AND RIGHT$(item$, 1) = ")" AND INSTR(item$, "-") > 0 THEN
             inner$ = MID$(item$, 2, LEN(item$) - 2)
             name$ = LTRIM$(RTRIM$(LEFT$(inner$, INSTR(inner$, "-") - 1)))
@@ -383,11 +507,13 @@ SUB event_read_chance (value$, why$)
             END IF
         END IF
         IF text_is_number(name$) THEN
-            chance_kind(chance_count) = CHANCE_NUMBER: chance_value#(chance_count) = VAL(name$)
+            chance_kind(chance_count) = CHANCE_NUMBER
+            chance_value#(chance_count) = VAL(name$)
         ELSEIF name$ = "weight" THEN
             chance_kind(chance_count) = CHANCE_WEIGHT
         ELSEIF (name$ = "year" OR name$ = "difficulty") AND text_is_number(number$) <> 0 THEN
-            chance_kind(chance_count) = CHANCE_YEAR: IF name$ = "difficulty" THEN
+            chance_kind(chance_count) = CHANCE_YEAR
+            IF name$ = "difficulty" THEN
                 chance_kind(chance_count) = CHANCE_DIFFICULTY
             END IF
             chance_value#(chance_count) = VAL(number$)
@@ -397,11 +523,13 @@ SUB event_read_chance (value$, why$)
     LOOP
     DO WHILE rest$ <> "" AND why$ = ""
         cut = INSTR(rest$, ",")
-        item$ = LTRIM$(RTRIM$(LEFT$(rest$, cut - 1))): rest$ = MID$(rest$, cut + 1)
+        item$ = LTRIM$(RTRIM$(LEFT$(rest$, cut - 1)))
+        rest$ = MID$(rest$, cut + 1)
         IF LEFT$(item$, 5) = "plus " AND text_is_number(LTRIM$(MID$(item$, 6))) <> 0 THEN
             chance_plus# = VAL(MID$(item$, 6))
         ELSEIF LEFT$(item$, 8) = "at most " AND text_is_number(LTRIM$(MID$(item$, 9))) <> 0 THEN
-            chance_most# = VAL(MID$(item$, 9)): chance_has_most = 1
+            chance_most# = VAL(MID$(item$, 9))
+            chance_has_most = 1
         ELSE
             why$ = "cannot read the chance: " + item$
         END IF
@@ -411,7 +539,10 @@ END SUB
 ' Whether a text is a number as the file writes one: digits, at most one point, and a minus
 ' sign only at the start.
 FUNCTION text_is_number (text$)
-    DIM k AS INTEGER: DIM digits AS INTEGER: DIM points AS INTEGER: DIM c$
+    DIM k AS INTEGER
+    DIM digits AS INTEGER
+    DIM points AS INTEGER
+    DIM c$
     text_is_number = 0
     FOR k = 1 TO LEN(text$)
         c$ = MID$(text$, k, 1)
@@ -434,7 +565,8 @@ FUNCTION text_last_space (text$)
     text_last_space = 0
     FOR k = LEN(text$) TO 1 STEP -1
         IF MID$(text$, k, 1) = " " THEN
-            text_last_space = k: EXIT FUNCTION
+            text_last_space = k
+            EXIT FUNCTION
         END IF
     NEXT k
 END FUNCTION
@@ -442,7 +574,10 @@ END FUNCTION
 ' Reads the map's cities and roads from cities.grd. Adds each city to its owner's count,
 ' victory points and cash.
 SUB load_cities
-    DIM i AS INTEGER: DIM j AS INTEGER: DIM unused AS INTEGER: DIM owner AS INTEGER
+    DIM i AS INTEGER
+    DIM j AS INTEGER
+    DIM unused AS INTEGER
+    DIM owner AS INTEGER
     city_name$(0) = "NONE"
     OPEN "I", 1, scenario_file$("cities.grd")
     total_income = union_income_bonus + 200
@@ -455,7 +590,9 @@ SUB load_cities
         NEXT j
         INPUT #1, city_port_type(i), city_fort(i)
         IF city_owner(i) > 0 THEN
-            owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_victory_points(owner) = side_victory_points(owner) + city_value(i)
+            owner = city_owner(i)
+            side_city_count(owner) = side_city_count(owner) + 1
+            side_victory_points(owner) = side_victory_points(owner) + city_value(i)
         END IF
         IF city_owner(i) > 0 THEN
             side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
@@ -472,9 +609,18 @@ END SUB
 ' and nothing was changed. The menu of saved games is menu_load_game (ui/files.bm).
 SUB load_game (slot, problem$)
     DIM last_army AS INTEGER
-    DIM k AS INTEGER: DIM side AS INTEGER: DIM first_army AS INTEGER: DIM config_side AS INTEGER
-    DIM i AS INTEGER: DIM saved_side AS INTEGER: DIM unused AS INTEGER: DIM row AS INTEGER
-    DIM file$: DIM text$: DIM folder$: DIM named AS INTEGER
+    DIM k AS INTEGER
+    DIM side AS INTEGER
+    DIM first_army AS INTEGER
+    DIM config_side AS INTEGER
+    DIM i AS INTEGER
+    DIM saved_side AS INTEGER
+    DIM unused AS INTEGER
+    DIM row AS INTEGER
+    DIM file$
+    DIM text$
+    DIM folder$
+    DIM named AS INTEGER
     problem$ = ""
     file$ = "cws" + LTRIM$(STR$(slot)) + ".sav"
     ' The scenario first. The file is closed again, because load_scenario and load_cities read
@@ -495,14 +641,17 @@ SUB load_game (slot, problem$)
         EXIT SUB
     END IF
     IF row <> scenario_now THEN
-        scenario_now = row: CALL load_scenario: CALL load_cities
+        scenario_now = row
+        CALL load_scenario
+        CALL load_cities
     END IF
     OPEN "I", 1, file$
     IF named THEN
         LINE INPUT #1, text$
     END IF
     INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
-    FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+    FOR i = 1 TO MAX_ARMIES
+        INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
         IF army_exists(i) THEN
             IF army_name$(i) = leader_name$(i) THEN
                 leader_name$(i) = ""
@@ -512,7 +661,8 @@ SUB load_game (slot, problem$)
                 last_army = side_last_army(side)
                 FOR k = first_army TO last_army
                     IF army_name$(i) = leader_name$(k) THEN
-                        leader_name$(k) = "": EXIT FOR
+                        leader_name$(k) = ""
+                        EXIT FOR
                     END IF
                 NEXT k
             END IF
@@ -535,7 +685,8 @@ END SUB
 ' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The file's first line is the
 ' scenario's folder. The menu of the slots is menu_save_game (ui/files.bm).
 SUB save_game (slot)
-    DIM i AS INTEGER: DIM config_side AS INTEGER
+    DIM i AS INTEGER
+    DIM config_side AS INTEGER
     OPEN "O", 1, "cws" + LTRIM$(STR$(slot)) + ".sav"
     WRITE #1, scenario_folder$(scenario_now)
     WRITE #1, turn_month, turn_year, union_income_bonus, current_side
@@ -561,7 +712,8 @@ END SUB
 ' Notes whether a saved game is on the disk, so that the Files menu shows Load, or "-" when
 ' there is none.
 SUB saved_games_check
-    saves_exist = 0: IF any_saved_game THEN
+    saves_exist = 0
+    IF any_saved_game THEN
         saves_exist = 1
     END IF
 END SUB
@@ -571,7 +723,8 @@ FUNCTION any_saved_game
     DIM k AS INTEGER
     FOR k = 1 TO 9
         IF _FILEEXISTS("cws" + LTRIM$(STR$(k)) + ".sav") THEN
-            any_saved_game = -1: EXIT FUNCTION
+            any_saved_game = -1
+            EXIT FUNCTION
         END IF
     NEXT k
 END FUNCTION
@@ -589,7 +742,8 @@ SUB config_write (side)
 END SUB
 
 SUB save_battle_summary
-    DIM k AS INTEGER: DIM winner_mark$
+    DIM k AS INTEGER
+    DIM winner_mark$
     IF opt_history > 0 THEN
         OPEN "O", #1, "battsumm"
         PRINT #1, " SIDE      BATTLES WON       LOSSES"
@@ -606,7 +760,8 @@ END SUB
 
 ' Reads the Hall of Fame: five names and scores for each side.
 SUB hall_of_fame_load (names$(), scores())
-    DIM side AS INTEGER: DIM i AS INTEGER
+    DIM side AS INTEGER
+    DIM i AS INTEGER
     OPEN "I", 1, "hiscore.cws"
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
@@ -617,7 +772,8 @@ SUB hall_of_fame_load (names$(), scores())
 END SUB
 
 SUB hall_of_fame_save (names$(), scores())
-    DIM side AS INTEGER: DIM i AS INTEGER
+    DIM side AS INTEGER
+    DIM i AS INTEGER
     OPEN "O", 1, "hiscore.cws"
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5

@@ -2,7 +2,9 @@
 ' here opens a menu or reads a key.
 
 SUB city_capture (moving_army, city, side, weaken_fort)
-    DIM message$: DIM was_enemy_capital AS INTEGER: DIM razed AS INTEGER
+    DIM message$
+    DIM was_enemy_capital AS INTEGER
+    DIM razed AS INTEGER
     was_enemy_capital = 0
     IF city = side_capital(other_side(side)) THEN
         was_enemy_capital = 1
@@ -14,7 +16,8 @@ SUB city_capture (moving_army, city, side, weaken_fort)
     CALL city_take(city, side, weaken_fort)
     CALL clear_bottom_line
     message$ = army_name$(moving_army) + " has captured " + city_name$(city)
-    COLOR COLOR_LIGHT_CYAN: PRINT message$;
+    COLOR COLOR_LIGHT_CYAN
+    PRINT message$;
     IF army_side(moving_army) = SIDE_UNION AND opt_sound >= SOUND_MUSIC THEN
         PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
     END IF

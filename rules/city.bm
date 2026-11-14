@@ -1,6 +1,7 @@
 ' Sorts a list of cities by name, as the menu's bubble sort sorts its rows (menu_bubble_sort).
 SUB city_list_sort (cities(), count)
-    DIM i AS INTEGER: DIM swaps%
+    DIM i AS INTEGER
+    DIM swaps%
     DO
         swaps% = FALSE
         FOR i = 1 TO count - 1
@@ -14,7 +15,9 @@ END SUB
 
 ' The number of cities next to city that side holds: 0 when the city is cut off.
 FUNCTION city_is_connected (side, city)
-    DIM j AS INTEGER: DIM neighbor AS INTEGER: DIM friendly_neighbors AS INTEGER
+    DIM j AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM friendly_neighbors AS INTEGER
     friendly_neighbors = 0
     FOR j = 1 TO MAX_ROADS
         neighbor = city_road(city, j)
@@ -64,7 +67,11 @@ END SUB
 ' in from_city() and to_city(), with added() 1 when the road back was added and 0 when the
 ' city had no free slot. count is the length of the list. check_map_links (ui/reports.bm) shows it.
 SUB city_fix_return_routes (count, added(), from_city(), to_city())
-    DIM i AS INTEGER: DIM j AS INTEGER: DIM k AS INTEGER: DIM neighbor AS INTEGER: DIM linked AS INTEGER
+    DIM i AS INTEGER
+    DIM j AS INTEGER
+    DIM k AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM linked AS INTEGER
     count = 0
     FOR i = 1 TO MAX_CITIES
         FOR j = 1 TO MAX_ROADS
@@ -75,14 +82,24 @@ SUB city_fix_return_routes (count, added(), from_city(), to_city())
             linked = 0
             FOR k = 1 TO MAX_ROADS
                 IF city_road(neighbor, k) = i THEN
-                    linked = 1: EXIT FOR
+                    linked = 1
+                    EXIT FOR
                 END IF
                 IF city_road(neighbor, k) = 0 THEN
-                    city_road(neighbor, k) = i: count = count + 1: added(count) = 1: from_city(count) = neighbor: to_city(count) = i: linked = 1: EXIT FOR
+                    city_road(neighbor, k) = i
+                    count = count + 1
+                    added(count) = 1
+                    from_city(count) = neighbor
+                    to_city(count) = i
+                    linked = 1
+                    EXIT FOR
                 END IF
             NEXT k
             IF linked = 0 THEN
-                count = count + 1: added(count) = 0: from_city(count) = neighbor: to_city(count) = i
+                count = count + 1
+                added(count) = 0
+                from_city(count) = neighbor
+                to_city(count) = i
             END IF
         NEXT j
     NEXT i
@@ -93,7 +110,8 @@ SUB city_update_occupier (city)
     city_army(city) = 0
     FOR i = 1 TO MAX_ARMIES
         IF army_city(i) = city THEN
-            city_army(city) = i: EXIT SUB
+            city_army(city) = i
+            EXIT SUB
         END IF
     NEXT i
 END SUB

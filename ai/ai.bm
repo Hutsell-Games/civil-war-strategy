@@ -112,8 +112,12 @@ END SUB
 ' How many armies the computer's side has. Two fewer when the other side has more men, and
 ' none when it has more than twice as many, so that the computer recruits.
 FUNCTION ai_count_armies (side)
-    DIM first_army AS INTEGER: DIM last_army AS INTEGER: DIM i AS INTEGER
-    DIM army_count AS INTEGER: DIM enemy_strength AS INTEGER: DIM own_strength AS INTEGER
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
+    DIM i AS INTEGER
+    DIM army_count AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM own_strength AS INTEGER
     first_army = side_first_army(other_side(side))
     last_army = side_last_army(other_side(side))
     FOR i = first_army TO last_army
@@ -143,7 +147,8 @@ END FUNCTION
 ' The computer's fleet: builds a ship, sails, or attacks the port it lies off.
 SUB ai_fleet_orders (side)
     IF current_side = SIDE_REBEL AND NOT fleet_exists(SIDE_UNION) AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > COST_SHIP THEN
-        fleet_city(SIDE_UNION) = 30: CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD)
+        fleet_city(SIDE_UNION) = 30
+        CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD)
     ELSE
         IF fleet_is_at_sea(side) THEN
             IF RND < .9 THEN
@@ -169,10 +174,12 @@ SUB ai_fleet_orders (side)
     IF NOT fleet_is_at_sea(side) THEN
         'move ships & prohibit further action this turn
         IF city_owner(fleet_city(side)) = side THEN
-            CALL ai_navy_orders(side, NAVY_SAIL): EXIT SUB
+            CALL ai_navy_orders(side, NAVY_SAIL)
+            EXIT SUB
         END IF
         IF city_owner(fleet_city(side)) = SIDE_NONE THEN
-            CALL ai_navy_orders(side, NAVY_SAIL): EXIT SUB
+            CALL ai_navy_orders(side, NAVY_SAIL)
+            EXIT SUB
         END IF
     ELSE
         IF RND < .5 THEN
@@ -210,7 +217,12 @@ END SUB
 ' The computer's move order for an army, or none (ordered is 0).
 SUB ai_army_order (side, army, ordered)
     DIM city AS INTEGER
-    DIM enemy_strength AS INTEGER: DIM j AS INTEGER: DIM neighbor AS INTEGER: DIM neighbor_strength AS INTEGER: DIM best_road AS INTEGER: DIM other_army AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM j AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM neighbor_strength AS INTEGER
+    DIM best_road AS INTEGER
+    DIM other_army AS INTEGER
     ordered = 0
     city = army_city(army)
     IF NOT army_exists(army) OR army_has_acted(army) THEN
@@ -264,7 +276,9 @@ END SUB
 
 ' The computer drills each army that has no order and can still improve.
 SUB ai_drill (side)
-    DIM first_army AS INTEGER: DIM last_army AS INTEGER: DIM i AS INTEGER
+    DIM first_army AS INTEGER
+    DIM last_army AS INTEGER
+    DIM i AS INTEGER
     first_army = side_first_army(side)
     last_army = side_last_army(side)
     FOR i = first_army TO last_army
@@ -276,9 +290,23 @@ SUB ai_drill (side)
 END SUB
 
 SUB ai_evaluate_move (army, best_road)
-    DIM road_count AS INTEGER: DIM far_city AS INTEGER: DIM stay_weight AS INTEGER: DIM best_score AS INTEGER
-    DIM from_city AS INTEGER: DIM enemy_strength AS INTEGER: DIM own_strength AS INTEGER: DIM j AS INTEGER: DIM to_city AS INTEGER: DIM score AS INTEGER: DIM k AS INTEGER: DIM occupant AS INTEGER: DIM fort_factor AS INTEGER: DIM odds!: DIM ally_bound AS INTEGER
-    DIM own_side AS INTEGER: DIM enemy_side AS INTEGER
+    DIM road_count AS INTEGER
+    DIM far_city AS INTEGER
+    DIM stay_weight AS INTEGER
+    DIM best_score AS INTEGER
+    DIM from_city AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM own_strength AS INTEGER
+    DIM j AS INTEGER
+    DIM to_city AS INTEGER
+    DIM score AS INTEGER
+    DIM k AS INTEGER
+    DIM occupant AS INTEGER
+    DIM fort_factor AS INTEGER
+    DIM odds!
+    DIM ally_bound AS INTEGER
+    DIM own_side AS INTEGER
+    DIM enemy_side AS INTEGER
     ' Each road's score; -1 for a road not scored. Entry 0, for no road, stays 0.
     DIM road_score(MAX_ROADS) AS INTEGER
     enemy_side = current_side
@@ -325,7 +353,8 @@ SUB ai_evaluate_move (army, best_road)
         score = -1
         to_city = city_road(from_city, j)
         IF to_city = 0 THEN
-            road_count = j - 1: EXIT FOR
+            road_count = j - 1
+            EXIT FOR
         END IF
 
         occupant = city_army(to_city)
@@ -334,7 +363,8 @@ SUB ai_evaluate_move (army, best_road)
         FOR k = side_first_army(own_side) TO side_last_army(own_side)
             IF army_exists(k) THEN
                 IF army_order(k) = to_city AND occupant = 0 THEN
-                    ally_bound = 1: EXIT FOR
+                    ally_bound = 1
+                    EXIT FOR
                 END IF
             END IF
         NEXT k
@@ -381,7 +411,8 @@ SUB ai_evaluate_move (army, best_road)
             END IF
 
             IF army_size(army) < SMALL_ARMY_SIZE THEN
-                score = score - 300: odds! = .1
+                score = score - 300
+                odds! = .1
             END IF
             IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN
                 score = 0
@@ -459,7 +490,8 @@ SUB ai_evaluate_move (army, best_road)
             _CONTINUE
         END IF
         IF road_score(j) > best_score THEN
-            best_score = road_score(j): best_road = j
+            best_score = road_score(j)
+            best_road = j
         END IF
     NEXT j
     IF enemy_strength > army_size(army) AND road_score(best_road) < 50 THEN
@@ -470,12 +502,17 @@ END SUB
 ' The player's strength near a city: in full in the cities next to it, a tenth two roads away. The sum is an
 ' INTEGER, rounded at each step, as it was when it was a SUB's parameter.
 FUNCTION city_nearby_enemy_strength (city)
-    DIM j AS INTEGER: DIM neighbor AS INTEGER: DIM k AS INTEGER: DIM far_city AS INTEGER: DIM strength AS INTEGER
+    DIM j AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM k AS INTEGER
+    DIM far_city AS INTEGER
+    DIM strength AS INTEGER
     DIM enemy_side AS INTEGER
     enemy_side = current_side
     strength = 0
     FOR j = 1 TO MAX_ROADS
-        neighbor = city_road(city, j): IF neighbor = 0 THEN
+        neighbor = city_road(city, j)
+        IF neighbor = 0 THEN
             EXIT FOR
         END IF
         IF city_owner(neighbor) = enemy_side AND city_army(neighbor) > 0 THEN
@@ -497,8 +534,10 @@ END FUNCTION
 ' The computer recruits: it picks a city from its list and raises men there, while the money
 ' lasts and it has a commander for a new army.
 SUB ai_recruit (side)
-    DIM city AS INTEGER: DIM raised AS INTEGER
-    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
+    DIM city AS INTEGER
+    DIM raised AS INTEGER
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
     IF side_cash(side) < COST_RECRUIT THEN
         EXIT SUB
     END IF
@@ -522,7 +561,11 @@ END SUB
 
 ' The computer's pick from its list of count cities to recruit in.
 FUNCTION ai_recruit_pick (side, cities(), count)
-    DIM army AS INTEGER: DIM best_score AS INTEGER: DIM i AS INTEGER: DIM city AS INTEGER: DIM score AS INTEGER
+    DIM army AS INTEGER
+    DIM best_score AS INTEGER
+    DIM i AS INTEGER
+    DIM city AS INTEGER
+    DIM score AS INTEGER
     DIM choice AS INTEGER
     choice = 0
     army = 0
@@ -547,7 +590,8 @@ FUNCTION ai_recruit_pick (side, cities(), count)
                 score = recruit_troops(side, city, 1)
             END IF
             IF score > best_score AND RND > .5 THEN
-                best_score = score: choice = i
+                best_score = score
+                choice = i
             END IF
         NEXT i
     END IF
@@ -560,8 +604,11 @@ END FUNCTION
 ' The computer combines the armies in one of the cities where armies can combine, picked at
 ' random.
 SUB ai_combine (side)
-    DIM city AS INTEGER: DIM best AS INTEGER: DIM joined AS INTEGER
-    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
+    DIM city AS INTEGER
+    DIM best AS INTEGER
+    DIM joined AS INTEGER
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
     CALL army_list_combine_cities(side, cities(), count)
     IF count = 0 THEN
         EXIT SUB
@@ -587,7 +634,8 @@ END FUNCTION
 ' The computer's train. With an army aboard, it arrives. With none, the computer may send one
 ' (ai_railroad).
 SUB ai_railroad_orders (side)
-    DIM army AS INTEGER: DIM city AS INTEGER
+    DIM army AS INTEGER
+    DIM city AS INTEGER
     SELECT CASE train_army(side)
         CASE 0
             CALL ai_railroad(side, army, city)
@@ -603,8 +651,18 @@ END SUB
 ' The computer's train: an army that is far from the enemy, and a city of its own that the
 ' enemy threatens. army and city are 0 when it sends no train.
 SUB ai_railroad (side, army, city)
-    DIM least_threat AS INTEGER: DIM spare_army AS INTEGER: DIM i AS INTEGER: DIM enemy_neighbors AS INTEGER: DIM routes AS INTEGER: DIM j AS INTEGER
-    DIM neighbor AS INTEGER: DIM from_city AS INTEGER: DIM enemy_strength AS INTEGER: DIM capacity AS INTEGER: DIM to_city AS INTEGER: DIM candidate_city AS INTEGER
+    DIM least_threat AS INTEGER
+    DIM spare_army AS INTEGER
+    DIM i AS INTEGER
+    DIM enemy_neighbors AS INTEGER
+    DIM routes AS INTEGER
+    DIM j AS INTEGER
+    DIM neighbor AS INTEGER
+    DIM from_city AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM capacity AS INTEGER
+    DIM to_city AS INTEGER
+    DIM candidate_city AS INTEGER
     DIM enemy_side AS INTEGER
     enemy_side = current_side
     army = 0
@@ -632,8 +690,11 @@ SUB ai_railroad (side, army, city)
             END IF
         END IF
         IF enemy_strength < least_threat THEN
-            candidate_city = army_city(i): routes = railroad_route_count(side, candidate_city): IF routes > 1 THEN
-                least_threat = enemy_strength: spare_army = i
+            candidate_city = army_city(i)
+            routes = railroad_route_count(side, candidate_city)
+            IF routes > 1 THEN
+                least_threat = enemy_strength
+                spare_army = i
             END IF
         END IF
     NEXT i
@@ -658,7 +719,8 @@ SUB ai_railroad (side, army, city)
             _CONTINUE
         END IF
         candidate_city = i
-        routes = railroad_route_count(side, candidate_city): IF routes = 0 THEN
+        routes = railroad_route_count(side, candidate_city)
+        IF routes = 0 THEN
             _CONTINUE
         END IF
         IF enemy_side = SIDE_UNION AND city_y(i) < city_y(from_city) THEN
@@ -668,7 +730,8 @@ SUB ai_railroad (side, army, city)
             to_city = i
         END IF
         IF city_fort(i) > 0 AND city_army(i) = 0 THEN
-            to_city = i: EXIT FOR
+            to_city = i
+            EXIT FOR
         END IF
     NEXT i
     IF victory_rule(VICTORY_CAPITAL) > 0 AND city_army(side_capital(side)) = 0 THEN
@@ -681,13 +744,17 @@ SUB ai_railroad (side, army, city)
         END IF
     END IF
     IF to_city > 0 THEN
-        army = spare_army: city = to_city
+        army = spare_army
+        city = to_city
     END IF
 END SUB
 
 ' The computer's choice of a port to sail to, from its list of count ports.
 FUNCTION ai_pick_port (side, ports(), count)
-    DIM best AS INTEGER: DIM enemy_ports AS INTEGER: DIM i AS INTEGER: DIM port AS INTEGER
+    DIM best AS INTEGER
+    DIM enemy_ports AS INTEGER
+    DIM i AS INTEGER
+    DIM port AS INTEGER
     DIM enemy_side AS INTEGER
     enemy_side = other_side(side)
     best = 0
@@ -700,13 +767,16 @@ FUNCTION ai_pick_port (side, ports(), count)
 
         IF port = fleet_city(enemy_side) THEN
             IF fleet_size(side) >= fleet_size(enemy_side) AND RND > .1 THEN
-                ai_pick_port = port: EXIT FUNCTION
+                ai_pick_port = port
+                EXIT FUNCTION
             END IF
         END IF
         IF city_owner(port) <> side THEN
-            best = i: enemy_ports = enemy_ports + 1
+            best = i
+            enemy_ports = enemy_ports + 1
             IF RND > .8 THEN
-                ai_pick_port = ports(best): EXIT FUNCTION
+                ai_pick_port = ports(best)
+                EXIT FUNCTION
             END IF
         END IF
     NEXT i
@@ -731,7 +801,9 @@ END FUNCTION
 ' each action (ai_navy_adjust). An action may ask for another, for example after a ship is
 ' built.
 SUB ai_navy_orders (side, order)
-    DIM action AS INTEGER: DIM quit AS INTEGER: DIM again AS INTEGER
+    DIM action AS INTEGER
+    DIM quit AS INTEGER
+    DIM again AS INTEGER
     action = order
     CALL ai_navy(side, action)
     CALL draw_ai_navy_color
@@ -744,11 +816,16 @@ SUB ai_navy_orders (side, order)
         END IF
         again = 0
         SELECT CASE action
-            CASE NAVY_BUILD: CALL ai_navy_build(side, again)
-            CASE NAVY_ATTACK: CALL ai_navy_attack(side, action, again)
-            CASE NAVY_SAIL: CALL ai_navy_sail(side, again)
-            CASE NAVY_RAID: CALL ai_navy_raid(side, again)
-            CASE NAVY_INVADE: CALL ai_navy_invade(side)
+            CASE NAVY_BUILD
+                CALL ai_navy_build(side, again)
+            CASE NAVY_ATTACK
+                CALL ai_navy_attack(side, action, again)
+            CASE NAVY_SAIL
+                CALL ai_navy_sail(side, again)
+            CASE NAVY_RAID
+                CALL ai_navy_raid(side, again)
+            CASE NAVY_INVADE
+                CALL ai_navy_invade(side)
         END SELECT
     LOOP WHILE again > 0
 END SUB
@@ -758,11 +835,15 @@ END SUB
 ' (the original charged one). A new fleet starts in one of its sea ports, picked at random.
 ' again is 1 when a ship was built, or when the cash or a fleet at sea prevented it.
 SUB ai_navy_build (side, again)
-    DIM ship$: DIM cost AS INTEGER: DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
+    DIM ship$
+    DIM cost AS INTEGER
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
     DIM choice AS INTEGER
     again = 0
     IF side_cash(side) < COST_SHIP OR fleet_is_at_sea(side) THEN
-        again = 1: EXIT SUB
+        again = 1
+        EXIT SUB
     END IF
     IF fleet_size(side) >= MAX_FLEET_SHIPS THEN
         EXIT SUB
@@ -770,20 +851,25 @@ SUB ai_navy_build (side, again)
     IF RND < .07 * fleet_size(side) THEN
         EXIT SUB
     END IF
-    ship$ = "W": cost = COST_SHIP
+    ship$ = "W"
+    cost = COST_SHIP
 
     IF navy_has_ironclads = 1 AND side_cash(side) >= 2 * COST_SHIP THEN
-        ship$ = "I": cost = 2 * COST_SHIP
+        ship$ = "I"
+        cost = 2 * COST_SHIP
     END IF
 
     CALL navy_add_ship(side, ship$, cost)
     IF fleet_size(side) > 1 THEN
-        CALL navy_ship_joins(side, ship$): again = 1: EXIT SUB
+        CALL navy_ship_joins(side, ship$)
+        again = 1
+        EXIT SUB
     END IF
     CALL navy_list_shipyards(side, cities(), count)
     choice = 1 + INT(count * RND)
     IF count < 1 THEN
-        CALL navy_cancel_new_fleet(side): EXIT SUB
+        CALL navy_cancel_new_fleet(side)
+        EXIT SUB
     END IF
     CALL navy_fleet_founded(side, cities(choice), ship$, cost)
     again = 1
@@ -794,7 +880,8 @@ END SUB
 SUB ai_navy_attack (side, action, again)
     again = 0
     IF fleet_is_at_sea(side) THEN
-        again = 1: EXIT SUB
+        again = 1
+        EXIT SUB
     END IF
     IF city_owner(fleet_city(side)) = side THEN
         EXIT SUB
@@ -806,14 +893,17 @@ SUB ai_navy_attack (side, action, again)
         CALL random_discard
     ELSE
         IF city_owner(fleet_city(side)) = SIDE_NONE THEN
-            action = NAVY_SAIL: again = 1: EXIT SUB
+            action = NAVY_SAIL
+            again = 1
+            EXIT SUB
         END IF
     END IF
     IF NOT fleet_exists(side) THEN
         EXIT SUB
     END IF
     IF city_owner(fleet_city(side)) <> other_side(side) THEN
-        again = 1: EXIT SUB
+        again = 1
+        EXIT SUB
     END IF
     CALL navy_bombard(side)
 END SUB
@@ -821,14 +911,19 @@ END SUB
 ' Sail, for the computer: to the enemy's fleet when it pursues, else to a port it picks
 ' (ai_pick_port). The fleets fight if they meet.
 SUB ai_navy_sail (side, again)
-    DIM sailed AS INTEGER: DIM ports(MAX_CITIES) AS INTEGER: DIM count AS INTEGER: DIM port AS INTEGER
+    DIM sailed AS INTEGER
+    DIM ports(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
+    DIM port AS INTEGER
     again = 0
     CALL navy_count_ships(side)
     IF fleet_size(side) < 1 THEN
         EXIT SUB
     END IF
     IF NOT fleet_exists(side) THEN
-        CALL navy_say_no_ships: again = 1: EXIT SUB
+        CALL navy_say_no_ships
+        again = 1
+        EXIT SUB
     END IF
 
     CALL navy_list_ports(side, ports(), count)
@@ -859,12 +954,15 @@ SUB ai_navy_raid (side, again)
         EXIT SUB
     END IF
     IF raiding_side = side THEN
-        again = 1: EXIT SUB
+        again = 1
+        EXIT SUB
     END IF
 
     CALL navy_start_raid(side)
     IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN
-        CALL navy_combat_auto(side): CALL navy_finish_move: EXIT SUB
+        CALL navy_combat_auto(side)
+        CALL navy_finish_move
+        EXIT SUB
     END IF
     CALL navy_redraw_map
 END SUB
@@ -901,10 +999,12 @@ END SUB
 SUB ai_navy_adjust (side, action, quit)
     IF action = NAVY_BUILD THEN
         IF side_cash(side) < COST_SHIP THEN
-            quit = 1: EXIT SUB
+            quit = 1
+            EXIT SUB
         END IF
         IF fleet_size(side) >= MAX_FLEET_SHIPS THEN
-            quit = 1: EXIT SUB
+            quit = 1
+            EXIT SUB
         END IF
     END IF
     IF NOT fleet_exists(side) AND action = NAVY_SAIL THEN

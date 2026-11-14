@@ -5,11 +5,16 @@
 ' Commands, Join: the player picks a city where armies can combine, and they become one.
 ' found is 0 when there is no such city.
 SUB menu_army_combine (side, found)
-    DIM city AS INTEGER: DIM best AS INTEGER: DIM joined AS INTEGER
-    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
+    DIM city AS INTEGER
+    DIM best AS INTEGER
+    DIM joined AS INTEGER
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM count AS INTEGER
     found = 0
-    menu_color = COLOR_CYAN: menu_highlight = COLOR_CYAN
-    menu_col = PANEL_COL: menu_row = 2
+    menu_color = COLOR_CYAN
+    menu_highlight = COLOR_CYAN
+    menu_col = PANEL_COL
+    menu_row = 2
     CALL army_list_combine_cities(side, cities(), count)
     CALL menu_set_cities(cities(), count)
     IF menu_item_count = 0 THEN
@@ -19,7 +24,8 @@ SUB menu_army_combine (side, found)
     menu_text$(0) = "Join"
     menu_choice = MENU_START + 10
     menu_highlight = COLOR_LIGHT_CYAN
-    CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
+    CALL menu_select(MENU_CITY_POINTER)
+    CALL clear_right_panel
     IF menu_choice < 1 THEN
         EXIT SUB
     END IF
@@ -38,8 +44,10 @@ END SUB
 ' Raze ?: the player's army takes a city with a fort, without a battle. raze is 1 on Yes.
 SUB menu_raze_fort (raze)
     raze = 0
-    menu_col = PANEL_COL: menu_row = 15
-    menu_highlight = COLOR_WHITE: menu_color = COLOR_CYAN
+    menu_col = PANEL_COL
+    menu_row = 15
+    menu_highlight = COLOR_WHITE
+    menu_color = COLOR_CYAN
     menu_text$(0) = "Raze ?"
     menu_text$(1) = "No"
     menu_text$(2) = "Yes"

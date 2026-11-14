@@ -6,7 +6,10 @@
 ' is the army that will command, and joined the number that joined. The caller stops when
 ' joined is 0; otherwise it calls army_combine_done and army_combine_redraw.
 SUB army_combine_gather (side, city, best, joined)
-    DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM j AS INTEGER: DIM status AS INTEGER
+    DIM last_army AS INTEGER
+    DIM first_army AS INTEGER
+    DIM j AS INTEGER
+    DIM status AS INTEGER
     first_army = side_first_army(side)
     last_army = side_last_army(side)
     CALL clear_bottom_line
@@ -27,7 +30,9 @@ SUB army_combine_gather (side, city, best, joined)
         IF status = COMBINE_JOINED THEN
             joined = joined + 1
             CALL clear_bottom_line
-            PRINT army_name$(j); " is combining his ";: CALL print_army_size(j): PRINT " forces";
+            PRINT army_name$(j); " is combining his ";
+            CALL print_army_size(j)
+            PRINT " forces";
             CALL wait_seconds(opt_pause!)
             CALL army_combine_absorb(j)
         END IF
@@ -40,7 +45,9 @@ END SUB
 SUB army_combine_done (city, best, joined)
     CALL army_combine_finish(city, best, joined)
     IF joined > 1 THEN
-        PRINT "New army "; best; " of ";: CALL print_army_size(best): PRINT " is commanded by "; army_name$(best);
+        PRINT "New army "; best; " of ";
+        CALL print_army_size(best)
+        PRINT " is commanded by "; army_name$(best);
     ELSE
         PRINT "Only 1 eligible army -- cannot combine at this time";
     END IF
@@ -63,7 +70,8 @@ SUB army_new (side, army_slot, city)
     COLOR COLOR_LIGHT_RED
     CALL clear_bottom_line
     PRINT "Placing NEW army "; army_slot; army_name$(army_slot); " in "; city_name$(city);
-    PRINT " Size = ";: CALL print_army_size(army_slot)
+    PRINT " Size = ";
+    CALL print_army_size(army_slot)
     IF opt_sound >= SOUND_EFFECTS THEN
         SOUND 2222, .5
     END IF
@@ -74,7 +82,9 @@ END SUB
 SUB army_get_commander (side, army_slot)
     CALL army_pick_commander(side, army_slot)
     IF army_slot = 0 THEN
-        CALL clear_bottom_line: PRINT "No more "; side_name$(side); " commanders available";: CALL wait_seconds(opt_pause!)
+        CALL clear_bottom_line
+        PRINT "No more "; side_name$(side); " commanders available";
+        CALL wait_seconds(opt_pause!)
     END IF
 END SUB
 
@@ -85,10 +95,13 @@ SUB army_resupply (army)
         EXIT SUB
     END IF
     IF result = SUPPLY_NO_CASH THEN
-        CALL clear_bottom_line: PRINT "Not enough funds in the Treasury to supply "; army_name$(army);
+        CALL clear_bottom_line
+        PRINT "Not enough funds in the Treasury to supply "; army_name$(army);
     END IF
     IF result = SUPPLY_BOUGHT THEN
-        CALL clear_bottom_line: PRINT army_name$(army); " has received supplies ";: IF opt_sound >= SOUND_EFFECTS THEN
+        CALL clear_bottom_line
+        PRINT army_name$(army); " has received supplies ";
+        IF opt_sound >= SOUND_EFFECTS THEN
             SOUND 4500, .5
         END IF
     END IF
@@ -98,7 +111,12 @@ END SUB
 ' Raises men in a city for 100: a new army under the next commander, or more men for the
 ' army already there. raised is 0 when a new army was needed and no commander is left.
 SUB army_recruit (side, city, raised)
-    DIM army_slot AS INTEGER: DIM i AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM from_city AS INTEGER: DIM isolated AS INTEGER
+    DIM army_slot AS INTEGER
+    DIM i AS INTEGER
+    DIM x AS INTEGER
+    DIM y AS INTEGER
+    DIM from_city AS INTEGER
+    DIM isolated AS INTEGER
     raised = 1
     army_slot = 0
     CALL city_update_occupier(city)
@@ -106,7 +124,8 @@ SUB army_recruit (side, city, raised)
         CALL army_get_commander((side), army_slot)
 
         IF army_slot = 0 THEN
-            raised = 0: EXIT SUB
+            raised = 0
+            EXIT SUB
         END IF
         CALL army_new(side, army_slot, city)
         EXIT SUB
@@ -123,7 +142,8 @@ SUB army_recruit (side, city, raised)
     END IF
     COLOR COLOR_LIGHT_CYAN
     CALL clear_bottom_line
-    PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to ";: CALL print_army_size(i)
+    PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to ";
+    CALL print_army_size(i)
     IF isolated = 1 THEN
         PRINT " ISOLATED !";
     END IF
