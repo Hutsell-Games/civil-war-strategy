@@ -1963,6 +1963,38 @@ SUB TestOptionSwapSide
     AssertEqualInt 7, opt_event_balance, "events favor the Rebels"
 END SUB
 
+' Vary Start reloads the scenario, then may move the Rebel capital to Montgomery (city 25).
+' A Rebel fleet it keeps is put at New Orleans (city 27). The test runs in an empty folder,
+' so it writes a small scenario there: no armies, one ship a side, capitals at cities 1 and 2.
+SUB TestVaryStartMovesRebelCapital
+    CHDIR TestTempDir$
+    MKDIR "scenarios": MKDIR "scenarios/test"
+    scenario_folder$(0) = "test"
+    f = FREEFILE: OPEN "scenarios/test/cwslead.dat" FOR OUTPUT AS #f
+    FOR i = 1 TO MAX_LEADERS: WRITE #f, "Leader", 5: NEXT i
+    CLOSE #f
+    f = FREEFILE: OPEN "scenarios/test/cws.ini" FOR OUTPUT AS #f
+    WRITE #f, "NEUTRAL", "Union", "Rebel"
+    FOR i = 1 TO MONTHS_PER_YEAR: WRITE #f, "Month": NEXT i
+    PRINT #f, "3,1861,3,1865,80,80,1,3"
+    PRINT #f, "0": PRINT #f, "0"
+    PRINT #f, "300,50,11,9,20"
+    WRITE #f, "W", 5, "W", 6
+    PRINT #f, "1,2"
+    PRINT #f, "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
+    CLOSE #f
+    f = FREEFILE: OPEN "cws.cfg" FOR OUTPUT AS #f
+    PRINT #f, "1,3,0,3,1,1,5,100,100,0,0,0,0,0,0,0,3"
+    CLOSE #f
+    FOR s = 1 TO 100
+        RANDOMIZE s
+        CALL vary_start_conditions
+        IF side_capital(SIDE_REBEL) <> 2 AND fleet_size(SIDE_REBEL) > 0 THEN EXIT FOR
+    NEXT s
+    AssertEqualInt 25, side_capital(SIDE_REBEL), "a seed where the capital moves: Montgomery"
+    AssertEqualInt 27, fleet_city(SIDE_REBEL), "the Rebel fleet at New Orleans"
+END SUB
+
 SUB TestOptionSwitches
     opt_players = PLAYERS_ONE
     CALL option_toggle_players: AssertEqualInt PLAYERS_TWO, opt_players, "two players"

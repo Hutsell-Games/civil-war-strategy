@@ -3,8 +3,8 @@
 
 ' The computer's fleet: builds a ship, sails, or attacks the port it lies off.
 SUB ai_fleet_orders (side)
-    IF current_side = SIDE_REBEL AND NOT fleet_exists(SIDE_UNION) AND fleet_size(SIDE_UNION) < 1 AND city_owner(30) = SIDE_UNION AND side_cash(SIDE_UNION) > COST_SHIP THEN
-        fleet_city(SIDE_UNION) = 30
+    IF current_side = SIDE_REBEL AND NOT fleet_exists(SIDE_UNION) AND fleet_size(SIDE_UNION) < 1 AND city_owner(AI_UNION_FLEET_CITY) = SIDE_UNION AND side_cash(SIDE_UNION) > COST_SHIP THEN
+        fleet_city(SIDE_UNION) = AI_UNION_FLEET_CITY
         CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD)
     ELSE
         IF fleet_is_at_sea(side) THEN
@@ -92,12 +92,12 @@ FUNCTION ai_pick_port (side, ports(), count)
         ai_pick_port = ports(best)
     END IF
 
-    ' A Rebel fleet off city 30 holds its place half the time: its own port, so it does not
+    ' A Rebel fleet off Philadelphia holds its place half the time: its own port, so it does not
     ' sail (navy_sail_to). The original set the menu's row to 30, which read a 0, and city 0
     ' does not sail either.
-    IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = 30 THEN
+    IF side = SIDE_REBEL AND fleet_city(SIDE_REBEL) = AI_REBEL_HOLD_CITY THEN
         IF RND > .5 THEN
-            ai_pick_port = 30
+            ai_pick_port = AI_REBEL_HOLD_CITY
         END IF
     END IF
 END FUNCTION

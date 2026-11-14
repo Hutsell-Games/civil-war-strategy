@@ -85,14 +85,14 @@ The coverage rule still holds for new changes:
   change inside it. The hand-over names the lines that moved without a test.
 - A step that must rewrite lines no test runs waits for tests that reach them.
 
-The last recorded inventory lists 11 lines that no test runs. The table names the SUB rather
+The last recorded inventory lists 10 lines that no test runs. The script `navy-first-fleet`
+reached an 11th, in `ai_fleet_orders`, on 2026-11-14. The table names the SUB rather
 than line numbers, because refactors move them; consult a fresh `report.txt` before changing them.
 
 | File | SUB | Lines | Why |
 |------|-----|-------|-----|
 | `rules\setup.bm` | `vary_start_conditions` | 2 | The Rebels' army removed by Vary Start; no script's draw removes one. |
 | `ai\navy.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
-| `ai\navy.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. |
 | `ai\army.bm` | `ai_attack_score` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
 | `rules\battle.bm` | `battle_losses` | 1 | The losses of a defender of more than 80,000 men; no script has one. |
 | `ai\forces.bm` | `ai_fortify` | 1 | The Union computer stops fortifying when it has no fleet. |
@@ -128,7 +128,8 @@ rules are inventoried below; deciding whether to move them belongs to the engine
 
 1. **Move what is the war's and is already a SUB**: the flags, the map's line work, the title,
    the cannon and the two ship pictures go to `game\`, whole (as phase 6 moved SUBs). The ten
-   rule constants go to a `game\rules.bi`.
+   rule constants go to a `game\rules.bi`, with the four city constants beside them
+   ([structure-review.md](structure-review.md)).
 2. **Remaining event presentation.** The event data and rules are completed in the archive
    ("Phase 11 step 2"). Still in `ui\events.bm`: the two `PLAY` tunes, the alarm of an
    announcement, and the bottom line cleared only for an event of the Union's roll.

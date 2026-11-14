@@ -144,6 +144,23 @@ parser.
 the same parsing work. It does not yet justify a new language feature or a
 general serialization library.
 
+## 8. A positional data file takes no new field
+
+**Evidence.** On 2026-11-14 four city numbers in `rules\setup.bm` and
+`ai\navy.bm` became constants in `cws.bi` (`VARY_REBEL_FLEET_CITY` and three
+more; [structure-review.md](structure-review.md)). A city's own column in
+`CITIES.GRD` would have fitted better. But `load_cities`
+([port/files.bm](../port/files.bm)) reads each line by position with `INPUT #`.
+A new field changes the layout of both scenarios' files and of any scenario a
+player made, and an old file then reads wrong without an error.
+
+**Cost and current answer.** A war-wide `CONST` is the cheap place left. It holds
+one value for the whole war, not one for each scenario or city.
+
+**QB64Rust question.** None yet. A keyed format, such as the sections of
+`EVENTS.DAT`, would take new fields; that is the game's format choice, not a
+language feature.
+
 ## Findings that do not justify modules or records
 
 - **Records already work.** Phase 10's

@@ -192,6 +192,14 @@ CONST MAX_ARMY_SIZE = 1250
 CONST SMALL_ARMY_SIZE = 15
 CONST MONTHS_PER_TURN = 2
 CONST MONTHS_PER_YEAR = 12
+' Cities that a rule names, by their number in both scenarios' CITIES.GRD.
+' Vary Start puts a Rebel fleet at New Orleans, and may move the Rebel capital to Montgomery.
+CONST VARY_REBEL_FLEET_CITY = 27
+CONST VARY_REBEL_CAPITAL = 25
+' The Union computer builds its first fleet at Philadelphia (ai_fleet_orders). A Rebel fleet
+' there holds its place half the time (ai_pick_port).
+CONST AI_UNION_FLEET_CITY = 30
+CONST AI_REBEL_HOLD_CITY = 30
 ' The 16 colors, for COLOR statements and the menu's colors. The pictures keep their numbers.
 CONST COLOR_BLACK = 0
 CONST COLOR_BLUE = 1

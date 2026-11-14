@@ -204,6 +204,7 @@ on a desktop nobody sees.
 | `navy-build` | From a prepared save with no Union fleet: the Ships menu's entries that need a fleet, the Type menu, a new fleet through the Port menu, a sea fight in which the player attacks and wins, and the entries refused to a fleet at sea |
 | `navy-raid-back` | From a prepared save: the player raids commerce, the computer's fleet pursues and sinks the raider, the player builds a new fleet and raids again, and the computer's fleet goes raiding in answer and fights at sea |
 | `navy-losses` | From a prepared save, as the Rebels: a shore battery sinks their only ship, no army is left free to move, the Balance menu's faces, the Raze menu, and "NO SHIPYARDS AVAILABLE" |
+| `navy-first-fleet` | From a prepared save, as the Rebels with their ship off Philadelphia: the Union computer has no fleet and no shipyard, and tries to start its first fleet at Philadelphia (`ai_fleet_orders`) |
 | `menu-keys` | At the main menu, PgDn, Down from the last row round to the first, PgDn and PgUp |
 | `bad-files` | A run without `MTN.VGA`, with a `CWS.CFG` that names no player count and no display speed, and with a map that has two one-way roads, which Chk Links reports |
 | `bad-events` | A run with a `scenarios\EVENTS.DAT` that has a line the game cannot read: the game names the file, the line and the reason, and ends before the title |

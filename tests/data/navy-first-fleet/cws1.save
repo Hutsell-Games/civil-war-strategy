@@ -1,0 +1,10 @@
+# For the script navy-first-fleet: the Union computer starts its first fleet at Philadelphia
+# (ai_fleet_orders), and has no shipyard for it.
+# May 1862, the Rebels play. Their one ship lies off Philadelphia, the Union's only sea port, so
+# the Union has no shipyard. The Union has no fleet, and cash for a ship after it fortifies
+# and recruits.
+date 5 1862
+side 2
+cash 3050 500
+fleet 1 - 0
+fleet 2 W 30
