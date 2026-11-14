@@ -16,7 +16,8 @@ qb64rust -x cws.bas -o cws.exe
 The build is not committed (`.gitignore`). It takes the name of the DOS program, `CWS.EXE`. A GitHub Actions
 workflow (`.github\workflows\build.yml`) builds the game too. As in the World War 2 port, it runs on each
 merge into `main`, and by hand once it is on `main` (Actions, Build, Run workflow). Its artifact
-`civil-war-strategy` holds the game with its data files, ready to play. This branch is not merged into `main`
+`civil-war-strategy` holds the game with its data files, ready to play. The workflow then runs the tests
+(Python tests, unit tests and whole-game scripts). This branch is not merged into `main`
 yet, so the workflow has not run.
 
 Run the program from this folder. It reads its pictures from `graphics` and its map, setup, leaders
@@ -37,7 +38,7 @@ The branch `main` holds an earlier port, of 2024, for QB64pe. This branch does n
 
 The tests are described in [tests/README.md](tests/README.md). Work still to do is in [TODO.md](TODO.md).
 
-The original documentation of the game is in `docs`: the manual `CWS.DOC`, `README.1ST` and `WRHGAMES.DOC`.
+The original documentation of the game is in `docs`: the manual `CWS.DOC` and `RELEASE_NOTES.1ST` (the DOS game's `README.1ST`).
 The notes on the port are in [docs/devnotes.md](docs/devnotes.md).
 The permanent record of rule and behavior changes from the canonical DOS game is
 [docs/rule-changes.md](docs/rule-changes.md).

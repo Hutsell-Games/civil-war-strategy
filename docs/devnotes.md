@@ -2,13 +2,18 @@
 
 This branch starts from `canonical-source`, the BASIC PDS 7.1 source as W.R. Hutsell gave it. It changes that
 source as little as possible so that the game builds with QB64Rust and with QB64pe, and so that its SUBs can be
-tested. The plan is `docs\port-study.md` (QB64Rust's study 46 until 2026-11-06). It follows the ports of World War 2
+tested. The plan was `docs\port-study.md` (QB64Rust's study 46 until 2026-11-06), now
+`docs\archived\port-study-completed.md`. It follows the ports of World War 2
 (`Hutsell-Games/world-war-2`) and Civil War Battleset (`Hutsell-Games/civil-war-battleset`), both on a branch
 `qb64rust`, and the principles in QB64Rust's `docs\PORTING-PDS.md`, section 0.
 
 The branch `main` of this repo is an earlier port of 2024, made for QB64pe: one merged source file, with the DOS
 programs and their features removed. This branch does not build on it. It takes four graphics lines from it
 (item 8) and the text of the help program (item 6).
+
+`qb64rust` will eventually merge into `main` and replace the 2024 port (user, 2026-11-14). The branch `old-main`
+keeps `main` as it was before: commit `b02d2188115c7d9e5182696631d0f0372e947de3`. The build workflow
+(`.github\workflows\build.yml`) runs on merges into `main` only, so it first runs after that merge (D8).
 
 The permanent record of rule and observable behavior changes from `canonical-source` is
 [rule-changes.md](rule-changes.md). This file holds the port's technical changes and their reasons.

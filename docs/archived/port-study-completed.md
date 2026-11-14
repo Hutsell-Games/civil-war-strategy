@@ -1,8 +1,9 @@
 # 46. Porting Civil War Strategy to QB64Rust: what was done
 
-The finished parts of `port-study.md`, moved here on 2026-11-13, under the same headings. D8's remaining
-question was settled on 2026-11-14: `qb64rust` will eventually replace `main`, with its predecessor
-preserved as `old-main` (see `../port-study.md`). The account below retains the status when written.
+The finished parts of `port-study.md`, moved here on 2026-11-13, under the same headings. The rest, D8's
+answer of 2026-11-14, moved here on 2026-11-14 ("D8 settled", at the end), and `port-study.md` was removed.
+`qb64rust` will eventually replace `main`, with its predecessor preserved as `old-main` (`../devnotes.md`).
+The account below retains the status when written.
 
 Written 2026-11-06. The user asked for the port the same day: "port Civil War Strategy from canonical-source on a
 qb64rust branch, use the processes we have established for civil war battleset and world-war-2 and in QB64Rust"
@@ -199,3 +200,20 @@ corpus copy has QB64pe's recorded screens and ten scripts held to line coverage.
 the `leave` flag to what the corpus runs, which other programs already cover. **Recommended: (a); no
 `SOMEDAY.md` row unless the user wants (b).**
 
+
+## D8 settled (from `port-study.md`, 2026-11-14)
+
+**D8. The workflow's trigger, and what `main` becomes.** `build.yml` builds on each merge into `main`, as the
+other two ports do. Here `main` is the 2024 port, not the original. So the workflow runs only once `qb64rust`
+is merged into `main`, which would replace the 2024 port.
+
+**Chosen: (a)** (user, 2026-11-14). Leave the trigger as built: builds on merges into `main`, with no
+additional trigger for pushes to `qb64rust`.
+
+### Historical main
+
+**Decided** (user, 2026-11-14): `qb64rust` will eventually merge into `main` and replace what was there.
+Keep `old-main` as the historical branch: **main as it was before the latest rewrite**.
+Its snapshot is commit `b02d2188115c7d9e5182696631d0f0372e947de3`
+(`Merge pull request #23 from Hutsell-Games/minor-updates-for-release`).
+The future merge is separate work; D8 has no remaining open question.

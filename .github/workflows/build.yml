@@ -1,6 +1,7 @@
-# Builds the game (cws.bas) with QB64Rust on Windows.
+# Builds the game (cws.bas) with QB64Rust on Windows, then runs its tests (tests/README.md).
 # The result is an artifact named civil-war-strategy: cws.exe with the data files it reads,
-# ready to unzip and play.
+# ready to unzip and play. It is uploaded before the tests run, so a failing test still leaves
+# the build to look at.
 name: Build
 
 # When something reaches main (a merge or a push to it), or by hand with "Run workflow".
@@ -19,7 +20,7 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       # Keep the files' bytes as committed: the runner's default would turn LF into CR LF.
       - run: git config --global core.autocrlf false
@@ -71,10 +72,46 @@ jobs:
           Copy-Item game\CWS.CFG, game\HISCORE.CWS, game\README.md, game\LICENSE -Destination dist
           Copy-Item game\graphics, game\scenarios -Destination dist -Recurse
           New-Item -ItemType Directory dist\docs | Out-Null
-          Copy-Item game\docs\CWS.DOC, game\docs\README.1ST, game\docs\WRHGAMES.DOC, game\docs\CWSDOC.TXT -Destination dist\docs
+          Copy-Item game\docs\CWS.DOC, game\docs\RELEASE_NOTES.1ST, game\docs\CWSDOC.TXT -Destination dist\docs
 
       - uses: actions/upload-artifact@v7
         with:
           name: civil-war-strategy
           path: dist
           if-no-files-found: error
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # The tests of play.py and make_scripts.py, and the folder rules.
+      - name: Python tests
+        working-directory: game
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      # The SUBs that draw nothing, called from tests/rules_test.bas.
+      - name: Unit tests
+        working-directory: game
+        run: |
+          ..\qb64rust\target\release\qb64rust.exe test tests\rules_test.bas
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # The whole-game scripts against their recorded screens. Each runs on a desktop of its own;
+      # under a script the game makes no SHELL. The runner has four cores.
+      - name: Whole-game scripts
+        working-directory: game
+        env:
+          CWS_QB64RUST_REPO: ${{ github.workspace }}\qb64rust
+        run: |
+          python tests\play.py --jobs 4 check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # A failed script leaves the screens that differ, as PNGs, and what play.py printed.
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-failures
+          path: |
+            game/tests/out/fail
+            game/tests/out/last-*.txt
+          if-no-files-found: ignore
