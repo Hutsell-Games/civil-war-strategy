@@ -25,6 +25,9 @@ saved games and history files stay beside the program. Each map is a folder of
 `scenarios`: `standard` and `alternate`. After Start NEW Game the game asks which map to play;
 `scenarios\SCENARIOS.LST` names the folders and their titles.
 
+The window can be resized: drag its edge and the 640 by 480 screen is stretched to fill it
+(`$RESIZE:STRETCH`, `cws.bas`). Alt+Enter switches to full screen and back.
+
 Four things of the DOS game are pictures and text in `docs` now, because the DOS programs that showed them
 have no source: the title screen, the burning capital, the picture of Lincoln, and the help screens of F1
 ([docs/devnotes.md](docs/devnotes.md), items 5 and 6). The game no longer has F1 help. The quick help is

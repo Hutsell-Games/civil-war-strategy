@@ -54,7 +54,8 @@ FAIL  rebel [rust]: differs at checkpoint 4, tests/scripts/rebel.keys line 41
     the screen recorded: tests/out/fail/rebel-recorded-4.png
 ```
 
-A checkpoint is usually a digest, a hash of the screen. To show the screen, `check` plays the script again with
+A checkpoint is usually a digest, a hash of the screen. It hashes the 640 by 480 screen, not the window, so
+resizing the window (`$RESIZE:STRETCH`) or full screen changes no checkpoint. To show the screen, `check` plays the script again with
 full screens and writes a PNG of the one that differs. The recorded screen gets a PNG too when `record` ran on
 this machine: it keeps a copy with full screens in `tests\out\recorded\`.
 

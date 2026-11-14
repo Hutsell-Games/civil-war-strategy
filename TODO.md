@@ -39,6 +39,27 @@ is in `docs\modernize-completed.md`, "The kept bugs fixed" and "Three more".
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
 
+## Improvements
+
+Ideas that the original game did not have. Each one changes how the game plays, looks or sounds, or where
+it keeps its files, so each needs its own decision and its scripts recorded again.
+
+- **Records for the armies.** Phase 10 closed with no records (`docs\modernize-plan.md`, "Phase 10:
+  records"). Join copies some of an army's fields and four places clear a slot, each clearing different fields.
+  If those clears and copies were made the same, an `armies(i)` record with one copy and one clear would be
+  simpler code, not only a new spelling. Making them the same changes how the game plays.
+- **Mouse menus.** The menus read only keys (`menu_select`, `ui\menu.bm`). `_MOUSEINPUT` could let a player
+  click a row.
+- **Music that stops as soon as a key is pressed.** The tunes in `game\tunes.bm` check `INKEY$` only between
+  `PLAY` phrases, so a key stops the music at the end of a phrase. With `PLAY "MB"` the music plays in the
+  background, as one victory tune already does (`game\victory_screens.bm`).
+- **PNG pictures in place of the `.vga` files.** `load_picture` (`draw\pictures.bm`) loads the pictures with
+  `DEF SEG` and `BLOAD`. They could be PNG files loaded with `_LOADIMAGE`, as the three pictures in `docs\`
+  would be.
+- **One known folder for saves and settings.** `cws1.sav` to `cws9.sav`, `cws.cfg`, `hiscore.cws`, `cws.his`
+  and `battsumm` are opened in the current folder (`port\files.bm`), so they land wherever the game was
+  started from. A single folder, for example beside the program, would keep them together.
+
 ## The code
 
 Left alone by phase 3, group 1, of `docs\modernize-plan.md` (the sides and limits). None of these changes

@@ -1,5 +1,7 @@
 OPTION _EXPLICIT
 DEFINT A-Z
+' The player may resize the window, and the 640 by 480 screen is scaled to fill it. Alt+Enter goes full screen.
+$RESIZE:STRETCH
 ' $INCLUDE: 'cws.bi'
 DIM replay AS INTEGER
 DIM message$
