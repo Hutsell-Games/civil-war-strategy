@@ -1603,6 +1603,20 @@ SUB TestTurnRetreatCity
     AssertEqualInt ORDER_DONE, army_order(25), "done for the month"
 END SUB
 
+SUB TestArmyClearLeavesTheNames
+    army_city(3) = 5: army_size(3) = 80: army_leader_rating(3) = 4: army_experience(3) = 6
+    army_order(3) = 7: army_supply(3) = 2: army_name$(3) = "Grant": leader_name$(3) = "Meade"
+    CALL army_clear(3)
+    AssertEqualInt 0, army_city(3), "no city"
+    AssertEqualInt 0, army_size(3), "no men"
+    AssertEqualInt 0, army_leader_rating(3), "no leader rating"
+    AssertEqualInt 0, army_experience(3), "no experience"
+    AssertEqualInt ORDER_NONE, army_order(3), "no order"
+    AssertEqualInt 0, army_supply(3), "no supplies"
+    AssertEqualStr "Grant", army_name$(3), "the army's name is the caller's"
+    AssertEqualStr "Meade", leader_name$(3), "and so is the free leader's"
+END SUB
+
 SUB TestTurnArmyLost
     army_city(21) = 5: army_size(21) = 80: army_name$(21) = "Lee": army_supply(21) = 6: army_supply(1) = 4
     CALL turn_army_lost(21, 1)

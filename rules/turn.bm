@@ -207,14 +207,9 @@ SUB turn_army_lost (army, winner)
     IF army_supply(winner) > MAX_SUPPLY THEN
         army_supply(winner) = MAX_SUPPLY
     END IF
-    army_city(army) = 0
+    CALL army_clear(army)
     leader_name$(army) = ""
     army_name$(army) = ""
-    army_size(army) = 0
-    army_leader_rating(army) = 0
-    army_experience(army) = 0
-    army_order(army) = ORDER_NONE
-    army_supply(army) = 0
 END SUB
 
 ' An army enters the city and is done for the month.

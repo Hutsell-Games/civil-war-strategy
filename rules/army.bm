@@ -6,13 +6,9 @@
 ' army_combine_add for each army of the side, army_combine_absorb for each that joins, and
 ' army_combine_finish.
 SUB army_combine_start (city)
-    army_size(0) = 0
-    army_leader_rating(0) = 0
-    army_experience(0) = 0
+    CALL army_clear(0)
     army_city(0) = city
     army_name$(0) = ""
-    army_supply(0) = 0
-    army_order(0) = ORDER_NONE
 END SUB
 
 ' army joins army 0 when it is in the city, has no order and has men (COMBINE_JOINED). Army 0
@@ -51,13 +47,8 @@ SUB army_combine_absorb (army)
     IF army_supply(0) > MAX_SUPPLY THEN
         army_supply(0) = MAX_SUPPLY
     END IF
-    army_size(army) = 0
-    army_city(army) = 0
-    army_experience(army) = 0
-    army_order(army) = ORDER_NONE
+    CALL army_clear(army)
     leader_name$(army) = army_name$(army)
-    army_leader_rating(army) = 0
-    army_supply(army) = 0
     army_name$(army) = ""
 END SUB
 
@@ -215,6 +206,17 @@ SUB army_generate_name (army, name$)
     IF ones > 0 THEN
         name$ = name$ + STRING$(ones, "I")
     END IF
+END SUB
+
+' Empties the army's slot: no city, no men, no leader rating, experience, order or supplies.
+' Its names are the caller's: each caller leaves or clears them in its own way.
+SUB army_clear (army)
+    army_city(army) = 0
+    army_size(army) = 0
+    army_leader_rating(army) = 0
+    army_experience(army) = 0
+    army_order(army) = ORDER_NONE
+    army_supply(army) = 0
 END SUB
 
 ' The first and last army slots of a side: 1 and 20 for the Union, 21 and 40 for the Rebels.
