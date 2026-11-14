@@ -1,10 +1,10 @@
 SUB screen_snapshot (x, y, put_back)
-    IF put_back = SNAP_SAVE THEN
-        GET (x - 10, y - 10)-(x + 10, y + 10), saved_under_marker()
-    END IF
-    IF put_back = SNAP_RESTORE THEN
-        PUT (x - 10, y - 10), saved_under_marker(), PSET
-    END IF
+    SELECT CASE put_back
+        CASE SNAP_SAVE
+            GET (x - 10, y - 10)-(x + 10, y + 10), saved_under_marker()
+        CASE SNAP_RESTORE
+            PUT (x - 10, y - 10), saved_under_marker(), PSET
+    END SELECT
 END SUB
 
 SUB print_centered (row, text$)

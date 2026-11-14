@@ -89,12 +89,12 @@ END SUB
 
 ' The special events favor the side left to the computer: 7 for the Rebels, 3 for the Union.
 SUB option_events_favor_computer
-    IF current_side = SIDE_UNION THEN
-        opt_event_balance = 7
-    END IF
-    IF current_side = SIDE_REBEL THEN
-        opt_event_balance = 3
-    END IF
+    SELECT CASE current_side
+        CASE SIDE_UNION
+            opt_event_balance = 7
+        CASE SIDE_REBEL
+            opt_event_balance = 3
+    END SELECT
 END SUB
 
 ' One player or two.

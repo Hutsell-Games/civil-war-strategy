@@ -53,13 +53,14 @@ SUB animate_city (city)
         CALL draw_city_dot(city, dot_color)
         CALL wait_seconds(.1)
     NEXT dot_color
-    dot_color = 9
-    IF city_owner(city) = SIDE_REBEL THEN
-        dot_color = 7
-    END IF
-    IF city_owner(city) = SIDE_NONE THEN
-        dot_color = 12
-    END IF
+    SELECT CASE city_owner(city)
+        CASE SIDE_REBEL
+            dot_color = 7
+        CASE SIDE_NONE
+            dot_color = 12
+        CASE ELSE
+            dot_color = 9
+    END SELECT
     CALL draw_city_dot(city, dot_color)
 END SUB
 

@@ -38,12 +38,12 @@ SUB special_events
     IF event_then(event) <> 0 THEN
         CALL scribe_message(event_message$(event_text$(event_then(event), 0)), SHOW_BOX)
     END IF
-    IF event_redraw(event) = REDRAW_FLEETS THEN
-        CALL draw_fleets
-    END IF
-    IF event_redraw(event) = REDRAW_MAP THEN
-        CALL draw_map
-    END IF
+    SELECT CASE event_redraw(event)
+        CASE REDRAW_FLEETS
+            CALL draw_fleets
+        CASE REDRAW_MAP
+            CALL draw_map
+    END SELECT
 
     IF event_side = SIDE_UNION THEN
         IF opt_sound = SOUND_MUSIC THEN

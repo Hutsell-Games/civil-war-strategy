@@ -104,13 +104,14 @@ SUB draw_cities
     DIM i AS INTEGER
     DIM dot_color AS INTEGER
     FOR i = 1 TO MAX_CITIES
-        dot_color = 9
-        IF city_owner(i) = SIDE_REBEL THEN
-            dot_color = 7
-        END IF
-        IF city_owner(i) = SIDE_NONE THEN
-            dot_color = 12
-        END IF
+        SELECT CASE city_owner(i)
+            CASE SIDE_REBEL
+                dot_color = 7
+            CASE SIDE_NONE
+                dot_color = 12
+            CASE ELSE
+                dot_color = 9
+        END SELECT
         x = city_x(i)
         y = city_y(i)
         IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
@@ -118,19 +119,19 @@ SUB draw_cities
             LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
             LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
             PSET (x + 8, y - 4)
-            IF city_fort(i) = 1 THEN
-                DRAW "BR2C0e1D6BL1R2"
-            END IF
-            IF city_fort(i) = MAX_FORT THEN
-                DRAW "C0e1R1F1D1G3R3"
-            END IF
+            SELECT CASE city_fort(i)
+                CASE 1
+                    DRAW "BR2C0e1D6BL1R2"
+                CASE MAX_FORT
+                    DRAW "C0e1R1F1D1G3R3"
+            END SELECT
         ELSE
-            IF city_fort(i) = 1 THEN
-                LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
-            END IF
-            IF city_fort(i) >= MAX_FORT THEN
-                LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
-            END IF
+            SELECT CASE city_fort(i)
+                CASE 1
+                    LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
+                CASE IS >= MAX_FORT
+                    LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+            END SELECT
             CALL draw_city_dot(i, dot_color)
         END IF
         IF opt_graphics = GRAPHICS_OFF THEN

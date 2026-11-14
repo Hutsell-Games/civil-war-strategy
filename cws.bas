@@ -94,12 +94,12 @@ DO
             CASE MAIN_FILES
                 main_menu_start = MENU_START + MAIN_FILES
                 CALL menu_files(action)
-                IF action = FILES_NEW_GAME THEN
-                    new_game = 1
-                END IF
-                IF action = FILES_QUIT THEN
-                    END
-                END IF
+                SELECT CASE action
+                    CASE FILES_NEW_GAME
+                        new_game = 1
+                    CASE FILES_QUIT
+                        END
+                END SELECT
             CASE MENU_END_TURN_KEY
                 ended = 1
             CASE ELSE

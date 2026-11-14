@@ -151,16 +151,16 @@ END SUB
 SUB menu_option_graphics
     DIM setting$
     CALL option_next_graphics
-    setting$ = "ROADS"
-    IF opt_graphics = GRAPHICS_OFF THEN
-        setting$ = "DISABLED"
-    END IF
-    IF opt_graphics = GRAPHICS_NAMES THEN
-        setting$ = "CITY NAMES"
-    END IF
-    IF opt_graphics = GRAPHICS_FULL THEN
-        setting$ = "FULL"
-    END IF
+    SELECT CASE opt_graphics
+        CASE GRAPHICS_OFF
+            setting$ = "DISABLED"
+        CASE GRAPHICS_NAMES
+            setting$ = "CITY NAMES"
+        CASE GRAPHICS_FULL
+            setting$ = "FULL"
+        CASE ELSE
+            setting$ = "ROADS"
+    END SELECT
     CLS
     CALL draw_map
     CALL clear_bottom_line

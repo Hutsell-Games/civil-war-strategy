@@ -91,20 +91,19 @@ END SUB
 SUB army_resupply (army)
     DIM result AS INTEGER
     CALL army_buy_supply(army, result)
-    IF result = SUPPLY_CUT_OFF THEN
-        EXIT SUB
-    END IF
-    IF result = SUPPLY_NO_CASH THEN
-        CALL clear_bottom_line
-        PRINT "Not enough funds in the Treasury to supply "; army_name$(army);
-    END IF
-    IF result = SUPPLY_BOUGHT THEN
-        CALL clear_bottom_line
-        PRINT army_name$(army); " has received supplies ";
-        IF opt_sound >= SOUND_EFFECTS THEN
-            SOUND 4500, .5
-        END IF
-    END IF
+    SELECT CASE result
+        CASE SUPPLY_CUT_OFF
+            EXIT SUB
+        CASE SUPPLY_NO_CASH
+            CALL clear_bottom_line
+            PRINT "Not enough funds in the Treasury to supply "; army_name$(army);
+        CASE SUPPLY_BOUGHT
+            CALL clear_bottom_line
+            PRINT army_name$(army); " has received supplies ";
+            IF opt_sound >= SOUND_EFFECTS THEN
+                SOUND 4500, .5
+            END IF
+    END SELECT
     CALL wait_seconds(opt_pause!)
 END SUB
 

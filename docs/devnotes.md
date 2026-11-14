@@ -22,6 +22,22 @@ qb64rust -x cws.bas -o cws.exe
 build runs from this folder: it reads `CWS.CFG`, `HISCORE.CWS`, `graphics\` and `scenarios\` beside it.
 `tests\play.py` copies these into a folder of its own for each run.
 
+## Format
+
+The source is laid out by QB64Rust's formatter, with the settings in `qb64rust.toml`: upper-case keywords,
+four spaces a level, every IF a block IF, and one statement a line. Format an include file inside its
+program, so that its names take the program's spelling and the rewrites apply:
+
+```
+qb64rust -y commands/army.bm --program cws.bas -o commands/army.bm
+qb64rust -y cws.bas -o cws.bas
+```
+
+Format Document in VS Code does the same. `tests\rules_test.bas` is left packed: checked as a program it has
+errors, because `qb64rust test` supplies its `Assert` SUBs, so the formatter does not rewrite it. A SUB's name
+followed by a colon (`clear_right_panel: EXIT SUB`) also stays on one line, as the formatter cannot tell it
+from a label.
+
 ## What was changed from `canonical-source`, and why
 
 1. **One program, instead of three linked modules.** QB64 builds one source file. `CWSTRAT2.BAS` and
