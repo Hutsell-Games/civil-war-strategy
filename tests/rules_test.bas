@@ -104,6 +104,27 @@ SUB TestCityTakeOfTheCapital
     AssertEqualInt 0, side_capital(2), "the Rebels have no capital"
 END SUB
 
+SUB TestSideCityStepWrapsBothWays
+    city_owner(3) = 1: city_owner(38) = 1: city_owner(10) = 2
+    AssertEqualInt 38, side_city_step(3, 1, 1, MAX_CITIES), "forward: 38, past the Rebels' 10"
+    AssertEqualInt 3, side_city_step(38, 1, 1, MAX_CITIES), "forward past 40 to 3"
+    AssertEqualInt 38, side_city_step(3, 1, -1, MAX_CITIES), "back past 1 to 38"
+    AssertEqualInt 10, side_city_step(10, 2, 1, MAX_CITIES), "a side with one city comes back to it"
+    AssertEqualInt 0, side_city_step(4, 1, 1, 33), "33 steps from 4 reach 37, not 38"
+END SUB
+
+' The first city with the letter, or the side's next one. The search from city 1 stops at 39,
+' so city 40 is never looked at.
+SUB TestSideCityByLetter
+    city_name$(1) = "Albany": city_name$(5) = "Boston": city_name$(9) = "Bangor"
+    city_owner(1) = 2: city_owner(5) = 1: city_owner(9) = 1
+    AssertEqualInt 5, side_city_by_letter("B", 1, 9), "the first B, held"
+    AssertEqualInt 5, side_city_by_letter("A", 1, 9), "Albany is the Rebels': on to 5"
+    AssertEqualInt 9, side_city_by_letter("Z", 1, 9), "no Z: stay"
+    city_owner(5) = 0: city_owner(9) = 0: city_owner(40) = 1
+    AssertEqualInt 7, side_city_by_letter("A", 1, 7), "only 40 held: not reached, stay"
+END SUB
+
 ' --------------------------------------------------- city_fix_return_routes
 ' City 1 has roads to 2 and 3. City 2 has a road back; city 3 has none but a
 ' free slot; city 4 has a road to 5, whose six slots are full.

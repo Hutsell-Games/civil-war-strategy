@@ -312,6 +312,12 @@ Six unit tests are new: `TestAiStayWeight`, `TestAiMoveStrength`, `TestAiCityTar
    losses; `battle_cannon_sound` plays the rounds. `battle_history_line$` builds the history's
    line in locals, so `menu_text$(1)` to `(4)` are no longer its scratch strings.
    `TestBattleOddsText` and `TestBattleHistoryLine` are new.
+6. **`menu_city_select`'s three loops in one FUNCTION** (`ui\city.bm`, nesting 6 deep to 2).
+   `side_city_step` (`rules\city.bm`) steps to the side's next city either way, within a number
+   of steps. `side_city_by_letter` uses it for a letter, with the original's limit of 38 steps,
+   so the city just before the first with that letter is still never reached (`TODO.md`, "The
+   game"). Up and down used to loop forever if the side held no city; they now give city 0,
+   shown with no name. `TestSideCityStepWrapsBothWays` and `TestSideCityByLetter` are new.
 
 ## Questions for the user
 

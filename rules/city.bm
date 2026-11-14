@@ -44,6 +44,51 @@ SUB city_take (city, side, weaken_fort)
     END IF
 END SUB
 
+' The side's next city from city, stepping by direction (1 or -1) and wrapping past either
+' end: the first city the side holds within max_steps steps, or 0 when there is none. With
+' max_steps MAX_CITIES a city the side holds is always found, if only city itself.
+FUNCTION side_city_step (city, side, direction, max_steps)
+    DIM steps AS INTEGER
+    DIM next_city AS INTEGER
+    side_city_step = 0
+    next_city = city
+    FOR steps = 1 TO max_steps
+        next_city = next_city + direction
+        IF next_city > MAX_CITIES THEN
+            next_city = 1
+        ELSEIF next_city < 1 THEN
+            next_city = MAX_CITIES
+        END IF
+        IF city_owner(next_city) = side THEN
+            side_city_step = next_city
+            EXIT FUNCTION
+        END IF
+    NEXT steps
+END FUNCTION
+
+' The city a letter picks in the city picker (menu_city_select): the first city whose name
+' starts with the letter, when the side holds it; otherwise the side's next city after that one.
+' The search takes 38 steps, as the original's 39 tries did, so the city just before is never
+' looked at. city when no name starts with the letter or the search finds nothing.
+FUNCTION side_city_by_letter (letter$, side, city)
+    DIM k AS INTEGER
+    DIM found AS INTEGER
+    side_city_by_letter = city
+    FOR k = 1 TO MAX_CITIES
+        IF LEFT$(city_name$(k), 1) = letter$ THEN
+            IF city_owner(k) = side THEN
+                side_city_by_letter = k
+            ELSE
+                found = side_city_step(k, side, 1, MAX_CITIES - 2)
+                IF found > 0 THEN
+                    side_city_by_letter = found
+                END IF
+            END IF
+            EXIT FUNCTION
+        END IF
+    NEXT k
+END FUNCTION
+
 ' Whether the side has the money for a fort.
 FUNCTION fort_affordable (side)
     fort_affordable = side_cash(side) >= COST_FORT

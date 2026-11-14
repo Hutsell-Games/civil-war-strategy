@@ -70,9 +70,6 @@ END SUB
 
 SUB menu_city_select (city)
     DIM letter$
-    DIM tries AS INTEGER
-    DIM k AS INTEGER
-    DIM start_city AS INTEGER
     menu_text$(1) = "  "
     menu_text$(3) = "  "
     menu_item_count = 3
@@ -91,41 +88,13 @@ SUB menu_city_select (city)
                 EXIT SUB
             CASE IS < 1
                 letter$ = CHR$(ABS(menu_choice))
-                tries = 0
-                FOR k = 1 TO MAX_CITIES
-                    IF LEFT$(city_name$(k), 1) = letter$ THEN
-                        start_city = city
-                        city = k
-                        DO WHILE city_owner(city) <> current_side
-                            city = city + 1
-                            IF city > MAX_CITIES THEN
-                                city = 1
-                            END IF
-                            tries = tries + 1
-                            IF tries >= 39 THEN
-                                city = start_city
-                                EXIT DO
-                            END IF
-                        LOOP
-                        EXIT FOR
-                    END IF
-                NEXT k
+                city = side_city_by_letter(letter$, current_side, city)
             CASE 1
-                DO
-                    city = city - 1
-                    IF city < 1 THEN
-                        city = MAX_CITIES
-                    END IF
-                LOOP UNTIL city_owner(city) = current_side
+                city = side_city_step(city, current_side, -1, MAX_CITIES)
             CASE 2
                 EXIT SUB
             CASE 3
-                DO
-                    city = city + 1
-                    IF city > MAX_CITIES THEN
-                        city = 1
-                    END IF
-                LOOP UNTIL city_owner(city) = current_side
+                city = side_city_step(city, current_side, 1, MAX_CITIES)
             CASE ELSE
                 city = 0
                 EXIT SUB

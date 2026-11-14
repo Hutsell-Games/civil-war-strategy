@@ -51,6 +51,11 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
   original did the same (`CWSTRAT2.BM` line 381, `IF cityp(m) = capcity(side) THEN y = y + 50`).
   Found 2026-11-14. `TestAiBeyondScore`
   holds it.
+- **A letter in the city picker never reaches one city** (`side_city_by_letter`, `rules\city.bm`).
+  When the side does not hold the first city with that letter, the search goes on through the next
+  38 cities, as the original's 39 tries did. The 40th, the city just before the first, is never
+  looked at. When it is the only city the side holds, the picker stays where it was. It most likely meant
+  `MAX_CITIES - 1` steps. Found 2026-11-14. `TestSideCityByLetter` holds it.
 - **The army report counts the capitals' income twice** (`report_armies`, `ui\reports.bm`). Its line
   "income / all income" adds 100 for each capital to `total_income`, which `turn_collect_income` has
   already counted them in. The original did the same (`CWSTRAT2.BAS` line 811, with `vptotal` from
