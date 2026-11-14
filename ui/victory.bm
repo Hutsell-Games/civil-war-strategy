@@ -6,8 +6,8 @@ SUB hall_of_fame
     DIM hall_name$(2, 5)
     DIM hall_score(2, 5)
     COLOR COLOR_YELLOW
-    LOCATE 28, 1: PRINT "press a key"; : CALL wait_key("H")
-    SCREEN 0: COLOR COLOR_YELLOW, COLOR_MAGENTA: CLS : COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
+    LOCATE 28, 1: PRINT "press a key";: CALL wait_key("H")
+    SCREEN 0: COLOR COLOR_YELLOW, COLOR_MAGENTA: CLS: COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
 
     LOCATE 2, 7: PRINT STRING$(57, "²")
     LOCATE 9, 7: PRINT STRING$(57, "²")
@@ -27,8 +27,12 @@ SUB hall_of_fame
 
     FOR side = SIDE_UNION TO SIDE_REBEL
         i = hall_of_fame_place(side, hall_score())
-        IF i = 0 THEN _CONTINUE
-        COLOR COLOR_WHITE, COLOR_BLUE: IF side = SIDE_REBEL THEN COLOR COLOR_RED, COLOR_GRAY
+        IF i = 0 THEN
+            _CONTINUE
+        END IF
+        COLOR COLOR_WHITE, COLOR_BLUE: IF side = SIDE_REBEL THEN
+            COLOR COLOR_RED, COLOR_GRAY
+        END IF
         FOR k = 12 TO 14
             LOCATE k, 1: PRINT SPACE$(80);
         NEXT k
@@ -38,7 +42,7 @@ SUB hall_of_fame
             commander$ = "COMPUTER": PRINT commander$; " was "; side_name$(side); " commander"
         ELSE
             DO
-                PRINT "What is name of "; side_name$(side); " commander"; : CALL script_mark_key_wait(4, ""): INPUT commander$
+                PRINT "What is name of "; side_name$(side); " commander";: CALL script_mark_key_wait(4, ""): INPUT commander$
             LOOP WHILE commander$ = ""
         END IF
         CALL hall_of_fame_insert(side, i, commander$, hall_name$(), hall_score())
@@ -59,7 +63,9 @@ SUB check_victory_conditions
     END IF
     FOR side = SIDE_UNION TO SIDE_REBEL
         CALL victory_rule_met(side, union_troops, rebel_troops, rule)
-        IF rule > 0 THEN CALL end_game(side, rule): EXIT SUB
+        IF rule > 0 THEN
+            CALL end_game(side, rule): EXIT SUB
+        END IF
         CALL victory_warnings(side, union_troops, rebel_troops)
     NEXT side
 END SUB
@@ -107,7 +113,9 @@ SUB end_game (side, rule)
     END SELECT
     CLS
     side_color = 1
-    IF side = 2 THEN side_color = 7
+    IF side = 2 THEN
+        side_color = 7
+    END IF
     LINE (0, 0)-(639, 479), 4, BF
     LINE (0, 40)-(550, 460), 0, BF
     CALL draw_map
@@ -116,7 +124,11 @@ SUB end_game (side, rule)
     LINE (50, 120)-(465, 250), 4, B
     COLOR COLOR_YELLOW
     message$ = side_name$(side) + " SIDE IS WINNING"
-    IF rule = VICTORY_YEAR THEN CALL print_centered(10, "Confederates will win a technical victory") ELSE CALL print_centered(10, message$)
+    IF rule = VICTORY_YEAR THEN
+        CALL print_centered(10, "Confederates will win a technical victory")
+    ELSE
+        CALL print_centered(10, message$)
+    END IF
 
     COLOR COLOR_WHITE
     message$ = "END GAME VICTORY CONDITION" + STR$(rule - 1) + " REACHED"
@@ -131,21 +143,29 @@ SUB end_game (side, rule)
     menu_col = 27
     menu_row = 18
     menu_highlight = COLOR_WHITE
-    IF rule = VICTORY_WIPED_OUT THEN menu_item_count = 1
+    IF rule = VICTORY_WIPED_OUT THEN
+        menu_item_count = 1
+    END IF
     CALL menu_select(MENU_PLAIN)
 
-    IF menu_choice <> 1 AND rule < VICTORY_WIPED_OUT THEN CALL end_game_play_on(rule): EXIT SUB
+    IF menu_choice <> 1 AND rule < VICTORY_WIPED_OUT THEN
+        CALL end_game_play_on(rule): EXIT SUB
+    END IF
     menu_text$(0) = "Options"
     menu_text$(1) = "Quit this Game"
     menu_text$(2) = "Play More"
-    IF opt_players = PLAYERS_ONE THEN menu_text$(2) = "No - Press Onward to " + city_name$(side_capital(other_side(current_side)))
+    IF opt_players = PLAYERS_ONE THEN
+        menu_text$(2) = "No - Press Onward to " + city_name$(side_capital(other_side(current_side)))
+    END IF
     menu_item_count = 2
     menu_color = COLOR_DARK_GRAY
     menu_col = 27
     menu_row = 18
     IF rule <> VICTORY_WIPED_OUT THEN
         CALL menu_select(MENU_PLAIN)
-        IF menu_choice <> 1 THEN CALL end_game_play_on(rule): EXIT SUB
+        IF menu_choice <> 1 THEN
+            CALL end_game_play_on(rule): EXIT SUB
+        END IF
     END IF
 
     CALL victory_won(side, rule)

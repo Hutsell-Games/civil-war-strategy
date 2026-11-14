@@ -15,9 +15,13 @@ END SUB
 FUNCTION scenario_find (folder$)
     DIM k AS INTEGER
     scenario_find = -1
-    IF LCASE$(folder$) = LCASE$(scenario_folder$(scenario_now)) THEN scenario_find = scenario_now: EXIT FUNCTION
+    IF LCASE$(folder$) = LCASE$(scenario_folder$(scenario_now)) THEN
+        scenario_find = scenario_now: EXIT FUNCTION
+    END IF
     FOR k = 1 TO scenario_count
-        IF LCASE$(folder$) = LCASE$(scenario_folder$(k)) THEN scenario_find = k: EXIT FUNCTION
+        IF LCASE$(folder$) = LCASE$(scenario_folder$(k)) THEN
+            scenario_find = k: EXIT FUNCTION
+        END IF
     NEXT k
 END FUNCTION
 
@@ -46,11 +50,11 @@ SUB load_scenario
         INPUT #1, victory_rule(i)
     NEXT i
     victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
-    INPUT #1, army_count             ' number of Yankee armies
+    INPUT #1, army_count ' number of Yankee armies
     FOR i = 1 TO army_count
         INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i): city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
     NEXT i
-    INPUT #1, army_count             ' number of Rebel armies
+    INPUT #1, army_count ' number of Rebel armies
     FOR i = ARMIES_PER_SIDE + 1 TO ARMIES_PER_SIDE + army_count
         INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
         city_army(army_city(i)) = i: army_name$(i) = leader_name$(i): army_leader_rating(i) = leader_rating(i): leader_name$(i) = ""
@@ -63,7 +67,7 @@ SUB load_scenario
 
     FOR i = 1 TO 8
         INPUT #1, flag_star_x(i), flag_star_y(i)
-    NEXT i  ' star locations on flag
+    NEXT i ' star locations on flag
     CLOSE #1
     CALL config_read(current_side)
 END SUB
@@ -92,7 +96,9 @@ SUB load_events (file$)
             IF RIGHT$(text$, 1) <> "]" THEN
                 why$ = "a name in brackets needs its ]"
             ELSEIF key$ = "events" THEN
-                IF general_read <> 0 THEN why$ = "a second [events]"
+                IF general_read <> 0 THEN
+                    why$ = "a second [events]"
+                END IF
                 in_general = 1: general_read = 1
             ELSEIF event_find(key$) > 0 THEN
                 why$ = "a second event named " + key$
@@ -108,7 +114,9 @@ SUB load_events (file$)
         ELSE
             key$ = LCASE$(RTRIM$(LEFT$(text$, cut - 1)))
             value$ = LTRIM$(MID$(text$, cut + 1))
-            IF LEN(value$) >= 2 AND LEFT$(value$, 1) = CHR$(34) AND RIGHT$(value$, 1) = CHR$(34) THEN value$ = MID$(value$, 2, LEN(value$) - 2)
+            IF LEN(value$) >= 2 AND LEFT$(value$, 1) = CHR$(34) AND RIGHT$(value$, 1) = CHR$(34) THEN
+                value$ = MID$(value$, 2, LEN(value$) - 2)
+            END IF
             IF key$ <> "text" AND INSTR(seen$, "|" + key$ + "|") > 0 THEN
                 why$ = "a second " + key$ + " line"
             ELSEIF in_general <> 0 THEN
@@ -127,25 +135,43 @@ SUB load_events (file$)
         END IF
     LOOP
     CLOSE #file_num
-    IF why$ <> "" THEN event_file_error$ = file$ + ", line" + STR$(line_num) + ": " + why$: EXIT SUB
+    IF why$ <> "" THEN
+        event_file_error$ = file$ + ", line" + STR$(line_num) + ": " + why$: EXIT SUB
+    END IF
     ' The events that "instead" and "then" name may come later in the file, so they are
     ' looked up when all are read.
     FOR row = 1 TO event_count
-        IF event_before(row) = 0 AND event_favors(row) = SIDE_NONE THEN why$ = "has no favors line"
-        IF event_effect(row) <> EFFECT_NONE AND event_favors(row) = SIDE_NONE AND event_for(row) = SIDE_NONE THEN why$ = "has an effect but no side: it needs a favors or a for line"
+        IF event_before(row) = 0 AND event_favors(row) = SIDE_NONE THEN
+            why$ = "has no favors line"
+        END IF
+        IF event_effect(row) <> EFFECT_NONE AND event_favors(row) = SIDE_NONE AND event_for(row) = SIDE_NONE THEN
+            why$ = "has an effect but no side: it needs a favors or a for line"
+        END IF
         IF instead_name$(row) <> "" THEN
             event_instead(row) = event_find(instead_name$(row))
-            IF event_instead(row) = 0 THEN why$ = "names an event that is not there: " + instead_name$(row)
+            IF event_instead(row) = 0 THEN
+                why$ = "names an event that is not there: " + instead_name$(row)
+            END IF
         END IF
         IF then_name$(row) <> "" THEN
             event_then(row) = event_find(then_name$(row))
-            IF event_then(row) = 0 THEN why$ = "names an event that is not there: " + then_name$(row)
+            IF event_then(row) = 0 THEN
+                why$ = "names an event that is not there: " + then_name$(row)
+            END IF
         END IF
-        IF why$ <> "" THEN event_file_error$ = file$ + ", [" + event_name$(row) + "]: " + why$: EXIT SUB
+        IF why$ <> "" THEN
+            event_file_error$ = file$ + ", [" + event_name$(row) + "]: " + why$: EXIT SUB
+        END IF
     NEXT row
-    IF has_banner = 0 THEN why$ = "[events] needs a banner line"
-    IF has_chance = 0 THEN why$ = "[events] needs a chance line"
-    IF why$ <> "" THEN event_file_error$ = file$ + ": " + why$
+    IF has_banner = 0 THEN
+        why$ = "[events] needs a banner line"
+    END IF
+    IF has_chance = 0 THEN
+        why$ = "[events] needs a chance line"
+    END IF
+    IF why$ <> "" THEN
+        event_file_error$ = file$ + ": " + why$
+    END IF
 END SUB
 
 ' Empties a row of the events table before its lines are read.
@@ -167,10 +193,14 @@ SUB event_read_line (row, key$, value$, instead_name$, then_name$, why$)
     SELECT CASE key$
         CASE "favors"
             event_favors(row) = event_read_side(value$)
-            IF event_favors(row) = SIDE_NONE THEN why$ = "favors needs a side's name, 1 or 2"
+            IF event_favors(row) = SIDE_NONE THEN
+                why$ = "favors needs a side's name, 1 or 2"
+            END IF
         CASE "for"
             event_for(row) = event_read_side(value$)
-            IF event_for(row) = SIDE_NONE THEN why$ = "for needs a side's name, 1 or 2"
+            IF event_for(row) = SIDE_NONE THEN
+                why$ = "for needs a side's name, 1 or 2"
+            END IF
         CASE "when"
             SELECT CASE LCASE$(value$)
                 CASE "before": event_before(row) = 1
@@ -227,7 +257,9 @@ FUNCTION event_read_side (value$)
     DIM side AS INTEGER
     event_read_side = SIDE_NONE
     FOR side = SIDE_UNION TO SIDE_REBEL
-        IF LCASE$(value$) = LCASE$(side_name$(side)) OR value$ = LTRIM$(STR$(side)) THEN event_read_side = side
+        IF LCASE$(value$) = LCASE$(side_name$(side)) OR value$ = LTRIM$(STR$(side)) THEN
+            event_read_side = side
+        END IF
     NEXT side
 END FUNCTION
 
@@ -239,7 +271,11 @@ SUB event_read_conditions (list$, why$)
     rest$ = LCASE$(list$)
     DO WHILE rest$ <> "" AND why$ = ""
         cut = INSTR(rest$, ",")
-        IF cut = 0 THEN item$ = rest$: rest$ = "" ELSE item$ = LEFT$(rest$, cut - 1): rest$ = MID$(rest$, cut + 1)
+        IF cut = 0 THEN
+            item$ = rest$: rest$ = ""
+        ELSE
+            item$ = LEFT$(rest$, cut - 1): rest$ = MID$(rest$, cut + 1)
+        END IF
         item$ = LTRIM$(RTRIM$(item$))
         first_space = INSTR(item$, " "): last_space = text_last_space(item$)
         IF condition_count = MAX_EVENT_CONDITIONS THEN
@@ -282,8 +318,12 @@ SUB event_read_effect (row, value$, why$)
     DO
         last_space = text_last_space(rest$)
         word$ = MID$(rest$, last_space + 1)
-        IF last_space = 0 OR text_is_number(word$) = 0 THEN EXIT DO
-        IF numbers = 2 THEN why$ = "too many numbers in the effect": EXIT SUB
+        IF last_space = 0 OR text_is_number(word$) = 0 THEN
+            EXIT DO
+        END IF
+        IF numbers = 2 THEN
+            why$ = "too many numbers in the effect": EXIT SUB
+        END IF
         event_amount!(row, 1) = event_amount!(row, 0)
         event_amount!(row, 0) = VAL(word$)
         numbers = numbers + 1
@@ -305,9 +345,15 @@ SUB event_read_effect (row, value$, why$)
     END SELECT
     IF numbers < least OR numbers > most THEN
         need$ = LTRIM$(STR$(least))
-        IF most > least THEN need$ = need$ + " or " + LTRIM$(STR$(most))
-        need$ = need$ + " number": IF most > 1 THEN need$ = need$ + "s"
-        IF most = 0 THEN need$ = "no number"
+        IF most > least THEN
+            need$ = need$ + " or " + LTRIM$(STR$(most))
+        END IF
+        need$ = need$ + " number": IF most > 1 THEN
+            need$ = need$ + "s"
+        END IF
+        IF most = 0 THEN
+            need$ = "no number"
+        END IF
         why$ = rest$ + " needs " + need$
     END IF
 END SUB
@@ -323,21 +369,27 @@ SUB event_read_chance (value$, why$)
     DO WHILE factors$ <> "" AND why$ = ""
         cut = INSTR(factors$, " x ")
         item$ = LTRIM$(RTRIM$(LEFT$(factors$, cut - 1))): factors$ = MID$(factors$, cut + 3)
-        IF chance_count = MAX_CHANCE_FACTORS THEN why$ = "too many factors in the chance": EXIT SUB
+        IF chance_count = MAX_CHANCE_FACTORS THEN
+            why$ = "too many factors in the chance": EXIT SUB
+        END IF
         chance_count = chance_count + 1: chance_value#(chance_count) = 0
         name$ = item$: number$ = "0"
         IF LEFT$(item$, 1) = "(" AND RIGHT$(item$, 1) = ")" AND INSTR(item$, "-") > 0 THEN
             inner$ = MID$(item$, 2, LEN(item$) - 2)
             name$ = LTRIM$(RTRIM$(LEFT$(inner$, INSTR(inner$, "-") - 1)))
             number$ = LTRIM$(RTRIM$(MID$(inner$, INSTR(inner$, "-") + 1)))
-            IF name$ <> "year" AND name$ <> "difficulty" THEN name$ = "?"
+            IF name$ <> "year" AND name$ <> "difficulty" THEN
+                name$ = "?"
+            END IF
         END IF
         IF text_is_number(name$) THEN
             chance_kind(chance_count) = CHANCE_NUMBER: chance_value#(chance_count) = VAL(name$)
         ELSEIF name$ = "weight" THEN
             chance_kind(chance_count) = CHANCE_WEIGHT
         ELSEIF (name$ = "year" OR name$ = "difficulty") AND text_is_number(number$) <> 0 THEN
-            chance_kind(chance_count) = CHANCE_YEAR: IF name$ = "difficulty" THEN chance_kind(chance_count) = CHANCE_DIFFICULTY
+            chance_kind(chance_count) = CHANCE_YEAR: IF name$ = "difficulty" THEN
+                chance_kind(chance_count) = CHANCE_DIFFICULTY
+            END IF
             chance_value#(chance_count) = VAL(number$)
         ELSE
             why$ = "cannot read the chance: " + item$
@@ -371,7 +423,9 @@ FUNCTION text_is_number (text$)
             EXIT FUNCTION
         END IF
     NEXT k
-    IF digits > 0 AND points <= 1 THEN text_is_number = 1
+    IF digits > 0 AND points <= 1 THEN
+        text_is_number = 1
+    END IF
 END FUNCTION
 
 ' The place of the last space in a text. 0 when it has none.
@@ -379,7 +433,9 @@ FUNCTION text_last_space (text$)
     DIM k AS INTEGER
     text_last_space = 0
     FOR k = LEN(text$) TO 1 STEP -1
-        IF MID$(text$, k, 1) = " " THEN text_last_space = k: EXIT FUNCTION
+        IF MID$(text$, k, 1) = " " THEN
+            text_last_space = k: EXIT FUNCTION
+        END IF
     NEXT k
 END FUNCTION
 
@@ -398,8 +454,12 @@ SUB load_cities
             INPUT #1, city_road(i, j)
         NEXT j
         INPUT #1, city_port_type(i), city_fort(i)
-        IF city_owner(i) > 0 THEN owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_victory_points(owner) = side_victory_points(owner) + city_value(i)
-        IF city_owner(i) > 0 THEN side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
+        IF city_owner(i) > 0 THEN
+            owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_victory_points(owner) = side_victory_points(owner) + city_value(i)
+        END IF
+        IF city_owner(i) > 0 THEN
+            side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
+        END IF
         total_income = total_income + city_value(i)
     NEXT i
     CLOSE #1
@@ -434,9 +494,13 @@ SUB load_game (slot, problem$)
         problem$ = file$ + " is a game of the scenario " + CHR$(34) + folder$ + CHR$(34) + ", which is not in SCENARIOS.LST"
         EXIT SUB
     END IF
-    IF row <> scenario_now THEN scenario_now = row: CALL load_scenario: CALL load_cities
+    IF row <> scenario_now THEN
+        scenario_now = row: CALL load_scenario: CALL load_cities
+    END IF
     OPEN "I", 1, file$
-    IF named THEN LINE INPUT #1, text$
+    IF named THEN
+        LINE INPUT #1, text$
+    END IF
     INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
     FOR i = 1 TO MAX_ARMIES: INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
         IF army_exists(i) THEN
@@ -447,7 +511,9 @@ SUB load_game (slot, problem$)
                 first_army = side_first_army(side)
                 last_army = side_last_army(side)
                 FOR k = first_army TO last_army
-                    IF army_name$(i) = leader_name$(k) THEN leader_name$(k) = "": EXIT FOR
+                    IF army_name$(i) = leader_name$(k) THEN
+                        leader_name$(k) = "": EXIT FOR
+                    END IF
                 NEXT k
             END IF
         END IF
@@ -486,21 +552,27 @@ SUB save_game (slot)
     CLOSE #1
 
     config_side = current_side
-    IF config_side < 1 OR config_side > 2 THEN config_side = 1
+    IF config_side < 1 OR config_side > 2 THEN
+        config_side = 1
+    END IF
     CALL config_write(config_side)
 END SUB
 
 ' Notes whether a saved game is on the disk, so that the Files menu shows Load, or "-" when
 ' there is none.
 SUB saved_games_check
-    saves_exist = 0: IF any_saved_game THEN saves_exist = 1
+    saves_exist = 0: IF any_saved_game THEN
+        saves_exist = 1
+    END IF
 END SUB
 
 ' Whether one of the nine save slots, cws1.sav to cws9.sav, holds a saved game.
 FUNCTION any_saved_game
     DIM k AS INTEGER
     FOR k = 1 TO 9
-        IF _FILEEXISTS("cws" + LTRIM$(STR$(k)) + ".sav") THEN any_saved_game = -1: EXIT FUNCTION
+        IF _FILEEXISTS("cws" + LTRIM$(STR$(k)) + ".sav") THEN
+            any_saved_game = -1: EXIT FUNCTION
+        END IF
     NEXT k
 END FUNCTION
 
@@ -523,7 +595,9 @@ SUB save_battle_summary
         PRINT #1, " SIDE      BATTLES WON       LOSSES"
         FOR k = SIDE_UNION TO SIDE_REBEL
             winner_mark$ = " "
-            IF victory_reason = k THEN winner_mark$ = "*"
+            IF victory_reason = k THEN
+                winner_mark$ = "*"
+            END IF
             PRINT #1, winner_mark$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
         NEXT k
         CLOSE #1
@@ -556,7 +630,9 @@ END SUB
 ' Starts the history file cws.his with the date. The history of the game before is kept as
 ' oldhist.ory.
 SUB history_start
-    IF _FILEEXISTS("cws.his") THEN CALL script_shell("copy cws.his oldhist.ory")
+    IF _FILEEXISTS("cws.his") THEN
+        CALL script_shell("copy cws.his oldhist.ory")
+    END IF
     OPEN "O", 2, "cws.his"
     PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
     CLOSE #2

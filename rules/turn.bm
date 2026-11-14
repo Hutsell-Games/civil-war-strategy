@@ -20,8 +20,12 @@ END SUB
 ' Before each main menu. In a two-player game with no side set, the Union plays. Ships is
 ' closed for the month when the side has no fleet and not the price of a ship.
 SUB turn_check_commands
-    IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN current_side = SIDE_UNION
-    IF side_cash(current_side) < COST_SHIP AND NOT fleet_exists(current_side) THEN turn_navy_done = 1
+    IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN
+        current_side = SIDE_UNION
+    END IF
+    IF side_cash(current_side) < COST_SHIP AND NOT fleet_exists(current_side) THEN
+        turn_navy_done = 1
+    END IF
 END SUB
 
 ' Troops is closed for the month.
@@ -33,14 +37,22 @@ END SUB
 ' month_over is 0. Otherwise the month is played, month_over is 1, and the Union is next.
 SUB turn_next_player (month_over)
     month_over = 1
-    IF opt_players = PLAYERS_TWO THEN current_side = current_side + 1: IF current_side = SIDE_REBEL THEN month_over = 0: EXIT SUB
-    IF current_side > SIDE_REBEL THEN current_side = SIDE_UNION
+    IF opt_players = PLAYERS_TWO THEN
+        current_side = current_side + 1: IF current_side = SIDE_REBEL THEN
+            month_over = 0: EXIT SUB
+        END IF
+    END IF
+    IF current_side > SIDE_REBEL THEN
+        current_side = SIDE_UNION
+    END IF
 END SUB
 
 ' Two months pass.
 SUB turn_advance_month
     turn_month = turn_month + MONTHS_PER_TURN
-    IF turn_month > MONTHS_PER_YEAR THEN turn_month = 1: turn_year = turn_year + 1
+    IF turn_month > MONTHS_PER_YEAR THEN
+        turn_month = 1: turn_year = turn_year + 1
+    END IF
 END SUB
 
 ' An army's supplies for the month. Its side pays for a day of supply if it can, and the army
@@ -51,19 +63,27 @@ SUB turn_army_supply (army, blockaded, starved)
     DIM side AS INTEGER: DIM friendly_neighbors AS INTEGER
     side = army_side(army)
     IF side_cash(side) >= .2 * army_size(army) THEN
-        friendly_neighbors = 1: IF opt_realism >= REALISM_ON THEN friendly_neighbors = city_is_connected(side, army_city(army))
+        friendly_neighbors = 1: IF opt_realism >= REALISM_ON THEN
+            friendly_neighbors = city_is_connected(side, army_city(army))
+        END IF
         IF friendly_neighbors > 0 THEN
             army_supply(army) = army_supply(army) + 1
             side_cash(side) = side_cash(side) - .2 * army_size(army)
         END IF
     END IF
-    IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(army)) < PORT_SEA THEN army_supply(army) = army_supply(army) - 1
+    IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(army)) < PORT_SEA THEN
+        army_supply(army) = army_supply(army) - 1
+    END IF
     blockaded = 0: starved = 0
-    IF city_port_type(army_city(army)) = PORT_SEA AND fleet_city(other_side(side)) = army_city(army) THEN army_supply(army) = army_supply(army) - 1: blockaded = 1
+    IF city_port_type(army_city(army)) = PORT_SEA AND fleet_city(other_side(side)) = army_city(army) THEN
+        army_supply(army) = army_supply(army) - 1: blockaded = 1
+    END IF
     IF army_supply(army) < 1 THEN
         army_supply(army) = 0
         starved = 1
-        IF RND > .8 AND army_size(army) > 50 THEN army_size(army) = .9 * army_size(army)
+        IF RND > .8 AND army_size(army) > 50 THEN
+            army_size(army) = .9 * army_size(army)
+        END IF
     END IF
 END SUB
 
@@ -78,18 +98,32 @@ SUB turn_strength_ratio
     FOR i = ARMIES_PER_SIDE + 1 TO MAX_ARMIES
         rebel_strength = rebel_strength + .1 * army_size(i)
     NEXT i
-    IF current_side = SIDE_REBEL AND rebel_strength > 0 THEN ai_strength_ratio! = union_strength / rebel_strength ELSE ai_strength_ratio! = 1
-    IF current_side = SIDE_UNION AND union_strength > 0 THEN ai_strength_ratio! = rebel_strength / union_strength ELSE IF current_side = SIDE_UNION THEN ai_strength_ratio! = 1
+    IF current_side = SIDE_REBEL AND rebel_strength > 0 THEN
+        ai_strength_ratio! = union_strength / rebel_strength
+    ELSE
+        ai_strength_ratio! = 1
+    END IF
+    IF current_side = SIDE_UNION AND union_strength > 0 THEN
+        ai_strength_ratio! = rebel_strength / union_strength
+    ELSE
+        IF current_side = SIDE_UNION THEN
+            ai_strength_ratio! = 1
+        END IF
+    END IF
 END SUB
 
 ' An army sets out: it uses a day of supply. starved is 1 when it had none left.
 SUB turn_army_marches (army, starved)
-    starved = 0: army_supply(army) = army_supply(army) - 1: IF army_supply(army) < 0 THEN army_supply(army) = 0: starved = 1
+    starved = 0: army_supply(army) = army_supply(army) - 1: IF army_supply(army) < 0 THEN
+        army_supply(army) = 0: starved = 1
+    END IF
 END SUB
 
 ' The winner of a battle gains a level of experience.
 SUB turn_battle_experience (army)
-    IF army_experience(army) < MAX_EXPERIENCE THEN army_experience(army) = army_experience(army) + 1
+    IF army_experience(army) < MAX_EXPERIENCE THEN
+        army_experience(army) = army_experience(army) + 1
+    END IF
 END SUB
 
 ' The attacker withdrew to the city it came from (in its order) and is done for the month.
@@ -103,7 +137,11 @@ END SUB
 SUB turn_defender_halts (army, halted, old_order)
     halted = 0
     old_order = army_order(army)
-    IF 11 * RND > army_leader_rating(army) THEN halted = 1: IF army_has_move(army) THEN army_order(army) = ORDER_DONE
+    IF 11 * RND > army_leader_rating(army) THEN
+        halted = 1: IF army_has_move(army) THEN
+            army_order(army) = ORDER_DONE
+        END IF
+    END IF
 END SUB
 
 ' The city the defender of city retreats to: the richest city of its side next to city, and
@@ -119,11 +157,15 @@ FUNCTION turn_retreat_city (city, attacker_side)
                 best_road = i
                 best = city_value(neighbor)
             ELSE
-                IF city_army(neighbor) = 0 THEN best_road = i: best = city_value(neighbor)
+                IF city_army(neighbor) = 0 THEN
+                    best_road = i: best = city_value(neighbor)
+                END IF
             END IF
         END IF
     NEXT i
-    IF best_road = 0 THEN EXIT FUNCTION
+    IF best_road = 0 THEN
+        EXIT FUNCTION
+    END IF
     turn_retreat_city = city_road(city, best_road)
 END FUNCTION
 
@@ -142,7 +184,9 @@ SUB turn_army_lost (army, winner)
     side = army_side(winner)
     side_victory_points(side) = side_victory_points(side) + 25
     army_supply(winner) = army_supply(winner) + army_supply(army)
-    IF army_supply(winner) > MAX_SUPPLY THEN army_supply(winner) = MAX_SUPPLY
+    IF army_supply(winner) > MAX_SUPPLY THEN
+        army_supply(winner) = MAX_SUPPLY
+    END IF
     army_city(army) = 0: leader_name$(army) = "": army_name$(army) = ""
     army_size(army) = 0: army_leader_rating(army) = 0
     army_experience(army) = 0: army_order(army) = ORDER_NONE: army_supply(army) = 0
@@ -162,7 +206,9 @@ END SUB
 ' An army in a city of its side gathers supplies: a day, and more with a chance of 2 in 10 each.
 SUB turn_army_forages (army)
     DO
-        IF army_supply(army) >= MAX_SUPPLY THEN EXIT SUB
+        IF army_supply(army) >= MAX_SUPPLY THEN
+            EXIT SUB
+        END IF
         army_supply(army) = army_supply(army) + 1
     LOOP WHILE RND > .8
 END SUB
@@ -175,19 +221,31 @@ SUB turn_collect_income
 
     FOR i = SIDE_UNION TO SIDE_REBEL
         side_income(i) = 0
-        IF side_cash(i) > MAX_CASH THEN side_cash(i) = MAX_CASH
-        IF side_cash(i) < 0 THEN side_cash(i) = 0
+        IF side_cash(i) > MAX_CASH THEN
+            side_cash(i) = MAX_CASH
+        END IF
+        IF side_cash(i) < 0 THEN
+            side_cash(i) = 0
+        END IF
     NEXT i
-    IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
+    IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN
+        side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
+    END IF
 
     FOR i = 1 TO MAX_CITIES
-        IF city_owner(i) > 0 THEN owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_income(owner) = side_income(owner) + city_value(i)
+        IF city_owner(i) > 0 THEN
+            owner = city_owner(i): side_city_count(owner) = side_city_count(owner) + 1: side_income(owner) = side_income(owner) + city_value(i)
+        END IF
         army_order(i) = ORDER_NONE
     NEXT i
 
-    FOR i = SIDE_UNION TO SIDE_REBEL: IF side_capital(i) > 0 THEN side_income(i) = side_income(i) + CAPITAL_INCOME
+    FOR i = SIDE_UNION TO SIDE_REBEL: IF side_capital(i) > 0 THEN
+            side_income(i) = side_income(i) + CAPITAL_INCOME
+        END IF
         side_cash(i) = side_cash(i) + side_income(i)
-        IF raiding_side > 0 AND i <> raiding_side THEN side_cash(i) = side_cash(i) - raid_loss
+        IF raiding_side > 0 AND i <> raiding_side THEN
+            side_cash(i) = side_cash(i) - raid_loss
+        END IF
     NEXT i
     total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
 END SUB
@@ -198,20 +256,34 @@ SUB turn_set_move_order
     DIM i AS INTEGER
     FOR i = 1 TO MAX_ARMIES
         move_order_key(i) = MOVE_KEY_NONE
-        IF army_has_acted(i) THEN army_order(i) = ORDER_NONE
-        IF army_exists(i) AND army_has_move(i) THEN move_order_key(i) = INT(4 + 4 * RND) * 100 + i
-        IF army_supply(i) < 1 AND army_has_move(i) THEN move_order_key(i) = 900 + i
-        SELECT CASE army_size(i)         'bigger armies move slower
+        IF army_has_acted(i) THEN
+            army_order(i) = ORDER_NONE
+        END IF
+        IF army_exists(i) AND army_has_move(i) THEN
+            move_order_key(i) = INT(4 + 4 * RND) * 100 + i
+        END IF
+        IF army_supply(i) < 1 AND army_has_move(i) THEN
+            move_order_key(i) = 900 + i
+        END IF
+        SELECT CASE army_size(i) 'bigger armies move slower
             CASE IS > 1000
-                IF move_order_key(i) < 700 THEN move_order_key(i) = move_order_key(i) + 300
+                IF move_order_key(i) < 700 THEN
+                    move_order_key(i) = move_order_key(i) + 300
+                END IF
             CASE IS > 800
-                IF move_order_key(i) < 800 THEN move_order_key(i) = move_order_key(i) + 200
+                IF move_order_key(i) < 800 THEN
+                    move_order_key(i) = move_order_key(i) + 200
+                END IF
             CASE IS > 400
-                IF move_order_key(i) < 900 THEN move_order_key(i) = move_order_key(i) + 100
+                IF move_order_key(i) < 900 THEN
+                    move_order_key(i) = move_order_key(i) + 100
+                END IF
         END SELECT
         IF move_order_key(i) <> MOVE_KEY_NONE AND army_leader_rating(i) > 10 * RND THEN
             move_order_key(i) = move_order_key(i) - 100 * (army_leader_rating(i) \ 2)
-            IF move_order_key(i) < 100 THEN move_order_key(i) = 100 + i
+            IF move_order_key(i) < 100 THEN
+                move_order_key(i) = 100 + i
+            END IF
         END IF
     NEXT i
 
@@ -223,7 +295,15 @@ END SUB
 ' at 0; in the original only the Union's did.
 SUB turn_update_victory_points (side)
     side_victory_points(side) = .8 * side_victory_points(side) + .3 * (side_income(side) + side_city_count(side))
-    IF side_city_count(side) > 29 THEN side_victory_points(side) = side_victory_points(side) + 50: IF side_city_count(side) > 34 THEN side_victory_points(side) = side_victory_points(side) + 100
-    IF current_side = other_side(side) AND side_city_count(side) < 11 THEN ai_strength_ratio! = ai_strength_ratio! + .7
-    IF side_victory_points(side) < 1 THEN side_victory_points(side) = 0
+    IF side_city_count(side) > 29 THEN
+        side_victory_points(side) = side_victory_points(side) + 50: IF side_city_count(side) > 34 THEN
+            side_victory_points(side) = side_victory_points(side) + 100
+        END IF
+    END IF
+    IF current_side = other_side(side) AND side_city_count(side) < 11 THEN
+        ai_strength_ratio! = ai_strength_ratio! + .7
+    END IF
+    IF side_victory_points(side) < 1 THEN
+        side_victory_points(side) = 0
+    END IF
 END SUB

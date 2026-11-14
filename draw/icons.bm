@@ -11,21 +11,31 @@ SUB animate_army (army, picture_taken)
     step_y = .5 * (city_y(to_city) + city_y(from_city))
 
     CALL city_update_occupier(from_city)
-    IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
+    IF city_army(from_city) > 0 THEN
+        CALL draw_army_flag(city_army(from_city))
+    END IF
 
     IF picture_taken <= 0 THEN
-        GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army
-        IF city_army(from_city) = 0 THEN LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+        GET (x - 9, y - 7)-(x + 9, y + 6), saved_under_army()
+        IF city_army(from_city) = 0 THEN
+            LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
+        END IF
     END IF
 
     FOR i = 2 TO 8
         step_x = .1 * (i * city_x(to_city) + (10 - i) * city_x(from_city))
         step_y = .1 * (i * city_y(to_city) + (10 - i) * city_y(from_city))
-        GET (step_x - 10, step_y - 10)-(step_x + 9, step_y + 9), saved_under_marker
-        PUT (step_x - 10, step_y - 10), saved_under_army, PSET
-        IF opt_pause! > 1 THEN CALL wait_seconds(.1) ELSE CALL wait_seconds(.02)
-        IF opt_sound >= SOUND_EFFECTS THEN SOUND 200, .1: SOUND 50, .1
-        PUT (step_x - 10, step_y - 10), saved_under_marker, PSET
+        GET (step_x - 10, step_y - 10)-(step_x + 9, step_y + 9), saved_under_marker()
+        PUT (step_x - 10, step_y - 10), saved_under_army(), PSET
+        IF opt_pause! > 1 THEN
+            CALL wait_seconds(.1)
+        ELSE
+            CALL wait_seconds(.02)
+        END IF
+        IF opt_sound >= SOUND_EFFECTS THEN
+            SOUND 200, .1: SOUND 50, .1
+        END IF
+        PUT (step_x - 10, step_y - 10), saved_under_marker(), PSET
     NEXT i
     army_city(army) = from_city
 END SUB
@@ -38,8 +48,12 @@ SUB animate_city (city)
         CALL wait_seconds(.1)
     NEXT dot_color
     dot_color = 9
-    IF city_owner(city) = SIDE_REBEL THEN dot_color = 7
-    IF city_owner(city) = SIDE_NONE THEN dot_color = 12
+    IF city_owner(city) = SIDE_REBEL THEN
+        dot_color = 7
+    END IF
+    IF city_owner(city) = SIDE_NONE THEN
+        dot_color = 12
+    END IF
     CALL draw_city_dot(city, dot_color)
 END SUB
 
@@ -59,7 +73,9 @@ END SUB
 
 SUB draw_train (side, show)
     DIM city AS INTEGER: DIM x AS INTEGER: DIM side_color AS INTEGER: DIM y AS INTEGER
-    IF train_city(side) = 0 THEN EXIT SUB
+    IF train_city(side) = 0 THEN
+        EXIT SUB
+    END IF
     city = train_city(side)
     x = city_x(city) - 12
     y = city_y(city) - 11
@@ -68,7 +84,9 @@ SUB draw_train (side, show)
             LINE (x - 8, y - 6)-(x + 10, y + 7), 10, BF
             PSET (x - 6, y - 2), 3
             side_color = 9
-            IF side = SIDE_REBEL THEN side_color = 15
+            IF side = SIDE_REBEL THEN
+                side_color = 15
+            END IF
             DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
             x = POINT(0): y = POINT(1): PAINT (x, y), side_color, 0
         CASE ELSE
@@ -100,8 +118,12 @@ SUB draw_large_flag (side, x_offset, top_y)
     DIM x AS INTEGER: DIM y AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
     x = 585 + x_offset
     y = 200
-    IF x_offset = 0 THEN y = 180
-    IF top_y <> 0 THEN y = top_y
+    IF x_offset = 0 THEN
+        y = 180
+    END IF
+    IF top_y <> 0 THEN
+        y = top_y
+    END IF
     SELECT CASE side
         CASE 1
             LINE (x - 17, y - 15)-(x + 17, y + 7), 4, BF
@@ -109,7 +131,9 @@ SUB draw_large_flag (side, x_offset, top_y)
                 LINE (x - 17, y + i)-(x + 17, y + i - 1), 7, B
             NEXT i
             LINE (x - 17, y - 15)-(x, y), 1, BF
-            IF x_offset = 0 THEN COLOR COLOR_LIGHT_BLUE: LOCATE 10, 70: PRINT "U N I O N"
+            IF x_offset = 0 THEN
+                COLOR COLOR_LIGHT_BLUE: LOCATE 10, 70: PRINT "U N I O N"
+            END IF
             FOR i = -16 TO -1 STEP 3
                 FOR j = -14 TO -1 STEP 4: PSET (x + i, y + j), 7: NEXT j
             NEXT i
@@ -129,7 +153,9 @@ SUB draw_large_flag (side, x_offset, top_y)
             LINE (x - 16, y - 15)-(x + 17, y + 6), 1
             LINE (x - 17, y - 15)-(x + 17, y + 7), 4, B
 
-            IF x_offset = 0 THEN COLOR COLOR_RED: LOCATE 10, 70: PRINT "R E B E L"
+            IF x_offset = 0 THEN
+                COLOR COLOR_RED: LOCATE 10, 70: PRINT "R E B E L"
+            END IF
         CASE ELSE
     END SELECT
 END SUB

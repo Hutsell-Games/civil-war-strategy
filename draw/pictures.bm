@@ -83,8 +83,8 @@ SUB draw_title
     SCREEN 12
     CALL load_picture(GFXDIR + "cwsicon.vga", pic_loaded())
 
-    PUT (100, 100), pic_loaded, PSET
-    GET (101, 101)-(113, 113), pic_capital
+    PUT (100, 100), pic_loaded(), PSET
+    GET (101, 101)-(113, 113), pic_capital()
     CLS
     COLOR COLOR_LIGHT_CYAN: LOCATE 14, 27: PRINT "VGA CIVIL WAR STRATEGY GAME"
     COLOR COLOR_RED: LOCATE 15, 32: PRINT "Registered Edition"

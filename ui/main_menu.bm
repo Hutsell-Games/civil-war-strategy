@@ -12,10 +12,24 @@ SUB menu_main (start)
     menu_color = COLOR_RED
     menu_col = PANEL_COL: menu_row = 13
     menu_text$(0) = "Main"
-    menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN menu_text$(1) = "-": start = MENU_START + MAIN_MOVES
-    menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN menu_text$(2) = "-": IF start = MENU_START + MAIN_MOVES THEN start = MENU_START + MAIN_SHIPS
-    menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN menu_text$(3) = "-": IF start = MENU_START + MAIN_SHIPS THEN start = MENU_START + MAIN_RAILROAD
-    menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN menu_text$(4) = "-": IF start = MENU_START + MAIN_RAILROAD THEN start = MENU_START + MAIN_END_TURN
+    menu_text$(1) = "Troops": IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN
+        menu_text$(1) = "-": start = MENU_START + MAIN_MOVES
+    END IF
+    menu_text$(2) = "Moves": IF turn_moves_done > 0 THEN
+        menu_text$(2) = "-": IF start = MENU_START + MAIN_MOVES THEN
+            start = MENU_START + MAIN_SHIPS
+        END IF
+    END IF
+    menu_text$(3) = "Ships": IF turn_navy_done > 0 THEN
+        menu_text$(3) = "-": IF start = MENU_START + MAIN_SHIPS THEN
+            start = MENU_START + MAIN_RAILROAD
+        END IF
+    END IF
+    menu_text$(4) = "Railroad": IF train_army(current_side) > 0 THEN
+        menu_text$(4) = "-": IF start = MENU_START + MAIN_RAILROAD THEN
+            start = MENU_START + MAIN_END_TURN
+        END IF
+    END IF
     menu_text$(5) = "END TURN"
     menu_text$(6) = "Inform"
     menu_text$(7) = "COMMANDS"
@@ -36,14 +50,20 @@ SUB menu_main_railroad
         COLOR COLOR_WHITE: LOCATE 4, 68: PRINT "RAILROAD MOVE"
         PSET (550, 20), 0
         DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
-        side_color = 9: IF current_side = SIDE_REBEL THEN side_color = 7
+        side_color = 9: IF current_side = SIDE_REBEL THEN
+            side_color = 7
+        END IF
         x = POINT(0): y = POINT(1)
         PAINT (x, y), side_color, 15
-        COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN COLOR COLOR_LIGHT_CYAN
+        COLOR COLOR_WHITE: IF current_side = SIDE_UNION THEN
+            COLOR COLOR_LIGHT_CYAN
+        END IF
         capacity = railroad_capacity(current_side)
         CALL clear_bottom_line: PRINT "Railroad capacity ="; RTRIM$(STR$(capacity)); "00";
         CALL menu_railroad(current_side, army, city)
-        IF army > 0 THEN CALL railroad_start(current_side, army, city)
+        IF army > 0 THEN
+            CALL railroad_start(current_side, army, city)
+        END IF
         CALL wait_seconds(PAUSE_LONG)
         CALL railroad_finish
     ELSE
@@ -59,7 +79,9 @@ SUB menu_main_end_turn (ended)
     menu_text$(1) = "Yes"
     menu_text$(2) = "NOT YET"
     menu_item_count = 2: CALL menu_select(MENU_PLAIN): CALL clear_right_panel
-    ended = 0: IF menu_choice = 1 THEN ended = 1
+    ended = 0: IF menu_choice = 1 THEN
+        ended = 1
+    END IF
 END SUB
 
 ' Inform: the reports, then the lines of the armies' moves drawn again on the map.
@@ -68,7 +90,9 @@ SUB menu_main_inform
     CALL menu_report((current_side))
     first_army = side_first_army(current_side): last_army = side_last_army(current_side)
     FOR i = first_army TO last_army
-        IF army_has_move(i) THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+        IF army_has_move(i) THEN
+            CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+        END IF
     NEXT i
 END SUB
 
@@ -84,7 +108,9 @@ SUB show_title (replay)
     RESTORE
     FOR k = 1 TO 26: READ map_font$(k): NEXT k
     CALL draw_title
-    IF replay = 0 AND opt_sound = SOUND_MUSIC THEN CALL play_title_music
+    IF replay = 0 AND opt_sound = SOUND_MUSIC THEN
+        CALL play_title_music
+    END IF
 END SUB
 
 ' The title menu: Resume Saved Game, Start NEW Game or Quit to DOS. The choice is left in
@@ -94,7 +120,9 @@ SUB menu_title
     wait_seconds .3
     menu_box_type = BOX_DOUBLE
     menu_highlight = COLOR_WHITE
-    IF opt_players = PLAYERS_TWO THEN CALL draw_player_turn
+    IF opt_players = PLAYERS_TWO THEN
+        CALL draw_player_turn
+    END IF
     menu_text$(0) = "VGA CIVILWAR STRATEGY"
     menu_text$(1) = "Resume Saved Game"
     menu_text$(2) = "Start NEW Game"
@@ -111,7 +139,9 @@ END SUB
 SUB menu_scenario (picked)
     DIM k AS INTEGER
     picked = scenario_now
-    IF scenario_count < 2 THEN EXIT SUB
+    IF scenario_count < 2 THEN
+        EXIT SUB
+    END IF
     menu_text$(0) = "Scenario"
     FOR k = 1 TO scenario_count
         menu_text$(k) = scenario_title$(k)
@@ -120,7 +150,9 @@ SUB menu_scenario (picked)
     menu_choice = MENU_START + scenario_now
     CALL menu_select(MENU_PLAIN)
     picked = 0
-    IF menu_choice >= 1 AND menu_choice <= scenario_count THEN picked = menu_choice
+    IF menu_choice >= 1 AND menu_choice <= scenario_count THEN
+        picked = menu_choice
+    END IF
 END SUB
 
 ' A new game begins: the history file is started when History is on, and the map is drawn.

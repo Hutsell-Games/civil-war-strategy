@@ -1,8 +1,12 @@
 ' The Union's extra income each month, from the Balance setting.
 SUB set_union_advantage
     union_income_bonus = 120 * opt_difficulty
-    IF opt_players = PLAYERS_TWO THEN union_income_bonus = 50 * opt_difficulty
-    IF opt_realism >= REALISM_ON THEN union_income_bonus = union_income_bonus * .7
+    IF opt_players = PLAYERS_TWO THEN
+        union_income_bonus = 50 * opt_difficulty
+    END IF
+    IF opt_realism >= REALISM_ON THEN
+        union_income_bonus = union_income_bonus * .7
+    END IF
 END SUB
 
 ' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
@@ -29,22 +33,36 @@ SUB vary_start_conditions
         CALL city_update_occupier(k)
     NEXT k
     fleet_size(SIDE_UNION) = 10 * RND
-    IF fleet_size(SIDE_UNION) = 0 THEN fleet_city(SIDE_UNION) = 0
+    IF fleet_size(SIDE_UNION) = 0 THEN
+        fleet_city(SIDE_UNION) = 0
+    END IF
     fleet_size(SIDE_REBEL) = 10 * RND
-    IF fleet_size(SIDE_REBEL) > 0 THEN fleet_city(SIDE_REBEL) = 27
+    IF fleet_size(SIDE_REBEL) > 0 THEN
+        fleet_city(SIDE_REBEL) = 27
+    END IF
     FOR i = SIDE_UNION TO SIDE_REBEL
         fleet_ships$(i) = ""
         FOR j = 1 TO fleet_size(i)
             ship$ = "W"
-            IF RND > .45 * current_side THEN ship$ = "I"
+            IF RND > .45 * current_side THEN
+                ship$ = "I"
+            END IF
             fleet_ships$(i) = fleet_ships$(i) + ship$
         NEXT j
     NEXT i
-    IF RND > .7 THEN side_capital(SIDE_REBEL) = 25
+    IF RND > .7 THEN
+        side_capital(SIDE_REBEL) = 25
+    END IF
 
     FOR k = 1 TO MAX_LEADERS
-        IF RND > .8 THEN leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN leader_rating(k) = MAX_LEADER_RATING
-        IF leader_rating(k) < 1 THEN leader_rating(k) = 1
+        IF RND > .8 THEN
+            leader_rating(k) = leader_rating(k) - 3 + 6 * RND: IF leader_rating(k) > MAX_LEADER_RATING THEN
+                leader_rating(k) = MAX_LEADER_RATING
+            END IF
+        END IF
+        IF leader_rating(k) < 1 THEN
+            leader_rating(k) = 1
+        END IF
     NEXT k
 END SUB
 
@@ -59,8 +77,12 @@ END SUB
 
 ' The special events favor the side left to the computer: 7 for the Rebels, 3 for the Union.
 SUB option_events_favor_computer
-    IF current_side = SIDE_UNION THEN opt_event_balance = 7
-    IF current_side = SIDE_REBEL THEN opt_event_balance = 3
+    IF current_side = SIDE_UNION THEN
+        opt_event_balance = 7
+    END IF
+    IF current_side = SIDE_REBEL THEN
+        opt_event_balance = 3
+    END IF
 END SUB
 
 ' One player or two.
@@ -71,7 +93,9 @@ END SUB
 ' Graphics: the next level of the map's detail, and after the last the first again.
 SUB option_next_graphics
     opt_graphics = opt_graphics + 1
-    IF opt_graphics > GRAPHICS_FULL THEN opt_graphics = GRAPHICS_OFF
+    IF opt_graphics > GRAPHICS_FULL THEN
+        opt_graphics = GRAPHICS_OFF
+    END IF
 END SUB
 
 SUB option_set_sound (level)
@@ -81,7 +105,9 @@ END SUB
 ' Display: choice is the menu's row, 1 (Fast) to 4 (Very Slow). Very Slow is 8 seconds.
 SUB option_set_display_speed (choice)
     opt_pause! = choice
-    IF opt_pause! = 4 THEN opt_pause! = 8
+    IF opt_pause! = 4 THEN
+        opt_pause! = 8
+    END IF
 END SUB
 
 SUB option_toggle_alt_colors
@@ -118,7 +144,9 @@ END SUB
 SUB option_toggle_realism
     opt_realism = 1 - opt_realism
     IF opt_realism <> REALISM_OFF THEN
-        IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN opt_event_balance = opt_event_balance + 2
+        IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN
+            opt_event_balance = opt_event_balance + 2
+        END IF
         CALL set_union_advantage
     END IF
 END SUB
@@ -130,13 +158,17 @@ END SUB
 ' Aggress: the next level of the computer's boldness, 0 to 5, and after 5 again 0.
 SUB option_next_aggression
     opt_ai_aggression = opt_ai_aggression + 1
-    IF opt_ai_aggression > 5 THEN opt_ai_aggression = 0
+    IF opt_ai_aggression > 5 THEN
+        opt_ai_aggression = 0
+    END IF
 END SUB
 
 ' A new game: the scenario and the settings are read, and the map's cities. The first game
 ' reads the list of scenarios and starts on its first.
 SUB game_new
-    IF scenario_now = 0 THEN CALL load_scenario_list: scenario_now = 1
+    IF scenario_now = 0 THEN
+        CALL load_scenario_list: scenario_now = 1
+    END IF
     CALL game_reset
     CALL load_scenario
     CALL load_events(SCNDIR + "events.dat")
@@ -183,12 +215,22 @@ SUB game_apply_settings
             fleet_ships$(i) = ships$
         NEXT i
     END IF
-    IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN opt_players = PLAYERS_ONE
-    IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN current_side = SIDE_UNION
+    IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN
+        opt_players = PLAYERS_ONE
+    END IF
+    IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN
+        current_side = SIDE_UNION
+    END IF
     CALL option_events_favor_computer
-    IF opt_pause! < 1 THEN opt_pause! = 2
-    IF current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
-    IF current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
+    IF opt_pause! < 1 THEN
+        opt_pause! = 2
+    END IF
+    IF current_side = SIDE_UNION AND opt_difficulty < DIFFICULTY_EVEN THEN
+        side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 600 - 100 * opt_difficulty
+    END IF
+    IF current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN
+        side_cash(SIDE_UNION) = side_cash(SIDE_UNION) + 100 * opt_difficulty
+    END IF
     FOR i = SIDE_UNION TO SIDE_REBEL
         side_income(i) = side_cash(i)
         side_cash(i) = side_cash(i) + 50 * RND

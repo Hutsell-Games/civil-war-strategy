@@ -21,7 +21,9 @@
 SUB script_start
     DIM seed$
     seed$ = ENVIRON$("CWS_SEED")
-    IF seed$ = "" THEN RANDOMIZE TIMER: EXIT SUB
+    IF seed$ = "" THEN
+        RANDOMIZE TIMER: EXIT SUB
+    END IF
     scripted = 1
     RANDOMIZE VAL(seed$)
     script_dice$ = ENVIRON$("CWS_DICE")
@@ -30,7 +32,9 @@ END SUB
 ' Makes PLAY and SOUND silent when the program is scripted. Called once, before the title
 ' tune, which plays before script_start seeds the random numbers.
 SUB script_mute
-    IF ENVIRON$("CWS_SEED") <> "" THEN PLAY "V0"
+    IF ENVIRON$("CWS_SEED") <> "" THEN
+        PLAY "V0"
+    END IF
 END SUB
 
 ' Forced dice for special_events. CWS_DICE holds groups of numbers, as in
@@ -43,28 +47,42 @@ END SUB
 SUB script_dice_next
     DIM cut AS INTEGER
     script_dice_now$ = ""
-    IF script_dice$ = "" THEN EXIT SUB
+    IF script_dice$ = "" THEN
+        EXIT SUB
+    END IF
     cut = INSTR(script_dice$, ";")
-    IF cut = 0 THEN script_dice_now$ = script_dice$: script_dice$ = "": EXIT SUB
+    IF cut = 0 THEN
+        script_dice_now$ = script_dice$: script_dice$ = "": EXIT SUB
+    END IF
     script_dice_now$ = LEFT$(script_dice$, cut - 1): script_dice$ = MID$(script_dice$, cut + 1)
 END SUB
 
 FUNCTION script_rnd!
     DIM cut AS INTEGER: DIM item$
-    IF script_dice_now$ = "" THEN script_rnd! = RND: EXIT FUNCTION
+    IF script_dice_now$ = "" THEN
+        script_rnd! = RND: EXIT FUNCTION
+    END IF
     cut = INSTR(script_dice_now$, ",")
     IF cut = 0 THEN
         item$ = script_dice_now$: script_dice_now$ = ""
     ELSE
         item$ = LEFT$(script_dice_now$, cut - 1): script_dice_now$ = MID$(script_dice_now$, cut + 1)
     END IF
-    IF item$ = "r" THEN script_rnd! = RND ELSE script_rnd! = VAL(item$)
+    IF item$ = "r" THEN
+        script_rnd! = RND
+    ELSE
+        script_rnd! = VAL(item$)
+    END IF
 END FUNCTION
 
 ' The date the history file starts with: today, or a fixed one when the
 ' program is scripted, so that the file is the same in every run.
 FUNCTION script_date$
-    IF scripted THEN script_date$ = "01-01-2000" ELSE script_date$ = DATE$
+    IF scripted THEN
+        script_date$ = "01-01-2000"
+    ELSE
+        script_date$ = DATE$
+    END IF
 END FUNCTION
 
 ' wait_seconds's pause when the program is scripted. Gives 0 when it is not, and
@@ -73,9 +91,13 @@ END FUNCTION
 ' script waits there for a key; a shorter one returns at once.
 FUNCTION script_tick% (seconds!)
     script_tick% = 0
-    IF scripted = 0 THEN EXIT FUNCTION
+    IF scripted = 0 THEN
+        EXIT FUNCTION
+    END IF
     script_tick% = -1
-    IF seconds! < 99 THEN EXIT FUNCTION
+    IF seconds! < 99 THEN
+        EXIT FUNCTION
+    END IF
     CALL script_mark_key_wait(1, "L")
     DO WHILE INKEY$ = "": LOOP
 END FUNCTION
@@ -88,15 +110,23 @@ END FUNCTION
 SUB script_shell (cmd$)
     DIM space_at AS INTEGER: DIM contents$
     DIM trimmed$: DIM args$: DIM verb$: DIM from$: DIM file_num AS INTEGER: DIM into$
-    IF scripted = 0 THEN SHELL cmd$: EXIT SUB
+    IF scripted = 0 THEN
+        SHELL cmd$: EXIT SUB
+    END IF
     trimmed$ = LTRIM$(RTRIM$(cmd$))
     space_at = INSTR(trimmed$, " "): verb$ = LCASE$(LEFT$(trimmed$, space_at - 1)): args$ = LTRIM$(MID$(trimmed$, space_at + 1))
     space_at = INSTR(args$, " "): from$ = LEFT$(args$, space_at - 1): into$ = LTRIM$(MID$(args$, space_at + 1))
-    IF verb$ <> "copy" THEN SHELL cmd$: EXIT SUB
-    IF NOT _FILEEXISTS(from$) THEN EXIT SUB
+    IF verb$ <> "copy" THEN
+        SHELL cmd$: EXIT SUB
+    END IF
+    IF NOT _FILEEXISTS(from$) THEN
+        EXIT SUB
+    END IF
     file_num = FREEFILE: OPEN from$ FOR BINARY AS #file_num
     contents$ = SPACE$(LOF(file_num)): GET #file_num, , contents$: CLOSE #file_num
-    IF _FILEEXISTS(into$) THEN KILL into$
+    IF _FILEEXISTS(into$) THEN
+        KILL into$
+    END IF
     file_num = FREEFILE: OPEN into$ FOR BINARY AS #file_num: PUT #file_num, , contents$: CLOSE #file_num
 END SUB
 
@@ -121,9 +151,13 @@ END SUB
 ' Byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits.
 SUB script_mark_key_wait (place, letter$)
     DIM code AS INTEGER
-    IF scripted = 0 THEN EXIT SUB
+    IF scripted = 0 THEN
+        EXIT SUB
+    END IF
     code = 0
-    IF letter$ <> "" THEN code = ASC(UCASE$(letter$))
+    IF letter$ <> "" THEN
+        code = ASC(UCASE$(letter$))
+    END IF
     DEF SEG = 0
     POKE &H4F1, place
     POKE &H4F2, code

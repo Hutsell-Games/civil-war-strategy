@@ -35,15 +35,23 @@ SUB draw_union_victory
     DRAW "S3C7R13U6L13D5BU5C7U2E1U2E2U3H2U3H1E3U2H1U2E2U2E2F2D2F4D3R2E2F1G4L1D7F1D2F1D1G2"
     LINE (140, 270)-(510, 430), 14, BF
     COLOR COLOR_WHITE
-    IF opt_sound = SOUND_MUSIC THEN PLAY "T130MFMSO2f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4"
+    IF opt_sound = SOUND_MUSIC THEN
+        PLAY "T130MFMSO2f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4"
+    END IF
     LOCATE 20, 20: PRINT CHR$(34); "... and that the government of the people,"
-    IF opt_sound = SOUND_MUSIC THEN PLAY "o2b-8.a16g8.g16g8.a16b-8.a16b-8.g16f8.g16f8.d16f4"
+    IF opt_sound = SOUND_MUSIC THEN
+        PLAY "o2b-8.a16g8.g16g8.a16b-8.a16b-8.g16f8.g16f8.d16f4"
+    END IF
     LOCATE 21, 20: PRINT "by the people, for the people,"
-    IF opt_sound = SOUND_MUSIC THEN PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
+    IF opt_sound = SOUND_MUSIC THEN
+        PLAY "f8.f16f8.f16f8.e-16d8.f16b-8.o3c16d8.d16d8.c16o2b-4b-4MNo3c4c4o2b-4a4b-2"
+    END IF
     LOCATE 22, 20: PRINT "shall not perish from the earth."; CHR$(34)
     LOCATE 25, 40: PRINT "- Abraham Lincoln"
     FOR i = -565 TO 50 STEP 50: CALL draw_large_flag(SIDE_UNION, i, 0): NEXT i
-    IF opt_sound = SOUND_MUSIC THEN PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
+    IF opt_sound = SOUND_MUSIC THEN
+        PLAY "P2f4..e-16d8.f16b-8.o3c16d2o2b-2g4..a16b-8.a16b-8.g16f2d2": PLAY "f4..e-16d8.f16b-8.o3c16d2o2b-4b-4o3c4c4o2b-4a4b-2.."
+    END IF
 END SUB
 
 SUB draw_rebel_victory
@@ -102,7 +110,9 @@ SUB draw_rebel_victory
 
     FOR i = 1 TO 6: LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF: NEXT i
 
-    IF opt_sound < SOUND_MUSIC THEN EXIT SUB
+    IF opt_sound < SOUND_MUSIC THEN
+        EXIT SUB
+    END IF
     PLAY "MBMS T120"
     PLAY "O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
     PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8"
@@ -118,7 +128,9 @@ SUB draw_surrender (army)
     DIM side AS INTEGER: DIM side_color AS INTEGER: DIM panel_left AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER
     SCREEN 12
     side = SIDE_UNION: side_color = 1: COLOR COLOR_BLACK: panel_left = 514
-    IF army_side(army) = SIDE_REBEL THEN side_color = 7: side = SIDE_REBEL
+    IF army_side(army) = SIDE_REBEL THEN
+        side_color = 7: side = SIDE_REBEL
+    END IF
     '               background
     LINE (panel_left + 15, 440)-(panel_left + 125, 16), 2, BF
     LINE (panel_left + 15, 16)-(panel_left + 125, 290), 3, BF
@@ -231,10 +243,14 @@ SUB draw_surrender (army)
     LINE -(panel_left + 48, 260): LINE -(panel_left + 37, 258)
     LINE -(panel_left + 36, 255): LINE -(panel_left + 37, 250)
     LINE -(panel_left + 39, 246): LINE -(panel_left + 40, 243)
-    side_color = 0: IF side = SIDE_REBEL THEN side_color = 15: LINE (547, 263)-(558, 263), 15
+    side_color = 0: IF side = SIDE_REBEL THEN
+        side_color = 15: LINE (547, 263)-(558, 263), 15
+    END IF
     PAINT (panel_left + 33, 250), side_color, 0
     PAINT (panel_left + 42, 264), side_color, 0
 
     CALL draw_large_flag(other_side(side), 26, 0)
-    IF army < 99 THEN CALL wait_seconds(opt_pause!)
+    IF army < 99 THEN
+        CALL wait_seconds(opt_pause!)
+    END IF
 END SUB

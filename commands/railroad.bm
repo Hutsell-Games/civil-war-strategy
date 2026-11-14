@@ -19,10 +19,14 @@ SUB railroad_start (side, army, city)
     PRINT army_name$(army); " is taking the train from "; city_name$(from_city); " to "; city_name$(city);
     CALL railroad_board(side, army, city)
     CALL draw_train(side, DRAW_SHOW)
-    IF opt_sound >= SOUND_EFFECTS THEN SOUND 2222, 1
+    IF opt_sound >= SOUND_EFFECTS THEN
+        SOUND 2222, 1
+    END IF
     CALL draw_train_box
 
-    IF city_army(from_city) > 0 THEN CALL draw_army_flag(city_army(from_city))
+    IF city_army(from_city) > 0 THEN
+        CALL draw_army_flag(city_army(from_city))
+    END IF
 END SUB
 
 ' The train arrives: its army gets off, and takes the city if it is not the side's.
@@ -31,17 +35,25 @@ SUB railroad_arrive (side)
     CALL draw_train(side, DRAW_ERASE)
     army = train_army(side)
     CALL railroad_unload(side)
-    IF city_army(train_from_city(side)) > 0 THEN CALL draw_army_flag(city_army(train_from_city(side)))
+    IF city_army(train_from_city(side)) > 0 THEN
+        CALL draw_army_flag(city_army(train_from_city(side)))
+    END IF
     CALL draw_train(side, DRAW_SHOW)
 
     COLOR COLOR_LIGHT_CYAN
     CALL clear_bottom_line
-    PRINT "Train with "; army_name$(army); " has arrived in "; city_name$(army_city(army)); : IF opt_sound >= SOUND_EFFECTS THEN SOUND 1200, 2
+    PRINT "Train with "; army_name$(army); " has arrived in "; city_name$(army_city(army));: IF opt_sound >= SOUND_EFFECTS THEN
+        SOUND 1200, 2
+    END IF
     CALL wait_seconds(opt_pause!)
     x = city_x(army_city(army)) - 12: y = city_y(army_city(army)) - 11
     LINE (x - 9, y - 8)-(x + 10, y + 8), 2, BF
-    IF city_owner(army_city(army)) <> side THEN CALL city_capture(army, army_city(army), side, 0)
+    IF city_owner(army_city(army)) <> side THEN
+        CALL city_capture(army, army_city(army), side, 0)
+    END IF
     CALL draw_army_flag(army)
-    IF city_army(army_city(army)) > 0 THEN CALL draw_stack_markers(side): EXIT SUB
+    IF city_army(army_city(army)) > 0 THEN
+        CALL draw_stack_markers(side): EXIT SUB
+    END IF
     CALL city_update_occupier(army_city(army)): CALL draw_army_flag(army)
 END SUB

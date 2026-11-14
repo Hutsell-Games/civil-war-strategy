@@ -1,15 +1,25 @@
 SUB play_shenandoah
     '                       Shenandoah
     IF opt_sound = SOUND_MUSIC THEN
-        IF INKEY$ <> "" THEN menu_choice = 1: EXIT SUB
+        IF INKEY$ <> "" THEN
+            menu_choice = 1: EXIT SUB
+        END IF
         PLAY "T90MFMNo1c4f8f8f4."
-        IF INKEY$ <> "" THEN menu_choice = 1: EXIT SUB
+        IF INKEY$ <> "" THEN
+            menu_choice = 1: EXIT SUB
+        END IF
         PLAY "g8a8b-8o2d8c4."
-        IF INKEY$ <> "" THEN menu_choice = 1: EXIT SUB
+        IF INKEY$ <> "" THEN
+            menu_choice = 1: EXIT SUB
+        END IF
         PLAY "MLf8e8MNd4.c8d8c8o1a8o2c4.c4d8d8d4."
-        IF INKEY$ <> "" THEN menu_choice = 1: EXIT SUB
+        IF INKEY$ <> "" THEN
+            menu_choice = 1: EXIT SUB
+        END IF
         PLAY "o1a8o2c8o1a8g8f4.g4a4.f8"
-        IF INKEY$ <> "" THEN menu_choice = 1: EXIT SUB
+        IF INKEY$ <> "" THEN
+            menu_choice = 1: EXIT SUB
+        END IF
         PLAY "a8o2d8c4.o1f8g8a4.f8g4f2."
     END IF
 END SUB
@@ -17,17 +27,29 @@ END SUB
 ' The title's tune: the Union's, or Shenandoah for the Rebels. A key stops the Union's.
 SUB play_title_music
     IF current_side = SIDE_UNION THEN
-        IF INKEY$ <> "" THEN EXIT SUB
+        IF INKEY$ <> "" THEN
+            EXIT SUB
+        END IF
         PLAY "MST170o1e8o0b8o1e8"
-        IF INKEY$ <> "" THEN EXIT SUB
+        IF INKEY$ <> "" THEN
+            EXIT SUB
+        END IF
         PLAY "e8e4f#8g4f#8"
-        IF INKEY$ <> "" THEN EXIT SUB
+        IF INKEY$ <> "" THEN
+            EXIT SUB
+        END IF
         PLAY "g4e8d2o0b8o1d2 "
-        IF INKEY$ <> "" THEN EXIT SUB
+        IF INKEY$ <> "" THEN
+            EXIT SUB
+        END IF
         PLAY "o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16"
-        IF INKEY$ <> "" THEN EXIT SUB
+        IF INKEY$ <> "" THEN
+            EXIT SUB
+        END IF
         PLAY "MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8"
-        IF INKEY$ <> "" THEN EXIT SUB
+        IF INKEY$ <> "" THEN
+            EXIT SUB
+        END IF
         PLAY "MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2."
     ELSE
         CALL play_shenandoah

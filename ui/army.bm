@@ -12,13 +12,17 @@ SUB menu_army_combine (side, found)
     menu_col = PANEL_COL: menu_row = 2
     CALL army_list_combine_cities(side, cities(), count)
     CALL menu_set_cities(cities(), count)
-    IF menu_item_count = 0 THEN EXIT SUB
+    IF menu_item_count = 0 THEN
+        EXIT SUB
+    END IF
     found = 1
     menu_text$(0) = "Join"
     menu_choice = MENU_START + 10
     menu_highlight = COLOR_LIGHT_CYAN
     CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
-    IF menu_choice < 1 THEN EXIT SUB
+    IF menu_choice < 1 THEN
+        EXIT SUB
+    END IF
     city = menu_value(menu_choice)
     CALL army_combine_gather(side, city, best, joined)
     IF joined = 0 THEN
@@ -42,5 +46,7 @@ SUB menu_raze_fort (raze)
     menu_item_count = 2
     CALL menu_select(MENU_PLAIN)
     CALL clear_right_panel
-    IF menu_choice = 2 THEN raze = 1
+    IF menu_choice = 2 THEN
+        raze = 1
+    END IF
 END SUB

@@ -10,7 +10,7 @@ SUB draw_ai_plan (army, text_color)
     CALL draw_map_marker(army_city(army), army_order(army), MARK_MOVE_LINE)
     CALL draw_map_marker(army_city(army), army_order(army), MARK_POINTER)
     CALL wait_seconds(opt_pause! - 1)
-    PUT (city_x(army_city(army)) - 20, city_y(army_city(army)) - 19), saved_under_marker, PSET
+    PUT (city_x(army_city(army)) - 20, city_y(army_city(army)) - 19), saved_under_marker(), PSET
 END SUB
 
 ' An army that drilled.
@@ -27,7 +27,9 @@ END SUB
 ' the list used to leave it.
 SUB draw_ai_funds (side, count)
     CALL draw_recruit_funds(side)
-    IF count > 0 THEN LOCATE 14 + count, 69
+    IF count > 0 THEN
+        LOCATE 14 + count, 69
+    END IF
 END SUB
 
 ' The color the computer's recruiting prints its funds in, set once before it recruits, as

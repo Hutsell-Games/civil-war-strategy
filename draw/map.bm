@@ -1,7 +1,11 @@
 SUB draw_map_marker (from_city, to_city, mark)
     DIM x AS INTEGER: DIM y AS INTEGER: DIM x1 AS INTEGER: DIM y1 AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-    IF from_city < 1 OR from_city > MAX_CITIES THEN EXIT SUB
-    IF to_city < 0 THEN EXIT SUB
+    IF from_city < 1 OR from_city > MAX_CITIES THEN
+        EXIT SUB
+    END IF
+    IF to_city < 0 THEN
+        EXIT SUB
+    END IF
     x = city_x(from_city) - 12
     y = city_y(from_city) - 11
     x1 = city_x(to_city)
@@ -23,37 +27,51 @@ SUB draw_map_marker (from_city, to_city, mark)
                 FOR i = 4 TO 10 STEP 1
                     CIRCLE (x, y), i, 4
                     PAINT (x, y), 14, 4
-                    IF opt_sound >= SOUND_EFFECTS THEN SOUND 37 + 50 * RND, .03
+                    IF opt_sound >= SOUND_EFFECTS THEN
+                        SOUND 37 + 50 * RND, .03
+                    END IF
                 NEXT i
                 CALL wait_seconds(.1)
                 CALL screen_snapshot(x, y, SNAP_RESTORE)
             NEXT j
 
         CASE MARK_ERASE_ARMY
-            IF city_army(from_city) = 0 THEN LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
-            IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
-            IF from_city = 27 OR from_city = 28 THEN CALL draw_map_touchup
+            IF city_army(from_city) = 0 THEN
+                LINE (x - 8, y - 6)-(x + 10, y + 8), 2, BF
+            END IF
+            IF x1 + y1 > 0 THEN
+                LINE (x, y)-(x1, y1), 2, , &HF0F0
+            END IF
+            IF from_city = 27 OR from_city = 28 THEN
+                CALL draw_map_touchup
+            END IF
 
         CASE MARK_ERASE_LINE
-            IF x1 + y1 > 0 THEN LINE (x, y)-(x1, y1), 2, , &HF0F0
+            IF x1 + y1 > 0 THEN
+                LINE (x, y)-(x1, y1), 2, , &HF0F0
+            END IF
 
         CASE MARK_FLASH_FRAME
             x = city_x(from_city): y = city_y(from_city)
             CALL screen_snapshot(x, y, SNAP_SAVE)
             LINE (x - 9, y - 9)-(x + 9, y + 9), 15, B
             LINE (x - 10, y - 10)-(x + 10, y + 10), 15, B
-            IF opt_sound >= SOUND_EFFECTS THEN SOUND 3999, .3
+            IF opt_sound >= SOUND_EFFECTS THEN
+                SOUND 3999, .3
+            END IF
             CALL wait_seconds(opt_pause! - .5)
             CALL screen_snapshot(x, y, SNAP_RESTORE)
-        CASE MARK_BOX          ' draw white box
-            GET (x - 8, y - 8)-(x + 8, y + 8), saved_under_marker
+        CASE MARK_BOX ' draw white box
+            GET (x - 8, y - 8)-(x + 8, y + 8), saved_under_marker()
             LINE (x - 7, y - 7)-(x + 7, y + 7), 15, B
             LINE (x - 8, y - 6)-(x + 8, y + 6), 15, B
-        CASE MARK_RESTORE     ' replace old image
-            IF x > 0 THEN PUT (x - 8, y - 8), saved_under_marker, PSET
+        CASE MARK_RESTORE ' replace old image
+            IF x > 0 THEN
+                PUT (x - 8, y - 8), saved_under_marker(), PSET
+            END IF
 
-        CASE MARK_POINTER          ' draw arrow pointer
-            GET (x - 8, y - 8)-(x + 10, y + 7), saved_under_marker
+        CASE MARK_POINTER ' draw arrow pointer
+            GET (x - 8, y - 8)-(x + 10, y + 7), saved_under_marker()
             x = x + 7: y = y + 5
             LINE (x + 2, y)-(x + 2, y - 8), 12
             LINE -(x, y - 6), 12
@@ -76,25 +94,41 @@ SUB draw_cities
     DIM i AS INTEGER: DIM dot_color AS INTEGER
     FOR i = 1 TO MAX_CITIES
         dot_color = 9
-        IF city_owner(i) = SIDE_REBEL THEN dot_color = 7
-        IF city_owner(i) = SIDE_NONE THEN dot_color = 12
+        IF city_owner(i) = SIDE_REBEL THEN
+            dot_color = 7
+        END IF
+        IF city_owner(i) = SIDE_NONE THEN
+            dot_color = 12
+        END IF
         x = city_x(i)
         y = city_y(i)
         IF i = side_capital(SIDE_UNION) OR i = side_capital(SIDE_REBEL) THEN
-            PUT (x - 6, y - 6), pic_capital, PSET
+            PUT (x - 6, y - 6), pic_capital(), PSET
             LINE (x + 9, y - 4)-(x + 15, y + 4), 0, BF
             LINE (x + 8, y - 5)-(x + 13, y + 2), 3, BF
             PSET (x + 8, y - 4)
-            IF city_fort(i) = 1 THEN DRAW "BR2C0e1D6BL1R2"
-            IF city_fort(i) = MAX_FORT THEN DRAW "C0e1R1F1D1G3R3"
+            IF city_fort(i) = 1 THEN
+                DRAW "BR2C0e1D6BL1R2"
+            END IF
+            IF city_fort(i) = MAX_FORT THEN
+                DRAW "C0e1R1F1D1G3R3"
+            END IF
         ELSE
-            IF city_fort(i) = 1 THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
-            IF city_fort(i) >= MAX_FORT THEN LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+            IF city_fort(i) = 1 THEN
+                LINE (x - 5, y - 5)-(x + 5, y + 5), 0, B
+            END IF
+            IF city_fort(i) >= MAX_FORT THEN
+                LINE (x - 5, y - 5)-(x + 5, y + 5), 0, BF
+            END IF
             CALL draw_city_dot(i, dot_color)
         END IF
-        IF opt_graphics = GRAPHICS_OFF THEN _CONTINUE
+        IF opt_graphics = GRAPHICS_OFF THEN
+            _CONTINUE
+        END IF
         FOR j = 1 TO MAX_ROADS
-            IF city_road(i, j) > 0 THEN CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
+            IF city_road(i, j) > 0 THEN
+                CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
+            END IF
         NEXT j
     NEXT i
 END SUB
@@ -121,15 +155,23 @@ SUB draw_city_names
         FOR j = 1 TO LEN(city_name$(k))
             letter_x = city_x(k) + 6 * (j - 4) - 3
             letter = ASC(MID$(UCASE$(city_name$(k)), j, 1)) - 64
-            IF letter_x > 527 THEN EXIT FOR
+            IF letter_x > 527 THEN
+                EXIT FOR
+            END IF
             PSET (letter_x, city_y(k) + 12), 10
 
             IF city_port_type(k) < PORT_RIVER THEN
-                IF opt_alt_colors = 0 THEN DRAW "S4C0" ELSE DRAW "S4C7"
+                IF opt_alt_colors = 0 THEN
+                    DRAW "S4C0"
+                ELSE
+                    DRAW "S4C7"
+                END IF
             ELSE
                 DRAW "C10"
             END IF
-            IF letter > 0 AND letter < 27 THEN DRAW map_font$(letter)
+            IF letter > 0 AND letter < 27 THEN
+                DRAW map_font$(letter)
+            END IF
         NEXT j
     NEXT k
 END SUB
@@ -137,7 +179,9 @@ END SUB
 SUB draw_fleets
     DIM side AS INTEGER: DIM x AS INTEGER: DIM y AS INTEGER: DIM ship_type AS INTEGER
     FOR side = SIDE_UNION TO SIDE_REBEL
-        IF fleet_size(side) = 0 OR NOT fleet_exists(side) THEN fleet_city(side) = 0: _CONTINUE
+        IF fleet_size(side) = 0 OR NOT fleet_exists(side) THEN
+            fleet_city(side) = 0: _CONTINUE
+        END IF
         SELECT CASE fleet_city(side)
             CASE 30: x = 515: y = 268
             CASE 28: x = 517: y = 172
@@ -145,10 +189,14 @@ SUB draw_fleets
             CASE FLEET_AT_SEA: x = 495: y = 310
             CASE ELSE
                 x = city_x(fleet_city(side)) + 25: y = city_y(fleet_city(side)) + 25
-                IF fleet_city(side) = 24 THEN y = y + 5: x = x - 5
+                IF fleet_city(side) = 24 THEN
+                    y = y + 5: x = x - 5
+                END IF
         END SELECT
         PSET (x, y), 1
-        ship_type = 1: IF LEFT$(fleet_ships$(side), 1) = "I" THEN ship_type = 2
+        ship_type = 1: IF LEFT$(fleet_ships$(side), 1) = "I" THEN
+            ship_type = 2
+        END IF
         CALL draw_ship_icon(side, ship_type)
     NEXT side
 END SUB
@@ -174,7 +222,7 @@ SUB draw_map_touchup
 
     ' PAINT (502, 160), 1, 10
 
-    LINE (145, 375)-(145, 405), 10   'Mobile border
+    LINE (145, 375)-(145, 405), 10 'Mobile border
 
     LINE (291, 111)-(301, 101), 1
     LINE -(316, 96), 1
@@ -183,16 +231,16 @@ SUB draw_map_touchup
     LINE -(351, 30), 1
     LINE -(370, 35), 1
 
-    LINE (381, 81)-(431, 66), 1  'Potomac River
+    LINE (381, 81)-(431, 66), 1 'Potomac River
     LINE -(456, 81), 1
     LINE -(471, 111), 1
 
-    LINE (115, 165)-(105, 170), 1  'Paducah
+    LINE (115, 165)-(105, 170), 1 'Paducah
     LINE -(105, 190), 1
-    LINE (106, 170)-(91, 140), 1   'Missouri R
+    LINE (106, 170)-(91, 140), 1 'Missouri R
 
     LINE (105, 190)-(150, 190), 10
-    LINE (120, 160)-(130, 200), 1  'Tenn River
+    LINE (120, 160)-(130, 200), 1 'Tenn River
 
     LINE (60, 295)-(65, 325), 1 'Vicksburg
     LINE -(65, 335), 1
@@ -206,9 +254,9 @@ SUB draw_map_touchup
     LINE (60, 395)-(105, 405), 1
     LINE -(110, 420), 1
 
-    LINE (291, 265)-(350, 340), 1   'Savannah R.
+    LINE (291, 265)-(350, 340), 1 'Savannah R.
 
-    LINE (1, 80)-(15, 77), 1    'Missouri River
+    LINE (1, 80)-(15, 77), 1 'Missouri River
     LINE -(25, 95), 1
     LINE -(50, 98), 1
     LINE -(75, 96), 1
@@ -235,14 +283,14 @@ SUB draw_map
     COLOR COLOR_LIGHT_GREEN
     '==========================  Mountains =================================
     IF _FILEEXISTS(GFXDIR + "mtn.vga") THEN
-        PUT (380, 30), pic_mountain, PSET
-        PUT (270, 200), pic_mountain, PSET
-        PUT (310, 160), pic_mountain, PSET
-        PUT (350, 120), pic_mountain, PSET
-        PUT (200, 185), pic_mountain, PSET
-        PUT (250, 130), pic_mountain, PSET
-        PUT (320, 80), pic_mountain, PSET
-        PUT (30, 150), pic_mountain, PSET
+        PUT (380, 30), pic_mountain(), PSET
+        PUT (270, 200), pic_mountain(), PSET
+        PUT (310, 160), pic_mountain(), PSET
+        PUT (350, 120), pic_mountain(), PSET
+        PUT (200, 185), pic_mountain(), PSET
+        PUT (250, 130), pic_mountain(), PSET
+        PUT (320, 80), pic_mountain(), PSET
+        PUT (30, 150), pic_mountain(), PSET
         LINE (30, 150)-(70, 190), 2, BF
     END IF
     '===========================  Kentucky =================================
@@ -322,7 +370,7 @@ SUB draw_map
     LINE -(350, 340)
     LINE -(336, 390)
     LINE -(366, 440)
-    LINE (336, 385)-(325, 385)   'Fla /Ga Border
+    LINE (336, 385)-(325, 385) 'Fla /Ga Border
     LINE -(320, 388)
     LINE -(245, 388)
     LINE -(230, 385)
@@ -424,13 +472,13 @@ SUB draw_map
     PAINT (110, 439), 1, 10
     PAINT (50, 439), 1, 10
     '----------------------------------
-    LINE (1, 300)-(61, 300)       'Ark
+    LINE (1, 300)-(61, 300) 'Ark
     LINE (91, 205)-(71, 205)
     LINE -(76, 190)
     LINE -(71, 185)
     LINE -(1, 185)
 
-    LINE (106, 170)-(91, 140), 1    'Missouri
+    LINE (106, 170)-(91, 140), 1 'Missouri
     LINE -(71, 120), 1
     LINE -(76, 110), 1
     LINE -(76, 95), 1
@@ -442,19 +490,19 @@ SUB draw_map
 
     LINE -(38, 16)
 
-    LINE (46, 20)-(61, 17), 1        'Illinois
+    LINE (46, 20)-(61, 17), 1 'Illinois
 
     LINE (150, 17)-(150, 110)
     LINE -(147, 125), 1
     LINE -(140, 138), 1
     '========================== Rivers =========================================
 
-    LINE (1, 80)-(15, 77), 1    'Missouri River
+    LINE (1, 80)-(15, 77), 1 'Missouri River
     LINE -(25, 95), 1
     LINE -(50, 98), 1
     LINE -(75, 96), 1
 
-    LINE (120, 160)-(130, 200), 1  'Tenn River
+    LINE (120, 160)-(130, 200), 1 'Tenn River
     LINE -(135, 240), 1
     LINE -(130, 247), 1
     LINE -(160, 250), 1
@@ -463,36 +511,36 @@ SUB draw_map
     LINE -(245, 240), 1
     LINE -(270, 200), 1
 
-    LINE (120, 160)-(140, 200), 1  'Cumberland River
+    LINE (120, 160)-(140, 200), 1 'Cumberland River
     LINE -(160, 210), 1
     LINE -(200, 208), 1
     LINE -(240, 170), 1
 
-    LINE (161, 400)-(155, 320), 1  'Tombigbee River
+    LINE (161, 400)-(155, 320), 1 'Tombigbee River
     LINE -(145, 300), 1
 
-    LINE (161, 400)-(170, 370), 1  'Alabama River
+    LINE (161, 400)-(170, 370), 1 'Alabama River
     LINE -(200, 350), 1
 
-    LINE (230, 425)-(231, 385), 1  'Chattahoochee River
+    LINE (230, 425)-(231, 385), 1 'Chattahoochee River
     LINE -(233, 350), 1
     LINE -(240, 330), 1
     LINE -(270, 290), 1
 
-    LINE (381, 81)-(431, 66), 1   'Potomac River
+    LINE (381, 81)-(431, 66), 1 'Potomac River
     LINE -(456, 81), 1
     LINE -(471, 111), 1
 
-    LINE (485, 150)-(455, 145), 1   'James River
+    LINE (485, 150)-(455, 145), 1 'James River
     LINE -(400, 150), 1
 
-    LINE (489, 200)-(415, 185), 1   'Roanoke River
+    LINE (489, 200)-(415, 185), 1 'Roanoke River
     LINE -(400, 160), 1
 
-    LINE (296, 241)-(291, 265), 1   'Savannah River
+    LINE (296, 241)-(291, 265), 1 'Savannah River
     LINE -(350, 340), 1
 
-    LINE (438, 271)-(430, 235), 1  'Cape Fear River
+    LINE (438, 271)-(430, 235), 1 'Cape Fear River
     LINE -(420, 205), 1
 
     LINE (500, 80)-(498, 50), 1 'Susquehanna River
@@ -521,7 +569,9 @@ SUB draw_map
         LINE (485, 241)-(525, 270), 11, B
     END IF
 
-    IF opt_graphics >= GRAPHICS_NAMES THEN CALL draw_city_names
+    IF opt_graphics >= GRAPHICS_NAMES THEN
+        CALL draw_city_names
+    END IF
     IF raiding_side > 0 THEN
         LINE (447, 291)-(525, 317), 4, BF: LINE (447, 291)-(525, 317), 10, B
         word$ = "COMMERCE"
@@ -533,7 +583,9 @@ SUB draw_map
     END IF
 
     FOR i = 1 TO MAX_ARMIES
-        IF army_exists(i) THEN CALL draw_army_flag(i)
+        IF army_exists(i) THEN
+            CALL draw_army_flag(i)
+        END IF
     NEXT i
 
     FOR k = SIDE_UNION TO SIDE_REBEL
@@ -542,7 +594,9 @@ SUB draw_map
 
     IF opt_players <> PLAYERS_TWO THEN
         FOR i = 1 TO MAX_ARMIES
-            IF army_exists(i) AND army_has_move(i) THEN CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+            IF army_exists(i) AND army_has_move(i) THEN
+                CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+            END IF
         NEXT i
     END IF
     CALL draw_fleets

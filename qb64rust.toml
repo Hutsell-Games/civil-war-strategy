@@ -1,7 +1,8 @@
 # Settings of QB64Rust for this program (QB64Rust's docs\MANUAL.md, "The settings file").
 
-# The layout of `qb64rust -y` and of Format Document in VS Code. Formatting changes only the indent: four
-# spaces a level, with the body of a SUB or FUNCTION one level in. The spacing inside a line stays as written.
+# The layout of `qb64rust -y` and of Format Document in VS Code: four spaces a level, with the body of a SUB or
+# FUNCTION one level in, and each single-line IF written as a block IF with END IF. Format an include file
+# inside its program: `qb64rust -y commands/army.bm --program cws.bas -o commands/army.bm`.
 [format]
 keyword-case = "upper"
-auto-layout = false
+block-if = true

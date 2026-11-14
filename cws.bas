@@ -10,7 +10,10 @@ replay = 0
 ' main_menu_start, the row the main menu starts on, is kept from one game to the next.
 DO
     CALL game_new
-    IF event_file_error$ <> "" THEN PRINT event_file_error$: END
+    IF event_file_error$ <> "" THEN
+        PRINT event_file_error$
+        END
+    END IF
     CALL show_title(replay): replay = 1
     CALL script_start
     ' The title menu, and for a new game the scenario menu. Esc there goes back to the title menu,
@@ -18,19 +21,30 @@ DO
     DO
         CALL menu_title
         title_choice = menu_choice
-        IF title_choice = TITLE_QUIT THEN CLS : END
+        IF title_choice = TITLE_QUIT THEN
+            CLS
+            END
+        END IF
         picked = scenario_now
         IF title_choice = TITLE_RESUME THEN
-            CLS : CALL menu_load_game
-            IF menu_choice < 1 THEN picked = 0
+            CLS
+            CALL menu_load_game
+            IF menu_choice < 1 THEN
+                picked = 0
+            END IF
         ELSE
             CALL menu_scenario(picked)
         END IF
-        IF picked = 0 THEN CALL draw_title
+        IF picked = 0 THEN
+            CALL draw_title
+        END IF
     LOOP UNTIL picked > 0
     IF title_choice <> TITLE_RESUME THEN
         ' Another scenario than the one loaded: the game starts again on it.
-        IF picked <> scenario_now THEN scenario_now = picked: CALL game_new
+        IF picked <> scenario_now THEN
+            scenario_now = picked
+            CALL game_new
+        END IF
         CALL show_new_game
     END IF
     new_game = 0
@@ -39,17 +53,25 @@ DO
         ended = 0
         SELECT CASE menu_choice
             CASE MAIN_TROOPS
-                IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN CALL turn_close_recruiting ELSE CALL menu_army_recruit((current_side)): main_menu_start = MENU_START + MAIN_MOVES
+                IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN
+                    CALL turn_close_recruiting
+                ELSE
+                    CALL menu_army_recruit((current_side)): main_menu_start = MENU_START + MAIN_MOVES
+                END IF
             CASE MAIN_MOVES
                 CALL menu_army_move
                 main_menu_start = MENU_START + MAIN_MOVES
             CASE MAIN_SHIPS
-                IF turn_navy_done = 0 THEN CALL menu_navy_commands((current_side))
+                IF turn_navy_done = 0 THEN
+                    CALL menu_navy_commands((current_side))
+                END IF
                 main_menu_start = MENU_START + MAIN_RAILROAD
             CASE MAIN_RAILROAD
                 CALL menu_main_railroad
             CASE MAIN_END_TURN
-                CALL menu_main_end_turn(ended): IF ended = 0 THEN main_menu_start = MENU_START + MAIN_SHIPS
+                CALL menu_main_end_turn(ended): IF ended = 0 THEN
+                    main_menu_start = MENU_START + MAIN_SHIPS
+                END IF
             CASE MAIN_INFORM
                 CALL menu_main_inform: main_menu_start = MENU_START + MAIN_INFORM
             CASE MAIN_COMMANDS
@@ -61,8 +83,12 @@ DO
             CASE MAIN_FILES
                 main_menu_start = MENU_START + MAIN_FILES
                 CALL menu_files(action)
-                IF action = FILES_NEW_GAME THEN new_game = 1
-                IF action = FILES_QUIT THEN END
+                IF action = FILES_NEW_GAME THEN
+                    new_game = 1
+                END IF
+                IF action = FILES_QUIT THEN
+                    END
+                END IF
             CASE MENU_END_TURN_KEY
                 ended = 1
             CASE ELSE
@@ -79,9 +105,13 @@ DO
                 CALL turn_resolve
                 CALL turn_collect_income
                 main_menu_start = MENU_START + MAIN_TROOPS
-                IF opt_players = PLAYERS_TWO THEN CALL draw_player_turn: CALL draw_map
+                IF opt_players = PLAYERS_TWO THEN
+                    CALL draw_player_turn: CALL draw_map
+                END IF
                 CALL check_victory_conditions
-                IF game_over > 0 THEN new_game = 1
+                IF game_over > 0 THEN
+                    new_game = 1
+                END IF
             END IF
         END IF
     LOOP UNTIL new_game = 1

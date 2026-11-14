@@ -18,7 +18,9 @@ FUNCTION city_is_connected (side, city)
     friendly_neighbors = 0
     FOR j = 1 TO MAX_ROADS
         neighbor = city_road(city, j)
-        IF neighbor > 0 AND city_owner(neighbor) = side THEN friendly_neighbors = friendly_neighbors + 1
+        IF neighbor > 0 AND city_owner(neighbor) = side THEN
+            friendly_neighbors = friendly_neighbors + 1
+        END IF
     NEXT j
     city_is_connected = friendly_neighbors
 END FUNCTION
@@ -34,7 +36,9 @@ SUB city_take (city, side, weaken_fort)
         side_victory_points(other_side(side)) = side_victory_points(other_side(side)) - 100
         side_capital(other_side(side)) = 0
     END IF
-    IF city_fort(city) > 0 AND weaken_fort > 0 THEN city_fort(city) = city_fort(city) - 1
+    IF city_fort(city) > 0 AND weaken_fort > 0 THEN
+        city_fort(city) = city_fort(city) - 1
+    END IF
 END SUB
 
 ' Fortify: the city's fort grows a level, and the side pays for it.
@@ -64,14 +68,22 @@ SUB city_fix_return_routes (count, added(), from_city(), to_city())
     count = 0
     FOR i = 1 TO MAX_CITIES
         FOR j = 1 TO MAX_ROADS
-            IF city_road(i, j) = 0 THEN EXIT FOR
+            IF city_road(i, j) = 0 THEN
+                EXIT FOR
+            END IF
             neighbor = city_road(i, j)
             linked = 0
             FOR k = 1 TO MAX_ROADS
-                IF city_road(neighbor, k) = i THEN linked = 1: EXIT FOR
-                IF city_road(neighbor, k) = 0 THEN city_road(neighbor, k) = i: count = count + 1: added(count) = 1: from_city(count) = neighbor: to_city(count) = i: linked = 1: EXIT FOR
+                IF city_road(neighbor, k) = i THEN
+                    linked = 1: EXIT FOR
+                END IF
+                IF city_road(neighbor, k) = 0 THEN
+                    city_road(neighbor, k) = i: count = count + 1: added(count) = 1: from_city(count) = neighbor: to_city(count) = i: linked = 1: EXIT FOR
+                END IF
             NEXT k
-            IF linked = 0 THEN count = count + 1: added(count) = 0: from_city(count) = neighbor: to_city(count) = i
+            IF linked = 0 THEN
+                count = count + 1: added(count) = 0: from_city(count) = neighbor: to_city(count) = i
+            END IF
         NEXT j
     NEXT i
 END SUB
@@ -80,6 +92,8 @@ SUB city_update_occupier (city)
     DIM i AS INTEGER
     city_army(city) = 0
     FOR i = 1 TO MAX_ARMIES
-        IF army_city(i) = city THEN city_army(city) = i: EXIT SUB
+        IF army_city(i) = city THEN
+            city_army(city) = i: EXIT SUB
+        END IF
     NEXT i
 END SUB

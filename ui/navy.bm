@@ -12,7 +12,9 @@ SUB menu_navy_commands (side)
         CALL navy_mark_side(side)
         quit = 0
         CALL menu_navy(side, quit)
-        IF quit > 0 THEN EXIT SUB
+        IF quit > 0 THEN
+            EXIT SUB
+        END IF
         again = 0
         SELECT CASE menu_choice
             CASE 1: CALL menu_navy_build(side, again)
@@ -32,12 +34,20 @@ SUB menu_navy_build (side, again)
     DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     again = 1
     cost = COST_SHIP
-    IF side_cash(side) < cost OR fleet_is_at_sea(side) THEN EXIT SUB
-    IF fleet_size(side) >= MAX_FLEET_SHIPS THEN EXIT SUB
+    IF side_cash(side) < cost OR fleet_is_at_sea(side) THEN
+        EXIT SUB
+    END IF
+    IF fleet_size(side) >= MAX_FLEET_SHIPS THEN
+        EXIT SUB
+    END IF
 
     IF fleet_exists(side) THEN
-        IF city_owner(fleet_city(side)) <> side THEN EXIT SUB
-        IF city_port_type(fleet_city(side)) < PORT_SEA THEN EXIT SUB
+        IF city_owner(fleet_city(side)) <> side THEN
+            EXIT SUB
+        END IF
+        IF city_port_type(fleet_city(side)) < PORT_SEA THEN
+            EXIT SUB
+        END IF
     END IF
     ship$ = "W"
 
@@ -51,12 +61,18 @@ SUB menu_navy_build (side, again)
         menu_item_count = 2
         CALL menu_select(MENU_PLAIN)
         CALL clear_right_panel
-        IF menu_choice < 1 THEN EXIT SUB
-        IF menu_choice = 2 THEN ship$ = "I": cost = 2 * cost
+        IF menu_choice < 1 THEN
+            EXIT SUB
+        END IF
+        IF menu_choice = 2 THEN
+            ship$ = "I": cost = 2 * cost
+        END IF
     END IF
 
     CALL navy_add_ship(side, ship$, cost)
-    IF fleet_size(side) > 1 THEN CALL navy_ship_joins(side, ship$): EXIT SUB
+    IF fleet_size(side) > 1 THEN
+        CALL navy_ship_joins(side, ship$): EXIT SUB
+    END IF
     DO
         CALL navy_list_shipyards(side, cities(), count)
         menu_text$(0) = "Port"
@@ -64,7 +80,7 @@ SUB menu_navy_build (side, again)
         menu_col = PANEL_COL: menu_row = 12
         IF menu_item_count < 1 THEN
             CALL navy_cancel_new_fleet(side)
-            CALL clear_bottom_line: PRINT "NO SHIPYARDS AVAILABLE !"; : again = 0: EXIT SUB
+            CALL clear_bottom_line: PRINT "NO SHIPYARDS AVAILABLE !";: again = 0: EXIT SUB
         END IF
         CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel
     LOOP WHILE menu_choice < 1
@@ -75,9 +91,15 @@ END SUB
 ' fleet acted this month.
 SUB menu_navy_attack (side, again)
     again = 0
-    IF fleet_is_at_sea(side) THEN again = 1: EXIT SUB
-    IF NOT fleet_exists(side) THEN EXIT SUB
-    IF city_owner(fleet_city(side)) <> other_side(side) THEN again = 1: EXIT SUB
+    IF fleet_is_at_sea(side) THEN
+        again = 1: EXIT SUB
+    END IF
+    IF NOT fleet_exists(side) THEN
+        EXIT SUB
+    END IF
+    IF city_owner(fleet_city(side)) <> other_side(side) THEN
+        again = 1: EXIT SUB
+    END IF
     CALL turn_set_navy_done(1)
     CALL navy_bombard(side)
 END SUB
@@ -88,7 +110,9 @@ SUB menu_navy_sail (side, again)
     DIM sailed AS INTEGER: DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     again = 0
     CALL navy_count_ships(side)
-    IF NOT fleet_exists(side) OR fleet_size(side) < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
+    IF NOT fleet_exists(side) OR fleet_size(side) < 1 THEN
+        CALL navy_say_no_ships: again = 1: EXIT SUB
+    END IF
 
     CALL navy_list_ports(side, cities(), count)
     CALL menu_set_cities(cities(), count)
@@ -101,11 +125,17 @@ SUB menu_navy_sail (side, again)
     menu_text$(0) = "To"
     menu_color = COLOR_CYAN: menu_col = PANEL_COL: menu_row = 12
 
-    CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel: IF menu_choice < 1 THEN EXIT SUB
+    CALL menu_select(MENU_CITY_POINTER): CALL clear_right_panel: IF menu_choice < 1 THEN
+        EXIT SUB
+    END IF
     CALL navy_sail_to(side, menu_value(menu_choice), sailed)
-    IF sailed = 0 THEN EXIT SUB
+    IF sailed = 0 THEN
+        EXIT SUB
+    END IF
     CALL turn_set_navy_done(1)
-    IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL menu_navy_combat(side)
+    IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN
+        CALL menu_navy_combat(side)
+    END IF
     CALL navy_finish_move
 END SUB
 
@@ -114,11 +144,15 @@ END SUB
 SUB menu_navy_raid (side, again)
     again = 0
     CALL navy_count_ships(side)
-    IF fleet_size(side) < 1 OR raiding_side = side THEN again = 1: EXIT SUB
+    IF fleet_size(side) < 1 OR raiding_side = side THEN
+        again = 1: EXIT SUB
+    END IF
 
     CALL turn_set_navy_done(1)
     CALL navy_start_raid(side)
-    IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN CALL menu_navy_combat(side): CALL navy_finish_move: EXIT SUB
+    IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN
+        CALL menu_navy_combat(side): CALL navy_finish_move: EXIT SUB
+    END IF
     CALL navy_redraw_map
 END SUB
 
@@ -127,7 +161,9 @@ END SUB
 SUB menu_navy_invade (side)
     DIM army_slot AS INTEGER
     CALL army_get_commander((side), army_slot)
-    IF army_slot = 0 THEN EXIT SUB
+    IF army_slot = 0 THEN
+        EXIT SUB
+    END IF
     CALL navy_land_army(side, army_slot)
     CALL turn_set_navy_done(1)
 END SUB
@@ -146,7 +182,9 @@ SUB menu_navy_combat (side)
             menu_text$(2) = "Retreat"
             menu_item_count = 2: menu_color = COLOR_CYAN: menu_highlight = COLOR_YELLOW: menu_col = 50: menu_row = 18: CALL menu_select(MENU_PLAIN)
         LOOP UNTIL menu_choice = 1 OR menu_choice = 2
-        IF menu_choice = 2 THEN CALL navy_combat_retreat(side): EXIT SUB
+        IF menu_choice = 2 THEN
+            CALL navy_combat_retreat(side): EXIT SUB
+        END IF
         CALL navy_combat_volley(side, hits(), combat_over)
     LOOP UNTIL combat_over = 1
 END SUB

@@ -4,21 +4,33 @@
 SUB city_capture (moving_army, city, side, weaken_fort)
     DIM message$: DIM was_enemy_capital AS INTEGER: DIM razed AS INTEGER
     was_enemy_capital = 0
-    IF city = side_capital(other_side(side)) THEN was_enemy_capital = 1
+    IF city = side_capital(other_side(side)) THEN
+        was_enemy_capital = 1
+    END IF
     razed = 0
-    IF city_fort(city) > 0 AND weaken_fort > 0 THEN razed = 1
+    IF city_fort(city) > 0 AND weaken_fort > 0 THEN
+        razed = 1
+    END IF
     CALL city_take(city, side, weaken_fort)
     CALL clear_bottom_line
     message$ = army_name$(moving_army) + " has captured " + city_name$(city)
     COLOR COLOR_LIGHT_CYAN: PRINT message$;
-    IF army_side(moving_army) = SIDE_UNION AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-    IF army_side(moving_army) = SIDE_REBEL AND opt_sound >= SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-    IF was_enemy_capital = 0 THEN CALL animate_city(city)
+    IF army_side(moving_army) = SIDE_UNION AND opt_sound >= SOUND_MUSIC THEN
+        PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+    END IF
+    IF army_side(moving_army) = SIDE_REBEL AND opt_sound >= SOUND_MUSIC THEN
+        PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+    END IF
+    IF was_enemy_capital = 0 THEN
+        CALL animate_city(city)
+    END IF
     IF was_enemy_capital = 1 THEN
         message$ = side_name$(other_side(side)) + " CAPITAL captured !"
         CALL scribe_message(message$, SHOW_LINE)
         CALL show_message_box(city_name$(city) + " has fallen!", COLOR_RED)
         CALL animate_city(city)
     END IF
-    IF razed = 1 THEN CALL city_redraw_fort(city)
+    IF razed = 1 THEN
+        CALL city_redraw_fort(city)
+    END IF
 END SUB

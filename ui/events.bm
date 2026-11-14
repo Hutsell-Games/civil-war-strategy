@@ -4,28 +4,46 @@
 SUB special_events
     DIM event AS INTEGER: DIM variant AS INTEGER: DIM event_side AS INTEGER: DIM k AS INTEGER
     CALL event_roll(event, variant, event_side)
-    IF event = EVENT_NONE THEN EXIT SUB
+    IF event = EVENT_NONE THEN
+        EXIT SUB
+    END IF
     ' An announcement: its text on the bottom line, and an alarm.
     IF event_before(event) <> 0 THEN
         COLOR COLOR_YELLOW: CALL clear_bottom_line
         PRINT event_message$(event_text$(event, variant));
-        IF opt_sound >= SOUND_EFFECTS THEN FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
+        IF opt_sound >= SOUND_EFFECTS THEN
+            FOR k = 1 TO 5: SOUND 140, 1: SOUND 37, 1: NEXT k
+        END IF
         CALL wait_key("I")
         EXIT SUB
     END IF
     CALL clear_bottom_line: COLOR COLOR_YELLOW: PRINT event_banner$;
-    IF event_effect(event) = EFFECT_CITY_NEUTRAL THEN CALL event_show_city(event): EXIT SUB
-    IF event_side = SIDE_UNION THEN CALL clear_bottom_line
+    IF event_effect(event) = EFFECT_CITY_NEUTRAL THEN
+        CALL event_show_city(event): EXIT SUB
+    END IF
+    IF event_side = SIDE_UNION THEN
+        CALL clear_bottom_line
+    END IF
     CALL scribe_message(event_message$(event_text$(event, variant)), SHOW_BOX)
-    IF event_then(event) <> 0 THEN CALL scribe_message(event_message$(event_text$(event_then(event), 0)), SHOW_BOX)
-    IF event_redraw(event) = REDRAW_FLEETS THEN CALL draw_fleets
-    IF event_redraw(event) = REDRAW_MAP THEN CALL draw_map
+    IF event_then(event) <> 0 THEN
+        CALL scribe_message(event_message$(event_text$(event_then(event), 0)), SHOW_BOX)
+    END IF
+    IF event_redraw(event) = REDRAW_FLEETS THEN
+        CALL draw_fleets
+    END IF
+    IF event_redraw(event) = REDRAW_MAP THEN
+        CALL draw_map
+    END IF
 
     IF event_side = SIDE_UNION THEN
-        IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+        IF opt_sound = SOUND_MUSIC THEN
+            PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+        END IF
         CALL wait_key("S")
     ELSE
-        IF opt_sound = SOUND_MUSIC THEN PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+        IF opt_sound = SOUND_MUSIC THEN
+            PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+        END IF
         CALL wait_key("N")
     END IF
 END SUB
@@ -33,7 +51,9 @@ END SUB
 ' An event that turned a city neutral: its text on the bottom line, the cities drawn again,
 ' then its outcome in a box. Nothing is shown when no city was found.
 SUB event_show_city (event)
-    IF event_city = 0 THEN EXIT SUB
+    IF event_city = 0 THEN
+        EXIT SUB
+    END IF
     CALL clear_bottom_line: COLOR COLOR_WHITE
     PRINT event_message$(event_text$(event, 0));
     CALL draw_cities
