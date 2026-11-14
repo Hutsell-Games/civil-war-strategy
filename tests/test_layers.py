@@ -7,6 +7,8 @@ Each folder keeps a rule (docs\\modernize-plan.md, "File layout at the end"):
 - ai\\ draws, prints and reads nothing itself. Its messages are SUBs of ui\\ai.bm, and it carries out
   an order through commands\\, as the player's menus do. It calls nothing else in ui\\, draw\\ or game\\.
 - commands\\ may draw and print, but opens no menu and reads no key.
+- rules\\ and ai\\ leave the menu's shared variables alone (menu_choice, menu_value(), menu_text$()
+  and the others): a list is an array the caller passes, and a pick is a FUNCTION's result.
 
 The few calls that break a rule today are listed in ALLOWED, each with its reason. A new one fails
 the test. Remove a row when its call goes.
@@ -31,15 +33,12 @@ KEYS = {"inkey$", "input", "_keyhit", "_keydown", "sleep"}
 ALLOWED = {
     ("ai", "ai_fortify", "draw_fort_built"):
         "the fort's message and flash, shared with the player's Fortify (ui/orders.bm)",
-    ("ai", "ai_navy_adjust", "menu_navy_items"):
-        "fills the Ships menu's texts and draws nothing; ai_navy_adjust reads menu_item_count = 5 "
-        "for Invasion",
-    ("ai", "ai_recruit", "menu_recruit_cities"):
-        "sets COLOR_LIGHT_RED, the color that draw_ai_funds then prints in, and lists the cities",
-    ("rules", "army_list_combine_cities", "menu_bubble_sort"):
-        "sorts the menu's arrays and draws nothing; the list is returned in the menu's globals",
-    ("rules", "army_recruit_cities", "menu_bubble_sort"):
-        "sorts the menu's arrays and draws nothing; the list is returned in the menu's globals",
+}
+
+# The menu's shared variables (cws.bi).
+MENU_SHARED = {
+    "menu_choice", "menu_col", "menu_row", "menu_item_count", "menu_text$", "menu_value",
+    "menu_box_type", "menu_color", "menu_highlight",
 }
 
 TOKEN = re.compile(r'"[^"]*"?|\'.*|[A-Za-z_][A-Za-z0-9_.]*[$!%&#]?')
@@ -120,6 +119,12 @@ class LayersTest(unittest.TestCase):
     def test_ai_draws_nothing_itself(self):
         found, _ = self.problems("ai", SCREEN | KEYS, {"ui", "draw", "game"}, allowed_files=("ui/ai.bm",))
         self.assertEqual(found, [], "ai\\ shows its messages through ui/ai.bm and acts through commands\\")
+
+    def test_rules_and_ai_leave_the_menu_alone(self):
+        found = []
+        for folder in ("rules", "ai"):
+            found += self.problems(folder, MENU_SHARED, set())[0]
+        self.assertEqual(found, [], "rules\\ and ai\\ pass lists in arrays, not in the menu's variables")
 
     def test_commands_open_no_menu_and_read_no_key(self):
         found = []

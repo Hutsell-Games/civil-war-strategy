@@ -30,35 +30,39 @@ FUNCTION navy_has_ironclads
     IF opt_realism >= REALISM_ON AND ((turn_year < IRONCLAD_YEAR) OR (turn_year = IRONCLAD_YEAR AND turn_month < IRONCLAD_MONTH)) THEN navy_has_ironclads = 0
 END FUNCTION
 
-' Fills the menu with the sea ports where the side can start a fleet: its own, without the
+' The sea ports where the side can start a fleet, in the map's order: its own, without the
 ' port the other side's fleet lies off.
-SUB navy_list_shipyards (side)
+SUB navy_list_shipyards (side, cities(), count)
     DIM i AS INTEGER
-    menu_text$(0) = "Port"
-    menu_item_count = 0
-    menu_col = PANEL_COL
-    menu_row = 12
+    count = 0
     FOR i = 1 TO MAX_CITIES
         IF city_port_type(i) = PORT_SEA AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = city_name$(i)
-            menu_value(menu_item_count) = i
+            count = count + 1
+            cities(count) = i
         END IF
     NEXT i
 END SUB
 
-' Fills the menu with the sea ports the side's fleet can sail to: all but the one it lies off.
-SUB navy_list_ports (side)
+' The sea ports the side's fleet can sail to, in the map's order: all but the one it lies off.
+SUB navy_list_ports (side, cities(), count)
     DIM i AS INTEGER
-    menu_item_count = 0
+    count = 0
     FOR i = 1 TO MAX_CITIES
         IF city_port_type(i) > PORT_RIVER AND fleet_city(side) <> i THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = city_name$(i)
-            menu_value(menu_item_count) = i
+            count = count + 1
+            cities(count) = i
         END IF
     NEXT i
 END SUB
+
+' Whether the side's fleet can land an army: two ships or more, in port off a neutral city.
+' The Rebels can only without the Realism setting. -1 or 0, as a comparison gives.
+FUNCTION navy_can_invade (side)
+    navy_can_invade = 0
+    IF fleet_is_at_sea(side) OR fleet_size(side) < 2 THEN EXIT FUNCTION
+    IF city_owner(fleet_city(side)) <> SIDE_NONE THEN EXIT FUNCTION
+    IF side = SIDE_UNION OR (side = SIDE_REBEL AND opt_realism = REALISM_OFF) THEN navy_can_invade = -1
+END FUNCTION
 
 ' Draws a random number and drops it. The computer's Attack calls it where the original drew
 ' a second number for its look at the order, so that the random numbers stay in their order.

@@ -847,20 +847,36 @@ SUB TestAiArmyOrderAndWinter
 END SUB
 
 SUB TestArmyRecruitCitiesKeptForTheMonth
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     current_side = 1: turn_recruit_state = 2
     turn_recruit_city(1) = 7: turn_recruit_city(2) = 3
     city_name$(7) = "Boston": city_name$(3) = "Albany"
-    CALL army_recruit_cities(1)
-    AssertEqualInt 2, menu_item_count, "the month's two cities"
-    AssertEqualStr "Albany", menu_text$(1), "sorted"
-    AssertEqualInt 3, menu_value(1), "city 3"
+    CALL army_recruit_cities(1, cities(), count)
+    AssertEqualInt 2, count, "the month's two cities"
+    AssertEqualInt 3, cities(1), "sorted: Albany, city 3"
+    AssertEqualInt 7, cities(2), "then Boston"
 END SUB
 
 SUB TestAiRecruitPickSmallArmy
-    menu_item_count = 2: menu_value(1) = 7: menu_value(2) = 3
+    DIM cities(MAX_CITIES) AS INTEGER
+    cities(1) = 7: cities(2) = 3
     city_army(3) = 4: army_size(4) = 100: side_cash(2) = 500
-    CALL ai_recruit_pick(2)
-    AssertEqualInt 2, menu_choice, "the city with an army under 15,500 men"
+    AssertEqualInt 3, ai_recruit_pick(2, cities(), 2), "the city with an army under 15,500 men"
+END SUB
+
+' A list of cities is sorted by name, and the menu shows the names with the cities' numbers.
+SUB TestCityListSortAndMenu
+    DIM cities(MAX_CITIES) AS INTEGER
+    city_name$(4) = "Richmond": city_name$(9) = "Atlanta": city_name$(2) = "Mobile"
+    cities(1) = 4: cities(2) = 9: cities(3) = 2
+    CALL city_list_sort(cities(), 3)
+    AssertEqualInt 9, cities(1), "Atlanta"
+    AssertEqualInt 2, cities(2), "Mobile"
+    AssertEqualInt 4, cities(3), "Richmond"
+    CALL menu_set_cities(cities(), 3)
+    AssertEqualInt 3, menu_item_count, "three rows"
+    AssertEqualStr "Mobile", menu_text$(2), "the second row's name"
+    AssertEqualInt 2, menu_value(2), "and its city"
 END SUB
 
 ' ------------------------------------------------------ the special events
@@ -1750,16 +1766,17 @@ END SUB
 ' The cities where armies can combine: a city of the side with an army that holds it and
 ' another army that has no order.
 SUB TestArmyListCombineCities
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     city_name$(7) = "Paducah": city_owner(7) = SIDE_UNION: city_army(7) = 1
     army_city(1) = 7: army_city(2) = 7
     city_name$(3) = "Cairo": city_owner(3) = SIDE_UNION: city_army(3) = 4
     army_city(4) = 3: army_city(5) = 3: army_order(5) = 9
     city_name$(9) = "Boston": city_owner(9) = SIDE_UNION: city_army(9) = 6: army_city(6) = 9
-    CALL army_list_combine_cities(SIDE_UNION)
-    AssertEqualInt 1, menu_item_count, "one city: not the one whose second army has an order, nor the one with one army"
-    AssertEqualInt 7, menu_value(1), "Paducah"
-    CALL army_list_combine_cities(SIDE_REBEL)
-    AssertEqualInt 0, menu_item_count, "none for the other side"
+    CALL army_list_combine_cities(SIDE_UNION, cities(), count)
+    AssertEqualInt 1, count, "one city: not the one whose second army has an order, nor the one with one army"
+    AssertEqualInt 7, cities(1), "Paducah"
+    CALL army_list_combine_cities(SIDE_REBEL, cities(), count)
+    AssertEqualInt 0, count, "none for the other side"
 END SUB
 
 ' The computer razes a fort it takes without a battle under realism, in the map's lower part.
@@ -1833,20 +1850,38 @@ END SUB
 ' The ports for a new fleet are the side's sea ports without the one the enemy's fleet lies
 ' off. The ports to sail to are all sea ports but the fleet's own.
 SUB TestNavyListsOfPorts
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     city_name$(5) = "Boston": city_port_type(5) = PORT_SEA: city_owner(5) = SIDE_UNION
     city_name$(8) = "Norfolk": city_port_type(8) = PORT_SEA: city_owner(8) = SIDE_UNION
     city_name$(9) = "Mobile": city_port_type(9) = PORT_SEA: city_owner(9) = SIDE_REBEL
     city_name$(11) = "Memphis": city_port_type(11) = PORT_RIVER: city_owner(11) = SIDE_UNION
     fleet_city(SIDE_REBEL) = 8
-    CALL navy_list_shipyards(SIDE_UNION)
-    AssertEqualInt 1, menu_item_count, "one shipyard: not the enemy's port, the blockaded port or the river port"
-    AssertEqualInt 5, menu_value(1), "Boston"
-    AssertEqualStr "Port", menu_text$(0), "the menu's title"
+    CALL navy_list_shipyards(SIDE_UNION, cities(), count)
+    AssertEqualInt 1, count, "one shipyard: not the enemy's port, the blockaded port or the river port"
+    AssertEqualInt 5, cities(1), "Boston"
     fleet_city(SIDE_UNION) = 5
-    CALL navy_list_ports(SIDE_UNION)
-    AssertEqualInt 2, menu_item_count, "two ports to sail to: every sea port but the fleet's own"
-    AssertEqualInt 8, menu_value(1), "Norfolk"
-    AssertEqualInt 9, menu_value(2), "Mobile, the enemy's"
+    CALL navy_list_ports(SIDE_UNION, cities(), count)
+    AssertEqualInt 2, count, "two ports to sail to: every sea port but the fleet's own"
+    AssertEqualInt 8, cities(1), "Norfolk"
+    AssertEqualInt 9, cities(2), "Mobile, the enemy's"
+END SUB
+
+' A fleet of two ships or more, in port off a neutral city, can land an army; the Rebels'
+' only without the Realism setting.
+SUB TestNavyCanInvade
+    city_owner(6) = SIDE_NONE: fleet_city(SIDE_UNION) = 6: fleet_size(SIDE_UNION) = 2
+    AssertEqualInt -1, navy_can_invade(SIDE_UNION), "two ships off a neutral city"
+    fleet_size(SIDE_UNION) = 1
+    AssertEqualInt 0, navy_can_invade(SIDE_UNION), "not with one ship"
+    fleet_size(SIDE_UNION) = 2: city_owner(6) = SIDE_REBEL
+    AssertEqualInt 0, navy_can_invade(SIDE_UNION), "not off a city with an owner"
+    fleet_city(SIDE_UNION) = FLEET_AT_SEA
+    AssertEqualInt 0, navy_can_invade(SIDE_UNION), "not at sea"
+    city_owner(6) = SIDE_NONE: fleet_city(SIDE_REBEL) = 6: fleet_size(SIDE_REBEL) = 2
+    opt_realism = REALISM_ON
+    AssertEqualInt 0, navy_can_invade(SIDE_REBEL), "the Rebels not under Realism"
+    opt_realism = REALISM_OFF
+    AssertEqualInt -1, navy_can_invade(SIDE_REBEL), "the Rebels without it"
 END SUB
 
 ' random_discard uses up one random number.

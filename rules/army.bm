@@ -202,24 +202,22 @@ SUB army_drill (army)
     army_order(army) = ORDER_BUSY
 END SUB
 
-' Fills the menu with the side's cities where armies can combine: a city with an army that
-' holds it and another that has no order. menu_item_count is 0 when there is none.
-SUB army_list_combine_cities (side)
+' The side's cities where armies can combine, sorted by name: a city with an army that holds
+' it and another that has no order. count is 0 when there is none.
+SUB army_list_combine_cities (side, cities(), count)
     DIM last_army AS INTEGER: DIM first_army AS INTEGER: DIM i AS INTEGER: DIM j AS INTEGER
-    menu_color = COLOR_CYAN: menu_highlight = COLOR_CYAN
-    menu_col = PANEL_COL: menu_row = 2
     first_army = side_first_army(side): last_army = side_last_army(side)
-    menu_item_count = 0
+    count = 0
     FOR i = 1 TO MAX_CITIES
         IF city_owner(i) = side AND city_army(i) > 0 THEN
             FOR j = first_army TO last_army
-                IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN menu_item_count = menu_item_count + 1: menu_text$(menu_item_count) = city_name$(i): menu_value(menu_item_count) = i: EXIT FOR
+                IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN count = count + 1: cities(count) = i: EXIT FOR
             NEXT j
         END IF
     NEXT i
 
-    IF menu_item_count = 0 THEN EXIT SUB
-    CALL menu_bubble_sort(menu_item_count)
+    IF count = 0 THEN EXIT SUB
+    CALL city_list_sort(cities(), count)
 END SUB
 
 ' Gives an army its order: a city to march to, or ORDER_NONE, ORDER_BUSY or ORDER_DONE.
@@ -280,31 +278,28 @@ SUB army_recruit_bonus (side, army_slot)
     IF side = SIDE_UNION AND current_side = SIDE_REBEL AND opt_difficulty > DIFFICULTY_EVEN THEN army_size(army_slot) = army_size(army_slot) + 5 * opt_difficulty - 15
 END SUB
 
-' Fills the menu with the cities where a side may recruit this month. They are drawn at
-' random; the player's list is kept for the month. menu_item_count is 0 when there is none.
-SUB army_recruit_cities (side)
-    DIM i AS INTEGER: DIM offer_count AS INTEGER: DIM chance!: DIM city AS INTEGER
-    menu_item_count = 0
-    menu_text$(0) = "Recruit"
-    IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: city = turn_recruit_city(i): menu_text$(i) = city_name$(city): menu_value(i) = city: NEXT i: menu_item_count = turn_recruit_state: CALL menu_bubble_sort(menu_item_count): EXIT SUB
+' The cities where a side may recruit this month, sorted by name. They are drawn at random;
+' the player's list is kept for the month. count is 0 when there is none.
+SUB army_recruit_cities (side, cities(), count)
+    DIM i AS INTEGER: DIM offer_count AS INTEGER: DIM chance!
+    count = 0
+    IF side = current_side AND turn_recruit_state > 0 THEN FOR i = 1 TO turn_recruit_state: cities(i) = turn_recruit_city(i): NEXT i: count = turn_recruit_state: CALL city_list_sort(cities(), count): EXIT SUB
     offer_count = 4: IF RND > .8 THEN offer_count = offer_count - 1
     IF opt_difficulty < DIFFICULTY_EVEN THEN offer_count = offer_count + 1
 
     FOR i = 1 TO MAX_CITIES
         IF side_city_count(side) > 0 THEN chance! = .6 * offer_count / side_city_count(side) ELSE chance! = .3
-        IF menu_item_count = 0 AND i > 20 THEN chance! = .3
-        IF menu_item_count < 2 AND i > 30 THEN chance! = .3
-        menu_value(i) = 0
+        IF count = 0 AND i > 20 THEN chance! = .3
+        IF count < 2 AND i > 30 THEN chance! = .3
         IF city_army(i) > 0 AND city_owner(i) = side THEN chance! = .4
         IF RND < chance! AND city_owner(i) = side THEN
             IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) THEN _CONTINUE
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = city_name$(i)
-            menu_value(menu_item_count) = i
-            IF menu_item_count > offer_count - 1 THEN EXIT FOR
+            count = count + 1
+            cities(count) = i
+            IF count > offer_count - 1 THEN EXIT FOR
         END IF
     NEXT i
-    IF menu_item_count = 0 THEN EXIT SUB
-    IF side = current_side AND turn_recruit_state = 0 THEN FOR i = 1 TO menu_item_count: turn_recruit_city(i) = menu_value(i): NEXT i: turn_recruit_state = menu_item_count
-    CALL menu_bubble_sort(menu_item_count)
+    IF count = 0 THEN EXIT SUB
+    IF side = current_side AND turn_recruit_state = 0 THEN FOR i = 1 TO count: turn_recruit_city(i) = cities(i): NEXT i: turn_recruit_state = count
+    CALL city_list_sort(cities(), count)
 END SUB

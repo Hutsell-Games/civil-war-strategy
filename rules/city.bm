@@ -1,3 +1,17 @@
+' Sorts a list of cities by name, as the menu's bubble sort sorts its rows (menu_bubble_sort).
+SUB city_list_sort (cities(), count)
+    DIM i AS INTEGER: DIM swaps%
+    DO
+        swaps% = FALSE
+        FOR i = 1 TO count - 1
+            IF city_name$(cities(i)) > city_name$(cities(i + 1)) THEN
+                SWAP cities(i), cities(i + 1)
+                swaps% = i
+            END IF
+        NEXT i
+    LOOP WHILE swaps%
+END SUB
+
 ' The number of cities next to city that side holds: 0 when the city is cut off.
 FUNCTION city_is_connected (side, city)
     DIM j AS INTEGER: DIM neighbor AS INTEGER: DIM friendly_neighbors AS INTEGER

@@ -12,6 +12,15 @@ SUB menu_bubble_sort (limit)
     LOOP WHILE swaps%
 END SUB
 
+' Makes a list of cities the menu's rows: each city's name, with its number in menu_value().
+SUB menu_set_cities (cities(), count)
+    DIM i AS INTEGER
+    menu_item_count = count
+    FOR i = 1 TO count
+        menu_text$(i) = city_name$(cities(i)): menu_value(i) = cities(i)
+    NEXT i
+END SUB
+
 '============================================================================
 '                GENmenu 3.05 : Generic Menu Main Module Level  12/91
 '                Updated to Use Graphic Screens 8, 9, 12

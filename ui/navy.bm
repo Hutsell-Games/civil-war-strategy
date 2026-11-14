@@ -29,6 +29,7 @@ END SUB
 ' there is no port for a new fleet.
 SUB menu_navy_build (side, again)
     DIM cost AS INTEGER: DIM ship$
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     again = 1
     cost = COST_SHIP
     IF side_cash(side) < cost OR fleet_is_at_sea(side) THEN EXIT SUB
@@ -57,7 +58,10 @@ SUB menu_navy_build (side, again)
     CALL navy_add_ship(side, ship$, cost)
     IF fleet_size(side) > 1 THEN CALL navy_ship_joins(side, ship$): EXIT SUB
     DO
-        CALL navy_list_shipyards(side)
+        CALL navy_list_shipyards(side, cities(), count)
+        menu_text$(0) = "Port"
+        CALL menu_set_cities(cities(), count)
+        menu_col = PANEL_COL: menu_row = 12
         IF menu_item_count < 1 THEN
             CALL navy_cancel_new_fleet(side)
             CALL clear_bottom_line: PRINT "NO SHIPYARDS AVAILABLE !"; : again = 0: EXIT SUB
@@ -81,12 +85,13 @@ END SUB
 ' Sail: the player picks a port, and the fleet goes there. It fights the enemy's fleet if
 ' that is there.
 SUB menu_navy_sail (side, again)
-    DIM sailed AS INTEGER
+    DIM sailed AS INTEGER: DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     again = 0
     CALL navy_count_ships(side)
     IF NOT fleet_exists(side) OR fleet_size(side) < 1 THEN CALL navy_say_no_ships: again = 1: EXIT SUB
 
-    CALL navy_list_ports(side)
+    CALL navy_list_ports(side, cities(), count)
+    CALL menu_set_cities(cities(), count)
     COLOR COLOR_LIGHT_CYAN: LOCATE 11, 68
     IF NOT fleet_is_at_sea(side) THEN
         PRINT city_name$(fleet_city(side))

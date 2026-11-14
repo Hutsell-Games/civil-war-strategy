@@ -42,6 +42,11 @@ What each fix did is in `docs\modernize-completed.md`, "The kept bugs fixed".
 - **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
   (`ai\ai.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
   bombards the city anyway when it is the enemy's. The change of order does not stop this attack.
+- **A Rebel fleet at Philadelphia stays there half the time it would sail.** `ai_pick_port`
+  (`ai\ai.bm`) ends with a test for the Rebel fleet at city 30, with a chance of 1 in 2. The
+  original set the menu's row to 30 there, most likely meant as the city. Row 30 of the menu's
+  values was always 0, and `navy_sail_to` does nothing for city 0. The FUNCTION returns 0 to keep
+  it.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.

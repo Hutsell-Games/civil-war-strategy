@@ -191,8 +191,11 @@ END SUB
 
 ' The cities where a side may recruit (rules/army.bm), in the menu's color.
 SUB menu_recruit_cities (side)
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     COLOR COLOR_LIGHT_RED
-    CALL army_recruit_cities(side)
+    CALL army_recruit_cities(side, cities(), count)
+    menu_text$(0) = "Recruit"
+    CALL menu_set_cities(cities(), count)
 END SUB
 
 SUB menu_army_cancel (side)
@@ -430,10 +433,7 @@ SUB menu_navy_items (side)
     menu_col = PANEL_COL
     menu_row = 12
     menu_item_count = 4
-    IF NOT fleet_is_at_sea(side) THEN
-        IF side = SIDE_UNION AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
-        IF opt_realism = REALISM_OFF AND side = SIDE_REBEL AND fleet_size(side) > 1 AND city_owner(fleet_city(side)) = SIDE_NONE THEN menu_item_count = 5: menu_text$(5) = "Invasion"
-    END IF
+    IF navy_can_invade(side) THEN menu_item_count = 5: menu_text$(5) = "Invasion"
 END SUB
 
 ' The Commands menu. After a command is carried out it shows again, on that command's row.

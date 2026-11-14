@@ -23,10 +23,17 @@ SUB draw_ai_drill (army)
 END SUB
 
 ' Before the computer picks a city to recruit in: its funds, when the player may see them, and
-' the menu's place. The cursor is left where the pick's loop over the list used to leave it.
-SUB draw_ai_funds (side)
+' the menu's place for a list of count cities. The cursor is left where the pick's loop over
+' the list used to leave it.
+SUB draw_ai_funds (side, count)
     CALL draw_recruit_funds(side)
-    IF menu_item_count > 0 THEN LOCATE 14 + menu_item_count, 69
+    IF count > 0 THEN LOCATE 14 + count, 69
+END SUB
+
+' The color the computer's recruiting prints its funds in, set once before it recruits, as
+' the player's list of cities sets it (menu_recruit_cities).
+SUB draw_ai_recruit_color
+    COLOR COLOR_LIGHT_RED
 END SUB
 
 ' The color of the fleet's messages on the bottom line, set before the computer's fleet

@@ -182,6 +182,31 @@ The others stay SUBs, for these reasons:
 `TestTextReplaceEveryPlace` is new. The 40 scripts passed `check` and `compare` on unchanged
 recordings, and the 159 unit tests passed.
 
+**Item 4, the menu's globals out of `rules\` and `ai\`**, in the working tree on 2026-11-13, not
+committed. Neither folder names a menu variable any more, and `tests\test_layers.py` checks it
+(`test_rules_and_ai_leave_the_menu_alone`). Four rows of its `ALLOWED` are gone; `ai_fortify`'s call
+of `draw_fort_built` is the one left.
+
+- **Lists.** `army_list_combine_cities`, `army_recruit_cities`, `navy_list_shipyards` and
+  `navy_list_ports` fill an array the caller passes, with a count. `city_list_sort` (`rules\city.bm`)
+  sorts by name as `menu_bubble_sort` did, so the lists keep their order. The player's menus copy a
+  list into the menu with `menu_set_cities` (`ui\menu.bm`), and set the menu's place and colors
+  that the rules set before.
+- **Picks.** `ai_recruit_pick` and `ai_pick_port` are FUNCTIONs that give a city. `ai_navy_orders`
+  chooses by its `action`, not `menu_choice`. `ai_army_order` lost a line that never ran.
+- **Scores.** `ai_evaluate_move` keeps its scores in a local `road_score()`.
+- **Invasion.** `navy_can_invade` (`rules\navy.bm`) is the test that the Ships menu and
+  `ai_navy_adjust` share. The computer filled the Ships menu to read its row count.
+- **The computer's screen.** `draw_ai_funds` takes the list's count. `draw_ai_recruit_color`
+  (`ui\ai.bm`) sets the color the player's list set for the computer before.
+
+What the computer left in the menu's variables could change no screen. The menus that open in its
+turn, Retreat and End Game, set their own place and colors. The values it left in `menu_choice` give
+row 1, as the player's End Turn does. One read was a bug: `ai_pick_port` set the row to 30, and
+`menu_value(30)` was always 0, so the fleet stayed in port. It returns 0 now (`TODO.md`). The 40
+scripts passed `check` and `compare` on unchanged recordings, the 161 unit tests passed, and every
+changed line runs under the tests.
+
 ## Questions for the user
 
 1. **The order above:** go ahead with it, or keep to the `ai\ai.bm` steps?

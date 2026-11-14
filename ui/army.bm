@@ -6,8 +6,12 @@
 ' found is 0 when there is no such city.
 SUB menu_army_combine (side, found)
     DIM city AS INTEGER: DIM best AS INTEGER: DIM joined AS INTEGER
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     found = 0
-    CALL army_list_combine_cities(side)
+    menu_color = COLOR_CYAN: menu_highlight = COLOR_CYAN
+    menu_col = PANEL_COL: menu_row = 2
+    CALL army_list_combine_cities(side, cities(), count)
+    CALL menu_set_cities(cities(), count)
     IF menu_item_count = 0 THEN EXIT SUB
     found = 1
     menu_text$(0) = "Join"
