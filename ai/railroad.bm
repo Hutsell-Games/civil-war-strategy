@@ -17,9 +17,33 @@ SUB ai_railroad_orders (side)
     CALL railroad_finish
 END SUB
 
-' The computer's train: an army that is far from the enemy, and a city of its own that the
-' enemy threatens. army and city are 0 when it sends no train.
+' The computer's train: an army that is far from the enemy (ai_railroad_army), and a city of
+' its own that the enemy threatens (ai_railroad_city). army and city are 0 when it sends no
+' train.
 SUB ai_railroad (side, army, city)
+    DIM spare_army AS INTEGER
+    DIM to_city AS INTEGER
+    army = 0
+    city = 0
+    spare_army = ai_railroad_army(side)
+    IF spare_army = 0 THEN
+        EXIT SUB
+    END IF
+    IF army_size(spare_army) > railroad_capacity(side) THEN
+        EXIT SUB
+    END IF
+    to_city = ai_railroad_city(side, spare_army)
+    IF to_city > 0 THEN
+        army = spare_army
+        city = to_city
+    END IF
+END SUB
+
+' The army the computer could send by train: of its armies without an order and with more
+' than one railroad out of their city, the one with the least enemy near it. An army beside
+' more than one enemy city stays while the capital has an army. 0 when the least enemy near
+' is more than 3 tenths of the army.
+FUNCTION ai_railroad_army (side)
     DIM least_threat AS INTEGER
     DIM spare_army AS INTEGER
     DIM i AS INTEGER
@@ -27,15 +51,9 @@ SUB ai_railroad (side, army, city)
     DIM routes AS INTEGER
     DIM j AS INTEGER
     DIM neighbor AS INTEGER
-    DIM from_city AS INTEGER
     DIM enemy_strength AS INTEGER
-    DIM capacity AS INTEGER
-    DIM to_city AS INTEGER
     DIM candidate_city AS INTEGER
-    DIM enemy_side AS INTEGER
-    enemy_side = current_side
-    army = 0
-    city = 0
+    ai_railroad_army = 0
     least_threat = 32767
     spare_army = 0
     FOR i = side_first_army(side) TO side_last_army(side)
@@ -68,12 +86,24 @@ SUB ai_railroad (side, army, city)
         END IF
     NEXT i
     IF spare_army = 0 OR least_threat > .3 * army_size(spare_army) THEN
-        EXIT SUB
+        EXIT FUNCTION
     END IF
-    capacity = railroad_capacity(side)
-    IF army_size(spare_army) > capacity THEN
-        EXIT SUB
-    END IF
+    ai_railroad_army = spare_army
+END FUNCTION
+
+' Where the computer sends spare_army by train: a city of its own with no army, the railroad
+' reaching it, and an enemy near it but not more than three times the army. The last such city
+' toward the enemy is taken, or the first with a fort. An empty capital with the enemy near
+' comes first when taking the capital wins the war. 0 when there is no such city.
+FUNCTION ai_railroad_city (side, spare_army)
+    DIM i AS INTEGER
+    DIM routes AS INTEGER
+    DIM from_city AS INTEGER
+    DIM enemy_strength AS INTEGER
+    DIM to_city AS INTEGER
+    DIM candidate_city AS INTEGER
+    DIM enemy_side AS INTEGER
+    enemy_side = current_side
     from_city = army_city(spare_army)
     to_city = 0
     FOR i = 1 TO MAX_CITIES
@@ -112,8 +142,5 @@ SUB ai_railroad (side, army, city)
             END IF
         END IF
     END IF
-    IF to_city > 0 THEN
-        army = spare_army
-        city = to_city
-    END IF
-END SUB
+    ai_railroad_city = to_city
+END FUNCTION

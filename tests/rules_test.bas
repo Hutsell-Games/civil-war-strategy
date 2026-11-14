@@ -970,6 +970,73 @@ SUB TestAiArmyOrderAndWinter
     AssertEqualInt 0, ordered, "an army without a city has none"
 END SUB
 
+SUB TestAiStayWeight
+    AssertEqualInt 200, ai_stay_weight(10), "the enemy near, the computer no stronger"
+    AssertEqualInt 0, ai_stay_weight(0), "no enemy near"
+    ai_strength_ratio! = 2.5
+    AssertEqualInt 20, ai_stay_weight(10), "more than twice the player's strength"
+    ai_strength_ratio! = 4
+    AssertEqualInt 5, ai_stay_weight(10), "more than three times"
+    ai_strength_ratio! = 0: opt_ai_aggression = 2
+    AssertEqualInt 100, ai_stay_weight(10), "half for an aggressive computer"
+END SUB
+
+SUB TestAiMoveStrength
+    army_city(21) = 1: army_size(21) = 500
+    city_road(1, 1) = 2: city_army(2) = 1: army_size(1) = 100
+    city_road(1, 2) = 3
+    AssertEqualInt 4, ai_move_strength(21), "50,000 men less 10,000 beside it, in hundredths"
+    opt_ai_aggression = 2
+    AssertEqualInt 44, ai_move_strength(21), "and 20 for each level of aggression"
+END SUB
+
+SUB TestAiCityTargeted
+    army_city(21) = 5: army_order(21) = 7
+    army_city(1) = 3: army_order(1) = 8
+    AssertTrue ai_city_targeted(2, 7), "army 21 marches to city 7"
+    AssertTrue NOT ai_city_targeted(2, 8), "only the Union's army marches to city 8"
+    army_city(21) = 0
+    AssertTrue NOT ai_city_targeted(2, 7), "an army that is gone has no order"
+END SUB
+
+SUB TestAiAttackScore
+    RANDOMIZE 1
+    army_city(21) = 5: army_size(21) = 10: army_supply(21) = 5
+    army_city(1) = 6: army_size(1) = 500: city_army(6) = 1
+    AssertEqualInt -9999, ai_attack_score(21, 1, 6, 100), "1,000 men against 50,000: never"
+    army_size(21) = 500: army_size(1) = 100: opt_ai_aggression = 1
+    score = ai_attack_score(21, 1, 6, 100)
+    AssertTrue score >= 300 AND score <= 350, "five to one: 100, half the 400 more, and up to 50:" + STR$(score)
+END SUB
+
+SUB TestAiBeyondScore
+    side_capital(1) = 20
+    city_road(5, 1) = 6: city_value(6) = 4: city_fort(6) = 1
+    city_road(5, 2) = 7: city_owner(7) = 1: city_value(7) = 2
+    AssertEqualInt 22, ai_beyond_score(21, 0, 5, 1), "a neutral city of 4 with a fort, and the enemy's of 2"
+    army_size(21) = 50: army_size(1) = 100
+    AssertEqualInt 20, ai_beyond_score(21, 1, 5, 1), "2 less: the army in city 5 is twice its size"
+    side_capital(1) = 0
+    AssertEqualInt 70, ai_beyond_score(21, 1, 5, 1), "the enemy lost its capital (0): the neutral city gets 50"
+END SUB
+
+' The Rebels' army 21 in city 1, with track to cities 2 and 3. A Union army is in city 5,
+' next to city 3.
+SUB TestAiRailroadArmyAndCity
+    current_side = 1
+    city_owner(1) = 2: city_owner(2) = 2: city_owner(3) = 2: city_owner(5) = 1
+    city_road(1, 1) = 2
+    city_road(2, 1) = 1: city_road(2, 2) = 3
+    city_road(3, 1) = 2: city_road(3, 2) = 5
+    army_city(21) = 1: army_size(21) = 100: city_army(1) = 21
+    army_city(1) = 5: army_size(1) = 50: city_army(5) = 1
+    city_y(1) = 50: city_y(2) = 30: city_y(3) = 10: city_y(5) = 5
+    AssertEqualInt 21, ai_railroad_army(2), "no enemy near it, and two cities by rail"
+    AssertEqualInt 3, ai_railroad_city(2, 21), "of cities 2 and 3, near the enemy and to the north, the last"
+    city_road(1, 2) = 6: city_owner(6) = 1: city_army(6) = 2: army_city(2) = 6: army_size(2) = 400
+    AssertEqualInt 0, ai_railroad_army(2), "40,000 of the enemy's men next to it: it stays"
+END SUB
+
 SUB TestArmyRecruitCitiesKeptForTheMonth
     DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     current_side = 1: turn_recruit_state = 2

@@ -35,14 +35,22 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
 - **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
   (`ai\navy.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
   bombards the city anyway when it is the enemy's. The change of order does not stop this attack.
-- **The computer counts a fort of 2 as no fort** when it weighs an attack (`ai_evaluate_move`, `ai\army.bm`
-  lines 202 to 207). The original's `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3` is
+- **The computer counts a fort of 2 as no fort** when it weighs an attack (`ai_attack_score`, `ai\army.bm`
+  lines 262 to 267). The original's `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3` is
   one `IF` line, so the second test runs only when the fort is 1. A fort of 0 gives 1, of 1 gives 2, and of
   2 gives 1 again; a fort is never 3 (`MAX_FORT` is 2). It most likely meant the fort plus 1.
 - **The Union's computer skips fortifying half the time when it has no fleet** (`ai_fortify`, `ai\forces.bm`
   line 44): `... AND RND > .5 AND side_cash < 222 THEN EXIT SUB`. `side_cash` there is a local scalar,
   declared so that `OPTION _EXPLICIT` accepts it, and it is always 0, as the original's undeclared `cash`
   was. So the cash test is always true. It most likely meant `side_cash(side) < 222`.
+- **The computer's bonus for a road toward the enemy's capital compares an owner with a city**
+  (`ai_beyond_score`, `ai\army.bm`): `IF city_owner(far_city) = side_capital(enemy_side)`. An
+  owner is 0 to 2, and no capital is city 1 or 2, so the 50 goes to no city while the enemy
+  holds its capital. Once the capital falls, `side_capital` is 0, and every neutral city one
+  road beyond gets the 50. It most likely meant `far_city = side_capital(enemy_side)`. The
+  original did the same (`CWSTRAT2.BM` line 381, `IF cityp(m) = capcity(side) THEN y = y + 50`).
+  Found 2026-11-14. `TestAiBeyondScore`
+  holds it.
 - **The army report counts the capitals' income twice** (`report_armies`, `ui\reports.bm`). Its line
   "income / all income" adds 100 for each capital to `total_income`, which `turn_collect_income` has
   already counted them in. The original did the same (`CWSTRAT2.BAS` line 811, with `vptotal` from

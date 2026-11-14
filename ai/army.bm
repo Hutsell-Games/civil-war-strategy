@@ -95,9 +95,11 @@ SUB ai_drill (side)
     NEXT i
 END SUB
 
+' The computer's choice of a road for an army: best_road is the road whose city scores best, or 0
+' when the army stays. A road's score is what its city is worth, the battle there if the enemy
+' holds it (ai_attack_score), and the cities beyond it (ai_beyond_score).
 SUB ai_evaluate_move (army, best_road)
     DIM road_count AS INTEGER
-    DIM far_city AS INTEGER
     DIM stay_weight AS INTEGER
     DIM best_score AS INTEGER
     DIM from_city AS INTEGER
@@ -106,11 +108,7 @@ SUB ai_evaluate_move (army, best_road)
     DIM j AS INTEGER
     DIM to_city AS INTEGER
     DIM score AS INTEGER
-    DIM k AS INTEGER
     DIM occupant AS INTEGER
-    DIM fort_factor AS INTEGER
-    DIM odds!
-    DIM ally_bound AS INTEGER
     DIM own_side AS INTEGER
     DIM enemy_side AS INTEGER
     ' Each road's score; -1 for a road not scored. Entry 0, for no road, stays 0.
@@ -118,45 +116,15 @@ SUB ai_evaluate_move (army, best_road)
     enemy_side = current_side
     own_side = other_side(enemy_side)
     from_city = army_city(army)
-    stay_weight = 200
-    IF ai_strength_ratio! > 1.5 THEN
-        stay_weight = 80
-        IF ai_strength_ratio! > 2 THEN
-            stay_weight = 20
-            IF ai_strength_ratio! > 3 THEN
-                stay_weight = 5
-            END IF
-        END IF
-    END IF
     enemy_strength = city_nearby_enemy_strength(from_city)
-    IF enemy_strength = 0 THEN
-        stay_weight = 0
-    END IF
-    IF opt_ai_aggression > 1 THEN
-        stay_weight = .5 * stay_weight
-    END IF
-
-    own_strength = army_size(army)
-
+    stay_weight = ai_stay_weight(enemy_strength)
+    own_strength = ai_move_strength(army)
     FOR j = 1 TO MAX_ROADS
         road_score(j) = -1
-        to_city = city_road(from_city, j)
-        IF to_city > 0 THEN
-            IF city_army(to_city) > 0 THEN
-                own_strength = own_strength - army_size(city_army(to_city))
-                score = 1
-            END IF
-        END IF
     NEXT j
-    own_strength = .01 * own_strength
-    IF opt_ai_aggression > 0 THEN
-        own_strength = own_strength + 20 * opt_ai_aggression
-    END IF
-
 
     road_count = 6
     FOR j = 1 TO MAX_ROADS
-        score = -1
         to_city = city_road(from_city, j)
         IF to_city = 0 THEN
             road_count = j - 1
@@ -165,17 +133,10 @@ SUB ai_evaluate_move (army, best_road)
 
         occupant = city_army(to_city)
         ' An empty city that another of the computer's armies already marches to is left to it.
-        ally_bound = 0
-        FOR k = side_first_army(own_side) TO side_last_army(own_side)
-            IF army_exists(k) THEN
-                IF army_order(k) = to_city AND occupant = 0 THEN
-                    ally_bound = 1
-                    EXIT FOR
-                END IF
+        IF occupant = 0 THEN
+            IF ai_city_targeted(own_side, to_city) THEN
+                _CONTINUE
             END IF
-        NEXT k
-        IF ally_bound = 1 THEN
-            _CONTINUE
         END IF
 
         score = own_strength - stay_weight * city_fort(from_city) - city_value(from_city) + 30 * RND
@@ -199,56 +160,7 @@ SUB ai_evaluate_move (army, best_road)
             score = score + 10 * city_value(to_city)
         END IF
         IF city_owner(to_city) = enemy_side AND occupant <> 0 THEN
-            fort_factor = 1
-            IF city_fort(to_city) = 1 THEN
-                fort_factor = 2
-                IF city_fort(to_city) = 3 THEN
-                    fort_factor = 3
-                END IF
-            END IF
-
-            IF army_size(occupant) > 0 THEN
-                odds! = army_size(army) / (fort_factor * army_size(occupant))
-                IF opt_realism >= REALISM_HIGH THEN
-                    odds! = .8 * odds!
-                END IF
-            ELSE
-                odds! = 5
-            END IF
-
-            IF army_size(army) < SMALL_ARMY_SIZE THEN
-                score = score - 300
-                odds! = .1
-            END IF
-            IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN
-                score = 0
-            END IF
-            IF opt_realism >= REALISM_ON THEN
-                score = score - 15
-            END IF
-            IF odds! < .5 THEN
-                score = score - 200
-            END IF
-            IF opt_ai_aggression = 0 AND RND > .9 THEN
-                score = score + 10 * (army_leader_rating(army) - army_leader_rating(occupant) + army_experience(army) - army_leader_rating(army))
-            END IF
-            IF army_supply(army) < 1 THEN
-                score = score - 100
-            END IF
-            SELECT CASE odds! + .5 * opt_ai_aggression
-                CASE IS < .3
-                    score = -9999
-                CASE IS < .5
-                    score = score - 300
-                CASE IS <= .8
-                    score = score - 20
-                CASE .8 TO 1.2
-                    score = score - 5
-                CASE 1.2 TO 1.5
-                    score = score + 10
-                CASE ELSE
-                    score = score + .5 * (army_size(army) - army_size(occupant)) + 50 * RND
-            END SELECT
+            score = ai_attack_score(army, occupant, to_city, score)
         END IF
         IF city_owner(to_city) = own_side AND occupant > 0 AND army_order(occupant) = ORDER_NONE THEN
             score = score - army_size(occupant)
@@ -259,33 +171,7 @@ SUB ai_evaluate_move (army, best_road)
         IF enemy_side = SIDE_REBEL AND city_y(to_city) > city_y(from_city) THEN
             score = score + 2
         END IF
-
-        FOR k = 1 TO MAX_ROADS
-            far_city = city_road(to_city, k)
-            IF far_city = 0 THEN
-                _CONTINUE
-            END IF
-            IF city_owner(far_city) = SIDE_NONE THEN
-                score = score + 3 * city_value(far_city) + 4 * city_fort(far_city)
-            END IF
-            IF city_owner(far_city) = enemy_side THEN
-                score = score + 3 * city_value(far_city) + 4 * city_fort(far_city)
-            END IF
-            IF city_owner(far_city) = enemy_side AND occupant > 0 THEN
-                odds! = 5 - 4 * RND
-                IF army_size(occupant) > 0 THEN
-                    odds! = army_size(army) / army_size(occupant)
-                ELSE
-                    odds! = 5
-                END IF
-                IF odds! < 1 THEN
-                    score = score - 2
-                END IF
-            END IF
-            IF city_owner(far_city) = side_capital(enemy_side) THEN
-                score = score + 50
-            END IF
-        NEXT k
+        score = score + ai_beyond_score(army, occupant, to_city, enemy_side)
 
         road_score(j) = score
     NEXT j
@@ -304,6 +190,167 @@ SUB ai_evaluate_move (army, best_road)
         best_road = 0
     END IF
 END SUB
+
+' How much a fort holds the computer's army in its city, for each level of the fort. It is 0
+' when no enemy is near (enemy_strength is 0). It is less as the computer grows stronger than
+' the player, and half for an aggressive computer.
+FUNCTION ai_stay_weight (enemy_strength)
+    DIM weight AS INTEGER
+    weight = 200
+    IF ai_strength_ratio! > 1.5 THEN
+        weight = 80
+        IF ai_strength_ratio! > 2 THEN
+            weight = 20
+            IF ai_strength_ratio! > 3 THEN
+                weight = 5
+            END IF
+        END IF
+    END IF
+    IF enemy_strength = 0 THEN
+        weight = 0
+    END IF
+    IF opt_ai_aggression > 1 THEN
+        weight = .5 * weight
+    END IF
+    ai_stay_weight = weight
+END FUNCTION
+
+' The army's urge to move: a hundredth of its size less the armies of either side in the
+' cities next to it, plus 20 for each level of the computer's aggression.
+FUNCTION ai_move_strength (army)
+    DIM strength AS INTEGER
+    DIM j AS INTEGER
+    DIM to_city AS INTEGER
+    strength = army_size(army)
+    FOR j = 1 TO MAX_ROADS
+        to_city = city_road(army_city(army), j)
+        IF to_city > 0 THEN
+            IF city_army(to_city) > 0 THEN
+                strength = strength - army_size(city_army(to_city))
+            END IF
+        END IF
+    NEXT j
+    strength = .01 * strength
+    IF opt_ai_aggression > 0 THEN
+        strength = strength + 20 * opt_ai_aggression
+    END IF
+    ai_move_strength = strength
+END FUNCTION
+
+' True when an army of the side already has an order to march to the city.
+FUNCTION ai_city_targeted (side, city)
+    DIM k AS INTEGER
+    ai_city_targeted = 0
+    FOR k = side_first_army(side) TO side_last_army(side)
+        IF army_exists(k) THEN
+            IF army_order(k) = city THEN
+                ai_city_targeted = -1
+                EXIT FUNCTION
+            END IF
+        END IF
+    NEXT k
+END FUNCTION
+
+' The score of a road to a city where the enemy has an army (occupant): score_before, changed
+' by the odds of the battle. The odds count the city's fort, the realism setting and the
+' computer's aggression.
+FUNCTION ai_attack_score (army, occupant, to_city, score_before)
+    DIM score AS INTEGER
+    DIM fort_factor AS INTEGER
+    DIM odds!
+    score = score_before
+    fort_factor = 1
+    IF city_fort(to_city) = 1 THEN
+        fort_factor = 2
+        IF city_fort(to_city) = 3 THEN
+            fort_factor = 3
+        END IF
+    END IF
+
+    IF army_size(occupant) > 0 THEN
+        odds! = army_size(army) / (fort_factor * army_size(occupant))
+        IF opt_realism >= REALISM_HIGH THEN
+            odds! = .8 * odds!
+        END IF
+    ELSE
+        odds! = 5
+    END IF
+
+    IF army_size(army) < SMALL_ARMY_SIZE THEN
+        score = score - 300
+        odds! = .1
+    END IF
+    IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN
+        score = 0
+    END IF
+    IF opt_realism >= REALISM_ON THEN
+        score = score - 15
+    END IF
+    IF odds! < .5 THEN
+        score = score - 200
+    END IF
+    IF opt_ai_aggression = 0 AND RND > .9 THEN
+        score = score + 10 * (army_leader_rating(army) - army_leader_rating(occupant) + army_experience(army) - army_leader_rating(army))
+    END IF
+    IF army_supply(army) < 1 THEN
+        score = score - 100
+    END IF
+    SELECT CASE odds! + .5 * opt_ai_aggression
+        CASE IS < .3
+            score = -9999
+        CASE IS < .5
+            score = score - 300
+        CASE IS <= .8
+            score = score - 20
+        CASE .8 TO 1.2
+            score = score - 5
+        CASE 1.2 TO 1.5
+            score = score + 10
+        CASE ELSE
+            score = score + .5 * (army_size(army) - army_size(occupant)) + 50 * RND
+    END SELECT
+    ai_attack_score = score
+END FUNCTION
+
+' What the cities one road beyond to_city add to its score: their worth and forts when the
+' enemy or no side holds them, and 2 less for each of the enemy's when the army is smaller than
+' the one in to_city (occupant). The 50 meant for the enemy's capital compares a city's owner
+' with the capital's number. So it goes to each neutral city once the enemy has lost its
+' capital (number 0), and to no city before (TODO.md).
+FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
+    DIM k AS INTEGER
+    DIM far_city AS INTEGER
+    DIM odds!
+    DIM bonus AS INTEGER
+    bonus = 0
+    FOR k = 1 TO MAX_ROADS
+        far_city = city_road(to_city, k)
+        IF far_city = 0 THEN
+            _CONTINUE
+        END IF
+        IF city_owner(far_city) = SIDE_NONE THEN
+            bonus = bonus + 3 * city_value(far_city) + 4 * city_fort(far_city)
+        END IF
+        IF city_owner(far_city) = enemy_side THEN
+            bonus = bonus + 3 * city_value(far_city) + 4 * city_fort(far_city)
+        END IF
+        IF city_owner(far_city) = enemy_side AND occupant > 0 THEN
+            odds! = 5 - 4 * RND
+            IF army_size(occupant) > 0 THEN
+                odds! = army_size(army) / army_size(occupant)
+            ELSE
+                odds! = 5
+            END IF
+            IF odds! < 1 THEN
+                bonus = bonus - 2
+            END IF
+        END IF
+        IF city_owner(far_city) = side_capital(enemy_side) THEN
+            bonus = bonus + 50
+        END IF
+    NEXT k
+    ai_beyond_score = bonus
+END FUNCTION
 
 ' The player's strength near a city: in full in the cities next to it, a tenth two roads away. The sum is an
 ' INTEGER, rounded at each step, as it was when it was a SUB's parameter.

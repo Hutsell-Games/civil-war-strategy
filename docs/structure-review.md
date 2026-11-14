@@ -103,7 +103,7 @@ In this order, each a commit that keeps the recorded screens identical:
 The earlier plan for `ai\ai.bm` alone was four steps. Its step 1 is done (`archived\structure-review-completed.md`). Its steps 2 to 4
 (`SELECT CASE` and `_ANDALSO` for nested `IF`s, named predicates, splitting `ai_evaluate_move`) are dropped
 as separate work: the predicates and FUNCTIONs above cover most of them. The split of `ai_evaluate_move`
-can follow item 4, once its scores no longer live in `menu_value()`.
+was done on 2026-11-14 (the third review, below).
 
 ## The second review: one idea written in several places
 
@@ -158,6 +158,30 @@ for these rules. `TestTurnStrengthRatio` now gives its two armies a city, as eve
 | A ship can be built | the Ships menu's row, `menu_navy_build`, `ai_navy_build`, `ai_navy_adjust`, `ai_fleet_orders`, `turn_check_commands` | only the player's Build asks for a sea port, and the computer's does not test the port's owner |
 | Attack and Raid | the Ships menu's rows, the player's and the computer's action | the computer's Attack also sails off a neutral city |
 | A side's strength | `turn_strength_ratio`, `ai_count_armies`, `victory_forces` | only the first counts the army on a train; two of them add tenths, rounded at each step |
+
+## The third review: the size of files and procedures
+
+Written 2026-11-14. It asked whether procedures should be broken up or filed elsewhere. Of 388
+procedures, 276 are 25 lines or fewer and 11 are over 100. The user took its order ("do file
+splits", then "continue", 2026-11-14). What is done is in `archived\structure-review-completed.md`.
+
+Still to do, each a commit that keeps every screen:
+
+1. **`menu_select`** (`ui\menu.bm`, 131 lines): the checks of the start row, and the loop that
+   reads a key.
+2. **`calculate_battle`** (`ui\battle.bm`, 179 lines): the panel of strengths, the result, the
+   history line. Its `menu_text$(1)` to `(4)` are scratch strings that locals would replace.
+3. **`menu_city_select`** (`ui\city.bm`, nesting 6 deep): three loops that step to the side's next
+   city become one FUNCTION.
+4. **`load_events`** (`port\events_file.bm`, 123 lines): the checks after the file is read.
+5. **The fort command.** `ai_fortify` calls `draw_fort_built` (`ui\city.bm`), the one exception of
+   `tests\test_layers.py`. A command `city_fortify` in `commands\city.bm` would remove it.
+6. **The computer's enemy as a parameter.** `ai_evaluate_move`, `ai_railroad_city` and
+   `city_nearby_enemy_strength` read the enemy from `current_side`; the other `ai_*` take `side`.
+
+Left alone: `battle_strengths` (above), `menu_utility`, `report_armies` and `end_game`, which are
+long but read top to bottom, and the four pictures drawn line by line (`draw_map`, `draw_schooner`,
+`draw_ironclad`, `draw_surrender`).
 
 ## Questions for the user
 

@@ -168,7 +168,7 @@ numbers, because each step moves the lines; `report.txt` has the numbers of the 
 | `rules\setup.bm` | `vary_start_conditions` | 2 | The Rebels' army removed by Vary Start; no script's draw removes one. The loop never ran until 2026-11-13 (`FOR k = 21 TO 6`) |
 | `ai\navy.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
 | `ai\navy.bm` | `ai_fleet_orders` | 1 | The Union computer's first fleet, started at city 30 against a Rebel player. `ai_raise_forces` builds the first ship before it. It was the `THEN` part of a one-line `IF` until 2026-11-12 |
-| `ai\army.bm` | `ai_evaluate_move` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
+| `ai\army.bm` | `ai_attack_score` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
 | `rules\battle.bm` | `battle_losses` | 1 | The losses of a defender of more than 80,000 men; no script has one. The case came after `CASE IS > 300` until 2026-11-13 |
 | `ai\forces.bm` | `ai_fortify` | 1 | The Union computer stops fortifying when it has no fleet. Since 2026-11-13 a computer without a fleet builds one in the same turn (`ai_fleet_orders`), so no script's computer fortifies without one. A game can still reach it: the Union's fleet sunk in the player's turn, before the computer fortifies |
 | `ai\navy.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |

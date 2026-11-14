@@ -29,10 +29,10 @@ The main program (`CWSTRAT.BAS`, with its `GOSUB` routines) became `cws.bas` in 
 
 | File | SUBs |
 |------|------|
-| `army.bm` | `ai_army_orders`, `ai_army_order`, `ai_drill`, `ai_evaluate_move`, `city_nearby_enemy_strength`, `ai_combine`, `ai_razes_fort` (`ai_turn` until phase 8 moved it to `ui\turn.bm`) |
+| `army.bm` | `ai_army_orders`, `ai_army_order`, `ai_drill`, `ai_evaluate_move`, `ai_stay_weight`, `ai_move_strength`, `ai_city_targeted`, `ai_attack_score`, `ai_beyond_score` (new 2026-11-14: the parts of `ai_evaluate_move`), `city_nearby_enemy_strength`, `ai_combine`, `ai_razes_fort` (`ai_turn` until phase 8 moved it to `ui\turn.bm`) |
 | `forces.bm` | `ai_resupply`, `ai_fortify`, `ai_fortify_pick`, `ai_raise_forces`, `ai_count_armies`, `ai_recruit`, `ai_recruit_pick` |
 | `navy.bm` | `ai_fleet_orders`, `ai_pick_port`, `ai_navy_orders`, `ai_navy_build`, `ai_navy_attack`, `ai_navy_sail`, `ai_navy_raid`, `ai_navy_invade` (new in phase 9: the computer's half of the navy's commands), `ai_navy`, `ai_navy_adjust` |
-| `railroad.bm` | `ai_railroad_orders`, `ai_railroad` |
+| `railroad.bm` | `ai_railroad_orders`, `ai_railroad`, `ai_railroad_army`, `ai_railroad_city` (new 2026-11-14: the two halves of `ai_railroad`) |
 
 The four files were one, `ai.bm`, until 2026-11-14 (`tools\refactor\split_files.py`).
 

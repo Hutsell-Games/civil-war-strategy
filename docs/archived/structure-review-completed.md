@@ -134,6 +134,26 @@ In the working tree on 2026-11-13, not committed. Each part passed the unit test
    `flag_picture_restore` (`draw\icons.bm`) replace six places that worked it out. Two were in
    `commands\` (`army_recruit`, `railroad_arrive`), which no longer draw pixels themselves.
 
+## The third review: the size of files and procedures
+
+### Done, keeping every screen
+
+1. **Three files split by topic** (`tools\refactor\split_files.py`, commit `1f3e52a`). `ai\ai.bm`
+   became `ai\army.bm`, `ai\forces.bm`, `ai\navy.bm` and `ai\railroad.bm`. `ui\orders.bm` keeps
+   only `menu_commands`; its other menus went to `ui\army.bm`, `ui\navy.bm` and the new
+   `ui\city.bm` and `ui\railroad.bm`. The events file's reader left `port\files.bm` for
+   `port\events_file.bm`. All 388 procedures moved byte for byte.
+2. **`ai_evaluate_move` in parts** (`ai\army.bm`, 209 lines to 92). `ai_stay_weight`,
+   `ai_move_strength`, `ai_city_targeted`, `ai_attack_score` and `ai_beyond_score` are called
+   where their lines were, so the four `RND` draws keep their order. The unused `score = 1` in the
+   loop that summed the strength went. Found on the way: the bonus for the enemy's capital
+   compares an owner with a city (`TODO.md`, "The game").
+3. **`ai_railroad` in two** (`ai\railroad.bm`): `ai_railroad_army` picks the army and
+   `ai_railroad_city` the city.
+
+Six unit tests are new: `TestAiStayWeight`, `TestAiMoveStrength`, `TestAiCityTargeted`,
+`TestAiAttackScore`, `TestAiBeyondScore` and `TestAiRailroadArmyAndCity`.
+
 ## Questions for the user
 
 2. **The kept bugs:** rule on `TODO.md`'s "The game" rows in one batch now, or leave them until after
