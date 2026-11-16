@@ -25,7 +25,7 @@ rule 2:M text e
 rule 2:E text y
 rule 2:R key enter
 # Game 1. The title menu: Start NEW Game; the main menu: UTILITY, End Cond: Time, Cities, Capital and Force Ratio off.
-play until 2:V
+play until 2:C
 digest
 text s
 # The scenario menu: the Standard Map.
@@ -64,7 +64,7 @@ play until 4
 text Grant
 key enter
 # Game 2. Start NEW Game; UTILITY, Aggress three times, End Cond: Time, Cities, Income and Force Ratio off.
-play until 2:V
+play until 2:C
 digest
 text s
 # The scenario menu: the Standard Map.
@@ -109,7 +109,7 @@ play until 4
 text Grant
 key enter
 # Game 3. Start NEW Game; UTILITY, End Cond: Cities, Income, Capital and Force Ratio off.
-play until 2:V
+play until 2:C
 digest
 text s
 # The scenario menu: the Standard Map.
@@ -145,7 +145,7 @@ play until 4
 state
 text Grant
 key enter
-play until 2:V
+play until 2:C
 state
 text q
 repeat space

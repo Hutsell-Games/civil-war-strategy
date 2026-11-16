@@ -15,7 +15,7 @@ rule 2:R key enter
 rule 2:O text q
 
 # The title menu: Start NEW Game.
-play until 2:V
+play until 2:C
 digest
 text s
 
@@ -66,8 +66,8 @@ play until 1:G
 digest
 key space
 
-# The title menu: Quit to DOS, and a key for END's "Press any key to continue".
-play until 2:V
+# The title menu: Quit, and a key for END's "Press any key to continue".
+play until 2:C
 digest
 text q
 repeat space

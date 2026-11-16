@@ -1,3 +1,7 @@
+' The settings and the start of a game. They draw nothing. The Utility menu that changes the
+' settings is in ui/options.bm. game_new reads a new game's files (io/files.bm and
+' io/events_file.bm).
+
 ' The Union's extra income each month, from the Balance setting.
 SUB set_union_advantage
     union_income_bonus = 120 * opt_difficulty
@@ -189,7 +193,7 @@ SUB game_new
     END IF
     CALL game_reset
     CALL load_scenario
-    CALL load_events(SCNDIR + "events.dat")
+    CALL load_events(SCNDIR + "EVENTS.DAT")
     CALL game_apply_settings
     CALL set_union_advantage
     CALL load_cities

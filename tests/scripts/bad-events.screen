@@ -2,7 +2,7 @@ screen-state 1
 pages 8 display 0 write 0 read 0
 page 0 mode 0 text 80x25 bits 16 font 16 cursor 26,25 off color 7 background 0
 palette FF000000 FF0000AA FF00AA00 FF00AAAA FFAA0000 FFAA00AA FFAA5500 FFAAAAAA FF555555 FF5555FF FF55FF55 FF55FFFF FFFF5555 FFFF55FF FFFFFF55 FFFFFFFF 00000000*240
-t "scenarios/events.dat, line 8: unknown effect: rain                              "
+t "scenarios/EVENTS.DAT, line 8: unknown effect: rain                              "
 a 07*80
 t "                                                                                "
 a 07*80

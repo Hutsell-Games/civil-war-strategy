@@ -1,6 +1,6 @@
 ' ===========================================================================
 ' FOLDERS.BI - the folders that hold the game's data files, relative to the
-' folder the game runs in. The DOS game kept every file beside the program.
+' folder the game runs in.
 ' Included by cws.bi. The forward slash works on Windows too.
 ' ===========================================================================
 CONST GFXDIR = "graphics/" ' pictures (.VGA): the icon, the mountains, the faces and the forts

@@ -1,19 +1,13 @@
 # To do
 
-Open work on the QB64 port (branch `qb64rust`). Remove an item when it is done. The plan is
+Open work on the QB64 port. Remove an item when it is done. The plan is
 `docs\modernize-plan.md`.
 
 ## The tests
 
-- **The real `SHELL "copy ..."`.** Under a script, `script_shell` (`port\script.bm`) copies in BASIC, because a
-  `SHELL` opens a console window on the user's desktop. A test of the real one must run where a window does no
-  harm: in QB64Rust's suites VM, or by hand.
 - **A game that reaches March 1865 with the computer active.** The generated games end sooner, because a
   player who only ends turns is beaten in 1 to 20 turns. `union-time` and `two-player` reach the time limit
   with a passive computer or none.
-- **Linux.** The game opens lower-case names of upper-case files (`"cities.grd"`, `"cws.cfg"`),
-  and copies its history with `SHELL "copy ..."`, a Windows command. Then `play.py` would need its Linux
-  branches checked, as for World War 2.
 
 ## The game
 
@@ -23,7 +17,8 @@ game plays changes the recorded screens.
 Ruled on 2026-11-13 (user): the other 22 bugs of this list, and the `SELECT CASE` branches that were never
 reached (`docs\archived\sub-names.md`, "Found while reading"), were fixed in one batch. The pictures,
 `normal_random_number` and the train's pixels below are kept. Of four rows found afterward, three were
-settled on 2026-11-13 (user); the computer's fleet that "thinks of sailing" is kept. What each fix did
+settled on 2026-11-13 (user). The fourth, the computer's fleet that "thinks of sailing" and
+attacks all the same, was kept then and fixed on 2026-11-14 (user; `docs\rule-changes.md`, G24). What each fix did
 is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Three more".
 
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
@@ -32,15 +27,12 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
 - **`normal_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
   on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
-- **The computer's fleet "thinks of sailing" and attacks all the same.** `ai_navy_attack`
-  (`ai\navy.bm`) sets `action = NAVY_SAIL` off a city with an army, with a chance of 1 in 2, and then
-  bombards the city anyway when it is the enemy's. The change of order does not stop this attack.
 - **The computer counts a fort of 2 as no fort** when it weighs an attack (`ai_attack_score`, `ai\army.bm`
   lines 262 to 267). The original's `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3` is
   one `IF` line, so the second test runs only when the fort is 1. A fort of 0 gives 1, of 1 gives 2, and of
   2 gives 1 again; a fort is never 3 (`MAX_FORT` is 2). It most likely meant the fort plus 1.
 - **The Union's computer skips fortifying half the time when it has no fleet** (`ai_fortify`, `ai\forces.bm`
-  line 44): `... AND RND > .5 AND side_cash < 222 THEN EXIT SUB`. `side_cash` there is a local scalar,
+  line 43): `... AND RND > .5 AND side_cash < 222 THEN EXIT SUB`. `side_cash` there is a local scalar,
   declared so that `OPTION _EXPLICIT` accepts it, and it is always 0, as the original's undeclared `cash`
   was. So the cash test is always true. It most likely meant `side_cash(side) < 222`.
 - **The computer's bonus for a road toward the enemy's capital compares an owner with a city**
@@ -97,42 +89,31 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   `DEF SEG` and `BLOAD`. They could be PNG files loaded with `_LOADIMAGE`, as the three pictures in `docs\`
   would be.
 - **One known folder for saves and settings.** `cws1.sav` to `cws9.sav`, `cws.cfg`, `hiscore.cws`, `cws.his`
-  and `battsumm` are opened in the current folder (`port\files.bm`), so they land wherever the game was
+  and `battsumm` are opened in the current folder (`io\files.bm`), so they land wherever the game was
   started from. A single folder, for example beside the program, would keep them together.
 
 ## The code
 
-- **The loops over a city's roads stop at a 0 in three ways.** Some end at the first 0 (`EXIT FOR`,
-  as in `ai_army_order` and `city_fix_return_routes`), `ai_beyond_score` skips it (`_CONTINUE`), and
-  the menus of `ui\army.bm` test each road for more than 0. They agree only while a city has no 0
-  before its last road. The shipped `CITIES.GRD` files have none, and `city_fix_return_routes`
-  fills the first 0. A hand-made scenario with a gap plays differently in each loop. One way would
-  be for `load_cities` (`port\files.bm`) to close the gaps, so that every loop may end at the first 0.
-  Left from the structure review (`docs\archived\structure-review-completed.md`, "The small repeats").
-
 Left alone by phase 3, group 1, of `docs\archived\modernize-plan-completed.md` (the sides and limits). None of these changes
 how the game plays.
 
-- **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 142 and 147).
+- **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 228 and 232).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
   report needs laying out again.
-- **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 28 and 29). That is a random
+- **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 54 and 58). That is a random
   size, not the fleet limit, so it stays 10 rather than `MAX_FLEET_SHIPS`.
-- **`turn_collect_income` clears the armies' orders in its loop over the cities** (`rules\turn.bm`):
-  `FOR i = 1 TO MAX_CITIES` sets `army_order(i)` too. It works only because `MAX_CITIES` and
-  `MAX_ARMIES` are both 40. A war with other limits needs a loop of its own over `MAX_ARMIES`.
 
 Left alone by group 2 (the special values):
 
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** Its tests read `fleet_exists(side)`
   since 2026-11-13 (`docs\archived\structure-review-completed.md`, item 2); 7 assignments of 0 are left.
   `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
-- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 195). The 900
+- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 293). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
-- **`menu_select` treats a start above 42 as row 1**: `IF row > 21` (`menu_start_row`, `ui\menu.bm` line 184) runs
+- **`menu_select` treats a start above 42 as row 1**: `IF row > 21` (`menu_start_row`, `ui\menu.bm` line 209) runs
   after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
   `MENU_START`, so it stays.
-- **The Utility menu calls `menu_select(-1)`** (`menu_utility`, `ui\options.bm` line 31). No mode has that number, so it is a
+- **The Utility menu calls `menu_select(-1)`** (`menu_utility`, `ui\options.bm` line 65). No mode has that number, so it is a
   plain menu without the F3, F4 and F7 keys. `docs\archived\constants.md` has no row for it, so it keeps the -1
   (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
 - **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
@@ -145,12 +126,12 @@ Left alone by group 6 (the settings and victory rules):
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
-  (`port\files.bm` line 52) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 28), which
+  (`io\files.bm` line 57) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 20), which
   also maps a rule to a menu row (`i - 1`).
 
 Left alone by group 7 (the rule numbers):
 
-- **`total_income = union_income_bonus + 200`** (`load_cities`, `port\files.bm` line 99), where the cities are read. The 200
+- **`total_income = union_income_bonus + 200`** (`load_cities`, `io\files.bm` line 104), where the cities are read. The 200
   may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`year above 1862`, `[emancipation]` in
@@ -161,16 +142,9 @@ Left alone by group 8 (the colors):
 
 - **`COLOR 16 - side_color` shows the other side's color** (`draw_battle_defender` and `draw_battle_losses`, `ui\battle.bm`): 16 - 9
   is 7 and 16 - 7 is 9. It stays as written. `side_color_of` (`game\colors.bm`) gives the color.
-- **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 56, Chk Links;
-  `ui\turn.bm` line 134, "There are still defenders"; left alone by group 9). It goes with phase 7's
+- **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 102, Chk Links;
+  `ui\turn.bm` line 224, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
-- **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 56): 0 there means "no color set",
+- **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 98): 0 there means "no color set",
   not black, so the test keeps its 0.
-
-Found while renaming the locals (`docs\archived\local-names.md`, part 4):
-
-- **`ai_army_order`'s capital check tests the loop counter** (`ai\army.bm` lines 49 to 52):
-  `IF j = 0 THEN EXIT FOR`, after `neighbor = city_road(city, j)`. `j` runs from 1, so the test is never
-  true; it most likely meant `neighbor = 0`. A fix changes no play: past the last road the loop asks
-  `city_nearby_enemy_strength(0)`, and city 0 has no roads, so the answer is 0.

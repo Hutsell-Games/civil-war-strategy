@@ -5,7 +5,7 @@
 # Map back with it. Files, Quit, Yes. cws1.sav is checked after the run: its first line names the scenario.
 
 # The title menu: Start NEW Game; the scenario menu: the Alternate Map.
-play until 2:V
+play until 2:C
 digest
 text s
 play until 2:S
@@ -23,7 +23,7 @@ prompt
 text f
 prompt
 text n
-play until 2:V
+play until 2:C
 text s
 play until 2:S
 text s

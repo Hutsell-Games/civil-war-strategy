@@ -1,3 +1,8 @@
+' The menus. A menu's rows are in menu_text$() and menu_value() (cws.bi). The SUBs at the
+' top fill them. menu_select shows the menu and reads the player's choice; the SUBs after it
+' are its parts.
+
+' Sorts the first limit menu rows alphabetically while keeping each row paired with its value.
 SUB menu_bubble_sort (limit)
     DIM i AS INTEGER
     DIM swaps%
@@ -350,7 +355,7 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
                 IF current_side = SIDE_UNION THEN
                     face_pic = 6 - row
                 END IF
-                file$ = GFXDIR + "face" + LTRIM$(STR$(face_pic)) + ".vga"
+                file$ = GFXDIR + "FACE" + LTRIM$(STR$(face_pic)) + ".VGA"
                 IF _FILEEXISTS(file$) THEN
                     CALL load_picture(file$, pic_face())
                     PUT (550, 150), pic_face(), PSET

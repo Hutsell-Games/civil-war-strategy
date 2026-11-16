@@ -1,6 +1,7 @@
 ' The end of the game as the player sees it: the warnings, the victory screens and the Hall of
 ' Fame. The rules are in rules/victory.bm.
 
+' Shows both sides' high scores, asks for qualifying commanders' names and saves the updated Hall of Fame.
 SUB hall_of_fame
     DIM i AS INTEGER
     DIM side AS INTEGER
@@ -72,6 +73,7 @@ SUB hall_of_fame
     CALL wait_key("G")
 END SUB
 
+' Checks both sides for victory, offers to end the game when a rule is met and warns about approaching limits.
 SUB check_victory_conditions
     DIM union_troops AS INTEGER
     DIM rule AS INTEGER

@@ -28,7 +28,7 @@ rule 2:R key enter
 rule 2:O text q
 
 # The title menu: Start NEW Game.
-play until 2:V
+play until 2:C
 digest
 text s
 # The scenario menu: the Standard Map.
@@ -99,7 +99,7 @@ state
 text Grant
 key enter
 # Game Over, and the title menu again: Quit; END's "Press any key to continue".
-play until 2:V
+play until 2:C
 state
 text q
 repeat space

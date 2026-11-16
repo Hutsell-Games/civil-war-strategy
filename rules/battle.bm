@@ -19,28 +19,20 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     END IF
 
     attack_strength = .01 * army_size(attacker)
-    IF attack_strength > rule_strength_cap THEN
-        attack_strength = rule_strength_cap
-    END IF
+    attack_strength = strength_capped(attack_strength)
     attack_steps(1) = attack_strength
     IF army_size(attacker) / army_size(defender) > .2 THEN
         attack_strength = attack_strength + .3 * army_leader_rating(attacker) + .3 * army_experience(attacker)
-        IF attack_strength > rule_strength_cap THEN
-            attack_strength = rule_strength_cap
-        END IF
+        attack_strength = strength_capped(attack_strength)
     END IF
     IF army_experience(attacker) > 8 THEN
         attack_strength = attack_strength + 1
-        IF attack_strength > rule_strength_cap THEN
-            attack_strength = rule_strength_cap
-        END IF
+        attack_strength = strength_capped(attack_strength)
     END IF
     attack_steps(2) = attack_strength
     IF army_size(attacker) < SMALL_ARMY_SIZE THEN
         attack_strength = .5 * attack_strength
-        IF attack_strength > rule_strength_cap THEN
-            attack_strength = rule_strength_cap
-        END IF
+        attack_strength = strength_capped(attack_strength)
     END IF
     attack_steps(3) = attack_strength
     IF army_size(attacker) / army_size(defender) <= .5 THEN
@@ -51,9 +43,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     END IF
     IF army_size(attacker) / army_size(defender) > 3 THEN
         attack_strength = attack_strength + 2
-        IF attack_strength > rule_strength_cap THEN
-            attack_strength = rule_strength_cap
-        END IF
+        attack_strength = strength_capped(attack_strength)
     END IF
     IF army_size(attacker) / army_size(defender) > 10 THEN
         attack_strength = rule_strength_cap
@@ -72,9 +62,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     '                       Adjust attack advantage
     attack_strength = attack_strength + 2 * balance_help(army_side(attacker))
     attack_steps(6) = attack_strength
-    IF attack_strength > rule_strength_cap THEN
-        attack_strength = rule_strength_cap
-    END IF
+    attack_strength = strength_capped(attack_strength)
     attack_steps(7) = attack_strength
 
     defend_strength = .013 * army_size(defender) + 1
@@ -87,15 +75,11 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     defend_steps(1) = defend_strength
     IF army_size(defender) / army_size(attacker) > .2 THEN
         defend_strength = defend_strength + .3 * army_leader_rating(defender) + .3 * army_experience(defender)
-        IF defend_strength > rule_strength_cap THEN
-            defend_strength = rule_strength_cap
-        END IF
+        defend_strength = strength_capped(defend_strength)
     END IF
     IF army_experience(defender) > 8 THEN
         defend_strength = defend_strength + 1
-        IF defend_strength > rule_strength_cap THEN
-            defend_strength = rule_strength_cap
-        END IF
+        defend_strength = strength_capped(defend_strength)
     END IF
     defend_steps(2) = defend_strength
     IF army_size(defender) < SMALL_ARMY_SIZE THEN
@@ -117,9 +101,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     IF defend_strength < 1 THEN
         defend_strength = 1
     END IF
-    IF defend_strength > rule_strength_cap THEN
-        defend_strength = rule_strength_cap
-    END IF
+    defend_strength = strength_capped(defend_strength)
 
     defend_steps(4) = defend_strength
     IF army_supply(defender) < 1 THEN
@@ -136,15 +118,18 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     IF army_order(defender) = ORDER_NONE THEN
         defend_strength = defend_strength * (1 + city_fort(army_city(defender)))
     END IF
-    IF defend_strength > rule_strength_cap THEN
-        defend_strength = rule_strength_cap
-    END IF
+    defend_strength = strength_capped(defend_strength)
     defend_steps(7) = defend_strength
-    IF defend_strength > rule_strength_cap THEN
-        defend_strength = rule_strength_cap
-    END IF
     defend_steps(8) = defend_strength
 END SUB
+
+' strength, or the scenario's cap on a battle strength when strength is above it.
+FUNCTION strength_capped (strength)
+    strength_capped = strength
+    IF strength > rule_strength_cap THEN
+        strength_capped = rule_strength_cap
+    END IF
+END FUNCTION
 
 ' The fight: each army rolls against its strength until one hits and the other does not. It also
 ' takes a day of supply from each of the two armies. rounds is how many rolls it took.
@@ -265,6 +250,7 @@ SUB battle_apply_losses (attacker, defender, winner, attacker_losses, defender_l
     side_victory_points(side) = side_victory_points(side) + 1
 END SUB
 
+' Approximates a normal draw from twelve random values, centered half a standard deviation above mean.
 FUNCTION normal_random_number (mean, variance)
     DIM sum!
     DIM k AS INTEGER

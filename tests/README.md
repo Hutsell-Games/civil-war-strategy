@@ -30,11 +30,12 @@ python tests\make_save.py <description> <out>    # writes a saved game from a de
 python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and make_scripts.py, and the folder rules (test_layers.py)
 ```
 
-`--jobs N` (before the command) sets how many runs go at once (default 4). `CWS_SHOW_WINDOWS=1` shows the
-program's window. Otherwise it runs on a desktop of its own that is never shown, and your keys and mouse cannot
-reach it. Everything a run makes goes into `tests\out\`, which git ignores. A build is made again only when a
+`--jobs N` (before the command) sets how many runs go at once (default 4 on Windows, 1 on Linux).
+On Windows, `CWS_SHOW_WINDOWS=1` shows the program's window. Otherwise it runs on a desktop of its own
+that is never shown, and your keys and mouse cannot reach it. Everything a run makes goes into
+`tests\out\`, which git ignores. A build is made again only when a
 source file, the compiler or the screen hook changed. What a command prints also goes to
-`tests\out\last-<command>.txt`. All 39 scripts take about half a minute with four jobs.
+`tests\out\last-<command>.txt`. All 41 scripts take about half a minute with four jobs on Windows.
 
 Each run starts in a fresh copy of the game's data files in `tests\out\run\`, so the files in the repo are never
 changed. The copy takes the top-level files that are not sources, documents or DOS programs, and the folders
@@ -62,9 +63,29 @@ this machine: it keeps a copy with full screens in `tests\out\recorded\`.
 A difference is either a mistake in the change or a change of behavior that was meant. If it was meant, record
 the script again (`record <name>`) and say so in the commit message.
 
+### Running on Linux
+
+Use Linux builds of the compilers, with `QB64RUST`, `QB64PE` and `CWS_QB64RUST_REPO` pointing to
+their locations when they differ from the defaults. Keep the shipped data filenames' case.
+For a headless run, use a virtual X display and run one game at a time:
+
+```
+xvfb-run -a python3 tests/play.py check
+```
+
+Windows isolates each game on its own desktop. Linux uses the current display, so parallel games
+can interfere with keyboard input on a shared virtual display.
+
+Each Linux game uses `tests/asound-null.conf` and a private `XDG_RUNTIME_DIR`, with
+`PULSE_SERVER` and `WAYLAND_DISPLAY` removed from its environment. This keeps WSLg's
+audio relay out of the run. With that relay, queued audio sometimes stopped draining:
+`SOUND` waited on the backlog and the keyboard driver timed out waiting for the next menu.
+The null device consumes the samples silently; the game still executes its `PLAY` and
+`SOUND` statements. This is the same setup as QB64Rust's Linux test runner.
+
 ## How the game takes part
 
-The game has hooks for the scripts, all in `port\script.bm`. They do nothing unless the program is started with the
+The game has hooks for the scripts, all in `io\script.bm`. They do nothing unless the program is started with the
 environment variable `CWS_SEED` set, as `play.py` does:
 
 1. **A fixed seed.** `RANDOMIZE` takes `CWS_SEED` instead of `TIMER`, so every run of a script is the same game.
@@ -80,9 +101,6 @@ environment variable `CWS_SEED` set, as `play.py` does:
    the `SOUND` and `PLAY` statements, which take their time, and nothing is heard. `script_mute` does this
    at the program's start, before the title music.
 5. **A fixed date.** The history file starts with 01-01-2000 instead of today's date.
-6. **No `SHELL`.** The game keeps the history of the game before with `SHELL "copy cws.his oldhist.ory"`. Under
-   a script `scriptshell` copies the file in BASIC. A `SHELL` starts a `cmd.exe`, and its console window shows
-   on your desktop even though the program runs on a hidden one.
 
 The places a script can name (`play until <place>[:<letter>]`, `rule <place>[:<letter>] <keys>`):
 
@@ -98,8 +116,8 @@ any key for ... events"; `K` the update's end in a two-player game; `I` the iron
 good for the Union; `S` an event good for the South; `H` "press a key" before the Hall of Fame; `G` "Game
 Over"; `F` a report's "press a key"; `L` a `TICK` of 99 seconds. `rule 1 key space` answers them all.
 
-Menu letters: `2:V` the title menu (VGA CIVILWAR STRATEGY) and Victory Conditions; `2:M` the main menu; `2:E` End Turn and End Game;
-`2:O` the Files menu's Options, and the Options at a game's end; `2:C` Commands, Capital and Cancel; `2:U`
+Menu letters: `2:V` Victory Conditions; `2:M` the main menu; `2:E` End Turn and End Game;
+`2:O` the Files menu's Options, and the Options at a game's end; `2:C` the title menu (Civil War Strategy), Commands, Capital and Cancel; `2:U`
 Utility; `2:R` Retreat, Recruit, Relieve, Random Events and Raze ?; `2:S` Ships, Supply, SOUNDS and Save Game;
 `2:L` Load; `2:I` Information; `2:F` From and Fortify; `2:T` To and Type; `2:Q` Quit.
 
@@ -163,7 +181,7 @@ settings (`#! cfg`), and the leaders' names of the scenario, which the game read
 ### Forced dice
 
 `#! dice` gives the random numbers of the special events (`special_events`, `rules\events.bm`), so that a
-script can make an event happen. The events draw their numbers through `script_rnd!` (`port\script.bm`).
+script can make an event happen. The events draw their numbers through `script_rnd!` (`io\script.bm`).
 Without `#! dice` it returns `RND`, so every other script plays as before.
 
 The line holds one group for each month, parted by `;`. A group holds the numbers the month's draws take, in
@@ -173,7 +191,7 @@ favors: with random events set to favor the Rebels, below .7 for the South and a
 follow the code of `special_events`, branch by branch. A month whose events are skipped (the ironclads'
 month) still takes its group.
 
-A script ends the program the way a player does: Quit to DOS at the title menu or Quit and Yes in the Files
+A script ends the program the way a player does: Quit at the title menu or Quit and Yes in the Files
 menu, then `repeat space` for END's "Press any key to continue". A run that ends any other way (a `prompt` that
 times out, no rule for a wait, a crash) fails, and the last line of its state file says why. `play.py` sets
 `QB64PE_NOPROMPT`, so a runtime error ends the program at once instead of waiting for an answer to "Continue?"
@@ -183,11 +201,11 @@ on a desktop nobody sees.
 
 | Script | What it plays |
 |---|---|
-| `title` | The title menu, then Quit to DOS |
+| `title` | The title menu, then Quit |
 | `union-manassas` | Two turns as the Union: a recruit, two moves, a ship, a railroad move, the reports, Fortify, the Utility menu, a save, and two battles. A state at each new kind of screen |
 | `commands` | Each entry of COMMANDS, each report of Inform, ships that land an army, a railroad move; then to the game's end |
 | `options` | Every entry of the Utility menu, then a game with what they set, with sound and history on |
-| `files` | The Files menu: two games saved, Resume Saved Game at the title menu, Load, New Game, and the history file with Recap. Checks `cws1.sav`, `cws2.sav`, `cws.his`, `oldhist.ory` and `CWS.CFG` |
+| `files` | The Files menu: Resume hidden with no saves and shown after saving, Enter starts a new game by default, two games saved, Load, New Game, and the history file with Recap. Checks `cws1.sav`, `cws2.sav`, `cws.his`, `oldhist.ory` and `CWS.CFG` |
 | `scenario-save` | A game on the Alternate Map saved; a new game on the Standard Map; Load brings the Alternate Map back. Checks `cws1.sav`, whose first line names the scenario |
 | `navy` | The Union navy against New Orleans: three attacks, then an invasion |
 | `rebel` | The Rebels attack Washington three times; No-Override and Press Onward at the game's end |
@@ -223,7 +241,7 @@ it recruits, moves, builds ships, fights and wins.
 | Script | How the game goes |
 |---|---|
 | `pass-<side>-<seed>` | The game ends at the first victory condition the computer reaches, after 1 to 14 turns. Eight games: the seeds 1861 to 1864 as each side, each seed with settings of its own (the map's detail, the play balance, the computer's aggression, random events, realism). `pass-<side>-altmap`: two more on the alternate map |
-| `war-<side>-<seed>` | The player first turns off every victory condition but the time limit (Utility, End Cond). The game lasts 9 to 20 turns, until the player's side has no army left. `war-union-1866`, `war-rebel-1867`, and `war-union-altmap` and `war-rebel-altmap` on the alternate map |
+| `war-<side>-<seed>` | The player first turns off every victory condition but the time limit (Utility, End Cond). The game lasts 10 to 20 turns, until the player's side has no army left. `war-union-1866`, `war-rebel-1867`, and `war-union-altmap` and `war-rebel-altmap` on the alternate map |
 
 Each takes a digest at every main menu, names the commander "Tester" when the Hall of Fame asks, and quits.
 Each runs with history on and checks the history file `cws.his` and `HISCORE.CWS` after the run. The history
@@ -267,6 +285,3 @@ Not covered:
   reasons in `docs\modernize-plan.md`, "Lines that no test runs".
 - **What the tunes sound like.** The sound scripts run the `PLAY` and `SOUND` statements; nothing checks the
   notes.
-- **The real `SHELL "copy ..."`**, which `scriptshell` replaces under a script.
-- **Linux.** The game opens lower-case names of upper-case files, and copies its history with a Windows
-  command.

@@ -1,6 +1,6 @@
-' The Files menu and the menus of saved games. The file work is in port/files.bm.
+' The Files menu and the menus of saved games. The file work is in io/files.bm.
 
-' The Files menu: Load, Save, New Game and Quit to DOS. action tells the main module what
+' The Files menu: Load, Save, New Game and Quit. action tells the main module what
 ' follows: the main menu (FILES_BACK), a new game or the program's end. Load with no saved
 ' game, the "-" row, shows the menu again.
 SUB menu_files (action)
@@ -20,7 +20,7 @@ SUB menu_files (action)
         END IF
         menu_text$(2) = "Save"
         menu_text$(3) = "New Game"
-        menu_text$(4) = "Quit to DOS"
+        menu_text$(4) = "Quit"
         menu_item_count = 4
         menu_col = PANEL_COL
         menu_row = 15
@@ -128,7 +128,7 @@ SUB menu_save_game
     CALL draw_map
 END SUB
 
-' Quit to DOS: Yes or No. action becomes FILES_QUIT on Yes.
+' Quit: Yes or No. action becomes FILES_QUIT on Yes.
 SUB menu_quit (action)
     menu_choice = MENU_START + 2
     CALL menu_set_two("Quit", "Yes", "No")

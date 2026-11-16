@@ -30,9 +30,11 @@ Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews 
   differ and list them in the commit message. Remaining known bugs are in `TODO.md`.
 - **One reviewable step per commit.** Run the checks and hand over a commit message; the user
   stages and commits. Keep rename and move scripts and their tables in `tools\refactor\`.
-- **Keep the rule-change record current.** Record every rule or observable behavior change
+- **Keep the rule-change record current.** Record gameplay-rule and AI changes
   from the canonical game in [rule-changes.md](rule-changes.md), including bug fixes and
-  resolved regressions, in the same change as the code. Keep its IDs and history permanent.
+  resolved gameplay regressions, in the same change as the code. Record interface and port
+  details in [devnotes.md](devnotes.md), and player-facing summaries in [CHANGELOG.md](../CHANGELOG.md).
+  Preserve existing IDs when moving entries between documents.
 - **Names and declarations.** Shared variables and parameters use snake_case, with the subject
   first (`army_size`, `city_owner`). Constants use uppercase group prefixes (`SIDE_UNION`).
   `OPTION _EXPLICIT` stays on. Rename locals when their procedure is reworked; loop counters
@@ -41,7 +43,7 @@ Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews 
   read no key. Commands carry out orders for the player or computer and may show results,
   but open no menu and read no key. Menus and other screens live in `ui\`.
   `tests\test_layers.py` enforces these boundaries and records the remaining exception.
-  [file-layout.md](file-layout.md) lists the current files and procedures.
+  [file-layout.md](file-layout.md) gives each folder's rule and each file's topic.
 
 The original numbered decisions are preserved in the archive under "Original plan: baseline,
 decisions and phases".
@@ -167,7 +169,7 @@ constants or procedures. No rule was moved or changed. The archived survey's "no
 entry is the historical starting point; this inventory supersedes it.
 
 Reviewed `rules\`, `ai\`, their callers in `commands\` and `ui\`, setup and loading in
-`port\files.bm`, and `scenarios\EVENTS.DAT`. The tables include explicit side tests, arithmetic
+`io\files.bm`, and `scenarios\EVENTS.DAT`. The tables include explicit side tests, arithmetic
 using a side number, fixed city references, and ordering that gives one side precedence.
 Locations name the procedure so they survive changes to line numbers. There are 26 named
 code rules below, followed by the 17 side-specific event entries already in data.
@@ -181,7 +183,7 @@ code rules below, followed by the 17 side-specific event entries already in data
 | Rebel detach privilege | Only the Rebels may detach part of an army. | `rules/army.bm`, `side_can_detach`; [ui/army.bm](../ui/army.bm), `menu_army_detach` |
 | Union realistic naval invasion | With Realism on, only the Union may land an army from a fleet. With it off, either side may. Both still need at least two ships off a neutral city. | [rules/navy.bm](../rules/navy.bm), `navy_can_invade` |
 | Railroad city baselines | With Realism on, capacity changes by 5 hundred men per city above or below 11 for the Union, 23 for the Rebels. Both use the same limits: half to twice their configured capacity. | [rules/railroad.bm](../rules/railroad.bm), `railroad_capacity` |
-| Union computer income bonus | `union_income_bonus` is `120 * opt_difficulty` (50 instead of 120 with two players), reduced to 70% with Realism. Monthly collection actually adds it only in a one-player game with a Rebel player. It also enters the initial `total_income = union_income_bonus + 200`. | [rules/setup.bm](../rules/setup.bm), `set_union_advantage`; [rules/turn.bm](../rules/turn.bm), `turn_collect_income`; [port/files.bm](../port/files.bm), `load_cities` |
+| Union computer income bonus | `union_income_bonus` is `120 * opt_difficulty` (50 instead of 120 with two players), reduced to 70% with Realism. Monthly collection actually adds it only in a one-player game with a Rebel player. It also enters the initial `total_income = union_income_bonus + 200`. | [rules/setup.bm](../rules/setup.bm), `set_union_advantage`; [rules/turn.bm](../rules/turn.bm), `turn_collect_income`; [io/files.bm](../io/files.bm), `load_cities` |
 | Side-directed balance help | Above Even favors the Union computer; below Even favors the Rebel computer. `balance_help` returns the distance from Even only for that favored computer side. Starting cash uses `100 * (DIFFICULTY_EVEN + help)` when help is positive; recruitment adds `5 * help` hundred men; battle strength adds `2 * help`. | `rules/setup.bm`, `balance_help`, `game_apply_settings`; `rules/army.bm`, `army_recruit_bonus`; [rules/battle.bm](../rules/battle.bm), `battle_strengths` |
 | Side-directed event weight | Event weight is `6 - opt_difficulty` for a Union player, `opt_difficulty` for a Rebel player. It controls event chance and effects multiplied by weight. | [rules/events.bm](../rules/events.bm), `event_roll`, `event_chance!`, `event_apply` |
 | Event beneficiary selection | A roll at or below `.1 * opt_event_balance` favors the Rebels; above it favors the Union. The option maps Favor Union/Neutral/Favor Rebels to 3/5/7; changing side or applying settings defaults to favoring the computer (7 for a Union player, 3 for a Rebel player). `event_side` names the disadvantaged side. | `rules/events.bm`, `event_roll`; `rules/setup.bm`, `option_set_event_balance`, `option_events_favor_computer`, `game_apply_settings` |

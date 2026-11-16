@@ -33,12 +33,12 @@ SUB load_events (file$)
     DO WHILE NOT EOF(file_num) AND why$ = ""
         LINE INPUT #file_num, text$
         line_num = line_num + 1
-        text$ = LTRIM$(RTRIM$(text$))
+        text$ = _TRIM$(text$)
         cut = INSTR(text$, "=")
         IF text$ = "" OR LEFT$(text$, 1) = ";" THEN
             ' A blank line or a comment.
         ELSEIF LEFT$(text$, 1) = "[" THEN
-            key$ = LCASE$(LTRIM$(RTRIM$(MID$(text$, 2, LEN(text$) - 2))))
+            key$ = LCASE$(_TRIM$(MID$(text$, 2, LEN(text$) - 2)))
             in_general = 0
             row = 0
             seen$ = ""
@@ -281,7 +281,7 @@ SUB event_read_conditions (list$, why$)
             item$ = LEFT$(rest$, cut - 1)
             rest$ = MID$(rest$, cut + 1)
         END IF
-        item$ = LTRIM$(RTRIM$(item$))
+        item$ = _TRIM$(item$)
         first_space = INSTR(item$, " ")
         last_space = text_last_space(item$)
         IF condition_count = MAX_EVENT_CONDITIONS THEN
@@ -312,7 +312,7 @@ SUB event_read_conditions (list$, why$)
                 CASE ELSE
                     why$ = "cannot read the condition: " + item$
             END SELECT
-            SELECT CASE LTRIM$(RTRIM$(MID$(item$, first_space + 1, last_space - first_space - 1)))
+            SELECT CASE _TRIM$(MID$(item$, first_space + 1, last_space - first_space - 1))
                 CASE "is"
                     condition_relation(condition_count) = RELATION_IS
                 CASE "above"
@@ -339,7 +339,7 @@ SUB event_read_effect (row, value$, why$)
     DIM rest$
     DIM word$
     DIM need$
-    rest$ = LCASE$(LTRIM$(RTRIM$(value$)))
+    rest$ = LCASE$(_TRIM$(value$))
     DO
         last_space = text_last_space(rest$)
         word$ = MID$(rest$, last_space + 1)
@@ -419,7 +419,7 @@ SUB event_read_chance (value$, why$)
     rest$ = MID$(rest$, cut + 1)
     DO WHILE factors$ <> "" AND why$ = ""
         cut = INSTR(factors$, " x ")
-        item$ = LTRIM$(RTRIM$(LEFT$(factors$, cut - 1)))
+        item$ = _TRIM$(LEFT$(factors$, cut - 1))
         factors$ = MID$(factors$, cut + 3)
         IF chance_count = MAX_CHANCE_FACTORS THEN
             why$ = "too many factors in the chance"
@@ -431,8 +431,8 @@ SUB event_read_chance (value$, why$)
         number$ = "0"
         IF LEFT$(item$, 1) = "(" AND RIGHT$(item$, 1) = ")" AND INSTR(item$, "-") > 0 THEN
             inner$ = MID$(item$, 2, LEN(item$) - 2)
-            name$ = LTRIM$(RTRIM$(LEFT$(inner$, INSTR(inner$, "-") - 1)))
-            number$ = LTRIM$(RTRIM$(MID$(inner$, INSTR(inner$, "-") + 1)))
+            name$ = _TRIM$(LEFT$(inner$, INSTR(inner$, "-") - 1))
+            number$ = _TRIM$(MID$(inner$, INSTR(inner$, "-") + 1))
             IF name$ <> "year" AND name$ <> "difficulty" THEN
                 name$ = "?"
             END IF
@@ -454,7 +454,7 @@ SUB event_read_chance (value$, why$)
     LOOP
     DO WHILE rest$ <> "" AND why$ = ""
         cut = INSTR(rest$, ",")
-        item$ = LTRIM$(RTRIM$(LEFT$(rest$, cut - 1)))
+        item$ = _TRIM$(LEFT$(rest$, cut - 1))
         rest$ = MID$(rest$, cut + 1)
         IF LEFT$(item$, 5) = "plus " AND text_is_number(LTRIM$(MID$(item$, 6))) <> 0 THEN
             chance_plus# = VAL(MID$(item$, 6))

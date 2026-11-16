@@ -1,5 +1,5 @@
-# The title menu, then Quit to DOS.
-play until 2:V
+# The title menu, then Quit.
+play until 2:C
 state
 text q
 repeat space

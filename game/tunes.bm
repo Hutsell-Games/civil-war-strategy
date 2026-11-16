@@ -1,3 +1,5 @@
+' The war's tunes: Shenandoah and the title's tune.
+
 SUB play_shenandoah
     '                       Shenandoah
     IF opt_sound = SOUND_MUSIC THEN

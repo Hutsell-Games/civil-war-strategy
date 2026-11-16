@@ -13,7 +13,7 @@ rule 2:E text y
 rule 2:R key enter
 
 # The title menu: Resume Saved Game; the Load menu: the one save.
-play until 2:V
+play until 2:C
 text r
 play until 2:L
 key enter
@@ -113,7 +113,7 @@ text r
 prompt
 digest
 
-# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+# Files, Quit, Yes, and a key for END's "Press any key to continue".
 text f
 prompt
 text q

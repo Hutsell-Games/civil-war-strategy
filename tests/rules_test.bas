@@ -146,6 +146,23 @@ SUB TestCityFixReturnRoutesListsEach
     AssertEqualInt 4, to_city(2), "has no road to city 4"
 END SUB
 
+' A 0 between roads, as a hand-made CITIES.GRD may have, is closed up; the order stays.
+SUB TestCityCloseRoadGapsKeepsTheOrder
+    city_road(7, 1) = 0: city_road(7, 2) = 12: city_road(7, 3) = 0
+    city_road(7, 4) = 3: city_road(7, 5) = 0: city_road(7, 6) = 9
+    CALL city_close_road_gaps(7)
+    AssertEqualInt 12, city_road(7, 1), "first road"
+    AssertEqualInt 3, city_road(7, 2), "second road"
+    AssertEqualInt 9, city_road(7, 3), "third road"
+    AssertEqualInt 0, city_road(7, 4), "then 0"
+    AssertEqualInt 0, city_road(7, 6), "to the end"
+    city_road(8, 1) = 4: city_road(8, 2) = 5
+    CALL city_close_road_gaps(8)
+    AssertEqualInt 4, city_road(8, 1), "a list without a gap stays"
+    AssertEqualInt 5, city_road(8, 2), "as it was"
+    AssertEqualInt 0, city_road(8, 3), "and ends at its first 0"
+END SUB
+
 ' ------------------------------------------------------------------- cutoff
 ' a counts the cities linked to target that who holds; 0 means cut off.
 
@@ -297,6 +314,31 @@ SUB TestBattleOutnumberedDefender
     army_size(1) = 1800
     CALL battle_strengths(1, 21, attack_steps(), defend_steps())
     AssertEqualInt 6, defend_steps(4), "538 against 1800, under a half: 6.4"
+END SUB
+
+' With a cap of 2, each step that may pass the cap is brought back to it. The defense's base
+' has no cap of its own.
+SUB TestBattleStrengthsStopAtTheCap
+    DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
+    rule_strength_cap = 2: current_side = 1: opt_difficulty = 3
+    army_size(1) = 180: army_leader_rating(1) = 9: army_experience(1) = 10: army_supply(1) = 5
+    army_size(21) = 100: army_supply(21) = 5
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 2, attack_steps(1), "attack base: 1.8 rounds to 2"
+    AssertEqualInt 2, attack_steps(2), "leader and experience: 7.7 and 1 more, back to the cap"
+    AssertEqualInt 2, attack_steps(7), "the attack"
+    army_size(1) = 100: army_leader_rating(1) = 0: army_experience(1) = 0
+    army_size(21) = 180: army_leader_rating(21) = 9: army_experience(21) = 10
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 3, defend_steps(1), "defense base: .013 * 180 + 1, not capped"
+    AssertEqualInt 2, defend_steps(2), "leader and experience: 8.7 and 1 more, back to the cap"
+    AssertEqualInt 2, defend_steps(4), "outnumbering by 1.8: 2 more, back to the cap"
+    AssertEqualInt 2, defend_steps(8), "the defense"
+    current_side = 2: opt_difficulty = 5
+    army_size(1) = 180: army_size(21) = 100: army_leader_rating(21) = 0: army_experience(21) = 0
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 6, attack_steps(6), "the Union computer's balance help: 2 + 2 * 2"
+    AssertEqualInt 2, attack_steps(7), "the attack, back to the cap"
 END SUB
 
 SUB TestBattleFightTakesSupplyFromTheArmies
@@ -1147,7 +1189,7 @@ END SUB
 ' A test's program moves to its own folder when it starts; _STARTDIR$ is this file's folder.
 SUB events_for_test
     side_name$(1) = "Union": side_name$(2) = "Rebel"
-    CALL load_events(_STARTDIR$ + "/../scenarios/events.dat")
+    CALL load_events(_STARTDIR$ + "/../scenarios/EVENTS.DAT")
     opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863
 END SUB
 
@@ -1970,10 +2012,10 @@ SUB TestVaryStartMovesRebelCapital
     CHDIR TestTempDir$
     MKDIR "scenarios": MKDIR "scenarios/test"
     scenario_folder$(0) = "test"
-    f = FREEFILE: OPEN "scenarios/test/cwslead.dat" FOR OUTPUT AS #f
+    f = FREEFILE: OPEN "scenarios/test/CWSLEAD.DAT" FOR OUTPUT AS #f
     FOR i = 1 TO MAX_LEADERS: WRITE #f, "Leader", 5: NEXT i
     CLOSE #f
-    f = FREEFILE: OPEN "scenarios/test/cws.ini" FOR OUTPUT AS #f
+    f = FREEFILE: OPEN "scenarios/test/CWS.INI" FOR OUTPUT AS #f
     WRITE #f, "NEUTRAL", "Union", "Rebel"
     FOR i = 1 TO MONTHS_PER_YEAR: WRITE #f, "Month": NEXT i
     PRINT #f, "3,1861,3,1865,80,80,1,3"
@@ -1983,7 +2025,7 @@ SUB TestVaryStartMovesRebelCapital
     PRINT #f, "1,2"
     PRINT #f, "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
     CLOSE #f
-    f = FREEFILE: OPEN "cws.cfg" FOR OUTPUT AS #f
+    f = FREEFILE: OPEN "CWS.CFG" FOR OUTPUT AS #f
     PRINT #f, "1,3,0,3,1,1,5,100,100,0,0,0,0,0,0,0,3"
     CLOSE #f
     FOR s = 1 TO 100
@@ -2274,16 +2316,24 @@ SUB TestNavyCanInvade
     AssertEqualInt -1, navy_can_invade(SIDE_REBEL), "the Rebels without it"
 END SUB
 
-' random_discard uses up one random number.
-SUB TestRandomDiscard
-    RANDOMIZE USING 7
-    a! = RND: b! = RND
-    RANDOMIZE USING 7
-    CALL random_discard
-    AssertTrue RND = b!, "the next number is the second"
+' Off an enemy city with an army, on a roll above .5, the computer's fleet sails on and does
+' not bombard the army. The seed is the first whose first number is above .5.
+SUB TestAiNavyAttackSailsFromAnArmy
+    fleet_city(2) = 5: fleet_size(2) = 2: fleet_ships$(2) = STRING$(2, SHIP_WOODEN$)
+    city_owner(5) = 1: city_army(5) = 3: army_city(3) = 5: army_size(3) = 50
+    FOR seed = 1 TO 100
+        RANDOMIZE USING seed
+        IF RND > .5 THEN EXIT FOR
+    NEXT seed
+    RANDOMIZE USING seed
+    action = NAVY_ATTACK: again = 0
+    CALL ai_navy_attack(2, action, again)
+    AssertEqualInt NAVY_SAIL, action, "the order is Sail"
+    AssertEqualInt 1, again, "the fleet goes on to sail"
+    AssertEqualInt 50, army_size(3), "the army is not bombarded"
 END SUB
 
-' ------------------------------------------------- saved games (port/files.bm)
+' ------------------------------------------------- saved games (io/files.bm)
 
 SUB TestTurnResetCommands
     turn_recruit_state = -1: turn_moves_done = 1: turn_navy_done = 1
@@ -2615,17 +2665,23 @@ SUB TestScriptdateIsFixedUnderAScript
     AssertEqualStr "01-01-2000", script_date$, "scripted"
 END SUB
 
-' Under a script, scriptshell copies in BASIC instead of SHELL, whose
-' cmd.exe would show a console window. The test sets scripted first, so it
-' never runs a SHELL.
-SUB TestScriptshellCopiesAFile
-    scripted = 1
-    d$ = TestTempDir$ + "/"
-    f = FREEFILE: OPEN d$ + "cws.his" FOR OUTPUT AS #f: PRINT #f, "history": CLOSE #f
-    f = FREEFILE: OPEN d$ + "oldhist.ory" FOR OUTPUT AS #f: PRINT #f, "an older and longer one": CLOSE #f
-    CALL script_shell("copy " + d$ + "cws.his " + d$ + "oldhist.ory")
-    f = FREEFILE: OPEN d$ + "oldhist.ory" FOR INPUT AS #f: LINE INPUT #f, a$: CLOSE #f
-    AssertEqualStr "history", a$, "the copy replaces the old file"
+' history_start keeps the last game's history as oldhist.ory, replacing an older one, and
+' starts cws.his again.
+SUB TestHistoryStartKeepsTheLastHistory
+    CHDIR TestTempDir$
+    f = FREEFILE: OPEN "cws.his" FOR OUTPUT AS #f: PRINT #f, "history": CLOSE #f
+    f = FREEFILE: OPEN "oldhist.ory" FOR OUTPUT AS #f: PRINT #f, "an older and longer one": CLOSE #f
+    CALL history_start
+    f = FREEFILE: OPEN "oldhist.ory" FOR INPUT AS #f: LINE INPUT #f, a$: lines = 1
+    DO WHILE NOT EOF(f): LINE INPUT #f, b$: lines = lines + 1: LOOP
+    CLOSE #f
+    AssertEqualStr "history", a$, "the last history"
+    AssertEqualInt 1, lines, "nothing left of the older one"
+    f = FREEFILE: OPEN "cws.his" FOR INPUT AS #f: LINE INPUT #f, a$: CLOSE #f
+    AssertTrue INSTR(a$, "HISTORY OF GAME BEGUN") > 0, "a new history"
+    KILL "oldhist.ory"
+    CALL history_start
+    AssertTrue _FILEEXISTS("oldhist.ory"), "with no older one to replace"
 END SUB
 
 '$INCLUDE: '../rules/army.bm'
@@ -2669,6 +2725,6 @@ END SUB
 '$INCLUDE: '../game/victory_screens.bm'
 '$INCLUDE: '../game/tunes.bm'
 '$INCLUDE: '../game/colors.bm'
-'$INCLUDE: '../port/files.bm'
-'$INCLUDE: '../port/events_file.bm'
-'$INCLUDE: '../port/script.bm'
+'$INCLUDE: '../io/files.bm'
+'$INCLUDE: '../io/events_file.bm'
+'$INCLUDE: '../io/script.bm'

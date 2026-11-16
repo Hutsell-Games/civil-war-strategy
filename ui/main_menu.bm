@@ -125,8 +125,8 @@ END SUB
 ' in the main module. The title tune plays before the first game only (replay is 0).
 SUB show_title (replay)
     DIM k AS INTEGER
-    IF _FILEEXISTS(GFXDIR + "mtn.vga") THEN
-        CALL load_picture(GFXDIR + "mtn.vga", pic_mountain())
+    IF _FILEEXISTS(GFXDIR + "MTN.VGA") THEN
+        CALL load_picture(GFXDIR + "MTN.VGA", pic_mountain())
     ELSE
         COLOR COLOR_WHITE
         BEEP
@@ -143,8 +143,9 @@ SUB show_title (replay)
     END IF
 END SUB
 
-' The title menu: Resume Saved Game, Start NEW Game or Quit to DOS. The choice is left in
-' menu_choice. In a two-player game the first player's turn screen comes before it.
+' The title menu: Resume Saved Game, Start NEW Game or Quit. The choice is left in
+' menu_choice as a TITLE_* action. Resume is omitted when no save slot exists.
+' In a two-player game the first player's turn screen comes before it.
 SUB menu_title
     CALL clear_bottom_line
     wait_seconds .3
@@ -153,16 +154,21 @@ SUB menu_title
     IF opt_players = PLAYERS_TWO THEN
         CALL draw_player_turn
     END IF
-    menu_text$(0) = "VGA CIVILWAR STRATEGY"
-    menu_text$(1) = "Resume Saved Game"
-    menu_text$(2) = "Start NEW Game"
-    menu_text$(3) = "Quit to DOS"
+    menu_text$(0) = "Civil War Strategy"
+    menu_item_count = 0
+    IF any_saved_game THEN
+        CALL menu_add_row("Resume Saved Game", TITLE_RESUME)
+    END IF
+    CALL menu_add_row("Start NEW Game", TITLE_NEW_GAME)
+    CALL menu_add_row("Quit", TITLE_QUIT)
     menu_col = 33
     menu_row = 20
     menu_color = COLOR_MAGENTA
-    menu_item_count = 3
-    menu_choice = MENU_START + TITLE_NEW_GAME
+    menu_choice = MENU_START + menu_item_count - 1
     CALL menu_select(MENU_PLAIN)
+    IF menu_choice > 0 THEN
+        menu_choice = menu_value(menu_choice)
+    END IF
 END SUB
 
 ' The scenario menu, beside the title menu after Start NEW Game: the titles of SCENARIOS.LST,

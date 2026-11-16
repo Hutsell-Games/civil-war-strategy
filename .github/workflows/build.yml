@@ -1,7 +1,7 @@
-# Builds the game (cws.bas) with QB64Rust on Windows, then runs its tests (tests/README.md).
-# The result is an artifact named civil-war-strategy: cws.exe with the data files it reads,
-# ready to unzip and play. It is uploaded before the tests run, so a failing test still leaves
-# the build to look at.
+# Builds the game (cws.bas) with QB64Rust on Windows, then runs its tests (tests/README.md):
+# the Python and unit tests on Windows, the whole-game scripts on Linux. The result is an
+# artifact named civil-war-strategy: cws.exe with the data files it reads, ready to unzip and
+# play. It is uploaded before the tests run, so a failing test still leaves the build to look at.
 name: Build
 
 # When something reaches main (a merge or a push to it), or by hand with "Run workflow".
@@ -69,10 +69,10 @@ jobs:
       # and the developer notes are left out.
       - name: Put the playable folder together
         run: |
-          Copy-Item game\CWS.CFG, game\HISCORE.CWS, game\README.md, game\LICENSE -Destination dist
+          Copy-Item game\CWS.CFG, game\HISCORE.CWS, game\README.md, game\CHANGELOG.md, game\LICENSE -Destination dist
           Copy-Item game\graphics, game\scenarios -Destination dist -Recurse
           New-Item -ItemType Directory dist\docs | Out-Null
-          Copy-Item game\docs\CWS.DOC, game\docs\RELEASE_NOTES.1ST, game\docs\CWSDOC.TXT -Destination dist\docs
+          Copy-Item game\docs\CWS.DOC, game\docs\CWSDOC.TXT -Destination dist\docs
 
       - uses: actions/upload-artifact@v7
         with:
@@ -96,17 +96,50 @@ jobs:
           ..\qb64rust\target\release\qb64rust.exe test tests\rules_test.bas
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      # The whole-game scripts against their recorded screens. Each runs on a desktop of its own;
-      # under a script the game makes no SHELL. The runner has four cores.
+  # The whole-game scripts against their recorded screens, on Linux. On the Windows runner every
+  # script hung before the title menu (2026-11-14, the first run on main), most likely at the
+  # first sound statement: the runner has no sound device. QB64Rust's own CI runs its window
+  # programs the same way: on Linux, under Xvfb, with ALSA's null device, which play.py sets for
+  # each run (tests/README.md, "Running on Linux"). One game at a time, as the README says.
+  scripts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: game
+
+      - uses: actions/checkout@v7
+        with:
+          repository: davidshq/QB64Rust
+          ref: ${{ env.QB64RUST_REF }}
+          path: qb64rust
+
+      # The system C++ toolchain and libraries qb64rust builds with on Linux, and Xvfb for the
+      # window. The list is that of QB64Rust's Linux job (its .github/workflows/rust.yml).
+      - name: Install the packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libglu1-mesa-dev libasound2-dev libpng-dev libcurl4-openssl-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev xvfb
+
+      - run: rustup toolchain install
+        working-directory: qb64rust
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: qb64rust
+
+      - run: cargo build --release --locked
+        working-directory: qb64rust
+
       - name: Whole-game scripts
         working-directory: game
         env:
-          CWS_QB64RUST_REPO: ${{ github.workspace }}\qb64rust
-        run: |
-          python tests\play.py --jobs 4 check
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          CWS_QB64RUST_REPO: ${{ github.workspace }}/qb64rust
+        run: xvfb-run -a python3 tests/play.py check
 
-      # A failed script leaves the screens that differ, as PNGs, and what play.py printed.
+      # A failed script leaves the screens that differ, as PNGs, what play.py printed, and each
+      # run's own log.
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
@@ -114,4 +147,5 @@ jobs:
           path: |
             game/tests/out/fail
             game/tests/out/last-*.txt
+            game/tests/out/run/*/log.txt
           if-no-files-found: ignore

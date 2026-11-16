@@ -1,5 +1,5 @@
 DEFINT A-Z
-' $INCLUDE: 'port/folders.bi'
+' $INCLUDE: 'io/folders.bi'
 '==========================================================================
 ' Sides. other_side and army_side (rules/army.bm) work with them.
 CONST SIDE_NONE = 0
@@ -110,7 +110,7 @@ CONST FILES_NEW_GAME = 1
 CONST FILES_QUIT = 2
 ' event_roll's event: a row of the events table (1 to event_count), or this.
 CONST EVENT_NONE = 0
-' The events table, read from scenarios/EVENTS.DAT (load_events, port/events_file.bm).
+' The events table, read from scenarios/EVENTS.DAT (load_events, io/events_file.bm).
 CONST MAX_EVENTS = 40
 CONST MAX_EVENT_TEXTS = 4
 CONST MAX_EVENT_CONDITIONS = 120
@@ -200,10 +200,9 @@ CONST VARY_REBEL_CAPITAL = 25
 ' there holds its place half the time (ai_pick_port).
 CONST AI_UNION_FLEET_CITY = 30
 CONST AI_REBEL_HOLD_CITY = 30
-' The 16 colors, for COLOR statements and the menu's colors. The pictures keep their numbers.
+' Named colors for COLOR statements and the menu's colors. The pictures keep their numbers.
 CONST COLOR_BLACK = 0
 CONST COLOR_BLUE = 1
-CONST COLOR_GREEN = 2
 CONST COLOR_CYAN = 3
 CONST COLOR_RED = 4
 CONST COLOR_MAGENTA = 5
@@ -227,7 +226,7 @@ CONST KEY_PAGE_DOWN$ = "Q"
 CONST KEY_F3$ = "="
 CONST KEY_F4$ = ">"
 CONST KEY_F7$ = "A"
-' A long pause that a key ends (wait_seconds). A pause of 99 means "press a key"; see port/script.bm.
+' A long pause that a key ends (wait_seconds). A pause of 99 means "press a key"; see io/script.bm.
 CONST PAUSE_LONG = 9
 ' The column of the right panel, where most menus go.
 CONST PANEL_COL = 67
@@ -260,7 +259,7 @@ DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_ca
 ' for when that is another (SIDE_NONE when it is the same). event_before() is 1 for an
 ' announcement, which is tried before the month's roll. event_instead() and event_then() are
 ' rows, 0 for none. event_done() is set when the event has happened in this game.
-' The scenarios of scenarios/SCENARIOS.LST (load_scenario_list, port/files.bm): each one's folder
+' The scenarios of scenarios/SCENARIOS.LST (load_scenario_list, io/files.bm): each one's folder
 ' and title. scenario_now is the row of the scenario the game is on.
 DIM SHARED scenario_count, scenario_now, scenario_folder$(MAX_SCENARIOS), scenario_title$(MAX_SCENARIOS)
 DIM SHARED event_count, event_banner$, event_file_error$
@@ -282,8 +281,8 @@ DIM SHARED event_city, event_army, event_target_side
 ' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
 DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
 DIM SHARED pic_face(1 TO 1564)
-' Set by script_start (port/script.bm) when tests\play.py runs the program.
+' Set by script_start (io/script.bm) when tests\play.py runs the program.
 DIM SHARED scripted
 ' The forced dice of special_events under a script: the groups still to come, and what is
-' left of this call's group (script_dice_next and script_rnd!, port/script.bm).
+' left of this call's group (script_dice_next and script_rnd!, io/script.bm).
 DIM SHARED script_dice$, script_dice_now$

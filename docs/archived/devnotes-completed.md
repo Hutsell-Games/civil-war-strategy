@@ -133,3 +133,37 @@ after 10 and after 20 seconds.
   the computer reaches. The `war` games, with only the time limit on, end after 10 to 21 turns, when the
   player's side has no army left. None reaches March 1865; the hand-written `union-time` and `two-player` do.
 
+
+
+## Canonical comparison review (2026-11-14)
+
+Moved from `rule-changes.md` on 2026-11-14. This is historical review evidence,
+not a report of tests run during the documentation move. Regression IDs refer to
+[the rule-change record](../rule-changes.md#regression-history-and-subsequent-corrections).
+
+### Baseline and review coverage
+
+Reviewed 2026-11-14. This compares the complete branch trees, not just the most recent naming commits:
+
+- Reviewed branch: `refactor_naming`, `d8b845d3283ab83f29a8cb92a5efe7919b222a64`.
+- Canonical base: local remote-tracking ref `origin/canonical-source`, `45bdab482589d1a4d8d1b47c3e242bb19979f59c`.
+- No fetch was performed. These commit IDs identify the comparison even if either branch moves.
+- Supplemental source review covers the two commits added during this review, through `b182514fcd1a8e0ff2dcb43b91a0caf6f2a7601d` (`30d424e`, event-reader validation extraction; `b182514`, shared fortification command). No additional gameplay divergence was identified in those two commits. Line references below use the primary `d8b845d` snapshot.
+- Current update: the staged fixes in `ui/turn.bm`, `rules/setup.bm` and `rules/events.bm` were inspected on 2026-11-14 and are recorded as R1–R3 in `../rule-changes.md`. They are not yet associated with a commit. The verification results at the end remain those of the original review, not a test run of these staged fixes.
+- Scope: gameplay, AI, menus, presentation, persistence, startup and test-mode behavior. Renames, formatting, file moves and procedure extraction are excluded unless their behavior differs.
+
+The branch is **not behaviorally equivalent** to canonical. It includes explicit bug fixes and feature changes. Existing recordings describe the branch's behavior; passing them does not establish equivalence to the DOS original.
+
+### Original review verification and limits (2026-11-14)
+
+The review followed the commit history from canonical, inspected the original three BASIC sources and include, and checked the changed rule expressions and their current callers. Static findings are tied to the branch commit above. Unrelated working-tree edits appeared during the review; they were left untouched. An exported copy under ignored `tests/out/canonical-review/branch/` was used to separate branch verification from that ongoing work.
+
+- Python tooling/layer checks: **41 passed** on the working tree.
+- BASIC rule suite on the exact `d8b845d` snapshot: **188 passed, 0 failed, 0 errors**. A working-tree run that included the new event-reader tests also passed all 190 tests.
+- Recorded game checks on the exact `d8b845d` snapshot: **40 passed, 0 failed** with QB64Rust. The separate working-tree run also passed all 40.
+- Isolated review probes on the original snapshot: the crushed-attacker, scenario-count and absent-capital expectations **all failed**. R1/R2/R3 in `../rule-changes.md` record the later staged corrections; these failures do not describe the corrected working tree.
+- An additional probe compared the extracted volunteer-event arithmetic against the canonical expression for initial army sizes 1 through 1250, at event weight 3: it passed. No arithmetic divergence is claimed from storing that event multiplier in the event table.
+- The six map/setup/leader files match their canonical standard/alternate counterparts byte for byte. The two canonical leader files themselves are identical, so Git's apparent swapped rename pairing does not change the leaders. `CWS.CFG` and `HISCORE.CWS` have no branch diff.
+- The original review changed no game source. Scratch exports, probes and logs are ignored under `tests/out/canonical-review/`. Later source changes and their status are recorded separately in `../rule-changes.md`.
+
+The DOS/PDS executable was not replayed side by side, and QB64pe comparison was not rerun. Existing game recordings were rerecorded after intentional rule changes; neither their success nor line coverage proves that every possible play sequence matches canonical. This document records the divergences established by source review and the targeted probes, with inconsistent-state cases identified separately.
