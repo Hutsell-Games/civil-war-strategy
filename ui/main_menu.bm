@@ -14,7 +14,7 @@ SUB menu_main (start)
     menu_row = 13
     menu_text$(0) = "Main"
     menu_text$(1) = "Troops"
-    IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN
+    IF turn_recruit_state < 0 OR side_cash(current_side) < cost_recruit THEN
         menu_text$(1) = "-"
         start = MENU_START + MAIN_MOVES
     END IF

@@ -131,10 +131,10 @@ SUB report_armies (side)
     PRINT "Capital: "; city_name$(side_capital(side))
     all_income = total_income
     IF side_capital(SIDE_UNION) > 0 THEN
-        all_income = all_income + CAPITAL_INCOME
+        all_income = all_income + capital_income
     END IF
     IF side_capital(SIDE_REBEL) > 0 THEN
-        all_income = all_income + CAPITAL_INCOME
+        all_income = all_income + capital_income
     END IF
     PRINT side_income(side); "/"; all_income; TAB(15); "INCOME"; TAB(40); "(";
     percent = (side_income(side) / total_income) * 100

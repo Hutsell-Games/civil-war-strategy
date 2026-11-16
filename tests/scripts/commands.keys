@@ -47,7 +47,8 @@ key enter
 prompt
 key enter
 # COMMANDS: Cancel that move; Cancel again (no orders left); Fortify the first city; Army Drill the first army;
-# Relieve the first army's leader with the first new one; Supply (all have supplies: to the main menu).
+# Relieve the first army's leader with the first new one; Supply, "-" and four rows up (all have
+# supplies: to the main menu).
 prompt
 text c
 prompt
@@ -73,7 +74,15 @@ prompt
 digest
 key enter
 prompt
-text s
+key up
+prompt
+key up
+prompt
+key up
+prompt
+key up
+prompt
+key enter
 # COMMANDS: Join (no two armies in one city: to the main menu).
 prompt
 text c

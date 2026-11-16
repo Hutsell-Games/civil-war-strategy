@@ -43,7 +43,7 @@ SUB menu_city_fortify (city)
     END IF
     IF NOT fort_affordable(current_side) THEN
         CALL clear_bottom_line
-        PRINT "Fortifications for "; city_name$(city); " cost "; COST_FORT; " and you only have "; side_cash(current_side);
+        PRINT "Fortifications for "; city_name$(city); " cost "; cost_fort; " and you only have "; side_cash(current_side);
         CALL wait_seconds(4)
         EXIT SUB
     END IF

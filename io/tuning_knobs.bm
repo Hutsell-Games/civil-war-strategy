@@ -1,0 +1,1013 @@
+' The tuning knobs' defaults, names and ranges. Written by tools/tuning/make_knobs.py from tools/tuning/knobs.txt. Do not edit.
+' load_tuning and the SUBs these call are in io/tuning_file.bm.
+
+' Sets every knob to its default: the number the game had before it was a knob.
+SUB tuning_defaults
+    cost_recruit = 100
+    cost_ship = 100
+    ironclad_cost_times = 2
+    cost_fort = 200
+    cost_move_capital = 500
+    capital_income = 100
+    upkeep_per_size# = .2
+    start_cash_per_balance = 100
+    start_cash_spread = 50
+    vary_cash_shift = 100
+    vary_cash_spread = 200
+    union_bonus_per_balance = 120
+    union_bonus_two_players = 50
+    union_bonus_realism_share# = .7
+    max_army_size = 1250
+    small_army_size = 15
+    min_detach_size = 65
+    detach_share# = .3
+    resupply_level = 5
+    drill_experience_below = 6
+    made_up_leader_spread = 8
+    new_army_size = 70
+    reinforce_size = 45
+    recruit_per_value = 3
+    recruit_base = 33
+    reinforce_per_value = 2
+    reinforce_base = 20
+    recruit_cut_off_divisor = 3
+    recruit_cities_offered = 4
+    new_army_supply = 3
+    new_army_supply_spread = 5
+    union_new_army_supply = 2
+    rebel_new_army_experience = 2
+    balance_recruits = 5
+    balance_strength = 2
+    starve_roll# = .8
+    starve_size_above = 50
+    starve_keep_share# = .9
+    forage_roll# = .8
+    winter_months = 2
+    attack_per_size# = .01
+    defense_per_size# = .013
+    defense_base = 1
+    defense_per_size_realism# = .02
+    defense_base_realism = 2
+    defense_most_realism = 20
+    battle_leader_weight# = .3
+    battle_experience_weight# = .3
+    veteran_experience = 8
+    small_army_strength# = .5
+    no_supply_strength# = .5
+    attack_outnumbered_penalty = 2
+    attack_outnumbering_bonus = 2
+    defend_outnumbering_bonus = 2
+    defend_outnumbered# = .8
+    defend_badly_outnumbered# = .5
+    defender_halt_roll = 11
+    fort_defender_loss# = .03
+    fort_attacker_loss# = .02
+    attacker_wins_loss# = 1.3
+    defender_wins_loss# = 1.5
+    large_army_size = 300
+    large_army_loss# = .9
+    huge_army_size = 800
+    huge_army_loss# = .8
+    loss_own_share# = .8
+    loss_other_share# = .2
+    attacker_loss_most_times = 9
+    defender_loss_most_times = 5
+    points_kept# = .8
+    points_per_income# = .3
+    cities_bonus_above = 29
+    cities_bonus = 50
+    cities_big_bonus_above = 34
+    cities_big_bonus = 100
+    capital_capture_points = 100
+    capital_move_points = 50
+    army_destroyed_points = 25
+    fleet_sunk_points = 10
+    fleet_lost_points = 5
+    wiped_out_points = 300
+    victory_points_bonus = 100
+    time_limit_points_share# = .7
+    invade_ships_least = 2
+    invasion_army_size = 35
+    bombard_loss_per_ship# = .005
+    bombard_loss_spread# = .02
+    fort_damage_chance# = .7
+    fort_damage_per_ship# = .03
+    blast_base# = .25
+    blast_per_ship# = .07
+    raid_chance# = .8
+    raid_chance_per_ship# = .02
+    raid_loss_per_ship# = .05
+    raid_loss_most_share# = .3
+    wooden_ship_hits = 10
+    ironclad_hits = 20
+    ship_hit_chance# = .5
+    ironclad_aim_bonus# = .1
+    rail_union_cities = 11
+    rail_rebel_cities = 23
+    rail_per_city = 5
+    rail_most_times = 2
+    rail_least_divisor = 4
+    ai_move_spread = 30
+    ai_leave_fort_penalty = 25
+    ai_leave_fort_realism_penalty = 50
+    ai_enemy_capital_bonus = 200
+    ai_target_value = 5
+    ai_target_fort = 10
+    ai_empty_enemy_value = 10
+    ai_march_direction_bonus = 2
+    ai_beyond_value = 3
+    ai_beyond_fort = 4
+    ai_capital_road_bonus = 50
+    ai_stay_weight_even = 200
+    ai_stay_weight_strong = 80
+    ai_stay_weight_stronger = 20
+    ai_stay_weight_strongest = 5
+    ai_aggression_strength = 20
+    ai_small_army_penalty = 300
+    ai_poor_odds_penalty = 200
+    ai_realism_penalty = 15
+    ai_no_supply_penalty = 100
+    ai_odds_bad_penalty = 300
+    ai_odds_low_penalty = 20
+    ai_odds_even_penalty = 5
+    ai_odds_good_bonus = 10
+    ai_attack_spread = 50
+    ai_armies_base = 2
+    ai_armies_per_side = 3
+    ai_armies_spread = 3
+    ai_fleet_wanted = 5
+    ai_reinforce_below = 155
+    ai_fortify_cash = 222
+END SUB
+
+' Sets the knob named key$ to value#. why$ is "" when it was set; otherwise it says why
+' not: no knob of that name, a value outside the knob's least and most, or a fraction for
+' a knob that takes whole numbers.
+SUB tuning_set (key$, value#, why$)
+    why$ = ""
+    SELECT CASE key$
+        CASE "cost_recruit"
+            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            IF why$ = "" THEN
+                cost_recruit = value#
+            END IF
+        CASE "cost_ship"
+            why$ = tuning_check$(key$, value#, 0, 5000, 1)
+            IF why$ = "" THEN
+                cost_ship = value#
+            END IF
+        CASE "ironclad_cost_times"
+            why$ = tuning_check$(key$, value#, 1, 4, 1)
+            IF why$ = "" THEN
+                ironclad_cost_times = value#
+            END IF
+        CASE "cost_fort"
+            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            IF why$ = "" THEN
+                cost_fort = value#
+            END IF
+        CASE "cost_move_capital"
+            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            IF why$ = "" THEN
+                cost_move_capital = value#
+            END IF
+        CASE "capital_income"
+            why$ = tuning_check$(key$, value#, 0, 5000, 1)
+            IF why$ = "" THEN
+                capital_income = value#
+            END IF
+        CASE "upkeep_per_size"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                upkeep_per_size# = value#
+            END IF
+        CASE "start_cash_per_balance"
+            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            IF why$ = "" THEN
+                start_cash_per_balance = value#
+            END IF
+        CASE "start_cash_spread"
+            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            IF why$ = "" THEN
+                start_cash_spread = value#
+            END IF
+        CASE "vary_cash_shift"
+            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            IF why$ = "" THEN
+                vary_cash_shift = value#
+            END IF
+        CASE "vary_cash_spread"
+            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            IF why$ = "" THEN
+                vary_cash_spread = value#
+            END IF
+        CASE "union_bonus_per_balance"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                union_bonus_per_balance = value#
+            END IF
+        CASE "union_bonus_two_players"
+            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            IF why$ = "" THEN
+                union_bonus_two_players = value#
+            END IF
+        CASE "union_bonus_realism_share"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                union_bonus_realism_share# = value#
+            END IF
+        CASE "max_army_size"
+            why$ = tuning_check$(key$, value#, 100, 1600, 1)
+            IF why$ = "" THEN
+                max_army_size = value#
+            END IF
+        CASE "small_army_size"
+            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            IF why$ = "" THEN
+                small_army_size = value#
+            END IF
+        CASE "min_detach_size"
+            why$ = tuning_check$(key$, value#, 1, 16000, 1)
+            IF why$ = "" THEN
+                min_detach_size = value#
+            END IF
+        CASE "detach_share"
+            why$ = tuning_check$(key$, value#, .01, .99, 0)
+            IF why$ = "" THEN
+                detach_share# = value#
+            END IF
+        CASE "resupply_level"
+            why$ = tuning_check$(key$, value#, 1, 10, 1)
+            IF why$ = "" THEN
+                resupply_level = value#
+            END IF
+        CASE "drill_experience_below"
+            why$ = tuning_check$(key$, value#, 0, 11, 1)
+            IF why$ = "" THEN
+                drill_experience_below = value#
+            END IF
+        CASE "made_up_leader_spread"
+            why$ = tuning_check$(key$, value#, 0, 8, 1)
+            IF why$ = "" THEN
+                made_up_leader_spread = value#
+            END IF
+        CASE "new_army_size"
+            why$ = tuning_check$(key$, value#, 1, 1250, 1)
+            IF why$ = "" THEN
+                new_army_size = value#
+            END IF
+        CASE "reinforce_size"
+            why$ = tuning_check$(key$, value#, 1, 1250, 1)
+            IF why$ = "" THEN
+                reinforce_size = value#
+            END IF
+        CASE "recruit_per_value"
+            why$ = tuning_check$(key$, value#, 0, 100, 1)
+            IF why$ = "" THEN
+                recruit_per_value = value#
+            END IF
+        CASE "recruit_base"
+            why$ = tuning_check$(key$, value#, 0, 1250, 1)
+            IF why$ = "" THEN
+                recruit_base = value#
+            END IF
+        CASE "reinforce_per_value"
+            why$ = tuning_check$(key$, value#, 0, 100, 1)
+            IF why$ = "" THEN
+                reinforce_per_value = value#
+            END IF
+        CASE "reinforce_base"
+            why$ = tuning_check$(key$, value#, 0, 1250, 1)
+            IF why$ = "" THEN
+                reinforce_base = value#
+            END IF
+        CASE "recruit_cut_off_divisor"
+            why$ = tuning_check$(key$, value#, 1, 100, 1)
+            IF why$ = "" THEN
+                recruit_cut_off_divisor = value#
+            END IF
+        CASE "recruit_cities_offered"
+            why$ = tuning_check$(key$, value#, 1, 4, 1)
+            IF why$ = "" THEN
+                recruit_cities_offered = value#
+            END IF
+        CASE "new_army_supply"
+            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            IF why$ = "" THEN
+                new_army_supply = value#
+            END IF
+        CASE "new_army_supply_spread"
+            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            IF why$ = "" THEN
+                new_army_supply_spread = value#
+            END IF
+        CASE "union_new_army_supply"
+            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            IF why$ = "" THEN
+                union_new_army_supply = value#
+            END IF
+        CASE "rebel_new_army_experience"
+            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            IF why$ = "" THEN
+                rebel_new_army_experience = value#
+            END IF
+        CASE "balance_recruits"
+            why$ = tuning_check$(key$, value#, 0, 500, 1)
+            IF why$ = "" THEN
+                balance_recruits = value#
+            END IF
+        CASE "balance_strength"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                balance_strength = value#
+            END IF
+        CASE "starve_roll"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                starve_roll# = value#
+            END IF
+        CASE "starve_size_above"
+            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            IF why$ = "" THEN
+                starve_size_above = value#
+            END IF
+        CASE "starve_keep_share"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                starve_keep_share# = value#
+            END IF
+        CASE "forage_roll"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                forage_roll# = value#
+            END IF
+        CASE "winter_months"
+            why$ = tuning_check$(key$, value#, 0, 12, 1)
+            IF why$ = "" THEN
+                winter_months = value#
+            END IF
+        CASE "attack_per_size"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                attack_per_size# = value#
+            END IF
+        CASE "defense_per_size"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                defense_per_size# = value#
+            END IF
+        CASE "defense_base"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                defense_base = value#
+            END IF
+        CASE "defense_per_size_realism"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                defense_per_size_realism# = value#
+            END IF
+        CASE "defense_base_realism"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                defense_base_realism = value#
+            END IF
+        CASE "defense_most_realism"
+            why$ = tuning_check$(key$, value#, 1, 1000, 1)
+            IF why$ = "" THEN
+                defense_most_realism = value#
+            END IF
+        CASE "battle_leader_weight"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                battle_leader_weight# = value#
+            END IF
+        CASE "battle_experience_weight"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                battle_experience_weight# = value#
+            END IF
+        CASE "veteran_experience"
+            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            IF why$ = "" THEN
+                veteran_experience = value#
+            END IF
+        CASE "small_army_strength"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                small_army_strength# = value#
+            END IF
+        CASE "no_supply_strength"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                no_supply_strength# = value#
+            END IF
+        CASE "attack_outnumbered_penalty"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                attack_outnumbered_penalty = value#
+            END IF
+        CASE "attack_outnumbering_bonus"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                attack_outnumbering_bonus = value#
+            END IF
+        CASE "defend_outnumbering_bonus"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                defend_outnumbering_bonus = value#
+            END IF
+        CASE "defend_outnumbered"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                defend_outnumbered# = value#
+            END IF
+        CASE "defend_badly_outnumbered"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                defend_badly_outnumbered# = value#
+            END IF
+        CASE "defender_halt_roll"
+            why$ = tuning_check$(key$, value#, 1, 100, 1)
+            IF why$ = "" THEN
+                defender_halt_roll = value#
+            END IF
+        CASE "fort_defender_loss"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                fort_defender_loss# = value#
+            END IF
+        CASE "fort_attacker_loss"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                fort_attacker_loss# = value#
+            END IF
+        CASE "attacker_wins_loss"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                attacker_wins_loss# = value#
+            END IF
+        CASE "defender_wins_loss"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                defender_wins_loss# = value#
+            END IF
+        CASE "large_army_size"
+            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            IF why$ = "" THEN
+                large_army_size = value#
+            END IF
+        CASE "large_army_loss"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                large_army_loss# = value#
+            END IF
+        CASE "huge_army_size"
+            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            IF why$ = "" THEN
+                huge_army_size = value#
+            END IF
+        CASE "huge_army_loss"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                huge_army_loss# = value#
+            END IF
+        CASE "loss_own_share"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                loss_own_share# = value#
+            END IF
+        CASE "loss_other_share"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                loss_other_share# = value#
+            END IF
+        CASE "attacker_loss_most_times"
+            why$ = tuning_check$(key$, value#, 1, 20, 1)
+            IF why$ = "" THEN
+                attacker_loss_most_times = value#
+            END IF
+        CASE "defender_loss_most_times"
+            why$ = tuning_check$(key$, value#, 1, 20, 1)
+            IF why$ = "" THEN
+                defender_loss_most_times = value#
+            END IF
+        CASE "points_kept"
+            why$ = tuning_check$(key$, value#, 0, .95, 0)
+            IF why$ = "" THEN
+                points_kept# = value#
+            END IF
+        CASE "points_per_income"
+            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            IF why$ = "" THEN
+                points_per_income# = value#
+            END IF
+        CASE "cities_bonus_above"
+            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            IF why$ = "" THEN
+                cities_bonus_above = value#
+            END IF
+        CASE "cities_bonus"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                cities_bonus = value#
+            END IF
+        CASE "cities_big_bonus_above"
+            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            IF why$ = "" THEN
+                cities_big_bonus_above = value#
+            END IF
+        CASE "cities_big_bonus"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                cities_big_bonus = value#
+            END IF
+        CASE "capital_capture_points"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                capital_capture_points = value#
+            END IF
+        CASE "capital_move_points"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                capital_move_points = value#
+            END IF
+        CASE "army_destroyed_points"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                army_destroyed_points = value#
+            END IF
+        CASE "fleet_sunk_points"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                fleet_sunk_points = value#
+            END IF
+        CASE "fleet_lost_points"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                fleet_lost_points = value#
+            END IF
+        CASE "wiped_out_points"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                wiped_out_points = value#
+            END IF
+        CASE "victory_points_bonus"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                victory_points_bonus = value#
+            END IF
+        CASE "time_limit_points_share"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                time_limit_points_share# = value#
+            END IF
+        CASE "invade_ships_least"
+            why$ = tuning_check$(key$, value#, 2, 10, 1)
+            IF why$ = "" THEN
+                invade_ships_least = value#
+            END IF
+        CASE "invasion_army_size"
+            why$ = tuning_check$(key$, value#, 1, 1250, 1)
+            IF why$ = "" THEN
+                invasion_army_size = value#
+            END IF
+        CASE "bombard_loss_per_ship"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                bombard_loss_per_ship# = value#
+            END IF
+        CASE "bombard_loss_spread"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                bombard_loss_spread# = value#
+            END IF
+        CASE "fort_damage_chance"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                fort_damage_chance# = value#
+            END IF
+        CASE "fort_damage_per_ship"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                fort_damage_per_ship# = value#
+            END IF
+        CASE "blast_base"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                blast_base# = value#
+            END IF
+        CASE "blast_per_ship"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                blast_per_ship# = value#
+            END IF
+        CASE "raid_chance"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                raid_chance# = value#
+            END IF
+        CASE "raid_chance_per_ship"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                raid_chance_per_ship# = value#
+            END IF
+        CASE "raid_loss_per_ship"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                raid_loss_per_ship# = value#
+            END IF
+        CASE "raid_loss_most_share"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                raid_loss_most_share# = value#
+            END IF
+        CASE "wooden_ship_hits"
+            why$ = tuning_check$(key$, value#, 1, 1000, 1)
+            IF why$ = "" THEN
+                wooden_ship_hits = value#
+            END IF
+        CASE "ironclad_hits"
+            why$ = tuning_check$(key$, value#, 1, 1000, 1)
+            IF why$ = "" THEN
+                ironclad_hits = value#
+            END IF
+        CASE "ship_hit_chance"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                ship_hit_chance# = value#
+            END IF
+        CASE "ironclad_aim_bonus"
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            IF why$ = "" THEN
+                ironclad_aim_bonus# = value#
+            END IF
+        CASE "rail_union_cities"
+            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            IF why$ = "" THEN
+                rail_union_cities = value#
+            END IF
+        CASE "rail_rebel_cities"
+            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            IF why$ = "" THEN
+                rail_rebel_cities = value#
+            END IF
+        CASE "rail_per_city"
+            why$ = tuning_check$(key$, value#, 0, 200, 1)
+            IF why$ = "" THEN
+                rail_per_city = value#
+            END IF
+        CASE "rail_most_times"
+            why$ = tuning_check$(key$, value#, 1, 10, 1)
+            IF why$ = "" THEN
+                rail_most_times = value#
+            END IF
+        CASE "rail_least_divisor"
+            why$ = tuning_check$(key$, value#, 1, 100, 1)
+            IF why$ = "" THEN
+                rail_least_divisor = value#
+            END IF
+        CASE "ai_move_spread"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_move_spread = value#
+            END IF
+        CASE "ai_leave_fort_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_leave_fort_penalty = value#
+            END IF
+        CASE "ai_leave_fort_realism_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_leave_fort_realism_penalty = value#
+            END IF
+        CASE "ai_enemy_capital_bonus"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_enemy_capital_bonus = value#
+            END IF
+        CASE "ai_target_value"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                ai_target_value = value#
+            END IF
+        CASE "ai_target_fort"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                ai_target_fort = value#
+            END IF
+        CASE "ai_empty_enemy_value"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                ai_empty_enemy_value = value#
+            END IF
+        CASE "ai_march_direction_bonus"
+            why$ = tuning_check$(key$, value#, 0, 100, 1)
+            IF why$ = "" THEN
+                ai_march_direction_bonus = value#
+            END IF
+        CASE "ai_beyond_value"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                ai_beyond_value = value#
+            END IF
+        CASE "ai_beyond_fort"
+            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            IF why$ = "" THEN
+                ai_beyond_fort = value#
+            END IF
+        CASE "ai_capital_road_bonus"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_capital_road_bonus = value#
+            END IF
+        CASE "ai_stay_weight_even"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_stay_weight_even = value#
+            END IF
+        CASE "ai_stay_weight_strong"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_stay_weight_strong = value#
+            END IF
+        CASE "ai_stay_weight_stronger"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_stay_weight_stronger = value#
+            END IF
+        CASE "ai_stay_weight_strongest"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_stay_weight_strongest = value#
+            END IF
+        CASE "ai_aggression_strength"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_aggression_strength = value#
+            END IF
+        CASE "ai_small_army_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_small_army_penalty = value#
+            END IF
+        CASE "ai_poor_odds_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_poor_odds_penalty = value#
+            END IF
+        CASE "ai_realism_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_realism_penalty = value#
+            END IF
+        CASE "ai_no_supply_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_no_supply_penalty = value#
+            END IF
+        CASE "ai_odds_bad_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_odds_bad_penalty = value#
+            END IF
+        CASE "ai_odds_low_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_odds_low_penalty = value#
+            END IF
+        CASE "ai_odds_even_penalty"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_odds_even_penalty = value#
+            END IF
+        CASE "ai_odds_good_bonus"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_odds_good_bonus = value#
+            END IF
+        CASE "ai_attack_spread"
+            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            IF why$ = "" THEN
+                ai_attack_spread = value#
+            END IF
+        CASE "ai_armies_base"
+            why$ = tuning_check$(key$, value#, 0, 20, 1)
+            IF why$ = "" THEN
+                ai_armies_base = value#
+            END IF
+        CASE "ai_armies_per_side"
+            why$ = tuning_check$(key$, value#, 0, 9, 1)
+            IF why$ = "" THEN
+                ai_armies_per_side = value#
+            END IF
+        CASE "ai_armies_spread"
+            why$ = tuning_check$(key$, value#, 0, 20, 1)
+            IF why$ = "" THEN
+                ai_armies_spread = value#
+            END IF
+        CASE "ai_fleet_wanted"
+            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            IF why$ = "" THEN
+                ai_fleet_wanted = value#
+            END IF
+        CASE "ai_reinforce_below"
+            why$ = tuning_check$(key$, value#, 0, 1250, 1)
+            IF why$ = "" THEN
+                ai_reinforce_below = value#
+            END IF
+        CASE "ai_fortify_cash"
+            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            IF why$ = "" THEN
+                ai_fortify_cash = value#
+            END IF
+        CASE ELSE
+            why$ = "unknown knob: " + key$
+    END SELECT
+END SUB
+
+' The knobs that are not at their defaults, as "name=value;name=value;". "" when all are.
+FUNCTION tuning_changes$
+    DIM list$
+    list$ = list$ + tuning_note$("cost_recruit", (cost_recruit), 100)
+    list$ = list$ + tuning_note$("cost_ship", (cost_ship), 100)
+    list$ = list$ + tuning_note$("ironclad_cost_times", (ironclad_cost_times), 2)
+    list$ = list$ + tuning_note$("cost_fort", (cost_fort), 200)
+    list$ = list$ + tuning_note$("cost_move_capital", (cost_move_capital), 500)
+    list$ = list$ + tuning_note$("capital_income", (capital_income), 100)
+    list$ = list$ + tuning_note$("upkeep_per_size", (upkeep_per_size#), .2)
+    list$ = list$ + tuning_note$("start_cash_per_balance", (start_cash_per_balance), 100)
+    list$ = list$ + tuning_note$("start_cash_spread", (start_cash_spread), 50)
+    list$ = list$ + tuning_note$("vary_cash_shift", (vary_cash_shift), 100)
+    list$ = list$ + tuning_note$("vary_cash_spread", (vary_cash_spread), 200)
+    list$ = list$ + tuning_note$("union_bonus_per_balance", (union_bonus_per_balance), 120)
+    list$ = list$ + tuning_note$("union_bonus_two_players", (union_bonus_two_players), 50)
+    list$ = list$ + tuning_note$("union_bonus_realism_share", (union_bonus_realism_share#), .7)
+    list$ = list$ + tuning_note$("max_army_size", (max_army_size), 1250)
+    list$ = list$ + tuning_note$("small_army_size", (small_army_size), 15)
+    list$ = list$ + tuning_note$("min_detach_size", (min_detach_size), 65)
+    list$ = list$ + tuning_note$("detach_share", (detach_share#), .3)
+    list$ = list$ + tuning_note$("resupply_level", (resupply_level), 5)
+    list$ = list$ + tuning_note$("drill_experience_below", (drill_experience_below), 6)
+    list$ = list$ + tuning_note$("made_up_leader_spread", (made_up_leader_spread), 8)
+    list$ = list$ + tuning_note$("new_army_size", (new_army_size), 70)
+    list$ = list$ + tuning_note$("reinforce_size", (reinforce_size), 45)
+    list$ = list$ + tuning_note$("recruit_per_value", (recruit_per_value), 3)
+    list$ = list$ + tuning_note$("recruit_base", (recruit_base), 33)
+    list$ = list$ + tuning_note$("reinforce_per_value", (reinforce_per_value), 2)
+    list$ = list$ + tuning_note$("reinforce_base", (reinforce_base), 20)
+    list$ = list$ + tuning_note$("recruit_cut_off_divisor", (recruit_cut_off_divisor), 3)
+    list$ = list$ + tuning_note$("recruit_cities_offered", (recruit_cities_offered), 4)
+    list$ = list$ + tuning_note$("new_army_supply", (new_army_supply), 3)
+    list$ = list$ + tuning_note$("new_army_supply_spread", (new_army_supply_spread), 5)
+    list$ = list$ + tuning_note$("union_new_army_supply", (union_new_army_supply), 2)
+    list$ = list$ + tuning_note$("rebel_new_army_experience", (rebel_new_army_experience), 2)
+    list$ = list$ + tuning_note$("balance_recruits", (balance_recruits), 5)
+    list$ = list$ + tuning_note$("balance_strength", (balance_strength), 2)
+    list$ = list$ + tuning_note$("starve_roll", (starve_roll#), .8)
+    list$ = list$ + tuning_note$("starve_size_above", (starve_size_above), 50)
+    list$ = list$ + tuning_note$("starve_keep_share", (starve_keep_share#), .9)
+    list$ = list$ + tuning_note$("forage_roll", (forage_roll#), .8)
+    list$ = list$ + tuning_note$("winter_months", (winter_months), 2)
+    list$ = list$ + tuning_note$("attack_per_size", (attack_per_size#), .01)
+    list$ = list$ + tuning_note$("defense_per_size", (defense_per_size#), .013)
+    list$ = list$ + tuning_note$("defense_base", (defense_base), 1)
+    list$ = list$ + tuning_note$("defense_per_size_realism", (defense_per_size_realism#), .02)
+    list$ = list$ + tuning_note$("defense_base_realism", (defense_base_realism), 2)
+    list$ = list$ + tuning_note$("defense_most_realism", (defense_most_realism), 20)
+    list$ = list$ + tuning_note$("battle_leader_weight", (battle_leader_weight#), .3)
+    list$ = list$ + tuning_note$("battle_experience_weight", (battle_experience_weight#), .3)
+    list$ = list$ + tuning_note$("veteran_experience", (veteran_experience), 8)
+    list$ = list$ + tuning_note$("small_army_strength", (small_army_strength#), .5)
+    list$ = list$ + tuning_note$("no_supply_strength", (no_supply_strength#), .5)
+    list$ = list$ + tuning_note$("attack_outnumbered_penalty", (attack_outnumbered_penalty), 2)
+    list$ = list$ + tuning_note$("attack_outnumbering_bonus", (attack_outnumbering_bonus), 2)
+    list$ = list$ + tuning_note$("defend_outnumbering_bonus", (defend_outnumbering_bonus), 2)
+    list$ = list$ + tuning_note$("defend_outnumbered", (defend_outnumbered#), .8)
+    list$ = list$ + tuning_note$("defend_badly_outnumbered", (defend_badly_outnumbered#), .5)
+    list$ = list$ + tuning_note$("defender_halt_roll", (defender_halt_roll), 11)
+    list$ = list$ + tuning_note$("fort_defender_loss", (fort_defender_loss#), .03)
+    list$ = list$ + tuning_note$("fort_attacker_loss", (fort_attacker_loss#), .02)
+    list$ = list$ + tuning_note$("attacker_wins_loss", (attacker_wins_loss#), 1.3)
+    list$ = list$ + tuning_note$("defender_wins_loss", (defender_wins_loss#), 1.5)
+    list$ = list$ + tuning_note$("large_army_size", (large_army_size), 300)
+    list$ = list$ + tuning_note$("large_army_loss", (large_army_loss#), .9)
+    list$ = list$ + tuning_note$("huge_army_size", (huge_army_size), 800)
+    list$ = list$ + tuning_note$("huge_army_loss", (huge_army_loss#), .8)
+    list$ = list$ + tuning_note$("loss_own_share", (loss_own_share#), .8)
+    list$ = list$ + tuning_note$("loss_other_share", (loss_other_share#), .2)
+    list$ = list$ + tuning_note$("attacker_loss_most_times", (attacker_loss_most_times), 9)
+    list$ = list$ + tuning_note$("defender_loss_most_times", (defender_loss_most_times), 5)
+    list$ = list$ + tuning_note$("points_kept", (points_kept#), .8)
+    list$ = list$ + tuning_note$("points_per_income", (points_per_income#), .3)
+    list$ = list$ + tuning_note$("cities_bonus_above", (cities_bonus_above), 29)
+    list$ = list$ + tuning_note$("cities_bonus", (cities_bonus), 50)
+    list$ = list$ + tuning_note$("cities_big_bonus_above", (cities_big_bonus_above), 34)
+    list$ = list$ + tuning_note$("cities_big_bonus", (cities_big_bonus), 100)
+    list$ = list$ + tuning_note$("capital_capture_points", (capital_capture_points), 100)
+    list$ = list$ + tuning_note$("capital_move_points", (capital_move_points), 50)
+    list$ = list$ + tuning_note$("army_destroyed_points", (army_destroyed_points), 25)
+    list$ = list$ + tuning_note$("fleet_sunk_points", (fleet_sunk_points), 10)
+    list$ = list$ + tuning_note$("fleet_lost_points", (fleet_lost_points), 5)
+    list$ = list$ + tuning_note$("wiped_out_points", (wiped_out_points), 300)
+    list$ = list$ + tuning_note$("victory_points_bonus", (victory_points_bonus), 100)
+    list$ = list$ + tuning_note$("time_limit_points_share", (time_limit_points_share#), .7)
+    list$ = list$ + tuning_note$("invade_ships_least", (invade_ships_least), 2)
+    list$ = list$ + tuning_note$("invasion_army_size", (invasion_army_size), 35)
+    list$ = list$ + tuning_note$("bombard_loss_per_ship", (bombard_loss_per_ship#), .005)
+    list$ = list$ + tuning_note$("bombard_loss_spread", (bombard_loss_spread#), .02)
+    list$ = list$ + tuning_note$("fort_damage_chance", (fort_damage_chance#), .7)
+    list$ = list$ + tuning_note$("fort_damage_per_ship", (fort_damage_per_ship#), .03)
+    list$ = list$ + tuning_note$("blast_base", (blast_base#), .25)
+    list$ = list$ + tuning_note$("blast_per_ship", (blast_per_ship#), .07)
+    list$ = list$ + tuning_note$("raid_chance", (raid_chance#), .8)
+    list$ = list$ + tuning_note$("raid_chance_per_ship", (raid_chance_per_ship#), .02)
+    list$ = list$ + tuning_note$("raid_loss_per_ship", (raid_loss_per_ship#), .05)
+    list$ = list$ + tuning_note$("raid_loss_most_share", (raid_loss_most_share#), .3)
+    list$ = list$ + tuning_note$("wooden_ship_hits", (wooden_ship_hits), 10)
+    list$ = list$ + tuning_note$("ironclad_hits", (ironclad_hits), 20)
+    list$ = list$ + tuning_note$("ship_hit_chance", (ship_hit_chance#), .5)
+    list$ = list$ + tuning_note$("ironclad_aim_bonus", (ironclad_aim_bonus#), .1)
+    list$ = list$ + tuning_note$("rail_union_cities", (rail_union_cities), 11)
+    list$ = list$ + tuning_note$("rail_rebel_cities", (rail_rebel_cities), 23)
+    list$ = list$ + tuning_note$("rail_per_city", (rail_per_city), 5)
+    list$ = list$ + tuning_note$("rail_most_times", (rail_most_times), 2)
+    list$ = list$ + tuning_note$("rail_least_divisor", (rail_least_divisor), 4)
+    list$ = list$ + tuning_note$("ai_move_spread", (ai_move_spread), 30)
+    list$ = list$ + tuning_note$("ai_leave_fort_penalty", (ai_leave_fort_penalty), 25)
+    list$ = list$ + tuning_note$("ai_leave_fort_realism_penalty", (ai_leave_fort_realism_penalty), 50)
+    list$ = list$ + tuning_note$("ai_enemy_capital_bonus", (ai_enemy_capital_bonus), 200)
+    list$ = list$ + tuning_note$("ai_target_value", (ai_target_value), 5)
+    list$ = list$ + tuning_note$("ai_target_fort", (ai_target_fort), 10)
+    list$ = list$ + tuning_note$("ai_empty_enemy_value", (ai_empty_enemy_value), 10)
+    list$ = list$ + tuning_note$("ai_march_direction_bonus", (ai_march_direction_bonus), 2)
+    list$ = list$ + tuning_note$("ai_beyond_value", (ai_beyond_value), 3)
+    list$ = list$ + tuning_note$("ai_beyond_fort", (ai_beyond_fort), 4)
+    list$ = list$ + tuning_note$("ai_capital_road_bonus", (ai_capital_road_bonus), 50)
+    list$ = list$ + tuning_note$("ai_stay_weight_even", (ai_stay_weight_even), 200)
+    list$ = list$ + tuning_note$("ai_stay_weight_strong", (ai_stay_weight_strong), 80)
+    list$ = list$ + tuning_note$("ai_stay_weight_stronger", (ai_stay_weight_stronger), 20)
+    list$ = list$ + tuning_note$("ai_stay_weight_strongest", (ai_stay_weight_strongest), 5)
+    list$ = list$ + tuning_note$("ai_aggression_strength", (ai_aggression_strength), 20)
+    list$ = list$ + tuning_note$("ai_small_army_penalty", (ai_small_army_penalty), 300)
+    list$ = list$ + tuning_note$("ai_poor_odds_penalty", (ai_poor_odds_penalty), 200)
+    list$ = list$ + tuning_note$("ai_realism_penalty", (ai_realism_penalty), 15)
+    list$ = list$ + tuning_note$("ai_no_supply_penalty", (ai_no_supply_penalty), 100)
+    list$ = list$ + tuning_note$("ai_odds_bad_penalty", (ai_odds_bad_penalty), 300)
+    list$ = list$ + tuning_note$("ai_odds_low_penalty", (ai_odds_low_penalty), 20)
+    list$ = list$ + tuning_note$("ai_odds_even_penalty", (ai_odds_even_penalty), 5)
+    list$ = list$ + tuning_note$("ai_odds_good_bonus", (ai_odds_good_bonus), 10)
+    list$ = list$ + tuning_note$("ai_attack_spread", (ai_attack_spread), 50)
+    list$ = list$ + tuning_note$("ai_armies_base", (ai_armies_base), 2)
+    list$ = list$ + tuning_note$("ai_armies_per_side", (ai_armies_per_side), 3)
+    list$ = list$ + tuning_note$("ai_armies_spread", (ai_armies_spread), 3)
+    list$ = list$ + tuning_note$("ai_fleet_wanted", (ai_fleet_wanted), 5)
+    list$ = list$ + tuning_note$("ai_reinforce_below", (ai_reinforce_below), 155)
+    list$ = list$ + tuning_note$("ai_fortify_cash", (ai_fortify_cash), 222)
+    tuning_changes$ = list$
+END FUNCTION
+
+' The rules between knobs: "" when the knobs keep them all; otherwise the first one broken.
+FUNCTION tuning_relations$
+    tuning_relations$ = ""
+    IF NOT (huge_army_size > large_army_size) THEN
+        tuning_relations$ = "huge_army_size must be above large_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT (cities_big_bonus_above > cities_bonus_above) THEN
+        tuning_relations$ = "cities_big_bonus_above must be above cities_bonus_above"
+        EXIT FUNCTION
+    END IF
+    IF NOT (new_army_supply + new_army_supply_spread + union_new_army_supply <= MAX_SUPPLY) THEN
+        tuning_relations$ = "new_army_supply, new_army_supply_spread and union_new_army_supply may add up to 10 at most"
+        EXIT FUNCTION
+    END IF
+    IF NOT (small_army_size < max_army_size) THEN
+        tuning_relations$ = "small_army_size must be below max_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT (min_detach_size <= max_army_size) THEN
+        tuning_relations$ = "min_detach_size may not be above max_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT (new_army_size <= max_army_size) THEN
+        tuning_relations$ = "new_army_size may not be above max_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT (reinforce_size <= max_army_size) THEN
+        tuning_relations$ = "reinforce_size may not be above max_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT (invasion_army_size <= max_army_size) THEN
+        tuning_relations$ = "invasion_army_size may not be above max_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT ((points_per_income# * (capital_income + 5 * union_bonus_per_balance + 640) + cities_bonus + cities_big_bonus) / (1 - points_kept#) <= 15000) THEN
+        tuning_relations$ = "a side's victory points may grow to 15000 at most: lower points_per_income, the bonuses or points_kept"
+        EXIT FUNCTION
+    END IF
+    IF NOT (ironclad_cost_times * cost_ship <= MAX_CASH) THEN
+        tuning_relations$ = "an ironclad (ironclad_cost_times times cost_ship) may cost 19999 at most"
+        EXIT FUNCTION
+    END IF
+END FUNCTION

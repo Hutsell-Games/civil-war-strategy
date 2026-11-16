@@ -12,7 +12,9 @@
 '     longer one, which the game uses as "press a key", waits for a key;
 '   - PLAY and SOUND are silent (PLAY "V0"): they take their time, unheard;
 '   - the random numbers of special_events can be given (CWS_DICE);
-'   - the history file holds the date 01-01-2000 instead of today's.
+'   - the history file holds the date 01-01-2000 instead of today's;
+'   - with CWS_AUTOPLAY=1 too, the computer plays the player's side (ai_player_turn,
+'     ui/turn.bm), and the game writes autoplay.txt and ends when it is decided.
 ' A program started without it plays as before: script_mark_key_wait does nothing.
 ' ===========================================================================
 
@@ -27,6 +29,24 @@ SUB script_start
     scripted = 1
     RANDOMIZE VAL(seed$)
     script_dice$ = ENVIRON$("CWS_DICE")
+    autoplay = 0
+    IF ENVIRON$("CWS_AUTOPLAY") = "1" THEN
+        autoplay = 1
+    END IF
+END SUB
+
+' The end of an autoplayed game (end_game, ui/victory.bm): writes autoplay.txt and ends the
+' program before the end screens. Its one line holds the side that end_game names, the rule
+' that ended the game (VICTORY_MONTH to VICTORY_WIPED_OUT), the month and year, and each side's
+' victory points and cities. A time limit names the Union as its side, though the Rebels win a
+' technical victory (end_game).
+SUB script_autoplay_end (side, rule)
+    DIM file_num AS INTEGER
+    file_num = FREEFILE
+    OPEN "autoplay.txt" FOR OUTPUT AS #file_num
+    WRITE #file_num, side, rule, turn_month, turn_year, side_victory_points(SIDE_UNION), side_victory_points(SIDE_REBEL), side_city_count(SIDE_UNION), side_city_count(SIDE_REBEL)
+    CLOSE #file_num
+    SYSTEM
 END SUB
 
 ' Makes PLAY and SOUND silent when the program is scripted. Called once, before the title

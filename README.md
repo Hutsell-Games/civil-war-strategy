@@ -23,7 +23,8 @@ merge into `main`, and by hand once it is on `main` (Actions, Build, Run workflo
 (Python tests and unit tests on Windows, the whole-game scripts on Linux).
 
 Run the program from this folder. It reads its pictures from `graphics` and its map, setup, leaders
-and special events from `scenarios`. Its settings (`CWS.CFG`), its Hall of Fame (`HISCORE.CWS`),
+and special events from `scenarios`, and the tuning knobs for playtesting from `scenarios\TUNING.DAT`,
+which says how to use them. Its settings (`CWS.CFG`), its Hall of Fame (`HISCORE.CWS`),
 saved games and history files stay beside the program. Each map is a folder of
 `scenarios`: `standard` and `alternate`.
 

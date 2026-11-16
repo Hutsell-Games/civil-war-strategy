@@ -34,6 +34,8 @@ Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews 
   from the canonical game in [rule-changes.md](rule-changes.md), including bug fixes and
   resolved gameplay regressions, in the same change as the code. Record interface and port
   details in [devnotes.md](devnotes.md), and player-facing summaries in [CHANGELOG.md](../CHANGELOG.md).
+  A new entry goes under "Unreleased" at its top; a released version's section is not
+  changed (user, 2026-11-15).
   Preserve existing IDs when moving entries between documents.
 - **Names and declarations.** Shared variables and parameters use snake_case, with the subject
   first (`army_size`, `city_owner`). Constants use uppercase group prefixes (`SIDE_UNION`).
@@ -88,7 +90,9 @@ The coverage rule still holds for new changes:
 - A step that must rewrite lines no test runs waits for tests that reach them.
 
 The last recorded inventory lists 10 lines that no test runs. The script `navy-first-fleet`
-reached an 11th, in `ai_fleet_orders`, on 2026-11-14. The table names the SUB rather
+reached an 11th, in `ai_fleet_orders`, on 2026-11-14. The fixes G25 to G28 (2026-11-15) changed
+the scripts' games: two lines in `ai_fortify` and `ai_recruit` are no longer reached, and two
+others lost are reached by new unit tests. The table names the SUB rather
 than line numbers, because refactors move them; consult a fresh `report.txt` before changing them.
 
 | File | SUB | Lines | Why |
@@ -97,7 +101,8 @@ than line numbers, because refactors move them; consult a fresh `report.txt` bef
 | `ai\navy.bm` | `ai_fleet_orders` | 2 | The `ELSE` for a fleet at sea; a fleet at sea already left a few lines before |
 | `ai\army.bm` | `ai_attack_score` | 1 | `odds! = 5`: an army of size 0 that still holds a city; no game makes one |
 | `rules\battle.bm` | `battle_losses` | 1 | The losses of a defender of more than 80,000 men; no script has one. |
-| `ai\forces.bm` | `ai_fortify` | 1 | The Union computer stops fortifying when it has no fleet. |
+| `ai\forces.bm` | `ai_fortify` | 2 | It stops at a city whose fort is already at its limit; and the Union computer without a fleet stops when its cash is below 222 (G26), which no script's Union has after a fort |
+| `ai\forces.bm` | `ai_recruit` | 1 | The computer has no city to recruit in; since G25 to G28 no script's game reaches it |
 | `ai\navy.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
 | `ui\city.bm` | `menu_city_select` | 1 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
@@ -132,7 +137,9 @@ rules are inventoried below; deciding whether to move them belongs to the engine
    the cannon and the two ship pictures go to `game\`, whole (as phase 6 moved SUBs). The ten
    rule constants go to a `game\rules.bi`, with the four city constants beside them
    (`VARY_REBEL_FLEET_CITY`, `VARY_REBEL_CAPITAL`, `AI_UNION_FLEET_CITY`, `AI_REBEL_HOLD_CITY`,
-   in `cws.bi` since 2026-11-14). The map's seven city numbers in `draw\map.bm` go with the
+   in `cws.bi` since 2026-11-14). Most of the ten, and 120 more numbers of the rules and
+   the computer, became tuning knobs in `scenarios\TUNING.DAT` on 2026-11-16
+   (`tools\tuning\knobs.txt`); they are data already, and a scenario's folder may hold its own. The map's seven city numbers in `draw\map.bm` go with the
    map's line work, so question 2 decides where they live:
    - `draw_fleets`: fixed icon positions for a fleet at 30 Philadelphia, 28 Norfolk and
      17 Jackson MS, and a shifted icon at 24 Mobile.
@@ -203,9 +210,9 @@ code rules below, followed by the 17 side-specific event entries already in data
 
 | Name | Current difference | Location |
 |------|--------------------|----------|
-| Union first ship before recruiting | A Union computer with no ships and more than `COST_SHIP` cash tries to build before recruiting. There is no corresponding Rebel branch. | [ai/forces.bm](../ai/forces.bm), `ai_raise_forces` |
-| Union first fleet at city 30 | Against a Rebel player, a Union computer with neither fleet nor ships, ownership of city 30 and more than `COST_SHIP` cash sets its fleet location to 30 and tries to build. | [ai/navy.bm](../ai/navy.bm), `ai_fleet_orders` |
-| Union fortification stop without ships | After fortifying, a Union computer with no ships may stop on `RND > .5` and local `side_cash < 222`. That scalar is always zero; it is not the shared cash array. This records the existing quirk. | `ai/forces.bm`, `ai_fortify` |
+| Union first ship before recruiting | A Union computer with no ships and more than `cost_ship` cash tries to build before recruiting. There is no corresponding Rebel branch. | [ai/forces.bm](../ai/forces.bm), `ai_raise_forces` |
+| Union first fleet at city 30 | Against a Rebel player, a Union computer with neither fleet nor ships, ownership of city 30 and more than `cost_ship` cash sets its fleet location to 30 and tries to build. | [ai/navy.bm](../ai/navy.bm), `ai_fleet_orders` |
+| Union fortification stop without ships | After fortifying, a Union computer with no ships may stop on `RND > .5` when its cash is below 222. Until 2026-11-15 the test read a local scalar that was always zero ([G26](rule-changes.md#explicit-gameplay-changes)). | `ai/forces.bm`, `ai_fortify`, `ai_fortify_stops` |
 | Player-dependent computer army limit | Recruiting stops when the adjusted army count exceeds `2 + 3 * current_side + 3 * RND`: `5 + 3 * RND` for the Rebel computer facing a Union player, `8 + 3 * RND` for the Union computer facing a Rebel player. | `ai/forces.bm`, `ai_raise_forces`, `ai_count_armies` |
 | Computer march direction | A Rebel computer gets 2 extra move-score points for decreasing map y (toward the Union); a Union computer gets them for increasing y (toward the Rebels). | [ai/army.bm](../ai/army.bm), `ai_evaluate_move` |
 | Computer rail direction | Among otherwise eligible rail destinations, the Rebel computer selects decreasing map y, the Union computer increasing y. Fort and capital choices can override this preference. | [ai/railroad.bm](../ai/railroad.bm), `ai_railroad_city` |

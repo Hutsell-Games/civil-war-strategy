@@ -18,7 +18,8 @@ Ruled on 2026-11-13 (user): the other 22 bugs of this list, and the `SELECT CASE
 reached (`docs\archived\sub-names.md`, "Found while reading"), were fixed in one batch. The pictures,
 `normal_random_number` and the train's pixels below are kept. Of four rows found afterward, three were
 settled on 2026-11-13 (user). The fourth, the computer's fleet that "thinks of sailing" and
-attacks all the same, was kept then and fixed on 2026-11-14 (user; `docs\rule-changes.md`, G24). What each fix did
+attacks all the same, was kept then and fixed on 2026-11-14 (user; `docs\rule-changes.md`, G24). Three
+inherited typos of the computer were fixed on 2026-11-15 (user; G25 to G27), with a fourth (G28). What each fix did
 is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Three more".
 
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
@@ -27,22 +28,6 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
 - **`normal_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
   on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
-- **The computer counts a fort of 2 as no fort** when it weighs an attack (`ai_attack_score`, `ai\army.bm`
-  lines 262 to 267). The original's `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3` is
-  one `IF` line, so the second test runs only when the fort is 1. A fort of 0 gives 1, of 1 gives 2, and of
-  2 gives 1 again; a fort is never 3 (`MAX_FORT` is 2). It most likely meant the fort plus 1.
-- **The Union's computer skips fortifying half the time when it has no fleet** (`ai_fortify`, `ai\forces.bm`
-  line 43): `... AND RND > .5 AND side_cash < 222 THEN EXIT SUB`. `side_cash` there is a local scalar,
-  declared so that `OPTION _EXPLICIT` accepts it, and it is always 0, as the original's undeclared `cash`
-  was. So the cash test is always true. It most likely meant `side_cash(side) < 222`.
-- **The computer's bonus for a road toward the enemy's capital compares an owner with a city**
-  (`ai_beyond_score`, `ai\army.bm`): `IF city_owner(far_city) = side_capital(enemy_side)`. An
-  owner is 0 to 2, and no capital is city 1 or 2, so the 50 goes to no city while the enemy
-  holds its capital. Once the capital falls, `side_capital` is 0, and every neutral city one
-  road beyond gets the 50. It most likely meant `far_city = side_capital(enemy_side)`. The
-  original did the same (`CWSTRAT2.BM` line 381, `IF cityp(m) = capcity(side) THEN y = y + 50`).
-  Found 2026-11-14. `TestAiBeyondScore`
-  holds it.
 - **A letter in the city picker never reaches one city** (`side_city_by_letter`, `rules\city.bm`).
   When the side does not hold the first city with that letter, the search goes on through the next
   38 cities, as the original's 39 tries did. The 40th, the city just before the first, is never
@@ -61,6 +46,60 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
+- **The computer playing both sides favors the Rebels.** In 100 two-player games of the computer
+  against itself (`tests\autoplay.py`, standard map, seeds 1 to 100), the Rebels won 80 and the Union 20.
+  43 of the Rebels' wins came at the time limit, March 1865, a technical victory: the Union's computer did
+  not win before the clock ran out. Before the fixes G25 to G28 it was 69 to 31 (`docs\rule-changes.md`).
+  Found 2026-11-15. Whether people find the same is the next check (user, 2026-11-16): games played by
+  hand, as each side. Possible causes to measure with autoplay: the time limit itself, the Union's
+  computer being too cautious to take Richmond, and the scenario's starting forces.
+
+Found on 2026-11-16 in a code review, by reading the code; not run. Each is in the DOS code too
+(`CWSTRAT.BAS` and `CWSTRAT2.BAS` on `canonical-source`). A fix needs a row in `docs\rule-changes.md`.
+
+- **Join can make the armies disappear** (`army_combine_add`, `rules\army.bm`). `best` is set only when an
+  army's leader rating is above army 0's, which starts at 0. When every army that joins has a rating of 0,
+  `best` stays 0. `army_combine_finish` then puts the troops in army 0 and leaves the city with no army.
+  Relieve with a leader of rating 1 gives an army a rating of 0 (`army_take_leader`).
+- **Relieve mixes up the leaders' names and ratings** (`menu_army_relieve`, `ui\army.bm`;
+  `army_free_leader`). The old leader goes back to the list in the army's slot under his own name, but
+  keeps that slot's rating. He then has the rating of the slot's first leader. A second Relieve of the
+  same army writes over the name in that slot, and that leader is lost. Join (`army_combine_absorb`)
+  frees leaders the same way.
+- **Cancel can cancel another army's move** (`menu_army_cancel`, `ui\army.bm`). The menu keeps the city,
+  and the army is found by `INSTR` of its name. With "Rebel II" and "Rebel III" in one city, both with
+  moves, picking "Rebel II" cancels "Rebel III". Keeping the army's number in `menu_value()` would fix
+  it, but `MENU_CITY_BOX` reads the city from there.
+- **The computer's recruiting reads a leftover value** (`ai_recruit_pick`, `ai\forces.bm`).
+  `army = 0 XOR army_size(army) < ai_reinforce_below` reads `army_size(0)` for a city with no army.
+  Army 0 still holds the size of the last Join, so whether an empty city is picked depends on it. Army 0
+  is not saved, so a game plays differently after a Load.
+- **The time limit marks the wrong winner** (`end_game`, `ui\victory.bm`). `check_victory_conditions`
+  tests the Union first, so a game that runs out of time always ends with the Union as the side.
+  `victory_won` then sets `victory_reason` to the Union, and `save_battle_summary` puts the winner's `*`
+  beside the Union in `battsumm`, for a Confederate technical victory. `script_autoplay_end` and
+  `tests\autoplay.py` work around this rather than fix it.
+- **Vary Start** (`vary_start_conditions`, `rules\setup.bm`).
+  - When the Rebels' random fleet size is 0, their fleet keeps the scenario's port (city 24) with no
+    ships. `fleet_exists` is then true for a fleet of none.
+  - It is offered at any time in the Utility menu. It reloads the scenario, which resets the date, the
+    victory rules and the cash, and brings back every leader, including those who command an army.
+  - The ironclad chance is `RND > .45 * current_side`, the player's side, for both fleets.
+  - Under Realism it can give ironclads in 1861: `game_apply_settings` turned them into wooden ships
+    before Vary Start runs.
+- **A fleet that retreats to no port** (`navy_retreat_port`, `rules\navy.bm`). With no other sea port,
+  `fleet_city` becomes 0 while the fleet keeps its ships. The message says "retreating to NONE". Build
+  then adds ships to a fleet that is in no port and is never drawn.
+- **Smaller ones:**
+  - The force-ratio warning lacks a space: "UNIONside close to" (`victory_warnings`, `ui\victory.bm`).
+  - `ai_army_order` tests `victory_rule(VICTORY_CAPITAL) <> 0`, but a rule that is off is negative. The
+    computer still holds its capital when the capital rule is off. `ai_evaluate_move` tests `> 0`.
+  - Recruiting has no size cap. Repeated recruiting in one city can take an army past 32767, where it
+    wraps to a negative size.
+  - "No - Press Onward to" names the enemy's capital, which is "NONE" when the capital was taken
+    (`end_game`).
+  - The railroad picker allows the army's own city as a destination after one refused city
+    (`menu_railroad`).
 
 ## Improvements
 
@@ -91,6 +130,22 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 - **One known folder for saves and settings.** `cws1.sav` to `cws9.sav`, `cws.cfg`, `hiscore.cws`, `cws.his`
   and `battsumm` are opened in the current folder (`io\files.bm`), so they land wherever the game was
   started from. A single folder, for example beside the program, would keep them together.
+- **The numbers that are not tuning knobs yet.** `scenarios\TUNING.DAT` holds 135 knobs (user,
+  2026-11-16; `tools\tuning\knobs.txt`). Left as numbers in the code, each for a reason:
+  - **Thresholds that give a formula its shape**: the size ratios of `battle_strengths` (.2, .5, 1.5, 3,
+    10), the odds bands' edges of `ai_attack_score`, and the strength ratios of `ai_stay_weight` (1.5, 2,
+    3). A file could set them out of order; a knob for each needs a check of the order.
+  - **The price of supply** (`army_buy_supply` and `army_supply_days`, `rules\army.bm`): one line
+    multiplies by .1 and the other by 10, and one knob for both would not round as the two do now.
+  - **The move order** (`turn_set_move_order`), the recruit menu's chances (`army_recruit_cities`),
+    the fleets' chances in `ai\navy.bm`, the train's in `ai\railroad.bm`, the rest of Vary Start, and
+    the computer's strength boost when its enemy holds under 11 cities (`turn_update_victory_points`).
+  - **`MAX_FORT`, `MAX_SUPPLY`, `MAX_EXPERIENCE`, `MAX_LEADER_RATING`, `MAX_CASH`, `MAX_FLEET_SHIPS`**:
+    screens and files are laid out for them.
+
+  A new knob is one line in `knobs.txt`, `make_knobs.py`, and the variable in the code. A fraction must
+  be a DOUBLE (`name#`), which `make_knobs.py` sees to. Check a conversion as `number_knobs.py` was
+  checked: the scripts, and the same autoplay games with the number and with the knob.
 
 ## The code
 
@@ -132,7 +187,7 @@ Left alone by group 6 (the settings and victory rules):
 Left alone by group 7 (the rule numbers):
 
 - **`total_income = union_income_bonus + 200`** (`load_cities`, `io\files.bm` line 104), where the cities are read. The 200
-  may be the two capitals' income (`2 * CAPITAL_INCOME`), but nothing says so, and the main loop works
+  may be the two capitals' income (`2 * capital_income`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`year above 1862`, `[emancipation]` in
   `scenarios\EVENTS.DAT`). That is the date of an event, not `IRONCLAD_YEAR`; phase 11 moved the
@@ -148,3 +203,37 @@ Left alone by group 8 (the colors):
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
 - **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 98): 0 there means "no color set",
   not black, so the test keeps its 0.
+
+Found on 2026-11-16 in a code review, by reading the code; not run. The Realism tests and the forced
+choices change how the game plays or is played; the others do not.
+
+- **Waits that use a whole processor core.** `wait_key`, `wait_seconds` (`ui\screen.bm`), `menu_wait_key$`
+  (`ui\menu.bm`) and `script_tick` (`io\script.bm`) loop on `INKEY$` with no `_LIMIT`. While the game
+  waits for a key, it runs one core at 100%.
+- **`wait_seconds` at midnight.** `TIMER` goes back to 0 at midnight, so `TIMER - start!` turns negative
+  and the pause lasts until a key is pressed.
+- **Files opened without a check.** `config_read` (`CWS.CFG`), `hall_of_fame_load` (`HISCORE.CWS`),
+  `load_scenario_list` and `load_scenario` open their files without `_FILEEXISTS`. Started from another
+  folder, the game stops with "File not found".
+- **Special slots used as data.**
+  - City 0's owner stands for "the port of a side with no fleet" (`navy_mark_side`). `ai_raise_forces`
+    and `navy_can_invade` read it through `city_owner(fleet_city(side))`.
+  - Army 0 is the scratch army of Join and is never cleared after it.
+- **A latent precedence error** (`calculate_battle`, `ui\battle.bm`).
+  `IF opt_players = PLAYERS_ONE AND (…) OR (…)` reads as `(A AND B) OR C`. It does no harm today,
+  because `current_side` is the Union during a two-player month. The original has the same line.
+- **Dead code.**
+  - `IF army < 0` in `menu_city_fortify` (`ui\city.bm`): `city_army()` is never negative.
+  - The first assignment of `menu_text$(2)` in `menu_utility` (`ui\options.bm`).
+  - The unreachable `rule = VICTORY_WIPED_OUT` tests inside the force-ratio part of `victory_rule_met`.
+  - The value of `odds! = 5 - 4 * RND` in `ai_beyond_score`, which is overwritten at once. The draw may
+    be kept so that the random numbers stay in step; if so, a comment should say so.
+- **A literal side.** `army_get_commander(2, army_slot)` in `menu_army_detach` should be `SIDE_REBEL`.
+- **A rule that changes its input.** `battle_strengths` sets an army's size to 1 when it is below 1, in a
+  procedure that otherwise only works out strengths.
+- **Realism tests disagree.** Some places test `opt_realism = REALISM_ON`, others `>= REALISM_ON`, so
+  Realism 2 (`REALISM_HIGH`, reachable through `CWS.CFG`) is on for some rules and off for others. This
+  follows the original.
+- **Forced choices.** Relieve and the port menu of a new fleet loop until a row is picked, so Esc does not
+  back out. The Capital command takes the money before the city is picked, and picking the same capital
+  still pays (documented in `menu_move_capital`).

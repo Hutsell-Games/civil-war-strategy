@@ -4,6 +4,47 @@ Changes for players, newest first. The original DOS release notes are kept separ
 from the later Windows ports. The current port starts from Hutsell's original DOS
 source rather than extending version 1.61.
 
+## Unreleased
+
+### Computer play
+
+- When weighing an attack, the computer counts a fort of 2 as stronger than a fort
+  of 1; before, it counted it as no fort. A cautious computer compares its leader
+  and experience with the defender's.
+- The computer values a road that leads to the enemy's capital.
+- The Union's computer without a fleet keeps fortifying when it has 222 or more
+  in cash; before, it stopped half the time whatever its cash.
+
+### New Game and Load
+
+- Files, New Game starts with Moves and Ships open, and with no raid on commerce
+  left over from the game before.
+- A loaded game keeps no raid of the game played before it. A fleet saved at sea
+  raids on commerce from the first month after the load; before, it waited until
+  some fleet moved.
+- After Files, New Game or a Load, the computer's first turn no longer plays by the
+  strength ratio of the game before.
+- A Load gives back every leader of the scenario who commands no army in the saved
+  game, including those the game before had used.
+
+### Playtesting
+
+- `scenarios/TUNING.DAT` holds 135 numbers that set the game's balance: costs and
+  income, recruiting, supply, the battle formulas, victory points, the navy, the
+  railroad, and how the computer weighs its moves. Edit a value and start a new
+  game to play with it. The shipped file keeps the game as it was.
+- A scenario's folder may hold a `TUNING.DAT` of its own, with only the lines it
+  changes.
+- A saved game keeps the knobs it was saved with, and the history file names those
+  that differ from the defaults.
+
+### Menus
+
+- The Commands menu shows Supply as "-" when it would give no army supplies:
+  every army has them, or is cut off, or the treasury cannot buy a day of them.
+  After a purchase that leaves Supply as "-", the main menu comes back, as it does
+  after the last fort the treasury can pay for.
+
 ## Version 1.7
 
 The current port, on `main`, supports QB64Rust and QB64pe. Its title screen, manual and

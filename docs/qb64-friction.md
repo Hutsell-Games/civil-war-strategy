@@ -121,6 +121,10 @@ modernization archive's phase 10 notes also record this distinction.
 while preserving a misleading name. This is a known behavior kept by the
 refactor, not a new fix to make as part of this list.
 
+**Outcome (2026-11-15).** The user ruled it a typo. The test now reads
+`side_cash(side)`, and the local scalar is gone
+([rule-changes.md](rule-changes.md), G26).
+
 **QB64Rust question.** An optional warning for a same-named scalar and visible
 array, or a local never assigned before it is read, could expose this case.
 Whether an existing warning already covers it should be checked before adding
@@ -143,6 +147,22 @@ parser.
 **QB64Rust question.** Keep this as evidence to revisit if other ports repeat
 the same parsing work. It does not yet justify a new language feature or a
 general serialization library.
+
+**Second case (2026-11-16).** [io/tuning_file.bm](../io/tuning_file.bm) reads
+`scenarios/TUNING.DAT`, "name = value" lines, with the same trim, comment and
+`text_is_number` steps. Each knob is a shared variable and a `CASE` of
+`tuning_set`, because BASIC cannot look a variable up by its name. With 135
+knobs, a Python script writes those lines from a table
+(`tools/tuning/make_knobs.py`): a code generator outside the language, as the
+folder rules needed a checker outside it (section 2).
+
+**A number and a variable do not multiply alike.** A fraction written in the
+code is a DOUBLE in a product, but the same fraction in a SINGLE variable is
+not: `.3 * 95` assigned to an INTEGER gives 28 as a literal and 29 from a SINGLE.
+Over the game's fractions and 0 to 3000, 112 products round differently, with
+both compilers (2026-11-16). So every fractional knob is a DOUBLE. Nothing
+warns of this; a named constant (`CONST`) would not have the problem, but a
+constant cannot be read from a file.
 
 ## 8. A positional data file takes no new field
 

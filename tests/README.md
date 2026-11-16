@@ -216,7 +216,7 @@ on a desktop nobody sees.
 | `events-south` | From a prepared save of November 1863, the events that favor the South, by forced dice: riots in a city the Union took, England's ships, mercenaries, furloughs for the 1864 election, a loan, and the victory points of January 1864 and 1865 |
 | `events-union` | From a prepared save of May 1864, the events that favor the Union: riots in a city the Rebels took, extra ships up to the fleet's limit, the Emancipation Proclamation, and Lincoln reelected. The Rebel fleet starts at sea, so the computer sails it home |
 | `refusals` | From a prepared save, one month of commands that the game refuses or that need a certain state: no commander left for a new army, a blocked track, an army too large for the train, the Which menu, a train's destination with no track, "Railroad is already carrying", the Supply menu with an army cut off, armies too large to combine, the Cancel menu, and an ironclad from the Type menu |
-| `refusals-rebel` | From a prepared save, as the Rebels with little cash, entries of the Commands menu that the game refuses: no money for a fort or to move the capital, an army too small to detach from, an army that cannot drill further, and no army left to drill |
+| `refusals-rebel` | From a prepared save, as the Rebels with little cash, entries of the Commands menu that the game refuses: no money for a fort or to move the capital, an army too small to detach from, an army that cannot drill further, no army left to drill, Esc from the Supply menu, and Supply as "-" once supplies have spent the cash |
 | `navy-fights` | From a prepared save: the Options menu of a sea fight and a retreat, a raid on commerce without and with the lead ship's picture, a fleet that sails home from raiding, and a Union army that beats the army in Richmond, which flees |
 | `join` | From a prepared save: the player combines two armies in Washington (COMMANDS, Join), and a Rebel army's train arrives in the computer's turn |
 | `navy-build` | From a prepared save with no Union fleet: the Ships menu's entries that need a fleet, the Type menu, a new fleet through the Port menu, a sea fight in which the player attacks and wins, and the entries refused to a fleet at sea |
@@ -241,7 +241,7 @@ it recruits, moves, builds ships, fights and wins.
 | Script | How the game goes |
 |---|---|
 | `pass-<side>-<seed>` | The game ends at the first victory condition the computer reaches, after 1 to 14 turns. Eight games: the seeds 1861 to 1864 as each side, each seed with settings of its own (the map's detail, the play balance, the computer's aggression, random events, realism). `pass-<side>-altmap`: two more on the alternate map |
-| `war-<side>-<seed>` | The player first turns off every victory condition but the time limit (Utility, End Cond). The game lasts 10 to 20 turns, until the player's side has no army left. `war-union-1866`, `war-rebel-1867`, and `war-union-altmap` and `war-rebel-altmap` on the alternate map |
+| `war-<side>-<seed>` | The player first turns off every victory condition but the time limit (Utility, End Cond). The game lasts 10 to 24 turns, until the player's side has no army left. `war-union-1866`, `war-rebel-1867`, and `war-union-altmap` and `war-rebel-altmap` on the alternate map |
 
 Each takes a digest at every main menu, names the commander "Tester" when the Hall of Fame asks, and quits.
 Each runs with history on and checks the history file `cws.his` and `HISCORE.CWS` after the run. The history
@@ -273,6 +273,44 @@ Points that matter:
 - **The commander's name is an `INPUT`**: after `play until 4`, a `text` step and `key enter` give the whole
   line. A rule cannot answer it.
 - **Choose menu entries by letter where you can**, but check the menu: the first entry with the letter wins.
+
+## Autoplay: the computer against itself
+
+`autoplay.py` measures what a change of the rules or of the computer does to how games go. It is not a check
+against recordings and does not run in CI. It plays many seeded games in which the computer's code plays both
+sides, and counts who wins, by which rule and when.
+
+```
+python tests\autoplay.py run before.json --seeds 1-100          # 100 games; then change the game, and:
+python tests\autoplay.py run after.json --seeds 1-100
+python tests\autoplay.py compare before.json after.json         # the same games on both versions
+python tests\autoplay.py summary after.json
+```
+
+The game takes part through `CWS_AUTOPLAY=1`, which counts only under a script (`io\script.bm`). At each main
+menu, `ai_player_turn` (`ui\turn.bm`) runs the computer's decisions for the player's side. While it does,
+`current_side`, which the computer's code reads as its enemy, is the other side, and the strength ratio is worked
+out from the side deciding. When a victory rule ends the game, `end_game` writes `autoplay.txt` and the program
+ends before the end screens.
+
+- **`--mode two`** (the default) plays a two-player game, with both players played by the computer. No rule
+  favors either side as the computer, so this is the fair match.
+- **`--mode one`** plays a one-player game as each side: the player's side is played by the computer's code,
+  against the computer with the help the rules give it (the Union's income bonus, the computer's victory points).
+- **`--map alternate`** plays the alternate map.
+- **`--tuning <file>`** plays with a tuning file's lines on top of `scenarios\TUNING.DAT` and the scenario's
+  own (the game reads it through `CWS_TUNING`, only under a script). The file need hold only the knobs it
+  changes. Each game's result records the text of all three files (`--tuning`, the scenario's own, and
+  `scenarios\TUNING.DAT`), so a result says which knobs it was played with. Compare a run without the option against one with it.
+
+Each seed is one game, the same game every time. The seed also sets the computer's aggression (seed mod 6) and
+Realism (seed mod 2). The balance is Even and the random events neutral. Four games run at once; 100 take about
+ten minutes on Windows.
+
+What it shows and what it does not: a computer playing itself shows whether a change helps one side against the
+same opponent, and whether the sides stay balanced. It does not show how well the computer plays against a
+person. One limit of the swap: `fleet_pursuit`, the state of a sea pursuit, is set by `current_side` in three
+places of `rules\navy.bm`, so in autoplay it follows the swapped side.
 
 ## What the scripts do not cover
 

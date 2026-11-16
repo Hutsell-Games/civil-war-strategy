@@ -1,0 +1,35 @@
+' The tuning knobs' shared variables. Written by tools/tuning/make_knobs.py from tools/tuning/knobs.txt. Do not edit.
+DIM SHARED cost_recruit, cost_ship, ironclad_cost_times, cost_fort
+DIM SHARED cost_move_capital, capital_income, upkeep_per_size#, start_cash_per_balance
+DIM SHARED start_cash_spread, vary_cash_shift, vary_cash_spread, union_bonus_per_balance
+DIM SHARED union_bonus_two_players, union_bonus_realism_share#, max_army_size, small_army_size
+DIM SHARED min_detach_size, detach_share#, resupply_level, drill_experience_below
+DIM SHARED made_up_leader_spread, new_army_size, reinforce_size, recruit_per_value
+DIM SHARED recruit_base, reinforce_per_value, reinforce_base, recruit_cut_off_divisor
+DIM SHARED recruit_cities_offered, new_army_supply, new_army_supply_spread, union_new_army_supply
+DIM SHARED rebel_new_army_experience, balance_recruits, balance_strength, starve_roll#
+DIM SHARED starve_size_above, starve_keep_share#, forage_roll#, winter_months
+DIM SHARED attack_per_size#, defense_per_size#, defense_base, defense_per_size_realism#
+DIM SHARED defense_base_realism, defense_most_realism, battle_leader_weight#, battle_experience_weight#
+DIM SHARED veteran_experience, small_army_strength#, no_supply_strength#, attack_outnumbered_penalty
+DIM SHARED attack_outnumbering_bonus, defend_outnumbering_bonus, defend_outnumbered#, defend_badly_outnumbered#
+DIM SHARED defender_halt_roll, fort_defender_loss#, fort_attacker_loss#, attacker_wins_loss#
+DIM SHARED defender_wins_loss#, large_army_size, large_army_loss#, huge_army_size
+DIM SHARED huge_army_loss#, loss_own_share#, loss_other_share#, attacker_loss_most_times
+DIM SHARED defender_loss_most_times, points_kept#, points_per_income#, cities_bonus_above
+DIM SHARED cities_bonus, cities_big_bonus_above, cities_big_bonus, capital_capture_points
+DIM SHARED capital_move_points, army_destroyed_points, fleet_sunk_points, fleet_lost_points
+DIM SHARED wiped_out_points, victory_points_bonus, time_limit_points_share#, invade_ships_least
+DIM SHARED invasion_army_size, bombard_loss_per_ship#, bombard_loss_spread#, fort_damage_chance#
+DIM SHARED fort_damage_per_ship#, blast_base#, blast_per_ship#, raid_chance#
+DIM SHARED raid_chance_per_ship#, raid_loss_per_ship#, raid_loss_most_share#, wooden_ship_hits
+DIM SHARED ironclad_hits, ship_hit_chance#, ironclad_aim_bonus#, rail_union_cities
+DIM SHARED rail_rebel_cities, rail_per_city, rail_most_times, rail_least_divisor
+DIM SHARED ai_move_spread, ai_leave_fort_penalty, ai_leave_fort_realism_penalty, ai_enemy_capital_bonus
+DIM SHARED ai_target_value, ai_target_fort, ai_empty_enemy_value, ai_march_direction_bonus
+DIM SHARED ai_beyond_value, ai_beyond_fort, ai_capital_road_bonus, ai_stay_weight_even
+DIM SHARED ai_stay_weight_strong, ai_stay_weight_stronger, ai_stay_weight_strongest, ai_aggression_strength
+DIM SHARED ai_small_army_penalty, ai_poor_odds_penalty, ai_realism_penalty, ai_no_supply_penalty
+DIM SHARED ai_odds_bad_penalty, ai_odds_low_penalty, ai_odds_even_penalty, ai_odds_good_bonus
+DIM SHARED ai_attack_spread, ai_armies_base, ai_armies_per_side, ai_armies_spread
+DIM SHARED ai_fleet_wanted, ai_reinforce_below, ai_fortify_cash

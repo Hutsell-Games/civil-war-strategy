@@ -24,6 +24,9 @@ SUB menu_commands
         END IF
         menu_text$(3) = "Join"
         menu_text$(4) = "Supply"
+        IF NOT side_can_supply(current_side) THEN
+            menu_text$(4) = "-"
+        END IF
         menu_text$(5) = "Capital"
         IF NOT capital_can_move(current_side) THEN
             menu_text$(5) = "-"
@@ -65,8 +68,21 @@ SUB menu_commands
                     EXIT SUB
                 END IF
             CASE 4
+                IF NOT side_can_supply(current_side) THEN
+                    COLOR COLOR_LIGHT_CYAN
+                    CALL clear_bottom_line
+                    IF side_needs_supply(current_side) THEN
+                        PRINT "Not enough funds in the Treasury for supplies";
+                    ELSE
+                        PRINT "All eligible "; side_name$(current_side); " armies have supplies";
+                    END IF
+                    EXIT SUB
+                END IF
                 CALL menu_supply(picked)
                 IF picked = 0 THEN
+                    EXIT SUB
+                END IF
+                IF NOT side_can_supply(current_side) THEN
                     EXIT SUB
                 END IF
             CASE 5

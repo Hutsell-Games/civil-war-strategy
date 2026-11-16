@@ -1,7 +1,7 @@
 # Rule changes from the canonical game
 
 This records changes to gameplay rules and computer decisions from the DOS
-`canonical-source` game to the current port. Updated 2026-11-14.
+`canonical-source` game to the current port. Updated 2026-11-16.
 
 Include combat, movement, recruiting, economy, events, victory, AI decisions and changes
 to random draws or saved state that affect those rules. Interface fixes, graphics,
@@ -78,6 +78,43 @@ These are real divergences even where the branch intentionally corrects a canoni
 | G22 | Player chooses naval Build / Attack | Canonical's `AND RND ...` conditions consume AI decision draws even on the player's path. | Removes these otherwise unused draws. Later random events, battles and AI choices can differ even when the immediate action looks identical. [ui/navy.bm](../ui/navy.bm), `menu_navy_build:38`, `menu_navy_attack:95`; `0e32e1c`. |
 | G23 | Realism turned off after being on | `CWSTRAT.BAS:622–631` runs `unionplus` only when Realism goes on, so turning it off keeps the Union's income bonus at 70%. It stays there until Balance or the number of players changes. Starting a game recomputes it from the settings. | Recomputes the bonus on both paths, so it always matches the settings. The manual's list of Realism's effects (`docs/CWS.DOC`, section 6.13) does not mention the bonus. [rules/setup.bm](../rules/setup.bm), `option_toggle_realism`. `db5deb2`. `TestOptionToggleRealism`. |
 | G24 | Computer's fleet off an enemy city with an army | `CWSTRAT.BAS:1527`: on `RND > .5` the order becomes Sail (`chx = 3`), but `GOTO anchor` returns to `SELECT CASE choose`, which still holds Attack. The test runs again and draws a second number, and the fleet bombards the city all the same. | On `RND > .5` the fleet sails instead (`ai_navy_sail`), and the city is not bombarded. The second draw is gone with `random_discard`. Ruled by the user on 2026-11-14, reversing the ruling of 2026-11-13 that kept it. `war-rebel-altmap` now lasts 14 months, not 9; it and `war-union-altmap` were recorded again. [ai/navy.bm](../ai/navy.bm), `ai_navy_attack`. **Uncommitted** (2026-11-14). `TestAiNavyAttackSailsFromAnArmy`. |
+| G25 | Computer weighs an attack on a fort of 2 | `CWSTRAT2.BAS:351`, `x1 = 1: IF fort(a) = 1 THEN x1 = 2: IF fort(a) = 3 THEN x1 = 3`, is one `IF` line, so the second test runs only when the fort is 1. A fort of 2 gets the factor 1 of no fort; a fort is never 3. | The defender's size is multiplied by the fort plus 1: 1, 2 or 3. The computer sees worse odds against a fort of 2. Ruled by the user on 2026-11-15. [ai/army.bm](../ai/army.bm), `ai_attack_score`. **Uncommitted** (2026-11-15). `TestAiAttackScoreCountsAFortOfTwo`. |
+| G26 | Union computer without a fleet, after a fort | `CWSTRAT.BAS:2210` tests the undeclared `cash`, always 0, so the computer stops fortifying on any roll above .5 whatever its cash. | It stops on a roll above .5 only when its cash is below 222; the roll is drawn as before. Ruled by the user on 2026-11-15. [ai/forces.bm](../ai/forces.bm), `ai_fortify`, `ai_fortify_stops`. **Uncommitted** (2026-11-15). `TestAiFortifyStopsByItsCash`. |
+| G27 | Computer's bonus for a road toward the enemy's capital | `CWSTRAT2.BAS:393` compares a city's owner (0 to 2) with the capital's number. No capital is city 1 or 2, so the 50 goes to no city while the enemy holds its capital, and to every neutral city one road beyond once it has lost it. | The 50 goes to the enemy's capital when it is one road beyond. Ruled by the user on 2026-11-15. [ai/army.bm](../ai/army.bm), `ai_beyond_score`. **Uncommitted** (2026-11-15). `TestAiBeyondScore`. |
+| G28 | Cautious computer's leader and experience bonus | `CWSTRAT2.BAS:364` adds `10 * (armylead(index) - armylead(c) + armyexper(index) - armylead(index))`: the army's own leader is added and subtracted, so the bonus is its experience less the occupant's leader. | Leader against leader and experience against experience: `armyexper(c)` in place of the second `armylead(index)`. The intended term is a reading of the pattern, not documented. Ruled by the user on 2026-11-15. [ai/army.bm](../ai/army.bm), `ai_attack_score`. **Uncommitted** (2026-11-15). `TestAiAttackScoreWeighsExperience`. |
+| G29 | Supplies for a small army from a large treasury | `CWSTRAT2.BAS`, `resupply`, works out the days as `x = cash(who) / armysize(index) * 10` in an INTEGER and caps them at 5 afterward. Above 32,767 days, for example 5,000 in cash and an army of 100 men, the INTEGER overflows. QB 4.5 would stop with an Overflow error. QB64Rust wraps the value, to -15,536 in that example, so nothing is bought ("Not enough funds"). | The days are capped at the resupply level before they are rounded to an INTEGER. That example buys 5 days. Values that fit in an INTEGER give the same days as before. This affects the player's Supply and the computer's resupply alike. Since U14, the Commands menu also uses it to decide whether Supply shows. Ruled by the user on 2026-11-15. [rules/army.bm](../rules/army.bm), `army_supply_days`. **Uncommitted** (2026-11-15). `TestArmySupplyDaysDoesNotOverflow`. |
+| G30 | Files, New Game during a game | `GOTO newgame` (`CWSTRAT.BAS:693`) stays in the same process, and its `newgame` label resets only `rflag`. Moves and Ships (`mflag`, `nflag`) stay closed if they were closed in the game before. The raid (`commerce`, `raider`) carries over: in the new game's first month the old raider's side raids with its fleet in port, and the other side loses the old `raider` from its income. | `game_reset` calls `turn_reset_commands` and clears `raiding_side`, `raid_loss` and `fleet_pursuit`. A new game starts with every command open and no raid. A new game from the title plays as before. Ruled by the user on 2026-11-16. [rules/setup.bm](../rules/setup.bm), `game_reset`. **Uncommitted** (2026-11-16). `TestGameReset`, `TestNewGameTakesNoRaidFromIncome`. |
+| G31 | Files, Load, with a fleet at sea or a raid going on | The raid is not saved, and `filer` does not set `commerce`. A load during a game keeps that game's raider and its last `raider` loss, even when the loaded game has no fleet at sea. A fleet saved at sea raids only once some fleet has moved. | `load_game` clears `raiding_side`, `raid_loss` and `fleet_pursuit`, then calls `navy_note_raiding_side`. A fleet saved at sea raids from the first month after the load, with no pursuit and no loss carried over. When both fleets are at sea the Rebels raid, as after a move. `navy_raid_round` draws its random numbers from that month on, so the draws differ from DOS. Ruled by the user on 2026-11-16. [io/files.bm](../io/files.bm), `load_game`. **Uncommitted** (2026-11-16). `TestLoadGameClearsTheRaid`; `events-union` recorded again. |
+| G32 | The computer's strength ratio after Files, New Game or Load | The ratio (`aggress!` in `CWSTRAT.BAS`) is not saved, and is set only at the month's end (line 1378) and by the victory points (line 2621). The computer's first turn after a new game or a load in the same session plays by the last ratio of the game before. A game started from the title has 0. | `game_reset` and `load_game` set `ai_strength_ratio!` to 0, as at the title. `turn_strength_ratio` works it out at the month's end, as before. A game from the title plays as before; the 41 scripts were unchanged. Ruled by the user on 2026-11-16. [rules/setup.bm](../rules/setup.bm), `game_reset`; [io/files.bm](../io/files.bm), `load_game`. **Uncommitted** (2026-11-16). `TestNewGameAndLoadClearTheStrengthRatio`. |
+| G33 | Files, Load of a game of the same scenario | `filer` case 2 does not read `cwslead.dat` again. It only removes from the free leaders those who command an army in the save. A leader whom the game before used up stays gone, even when the saved game has no army of his. | `load_game` reads the scenario's leaders again (`load_scenario_leaders`) before it reads the armies, for every save. The free leaders are the scenario's, less those who command a saved army, whatever was played before. Ruled by the user on 2026-11-16. [io/files.bm](../io/files.bm), `load_game`. **Uncommitted** (2026-11-16). `TestLoadGameFreesTheScenariosLeaders`. |
+
+G25 to G28 were measured together on 2026-11-15. The same games were played before and after
+the fixes, with a player who only ends each turn: seeds 1 to 100 with every victory condition
+on, and seeds 1 to 50 with only the time limit, each seed once as each side.
+- **Every victory condition on, the computer as the Rebels:** it won faster in 33 games and
+  slower in 12 (sign test p = 0.002), 7.31 turns before and 7.00 after on average.
+- **Every victory condition on, the computer as the Union:** no change. It won faster in 9
+  games and slower in 10, in about 4 turns either way.
+- **Only the time limit, either side:** no measurable change (p = 0.47 and 0.49).
+
+These games show how fast the computer beats a player who does nothing. They do not show how
+well it plays against one who fights back. The measurement could not single out G26; the
+autoplay measurement below does.
+
+The computer against itself (`tests/autoplay.py`, two-player games, standard map, seeds 1 to
+100), before and after G25 to G28:
+- **Wins:** the Union won 31 games before and 20 after; the Rebels 69 and 80. 21 games went
+  from a Union win to a Rebel win and 10 the other way (sign test p = 0.071).
+- **Time limit:** 35 games before and 43 after ran to March 1865, a Rebel technical victory.
+  The fixes make the computer's attacks more cautious, so more games end in a stalemate.
+
+Both before and after, the computer playing both sides favors the Rebels, mostly by the time
+limit.
+
+G26 alone, measured the same way: with only G26 put back, all 100 games played exactly as with
+it, the same winners, end months and victory points. Its case, a Union computer with no fleet
+and 222 or more in cash after a fort, did not come up. The shift above comes from G25, G27
+and G28.
 
 ## Rule changes within the later shared-rule cleanup
 

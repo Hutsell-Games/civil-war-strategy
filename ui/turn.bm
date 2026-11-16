@@ -350,10 +350,29 @@ END SUB
 ' The computer's half of the month: special events, then each of its decisions in turn, which
 ' carry out their orders on screen.
 SUB ai_turn
-    DIM ai_side AS INTEGER
-    DIM side_color AS INTEGER
     CALL special_events
-    ai_side = other_side(current_side)
+    CALL ai_side_turn(other_side(current_side))
+END SUB
+
+' Autoplay (CWS_AUTOPLAY, io/script.bm): the computer's code plays the player's side too, as it
+' plays its own. While it decides, current_side, which the computer reads as its enemy, is the
+' other side, and the strength ratio is worked out from the side that decides. Both are put back.
+SUB ai_player_turn
+    DIM side AS INTEGER
+    DIM ratio!
+    side = current_side
+    ratio! = ai_strength_ratio!
+    current_side = other_side(side)
+    CALL turn_strength_ratio
+    CALL ai_side_turn(side)
+    current_side = side
+    ai_strength_ratio! = ratio!
+END SUB
+
+' The computer's decisions for ai_side: supply, forts, recruits, its fleet, Join, the train and
+' each army's move.
+SUB ai_side_turn (ai_side)
+    DIM side_color AS INTEGER
     side_color = side_bright_color(ai_side)
     LOCATE 1, 1
     PRINT SPACE$(80);

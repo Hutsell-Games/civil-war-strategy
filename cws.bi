@@ -174,22 +174,15 @@ CONST VICTORY_CAPITAL = 5
 CONST VICTORY_FORCE_RATIO = 6
 ' victory_rule_met's rule is one of the rules above, or this: the enemy has no troops left.
 CONST VICTORY_WIPED_OUT = 7
-' The Civil War's own rule numbers. Phase 11 moves them to game\.
-CONST COST_RECRUIT = 100
-CONST COST_SHIP = 100
-CONST COST_FORT = 200
-CONST COST_MOVE_CAPITAL = 500
-CONST CAPITAL_INCOME = 100
+' The Civil War's own rule numbers. Phase 11 moves them to game\. The costs and the capital's
+' income are tuning knobs now: see the knobs at the end of this file.
 CONST FIRST_YEAR = 1861
 ' The ironclads' date. The announcement [ironclads] of scenarios/EVENTS.DAT names it too
 ' (TestEventIroncladsMatchTheRule checks that the two agree).
 CONST IRONCLAD_YEAR = 1862
 CONST IRONCLAD_MONTH = 3
-CONST MIN_DETACH_SIZE = 65
-CONST RESUPPLY_LEVEL = 5
-' army_size is in hundreds of troops: an army can hold 125,000 troops, and one below 1,500 fights at half strength.
-CONST MAX_ARMY_SIZE = 1250
-CONST SMALL_ARMY_SIZE = 15
+' army_size is in hundreds of troops. The largest army, the small army that fights at reduced
+' strength, the detach size and the supply level are knobs too (max_army_size and the others).
 CONST MONTHS_PER_TURN = 2
 CONST MONTHS_PER_YEAR = 12
 ' Cities that a rule names, by their number in both scenarios' CITIES.GRD.
@@ -283,6 +276,15 @@ DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
 DIM SHARED pic_face(1 TO 1564)
 ' Set by script_start (io/script.bm) when tests\play.py runs the program.
 DIM SHARED scripted
+' Set by script_start when CWS_AUTOPLAY is 1 as well: the computer plays both sides.
+DIM SHARED autoplay
 ' The forced dice of special_events under a script: the groups still to come, and what is
 ' left of this call's group (script_dice_next and script_rnd!, io/script.bm).
 DIM SHARED script_dice$, script_dice_now$
+' The tuning knobs: numbers that set the game's balance, read from scenarios/TUNING.DAT at each new
+' game (load_tuning, io/tuning_file.bm). Each has the name of its line in that file, and what it
+' does is said there and in tools/tuning/knobs.txt, from which io/tuning_knobs.bi is written. Their
+' defaults are set here, when the program starts, so that the unit tests see them too.
+' $INCLUDE: 'io/tuning_knobs.bi'
+DIM SHARED tuning_error$
+CALL tuning_defaults

@@ -1,0 +1,117 @@
+' The tuning files: numbers that set the game's balance, which a playtester can change without
+' building the game again. A file holds lines "name = value". A ";" starts a comment, on a line of
+' its own or after a value. The knobs, their defaults and their ranges are in io/tuning_knobs.bm,
+' written from tools/tuning/knobs.txt.
+
+' Sets the knobs for a new game. Each file counts on top of the one before, and one that is not
+' there is passed over: the defaults, scenarios/TUNING.DAT, the scenario's own TUNING.DAT, and
+' under a script (CWS_SEED set) the file that CWS_TUNING names, for tests/autoplay.py. A line that
+' cannot be read ends the reading: tuning_error$ then names the file and the line and says why.
+' Last, the rules between knobs are checked (tuning_relations$, io/tuning_knobs.bm).
+SUB load_tuning
+    tuning_error$ = ""
+    CALL tuning_defaults
+    CALL tuning_read(SCNDIR + "TUNING.DAT")
+    IF tuning_error$ = "" THEN
+        CALL tuning_read(scenario_file$("TUNING.DAT"))
+    END IF
+    IF tuning_error$ = "" AND ENVIRON$("CWS_SEED") <> "" AND ENVIRON$("CWS_TUNING") <> "" THEN
+        IF _FILEEXISTS(ENVIRON$("CWS_TUNING")) THEN
+            CALL tuning_read(ENVIRON$("CWS_TUNING"))
+        ELSE
+            tuning_error$ = "CWS_TUNING names no file: " + ENVIRON$("CWS_TUNING")
+        END IF
+    END IF
+    ' The rules between knobs hold for the knobs that all the files have set.
+    IF tuning_error$ = "" AND tuning_relations$ <> "" THEN
+        tuning_error$ = "tuning: " + tuning_relations$
+    END IF
+END SUB
+
+' Reads one tuning file on top of the knobs as they are. Does nothing when there is no such file.
+SUB tuning_read (file$)
+    DIM file_num AS INTEGER
+    DIM line_num AS INTEGER
+    DIM cut AS INTEGER
+    DIM text$
+    DIM key$
+    DIM value$
+    DIM why$
+    IF NOT _FILEEXISTS(file$) THEN
+        EXIT SUB
+    END IF
+    file_num = FREEFILE
+    OPEN file$ FOR INPUT AS #file_num
+    DO WHILE NOT EOF(file_num) AND why$ = ""
+        LINE INPUT #file_num, text$
+        line_num = line_num + 1
+        cut = INSTR(text$, ";")
+        IF cut > 0 THEN
+            text$ = LEFT$(text$, cut - 1)
+        END IF
+        text$ = _TRIM$(text$)
+        cut = INSTR(text$, "=")
+        IF text$ = "" THEN
+            ' A blank line or a comment.
+        ELSEIF cut = 0 THEN
+            why$ = "the line has no ="
+        ELSE
+            key$ = LCASE$(_TRIM$(LEFT$(text$, cut - 1)))
+            value$ = _TRIM$(MID$(text$, cut + 1))
+            IF text_is_number(value$) = 0 THEN
+                why$ = key$ + " needs a number"
+            ELSE
+                CALL tuning_set(key$, VAL(value$), why$)
+            END IF
+        END IF
+    LOOP
+    CLOSE #file_num
+    IF why$ <> "" THEN
+        tuning_error$ = file$ + ", line" + STR$(line_num) + ": " + why$
+    END IF
+END SUB
+
+' tuning_set's check of a value: "" when value# is from least# to most#, and a whole number when
+' whole is 1; otherwise why not.
+FUNCTION tuning_check$ (key$, value#, least#, most#, whole)
+    tuning_check$ = ""
+    IF value# < least# OR value# > most# THEN
+        tuning_check$ = key$ + " must be from" + STR$(least#) + " to" + STR$(most#)
+    ELSEIF whole = 1 AND value# <> INT(value#) THEN
+        tuning_check$ = key$ + " needs a whole number"
+    END IF
+END FUNCTION
+
+' tuning_changes$' entry for one knob: "name=value;" when value# is not its default, else "".
+FUNCTION tuning_note$ (name$, value#, default#)
+    tuning_note$ = ""
+    IF value# <> default# THEN
+        tuning_note$ = name$ + "=" + LTRIM$(STR$(value#)) + ";"
+    END IF
+END FUNCTION
+
+' Sets the knobs to their defaults and then to a list as tuning_changes$ gives it, which a saved
+' game holds: the game goes on with the knobs it was saved with. An entry that cannot be set is
+' passed over, as a knob may be gone since the game was saved.
+SUB tuning_apply_list (list$)
+    DIM rest$
+    DIM item$
+    DIM why$
+    DIM cut AS INTEGER
+    CALL tuning_defaults
+    rest$ = list$
+    DO WHILE rest$ <> ""
+        cut = INSTR(rest$, ";")
+        IF cut = 0 THEN
+            item$ = rest$
+            rest$ = ""
+        ELSE
+            item$ = LEFT$(rest$, cut - 1)
+            rest$ = MID$(rest$, cut + 1)
+        END IF
+        cut = INSTR(item$, "=")
+        IF cut > 0 THEN
+            CALL tuning_set(LEFT$(item$, cut - 1), VAL(MID$(item$, cut + 1)), why$)
+        END IF
+    LOOP
+END SUB

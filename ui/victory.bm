@@ -127,6 +127,9 @@ SUB end_game (side, rule)
     DIM reason$
     DIM message$
     DIM side_color AS INTEGER
+    IF autoplay THEN
+        CALL script_autoplay_end(side, rule)
+    END IF
     SELECT CASE rule
         CASE IS < VICTORY_CITIES
             reason$ = "TIME EXPIRED"

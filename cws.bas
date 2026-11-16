@@ -24,6 +24,10 @@ DO
         PRINT event_file_error$
         END
     END IF
+    IF tuning_error$ <> "" THEN
+        PRINT tuning_error$
+        END
+    END IF
     IF replay = 0 THEN
         CALL window_open
     END IF
@@ -57,16 +61,27 @@ DO
         IF picked <> scenario_now THEN
             scenario_now = picked
             CALL game_new
+            ' The scenario's own TUNING.DAT is read only here, so its errors are found here.
+            IF tuning_error$ <> "" THEN
+                PRINT tuning_error$
+                END
+            END IF
         END IF
         CALL show_new_game
     END IF
     new_game = 0
     DO
-        CALL menu_main(main_menu_start)
+        IF autoplay THEN
+            ' The computer plays the player's side, then ends the turn as F7 does.
+            CALL ai_player_turn
+            menu_choice = MENU_END_TURN_KEY
+        ELSE
+            CALL menu_main(main_menu_start)
+        END IF
         ended = 0
         SELECT CASE menu_choice
             CASE MAIN_TROOPS
-                IF side_cash(current_side) < COST_RECRUIT OR turn_recruit_state < 0 THEN
+                IF side_cash(current_side) < cost_recruit OR turn_recruit_state < 0 THEN
                     CALL turn_close_recruiting
                 ELSE
                     CALL menu_army_recruit((current_side))
@@ -216,4 +231,6 @@ END SUB
 ' $INCLUDE: 'game/colors.bm'
 ' $INCLUDE: 'io/files.bm'
 ' $INCLUDE: 'io/events_file.bm'
+' $INCLUDE: 'io/tuning_file.bm'
+' $INCLUDE: 'io/tuning_knobs.bm'
 ' $INCLUDE: 'io/script.bm'
