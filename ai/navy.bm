@@ -58,13 +58,11 @@ END SUB
 ' The computer's choice of a port to sail to, from its list of count ports.
 FUNCTION ai_pick_port (side, ports(), count)
     DIM best AS INTEGER
-    DIM enemy_ports AS INTEGER
     DIM i AS INTEGER
     DIM port AS INTEGER
     DIM enemy_side AS INTEGER
     enemy_side = other_side(side)
     best = 0
-    enemy_ports = 0
     FOR i = 1 TO count
         port = ports(i)
         IF city_owner(port) = SIDE_NONE THEN
@@ -79,7 +77,6 @@ FUNCTION ai_pick_port (side, ports(), count)
         END IF
         IF city_owner(port) <> side THEN
             best = i
-            enemy_ports = enemy_ports + 1
             IF RND > .8 THEN
                 ai_pick_port = ports(best)
                 EXIT FUNCTION
@@ -175,8 +172,9 @@ SUB ai_navy_build (side, again)
     again = 1
 END SUB
 
-' Attack, for the computer: the fleet bombards the enemy city it lies off. Off a neutral
-' city the order becomes NAVY_SAIL and again is 1.
+' Attack, for the computer: the fleet bombards the enemy city it lies off. Off a city with
+' an army, on an even chance, and off a neutral city the order becomes NAVY_SAIL and again
+' is 1.
 SUB ai_navy_attack (side, action, again)
     again = 0
     IF fleet_is_at_sea(side) THEN
@@ -187,10 +185,11 @@ SUB ai_navy_attack (side, action, again)
         EXIT SUB
     END IF
     IF city_army(fleet_city(side)) > 0 AND RND > .5 THEN
-        ' The computer thinks of sailing instead of attacking an army. It attacks all the same
-        ' when the city is the enemy's. The second look at the order drew another number.
+        ' The fleet sails instead of attacking an army. The original set the order to Sail and
+        ' then bombarded all the same (docs/rule-changes.md, G24).
         action = NAVY_SAIL
-        CALL random_discard
+        again = 1
+        EXIT SUB
     ELSE
         IF city_owner(fleet_city(side)) = SIDE_NONE THEN
             action = NAVY_SAIL

@@ -65,6 +65,7 @@ SUB army_combine_redraw (side, city, best)
     CALL draw_stack_markers(side)
 END SUB
 
+' Raises an army in the chosen slot and city, then announces it and draws its flag.
 SUB army_new (side, army_slot, city)
     CALL army_raise(side, army_slot, city)
     COLOR COLOR_LIGHT_RED
@@ -79,6 +80,7 @@ SUB army_new (side, army_slot, city)
     CALL wait_seconds(opt_pause! - .5)
 END SUB
 
+' Chooses a free commander slot for the side and warns the player when none remains.
 SUB army_get_commander (side, army_slot)
     CALL army_pick_commander(side, army_slot)
     IF army_slot = 0 THEN
@@ -88,6 +90,7 @@ SUB army_get_commander (side, army_slot)
     END IF
 END SUB
 
+' Buys supplies for an army and reports the purchase or lack of funds on screen.
 SUB army_resupply (army)
     DIM result AS INTEGER
     CALL army_buy_supply(army, result)

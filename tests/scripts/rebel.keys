@@ -25,7 +25,7 @@ rule 2:E text y
 rule 2:R key enter
 
 # The title menu: Start NEW Game; March 1861, the main menu: UTILITY, Side, UTILITY, Aggress three times, out.
-play until 2:V
+play until 2:C
 digest
 text s
 # The scenario menu: the Standard Map.
@@ -98,7 +98,7 @@ play until 4
 state
 text Lee
 key enter
-play until 2:V
+play until 2:C
 digest
 text q
 repeat space

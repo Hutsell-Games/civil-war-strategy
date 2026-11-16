@@ -1,7 +1,7 @@
 #! seed 1861
 #! files cws1.sav cws2.sav cws.his oldhist.ory CWS.CFG
 # Civil War Strategy: the Files menu and Resume Saved Game (QB64Rust's tools/screen/README.md, "Places and rules").
-# Resume Saved Game at the title menu finds no saved game and goes back to the title menu; Start NEW Game. Files
+# Resume Saved Game is absent with no saves, and its R key is ignored; Start NEW Game. Files
 # shows Load as "-". Save writes cws1.sav, and Load is offered from then on. After a recruit, Save writes
 # cws2.sav (cws1.sav is marked as used). Quit, No. New Game goes back to
 # the title menu, where Resume Saved Game now lists the two saved games: cws1.sav, the game before the recruit.
@@ -18,13 +18,13 @@ rule 2:E text y
 rule 2:R key enter
 rule 2:O text q
 
-# The title menu: Resume Saved Game (none is found: the title menu again); Start NEW Game, the Standard Map.
-play until 2:V
+# The title menu: Resume is absent and R is ignored; Enter starts a new game on the Standard Map.
+play until 2:C
 digest
 text r
-play until 2:V
+play until 2:C
 digest
-text s
+key enter
 prompt
 text s
 # March 1861. Files: Load is "-". Save, to cws1.sav.
@@ -69,6 +69,7 @@ text f
 prompt
 text n
 prompt
+digest
 text r
 prompt
 digest
@@ -150,7 +151,7 @@ key enter
 play until 1:G
 digest
 key space
-play until 2:V
+play until 2:C
 digest
 text q
 repeat space

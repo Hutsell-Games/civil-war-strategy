@@ -56,6 +56,7 @@ SUB menu_raze_fort (raze)
     END IF
 END SUB
 
+' Lets the player pick an army and a neighboring destination, then records its move if winter rules allow it.
 SUB menu_army_move
     DIM army AS INTEGER
     DIM city AS INTEGER
@@ -112,6 +113,7 @@ SUB menu_army_move
     CALL clear_right_panel
 END SUB
 
+' Picks an unordered army and its city, returning army = -1 when none is available and 0 on cancellation.
 SUB menu_army_select (army, city)
     DIM last_army AS INTEGER
     DIM first_army AS INTEGER
@@ -221,6 +223,7 @@ SUB menu_recruit_cities (side)
     CALL menu_set_cities(cities(), count)
 END SUB
 
+' Lets the player cancel an army's move order and removes its move marker from the map.
 SUB menu_army_cancel (side)
     DIM last_army AS INTEGER
     DIM first_army AS INTEGER
@@ -284,6 +287,7 @@ SUB menu_army_cancel (side)
     CALL clear_right_panel
 END SUB
 
+' Lets the player replace an unordered army's commander with a leader from the available list.
 SUB menu_army_relieve (side)
     DIM last_army AS INTEGER
     DIM first_army AS INTEGER
@@ -348,6 +352,7 @@ SUB menu_army_relieve (side)
     CALL clear_bottom_line
 END SUB
 
+' Chooses a neighboring friendly retreat city for a human defender, leaving retreat_city at 0 when none is chosen.
 SUB menu_army_retreat (defender, retreat_city)
     DIM city AS INTEGER
     DIM side AS INTEGER

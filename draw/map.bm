@@ -1,3 +1,6 @@
+' The map: its line work (draw_map), the cities and their names, the fleets, and the markers
+' of armies and moves (draw_map_marker, draw_stack_markers).
+
 SUB draw_map_marker (from_city, to_city, mark)
     DIM x AS INTEGER
     DIM y AS INTEGER
@@ -220,6 +223,7 @@ SUB draw_fleets
     NEXT side
 END SUB
 
+' Marks cities where the side has an army in addition to the one recorded in city_army().
 SUB draw_stack_markers (side)
     DIM y AS INTEGER
     DIM i AS INTEGER
@@ -235,6 +239,7 @@ SUB draw_stack_markers (side)
     NEXT i
 END SUB
 
+' Redraws coast, border and river details that moving units and markers can cover.
 SUB draw_map_touchup
 
     LINE (500, 170)-(490, 165), 10 'Norfolk Coast
@@ -308,7 +313,7 @@ SUB draw_map
     PAINT (200, 200), 2, 10
     COLOR COLOR_LIGHT_GREEN
     '==========================  Mountains =================================
-    IF _FILEEXISTS(GFXDIR + "mtn.vga") THEN
+    IF _FILEEXISTS(GFXDIR + "MTN.VGA") THEN
         PUT (380, 30), pic_mountain(), PSET
         PUT (270, 200), pic_mountain(), PSET
         PUT (310, 160), pic_mountain(), PSET

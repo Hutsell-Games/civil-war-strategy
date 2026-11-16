@@ -1,7 +1,11 @@
+' The game's files: the list of scenarios, a scenario's setup and map, the saved games, the
+' settings (cws.cfg), the battle summary, the Hall of Fame and the history file. The events
+' file is read by io/events_file.bm.
+
 ' Reads scenarios/SCENARIOS.LST: each scenario's folder and title, up to MAX_SCENARIOS.
 SUB load_scenario_list
     scenario_count = 0
-    OPEN "I", 1, SCNDIR + "scenarios.lst"
+    OPEN "I", 1, SCNDIR + "SCENARIOS.LST"
     DO WHILE NOT EOF(1) AND scenario_count < MAX_SCENARIOS
         scenario_count = scenario_count + 1
         INPUT #1, scenario_folder$(scenario_count), scenario_title$(scenario_count)
@@ -32,15 +36,16 @@ FUNCTION scenario_file$ (name$)
     scenario_file$ = SCNDIR + scenario_folder$(scenario_now) + "/" + name$
 END FUNCTION
 
+' Loads the selected scenario's leaders, starting forces, rules and flag details, then reads the saved settings.
 SUB load_scenario
     DIM k AS INTEGER
     DIM i AS INTEGER
-    OPEN "I", 1, scenario_file$("cwslead.dat")
+    OPEN "I", 1, scenario_file$("CWSLEAD.DAT")
     FOR i = 1 TO MAX_LEADERS
         INPUT #1, leader_name$(i), leader_rating(i)
     NEXT i
     CLOSE #1
-    OPEN "I", 1, scenario_file$("cws.ini")
+    OPEN "I", 1, scenario_file$("CWS.INI")
     FOR i = 0 TO 2
         INPUT #1, side_name$(i)
     NEXT i
@@ -95,7 +100,7 @@ SUB load_cities
     DIM unused AS INTEGER
     DIM owner AS INTEGER
     city_name$(0) = "NONE"
-    OPEN "I", 1, scenario_file$("cities.grd")
+    OPEN "I", 1, scenario_file$("CITIES.GRD")
     total_income = union_income_bonus + 200
     FOR i = 1 TO MAX_CITIES
         INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
@@ -104,6 +109,7 @@ SUB load_cities
         FOR j = 1 TO MAX_ROADS
             INPUT #1, city_road(i, j)
         NEXT j
+        CALL city_close_road_gaps(i)
         INPUT #1, city_port_type(i), city_fort(i)
         IF city_owner(i) > 0 THEN
             owner = city_owner(i)
@@ -284,18 +290,21 @@ FUNCTION save_file_name$ (slot)
     save_file_name$ = "cws" + LTRIM$(STR$(slot)) + ".sav"
 END FUNCTION
 
+' Reads the current side, game settings and battle totals from CWS.CFG.
 SUB config_read (side)
-    OPEN "I", 1, "cws.cfg"
+    OPEN "I", 1, "CWS.CFG"
     INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
     CLOSE #1
 END SUB
 
+' Writes the current side, game settings and battle totals to CWS.CFG.
 SUB config_write (side)
-    OPEN "O", 1, "cws.cfg"
+    OPEN "O", 1, "CWS.CFG"
     WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
     CLOSE #1
 END SUB
 
+' Writes both sides' battle totals and marks the winner in battsumm when History is on.
 SUB save_battle_summary
     DIM k AS INTEGER
     DIM winner_mark$
@@ -317,7 +326,7 @@ END SUB
 SUB hall_of_fame_load (names$(), scores())
     DIM side AS INTEGER
     DIM i AS INTEGER
-    OPEN "I", 1, "hiscore.cws"
+    OPEN "I", 1, "HISCORE.CWS"
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
             INPUT #1, names$(side, i), scores(side, i)
@@ -326,10 +335,11 @@ SUB hall_of_fame_load (names$(), scores())
     CLOSE #1
 END SUB
 
+' Writes the five Hall of Fame names and scores for each side to HISCORE.CWS.
 SUB hall_of_fame_save (names$(), scores())
     DIM side AS INTEGER
     DIM i AS INTEGER
-    OPEN "O", 1, "hiscore.cws"
+    OPEN "O", 1, "HISCORE.CWS"
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
             WRITE #1, names$(side, i), scores(side, i)
@@ -339,10 +349,14 @@ SUB hall_of_fame_save (names$(), scores())
 END SUB
 
 ' Starts the history file cws.his with the date. The history of the game before is kept as
-' oldhist.ory.
+' oldhist.ory, which it replaces. The original copied cws.his there and then emptied it, so a
+' rename does the same. NAME fails when its target exists, so an old oldhist.ory goes first.
 SUB history_start
     IF _FILEEXISTS("cws.his") THEN
-        CALL script_shell("copy cws.his oldhist.ory")
+        IF _FILEEXISTS("oldhist.ory") THEN
+            KILL "oldhist.ory"
+        END IF
+        NAME "cws.his" AS "oldhist.ory"
     END IF
     OPEN "O", 2, "cws.his"
     PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"

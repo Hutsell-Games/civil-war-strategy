@@ -133,7 +133,7 @@ FUNCTION battle_odds_text$ (attack_strength, defend_strength)
     IF odds_pct < 1 THEN
         odds_pct = 1
     END IF
-    battle_odds_text$ = LTRIM$(RTRIM$(STR$(odds_pct))) + "%"
+    battle_odds_text$ = _TRIM$(STR$(odds_pct)) + "%"
 END FUNCTION
 
 ' The odds, boxed at the foot of the right panel.
@@ -154,7 +154,7 @@ SUB draw_battle_fort (defender)
     IF opt_graphics >= GRAPHICS_FULL THEN
         CALL draw_cannon
         fort_level = city_fort(army_city(defender))
-        file$ = GFXDIR + "fort" + LTRIM$(STR$(fort_level)) + ".vga"
+        file$ = GFXDIR + "FORT" + LTRIM$(STR$(fort_level)) + ".VGA"
         IF _FILEEXISTS(file$) THEN
             CALL load_picture(file$, pic_loaded())
             PUT (550, 270), pic_loaded(), PSET
@@ -216,12 +216,12 @@ SUB draw_battle_losses (attacker, defender, attacker_losses, defender_losses)
     PRINT "Attack Loss: ";
     PRINT troops_text$(attacker_losses); "/";
     CALL print_army_size(attacker)
-    PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker)))))); "%) ²";
+    PRINT " ("; _TRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker))))); "%) ²";
     COLOR 16 - side_color
     PRINT "² Defend Loss: ";
     PRINT troops_text$(defender_losses); "/";
     CALL print_army_size(defender)
-    PRINT " ("; LTRIM$(RTRIM$(STR$(INT(100 * (defender_losses / army_size(defender)))))); "%)"
+    PRINT " ("; _TRIM$(STR$(INT(100 * (defender_losses / army_size(defender))))); "%)"
 END SUB
 
 ' The battle's line in the history, such as "Memphis: *Grant (1200/15000)  defeats Polk (3000/9000)".

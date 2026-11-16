@@ -1,3 +1,6 @@
+' A message in a box over the screen, and scribe_message, which also writes a message to the
+' history file (cws.his) when the History setting is on.
+
 SUB show_message_box (text$, box_color)
     DIM menu_width AS INTEGER
     DIM saved_screen(1 TO 8000)
@@ -24,6 +27,7 @@ SUB show_message_box (text$, box_color)
     PUT (8 * menu_col - 4, 16 * menu_row - 3), saved_screen(), PSET
 END SUB
 
+' Shows the message as a line or box when requested and appends it to cws.his when History is on.
 SUB scribe_message (text$, display)
     SELECT CASE display
         CASE SHOW_LINE
@@ -34,7 +38,7 @@ SUB scribe_message (text$, display)
     END SELECT
     IF opt_history > 0 THEN
         OPEN "A", 2, "cws.his"
-        text$ = LTRIM$(RTRIM$(text$))
+        text$ = _TRIM$(text$)
         PRINT #2, text$
         CLOSE #2
     END IF

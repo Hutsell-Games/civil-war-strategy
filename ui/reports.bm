@@ -1,32 +1,7 @@
-SUB draw_army_stats (army)
-    LINE (530, 60)-(639, 150), 0, BF
-    COLOR COLOR_WHITE
-    LOCATE 5, 68
-    PRINT army_name$(army)
-    COLOR side_color_of(army_side(army))
-    LOCATE 6, 68
-    PRINT "Size:";
-    CALL print_army_size(army)
-    LOCATE 7, 68
-    PRINT "Leader:"; TAB(75); army_leader_rating(army)
-    LOCATE 8, 68
-    PRINT "Exper:"; TAB(75); army_experience(army)
-    IF army_supply(army) < 2 THEN
-        COLOR COLOR_LIGHT_RED
-    END IF
-    LOCATE 9, 68
-    PRINT "Supply:"; TAB(75); army_supply(army)
-END SUB
+' The Inform menu's reports (menu_report), the Victory Conditions menu of Utility, and Chk
+' Links (check_map_links).
 
-SUB print_army_size (army)
-    PRINT troops_text$(army_size(army));
-END SUB
-
-' A number of troops, given in hundreds as the game keeps them: 35 is "3500".
-FUNCTION troops_text$ (hundreds)
-    troops_text$ = LTRIM$(STR$(hundreds)) + "00"
-END FUNCTION
-
+' Lets the player turn individual victory conditions on or off, then redraws the map.
 SUB menu_victory_conditions
     DIM cities_text$
     DIM income_text$
@@ -76,6 +51,7 @@ SUB menu_victory_conditions
     CALL draw_map
 END SUB
 
+' Opens the Information menu, shows the chosen report and redraws the map afterward.
 SUB menu_report (side)
     menu_text$(0) = "Information"
     menu_text$(1) = side_name$(current_side) + " Armies"
@@ -416,6 +392,7 @@ SUB report_recap
     CALL report_wait_key
 END SUB
 
+' Prints the report's key prompt and waits at the script hook shared by report screens.
 SUB report_wait_key
     COLOR COLOR_YELLOW
     LOCATE 29, 29

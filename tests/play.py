@@ -24,7 +24,7 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
                              of the same name; a <name>.save there is a description that
                              make_save.py turns into the saved game <name>.sav
     #! without <name> ...    files the run starts without, as graphics/MTN.VGA
-    #! dice <groups>         forced random numbers for the special events (CWS_DICE, port/script.bm):
+    #! dice <groups>         forced random numbers for the special events (CWS_DICE, io/script.bm):
                              a group for each month, as 0,.05,.95;0,.9
 
 Exit code: 0 when every script passed, 1 when one failed, 2 when a build or the set-up failed.
@@ -51,7 +51,7 @@ OUT = GAME / "tests" / "out"
 
 # The source files of the game; a build is made again when one of them changes.
 SOURCE_SUFFIXES = {".bas", ".bi", ".bm"}
-SOURCE_FOLDERS = ["rules", "ai", "commands", "ui", "draw", "game", "port"]
+SOURCE_FOLDERS = ["rules", "ai", "commands", "ui", "draw", "game", "io"]
 # Top-level files that a run does not need: sources, DOS programs and objects, documents.
 NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
     ".exe", ".obj", ".lnk", ".mak", ".zip", ".md", ".qlb", ".com", ".drv", ".bat", ".btm",
@@ -68,7 +68,7 @@ TEST_DATA = GAME / "tests" / "data"
 CFG_NAME = "CWS.CFG"
 
 # The fields of CWS.CFG in the order the game reads and writes them (config_read and
-# config_write, port/files.bm), with the values a run starts with. They are those of the CWS.CFG that
+# config_write, io/files.bm), with the values a run starts with. They are those of the CWS.CFG that
 # came with the game, but noise: 0 (no sound, and no title music, which waits for its notes)
 # where the file has 2.
 CFG_FIELDS = {
@@ -508,6 +508,15 @@ def run_script(tools: Tools, exe: Path, script: Script, compiler: str, tag: str 
         cmd.append(str(game))
         flags = subprocess.CREATE_NO_WINDOW
     else:
+        # WSLg's audio relay can stop draining queued samples even with PLAY V0.
+        # Use the same silent ALSA device and private runtime directory as QB64Rust's
+        # Linux test runner. Clearing PULSE_SERVER alone leaves its socket discoverable.
+        runtime = folder / "runtime"
+        runtime.mkdir(mode=0o700)
+        env.pop("PULSE_SERVER", None)
+        env.pop("WAYLAND_DISPLAY", None)
+        env["XDG_RUNTIME_DIR"] = str(runtime.resolve())
+        env["ALSA_CONFIG_PATH"] = str(GAME / "tests" / "asound-null.conf")
         cmd, flags = [str(game)], 0
     with open(folder / "log.txt", "wb") as log:
         proc = subprocess.Popen(cmd, cwd=work, env=env, stdout=log, stderr=subprocess.STDOUT,
@@ -931,7 +940,8 @@ def rel(path: Path) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--qb64rust-repo", help="QB64Rust's repo (default: ../QB64Rust beside this repo)")
-    parser.add_argument("--jobs", type=int, default=4, help="runs at a time (default 4)")
+    parser.add_argument("--jobs", type=int, default=4 if os.name == "nt" else 1,
+                        help="runs at a time (default 4 on Windows, 1 on Linux)")
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("check", help="the QB64Rust build against the recorded screens")
     p.add_argument("--compiler", choices=COMPILERS, default="rust")

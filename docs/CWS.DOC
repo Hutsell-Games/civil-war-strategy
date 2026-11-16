@@ -1,7 +1,7 @@
                         i
 ===========================================================
-   VGA Civil War Strategy Game version 1.50
-            (c) 1994 W.R. Hutsell
+   Civil War Strategy Game version 1.7
+            (c) 1994-2026 W.R. Hutsell and David Mackey
 ===========================================================
            C O N T E N T S
 
@@ -85,12 +85,8 @@
 ===========================================================
  1.1   Introduction
 ===================
-The VGA Civil War Strategy Game is a 1 or 2-player graphic
-strategic level wargame of the American Civil War. The game
-requires VGA. It is provided "as is" without any warranty of
-any kind. It has been tested on several types of IBM
-compatibles (from XT to 386) but it is impossible to try all
-the many combinations of equipment that exist.
+The Civil War Strategy Game is a 1 or 2-player graphic
+strategic level wargame of the American Civil War.
 
 The object of the game is to accumulate as many victory
 points as possible. The game is played in turns of 2 months
@@ -1475,7 +1471,7 @@ not alphabetized. There must be exactly 40 cities.
 
 Format:
         City #,
-        x VGA coordinate (1-530),
+        x coordinate (1-530),
         y coordinate (16-440),
         city name (text),
         which side initially possesses

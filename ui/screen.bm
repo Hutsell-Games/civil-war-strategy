@@ -1,3 +1,8 @@
+' Parts of the screen that many SUBs share: the bottom line, the right panel and an army's
+' numbers there, the top bar, the train's box, the screen between two players' turns, and
+' the waits for a time or a key.
+
+' Saves or restores the 21-by-21 pixel area centered on x and y using saved_under_marker().
 SUB screen_snapshot (x, y, put_back)
     SELECT CASE put_back
         CASE SNAP_SAVE
@@ -7,6 +12,7 @@ SUB screen_snapshot (x, y, put_back)
     END SELECT
 END SUB
 
+' Prints text centered across the map area at the given text row.
 SUB print_centered (row, text$)
     DIM col AS INTEGER
     col = LEN(text$)
@@ -27,6 +33,7 @@ SUB clear_right_panel
     VIEW
 END SUB
 
+' Shows the trains carrying armies and their destination names in a box at the map's upper left.
 SUB draw_train_box
     DIM i AS INTEGER
     DIM side_color AS INTEGER
@@ -57,6 +64,7 @@ SUB draw_train_box
     NEXT i
 END SUB
 
+' Pauses for the requested time or until a key is pressed, using the script wait hook during scripted play.
 SUB wait_seconds (seconds!)
     DIM start!
     IF script_tick(seconds!) THEN
@@ -67,13 +75,14 @@ SUB wait_seconds (seconds!)
     LOOP
 END SUB
 
-' Waits until a key is pressed. The letter tells a script which wait this is (port/script.bm).
+' Waits until a key is pressed. The letter tells a script which wait this is (io/script.bm).
 SUB wait_key (letter$)
     CALL script_mark_key_wait(1, letter$)
     DO WHILE INKEY$ = ""
     LOOP
 END SUB
 
+' Shows the current side and date above the map, with its flag, funds, victory points and settings in the right panel.
 SUB draw_top_bar
     DIM i AS INTEGER
     DIM total_points AS INTEGER
@@ -94,7 +103,7 @@ SUB draw_top_bar
         COLOR COLOR_GRAY
     END IF
     LOCATE 6, 68
-    PRINT "Difficulty "; LTRIM$(RTRIM$(STR$(opt_difficulty)))
+    PRINT "Difficulty "; _TRIM$(STR$(opt_difficulty))
     LOCATE 7, 68
     PRINT "Funds:"; side_cash(current_side);
 
@@ -168,3 +177,33 @@ SUB draw_update_box
     LOCATE 25, 50
     PRINT "ศอออออออออออออผ"
 END SUB
+
+SUB draw_army_stats (army)
+    LINE (530, 60)-(639, 150), 0, BF
+    COLOR COLOR_WHITE
+    LOCATE 5, 68
+    PRINT army_name$(army)
+    COLOR side_color_of(army_side(army))
+    LOCATE 6, 68
+    PRINT "Size:";
+    CALL print_army_size(army)
+    LOCATE 7, 68
+    PRINT "Leader:"; TAB(75); army_leader_rating(army)
+    LOCATE 8, 68
+    PRINT "Exper:"; TAB(75); army_experience(army)
+    IF army_supply(army) < 2 THEN
+        COLOR COLOR_LIGHT_RED
+    END IF
+    LOCATE 9, 68
+    PRINT "Supply:"; TAB(75); army_supply(army)
+END SUB
+
+' Prints the army's size in individual troops, converting the stored hundreds without starting a new line.
+SUB print_army_size (army)
+    PRINT troops_text$(army_size(army));
+END SUB
+
+' A number of troops, given in hundreds as the game keeps them: 35 is "3500".
+FUNCTION troops_text$ (hundreds)
+    troops_text$ = LTRIM$(STR$(hundreds)) + "00"
+END FUNCTION

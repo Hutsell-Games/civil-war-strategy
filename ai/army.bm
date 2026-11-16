@@ -47,7 +47,7 @@ SUB ai_army_order (side, army, ordered)
     IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) <> 0 THEN
         FOR j = 1 TO MAX_ROADS
             neighbor = city_road(city, j)
-            IF j = 0 THEN
+            IF neighbor = 0 THEN
                 EXIT FOR
             END IF
             neighbor_strength = city_nearby_enemy_strength(neighbor)

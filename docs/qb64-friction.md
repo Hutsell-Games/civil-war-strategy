@@ -128,7 +128,7 @@ one. Namespaces alone would not resolve an explicitly declared local scalar.
 
 ## 7. Editable events require a parser and a shared table
 
-**Evidence.** [port/events_file.bm](../port/events_file.bm) parses event names,
+**Evidence.** [io/events_file.bm](../io/events_file.bm) parses event names,
 conditions, effects and chance factors into the parallel arrays in `cws.bi`.
 Its `text_is_number` validates numbers before conversion, and `load_events`
 reports recognized definition errors through shared `event_file_error$`.
@@ -150,7 +150,7 @@ general serialization library.
 `ai\navy.bm` became constants in `cws.bi` (`VARY_REBEL_FLEET_CITY` and three
 more; [the completed structure review](archived/structure-review-completed.md)). A city's own column in
 `CITIES.GRD` would have fitted better. But `load_cities`
-([port/files.bm](../port/files.bm)) reads each line by position with `INPUT #`.
+([io/files.bm](../io/files.bm)) reads each line by position with `INPUT #`.
 A new field changes the layout of both scenarios' files and of any scenario a
 player made, and an old file then reads wrong without an error.
 

@@ -1,3 +1,5 @@
+' The war's end screens: the Union's victory, the Rebels' victory, and an army's surrender.
+
 SUB draw_union_victory
     DIM capitol_wing AS INTEGER
     DIM i AS INTEGER

@@ -101,13 +101,6 @@ FUNCTION navy_can_invade (side)
     END IF
 END FUNCTION
 
-' Draws a random number and drops it. The computer's Attack calls it where the original drew
-' a second number for its look at the order, so that the random numbers stay in their order.
-SUB random_discard
-    DIM unused!
-    unused! = RND
-END SUB
-
 ' The side has no fleet: no ships and no port.
 SUB navy_clear_fleet (side)
     fleet_ships$(side) = ""
@@ -115,6 +108,7 @@ SUB navy_clear_fleet (side)
     fleet_size(side) = 0
 END SUB
 
+' Removes the last ship in the fleet's list and clears the fleet when no ships remain.
 SUB navy_remove_ship (side)
     fleet_size(side) = fleet_size(side) - 1
     IF fleet_size(side) > 0 THEN

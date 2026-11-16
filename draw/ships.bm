@@ -1,3 +1,6 @@
+' The ships: a fleet's icons on the map, the pictures of the ironclad and the schooner, a
+' fleet putting to sea, and a ship sunk.
+
 SUB draw_fleet_ship (side, ship)
     CALL draw_ship_icon(side, ship_icon(MID$(fleet_ships$(side), ship, 1)))
 END SUB
@@ -10,6 +13,7 @@ FUNCTION ship_icon (ship$)
     END IF
 END FUNCTION
 
+' Draws a wooden ship or ironclad near the current graphics position, flying the side's flag.
 SUB draw_ship_icon (side, ship_type)
     DIM x AS INTEGER
     DIM y AS INTEGER

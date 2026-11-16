@@ -1,9 +1,13 @@
+' The flags: an army's or a train's flag beside a city and its animation, the flash of a
+' city, and the large flags of the other screens.
+
 ' Where an army's or a train's flag stands beside a city: its center, left of the city's dot
 ' and above it.
 FUNCTION flag_x (city)
     flag_x = city_x(city) - 12
 END FUNCTION
 
+' Returns the vertical center of the flag above the city's map dot.
 FUNCTION flag_y (city)
     flag_y = city_y(city) - 11
 END FUNCTION
@@ -18,6 +22,7 @@ SUB flag_picture_save (city)
     GET (flag_x(city) - 9, flag_y(city) - 7)-(flag_x(city) + 9, flag_y(city) + 6), saved_under_army()
 END SUB
 
+' Puts the picture kept in saved_under_army() back over the flag beside the city.
 SUB flag_picture_restore (city)
     PUT (flag_x(city) - 9, flag_y(city) - 7), saved_under_army(), PSET
 END SUB
@@ -76,6 +81,7 @@ SUB animate_city (city)
     CALL draw_city_dot(city, city_dot_color(city))
 END SUB
 
+' Draws the army's flag beside its city, with an extra mark when it has no supplies.
 SUB draw_army_flag (army)
     DIM side AS INTEGER
     DIM x AS INTEGER
@@ -94,6 +100,7 @@ SUB draw_army_flag (army)
     END IF
 END SUB
 
+' Shows the side's train beside its current city, or erases it when show is 0.
 SUB draw_train (side, show)
     DIM city AS INTEGER
     DIM x AS INTEGER
@@ -139,6 +146,7 @@ SUB draw_flag_icon (x, y, side)
     END SELECT
 END SUB
 
+' Draws the side's large flag at the given offset and height, using the usual panel position when both are 0.
 SUB draw_large_flag (side, x_offset, top_y)
     DIM x AS INTEGER
     DIM y AS INTEGER

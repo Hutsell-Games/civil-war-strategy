@@ -1,5 +1,5 @@
 ' ===========================================================================
-' port\script.bm - hooks for the whole-game scripts of tests\play.py.
+' io\script.bm - hooks for the whole-game scripts of tests\play.py.
 ' Included at the end of cws.bas. See tests\README.md.
 '
 ' A program started with the environment variable CWS_SEED set is
@@ -12,8 +12,7 @@
 '     longer one, which the game uses as "press a key", waits for a key;
 '   - PLAY and SOUND are silent (PLAY "V0"): they take their time, unheard;
 '   - the random numbers of special_events can be given (CWS_DICE);
-'   - the history file holds the date 01-01-2000 instead of today's;
-'   - the history file is copied in BASIC, not by SHELL "copy ...".
+'   - the history file holds the date 01-01-2000 instead of today's.
 ' A program started without it plays as before: script_mark_key_wait does nothing.
 ' ===========================================================================
 
@@ -61,6 +60,7 @@ SUB script_dice_next
     script_dice$ = MID$(script_dice$, cut + 1)
 END SUB
 
+' Returns the next forced die value, or RND when the script gives r or has no values left.
 FUNCTION script_rnd!
     DIM cut AS INTEGER
     DIM item$
@@ -110,52 +110,6 @@ FUNCTION script_tick% (seconds!)
     DO WHILE INKEY$ = ""
     LOOP
 END FUNCTION
-
-' SHELL cmd$, or under a script the same work done in BASIC. The game runs
-' "copy <from> <to>" (the history file of the game before). A SHELL starts
-' cmd.exe, whose console window shows on the user's desktop even when the
-' program runs on a hidden one, so the scripts must not run it. Copy
-' replaces <to>, as copy does.
-SUB script_shell (cmd$)
-    DIM space_at AS INTEGER
-    DIM contents$
-    DIM trimmed$
-    DIM args$
-    DIM verb$
-    DIM from$
-    DIM file_num AS INTEGER
-    DIM into$
-    IF scripted = 0 THEN
-        SHELL cmd$
-        EXIT SUB
-    END IF
-    trimmed$ = LTRIM$(RTRIM$(cmd$))
-    space_at = INSTR(trimmed$, " ")
-    verb$ = LCASE$(LEFT$(trimmed$, space_at - 1))
-    args$ = LTRIM$(MID$(trimmed$, space_at + 1))
-    space_at = INSTR(args$, " ")
-    from$ = LEFT$(args$, space_at - 1)
-    into$ = LTRIM$(MID$(args$, space_at + 1))
-    IF verb$ <> "copy" THEN
-        SHELL cmd$
-        EXIT SUB
-    END IF
-    IF NOT _FILEEXISTS(from$) THEN
-        EXIT SUB
-    END IF
-    file_num = FREEFILE
-    OPEN from$ FOR BINARY AS #file_num
-    contents$ = SPACE$(LOF(file_num))
-    GET #file_num, , contents$
-    CLOSE #file_num
-    IF _FILEEXISTS(into$) THEN
-        KILL into$
-    END IF
-    file_num = FREEFILE
-    OPEN into$ FOR BINARY AS #file_num
-    PUT #file_num, , contents$
-    CLOSE #file_num
-END SUB
 
 ' Says that the program is about to wait for a key. place names the kind of
 ' wait (1 to 255) and letter$ narrows it (its first character, or ""):

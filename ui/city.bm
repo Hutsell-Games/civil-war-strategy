@@ -1,6 +1,7 @@
 ' The player's menus for cities: Fortify, Move Capital, and the picker of a city of the
 ' player's side.
 
+' Lets the player fortify an eligible occupied city, paying for the fort and making its army busy this turn.
 SUB menu_city_fortify (city)
     DIM i AS INTEGER
     DIM army AS INTEGER
@@ -56,6 +57,7 @@ SUB menu_city_fortify (city)
     CALL draw_stack_markers(current_side)
 END SUB
 
+' Lets the player browse friendly cities by arrow or initial letter, returning city = 0 on cancellation.
 SUB menu_city_select (city)
     DIM letter$
     menu_text$(1) = "  "

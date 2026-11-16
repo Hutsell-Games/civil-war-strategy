@@ -1,5 +1,5 @@
 # Civil War Strategy: the game starts with music and sound on, as the Union. Nothing is heard
-# (script_mute, port/script.bm), but the tunes and beeps run and take their time: the title
+# (script_mute, io/script.bm), but the tunes and beeps run and take their time: the title
 # tune, the ironclads' announcement in January 1862, and the tune of an event that favors the
 # Union in March (wealthy Unionists give, by forced dice). The notes are not checked.
 #! seed 1862
@@ -13,7 +13,7 @@ rule 2:E text y
 rule 2:R key enter
 
 # The title menu, after the title tune: Resume Saved Game; the Load menu: the one save.
-play until 2:V
+play until 2:C
 digest
 text r
 play until 2:L
@@ -26,7 +26,7 @@ digest
 text e
 end
 
-# May 1862. Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+# May 1862. Files, Quit, Yes, and a key for END's "Press any key to continue".
 play until 2:M
 digest
 text f

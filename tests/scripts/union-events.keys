@@ -27,7 +27,7 @@ rule 2:E text y
 rule 2:R key enter
 # The title menu: Start NEW Game; March 1861, the main menu: UTILITY; Aggress three times; Balance: Rebel ++;
 # Random Events: Favor Union, a key; End Cond: the four after Time off; out twice.
-play until 2:V
+play until 2:C
 digest
 text s
 # The scenario menu: the Standard Map.
@@ -143,7 +143,7 @@ play until 4
 state
 text Grant
 key enter
-play until 2:V
+play until 2:C
 digest
 text q
 repeat space

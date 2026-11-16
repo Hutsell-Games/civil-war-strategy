@@ -1,6 +1,7 @@
 OPTION _EXPLICIT
 DEFINT A-Z
-' The player may resize the window, and the 640 by 480 screen is scaled to fill it. Alt+Enter goes full screen.
+' The window opens at 1280 by 960 (window_open). The player may resize it, and the 640 by 480 screen
+' is scaled to fill it. Alt+Enter goes full screen.
 $RESIZE:STRETCH
 ' $INCLUDE: 'cws.bi'
 DIM replay AS INTEGER
@@ -23,6 +24,9 @@ DO
         PRINT event_file_error$
         END
     END IF
+    IF replay = 0 THEN
+        CALL window_open
+    END IF
     CALL show_title(replay)
     replay = 1
     CALL script_start
@@ -32,8 +36,7 @@ DO
         CALL menu_title
         title_choice = menu_choice
         IF title_choice = TITLE_QUIT THEN
-            CLS
-            END
+            SYSTEM
         END IF
         picked = scenario_now
         IF title_choice = TITLE_RESUME THEN
@@ -100,7 +103,7 @@ DO
                     CASE FILES_NEW_GAME
                         new_game = 1
                     CASE FILES_QUIT
-                        END
+                        SYSTEM
                 END SELECT
             CASE MENU_END_TURN_KEY
                 ended = 1
@@ -139,6 +142,37 @@ DATA "U4BD4BR1R1","U4F2E2D4","U4F4U4","H1U2E1R2F1D2G1L1","U4R3F1G1L2"
 DATA "H1U2E1R2F1D2G1L1BE1F1R1","U4R3F1G1L2BR1F2","R3E1H1L2H1E1R3"
 DATA "U4L2BR3R1","H1U3BR4D3G1L1","H2U2BR4D2G2","H2U2BF3BU1D1F1E2U2"
 DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
+
+' Opens the 640 by 480 screen in a window twice its size, 1280 by 960, when the desktop has room
+' for it. No statement sets a window's size, so this asks for 1280 by 960 as the smallest size
+' allowed, which makes the window grow, and then lifts the limit so the player may make it smaller.
+' The window opens at 640 by 400 and takes the screen's 640 by 480 at its first frame. The limit
+' waits for that, or that frame would shrink the window again once the limit is lifted.
+SUB window_open
+    SCREEN 12
+    IF _DESKTOPWIDTH < 1280 OR _DESKTOPHEIGHT < 1024 THEN
+        EXIT SUB
+    END IF
+    CALL window_wait_height(480)
+    _WINDOWSIZELIMIT (1280, 960)
+    CALL window_wait_height(960)
+    _WINDOWSIZELIMIT
+END SUB
+
+' Waits until the window reports at least the height asked for, or for a second at most.
+SUB window_wait_height (height)
+    DIM started!
+    started! = TIMER
+    DO
+        _LIMIT 200
+        IF _RESIZE THEN
+            IF _RESIZEHEIGHT >= height THEN
+                EXIT DO
+            END IF
+        END IF
+    LOOP UNTIL ABS(TIMER - started!) > 1
+END SUB
+
 ' $INCLUDE: 'rules/army.bm'
 ' $INCLUDE: 'rules/city.bm'
 ' $INCLUDE: 'rules/battle.bm'
@@ -180,6 +214,6 @@ DATA "E4BD4H4","U2H2BR4G2","E4L4BD4R4"
 ' $INCLUDE: 'game/victory_screens.bm'
 ' $INCLUDE: 'game/tunes.bm'
 ' $INCLUDE: 'game/colors.bm'
-' $INCLUDE: 'port/files.bm'
-' $INCLUDE: 'port/events_file.bm'
-' $INCLUDE: 'port/script.bm'
+' $INCLUDE: 'io/files.bm'
+' $INCLUDE: 'io/events_file.bm'
+' $INCLUDE: 'io/script.bm'

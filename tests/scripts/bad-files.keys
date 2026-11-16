@@ -8,7 +8,7 @@
 #! data bad-map
 
 # The title menu, after "ERROR: Missing File 'MTN.VGA'": Start NEW Game.
-play until 2:V
+play until 2:C
 digest
 text s
 # The scenario menu: the Standard Map.
@@ -27,7 +27,7 @@ key space
 play until 2:M
 digest
 
-# Files, Quit to DOS, Yes, and a key for END's "Press any key to continue".
+# Files, Quit, Yes, and a key for END's "Press any key to continue".
 text f
 prompt
 text q

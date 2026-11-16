@@ -260,6 +260,8 @@ SUB turn_collect_income
             side_city_count(owner) = side_city_count(owner) + 1
             side_income(owner) = side_income(owner) + city_value(i)
         END IF
+    NEXT i
+    FOR i = 1 TO MAX_ARMIES
         army_order(i) = ORDER_NONE
     NEXT i
 
@@ -313,6 +315,21 @@ SUB turn_set_move_order
     NEXT i
 
     CALL sort_move_order(MAX_ARMIES)
+END SUB
+
+' Sorts the first limit move keys from lowest to highest so armies act in their assigned order.
+SUB sort_move_order (limit)
+    DIM i AS INTEGER
+    DIM swaps%
+    DO
+        swaps% = FALSE
+        FOR i = 1 TO limit - 1
+            IF move_order_key(i) > move_order_key(i + 1) THEN
+                SWAP move_order_key(i), move_order_key(i + 1)
+                swaps% = i
+            END IF
+        NEXT i
+    LOOP WHILE swaps%
 END SUB
 
 ' The month's victory points of one side: it keeps eight tenths and gains by its income and

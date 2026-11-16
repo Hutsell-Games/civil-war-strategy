@@ -1,5 +1,6 @@
 ' The month's moves as the player sees them. The rules are in rules/turn.bm.
 
+' Advances the month, applies army supply rules with on-screen warnings and updates the force ratio.
 SUB turn_date_and_supply
     DIM i AS INTEGER
     DIM k AS INTEGER
@@ -38,6 +39,7 @@ SUB turn_date_and_supply
     CALL turn_strength_ratio
 END SUB
 
+' Runs computer decisions, train arrivals, army moves and commerce raids, then advances the month and updates victory points.
 SUB turn_resolve
     DIM i AS INTEGER
     DIM j AS INTEGER
