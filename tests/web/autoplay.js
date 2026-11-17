@@ -1,0 +1,172 @@
+// Plays Civil War Strategy in QBJS with the computer playing both sides and prints the line that
+// the game writes to autoplay.txt. docs/qbjs-plan.md, step 9.
+//
+//   node tests/web/autoplay.js [--seeds 1-3] [--timeout 600] [--qbc "<flags>"] [--qbjs <folder>] [--native]
+//
+// For each seed it starts the page with CWS_SEED=<seed> and CWS_AUTOPLAY=1, and with the CWS.CFG that
+// tests/autoplay.py gives a two-player game (the player's side is the Union). The game announces each
+// wait for a key by POKEing bytes &H4F0 to &H4F2 (io/script.bm). This script catches those POKEs and
+// answers with the keys of tests/autoplay.py's keys file. When autoplay.txt exists in QBJS's file
+// system it reads it. With --native it also runs tests/autoplay.py for the same seeds, and prints
+// the native build's line beside the QBJS one.
+//
+// A line is: the side end_game names, the rule that ended the game, the month and year, each side's
+// victory points, each side's cities. Exit code: 0 when every seed gave a line (and with --native,
+// the same one), else 1.
+
+const fs = require('fs');
+const path = require('path');
+const { spawnSync } = require('child_process');
+const puppeteer = require('puppeteer-core');
+const { findChrome, copyDependencies, copyData, serve } = require('./run_qbjs.js');
+
+const GAME = path.resolve(__dirname, '..', '..');
+const PROGRAM = path.join(GAME, 'cws.bas');
+
+// The keys of tests/autoplay.py: [place, letter] -> key. Place 1 is a pause any key ends; place 2 is a
+// menu named by its first letter.
+function keyFor(place, letter) {
+    if (place === 1) return 'Space';
+    if (place === 2) {
+        if (letter === 'E') return 'y';   // End Turn / End Game: Yes
+        if (letter === 'R') return 'Enter'; // a retreat: the first city
+        if (letter === 'O') return 'q';   // Quit this Game
+        if (letter === 'C') return 's';   // the title menu: Start NEW Game
+        if (letter === 'S') return 's';   // the map: standard
+    }
+    return null;
+}
+
+// The CWS.CFG of tests/autoplay.py's two-player game, in tests/play.py's field order.
+function cfgFor(seed) {
+    const f = [1, 3, 0, 3, 2, 1, 5, 600, 300, 1, seed % 2, 36, 134, 3992, 5041, 0, seed % 6];
+    return f.join(',') + '\n';
+}
+
+function options(argv) {
+    const o = { seeds: '1', timeout: 600, qbc: '--byref --round-half-even' };
+    for (let i = 0; i < argv.length; i++) {
+        const a = argv[i];
+        if (a === '--native') o.native = true;
+        else if (a.startsWith('--')) o[a.slice(2)] = argv[++i];
+    }
+    const [first, last] = String(o.seeds).split('-');
+    o.list = [];
+    for (let s = Number(first); s <= Number(last || first); s++) o.list.push(s);
+    return o;
+}
+
+async function playSeed(browser, port, seed, timeoutSeconds) {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.evaluateOnNewDocument((seed) => {
+        window.__env = { CWS_SEED: String(seed), CWS_AUTOPLAY: '1' };
+        window.__waits = 0;
+        window.__last = [0, 0];
+        window.addEventListener('DOMContentLoaded', () => {
+            QB.func_Environ = name => (window.__env[name] !== undefined ? window.__env[name] : '');
+            // io/script.bm: byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits,
+            // which it POKEs last.
+            const poke = QB.sub_Poke;
+            let place = 0, letter = 0;
+            QB.sub_Poke = function (address, value) {
+                if (address === 0x4F1) place = value;
+                else if (address === 0x4F2) letter = value;
+                else if (address === 0x4F0) { window.__last = [place, letter]; window.__waits++; }
+                return poke.apply(this, arguments);
+            };
+        });
+    }, seed);
+    await page.goto('http://127.0.0.1:' + port + '/index.html');
+    const deadline = Date.now() + timeoutSeconds * 1000;
+    let answered = 0;
+    let line = null;
+    while (Date.now() < deadline) {
+        const state = await page.evaluate(() => {
+            const vfs = GX.vfs();
+            const file = vfs.getNode('autoplay.txt', GX.vfsCwd());
+            return { waits: window.__waits, last: window.__last,
+                     result: file && file.type == vfs.FILE ? vfs.readText(file) : null };
+        }).catch(() => null);
+        if (state && state.result) { line = state.result.trim(); break; }
+        if (errors.length) break;
+        if (state && state.waits !== answered) {
+            answered = state.waits;
+            const key = keyFor(state.last[0], String.fromCharCode(state.last[1]));
+            if (key) await page.keyboard.press(key);
+        }
+        await new Promise(r => setTimeout(r, 20));
+    }
+    await page.close();
+    return { line, error: errors[0] || (line ? null : 'no autoplay.txt in ' + timeoutSeconds + ' seconds') };
+}
+
+function nativeLines(seeds) {
+    const out = path.join(GAME, 'tests', 'out', 'web', 'autoplay-native.json');
+    const first = seeds[0], last = seeds[seeds.length - 1];
+    const r = spawnSync('python', [path.join(GAME, 'tests', 'autoplay.py'), 'run', out, '--seeds', first + '-' + last,
+        '--mode', 'two'], { cwd: GAME, encoding: 'utf8' });
+    process.stdout.write(r.stdout || '');
+    if (r.status !== 0) { process.stderr.write(r.stderr || ''); return null; }
+    return JSON.parse(fs.readFileSync(out, 'utf8'));
+}
+
+async function main() {
+    const o = options(process.argv.slice(2));
+    const qbjs = path.resolve(o.qbjs || path.join(GAME, '..', 'qbjs'));
+    const out = path.join(GAME, 'tests', 'out', 'web', 'autoplay');
+    fs.rmSync(out, { recursive: true, force: true });
+    fs.mkdirSync(out, { recursive: true });
+    const build = spawnSync('node', [path.join(qbjs, 'qbc.js'), PROGRAM, path.join(out, 'program.js'), ...o.qbc.split(' ')],
+        { cwd: GAME, encoding: 'utf8' });
+    process.stderr.write(build.stderr || '');
+    if (build.status !== 0 || (build.stdout || '').split('\n').some(l => l.startsWith('ERROR:'))) {
+        process.stdout.write(build.stdout || '');
+        process.exit(2);
+    }
+    copyDependencies(qbjs, out);
+    copyData(GAME, out);
+
+    const server = await serve(out);
+    const browser = await puppeteer.launch({ executablePath: findChrome(o.chrome), headless: true });
+    const lines = {};
+    try {
+        for (const seed of o.list) {
+            fs.writeFileSync(path.join(out, 'CWS.CFG'), cfgFor(seed));
+            const t0 = Date.now();
+            const r = await playSeed(browser, server.address().port, seed, Number(o.timeout));
+            lines[seed] = r;
+            console.log('seed ' + seed + ' qbjs  : ' + (r.line || ('ERROR ' + r.error)) +
+                '  (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s)');
+        }
+    } finally {
+        await browser.close();
+        server.close();
+    }
+    let bad = o.list.filter(s => !lines[s].line).length;
+    if (o.native) {
+        const native = nativeLines(o.list);
+        if (!native) process.exit(2);
+        // tests/autoplay.py's results are objects (winner, rule, month, year, points, cities); compare
+        // the numbers of the line the game wrote with the same fields.
+        for (const g of native.games || native) {
+            if (!g || g.seed === undefined) continue;
+            const mine = lines[g.seed];
+            const expected = [g.winner, g.rule, g.month, g.year, ...(g.points || []), ...(g.cities || [])].join(',');
+            console.log('seed ' + g.seed + ' native: ' + expected);
+            console.log('seed ' + g.seed + (mine && mine.line && sameFields(mine.line, g) ? ' MATCH' : ' DIFFERENT'));
+        }
+    }
+    process.exit(bad ? 1 : 0);
+}
+
+// The line holds the named side, the rule number, month, year, points and cities. autoplay.py keeps
+// the winner (the Rebels for a time limit) and the rule's name, so compare month, year, points, cities.
+function sameFields(line, g) {
+    const f = line.split(',').map(x => Math.round(Number(x)));
+    const want = [g.month, g.year, ...(g.points || []), ...(g.cities || [])];
+    return want.every((v, i) => f[i + 2] === v);
+}
+
+main().catch(e => { console.error(e); process.exit(2); });
