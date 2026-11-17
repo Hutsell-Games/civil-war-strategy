@@ -229,7 +229,7 @@ CONST TRAIN_OUTLINE$ = "R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3"
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
 COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_state
-COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), pic_mountain(), train_from_city()
+COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), train_from_city()
 COMMON SHARED saved_under_marker(), side_name$(), army_city(), army_name$(), opt_players, ai_strength_ratio!
 COMMON SHARED army_size(), army_leader_rating(), army_experience(), army_supply(), month_name$()
 COMMON SHARED turn_recruit_city(), victory_rule(), train_city(), side_battles_won(), city_first_owner()
@@ -243,7 +243,7 @@ DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_
 DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(MAX_LEADERS)
 DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
 DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(MONTHS_PER_YEAR)
-DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)
+DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), train_from_city(2)
 DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
 DIM SHARED side_victory_points(2), side_capital(2), train_city(2), fleet_ships$(2)
 DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_casualties&(2), side_battles_won(2), city_first_owner(MAX_CITIES)
@@ -271,9 +271,10 @@ DIM SHARED chance_count, chance_kind(MAX_CHANCE_FACTORS), chance_value#(MAX_CHAN
 ' Set by event_roll for the texts of the event: the city of a riot, the army that was
 ' reinforced, and the side the effect was for. They fill {city}, {army} and {side}.
 DIM SHARED event_city, event_army, event_target_side
-' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
-DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
-DIM SHARED pic_face(1 TO 1564)
+' The capital's star, taken from the icon with GET (draw_title), and the image handle of the mountains,
+' loaded by show_title. The other pictures are loaded when drawn (draw_picture, draw/pictures.bm).
+DIM SHARED pic_capital(60)
+DIM SHARED pic_mountain AS LONG
 ' Set by script_start (io/script.bm) when tests\play.py runs the program.
 DIM SHARED scripted
 ' Set by script_start when CWS_AUTOPLAY is 1 as well: the computer plays both sides.

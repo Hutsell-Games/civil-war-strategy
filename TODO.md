@@ -124,9 +124,6 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 - **Music that stops as soon as a key is pressed.** The tunes in `game\tunes.bm` check `INKEY$` only between
   `PLAY` phrases, so a key stops the music at the end of a phrase. With `PLAY "MB"` the music plays in the
   background, as one victory tune already does (`game\victory_screens.bm`).
-- **PNG pictures in place of the `.vga` files.** `load_picture` (`draw\pictures.bm`) loads the pictures with
-  `DEF SEG` and `BLOAD`. They could be PNG files loaded with `_LOADIMAGE`, as the three pictures in `docs\`
-  would be.
 - **One known folder for saves and settings.** `cws1.sav` to `cws9.sav`, `cws.cfg`, `hiscore.cws`, `cws.his`
   and `battsumm` are opened in the current folder (`io\files.bm`), so they land wherever the game was
   started from. A single folder, for example beside the program, would keep them together.
@@ -146,6 +143,9 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   A new knob is one line in `knobs.txt`, `make_knobs.py`, and the variable in the code. A fraction must
   be a DOUBLE (`name#`), which `make_knobs.py` sees to. Check a conversion as `number_knobs.py` was
   checked: the scripts, and the same autoplay games with the number and with the knob.
+- **The game in a browser, built by QBJS.** The plan is `docs\qbjs-plan.md` (2026-11-16): what QBJS
+  lacks for the game, measured by compiling it, and the steps in our fork of QBJS. Not started; its
+  questions are answered.
 
 ## The code
 

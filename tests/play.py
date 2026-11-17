@@ -23,7 +23,7 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
     #! data <folder>         the files of tests/data/<folder> go into the run's folder, over those
                              of the same name; a <name>.save there is a description that
                              make_save.py turns into the saved game <name>.sav
-    #! without <name> ...    files the run starts without, as graphics/MTN.VGA
+    #! without <name> ...    files the run starts without, as graphics/MTN.PNG
     #! dice <groups>         forced random numbers for the special events (CWS_DICE, io/script.bm):
                              a group for each month, as 0,.05,.95;0,.9
 
