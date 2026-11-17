@@ -64,11 +64,14 @@ Still to do:
   drawing bug.
 - Fix in QBJS what the screens show. Known from `navy` (shown by small programs in
   `tests\out\web\probe\`, which is not kept; `--hook` traces a run):
-  1. `DRAW` strokes a canvas path, which is anti-aliased, so its lines are not one exact color.
-     `PAINT (x, y), c, 0` after the train's `DRAW` (`draw_train`, `draw/icons.bm` line 116; and
-     `ui/screen.bm` line 58) finds no closed border and floods the whole map white. `DRAW` must set
-     pixels as `LINE` does.
-  2. `POINT(0)` and `POINT(1)` after `DRAW` give half pixels (195.5), so `PAINT` starts off by one.
+  1. and 2. Done on 2026-11-17, branch `fix/draw-pixels`, not yet run with the game's scripts. With
+     the switch `--qb-lines` (or `$LINES QB`), `DRAW` sets whole pixels as QB64pe does, so `PAINT`
+     after the train's `DRAW` finds its border; `POINT(0)` and `POINT(1)` give the pen rounded. The
+     switch is off by default because QBJS strokes smooth lines on purpose, and the Graphics 2D
+     library's `LineWidth` relies on them (user, 2026-11-17). The game's runners pass it.
+  - `LINE` strokes the canvas too, two pixels wide: `LINE (20,20)-(30,20)` covers rows 19 and 20
+    and leaves out x=30, and a `B` box is two pixels wide. The map's `PAINT`s work because a line
+    two pixels wide is hard to leak through. Next: `--qb-lines` for `LINE`, with the same helper.
   3. `POINT(x, y)` in `SCREEN 12` gives a 32-bit color (4278233088), where QB gives the palette
      number (2). The game does not use this form; QBJS's tests should cover it.
   4. The mountains (`_PUTIMAGE` of `MTN.PNG`) look different. Not looked at yet.
@@ -84,15 +87,21 @@ below). Each problem becomes a step here.
 
 ## Step 14: upstream — Sonnet drafts, the user posts
 
-- An issue first: the by-reference option, `DEFINT`, the rounding setting and the booleans setting
-  (`--qb-booleans`), each with a small program that shows the difference today. One switch for all of
-  QB's numeric semantics may suit upstream better than three; the issue can ask.
+- An issue first: the by-reference option, `DEFINT`, the rounding setting, the booleans setting
+  (`--qb-booleans`) and the lines setting (`--qb-lines`), each with a small program that shows the
+  difference today. One switch for all of QB's numeric semantics may suit upstream better than three;
+  the issue can ask.
 - Then the pull requests, the certain ones first: the five fixes already made (branch
   `fix/const-string-suffix`, to split into one branch each), step 1, steps 3 and 4, step 8, and the
   integer fixes of 10, and the drawing fixes of 12. Also the three branches of 2026-11-17:
   `fix/file-number-input`, `feature/view-offset-clip`, and the precedence and `READ` parts of
   `fix/mod-read-rounding`. Then 5, 6, 7 and 11 (`QB.persistFiles`) once the issue has an answer, with
-  the rounding of `MOD`'s operands, which follows the rounding setting of 6.
+  the rounding of `MOD`'s operands, which follows the rounding setting of 6, and `fix/boolean-store`:
+  a comparison stored in an integer gives -1 only with the booleans setting, 1 as before without it.
+- Behavior that changes for existing QBJS programs, to name in each pull request (checked against
+  upstream's compiler, 2026-11-17): `DEFINT` was ignored with a warning (`DEFINT A-Z: x = 7 / 2` gave
+  3.5); `10 MOD 3 * 2` was 2; `INPUT #` read a whole line per statement; `CLS` and `VIEW` now reset
+  `DRAW`'s angle and scale.
 - Each pull request: what was wrong, the small program, the test added, and the rebuilt `qb2js.js`.
 - QBJS has one maintainer and no contribution guide, so the answer may take time. The game does not
   wait for it: it builds from the fork.

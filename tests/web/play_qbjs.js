@@ -499,7 +499,7 @@ async function writeReport(browser, r) {
 }
 
 function options(argv) {
-    const o = { jobs: 1, promptSeconds: 120, qbc: '--byref --round-half-even --qb-booleans', scripts: [] };
+    const o = { jobs: 1, promptSeconds: 120, qbc: '--byref --round-half-even --qb-booleans --qb-lines', scripts: [] };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--native') o.native = true;

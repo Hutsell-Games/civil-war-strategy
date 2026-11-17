@@ -57,7 +57,7 @@ function cfgFor(seed, history) {
 }
 
 function options(argv) {
-    const o = { seeds: '1', timeout: 600, qbc: '--byref --round-half-even --qb-booleans' };
+    const o = { seeds: '1', timeout: 600, qbc: '--byref --round-half-even --qb-booleans --qb-lines' };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--native') o.native = true;
