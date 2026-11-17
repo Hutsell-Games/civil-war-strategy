@@ -2,6 +2,14 @@
 // the game writes to autoplay.txt. docs/qbjs-plan.md, step 9.
 //
 //   node tests/web/autoplay.js [--seeds 1-3] [--timeout 600] [--qbc "<flags>"] [--qbjs <folder>] [--native]
+//                              [--history] [--dump <names>] [--out <folder name>]
+//
+// --out names the folder under tests/out/web/ where the page is built (default autoplay), so that
+// several runs of different seeds can go side by side.
+//
+// --history turns the game's History setting on, and --dump a.txt,b.txt names other files of QBJS's
+// file system. At the end of a seed they are saved as tests/out/web/autoplay/seed<seed>-<name>, to find
+// where two runs part.
 //
 // For each seed it starts the page with CWS_SEED=<seed> and CWS_AUTOPLAY=1, and with the CWS.CFG that
 // tests/autoplay.py gives a two-player game (the player's side is the Union). The game announces each
@@ -38,8 +46,8 @@ function keyFor(place, letter) {
 }
 
 // The CWS.CFG of tests/autoplay.py's two-player game, in tests/play.py's field order.
-function cfgFor(seed) {
-    const f = [1, 3, 0, 3, 2, 1, 5, 600, 300, 1, seed % 2, 36, 134, 3992, 5041, 0, seed % 6];
+function cfgFor(seed, history) {
+    const f = [1, 3, 0, 3, 2, 1, 5, 600, 300, 1, seed % 2, 36, 134, 3992, 5041, history ? 1 : 0, seed % 6];
     return f.join(',') + '\n';
 }
 
@@ -48,6 +56,7 @@ function options(argv) {
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--native') o.native = true;
+        else if (a === '--history') o.history = true;
         else if (a.startsWith('--')) o[a.slice(2)] = argv[++i];
     }
     const [first, last] = String(o.seeds).split('-');
@@ -56,7 +65,7 @@ function options(argv) {
     return o;
 }
 
-async function playSeed(browser, port, seed, timeoutSeconds) {
+async function playSeed(browser, port, seed, timeoutSeconds, dumpPrefix, dumpNames) {
     const page = await browser.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
@@ -83,13 +92,27 @@ async function playSeed(browser, port, seed, timeoutSeconds) {
     let answered = 0;
     let line = null;
     while (Date.now() < deadline) {
-        const state = await page.evaluate(() => {
+        const state = await page.evaluate((names) => {
             const vfs = GX.vfs();
             const file = vfs.getNode('autoplay.txt', GX.vfsCwd());
+            const done = file && file.type == vfs.FILE;
+            const dumped = {};
+            if (done) {
+                for (const name of names) {
+                    const f = vfs.getNode(name, GX.vfsCwd());
+                    if (f && f.type == vfs.FILE) dumped[name] = vfs.readText(f);
+                }
+            }
             return { waits: window.__waits, last: window.__last,
-                     result: file && file.type == vfs.FILE ? vfs.readText(file) : null };
-        }).catch(() => null);
-        if (state && state.result) { line = state.result.trim(); break; }
+                     result: done ? vfs.readText(file) : null, dumped };
+        }, dumpNames).catch(() => null);
+        if (state && state.result) {
+            line = state.result.trim();
+            for (const name of Object.keys(state.dumped)) {
+                fs.writeFileSync(dumpPrefix + name, state.dumped[name]);
+            }
+            break;
+        }
         if (errors.length) break;
         if (state && state.waits !== answered) {
             answered = state.waits;
@@ -115,7 +138,7 @@ function nativeLines(seeds) {
 async function main() {
     const o = options(process.argv.slice(2));
     const qbjs = path.resolve(o.qbjs || path.join(GAME, '..', 'qbjs'));
-    const out = path.join(GAME, 'tests', 'out', 'web', 'autoplay');
+    const out = path.join(GAME, 'tests', 'out', 'web', o.out || 'autoplay');
     fs.rmSync(out, { recursive: true, force: true });
     fs.mkdirSync(out, { recursive: true });
     const build = spawnSync('node', [path.join(qbjs, 'qbc.js'), PROGRAM, path.join(out, 'program.js'), ...o.qbc.split(' ')],
@@ -133,9 +156,11 @@ async function main() {
     const lines = {};
     try {
         for (const seed of o.list) {
-            fs.writeFileSync(path.join(out, 'CWS.CFG'), cfgFor(seed));
+            fs.writeFileSync(path.join(out, 'CWS.CFG'), cfgFor(seed, o.history));
             const t0 = Date.now();
-            const r = await playSeed(browser, server.address().port, seed, Number(o.timeout));
+            const dumpNames = (o.history ? ['cws.his'] : []).concat(o.dump ? o.dump.split(',') : []);
+            const r = await playSeed(browser, server.address().port, seed, Number(o.timeout),
+                path.join(out, 'seed' + seed + '-'), dumpNames);
             lines[seed] = r;
             console.log('seed ' + seed + ' qbjs  : ' + (r.line || ('ERROR ' + r.error)) +
                 '  (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s)');
