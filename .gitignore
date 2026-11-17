@@ -18,3 +18,5 @@ BATTSUMM
 
 # Packages of the QBJS test harness (tests/web).
 tests/web/node_modules/
+
+*.exe.stackdump

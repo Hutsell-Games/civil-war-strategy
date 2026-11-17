@@ -223,6 +223,7 @@ FUNCTION menu_wait_key$
     DIM pressed$
     CALL script_mark_key_wait(2, menu_text$(0))
     DO
+        _LIMIT 60
         pressed$ = INKEY$
     LOOP WHILE pressed$ = ""
     menu_wait_key$ = pressed$

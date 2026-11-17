@@ -484,6 +484,13 @@ def run_script(tools: Tools, exe: Path, script: Script, compiler: str, tag: str 
     remove_files(work, script.without)
     game = work / exe.name
     shutil.copy2(exe, game)
+    # In QB64Rust's suites VM, whose own OpenGL cannot open a QB64 program's window, QB64RUST_OPENGL_DIR
+    # names Mesa's software OpenGL; its two DLLs go beside the program, as QB64Rust's runner puts them
+    # (QB64Rust's tools/legacy_tests/run_legacy_tests.py, link_opengl). Unset, nothing is copied.
+    opengl = os.environ.get("QB64RUST_OPENGL_DIR")
+    if opengl:
+        for dll in ("opengl32.dll", "libgallium_wgl.dll"):
+            shutil.copy2(Path(opengl) / dll, work / dll)
     state = folder / "screen.txt"
     env = dict(os.environ)
     env["CWS_SEED"] = script.seed

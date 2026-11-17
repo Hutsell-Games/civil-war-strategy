@@ -2,7 +2,12 @@
 // the game writes to autoplay.txt. docs/qbjs-plan.md, step 9.
 //
 //   node tests/web/autoplay.js [--seeds 1-3] [--timeout 600] [--qbc "<flags>"] [--qbjs <folder>] [--native]
-//                              [--history] [--dump <names>] [--out <folder name>]
+//                              [--history] [--dump <names>] [--out <folder name>] [--jobs <n>]
+//                              [--expect <native results>]
+//
+// --jobs plays that many seeds at once. --expect compares each seed with a file of native results that
+// tests/autoplay.py run wrote (as tests/out/web/native-1-100.json), prints the seeds that differ, and
+// fails when one does. Seeds 1 to 100 are a large run, for QB64Rust's suites VM (tools\winvm\game.ps1).
 //
 // --out names the folder under tests/out/web/ where the page is built (default autoplay), so that
 // several runs of different seeds can go side by side.
@@ -52,7 +57,7 @@ function cfgFor(seed, history) {
 }
 
 function options(argv) {
-    const o = { seeds: '1', timeout: 600, qbc: '--byref --round-half-even' };
+    const o = { seeds: '1', timeout: 600, qbc: '--byref --round-half-even --qb-booleans' };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--native') o.native = true;
@@ -87,7 +92,8 @@ async function playSeed(browser, port, seed, timeoutSeconds, dumpPrefix, dumpNam
             };
         });
     }, seed);
-    await page.goto('http://127.0.0.1:' + port + '/index.html');
+    // Two minutes, not puppeteer's 30 s: in the suites VM, with six pages at once, a load took longer.
+    await page.goto('http://127.0.0.1:' + port + '/index.html', { timeout: 120000 });
     const deadline = Date.now() + timeoutSeconds * 1000;
     let answered = 0;
     let line = null;
@@ -151,25 +157,57 @@ async function main() {
     copyDependencies(qbjs, out);
     copyData(GAME, out);
 
-    const server = await serve(out);
     const browser = await puppeteer.launch({ executablePath: findChrome(o.chrome), headless: true });
     const lines = {};
+    const servers = [];
     try {
-        for (const seed of o.list) {
-            fs.writeFileSync(path.join(out, 'CWS.CFG'), cfgFor(seed, o.history));
-            const t0 = Date.now();
-            const dumpNames = (o.history ? ['cws.his'] : []).concat(o.dump ? o.dump.split(',') : []);
-            const r = await playSeed(browser, server.address().port, seed, Number(o.timeout),
-                path.join(out, 'seed' + seed + '-'), dumpNames);
-            lines[seed] = r;
-            console.log('seed ' + seed + ' qbjs  : ' + (r.line || ('ERROR ' + r.error)) +
-                '  (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s)');
-        }
+        // --jobs: each worker plays its seeds from a folder and a server of its own, since a seed's
+        // CWS.CFG is written into the folder the page is served from.
+        const queue = o.list.slice();
+        const worker = async (k) => {
+            const folder = k === 0 ? out : out + '-' + k;
+            if (k > 0) {
+                fs.rmSync(folder, { recursive: true, force: true });
+                fs.cpSync(out, folder, { recursive: true });
+            }
+            const server = await serve(folder);
+            servers.push(server);
+            while (queue.length) {
+                const seed = queue.shift();
+                fs.writeFileSync(path.join(folder, 'CWS.CFG'), cfgFor(seed, o.history));
+                const t0 = Date.now();
+                const dumpNames = (o.history ? ['cws.his'] : []).concat(o.dump ? o.dump.split(',') : []);
+                // An error of one seed (a page that did not load) is that seed's result, not the run's end.
+                const r = await playSeed(browser, server.address().port, seed, Number(o.timeout),
+                    path.join(out, 'seed' + seed + '-'), dumpNames).catch(e => ({ line: null, error: e.message }));
+                lines[seed] = r;
+                console.log('seed ' + seed + ' qbjs  : ' + (r.line || ('ERROR ' + r.error)) +
+                    '  (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s)');
+            }
+        };
+        await Promise.all(Array.from({ length: Math.max(1, Number(o.jobs) || 1) }, (_, k) => worker(k)));
     } finally {
         await browser.close();
-        server.close();
+        servers.forEach(s => s.close());
     }
     let bad = o.list.filter(s => !lines[s].line).length;
+    if (o.expect) {
+        // The native results of tests/autoplay.py run, as tests/out/web/native-1-100.json
+        const data = JSON.parse(fs.readFileSync(path.resolve(o.expect), 'utf8'));
+        const games = data.games || data;
+        let same = 0, differ = 0;
+        for (const seed of o.list) {
+            const g = games.find(x => x && x.seed === seed);
+            const mine = lines[seed];
+            if (!g) { console.log('seed ' + seed + ' NO NATIVE RESULT'); differ++; continue; }
+            if (mine && mine.line && sameFields(mine.line, g)) { same++; continue; }
+            differ++;
+            console.log('seed ' + seed + ' DIFFERENT: native ' +
+                [g.winner, g.rule, g.month, g.year, ...(g.points || []), ...(g.cities || [])].join(','));
+        }
+        console.log(same + ' of ' + o.list.length + ' seeds match the native results, ' + differ + ' differ');
+        if (differ) bad++;
+    }
     if (o.native) {
         const native = nativeLines(o.list);
         if (!native) process.exit(2);

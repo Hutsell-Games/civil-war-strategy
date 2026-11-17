@@ -24,7 +24,7 @@ function main() {
     fs.rmSync(out, { recursive: true, force: true });
     fs.mkdirSync(out, { recursive: true });
     const b = spawnSync('node', [path.join(o.qbjs, 'qbc.js'), path.join(GAME, 'cws.bas'), path.join(out, 'program.js'),
-        '--byref', '--round-half-even'], { cwd: GAME, encoding: 'utf8' });
+        '--byref', '--round-half-even', '--qb-booleans'], { cwd: GAME, encoding: 'utf8' });
     process.stderr.write(b.stderr || '');
     if (b.status !== 0 || (b.stdout || '').split('\n').some(l => l.startsWith('ERROR:'))) {
         process.stdout.write(b.stdout || '');

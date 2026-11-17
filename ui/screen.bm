@@ -72,6 +72,9 @@ SUB wait_seconds (seconds!)
     END IF
     start! = TIMER
     DO WHILE TIMER - start! < seconds! AND INKEY$ = ""
+        ' rest between checks, so that the wait does not use a whole processor core (and so that
+        ' QBJS lets the browser deliver the key)
+        _LIMIT 60
     LOOP
 END SUB
 
@@ -79,6 +82,7 @@ END SUB
 SUB wait_key (letter$)
     CALL script_mark_key_wait(1, letter$)
     DO WHILE INKEY$ = ""
+        _LIMIT 60
     LOOP
 END SUB
 

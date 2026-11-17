@@ -207,9 +207,6 @@ Left alone by group 8 (the colors):
 Found on 2026-11-16 in a code review, by reading the code; not run. The Realism tests and the forced
 choices change how the game plays or is played; the others do not.
 
-- **Waits that use a whole processor core.** `wait_key`, `wait_seconds` (`ui\screen.bm`), `menu_wait_key$`
-  (`ui\menu.bm`) and `script_tick` (`io\script.bm`) loop on `INKEY$` with no `_LIMIT`. While the game
-  waits for a key, it runs one core at 100%.
 - **`wait_seconds` at midnight.** `TIMER` goes back to 0 at midnight, so `TIMER - start!` turns negative
   and the pause lasts until a key is pressed.
 - **Files opened without a check.** `config_read` (`CWS.CFG`), `hall_of_fame_load` (`HISCORE.CWS`),
