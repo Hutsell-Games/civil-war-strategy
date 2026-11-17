@@ -10,6 +10,7 @@
 //   --shot <file>     save a PNG of the page after the run
 //   --env NAME=VALUE  make ENVIRON$("NAME") return VALUE (QBJS's own ENVIRON$ always gives "")
 //   --keys <list>     press keys during the run: "3:Enter,1:ArrowDown" (seconds to wait, then the key)
+//   --qbc "<flags>"   extra flags for QBJS's compiler, such as "--byref --round-half-even"
 //   --chrome <exe>    the browser (default: Chrome or Edge in their usual places)
 //
 // What it prints: QBJS's warnings and errors from the build, the page's console output and errors,
@@ -110,7 +111,8 @@ async function main() {
     fs.mkdirSync(out, { recursive: true });
 
     // Build: QBJS's command-line compiler writes program.js and prints its warnings.
-    const build = spawnSync('node', [path.join(qbjs, 'qbc.js'), program, path.join(out, 'program.js')],
+    const qbcFlags = o.qbc ? o.qbc.split(' ') : [];
+    const build = spawnSync('node', [path.join(qbjs, 'qbc.js'), program, path.join(out, 'program.js'), ...qbcFlags],
         { cwd: path.dirname(program), encoding: 'utf8' });
     process.stdout.write(build.stdout || '');
     process.stderr.write(build.stderr || '');
