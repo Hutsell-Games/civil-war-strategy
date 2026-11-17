@@ -82,7 +82,7 @@ function copyData(from, out) {
     walk(from, '');
 }
 
-function serve(root) {
+function serve(root, port) {
     const types = { '.html': 'text/html', '.js': 'text/javascript', '.png': 'image/png', '.css': 'text/css' };
     const server = http.createServer((req, res) => {
         const file = path.join(root, decodeURIComponent(req.url.split('?')[0]).replace(/^\//, '') || 'index.html');
@@ -94,7 +94,7 @@ function serve(root) {
         res.writeHead(200, { 'Content-Type': types[path.extname(file).toLowerCase()] || 'application/octet-stream' });
         fs.createReadStream(file).pipe(res);
     });
-    return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server)));
+    return new Promise(resolve => server.listen(port || 0, '127.0.0.1', () => resolve(server)));
 }
 
 async function main() {
