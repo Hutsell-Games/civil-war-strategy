@@ -57,6 +57,10 @@ on something no browser can give.
 `node tests\web\play_qbjs.js` plays the 41 scripts of `tests\scripts` in the QBJS build, as `play.py`
 plays them natively (what it checks is at the top of the file). All 41 pass in QB64Rust's suites VM,
 and autoplay seeds 1 to 100 match the native results (the archive's progress record, 2026-11-17).
+On 2026-11-18, with `fix/line-pixels` and `fix/screen-same-mode`, 37 passed in the VM; the other four
+pass alone. Under load in the VM a page can stop answering, so with `--jobs` above 1 the runner now
+plays a failed script once more, alone, at the end. The summary names the scripts that passed only
+then.
 Still to do:
 
 - Look at the `report.html` of each script (`--native --jobs 4` in the suites VM, with QB64Rust's
@@ -71,10 +75,23 @@ Still to do:
      library's `LineWidth` relies on them (user, 2026-11-17). The game's runners pass it.
   - `LINE` strokes the canvas too, two pixels wide: `LINE (20,20)-(30,20)` covers rows 19 and 20
     and leaves out x=30, and a `B` box is two pixels wide. The map's `PAINT`s work because a line
-    two pixels wide is hard to leak through. Next: `--qb-lines` for `LINE`, with the same helper.
+    two pixels wide is hard to leak through. Done on 2026-11-18, branch `fix/line-pixels`: with
+    `--qb-lines`, `LINE` sets whole pixels with the same helper.
   3. `POINT(x, y)` in `SCREEN 12` gives a 32-bit color (4278233088), where QB gives the palette
      number (2). The game does not use this form; QBJS's tests should cover it.
   4. The mountains (`_PUTIMAGE` of `MTN.PNG`) look different. Not looked at yet.
+  5. `SCREEN 12` while already in `SCREEN 12` clears the screen in QBJS. In QB64pe it changes
+     nothing: pixels, graphics cursor and text cursor stay (checked 2026-11-17). The end-game screen
+     (`ui/victory.bm` line 149) fills the screen red, then `draw_map` runs `SCREEN 12`, so QBJS shows
+     white around the map where native shows red with a black shadow (`navy`, 20.7 % of pixels).
+     Worse, `draw_surrender` (`game/victory_screens.bm` line 183) runs `SCREEN 12` during a turn and
+     draws only the right panel, so in QBJS the map is gone until the next redraw
+     (`pass-union-1861`, March and April 1862, 65 % of pixels). Done on 2026-11-18, branch
+     `fix/screen-same-mode`: `SCREEN` with the mode in use returns at once, as QB64pe's
+     `qbg_screen` does. With it and `fix/line-pixels` on `game/cws`, no screen of `pass-union-1861` or
+     `navy` differs by more than 0.9 %.
+  6. The bar under "VP" at the top right: native draws blue, then white to x=630; QBJS draws the blue
+     shorter and no white (`pass-union-1861`, July 1862). Not looked at yet.
 - Not run yet: the autoplay check of the one-player games (`--mode one`) and of the alternate map.
 
 ## Step 13: listen, and press keys in a real browser — the user
@@ -101,7 +118,8 @@ below). Each problem becomes a step here.
 - Behavior that changes for existing QBJS programs, to name in each pull request (checked against
   upstream's compiler, 2026-11-17): `DEFINT` was ignored with a warning (`DEFINT A-Z: x = 7 / 2` gave
   3.5); `10 MOD 3 * 2` was 2; `INPUT #` read a whole line per statement; `CLS` and `VIEW` now reset
-  `DRAW`'s angle and scale.
+  `DRAW`'s angle and scale; `SCREEN` with the mode in use no longer clears the screen or resets
+  anything.
 - Each pull request: what was wrong, the small program, the test added, and the rebuilt `qb2js.js`.
 - QBJS has one maintainer and no contribution guide, so the answer may take time. The game does not
   wait for it: it builds from the fork.

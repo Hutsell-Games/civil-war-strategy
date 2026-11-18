@@ -162,7 +162,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 // Installed in the page before QBJS starts: ENVIRON$, the announced waits, and what the program reads.
 function pageHooks(env) {
     window.__env = env;
-    window.__h = { waits: 0, place: 0, letter: 0, given: 0, taken: 0, reads: 0, input: false };
+    window.__h = { waits: 0, place: 0, letter: 0, given: 0, taken: 0, reads: 0, input: false, echoes: 0, inputs: 0 };
     window.addEventListener('DOMContentLoaded', () => {
         const h = window.__h;
         QB.func_Environ = name => (window.__env[name] !== undefined ? window.__env[name] : '');
@@ -190,7 +190,14 @@ function pageHooks(env) {
         QB.sub_Input = async function () {
             h.input = true;
             h.reads++;
-            try { return await input.apply(this, arguments); } finally { h.input = false; }
+            try { return await input.apply(this, arguments); } finally { h.input = false; h.inputs++; }
+        };
+        // INPUT draws its text again for each key it takes (a character or Backspace), so the count of
+        // those draws tells when the key was taken.
+        const printString = QB.sub__PrintString;
+        QB.sub__PrintString = function () {
+            if (h.input) h.echoes++;
+            return printString.apply(this, arguments);
         };
     });
 }
@@ -236,9 +243,21 @@ async function playSteps(page, steps, o, errors, folder, keysName, shots) {
             await sleep(5);
         }
         if (s.input) {
-            // QBJS's INPUT looks at the last key every 5 ms, so keys must come slower than that.
+            // QBJS's INPUT looks at the last key every 5 ms and keeps only that one, so the next key waits
+            // until INPUT has drawn this one (or, after Enter, has ended: counted, since the next INPUT may
+            // start at once, as the second player's name does). Under load a fixed pause lost keys.
+            // INPUT draws nothing for other keys (Backspace on an empty field, Tab, Esc, the arrows), so after
+            // those a fixed pause stays.
+            const ends = key.name === 'enter';
             await page.keyboard.press(key.name ? KEY_NAMES[key.name] : key.char);
-            await sleep(40);
+            if (!ends && !key.char) await sleep(40);
+            else for (;;) {
+                check();
+                const t = await h();
+                if (ends ? t.inputs > s.inputs : t.echoes > s.echoes) break;
+                if (Date.now() > until) throw new Stop('INPUT did not take the key ' + JSON.stringify(key) + ' in ' + o.promptSeconds + ' s');
+                await sleep(5);
+            }
             lastReads = (await h()).reads;
             return;
         }
@@ -400,8 +419,9 @@ async function playScript(browser, build, name, o) {
         }
         if (errors.length) throw new Stop('page error: ' + errors[0]);
     } catch (e) {
-        if (!(e instanceof Stop)) throw e;
-        problem = e.message;
+        // A browser error (such as puppeteer's protocol timeout, seen in the suites VM under load) fails
+        // this script only; the other scripts still run.
+        problem = (e instanceof Stop) ? e.message : 'the browser failed: ' + e.message;
     }
     try {
         const file = path.join(folder, 'qbjs-' + (shots.length + 1) + '.png');
@@ -420,7 +440,7 @@ async function playScript(browser, build, name, o) {
             }
         }
     }
-    await page.close();
+    await page.close().catch(() => {});
     server.close();
     const seconds = (Date.now() - t0) / 1000;
 
@@ -557,24 +577,51 @@ async function main() {
 
     const browser = await puppeteer.launch({ executablePath: findChrome(o.chrome), headless: true });
     const results = [];
+    const retried = [];
+    const failing = r => !r.setupError && (r.problem || r.differing.length || r.files.length !== r.want.length);
+    const runOne = async (name) => {
+        let r;
+        try {
+            r = await playScript(browser, build, name, o);
+        } catch (e) {
+            r = { name, problem: 'the script could not run: ' + e.message, seconds: 0, shots: [], checkpoints: 0,
+                files: [], want: [], differing: [] };
+        }
+        if (!r.setupError) await writeReport(browser, r).catch(e => { r.problem = r.problem || 'no report: ' + e.message; });
+        return r;
+    };
     try {
         const queue = o.scripts.slice();
         const worker = async () => {
             while (queue.length) {
-                const name = queue.shift();
-                const r = await playScript(browser, build, name, o);
-                if (!r.setupError) await writeReport(browser, r);
+                const r = await runOne(queue.shift());
                 results.push(r);
                 report(r);
             }
         };
         await Promise.all(Array.from({ length: Math.max(1, o.jobs) }, worker));
+        // A script that failed runs once more at the end, alone. With several jobs at once in the suites VM, a page
+        // could stop answering under the load (puppeteer's protocol timeout) and pass when run by itself; a real
+        // failure fails again. The result of the run alone is the one that counts, but the summary names the
+        // scripts that passed only then, since a failure that comes only under load can be a real bug.
+        if (o.jobs > 1) {
+            for (let i = 0; i < results.length; i++) {
+                if (!failing(results[i])) continue;
+                console.log('again, alone: ' + results[i].name);
+                // The first run's folder is replaced, so its reason is kept for the summary.
+                const first = results[i].problem || 'its files differ';
+                results[i] = await runOne(results[i].name);
+                if (!failing(results[i])) retried.push(results[i].name + ' (first: ' + first + ')');
+                report(results[i]);
+            }
+        }
     } finally {
         await browser.close();
     }
     const setup = results.filter(r => r.setupError).length;
-    const failed = results.filter(r => !r.setupError && (r.problem || r.differing.length || r.files.length !== r.want.length)).length;
-    console.log((results.length - failed - setup) + ' passed, ' + failed + ' failed' + (setup ? ', ' + setup + ' not set up' : ''));
+    const failed = results.filter(failing).length;
+    console.log((results.length - failed - setup) + ' passed' + (retried.length ? ' (' + retried.length + ' only when run again, alone: ' + retried.join('; ') + ')' : '') +
+        ', ' + failed + ' failed' + (setup ? ', ' + setup + ' not set up' : ''));
     process.exit(setup ? 2 : failed ? 1 : 0);
 }
 
