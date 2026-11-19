@@ -88,6 +88,11 @@ below). Each problem becomes a step here.
   anything. From step 12 on 2026-11-18 (not checked against upstream's compiler): `PRINT` moves an
   item that does not fit to the next line; a negative color is no longer black; a source file that
   is not valid UTF-8 is read as code page 437.
+- From 2026-11-19, step 13's fixes (the archive's progress record): `fix/sound-timing` and
+  `fix/paint-default-color` for every program, `fix/circle-pixels` with the lines setting, and
+  `fix/play-dots-volume` with the sound setting. `fix/sound-timing`, and the branches made from it,
+  also add `node_modules/` to `.gitignore` and `test/headless/package-lock.json`, which must come
+  out of the pull requests to upstream.
 - Each pull request: what was wrong, the small program, the test added, and the rebuilt `qb2js.js`.
 - QBJS has one maintainer and no contribution guide, so the answer may take time. The game does not
   wait for it: it builds from the fork.

@@ -565,6 +565,35 @@ suites VM:
 - How to run the scripts in the VM and read their reports is at the top of
   `tests\web\play_qbjs.js`.
 
+**2026-11-19, step 13: what the user heard and saw, fixed.** The user played the game in Chrome
+with `serve.js` and found two problems. Each is fixed in the fork, measured against QB64pe's source
+or `qb64pe.exe`, and merged into `game/cws` (now `266df99`, the fork's pull requests 8 to 11).
+- **A long beep after "new game".** The beep is the menu's `SOUND 700, .5` (`ui/menu.bm` line 175),
+  28 ms. QBJS ended `SOUND`, `BEEP` and `PLAY` notes with a JavaScript timer, so a busy page made a
+  tone ring until the timer ran: in a test that kept the page busy, the 28 ms tone lasted 0.69 s.
+  `SOUND` also gave `oscillator.stop()` milliseconds where it takes seconds. Branch
+  `fix/sound-timing`, for every program: each tone now ends on the audio clock. Whether this was the
+  beep the user heard is not confirmed: the user has not listened since.
+- **The schooner's picture mostly black.** `draw_schooner` (`draw/ships.bm`) runs `PAINT (140, 340)`
+  with no color. QB64pe fills with the foreground color; QBJS filled with black and flooded the
+  screen (96.5 % of pixels differed, 2.2 % with the fix). Branch `fix/paint-default-color`, for
+  every program, with a suite test.
+- **Found on the way:** `CIRCLE` drawn as a smoothed arc, so a `PAINT` inside a small circle could
+  leak. Branch `fix/circle-pixels`, under `--qb-lines`: `CIRCLE` sets QB64's pixels; 20 cases match
+  `qb64pe.exe` pixel for pixel. With it, the scripts' screens differ by about 0.6 % where they
+  differed by up to 1.3 %.
+- **The sound review.** QBJS's `PLAY`, `SOUND` and `BEEP`, read against QB64pe's `audio.cpp`. What
+  the game meets is fixed under a new switch, `--qb-sound` / `$SOUND QB` (branch
+  `fix/play-dots-volume`): every dot after a note counts (the victory tune's `f4..`), 18.2 clock
+  ticks to a second, `SOUND` and `BEEP` as loud as `PLAY`, one queue for `PLAY` and `SOUND` with
+  QB64's wait, `MB` in the background (the end-game tune), and the audio resumed on the first key.
+  The switch is off by default, because these change how existing QBJS programs sound (user,
+  2026-11-19). What the game does not meet is in the fork's `SOMEDAY.md`. The game's build
+  scripts pass `--qb-sound`.
+- **Checks:** all 41 scripts pass in the VM with `f8cb94e` (four only when played again alone,
+  for load). `sound-rebel` and `sound-union` pass on the host with `266df99` and the switch on.
+  QBJS's suite passes 12 of 12 on each merge.
+
 ## Effort
 
 Counted in Claude's sessions: step 1 one, step 2 two to three, step 3 two, step 4 one to three,
