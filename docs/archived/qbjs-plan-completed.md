@@ -2,7 +2,8 @@
 
 The completed parts of [../qbjs-plan.md](../qbjs-plan.md), moved here on 2026-11-17: steps 0 to 3a,
 the autoplay check of step 4, the progress record to 2026-11-17, the effort estimate, and the
-answered questions with the panel. The plan keeps what is still open. "The steps file" below is
+answered questions with the panel. Step 12 was moved here on 2026-11-18 and 19, as the last progress
+entries. The plan keeps what is still open. "The steps file" below is
 `qbjs-steps.md`, the numbered work list. Its open steps (12 to 14) were merged into the plan on
 2026-11-17, and its done steps are the progress entries here.
 
@@ -447,6 +448,122 @@ not kept); `qb64rust` gives the same output, line for line.
   the switch both are wrong.
 - **`ENVIRON$`** left the list: a browser has no environment, so `""` is right, and the harness
   supplies the variables. **The `.VGA` files** go (user, 2026-11-17), with `tools\vga_to_png.py`.
+
+**2026-11-18, step 12: the reports read, and the drawing bugs fixed.** Moved here from the plan's
+step 12 on 2026-11-18. Bug 3 of the list is still open and stays in the plan.
+- On 2026-11-18 the reports of that morning's run were read: 35 scripts, all with
+  `fix/line-pixels` and `fix/screen-same-mode`. Most screens differ by about 1 %, because QBJS draws
+  text and `CIRCLE` its own way. The rest came from the bugs 6 to 9 below. Six scripts have no report
+  from that run: `endings`, `sound-rebel`, `sound-union`, `two-player` and `union-time`, and
+  `pass-union-1861`, played again on the host (at most 0.9 % with 6 to 9).
+- Fixed in QBJS what the screens show. Known from `navy` (shown by small programs in
+  `tests\out\web\probe\`, which is not kept; `--hook` traces a run):
+  1. and 2. Done on 2026-11-17, branch `fix/draw-pixels`, not yet run with the game's scripts. With
+     the switch `--qb-lines` (or `$LINES QB`), `DRAW` sets whole pixels as QB64pe does, so `PAINT`
+     after the train's `DRAW` finds its border; `POINT(0)` and `POINT(1)` give the pen rounded. The
+     switch is off by default because QBJS strokes smooth lines on purpose, and the Graphics 2D
+     library's `LineWidth` relies on them (user, 2026-11-17). The game's runners pass it.
+  - `LINE` strokes the canvas too, two pixels wide: `LINE (20,20)-(30,20)` covers rows 19 and 20
+    and leaves out x=30, and a `B` box is two pixels wide. The map's `PAINT`s work because a line
+    two pixels wide is hard to leak through. Done on 2026-11-18, branch `fix/line-pixels`: with
+    `--qb-lines`, `LINE` sets whole pixels with the same helper.
+  4. The mountains (`_PUTIMAGE` of `MTN.PNG`) looked different. On 2026-11-18 they show no
+     difference in `navy` or `commands`. Which fix did it was not looked into.
+  5. `SCREEN 12` while already in `SCREEN 12` clears the screen in QBJS. In QB64pe it changes
+     nothing: pixels, graphics cursor and text cursor stay (checked 2026-11-17). The end-game screen
+     (`ui/victory.bm` line 149) fills the screen red, then `draw_map` runs `SCREEN 12`, so QBJS shows
+     white around the map where native shows red with a black shadow (`navy`, 20.7 % of pixels).
+     Worse, `draw_surrender` (`game/victory_screens.bm` line 183) runs `SCREEN 12` during a turn and
+     draws only the right panel, so in QBJS the map is gone until the next redraw
+     (`pass-union-1861`, March and April 1862, 65 % of pixels). Done on 2026-11-18, branch
+     `fix/screen-same-mode`: `SCREEN` with the mode in use returns at once, as QB64pe's
+     `qbg_screen` does. With it and `fix/line-pixels` on `game/cws`, no screen of `pass-union-1861` or
+     `navy` differs by more than 0.9 %.
+  6. The bar under "VP" at the top right: native draws blue, then white to x=630; QBJS draws no
+     white (`pass-union-1861`, every turn; the blue matches since `fix/line-pixels`). The white is
+     `LINE ..., 8 - side_color, BF` (`ui/screen.bm` line 123), color -1 for the Union. QBJS draws
+     every negative color black. QB64 masks it to the screen's palette: -1 is 15 in `SCREEN 12`, and
+     `&HFFFFFFFF` (white) in a 32-bit image. Done on 2026-11-18, branch `fix/negative-color`.
+  7. The army report draws its two rules with `STRING$(70, "─")`, where the `─` is byte 196 in the
+     source (`ui/reports.bm` lines 173 and 175). `qbc.js` read the source as UTF-8, so each such byte
+     became U+FFFD, drawn as a wide `?` box: the rule wrapped onto three lines (`union-manassas` and
+     `commands`, 7.4 to 7.9 %). Fifteen lines in six files have such bytes: box lines, `▓` bars and
+     `√` marks. Done on 2026-11-18, branch `fix/cp437-source`: `qbc.js` reads a source file, and each
+     `$INCLUDE` file, that is not valid UTF-8 as code page 437, with the same characters `CHR$` gives.
+     QBJS's suite does not use `qbc.js`, so no suite test covers it; a small program with box
+     characters in its main file and its `$INCLUDE` file showed it.
+  8. PRINT did not move an item that does not fit on the rest of the line to the next line, as QB64's
+     `makefit` does. The report's ` 11 ` at column 78 went to the end of row 1 instead of the start of
+     row 2. Done on 2026-11-18, branch `fix/print-makefit`, for every program (not under a switch).
+     Six cases match QB64pe's `CSRLIN` and `POS(0)`, among them `TAB` and an item longer than a line.
+  9. `PAINT` stopped at pixels of the fill color as well as at the border. `draw_map` starts with
+     `PAINT (200, 200), 2, 10` over a map that is already green, so in QBJS it painted nothing, and a
+     menu left on the map stayed under the Intelligence report (`commands`, 3.5 %). QB64pe fills every
+     pixel not of the border color. Done on 2026-11-18, branch `fix/paint-fill-color`, with
+     `--qb-lines` only, so that QBJS's default `PAINT` does not change.
+
+  The four branches of 6 to 9 start from `fix/screen-same-mode`, each with a test in QBJS's suite
+  but 7. They are committed (`cdd021a`, `57d93c1`, `31b157f`, `6d222cc`) and not merged into
+  `game/cws`. With all four applied to `game/cws`, no screen of `commands`,
+  `union-manassas`, `navy` or `pass-union-1861` differs by more than 1.3 %.
+
+**2026-11-18 and 19, step 12: three more drawing bugs, and the two-player autoplay.** Moved here
+from the plan's step 12 on 2026-11-19.
+- With `fix/line-pixels` and `fix/screen-same-mode`, 37 of the 41 scripts passed in the VM; the
+  other four (`pass-union-1861`, `sound-rebel`, `sound-union`, `two-player`) passed alone.
+- The branches of 6 to 9 (`fix/negative-color`, `fix/cp437-source`, `fix/print-makefit`,
+  `fix/paint-fill-color`) were merged into `game/cws` on 2026-11-18 (the fork's pull requests 1 to
+  4; `game/cws` is at `64a9c02`, and QBJS's suite passes 12 of 12 there). With them, all 41 scripts
+  passed in the VM on the first try, and every script but `bad-events` (no screens) has a report.
+  No screen differs by more than 1.4 %. A scan of the 578 pairs for blocks of 8 by 16 pixels that
+  differ, not thin text edges, found three bugs, 10 to 12 below.
+- Bug 3 of the list, not fixed:
+  3. `POINT(x, y)` in `SCREEN 12` gives a 32-bit color (4278233088), where QB gives the palette
+     number (2). The game never calls `POINT(x, y)` (checked 2026-11-18). QBJS keeps every screen as
+     32-bit pixels, and its own tests compare `POINT` with `_RGB32` in `SCREEN 12`, so a fix changes
+     existing programs and goes behind a switch that is off by default, as the other QB settings do.
+     Not needed now (user, 2026-11-18): a row in the fork's `SOMEDAY.md`.
+- Three more bugs, fixed:
+  10. A tab character in `PRINT` was drawn as a glyph. In QB64 it moves to the next tab stop, 8
+      columns apart, blanking what it passes; with no stop left on the line it starts the next line.
+      The game's prompts `"<4 tabs>ESC when done"` (`ui/reports.bm` line 18) and
+      `"<3 tabs>press a key"` (`ui/options.bm` line 300) came out at the wrong column
+      (`union-time`, the `war-*` scripts, `options`). Branch `fix/print-tab`, from
+      `fix/print-makefit`.
+  11. `LOCATE` cut a row or column that is not a whole number; QB64 rounds it, a half to the even
+      number. The forces report (`ui/reports.bm` line 321) puts each number at `city_x(k) / 8`, so
+      some were one column left (`union-time`, `commands`). Branch `fix/locate-round`, from
+      `fix/screen-same-mode`.
+  12. A new line on the last two rows scrolled the whole screen. In QB64 the last row does not
+      scroll: the rows above it move up and the cursor stays on the row before the last. The
+      History recap (`report_recap`, `ui/reports.bm`) prints each line on row 29, so in QBJS the
+      lines scrolled off and "press a key" covered the last one (`files`). The new row is filled
+      with the background color, as in QB64. Branch `fix/print-last-row`, from `fix/print-makefit`.
+
+  Each was measured first with a small program built with `qb64pe.exe`: 38 cases of `PRINT` and
+  `LOCATE` in `SCREEN 12`, and 18 cases of the last rows in six screen modes (in QB64Rust's
+  `target\scratch\2026-11-18\print-probe\`, not kept). Each branch has a test in
+  `test\qb-graphics.bas`, and QBJS's suite passes 12 of 12 on each, and on the three together over
+  `game/cws`. With the three together, `files`, `union-time`, `commands` and `options` pass on the
+  host and have no such block left. The three were merged into `game/cws` on 2026-11-19 (the fork's
+  pull requests 5 to 7; `game/cws` is at `4188f2e`, and QBJS's suite passes 12 of 12 there).
+- The autoplay check, two-player game on the standard map, with seeds 1 to 100 on
+  2026-11-18. With `game/cws` at `64a9c02`, all 100 seeds match the native results. In the VM, with six
+  pages at once, seeds 23, 25, 26 and 41 ran past the 600-second limit; on the host they finished in
+  90 to 189 s and match. The `PAINT` of bug 9 makes a seed about 10 % slower (the fork's
+  `SOMEDAY.md`). The alternate map was stopped after 78 seeds had played in QBJS, before the
+  comparison with the native build. I stopped it when the user objected to the size of these runs.
+
+**2026-11-19, step 12 done.** With `game/cws` at `4188f2e` (bugs 6 to 12 fixed), in QB64Rust's
+suites VM:
+- All 41 scripts pass, with no retry. No screen differs from the native one by more than 1.3 %,
+  the difference of QBJS's text and `CIRCLE`. A scan of all 578 screen pairs finds no block of 8 by
+  16 pixels that differs.
+- Autoplay, two-player game on the alternate map, seeds 1 to 20: all 20 match the native results.
+- Autoplay, one-player game on the standard map, seeds 1 to 20, played once as each side: all 40
+  match the native results.
+- How to run the scripts in the VM and read their reports is at the top of
+  `tests\web\play_qbjs.js`.
 
 ## Effort
 

@@ -3,7 +3,10 @@
 //
 //   node tests/web/autoplay.js [--seeds 1-3] [--timeout 600] [--qbc "<flags>"] [--qbjs <folder>] [--native]
 //                              [--history] [--dump <names>] [--out <folder name>] [--jobs <n>]
-//                              [--expect <native results>]
+//                              [--expect <native results>] [--mode two|one] [--map standard|alternate]
+//
+// --mode and --map are those of tests/autoplay.py. --mode one plays each seed twice, once with the
+// computer's code as each side, against the computer as the game plays it.
 //
 // --jobs plays that many seeds at once. --expect compares each seed with a file of native results that
 // tests/autoplay.py run wrote (as tests/out/web/native-1-100.json), prints the seeds that differ, and
@@ -38,26 +41,31 @@ const PROGRAM = path.join(GAME, 'cws.bas');
 
 // The keys of tests/autoplay.py: [place, letter] -> key. Place 1 is a pause any key ends; place 2 is a
 // menu named by its first letter.
-function keyFor(place, letter) {
+function keyFor(place, letter, alternate) {
     if (place === 1) return 'Space';
     if (place === 2) {
         if (letter === 'E') return 'y';   // End Turn / End Game: Yes
         if (letter === 'R') return 'Enter'; // a retreat: the first city
         if (letter === 'O') return 'q';   // Quit this Game
         if (letter === 'C') return 's';   // the title menu: Start NEW Game
-        if (letter === 'S') return 's';   // the map: standard
+        if (letter === 'S') return alternate ? 'a' : 's';   // the map
     }
     return null;
 }
 
-// The CWS.CFG of tests/autoplay.py's two-player game, in tests/play.py's field order.
-function cfgFor(seed, history) {
-    const f = [1, 3, 0, 3, 2, 1, 5, 600, 300, 1, seed % 2, 36, 134, 3992, 5041, history ? 1 : 0, seed % 6];
+// The CWS.CFG of tests/autoplay.py's game, in tests/play.py's field order: the first field is the
+// player's side, the fifth the number of players.
+function cfgFor(game, history) {
+    const seed = game.seed;
+    const players = game.mode === 'two' ? 2 : 1;
+    const f = [game.side, 3, 0, 3, players, 1, 5, 600, 300, 1, seed % 2, 36, 134, 3992, 5041, history ? 1 : 0,
+        seed % 6];
     return f.join(',') + '\n';
 }
 
 function options(argv) {
-    const o = { seeds: '1', timeout: 600, qbc: '--byref --round-half-even --qb-booleans --qb-lines' };
+    const o = { seeds: '1', timeout: 600, qbc: '--byref --round-half-even --qb-booleans --qb-lines --qb-sound',
+                mode: 'two', map: 'standard' };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--native') o.native = true;
@@ -65,12 +73,27 @@ function options(argv) {
         else if (a.startsWith('--')) o[a.slice(2)] = argv[++i];
     }
     const [first, last] = String(o.seeds).split('-');
+    if (!['two', 'one'].includes(o.mode) || !['standard', 'alternate'].includes(o.map)) {
+        console.error('--mode is two or one, --map is standard or alternate');
+        process.exit(2);
+    }
+    // One game for a seed of a two-player game; one for each side the player can be in a one-player game.
     o.list = [];
-    for (let s = Number(first); s <= Number(last || first); s++) o.list.push(s);
+    for (let s = Number(first); s <= Number(last || first); s++) {
+        for (const side of (o.mode === 'two' ? [1] : [1, 2])) o.list.push({ seed: s, side, mode: o.mode, map: o.map });
+    }
     return o;
 }
 
-async function playSeed(browser, port, seed, timeoutSeconds, dumpPrefix, dumpNames) {
+// A game's name in the output: its seed, and in a one-player game the player's side.
+function label(game) {
+    return 'seed ' + game.seed + (game.mode === 'one' ? ' side ' + game.side : '');
+}
+
+function key(game) { return game.seed + '/' + game.side; }
+
+async function playSeed(browser, port, game, timeoutSeconds, dumpPrefix, dumpNames) {
+    const seed = game.seed;
     const page = await browser.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
@@ -122,8 +145,8 @@ async function playSeed(browser, port, seed, timeoutSeconds, dumpPrefix, dumpNam
         if (errors.length) break;
         if (state && state.waits !== answered) {
             answered = state.waits;
-            const key = keyFor(state.last[0], String.fromCharCode(state.last[1]));
-            if (key) await page.keyboard.press(key);
+            const press = keyFor(state.last[0], String.fromCharCode(state.last[1]), game.map === 'alternate');
+            if (press) await page.keyboard.press(press);
         }
         await new Promise(r => setTimeout(r, 20));
     }
@@ -131,11 +154,11 @@ async function playSeed(browser, port, seed, timeoutSeconds, dumpPrefix, dumpNam
     return { line, error: errors[0] || (line ? null : 'no autoplay.txt in ' + timeoutSeconds + ' seconds') };
 }
 
-function nativeLines(seeds) {
+function nativeLines(o) {
     const out = path.join(GAME, 'tests', 'out', 'web', 'autoplay-native.json');
-    const first = seeds[0], last = seeds[seeds.length - 1];
+    const first = o.list[0].seed, last = o.list[o.list.length - 1].seed;
     const r = spawnSync('python', [path.join(GAME, 'tests', 'autoplay.py'), 'run', out, '--seeds', first + '-' + last,
-        '--mode', 'two'], { cwd: GAME, encoding: 'utf8' });
+        '--mode', o.mode, '--map', o.map], { cwd: GAME, encoding: 'utf8' });
     process.stdout.write(r.stdout || '');
     if (r.status !== 0) { process.stderr.write(r.stderr || ''); return null; }
     return JSON.parse(fs.readFileSync(out, 'utf8'));
@@ -173,15 +196,16 @@ async function main() {
             const server = await serve(folder);
             servers.push(server);
             while (queue.length) {
-                const seed = queue.shift();
-                fs.writeFileSync(path.join(folder, 'CWS.CFG'), cfgFor(seed, o.history));
+                const game = queue.shift();
+                fs.writeFileSync(path.join(folder, 'CWS.CFG'), cfgFor(game, o.history));
                 const t0 = Date.now();
                 const dumpNames = (o.history ? ['cws.his'] : []).concat(o.dump ? o.dump.split(',') : []);
                 // An error of one seed (a page that did not load) is that seed's result, not the run's end.
-                const r = await playSeed(browser, server.address().port, seed, Number(o.timeout),
-                    path.join(out, 'seed' + seed + '-'), dumpNames).catch(e => ({ line: null, error: e.message }));
-                lines[seed] = r;
-                console.log('seed ' + seed + ' qbjs  : ' + (r.line || ('ERROR ' + r.error)) +
+                const r = await playSeed(browser, server.address().port, game, Number(o.timeout),
+                    path.join(out, 'seed' + game.seed + (game.mode === 'one' ? '-side' + game.side : '') + '-'),
+                    dumpNames).catch(e => ({ line: null, error: e.message }));
+                lines[key(game)] = r;
+                console.log(label(game) + ' qbjs  : ' + (r.line || ('ERROR ' + r.error)) +
                     '  (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s)');
             }
         };
@@ -190,36 +214,44 @@ async function main() {
         await browser.close();
         servers.forEach(s => s.close());
     }
-    let bad = o.list.filter(s => !lines[s].line).length;
+    let bad = o.list.filter(g => !lines[key(g)].line).length;
+    // The native game of the same seed, side, mode and map.
+    const nativeOf = (games, game) => games.find(x => x && x.seed === game.seed && (x.side || 1) === game.side &&
+        (x.mode || 'two') === game.mode && (x.map || 'standard') === game.map);
     if (o.expect) {
         // The native results of tests/autoplay.py run, as tests/out/web/native-1-100.json
         const data = JSON.parse(fs.readFileSync(path.resolve(o.expect), 'utf8'));
         const games = data.games || data;
         let same = 0, differ = 0;
-        for (const seed of o.list) {
-            const g = games.find(x => x && x.seed === seed);
-            const mine = lines[seed];
-            if (!g) { console.log('seed ' + seed + ' NO NATIVE RESULT'); differ++; continue; }
+        for (const game of o.list) {
+            const g = nativeOf(games, game);
+            const mine = lines[key(game)];
+            if (!g) { console.log(label(game) + ' NO NATIVE RESULT'); differ++; continue; }
             if (mine && mine.line && sameFields(mine.line, g)) { same++; continue; }
             differ++;
-            console.log('seed ' + seed + ' DIFFERENT: native ' +
+            console.log(label(game) + ' DIFFERENT: native ' +
                 [g.winner, g.rule, g.month, g.year, ...(g.points || []), ...(g.cities || [])].join(','));
         }
-        console.log(same + ' of ' + o.list.length + ' seeds match the native results, ' + differ + ' differ');
+        console.log(same + ' of ' + o.list.length + ' games match the native results, ' + differ + ' differ');
         if (differ) bad++;
     }
     if (o.native) {
-        const native = nativeLines(o.list);
+        const native = nativeLines(o);
         if (!native) process.exit(2);
+        let same = 0;
         // tests/autoplay.py's results are objects (winner, rule, month, year, points, cities); compare
         // the numbers of the line the game wrote with the same fields.
         for (const g of native.games || native) {
             if (!g || g.seed === undefined) continue;
-            const mine = lines[g.seed];
+            const mine = lines[key(g)];
             const expected = [g.winner, g.rule, g.month, g.year, ...(g.points || []), ...(g.cities || [])].join(',');
-            console.log('seed ' + g.seed + ' native: ' + expected);
-            console.log('seed ' + g.seed + (mine && mine.line && sameFields(mine.line, g) ? ' MATCH' : ' DIFFERENT'));
+            const match = Boolean(mine && mine.line && sameFields(mine.line, g));
+            if (match) same++;
+            console.log(label(g) + ' native: ' + expected);
+            console.log(label(g) + (match ? ' MATCH' : ' DIFFERENT'));
         }
+        console.log(same + ' of ' + o.list.length + ' games match the native results');
+        if (same !== o.list.length) bad++;
     }
     process.exit(bad ? 1 : 0);
 }

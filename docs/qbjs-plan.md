@@ -1,7 +1,7 @@
 # Plan: run Civil War Strategy in a browser with QBJS
 
-Written 2026-11-16. What is done (steps 0 to 11, the start of step 12, and the progress record to
-2026-11-17) is in [archived/qbjs-plan-completed.md](archived/qbjs-plan-completed.md). The work list
+Written 2026-11-16. What is done (steps 0 to 12 and the progress record) is in
+[archived/qbjs-plan-completed.md](archived/qbjs-plan-completed.md). The work list
 that was `qbjs-steps.md` was merged into this file on 2026-11-17.
 
 ## Goal
@@ -21,7 +21,8 @@ Where the work happens:
   be its own pull request upstream.
 - A branch started while another is not committed yet goes in a git worktree, `..\qbjs-wt\<name>`, made
   from the last committed branch. `test\headless\run.js` runs there with `NODE_PATH` set to the
-  `node_modules` of `..\qbjs\test\headless`.
+  `node_modules` of `..\qbjs\test\headless`. It is handed over in `..\qbjs`, one branch at a time,
+  after the one before it is committed (QB64Rust's `CLAUDE.md`, working rule 18, user, 2026-11-18).
 - The game is on its branch `qbjs-web`.
 - Claude stages and commits nothing (QB64Rust's `CLAUDE.md`, human rule 1). Before a new fork
   branch starts, the user commits the work before it.
@@ -44,6 +45,12 @@ How every step is checked:
 - `qb.js`, `vfs.js` and `qb-console.js` are hand-written sources. Keep QBJS's style: its indentation,
   its naming (`this.sub_X`, `this.func_X`, `_private`), no reformatting of lines not changed.
 
+How many autoplay seeds: 100 only for a change that can move the game's numbers, such as integers,
+rounding, by reference, file input and output, `MOD` or `READ`. A drawing or text change cannot,
+because the game reads the screen only for the graphics cursor (`POINT(0)` and `POINT(1)`), so 10
+seeds are enough. The first run of a setup QBJS has not played (a map, a mode) takes 20. Say how long
+a run will take before starting it (QB64Rust's `CLAUDE.md`, working rule 4, user, 2026-11-18).
+
 Which model: Sonnet is enough where a wrong result shows: a page error, a wrong screenshot, a failing
 test. Opus is for the steps where a mistake runs without any error and changes the game's numbers.
 Those are marked **Opus**. A silent mistake shows in the autoplay check (`tests\web\autoplay.js`) as a
@@ -51,48 +58,6 @@ different last line, but finding its cause is still Opus work.
 
 Each fix is in QBJS when QBJS differs from QB64. A fix goes in the game only when the game depends
 on something no browser can give.
-
-## Step 12: the screens of the native scripts — Opus
-
-`node tests\web\play_qbjs.js` plays the 41 scripts of `tests\scripts` in the QBJS build, as `play.py`
-plays them natively (what it checks is at the top of the file). All 41 pass in QB64Rust's suites VM,
-and autoplay seeds 1 to 100 match the native results (the archive's progress record, 2026-11-17).
-On 2026-11-18, with `fix/line-pixels` and `fix/screen-same-mode`, 37 passed in the VM; the other four
-pass alone. Under load in the VM a page can stop answering, so with `--jobs` above 1 the runner now
-plays a failed script once more, alone, at the end. The summary names the scripts that passed only
-then.
-Still to do:
-
-- Look at the `report.html` of each script (`--native --jobs 4` in the suites VM, with QB64Rust's
-  `tools\winvm\game.ps1`; the command is at the top of `play_qbjs.js`). A screen that differs is a
-  drawing bug.
-- Fix in QBJS what the screens show. Known from `navy` (shown by small programs in
-  `tests\out\web\probe\`, which is not kept; `--hook` traces a run):
-  1. and 2. Done on 2026-11-17, branch `fix/draw-pixels`, not yet run with the game's scripts. With
-     the switch `--qb-lines` (or `$LINES QB`), `DRAW` sets whole pixels as QB64pe does, so `PAINT`
-     after the train's `DRAW` finds its border; `POINT(0)` and `POINT(1)` give the pen rounded. The
-     switch is off by default because QBJS strokes smooth lines on purpose, and the Graphics 2D
-     library's `LineWidth` relies on them (user, 2026-11-17). The game's runners pass it.
-  - `LINE` strokes the canvas too, two pixels wide: `LINE (20,20)-(30,20)` covers rows 19 and 20
-    and leaves out x=30, and a `B` box is two pixels wide. The map's `PAINT`s work because a line
-    two pixels wide is hard to leak through. Done on 2026-11-18, branch `fix/line-pixels`: with
-    `--qb-lines`, `LINE` sets whole pixels with the same helper.
-  3. `POINT(x, y)` in `SCREEN 12` gives a 32-bit color (4278233088), where QB gives the palette
-     number (2). The game does not use this form; QBJS's tests should cover it.
-  4. The mountains (`_PUTIMAGE` of `MTN.PNG`) look different. Not looked at yet.
-  5. `SCREEN 12` while already in `SCREEN 12` clears the screen in QBJS. In QB64pe it changes
-     nothing: pixels, graphics cursor and text cursor stay (checked 2026-11-17). The end-game screen
-     (`ui/victory.bm` line 149) fills the screen red, then `draw_map` runs `SCREEN 12`, so QBJS shows
-     white around the map where native shows red with a black shadow (`navy`, 20.7 % of pixels).
-     Worse, `draw_surrender` (`game/victory_screens.bm` line 183) runs `SCREEN 12` during a turn and
-     draws only the right panel, so in QBJS the map is gone until the next redraw
-     (`pass-union-1861`, March and April 1862, 65 % of pixels). Done on 2026-11-18, branch
-     `fix/screen-same-mode`: `SCREEN` with the mode in use returns at once, as QB64pe's
-     `qbg_screen` does. With it and `fix/line-pixels` on `game/cws`, no screen of `pass-union-1861` or
-     `navy` differs by more than 0.9 %.
-  6. The bar under "VP" at the top right: native draws blue, then white to x=630; QBJS draws the blue
-     shorter and no white (`pass-union-1861`, July 1862). Not looked at yet.
-- Not run yet: the autoplay check of the one-player games (`--mode one`) and of the alternate map.
 
 ## Step 13: listen, and press keys in a real browser — the user
 
@@ -105,7 +70,8 @@ below). Each problem becomes a step here.
 ## Step 14: upstream — Sonnet drafts, the user posts
 
 - An issue first: the by-reference option, `DEFINT`, the rounding setting, the booleans setting
-  (`--qb-booleans`) and the lines setting (`--qb-lines`), each with a small program that shows the
+  (`--qb-booleans`), the lines setting (`--qb-lines`) and the sound setting (`--qb-sound`), each
+  with a small program that shows the
   difference today. One switch for all of QB's numeric semantics may suit upstream better than three;
   the issue can ask.
 - Then the pull requests, the certain ones first: the five fixes already made (branch
@@ -119,7 +85,9 @@ below). Each problem becomes a step here.
   upstream's compiler, 2026-11-17): `DEFINT` was ignored with a warning (`DEFINT A-Z: x = 7 / 2` gave
   3.5); `10 MOD 3 * 2` was 2; `INPUT #` read a whole line per statement; `CLS` and `VIEW` now reset
   `DRAW`'s angle and scale; `SCREEN` with the mode in use no longer clears the screen or resets
-  anything.
+  anything. From step 12 on 2026-11-18 (not checked against upstream's compiler): `PRINT` moves an
+  item that does not fit to the next line; a negative color is no longer black; a source file that
+  is not valid UTF-8 is read as code page 437.
 - Each pull request: what was wrong, the small program, the test added, and the rebuilt `qb2js.js`.
 - QBJS has one maintainer and no contribution guide, so the answer may take time. The game does not
   wait for it: it builds from the fork.
@@ -137,6 +105,10 @@ Found while building, not fixed:
 - `WINDOW` inside a `VIEW` port still maps to the whole screen; QB maps it to the port. A graphics
   `PUT` that reaches outside the port is drawn there; QB64 gives an error.
 - `PRESET` draws nothing: it only moves the graphics cursor (`sub_PReset` in `qb.js`).
+- Printing exactly a whole line with `;` leaves `POS(0)` at 81 in QBJS; QB64 gives 1 on the next row.
+  A comma that moves past the end of the line goes wrong on the row before the last. QBJS's font
+  can put a pixel of a character into the cell before it. The game does none of the first two
+  (measured 2026-11-18 with the probe of step 12).
 - QBJS splits a number such as `1E+1` into `1E + 1`, which is invalid JavaScript. A statement call
   whose argument holds `=` (`UT.AssertTrue 9 MOD 3 = 0`) is compiled as an assignment.
 - By reference: a procedure called through `@name` or from another module gets no Refs. `READ`,
