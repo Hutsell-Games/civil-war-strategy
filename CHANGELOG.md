@@ -38,6 +38,11 @@ source rather than extending version 1.61.
 - A saved game keeps the knobs it was saved with, and the history file names those
   that differ from the defaults.
 
+### Events
+
+- Random events happen in a game of two players too, once a month after both
+  players have given their orders. Before, only a game against the computer had them.
+
 ### Menus
 
 - The Commands menu shows Supply as "-" when it would give no army supplies:

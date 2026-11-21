@@ -10,11 +10,10 @@ original source is kept unchanged on the branch `canonical-source`.
 To compile on Windows:
 
 ```
-qb64rust -x cws.bas -o cws.exe
+qb64rust -x cws.bas
 ```
 
-On Linux, build a native executable with `qb64rust -x cws.bas -o cws`, then run `./cws`
-from this folder.
+It writes `build\cws.exe`. On Linux the same command builds a native executable, `build/cws`.
 
 The build is not committed (`.gitignore`). It takes the name of the DOS program, `CWS.EXE`. A GitHub Actions
 workflow (`.github\workflows\build.yml`) builds the game too. It runs on each
@@ -22,11 +21,16 @@ merge into `main`, and by hand once it is on `main` (Actions, Build, Run workflo
 `civil-war-strategy` holds the game with its data files, ready to play. The workflow then runs the tests
 (Python tests and unit tests on Windows, the whole-game scripts on Linux).
 
-Run the program from this folder. It reads its pictures from `graphics` and its map, setup, leaders
-and special events from `scenarios`, and the tuning knobs for playtesting from `scenarios\TUNING.DAT`,
-which says how to use them. Its settings (`CWS.CFG`), its Hall of Fame (`HISCORE.CWS`),
-saved games and history files stay beside the program. Each map is a folder of
-`scenarios`: `standard` and `alternate`.
+Run the program in `build`, as Run in VS Code does. Each build copies the game's data files there
+(`[build]` `copy` in `qb64rust.toml`): `CWS.CFG`, `HISCORE.CWS`, `graphics` and `scenarios`. A file is
+copied when the copy in `build` is missing or older, so an edit of a map or of `scenarios\TUNING.DAT`
+in the repo reaches the next build. The settings and Hall of Fame the game rewrites in `build` are kept,
+and so are its saved games and history files. So playing never changes the repo's `CWS.CFG`,
+`HISCORE.CWS` or saved games. Delete `build` to start again from the repo's files.
+
+The program reads its pictures from `graphics` and its map, setup, leaders and special events from
+`scenarios`, and the tuning knobs for playtesting from `scenarios\TUNING.DAT`, which says how to use
+them. Each map is a folder of `scenarios`: `standard` and `alternate`.
 
 The window opens at 1280 by 960, when the desktop has room for it
 (`window_open`, `cws.bas`). It can be resized: drag its edge and the screen is stretched to fill it

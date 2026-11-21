@@ -56,6 +56,7 @@ SOURCE_FOLDERS = ["rules", "ai", "commands", "ui", "draw", "game", "io"]
 NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
     ".exe", ".obj", ".lnk", ".mak", ".zip", ".md", ".qlb", ".com", ".drv", ".bat", ".btm",
     ".pif", ".doc", ".txt", ".png", ".1st",
+    ".sav",  # a game saved while playing; a script that loads one takes it from its #! data folder
 }
 # The folders of data files, copied whole into a run's folder.
 DATA_FOLDERS: tuple[str, ...] = ("graphics", "scenarios")

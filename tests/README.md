@@ -38,10 +38,10 @@ source file, the compiler or the screen hook changed. What a command prints also
 `tests\out\last-<command>.txt`. All 41 scripts take about half a minute with four jobs on Windows.
 
 Each run starts in a fresh copy of the game's data files in `tests\out\run\`, so the files in the repo are never
-changed. The copy takes the top-level files that are not sources, documents or DOS programs, and the folders
-`graphics` and `scenarios`. Then it takes the files of `tests\data\` over those of the same name: the empty
-`HISCORE.CWS` that came with the game. So a Hall of Fame left in the repo's folder by playing does not change
-what the scripts see.
+changed. The copy takes the top-level files that are not sources, documents, DOS programs or saved games, and
+the folders `graphics` and `scenarios`. Then it takes the files of `tests\data\` over those of the same name:
+the empty `HISCORE.CWS` that came with the game, and the game's settings `CWS.CFG` as shipped. So a Hall of
+Fame, a saved game or settings left in the repo's folder by playing do not change what the scripts see.
 
 ### When a check fails
 

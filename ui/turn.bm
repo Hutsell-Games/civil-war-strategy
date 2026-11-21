@@ -39,7 +39,10 @@ SUB turn_date_and_supply
     CALL turn_strength_ratio
 END SUB
 
-' Runs computer decisions, train arrivals, army moves and commerce raids, then advances the month and updates victory points.
+' Runs the special events and computer decisions, train arrivals, army moves and commerce raids, then
+' advances the month and updates victory points. A two-player game has its special events here too, after
+' both players' orders. current_side is already back to the Union, so the Balance setting weighs the events
+' as it does when one player plays the Union.
 SUB turn_resolve
     DIM i AS INTEGER
     DIM j AS INTEGER
@@ -47,6 +50,7 @@ SUB turn_resolve
     IF opt_players = PLAYERS_ONE THEN
         CALL ai_turn
     ELSE
+        CALL special_events
         FOR i = 1 TO MAX_ARMIES
             IF army_exists(i) AND army_has_move(i) THEN
                 CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
