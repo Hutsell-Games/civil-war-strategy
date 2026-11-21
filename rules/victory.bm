@@ -121,6 +121,16 @@ SUB victory_play_on (rule)
     END IF
 END SUB
 
+' The side that wins when side has met rule (victory_rule_met): the Rebels when time ran out,
+' a technical victory, whichever side met it first. The original ended the game with the
+' Union, which check_victory_conditions tests first, and marked the Union as the winner (G39).
+FUNCTION victory_winner (side, rule)
+    victory_winner = side
+    IF rule = VICTORY_YEAR THEN
+        victory_winner = SIDE_REBEL
+    END IF
+END FUNCTION
+
 ' The game ends with the side's victory by the rule in rule: 100 more victory points when the enemy was
 ' wiped out (7), the side marked for the battle summary, and the game over.
 SUB victory_won (side, rule)

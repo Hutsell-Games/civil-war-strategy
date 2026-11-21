@@ -37,7 +37,9 @@ END SUB
 
 ' After a turn ends. In a two-player game the Rebels' turn follows the Union's, and
 ' month_over is 0. Otherwise the month is played, month_over is 1, and the Union is next.
+' Vary Start is no longer offered.
 SUB turn_next_player (month_over)
+    vary_start_open = 0
     month_over = 1
     IF opt_players = PLAYERS_TWO THEN
         current_side = current_side + 1

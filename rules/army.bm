@@ -106,10 +106,39 @@ SUB army_appoint (army, leader)
     leader_name$(leader) = ""
 END SUB
 
-' The army's leader goes back among the free leaders, in the army's slot. Relieve calls it
-' first; a combine calls it for each army that joins.
-SUB army_free_leader (army)
-    leader_name$(army) = army_name$(army)
+' The army's leader goes back among the free leaders (leader_return). Relieve calls it first;
+' a combine calls it for each army that joins, except the one whose leader takes command.
+SUB army_free_leader (army, slot)
+    CALL leader_return(army_name$(army), army_leader_rating(army), army_side(army), army, slot)
+END SUB
+
+' A leader goes back among the side's free leaders with rating, at least 1, the lowest a leader
+' has. He takes the slot preferred when it holds no free leader, or else the side's first slot
+' that holds none. slot is the slot he took, or 0 when every slot of the side holds a free
+' leader; he is then not kept. A leader who came to his army by Relieve keeps the point he
+' lost then. The original put him in the army's slot with that slot's own rating, over any
+' leader freed there before (G36).
+SUB leader_return (name$, rating, side, preferred, slot)
+    DIM i AS INTEGER
+    slot = 0
+    IF leader_name$(preferred) = "" THEN
+        slot = preferred
+    ELSE
+        FOR i = side_first_army(side) TO side_last_army(side)
+            IF leader_name$(i) = "" THEN
+                slot = i
+                EXIT FOR
+            END IF
+        NEXT i
+    END IF
+    IF slot = 0 THEN
+        EXIT SUB
+    END IF
+    leader_name$(slot) = name$
+    leader_rating(slot) = rating
+    IF leader_rating(slot) < 1 THEN
+        leader_rating(slot) = 1
+    END IF
 END SUB
 
 ' Relieve, second half: the army takes the free leader of a slot, with a point less than his
@@ -279,7 +308,9 @@ END SUB
 
 ' More troops for the army in a city: 4,500, or under the Realism setting a number from the
 ' city's value, a third of it when the city is cut off (isolated is then 1), and the Balance
-' setting's extra troops. The side pays 100.
+' setting's extra troops. The side pays 100. The army has at most max_army_size, 125,000, the
+' limit of a Join; the original had none, and an army past 32,767 wrapped to a negative size
+' (G46). army_recruit (commands/army.bm) recruits nothing for an army that is full.
 SUB army_add_recruits (side, army, isolated)
     DIM troops AS INTEGER
     troops = reinforce_size
@@ -292,8 +323,16 @@ SUB army_add_recruits (side, army, isolated)
     END IF
     army_size(army) = army_size(army) + troops
     CALL army_recruit_bonus(side, army)
+    IF army_size(army) > max_army_size THEN
+        army_size(army) = max_army_size
+    END IF
     side_cash(side) = side_cash(side) - cost_recruit
 END SUB
+
+' Whether the army has as many troops as an army may have (army_add_recruits).
+FUNCTION army_is_full (army)
+    army_is_full = army_size(army) >= max_army_size
+END FUNCTION
 
 ' The troops a city gives under the Realism setting, in hundreds: by the city's value, for a new
 ' army, or for the army already there when joins_army is 1. A third of that when the city is
@@ -479,11 +518,14 @@ SUB army_combine_start (city)
 END SUB
 
 ' army joins army 0 when it is in the city, has no order and has troops (COMBINE_JOINED). Army 0
-' takes its leader when he is better than any before (best is then army), its troops and their
+' takes its leader when it is the first to join or he is better than any before (best is then
+' army, and the leader of the best before goes back to the free leaders), its troops and their
 ' share of experience. status is COMBINE_TOO_LARGE when army 0 would have more than 125,000 troops,
-' and COMBINE_SKIPPED when army does not join.
+' and COMBINE_SKIPPED when army does not join. The original took the first leader only when his
+' rating was above 0, so armies whose leaders all had 0 joined army 0 and were lost (G35).
 SUB army_combine_add (army, city, best, status)
     DIM share!
+    DIM slot AS INTEGER
     status = COMBINE_SKIPPED
     IF army_order(army) <> ORDER_NONE OR army_city(army) <> city OR army_size(army) = 0 THEN
         EXIT SUB
@@ -493,7 +535,10 @@ SUB army_combine_add (army, city, best, status)
         EXIT SUB
     END IF
 
-    IF army_leader_rating(army) > army_leader_rating(0) THEN
+    IF best = 0 OR army_leader_rating(army) > army_leader_rating(0) THEN
+        IF best > 0 THEN
+            CALL leader_return(army_name$(0), army_leader_rating(0), army_side(army), best, slot)
+        END IF
         army_name$(0) = army_name$(army)
         army_leader_rating(0) = army_leader_rating(army)
         best = army
@@ -508,19 +553,25 @@ SUB army_combine_add (army, city, best, status)
     status = COMBINE_JOINED
 END SUB
 
-' The army's supplies go to army 0, and its slot is emptied. Its leader goes back to the list.
-SUB army_combine_absorb (army)
+' The army's supplies go to army 0, and its slot is emptied. Its leader goes back to the list,
+' unless it is best, the army whose leader takes command so far (army_combine_add).
+SUB army_combine_absorb (army, best)
+    DIM slot AS INTEGER
     army_supply(0) = army_supply(0) + army_supply(army)
     IF army_supply(0) > MAX_SUPPLY THEN
         army_supply(0) = MAX_SUPPLY
     END IF
+    IF army <> best THEN
+        CALL army_free_leader(army, slot)
+    END IF
     CALL army_clear(army)
-    CALL army_free_leader(army)
     army_name$(army) = ""
 END SUB
 
 ' The combined army takes the slot of the best leader's army, in the city. When more than one
-' army joined, it can take no order this turn.
+' army joined, it can take no order this turn. The best leader never went back to the free
+' leaders; the original put him there and took him off again from the slot best, which could
+' remove another leader freed there before.
 SUB army_combine_finish (city, best, joined)
     army_size(best) = army_size(0)
     army_leader_rating(best) = army_leader_rating(0)
@@ -528,7 +579,6 @@ SUB army_combine_finish (city, best, joined)
     army_supply(best) = army_supply(0)
     army_city(best) = city
     army_name$(best) = army_name$(0)
-    leader_name$(best) = ""
     IF joined > 1 THEN
         army_order(best) = ORDER_BUSY
     END IF

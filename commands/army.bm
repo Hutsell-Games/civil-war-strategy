@@ -34,7 +34,7 @@ SUB army_combine_gather (side, city, best, joined)
             CALL print_army_size(j)
             PRINT " forces";
             CALL wait_seconds(opt_pause!)
-            CALL army_combine_absorb(j)
+            CALL army_combine_absorb(j, best)
         END IF
     NEXT j
 
@@ -111,7 +111,8 @@ SUB army_resupply (army)
 END SUB
 
 ' Raises troops in a city for 100: a new army under the next commander, or more troops for the
-' army already there. raised is 0 when a new army was needed and no commander is left.
+' army already there. raised is 0 when a new army was needed and no commander is left, or when
+' the army there is full (army_is_full); nothing is then paid.
 SUB army_recruit (side, city, raised)
     DIM army_slot AS INTEGER
     DIM i AS INTEGER
@@ -131,6 +132,14 @@ SUB army_recruit (side, city, raised)
         EXIT SUB
     END IF
     i = city_army(city)
+    IF army_is_full(i) THEN
+        raised = 0
+        COLOR COLOR_LIGHT_CYAN
+        CALL clear_bottom_line
+        PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " is at full strength";
+        CALL wait_seconds(opt_pause! - .5)
+        EXIT SUB
+    END IF
     CALL army_add_recruits(side, i, isolated)
     from_city = army_city(i)
     CALL flag_picture_save(from_city)

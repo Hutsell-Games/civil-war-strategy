@@ -255,6 +255,9 @@ DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_ca
 ' The scenarios of scenarios/SCENARIOS.LST (load_scenario_list, io/files.bm): each one's folder
 ' and title. scenario_now is the row of the scenario the game is on.
 DIM SHARED scenario_count, scenario_now, scenario_folder$(MAX_SCENARIOS), scenario_title$(MAX_SCENARIOS)
+' 1 while the Utility menu's Vary Start may be used: in a new game until its first End Turn
+' (game_reset, turn_next_player). A loaded game sets it to 0 (load_game).
+DIM SHARED vary_start_open
 DIM SHARED event_count, event_banner$, event_file_error$
 DIM SHARED event_name$(MAX_EVENTS), event_favors(MAX_EVENTS), event_listed(MAX_EVENTS), event_done(MAX_EVENTS)
 DIM SHARED event_before(MAX_EVENTS), event_for(MAX_EVENTS)

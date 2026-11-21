@@ -14,6 +14,43 @@ source rather than extending version 1.61.
 - The computer values a road that leads to the enemy's capital.
 - The Union's computer without a fleet keeps fortifying when it has 222 or more
   in cash; before, it stopped half the time whatever its cash.
+- When it recruits, the computer prefers a city whose army is small, and no longer
+  picks an empty city because of the size of its last Join.
+- The computer keeps its armies in its capital only while taking the capital wins
+  the game; before, it did so with the capital rule turned off too.
+
+### Armies and fleets
+
+- An army has at most 125,000 troops, as a Join already allowed. Recruiting in a
+  city whose army is full costs nothing and says so; before, a very large army
+  wrapped to a negative size.
+- Join no longer loses the armies when every leader that joins has a rating of 0.
+- A leader relieved, or freed by a Join, goes back to the list with his own
+  rating, and no longer writes over another free leader.
+- Cancel cancels the move of the army picked. Before, picking "Rebel II" could
+  cancel the move of "Rebel III" in the same city.
+- A fleet with no other sea port cannot retreat from a battle. Before, it retreated
+  to no port, kept its ships and was lost from the map.
+- After a refused city, the railroad's next destination is again picked from the
+  army's own city, which can no longer be chosen as a destination.
+
+### Vary Start
+
+- Vary Start is offered only before the first End Turn of a new game. It starts the
+  game again from a varied start and keeps the settings and victory conditions you
+  set. Before, it could be used at any time, and it set the date, the cash, the
+  victory conditions and the settings back while keeping the armies raised since.
+- The Union's ships are ironclads more often than the Rebels', whichever side you
+  play. Under Realism, a game of 1861 has no ironclads after Vary Start either.
+- A Rebel fleet of no ships is no longer left in port.
+
+### The end of a game
+
+- When time runs out, the Rebels' technical victory is shown in their color, and the
+  battle summary marks them as the winner.
+- After taking the enemy's capital, the Options read "No - Press Onward" instead of
+  "No - Press Onward to NONE".
+- The warning that a side nears the strength ratio has its missing space.
 
 ### New Game and Load
 

@@ -36,7 +36,8 @@ FUNCTION scenario_file$ (name$)
     scenario_file$ = SCNDIR + scenario_folder$(scenario_now) + "/" + name$
 END FUNCTION
 
-' Loads the selected scenario's leaders, starting forces, rules and flag details, then reads the saved settings.
+' Loads the selected scenario's leaders, starting forces, rules and flag details. The saved
+' settings are read by the caller (game_new, load_game), so that Vary Start keeps the player's.
 SUB load_scenario
     DIM k AS INTEGER
     DIM i AS INTEGER
@@ -70,7 +71,6 @@ SUB load_scenario
         INPUT #1, flag_star_x(i), flag_star_y(i)
     NEXT i ' star locations on flag
     CLOSE #1
-    CALL config_read(current_side)
 END SUB
 
 ' Reads the scenario's leaders from cwslead.dat: every leader free, with his rating.
@@ -248,6 +248,8 @@ SUB load_game (slot, problem$)
     ' The strength ratio is not saved either. It is 0, as in a game loaded from the title,
     ' until the month's end works it out (G32).
     ai_strength_ratio! = 0
+    ' A loaded game is under way: Vary Start would start it again (G40).
+    vary_start_open = 0
 END SUB
 
 ' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The file's first line is the

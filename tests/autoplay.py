@@ -93,7 +93,8 @@ def play_game(tools: play.Tools, exe: Path, seed: int, mode: str, side: int, alt
         return {**game, "error": f"exit code {run.rc}: {last}"}
     fields = next(csv.reader(result.read_text().splitlines()))
     named, rule, month, year, points1, points2, cities1, cities2 = (int(float(f)) for f in fields)
-    # A time limit names the Union, but the Rebels win a technical victory (end_game).
+    # The time limit names the Rebels, who win a technical victory (victory_winner, G39). A build
+    # before G39 named the Union.
     winner = 2 if rule < VICTORY_CITIES else named
     return {**game, "winner": winner, "rule": RULE_NAMES.get(rule, str(rule)), "month": month,
             "year": year, "points": [points1, points2], "cities": [cities1, cities2]}

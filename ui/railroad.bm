@@ -46,8 +46,9 @@ SUB menu_railroad (side, army, city)
             EXIT SUB
         END IF
 
-        route_city = to_city
-        routes = railroad_route_count(side, route_city)
+        ' The army's city stays the start. The original made a refused city the start, and
+        ' then took the army's own city as a destination (G47).
+        routes = railroad_route_count(side, to_city)
         IF routes > 1 THEN
             army = chosen_army
             city = to_city

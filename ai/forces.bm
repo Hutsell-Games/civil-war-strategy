@@ -166,7 +166,11 @@ SUB ai_recruit (side)
     LOOP
 END SUB
 
-' The computer's pick from its list of count cities to recruit in.
+' The computer's pick from its list of count cities to recruit in: the last city whose army has
+' fewer than ai_reinforce_below troops, else one at random. The original's test,
+' `x = 0 XOR armysize(x) < 155`, read army 0 for a city with no army: it holds the size of the
+' last Join, so an empty city was picked only after a Join of 155 or more, and not after a Load.
+' The test is now that of an empty army 0: an empty city is never picked by it (G38).
 FUNCTION ai_recruit_pick (side, cities(), count)
     DIM army AS INTEGER
     DIM best_score AS INTEGER
@@ -179,7 +183,7 @@ FUNCTION ai_recruit_pick (side, cities(), count)
     FOR i = 1 TO count
         city = cities(i)
         army = city_army(city)
-        IF army = 0 XOR army_size(army) < ai_reinforce_below THEN
+        IF army > 0 AND army_size(army) < ai_reinforce_below THEN
             choice = i
         END IF
     NEXT i

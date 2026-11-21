@@ -317,8 +317,23 @@ SUB navy_fleet_defeated (loser)
     END IF
 END SUB
 
+' Whether the side holds a sea port other than the one its fleet is in, for it to retreat to.
+' Without one the fleet cannot retreat (menu_navy_combat). The original retreated it to no
+' port: the fleet kept its ships, was never drawn and counted as no fleet (G44).
+FUNCTION navy_has_retreat_port (side)
+    DIM i AS INTEGER
+    navy_has_retreat_port = 0
+    FOR i = 1 TO MAX_CITIES
+        IF city_owner(i) = side AND i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN
+            navy_has_retreat_port = -1
+            EXIT FUNCTION
+        END IF
+    NEXT i
+END FUNCTION
+
 ' Naval combat: the side's fleet retreats to one of its other sea ports. Each in turn becomes
-' the target, and the search stops there with a chance of 7 in 10. port is 0 when there is none.
+' the target, and the search stops there with a chance of 7 in 10. port is 0 when there is none,
+' and the fleet then stays where it is; navy_has_retreat_port is asked first.
 SUB navy_retreat_port (side, port)
     DIM i AS INTEGER
     port = 0
@@ -332,5 +347,7 @@ SUB navy_retreat_port (side, port)
             END IF
         END IF
     NEXT i
-    fleet_city(side) = port
+    IF port > 0 THEN
+        fleet_city(side) = port
+    END IF
 END SUB

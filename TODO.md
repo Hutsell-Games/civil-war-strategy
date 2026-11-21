@@ -52,54 +52,10 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
   not win before the clock ran out. Before the fixes G25 to G28 it was 69 to 31 (`docs\rule-changes.md`).
   Found 2026-11-15. Whether people find the same is the next check (user, 2026-11-16): games played by
   hand, as each side. Possible causes to measure with autoplay: the time limit itself, the Union's
-  computer being too cautious to take Richmond, and the scenario's starting forces.
-
-Found on 2026-11-16 in a code review, by reading the code; not run. Each is in the DOS code too
-(`CWSTRAT.BAS` and `CWSTRAT2.BAS` on `canonical-source`). A fix needs a row in `docs\rule-changes.md`.
-
-- **Join can make the armies disappear** (`army_combine_add`, `rules\army.bm`). `best` is set only when an
-  army's leader rating is above army 0's, which starts at 0. When every army that joins has a rating of 0,
-  `best` stays 0. `army_combine_finish` then puts the troops in army 0 and leaves the city with no army.
-  Relieve with a leader of rating 1 gives an army a rating of 0 (`army_take_leader`).
-- **Relieve mixes up the leaders' names and ratings** (`menu_army_relieve`, `ui\army.bm`;
-  `army_free_leader`). The old leader goes back to the list in the army's slot under his own name, but
-  keeps that slot's rating. He then has the rating of the slot's first leader. A second Relieve of the
-  same army writes over the name in that slot, and that leader is lost. Join (`army_combine_absorb`)
-  frees leaders the same way.
-- **Cancel can cancel another army's move** (`menu_army_cancel`, `ui\army.bm`). The menu keeps the city,
-  and the army is found by `INSTR` of its name. With "Rebel II" and "Rebel III" in one city, both with
-  moves, picking "Rebel II" cancels "Rebel III". Keeping the army's number in `menu_value()` would fix
-  it, but `MENU_CITY_BOX` reads the city from there.
-- **The computer's recruiting reads a leftover value** (`ai_recruit_pick`, `ai\forces.bm`).
-  `army = 0 XOR army_size(army) < ai_reinforce_below` reads `army_size(0)` for a city with no army.
-  Army 0 still holds the size of the last Join, so whether an empty city is picked depends on it. Army 0
-  is not saved, so a game plays differently after a Load.
-- **The time limit marks the wrong winner** (`end_game`, `ui\victory.bm`). `check_victory_conditions`
-  tests the Union first, so a game that runs out of time always ends with the Union as the side.
-  `victory_won` then sets `victory_reason` to the Union, and `save_battle_summary` puts the winner's `*`
-  beside the Union in `battsumm`, for a Confederate technical victory. `script_autoplay_end` and
-  `tests\autoplay.py` work around this rather than fix it.
-- **Vary Start** (`vary_start_conditions`, `rules\setup.bm`).
-  - When the Rebels' random fleet size is 0, their fleet keeps the scenario's port (city 24) with no
-    ships. `fleet_exists` is then true for a fleet of none.
-  - It is offered at any time in the Utility menu. It reloads the scenario, which resets the date, the
-    victory rules and the cash, and brings back every leader, including those who command an army.
-  - The ironclad chance is `RND > .45 * current_side`, the player's side, for both fleets.
-  - Under Realism it can give ironclads in 1861: `game_apply_settings` turned them into wooden ships
-    before Vary Start runs.
-- **A fleet that retreats to no port** (`navy_retreat_port`, `rules\navy.bm`). With no other sea port,
-  `fleet_city` becomes 0 while the fleet keeps its ships. The message says "retreating to NONE". Build
-  then adds ships to a fleet that is in no port and is never drawn.
-- **Smaller ones:**
-  - The force-ratio warning lacks a space: "UNIONside close to" (`victory_warnings`, `ui\victory.bm`).
-  - `ai_army_order` tests `victory_rule(VICTORY_CAPITAL) <> 0`, but a rule that is off is negative. The
-    computer still holds its capital when the capital rule is off. `ai_evaluate_move` tests `> 0`.
-  - Recruiting has no size cap. Repeated recruiting in one city can take an army past 32767, where it
-    wraps to a negative size.
-  - "No - Press Onward to" names the enemy's capital, which is "NONE" when the capital was taken
-    (`end_game`).
-  - The railroad picker allows the army's own city as a destination after one refused city
-    (`menu_railroad`).
+  computer being too cautious to take Richmond, and the scenario's starting forces. On
+  2026-11-21 the same games gave 76 to 24 with G34 (events in two-player games), and 78 to 22 with
+  G35 to G47 as well; 43 games ended at the time limit. G35 to G47 changed the winner of 14 games,
+  8 toward the Rebels and 6 toward the Union (sign test p = 0.79): no measurable change.
 
 ## Improvements
 
@@ -144,8 +100,9 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   be a DOUBLE (`name#`), which `make_knobs.py` sees to. Check a conversion as `number_knobs.py` was
   checked: the scripts, and the same autoplay games with the number and with the knob.
 - **The game in a browser, built by QBJS.** The plan is `docs\qbjs-plan.md` (2026-11-16): what QBJS
-  lacks for the game, measured by compiling it, and the steps in our fork of QBJS. Not started; its
-  questions are answered.
+  lacks for the game, measured by compiling it, and the steps in our fork of QBJS. Steps 0 to 12
+  are done (`docs\archived\qbjs-plan-completed.md`). Step 13, playing it in a real browser, is the
+  user's; step 14 offers the fixes upstream.
 
 ## The code
 

@@ -44,7 +44,10 @@ SUB ai_army_order (side, army, ordered)
     IF enemy_strength > 0 AND city = side_capital(side) AND city_army(city) = army THEN
         EXIT SUB
     END IF
-    IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) <> 0 THEN
+    ' Any army in the capital stays while an enemy is next to it, when taking the capital wins
+    ' the game. The original tested the rule with <> 0, and a rule turned off is negative
+    ' (victory_toggle_rule), so it held the capital with the rule off too (G45).
+    IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) > 0 THEN
         FOR j = 1 TO MAX_ROADS
             neighbor = city_road(city, j)
             IF neighbor = 0 THEN
