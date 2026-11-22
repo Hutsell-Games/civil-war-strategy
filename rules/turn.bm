@@ -199,7 +199,9 @@ END SUB
 
 ' An army is crushed or surrenders to the army winner: winner's side gets 25 victory points,
 ' winner takes its supplies, and its slot is cleared. The original gave the points to the
-' loser's side, and cleared the supplies before winner took them.
+' loser's side, and cleared the supplies before winner took them. A free leader in the slot
+' stays free: the army's commander is never on the list. The original cleared the slot's free
+' leader, one who had been relieved or freed by a Join (G53).
 SUB turn_army_lost (army, winner)
     DIM side AS INTEGER
     side = army_side(winner)
@@ -209,7 +211,6 @@ SUB turn_army_lost (army, winner)
         army_supply(winner) = MAX_SUPPLY
     END IF
     CALL army_clear(army)
-    leader_name$(army) = ""
     army_name$(army) = ""
 END SUB
 
@@ -335,8 +336,8 @@ SUB sort_move_order (limit)
 END SUB
 
 ' The month's victory points of one side: it keeps eight tenths and gains by its income and
-' cities. A computer whose enemy holds few cities gets a higher strength ratio. The points stop
-' at 0; in the original only the Union's did.
+' cities. When side is the computer's and holds fewer than 11 cities, the computer's strength
+' ratio rises by .7. The points stop at 0; in the original only the Union's did.
 SUB turn_update_victory_points (side)
     side_victory_points(side) = points_kept# * side_victory_points(side) + points_per_income# * (side_income(side) + side_city_count(side))
     IF side_city_count(side) > cities_bonus_above THEN

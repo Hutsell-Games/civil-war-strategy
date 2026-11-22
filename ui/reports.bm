@@ -261,7 +261,9 @@ SUB report_intelligence
     first_army = side_first_army(current_side)
     last_army = side_last_army(current_side)
     FOR k = first_army TO last_army
-        IF army_size(k) > 0 THEN
+        ' An army on the train has no city to show. The original placed it by city 0, off
+        ' the screen, which stopped the game (U17).
+        IF army_exists(k) THEN
             COLOR side_color
             x = city_x(army_city(k))
             y = city_y(army_city(k))

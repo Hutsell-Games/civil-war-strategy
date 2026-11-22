@@ -230,7 +230,9 @@ SUB turn_attack (moving_army, city, fought, took)
 END SUB
 
 ' The attacker lost the battle: it goes back to the city it came from. The defender may lose
-' its own order for the month.
+' its own order for the month. animate_army draws the defender's flag again in city. The
+' original also drew the flag of the army whose number was a city's, before and after the
+' animation (G49).
 SUB turn_attacker_withdraws (moving_army, city, defender)
     DIM halted AS INTEGER
     DIM old_order AS INTEGER
@@ -240,11 +242,9 @@ SUB turn_attacker_withdraws (moving_army, city, defender)
     CALL clear_bottom_line
     PRINT army_name$(moving_army); " withdrew to "; city_name$(army_order(moving_army));
 
-    CALL draw_army_flag(army_city(moving_army))
     CALL animate_army(moving_army, ANIMATE_PICTURE_TAKEN)
 
     CALL turn_withdraw(moving_army)
-    CALL draw_army_flag(army_city(moving_army))
     CALL draw_army_flag(moving_army)
 
     CALL turn_defender_halts(defender, halted, old_order)

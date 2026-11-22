@@ -18,6 +18,10 @@ source rather than extending version 1.61.
   picks an empty city because of the size of its last Join.
 - The computer keeps its armies in its capital only while taking the capital wins
   the game; before, it did so with the capital rule turned off too.
+- The Rebel computer decides on an invasion by the enemy near its own fleet. Before,
+  it looked near the Union's fleet, and the game stopped when that was at sea.
+- When your last raiding ship is lost, the computer's fleet stops chasing it. Before,
+  the computer's fleet stood idle until you built a fleet again.
 
 ### Armies and fleets
 
@@ -33,6 +37,14 @@ source rather than extending version 1.61.
   to no port, kept its ships and was lost from the map.
 - After a refused city, the railroad's next destination is again picked from the
   army's own city, which can no longer be chosen as a destination.
+- An army on the train keeps its place while it travels. Before, a new army raised
+  or sent by a special event that month could take its place, and the game stopped
+  with "subscript out of range" when the train arrived.
+- Inform, Intelligence no longer stops the game while an army is on the train.
+- A Rebel fleet at sea that receives England's ships is in port, and stops raiding.
+- A relieved leader waiting on the list is no longer lost when the army in his slot
+  is crushed or surrenders.
+- Switching between one and two players works out the Union's extra income again.
 
 ### Vary Start
 

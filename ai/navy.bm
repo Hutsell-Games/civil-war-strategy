@@ -292,7 +292,9 @@ END SUB
 
 ' The computer's order, looked at again before each action. It stops building when the
 ' money or the fleet's limit is reached (quit is 1). A fleet that is gone builds, not sails.
-' It invades when the fleet can (navy_can_invade) and the enemy near the Union's fleet is weak.
+' It invades when the fleet can (navy_can_invade) and the enemy near the city it lies off is
+' weak. The original looked near the Union's fleet for either side. For the Rebels that read the
+' wrong city, and city 99 when the Union's fleet was at sea, which stopped the game (G50).
 SUB ai_navy_adjust (side, action, quit)
     IF action = NAVY_BUILD AND NOT navy_can_build(side) THEN
         quit = 1
@@ -302,7 +304,7 @@ SUB ai_navy_adjust (side, action, quit)
         action = NAVY_BUILD
     END IF
     IF navy_can_invade(side) THEN
-        IF city_nearby_enemy_strength(fleet_city(SIDE_UNION)) < 100 THEN
+        IF city_nearby_enemy_strength(fleet_city(side)) < 100 THEN
             action = NAVY_INVADE
         END IF
     END IF

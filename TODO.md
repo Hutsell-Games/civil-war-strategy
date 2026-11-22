@@ -92,7 +92,7 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
     multiplies by .1 and the other by 10, and one knob for both would not round as the two do now.
   - **The move order** (`turn_set_move_order`), the recruit menu's chances (`army_recruit_cities`),
     the fleets' chances in `ai\navy.bm`, the train's in `ai\railroad.bm`, the rest of Vary Start, and
-    the computer's strength boost when its enemy holds under 11 cities (`turn_update_victory_points`).
+    the computer's strength boost when it holds under 11 cities (`turn_update_victory_points`).
   - **`MAX_FORT`, `MAX_SUPPLY`, `MAX_EXPERIENCE`, `MAX_LEADER_RATING`, `MAX_CASH`, `MAX_FLEET_SHIPS`**:
     screens and files are laid out for them.
 

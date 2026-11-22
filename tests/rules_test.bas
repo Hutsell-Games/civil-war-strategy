@@ -460,6 +460,19 @@ SUB TestCommanderNoneLeft
     AssertEqualInt 0, empty, "every Union army has a city"
 END SUB
 
+' The army on the train has no city but keeps its slot (G48).
+SUB TestCommanderSkipsTheArmyOnTheTrain
+    leader_name$(1) = "Pope": army_city(1) = 5
+    leader_name$(2) = "Meade": train_army(1) = 2
+    leader_name$(3) = "Hooker"
+    CALL army_pick_commander(1, empty)
+    AssertEqualInt 3, empty, "Meade's army rides the train; Hooker is next"
+    FOR i = 1 TO 20: army_city(i) = 5: NEXT i
+    army_city(2) = 0
+    CALL army_pick_commander(1, empty)
+    AssertEqualInt 0, empty, "no slot is free when the only army without a city is on the train"
+END SUB
+
 ' -------------------------------------------------------- combining armies
 ' Army 0 gathers the armies of a city; the best leader's army takes them over.
 
@@ -1030,6 +1043,26 @@ SUB TestNavyRaidRoundLosesAShip
     AssertEqualInt 0, raid_loss, "they sank nothing"
     AssertEqualInt 0, fleet_size(1), "their last ship is gone"
     AssertEqualInt 0, raiding_side, "nobody raids now"
+END SUB
+
+' The player's raiders lose their last ship: the computer no longer pursues them (G51).
+' Another side's loss leaves the pursuit as it was.
+SUB TestNavyRaidRoundLastShipEndsThePursuit
+    FOR s = 1 TO 100
+        RANDOMIZE USING s
+        current_side = 1: fleet_pursuit = 1
+        raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA
+        CALL navy_raid_round(raider, sank)
+        IF sank = 0 THEN EXIT FOR
+    NEXT s
+    AssertEqualInt 0, sank, "a seed where the raiders lose"
+    AssertEqualInt 0, fleet_pursuit, "the player's raiders are gone: no pursuit"
+    RANDOMIZE USING s
+    current_side = 2: fleet_pursuit = 1
+    raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA
+    CALL navy_raid_round(raider, sank)
+    AssertEqualInt 0, sank, "the same seed"
+    AssertEqualInt 1, fleet_pursuit, "the computer's raiders lost: the pursuit stays"
 END SUB
 
 SUB TestNavyFleetLostToTheBattery
@@ -1712,6 +1745,18 @@ SUB TestEventEnglishShipsJoinFleetInPort
     AssertEqualInt 12, fleet_city(2), "the fleet stays in its port"
 END SUB
 
+' A Rebel fleet at sea takes England's ships in a port, and raids no more (G52).
+SUB TestEventEnglishShipsEndTheRaid
+    CALL events_for_test
+    city_owner(8) = 2: city_port_type(8) = PORT_SEA
+    fleet_size(2) = 3: fleet_ships$(2) = "WWW": fleet_city(2) = FLEET_AT_SEA: raiding_side = 2
+    script_dice$ = "0,0,0,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("english ships"), event, "no riot, and the draw for ships passes"
+    AssertEqualInt 8, fleet_city(2), "the fleet is in port 8"
+    AssertEqualInt SIDE_NONE, raiding_side, "and no longer raids"
+END SUB
+
 ' Without a fleet in port the ships go to the Rebels' first sea port that the Union's fleet
 ' is not in. Without such a port the event does not happen and the list goes on.
 SUB TestEventEnglishShipsNeedAPort
@@ -2172,6 +2217,13 @@ SUB TestTurnArmyLost
     AssertEqualInt MAX_SUPPLY, army_supply(1), "up to the most an army holds"
 END SUB
 
+' A free leader in the lost army's slot stays free (G53).
+SUB TestTurnArmyLostKeepsTheFreeLeader
+    army_city(21) = 5: army_size(21) = 80: army_name$(21) = "Hood": leader_name$(21) = "Johnston"
+    CALL turn_army_lost(21, 1)
+    AssertEqualStr "Johnston", leader_name$(21), "the relieved leader is still on the list"
+END SUB
+
 SUB TestTurnOccupyAndForage
     CALL turn_occupy(2, 7)
     AssertEqualInt 7, army_city(2), "in city 7"
@@ -2310,6 +2362,17 @@ SUB TestCancelShortName
     AssertEqualStr "Rebel II", cancel_short_name$("Rebel II"), "8 characters: as it is"
     AssertEqualStr "Rebel III", cancel_short_name$("Rebel III"), "and not the same as Rebel II"
     AssertEqualStr "E. Johnston", cancel_short_name$("Joseph E. Johnston"), "the first word goes"
+END SUB
+
+' Changing the number of players works out the Union's extra income again (G54).
+SUB TestOptionTogglePlayersSetsTheUnionBonus
+    opt_difficulty = 3: opt_realism = REALISM_OFF: opt_players = PLAYERS_TWO
+    CALL set_union_advantage
+    AssertEqualInt 150, union_income_bonus, "two players: 50 a step"
+    CALL option_toggle_players
+    AssertEqualInt 360, union_income_bonus, "one player: 120 a step"
+    CALL option_toggle_players
+    AssertEqualInt 150, union_income_bonus, "two again"
 END SUB
 
 SUB TestOptionSwitches
@@ -2608,6 +2671,21 @@ SUB TestAiNavyAttackSailsFromAnArmy
     AssertEqualInt NAVY_SAIL, action, "the order is Sail"
     AssertEqualInt 1, again, "the fleet goes on to sail"
     AssertEqualInt 50, army_size(3), "the army is not bombarded"
+END SUB
+
+' The Rebel computer weighs an invasion by the enemy near the city its own fleet lies off.
+' The Union's fleet at sea, city 99, stopped the game before (G50).
+SUB TestAiNavyAdjustInvadesByItsOwnCity
+    current_side = SIDE_UNION: opt_realism = REALISM_OFF
+    fleet_city(SIDE_REBEL) = 6: fleet_size(SIDE_REBEL) = 2: fleet_ships$(SIDE_REBEL) = "WW"
+    fleet_city(SIDE_UNION) = FLEET_AT_SEA: fleet_size(SIDE_UNION) = 1: fleet_ships$(SIDE_UNION) = "W"
+    action = NAVY_SAIL: quit = 0
+    CALL ai_navy_adjust(SIDE_REBEL, action, quit)
+    AssertEqualInt NAVY_INVADE, action, "no enemy near city 6: it invades"
+    city_road(6, 1) = 7: city_owner(7) = SIDE_UNION: city_army(7) = 1: army_city(1) = 7: army_size(1) = 900
+    action = NAVY_SAIL
+    CALL ai_navy_adjust(SIDE_REBEL, action, quit)
+    AssertEqualInt NAVY_SAIL, action, "90,000 Union troops beside city 6: it does not"
 END SUB
 
 ' ------------------- the tuning files (io/tuning_file.bm, io/tuning_knobs.bm)

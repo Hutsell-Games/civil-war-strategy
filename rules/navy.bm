@@ -246,7 +246,9 @@ END SUB
 
 ' One round of the raid on commerce. raider is the side that raids, or 0 when none does. When
 ' sank is 1 its raiders sank raid_loss of the other side's income; when 0 it lost a ship, and
-' raiding_side becomes 0 when that was its last.
+' raiding_side becomes 0 when that was its last. The computer then no longer pursues the
+' player's raiders, who are gone. The original kept the pursuit, and the computer's fleet only
+' tried to sail to the lost fleet's city 0 until the player had a fleet again (G51).
 SUB navy_raid_round (raider, sank)
     IF fleet_size(raiding_side) < 1 THEN
         raiding_side = SIDE_NONE
@@ -273,6 +275,9 @@ SUB navy_raid_round (raider, sank)
         CALL navy_remove_ship(raider)
         IF NOT fleet_exists(raider) THEN
             raiding_side = SIDE_NONE
+            IF raider = current_side THEN
+                fleet_pursuit = 0
+            END IF
         END IF
     END IF
 END SUB

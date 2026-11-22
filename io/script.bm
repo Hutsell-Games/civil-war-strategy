@@ -38,8 +38,8 @@ END SUB
 ' The end of an autoplayed game (end_game, ui/victory.bm): writes autoplay.txt and ends the
 ' program before the end screens. Its one line holds the side that end_game names, the rule
 ' that ended the game (VICTORY_MONTH to VICTORY_WIPED_OUT), the month and year, and each side's
-' victory points and cities. A time limit names the Union as its side, though the Rebels win a
-' technical victory (end_game).
+' victory points and cities. A time limit names the Rebels, who win a technical victory
+' (victory_winner, rules/victory.bm).
 SUB script_autoplay_end (side, rule)
     DIM file_num AS INTEGER
     file_num = FREEFILE

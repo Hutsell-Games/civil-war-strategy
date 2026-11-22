@@ -128,9 +128,11 @@ SUB option_events_favor_computer
     END SELECT
 END SUB
 
-' One player or two.
+' One player or two. The Union's extra income is worked out again, as it differs for two
+' players. The original kept the old one until Balance or Realism changed (G54).
 SUB option_toggle_players
     opt_players = PLAYERS_ONE + PLAYERS_TWO - opt_players
+    CALL set_union_advantage
 END SUB
 
 ' Graphics: the next level of the map's detail, and after the last the first again.

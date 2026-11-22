@@ -156,7 +156,9 @@ END SUB
 
 ' The next commander of a side, in army_slot: the first army without a city that has a name on the
 ' list, or a name made up for the first army without a city. army_slot is 0 when every army has a
-' city. army_get_commander (commands/army.bm) says so.
+' city. army_get_commander (commands/army.bm) says so. The army on the side's train has no city
+' but is not free (army_in_field). The original could give its slot to a new army; the train
+' then unloaded it in city -1, its order ORDER_BUSY (G48).
 SUB army_pick_commander (side, army_slot)
     DIM last_army AS INTEGER
     DIM generated_name$
@@ -166,7 +168,7 @@ SUB army_pick_commander (side, army_slot)
     first_army = side_first_army(side)
     last_army = side_last_army(side)
     FOR i = first_army TO last_army
-        IF NOT army_exists(i) AND leader_name$(i) <> "" THEN
+        IF NOT army_in_field(i) AND leader_name$(i) <> "" THEN
             army_slot = i
             EXIT SUB
         END IF
@@ -174,7 +176,7 @@ SUB army_pick_commander (side, army_slot)
 
     '                 generic leaders if set list is exhausted
     FOR i = first_army TO last_army
-        IF NOT army_exists(i) THEN
+        IF NOT army_in_field(i) THEN
             ' (i): army_generate_name changes its first argument.
             CALL army_generate_name((i), generated_name$)
             army_slot = i
