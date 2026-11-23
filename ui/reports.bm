@@ -101,7 +101,6 @@ SUB report_armies (side)
     DIM percent AS INTEGER
     DIM total_troops AS INTEGER
     DIM ironclads AS INTEGER
-    DIM all_income AS INTEGER
     DIM row AS INTEGER
     first_army = side_first_army(side)
     last_army = side_last_army(side)
@@ -129,14 +128,7 @@ SUB report_armies (side)
     PRINT TAB(50);
     COLOR COLOR_LIGHT_RED
     PRINT "Capital: "; city_name$(side_capital(side))
-    all_income = total_income
-    IF side_capital(SIDE_UNION) > 0 THEN
-        all_income = all_income + capital_income
-    END IF
-    IF side_capital(SIDE_REBEL) > 0 THEN
-        all_income = all_income + capital_income
-    END IF
-    PRINT side_income(side); "/"; all_income; TAB(15); "INCOME"; TAB(40); "(";
+    PRINT side_income(side); "/"; total_income; TAB(15); "INCOME"; TAB(40); "(";
     percent = (side_income(side) / total_income) * 100
     PRINT percent; "%)   ";
     COLOR COLOR_YELLOW

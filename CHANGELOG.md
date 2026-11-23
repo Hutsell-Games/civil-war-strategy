@@ -91,6 +91,8 @@ source rather than extending version 1.61.
 
 - Random events happen in a game of two players too, once a month after both
   players have given their orders. Before, only a game against the computer had them.
+- Turning Realism off no longer leaves a Rebel's event balance of 1 at 3. That
+  balance is reached only by editing `CWS.CFG` by hand.
 
 ### Menus
 
@@ -98,6 +100,8 @@ source rather than extending version 1.61.
   every army has them, or is cut off, or the treasury cannot buy a day of them.
   After a purchase that leaves Supply as "-", the main menu comes back, as it does
   after the last fort the treasury can pay for.
+- The army report's income line shows the right total of both sides' income.
+  Before, it counted the two capitals twice, so the total was 200 too high.
 
 ## Version 1.7
 

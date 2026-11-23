@@ -33,16 +33,6 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
   38 cities, as the original's 39 tries did. The 40th, the city just before the first, is never
   looked at. When it is the only city the side holds, the picker stays where it was. It most likely meant
   `MAX_CITIES - 1` steps. Found 2026-11-14. `TestSideCityByLetter` holds it.
-- **The army report counts the capitals' income twice** (`report_armies`, `ui\reports.bm`). Its line
-  "income / all income" adds 100 for each capital to `total_income`, which `turn_collect_income` has
-  already counted them in. The original did the same (`CWSTRAT2.BAS` line 811, with `vptotal` from
-  `CWSTRAT.BAS` line 169). Found 2026-11-13. A fix changes the report's screen in the scripts that
-  show it.
-- **Realism on gives a Rebel player's event balance of 1 two more, and Realism off does not take them back**
-  (`option_toggle_realism`, `rules\setup.bm`). The original did the same (`CWSTRAT.BAS` line 628). No menu
-  sets 1 (the Random Events menu sets 0, 3, 5 or 7), so only a `CWS.CFG` written by hand reaches it. Taking
-  2 off when Realism goes off would also change a 3 set in the menu, so a fix needs to remember the
-  change. Found 2026-11-14.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.

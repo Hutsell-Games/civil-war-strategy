@@ -2436,14 +2436,20 @@ SUB TestOptionToggleRealism
     AssertEqualInt 360, union_income_bonus, "worked out, without the seven tenths"
 END SUB
 
-' With realism going on, a Rebel player's event balance of 1 becomes 3. No menu sets 1.
+' With Realism on, a Rebel player's event balance of 1 counts as 3, and as 1 again when
+' Realism goes off. The setting itself stays 1 (G55). No menu sets 1.
 SUB TestOptionToggleRealismEventBalance
     current_side = SIDE_REBEL: opt_event_balance = 1
     CALL option_toggle_realism
-    AssertEqualInt 3, opt_event_balance, "1 becomes 3"
-    opt_realism = REALISM_OFF: opt_event_balance = 5
+    AssertEqualInt 1, opt_event_balance, "the setting stays 1"
+    AssertEqualInt 3, event_balance_in_play, "1 counts as 3"
     CALL option_toggle_realism
-    AssertEqualInt 5, opt_event_balance, "any other value stays"
+    AssertEqualInt 1, opt_event_balance, "still 1"
+    AssertEqualInt 1, event_balance_in_play, "1 again with Realism off"
+    opt_realism = REALISM_ON: current_side = SIDE_UNION
+    AssertEqualInt 1, event_balance_in_play, "a Union player's 1 stays 1"
+    current_side = SIDE_REBEL: opt_event_balance = 5
+    AssertEqualInt 5, event_balance_in_play, "any other value stays"
 END SUB
 
 SUB TestVictoryToggleRule

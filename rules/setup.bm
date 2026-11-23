@@ -189,13 +189,18 @@ END SUB
 ' worked it out only when Realism went on, so turning it off kept the 70% of Realism.
 SUB option_toggle_realism
     opt_realism = 1 - opt_realism
-    IF opt_realism <> REALISM_OFF THEN
-        IF current_side = SIDE_REBEL AND opt_event_balance = 1 AND opt_event_balance < 5 THEN
-            opt_event_balance = opt_event_balance + 2
-        END IF
-    END IF
     CALL set_union_advantage
 END SUB
+
+' The event balance that the month's roll uses. With Realism on, a Rebel player's balance of
+' 1 counts as 3. The original added the 2 to the setting itself when Realism went on, and
+' never took it off (G55). No menu sets 1; only a CWS.CFG written by hand does.
+FUNCTION event_balance_in_play
+    event_balance_in_play = opt_event_balance
+    IF opt_realism <> REALISM_OFF AND current_side = SIDE_REBEL AND opt_event_balance = 1 THEN
+        event_balance_in_play = 3
+    END IF
+END FUNCTION
 
 SUB option_toggle_history
     opt_history = 1 - opt_history
