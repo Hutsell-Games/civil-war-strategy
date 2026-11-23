@@ -1,5 +1,5 @@
 ' Pictures drawn line by line: the cannon of the battle screen, the shore of the Chesapeake
-' on the map, and the title screen; and load_picture, for the .vga files.
+' on the map, and the title screen; and load_picture and draw_picture, for the .PNG files.
 
 SUB draw_cannon
     DIM x AS INTEGER
@@ -120,19 +120,25 @@ SUB draw_chesapeake
     PAINT (510, 110), 2
 END SUB
 
-' Loads a .vga picture file into an array, for PUT.
-SUB load_picture (file$, picture())
-    DEF SEG = VARSEG(picture(1))
-    BLOAD file$, VARPTR(picture(1))
-    DEF SEG
+' Loads a .PNG picture file of the 16 colors of SCREEN 12 and returns its image handle, for
+' _PUTIMAGE. The 256 asks for a picture of color numbers, which SCREEN 12 can take; the pictures'
+' palette is the one of QB64pe, so each pixel keeps its number. Free the handle with _FREEIMAGE.
+FUNCTION load_picture& (file$)
+    load_picture = _LOADIMAGE(file$, 256)
+END FUNCTION
+
+' Draws a picture file with its top left corner at x, y, and frees it.
+SUB draw_picture (x, y, file$)
+    DIM picture AS LONG
+    picture = load_picture(file$)
+    _PUTIMAGE (x, y), picture
+    _FREEIMAGE picture
 END SUB
 
 ' The title screen. It also takes the capital's star from the icon file, for draw_cities.
 SUB draw_title
     SCREEN 12
-    CALL load_picture(GFXDIR + "CWSICON.VGA", pic_loaded())
-
-    PUT (100, 100), pic_loaded(), PSET
+    CALL draw_picture(100, 100, GFXDIR + "CWSICON.PNG")
     GET (101, 101)-(113, 113), pic_capital()
     CLS
     COLOR COLOR_LIGHT_CYAN

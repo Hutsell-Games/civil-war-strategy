@@ -59,17 +59,17 @@ FUNCTION railroad_capacity (side)
         railroad_capacity = train_capacity(side)
         EXIT FUNCTION
     END IF
-    base_cities = 11
+    base_cities = rail_union_cities
     IF side = SIDE_REBEL THEN
-        base_cities = 23
+        base_cities = rail_rebel_cities
     END IF
-    capacity = train_capacity(side) + 5 * (side_city_count(side) - base_cities)
-    max_capacity = 2 * train_capacity(side)
+    capacity = train_capacity(side) + rail_per_city * (side_city_count(side) - base_cities)
+    max_capacity = rail_most_times * train_capacity(side)
     IF capacity > max_capacity THEN
         capacity = max_capacity
     END IF
-    IF capacity < max_capacity \ 4 THEN
-        capacity = max_capacity \ 4
+    IF capacity < max_capacity \ rail_least_divisor THEN
+        capacity = max_capacity \ rail_least_divisor
     END IF
     railroad_capacity = capacity
 END FUNCTION

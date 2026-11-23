@@ -176,7 +176,7 @@ END SUB
 SUB menu_army_recruit (side)
     DIM city AS INTEGER
     DIM raised AS INTEGER
-    IF side_cash(side) < COST_RECRUIT THEN
+    IF side_cash(side) < cost_recruit THEN
         EXIT SUB
     END IF
     CALL menu_recruit_cities(side)
@@ -184,7 +184,7 @@ SUB menu_army_recruit (side)
         EXIT SUB
     END IF
     DO
-        IF side_cash(side) < COST_RECRUIT THEN
+        IF side_cash(side) < cost_recruit THEN
             EXIT SUB
         END IF
         CALL draw_recruit_funds(side)
@@ -223,28 +223,32 @@ SUB menu_recruit_cities (side)
     CALL menu_set_cities(cities(), count)
 END SUB
 
-' Lets the player cancel an army's move order and removes its move marker from the map.
+' The name of an army in the Cancel menu: a name of more than 10 characters loses its first word.
+FUNCTION cancel_short_name$ (name$)
+    cancel_short_name$ = name$
+    IF LEN(name$) > 10 THEN
+        cancel_short_name$ = RIGHT$(name$, LEN(name$) - INSTR(name$, " "))
+    END IF
+END FUNCTION
+
+' Lets the player cancel an army's move order and removes its move marker from the map. The menu
+' keeps the city of each row (MENU_CITY_BOX reads it), so the army is the one in that city whose
+' name is the row's. The original took any army there whose name held the row's, and the last
+' of them, so "Rebel II" cancelled the move of "Rebel III" (G37).
 SUB menu_army_cancel (side)
     DIM last_army AS INTEGER
     DIM first_army AS INTEGER
     DIM j AS INTEGER
-    DIM short_name$
     DIM city AS INTEGER
     DIM i AS INTEGER
-    DIM found_at AS INTEGER
     DIM army AS INTEGER
     first_army = side_first_army((side))
     last_army = side_last_army((side))
     CALL clear_right_panel
     menu_item_count = 0
     FOR j = first_army TO last_army
-        short_name$ = army_name$(j)
-        IF LEN(short_name$) > 10 THEN
-            found_at = INSTR(short_name$, " ")
-            short_name$ = RIGHT$(short_name$, LEN(short_name$) - found_at)
-        END IF
         IF army_exists(j) AND army_has_move(j) THEN
-            CALL menu_add_row(short_name$, army_city(j))
+            CALL menu_add_row(cancel_short_name$(army_name$(j)), army_city(j))
         END IF
     NEXT j
     CALL menu_bubble_sort(menu_item_count)
@@ -263,14 +267,19 @@ SUB menu_army_cancel (side)
         CASE 1 TO menu_item_count
             city = menu_value(menu_choice)
 
+            army = 0
             FOR i = first_army TO last_army
-                IF army_city(i) = city THEN
-                    found_at = INSTR(army_name$(i), menu_text$(menu_choice))
-                    IF found_at > 0 AND army_has_move(i) THEN
+                IF army_city(i) = city AND army_has_move(i) THEN
+                    IF cancel_short_name$(army_name$(i)) = menu_text$(menu_choice) THEN
                         army = i
+                        EXIT FOR
                     END IF
                 END IF
             NEXT i
+            IF army = 0 THEN
+                CALL clear_right_panel
+                EXIT SUB
+            END IF
 
             CALL clear_bottom_line
             COLOR COLOR_LIGHT_CYAN
@@ -295,6 +304,7 @@ SUB menu_army_relieve (side)
     DIM army AS INTEGER
     DIM old_name$
     DIM new_name$
+    DIM slot AS INTEGER
     menu_color = COLOR_CYAN
     menu_highlight = COLOR_CYAN
     menu_col = PANEL_COL
@@ -325,7 +335,7 @@ SUB menu_army_relieve (side)
     CALL draw_map_marker(army_city(army), 0, MARK_POINTER)
 
     old_name$ = army_name$(army)
-    CALL army_free_leader(army)
+    CALL army_free_leader(army, slot)
 
     menu_item_count = 0
     FOR i = first_army TO last_army
@@ -395,7 +405,8 @@ SUB menu_army_retreat (defender, retreat_city)
 END SUB
 
 ' The Supply menu: the player's armies that are short of supplies and not cut off. The one
-' picked gets supplies. picked is that army, or 0 when there is none or the player gave up.
+' picked gets supplies. picked is that army, or 0 when the player gave up. The Commands menu
+' calls it only when side_can_supply, so the menu has at least one army.
 SUB menu_supply (picked)
     DIM first_army AS INTEGER
     DIM last_army AS INTEGER
@@ -425,12 +436,6 @@ SUB menu_supply (picked)
         END IF
         CALL menu_add_row(menu_short_name$(army_name$(i)), i)
     NEXT i
-    IF menu_item_count = 0 THEN
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
-        PRINT "All eligible "; side_name$(current_side); " armies have supplies";
-        EXIT SUB
-    END IF
     CALL menu_select(MENU_ARMY_POINTER)
     CALL clear_right_panel
     IF menu_choice < 0 THEN
@@ -463,7 +468,7 @@ SUB menu_army_detach (again)
     IF city < 1 OR army < 1 THEN
         EXIT SUB
     END IF
-    IF army_size(army) < MIN_DETACH_SIZE THEN
+    IF army_size(army) < min_detach_size THEN
         CALL clear_bottom_line
         PRINT "Too small to detach";
         CALL wait_seconds(opt_pause!)

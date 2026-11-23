@@ -223,6 +223,7 @@ FUNCTION menu_wait_key$
     DIM pressed$
     CALL script_mark_key_wait(2, menu_text$(0))
     DO
+        _LIMIT 60
         pressed$ = INKEY$
     LOOP WHILE pressed$ = ""
     menu_wait_key$ = pressed$
@@ -355,10 +356,9 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
                 IF current_side = SIDE_UNION THEN
                     face_pic = 6 - row
                 END IF
-                file$ = GFXDIR + "FACE" + LTRIM$(STR$(face_pic)) + ".VGA"
+                file$ = GFXDIR + "FACE" + LTRIM$(STR$(face_pic)) + ".PNG"
                 IF _FILEEXISTS(file$) THEN
-                    CALL load_picture(file$, pic_face())
-                    PUT (550, 150), pic_face(), PSET
+                    CALL draw_picture(550, 150, file$)
                     IF current_side = SIDE_REBEL THEN
                         PAINT (560, 160), 8, 0
                         PAINT (570, 155), 7, 0

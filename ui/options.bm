@@ -90,9 +90,18 @@ SUB menu_utility
             CASE 8
                 CALL menu_option_events
             CASE 9
-                CALL vary_start_conditions
-                CLS
-                CALL draw_map
+                ' Only before the first End Turn of a new game (vary_start_conditions).
+                IF vary_start_open = 1 THEN
+                    CALL vary_start_conditions
+                    CLS
+                    CALL draw_map
+                ELSE
+                    CALL clear_bottom_line
+                    COLOR COLOR_LIGHT_CYAN
+                    PRINT "Vary Start only before the first End Turn of a new game";
+                    CALL wait_seconds(PAUSE_LONG)
+                    CALL clear_bottom_line
+                END IF
             CASE 10
                 CALL menu_option_january
             CASE 11

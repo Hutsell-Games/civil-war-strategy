@@ -6,6 +6,9 @@ SUB special_events
     DIM variant AS INTEGER
     DIM event_side AS INTEGER
     DIM k AS INTEGER
+    DIM raid_before AS INTEGER
+    DIM redraw AS INTEGER
+    raid_before = raiding_side
     CALL event_roll(event, variant, event_side)
     IF event = EVENT_NONE THEN
         EXIT SUB
@@ -38,7 +41,13 @@ SUB special_events
     IF event_then(event) <> 0 THEN
         CALL scribe_message(event_message$(event_text$(event_then(event), 0)), SHOW_BOX)
     END IF
-    SELECT CASE event_redraw(event)
+    ' An event that brought a raiding fleet into port (G52) draws the whole map again, so that
+    ' the COMMERCE banner and the fleet at sea go. Drawing the fleets alone would leave them.
+    redraw = event_redraw(event)
+    IF raiding_side <> raid_before THEN
+        redraw = REDRAW_MAP
+    END IF
+    SELECT CASE redraw
         CASE REDRAW_FLEETS
             CALL draw_fleets
         CASE REDRAW_MAP

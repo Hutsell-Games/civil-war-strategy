@@ -4,12 +4,12 @@
 
 ' The Union's extra income each month, from the Balance setting.
 SUB set_union_advantage
-    union_income_bonus = 120 * opt_difficulty
+    union_income_bonus = union_bonus_per_balance * opt_difficulty
     IF opt_players = PLAYERS_TWO THEN
-        union_income_bonus = 50 * opt_difficulty
+        union_income_bonus = union_bonus_two_players * opt_difficulty
     END IF
     IF opt_realism >= REALISM_ON THEN
-        union_income_bonus = union_income_bonus * .7
+        union_income_bonus = union_income_bonus * union_bonus_realism_share#
     END IF
 END SUB
 
@@ -27,16 +27,29 @@ FUNCTION balance_help (side)
     END IF
 END FUNCTION
 
-' Vary Start: loads the scenario again and changes cash, armies, fleets, the Rebel capital
-' and the leaders' ratings at random. Each side may lose some of its first six armies.
+' Vary Start: the game starts again from its scenario, with cash, armies, fleets, the Rebel
+' capital and the leaders' ratings changed at random. Each side may lose some of its first six
+' armies. The Utility menu offers it while vary_start_open is 1, until the first End Turn of a
+' new game. The settings and the victory rules stay as the player set them; the Balance
+' setting's cash and the Realism setting's wooden ships of 1861 are given as in a new game
+' (game_apply_settings). The original was offered at any time and only read the scenario again:
+' the date, the victory rules, the settings and every leader went back to the files', while
+' the cities and the armies raised since stayed (G40, G43).
 SUB vary_start_conditions
     DIM k AS INTEGER
     DIM i AS INTEGER
     DIM j AS INTEGER
     DIM ship$
+    DIM rules(6) AS INTEGER
+    DIM event_balance AS INTEGER
+    FOR k = 1 TO 6
+        rules(k) = victory_rule(k)
+    NEXT k
+    event_balance = opt_event_balance
+    CALL game_reset
     CALL load_scenario
-    side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - 100 + 200 * RND
-    side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + 100 + 200 * RND
+    side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - vary_cash_shift + vary_cash_spread * RND
+    side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + vary_cash_shift + vary_cash_spread * RND
     opt_ai_aggression = 5 * RND
     FOR k = 1 TO 6
         IF RND > .6 THEN
@@ -48,9 +61,7 @@ SUB vary_start_conditions
             CALL army_clear(k)
         END IF
     NEXT k
-    FOR k = 1 TO MAX_CITIES
-        CALL city_update_occupier(k)
-    NEXT k
+    ' A fleet of no ships is no fleet. The original left the Rebels' in its port (G41).
     fleet_size(SIDE_UNION) = 10 * RND
     IF fleet_size(SIDE_UNION) = 0 THEN
         fleet_city(SIDE_UNION) = 0
@@ -58,12 +69,16 @@ SUB vary_start_conditions
     fleet_size(SIDE_REBEL) = 10 * RND
     IF fleet_size(SIDE_REBEL) > 0 THEN
         fleet_city(SIDE_REBEL) = VARY_REBEL_FLEET_CITY
+    ELSE
+        fleet_city(SIDE_REBEL) = 0
     END IF
+    ' A ship is an ironclad with a chance of .55 for the Union and .1 for the Rebels. The
+    ' original multiplied .45 by the player's side, so both fleets had the same chance (G42).
     FOR i = SIDE_UNION TO SIDE_REBEL
         fleet_ships$(i) = ""
         FOR j = 1 TO fleet_size(i)
             ship$ = SHIP_WOODEN$
-            IF RND > .45 * current_side THEN
+            IF RND > .45 * i THEN
                 ship$ = SHIP_IRONCLAD$
             END IF
             fleet_ships$(i) = fleet_ships$(i) + ship$
@@ -83,6 +98,14 @@ SUB vary_start_conditions
         IF leader_rating(k) < 1 THEN
             leader_rating(k) = 1
         END IF
+    NEXT k
+    CALL game_apply_settings
+    opt_event_balance = event_balance
+    CALL set_union_advantage
+    ' The cities as at the start, and the army that holds each.
+    CALL load_cities
+    FOR k = 1 TO 6
+        victory_rule(k) = rules(k)
     NEXT k
 END SUB
 
@@ -105,9 +128,11 @@ SUB option_events_favor_computer
     END SELECT
 END SUB
 
-' One player or two.
+' One player or two. The Union's extra income is worked out again, as it differs for two
+' players. The original kept the old one until Balance or Realism changed (G54).
 SUB option_toggle_players
     opt_players = PLAYERS_ONE + PLAYERS_TWO - opt_players
+    CALL set_union_advantage
 END SUB
 
 ' Graphics: the next level of the map's detail, and after the last the first again.
@@ -184,8 +209,8 @@ SUB option_next_aggression
     END IF
 END SUB
 
-' A new game: the scenario and the settings are read, and the map's cities. The first game
-' reads the list of scenarios and starts on its first.
+' A new game: the scenario, the settings of cws.cfg, the special events and the tuning knobs are
+' read, and the map's cities. The first game reads the list of scenarios and starts on its first.
 SUB game_new
     IF scenario_now = 0 THEN
         CALL load_scenario_list
@@ -193,18 +218,26 @@ SUB game_new
     END IF
     CALL game_reset
     CALL load_scenario
+    CALL config_read(current_side)
     CALL load_events(SCNDIR + "EVENTS.DAT")
+    CALL load_tuning
     CALL game_apply_settings
     CALL set_union_advantage
     CALL load_cities
 END SUB
 
 ' Clears the armies, the fleets, the trains, the city counts and the victory points for a new
-' game.
+' game. Also the month's command flags, the commerce raid and the computer's strength ratio,
+' which the game before may have left set. Vary Start may be used again.
 SUB game_reset
     DIM k AS INTEGER
     game_over = 0
-    turn_recruit_state = 0
+    vary_start_open = 1
+    CALL turn_reset_commands
+    raiding_side = SIDE_NONE
+    raid_loss = 0
+    fleet_pursuit = 0
+    ai_strength_ratio! = 0
     FOR k = 1 TO MAX_ARMIES
         army_size(k) = 0
         army_city(k) = 0
@@ -254,11 +287,11 @@ SUB game_apply_settings
     END IF
     FOR i = SIDE_UNION TO SIDE_REBEL
         IF balance_help(i) > 0 THEN
-            side_cash(i) = side_cash(i) + 100 * (DIFFICULTY_EVEN + balance_help(i))
+            side_cash(i) = side_cash(i) + start_cash_per_balance * (DIFFICULTY_EVEN + balance_help(i))
         END IF
     NEXT i
     FOR i = SIDE_UNION TO SIDE_REBEL
         side_income(i) = side_cash(i)
-        side_cash(i) = side_cash(i) + 50 * RND
+        side_cash(i) = side_cash(i) + start_cash_spread * RND
     NEXT i
 END SUB

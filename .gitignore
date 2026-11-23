@@ -4,6 +4,10 @@ __pycache__/
 *.pyc
 *.exe
 
+# The build of `qb64rust -x cws.bas`, with the data files it copies there and what the game writes
+# beside itself: settings, Hall of Fame, saved games (qb64rust.toml, [build]).
+build/
+
 # Saved games, written by playing (Files, Save).
 *.sav
 *.SAV
@@ -15,3 +19,8 @@ oldhist.ory
 OLDHIST.ORY
 battsumm
 BATTSUMM
+
+# Packages of the QBJS test harness (tests/web).
+tests/web/node_modules/
+
+*.exe.stackdump

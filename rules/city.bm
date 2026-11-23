@@ -57,8 +57,8 @@ SUB city_take (city, side, weaken_fort)
     city_owner(city) = side
     side_victory_points(side) = side_victory_points(side) + city_value(city)
     IF city = side_capital(other_side(side)) THEN
-        side_victory_points(side) = side_victory_points(side) + 100
-        side_victory_points(other_side(side)) = side_victory_points(other_side(side)) - 100
+        side_victory_points(side) = side_victory_points(side) + capital_capture_points
+        side_victory_points(other_side(side)) = side_victory_points(other_side(side)) - capital_capture_points
         side_capital(other_side(side)) = 0
     END IF
     IF city_fort(city) > 0 AND weaken_fort > 0 THEN
@@ -113,25 +113,25 @@ END FUNCTION
 
 ' Whether the side has the money for a fort.
 FUNCTION fort_affordable (side)
-    fort_affordable = side_cash(side) >= COST_FORT
+    fort_affordable = side_cash(side) >= cost_fort
 END FUNCTION
 
 ' Whether the side can move its capital: it has one, and the money.
 FUNCTION capital_can_move (side)
-    capital_can_move = side_capital(side) <> 0 AND side_cash(side) >= COST_MOVE_CAPITAL
+    capital_can_move = side_capital(side) <> 0 AND side_cash(side) >= cost_move_capital
 END FUNCTION
 
 ' Fortify: the city's fort grows a level, and the side pays for it.
 SUB city_build_fort (side, city)
     city_fort(city) = city_fort(city) + 1
-    side_cash(side) = side_cash(side) - COST_FORT
+    side_cash(side) = side_cash(side) - cost_fort
 END SUB
 
 ' Capital, first half: the side pays to move its capital, and the other side gets 50 victory
 ' points. This comes before the new capital is picked, so a player who then gives up has paid.
 SUB capital_move_pay (side)
-    side_cash(side) = side_cash(side) - COST_MOVE_CAPITAL
-    side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + 50
+    side_cash(side) = side_cash(side) - cost_move_capital
+    side_victory_points(other_side(side)) = side_victory_points(other_side(side)) + capital_move_points
 END SUB
 
 ' Capital, second half: the city is the side's capital.

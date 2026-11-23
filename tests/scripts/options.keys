@@ -1,10 +1,10 @@
 #! seed 1861
 # Civil War Strategy: every entry of the Utility menu, then a game with what they set (QB64Rust's
-# tools/screen/README.md, "Places and rules"). Vary Start first (it reads the configuration and the start again);
+# tools/screen/README.md, "Places and rules"). Vary Start first (it starts the game again from a varied start);
 # Graphics four times round; sound on, the last Sounds entry (silent: under a script the game plays at volume 0); Display Very
 # Slow, the other colors, Fast; Balance Rebel ++; End Cond time off and on; Random Events Esc, Neutral, OFF, Favor
 # Rebels, Favor Union; Jan Campgn off; Realism off and on; Chk Links; History on; Aggress six times round; Side
-# Rebel and back; 2 Player and back. Then END TURN by rules: in November 1861 the Rebels win on cities (the
+# Rebel and back; 2 Player and back. Then END TURN by rules: in September 1861 the Rebels win on strength (the
 # other colors, sound and history on), the Hall of Fame, Game Over, Quit. A run takes about 26 s: the notes take
 # their time.
 
@@ -36,7 +36,7 @@ text s
 play until 2:M
 digest
 text u
-# Vary Start first: it reads the configuration again
+# Vary Start first: the game starts again from a varied start
 prompt
 text v
 # Graphics four times round
@@ -165,13 +165,13 @@ text 2
 prompt
 state
 key esc
-# Four turns: the main menu, END TURN (and Yes by the rule).
-repeat 4
+# Three turns: the main menu, END TURN (and Yes by the rule).
+repeat 3
 play until 2:M
 digest
 text e
 end
-# November 1861: the Rebels control 80 % of the cities; End Game (Yes by the rule), the Options: Quit.
+# September 1861: the Rebels have three times the Union's strength; End Game (Yes by the rule), the Options: Quit.
 play until 2:O
 state
 text q

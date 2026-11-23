@@ -25,23 +25,6 @@ the documents in `docs\`. The rest was measured by a script. No test was run for
      since then have removed that overlap.
    - The useful next step is to run this repo's `tools\refactor` rename tables over Wars of
      Napoleon and measure again. That shows the engine boundary instead of guessing it.
-2. **Make CI's scripts pass.** The port is on `main`, and
-   [build.yml](../.github/workflows/build.yml) builds it and runs every test. Its first run on
-   `main` (2026-11-14, at `55e608e`) passed the build, the Python tests and the unit tests.
-   All 41 whole-game scripts failed at checkpoint 1: `bad-events` was killed after 300 s, and
-   each of the others stopped with "no prompt in time" a few lines into its keys file. The
-   game never reached a prompt on the runner. The run's `test-failures` artifact holds the logs.
-
-   2026-11-15: the scripts moved to a Linux job, under Xvfb with ALSA's null sound device, as
-   QB64Rust's own CI runs its window programs. The Windows hang was most likely the first sound
-   statement on a runner with no sound device. This stays open until a run on `main` passes.
-4. **One batch ruling on the computer's inherited typos.** `TODO.md` has three: the fort of 2
-   counted as none, `ai_fortify`'s local `side_cash`, and `ai_beyond_score`'s owner compared with a
-   city. A fourth, `ai_army_order`'s test of `j = 0`, changed no play and was fixed on
-   2026-11-15. A fifth is in `ai_attack_score`
-   ([ai/army.bm:293](../ai/army.bm#L293)): the army's leader rating is added and subtracted, so
-   it cancels. The original has the same line (`CWSTRAT2.BAS` line 364). One batch means one
-   re-record.
 5. **Show the three lost pictures** (title, burning capital, Lincoln). They are the only DOS
    content a player lost, and Wars of Napoleon has the same item, so one helper serves both.
 
@@ -72,7 +55,8 @@ A player was added to the usual five roles, because "worth doing" depends on who
 - **Rust engineer:** nothing to add here.
 - **Player:** wants the pictures and a computer that plays as it was written to.
 
-The panel recommends items 2 and 3 now (item 3 is done), item 1 as the next plan, and item 4 when the user rules.
+The panel recommended items 2 and 3 now, item 1 as the next plan, and item 4 when the user rules.
+Items 2 to 4 are done.
 
 ## Decisions for the user
 
@@ -80,4 +64,3 @@ The panel recommends items 2 and 3 now (item 3 is done), item 1 as the next plan
 2. May the renames go to Wars of Napoleon? `pretzel-wargames`' `README.md` lists "Hutsell's
    short names stay until one engine exists" under "Decided so far" (2026-11-10). That file does
    not say whether it was the user's ruling.
-3. Fix the four computer typos left in one batch?

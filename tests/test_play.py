@@ -170,10 +170,11 @@ class CopyDataTest(unittest.TestCase):
             (game / "CWSTRAT.BAS").write_text("source")
             (game / "README.md").write_text("document")
             (game / "cws.exe").write_text("build")
+            (game / "cws1.sav").write_text("a game saved while playing")
             (game / "HISCORE.CWS").write_text("repo")
             (data / "HISCORE.CWS").write_text("test data")
             play.copy_data(work, game, data)
-            # The data folders are copied whole; sources, documents and builds are left out.
+            # The data folders are copied whole; sources, documents, builds and saved games are left out.
             self.assertEqual(sorted(p.name for p in work.iterdir()),
                              ["CWS.CFG", "HISCORE.CWS", "graphics", "scenarios"])
             self.assertEqual((work / "scenarios" / "CITIES.GRD").read_text(), "CITIES.GRD")

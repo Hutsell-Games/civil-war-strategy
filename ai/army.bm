@@ -44,7 +44,10 @@ SUB ai_army_order (side, army, ordered)
     IF enemy_strength > 0 AND city = side_capital(side) AND city_army(city) = army THEN
         EXIT SUB
     END IF
-    IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) <> 0 THEN
+    ' Any army in the capital stays while an enemy is next to it, when taking the capital wins
+    ' the game. The original tested the rule with <> 0, and a rule turned off is negative
+    ' (victory_toggle_rule), so it held the capital with the rule off too (G45).
+    IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) > 0 THEN
         FOR j = 1 TO MAX_ROADS
             neighbor = city_road(city, j)
             IF neighbor = 0 THEN
@@ -139,25 +142,25 @@ SUB ai_evaluate_move (army, best_road)
             END IF
         END IF
 
-        score = own_strength - stay_weight * city_fort(from_city) - city_value(from_city) + 30 * RND
+        score = own_strength - stay_weight * city_fort(from_city) - city_value(from_city) + ai_move_spread * RND
         IF city_fort(from_city) > 0 THEN
             IF army = city_army(from_city) THEN
-                score = score - 25
+                score = score - ai_leave_fort_penalty
                 IF opt_realism >= REALISM_ON THEN
-                    score = score - 50
+                    score = score - ai_leave_fort_realism_penalty
                 END IF
             END IF
         END IF
         IF to_city = side_capital(enemy_side) THEN
             IF victory_rule(VICTORY_CAPITAL) > 0 THEN
-                score = score + 200
+                score = score + ai_enemy_capital_bonus
             END IF
         END IF
         IF city_owner(to_city) <> own_side THEN
-            score = score + 5 * city_value(to_city) + 10 * city_fort(to_city)
+            score = score + ai_target_value * city_value(to_city) + ai_target_fort * city_fort(to_city)
         END IF
         IF city_owner(to_city) = enemy_side AND occupant = 0 THEN
-            score = score + 10 * city_value(to_city)
+            score = score + ai_empty_enemy_value * city_value(to_city)
         END IF
         IF city_owner(to_city) = enemy_side AND occupant <> 0 THEN
             score = ai_attack_score(army, occupant, to_city, score)
@@ -166,10 +169,10 @@ SUB ai_evaluate_move (army, best_road)
             score = score - army_size(occupant)
         END IF
         IF enemy_side = SIDE_UNION AND city_y(to_city) < city_y(from_city) THEN
-            score = score + 2
+            score = score + ai_march_direction_bonus
         END IF
         IF enemy_side = SIDE_REBEL AND city_y(to_city) > city_y(from_city) THEN
-            score = score + 2
+            score = score + ai_march_direction_bonus
         END IF
         score = score + ai_beyond_score(army, occupant, to_city, enemy_side)
 
@@ -196,13 +199,13 @@ END SUB
 ' the player, and half for an aggressive computer.
 FUNCTION ai_stay_weight (enemy_strength)
     DIM weight AS INTEGER
-    weight = 200
+    weight = ai_stay_weight_even
     IF ai_strength_ratio! > 1.5 THEN
-        weight = 80
+        weight = ai_stay_weight_strong
         IF ai_strength_ratio! > 2 THEN
-            weight = 20
+            weight = ai_stay_weight_stronger
             IF ai_strength_ratio! > 3 THEN
-                weight = 5
+                weight = ai_stay_weight_strongest
             END IF
         END IF
     END IF
@@ -232,7 +235,7 @@ FUNCTION ai_move_strength (army)
     NEXT j
     strength = .01 * strength
     IF opt_ai_aggression > 0 THEN
-        strength = strength + 20 * opt_ai_aggression
+        strength = strength + ai_aggression_strength * opt_ai_aggression
     END IF
     ai_move_strength = strength
 END FUNCTION
@@ -259,13 +262,9 @@ FUNCTION ai_attack_score (army, occupant, to_city, score_before)
     DIM fort_factor AS INTEGER
     DIM odds!
     score = score_before
-    fort_factor = 1
-    IF city_fort(to_city) = 1 THEN
-        fort_factor = 2
-        IF city_fort(to_city) = 3 THEN
-            fort_factor = 3
-        END IF
-    END IF
+    ' A fort multiplies the defender: 1 with none, 2 with a fort of 1, 3 with a fort of 2. The
+    ' original gave a fort of 2 the factor of none (docs/rule-changes.md, G25).
+    fort_factor = 1 + city_fort(to_city)
 
     IF army_size(occupant) > 0 THEN
         odds! = army_size(army) / (fort_factor * army_size(occupant))
@@ -276,47 +275,49 @@ FUNCTION ai_attack_score (army, occupant, to_city, score_before)
         odds! = 5
     END IF
 
-    IF army_size(army) < SMALL_ARMY_SIZE THEN
-        score = score - 300
+    IF army_size(army) < small_army_size THEN
+        score = score - ai_small_army_penalty
         odds! = .1
     END IF
     IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN
         score = 0
     END IF
     IF opt_realism >= REALISM_ON THEN
-        score = score - 15
+        score = score - ai_realism_penalty
     END IF
     IF odds! < .5 THEN
-        score = score - 200
+        score = score - ai_poor_odds_penalty
     END IF
+    ' Leader against leader and experience against experience. The original subtracted the
+    ' army's own leader in place of the occupant's experience (docs/rule-changes.md, G28).
     IF opt_ai_aggression = 0 AND RND > .9 THEN
-        score = score + 10 * (army_leader_rating(army) - army_leader_rating(occupant) + army_experience(army) - army_leader_rating(army))
+        score = score + 10 * (army_leader_rating(army) - army_leader_rating(occupant) + army_experience(army) - army_experience(occupant))
     END IF
     IF army_supply(army) < 1 THEN
-        score = score - 100
+        score = score - ai_no_supply_penalty
     END IF
     SELECT CASE odds! + .5 * opt_ai_aggression
         CASE IS < .3
             score = -9999
         CASE IS < .5
-            score = score - 300
+            score = score - ai_odds_bad_penalty
         CASE IS <= .8
-            score = score - 20
+            score = score - ai_odds_low_penalty
         CASE .8 TO 1.2
-            score = score - 5
+            score = score - ai_odds_even_penalty
         CASE 1.2 TO 1.5
-            score = score + 10
+            score = score + ai_odds_good_bonus
         CASE ELSE
-            score = score + .5 * (army_size(army) - army_size(occupant)) + 50 * RND
+            score = score + .5 * (army_size(army) - army_size(occupant)) + ai_attack_spread * RND
     END SELECT
     ai_attack_score = score
 END FUNCTION
 
 ' What the cities one road beyond to_city add to its score: their worth and forts when the
 ' enemy or no side holds them, and 2 less for each of the enemy's when the army is smaller than
-' the one in to_city (occupant). The 50 meant for the enemy's capital compares a city's owner
-' with the capital's number. So it goes to each neutral city once the enemy has lost its
-' capital (number 0), and to no city before (TODO.md).
+' the one in to_city (occupant), and 50 for the enemy's capital. The original compared a city's
+' owner with the capital's number, so its 50 went to no city while the enemy held its capital
+' (docs/rule-changes.md, G27).
 FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
     DIM k AS INTEGER
     DIM far_city AS INTEGER
@@ -329,10 +330,10 @@ FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
             _CONTINUE
         END IF
         IF city_owner(far_city) = SIDE_NONE THEN
-            bonus = bonus + 3 * city_value(far_city) + 4 * city_fort(far_city)
+            bonus = bonus + ai_beyond_value * city_value(far_city) + ai_beyond_fort * city_fort(far_city)
         END IF
         IF city_owner(far_city) = enemy_side THEN
-            bonus = bonus + 3 * city_value(far_city) + 4 * city_fort(far_city)
+            bonus = bonus + ai_beyond_value * city_value(far_city) + ai_beyond_fort * city_fort(far_city)
         END IF
         IF city_owner(far_city) = enemy_side AND occupant > 0 THEN
             odds! = 5 - 4 * RND
@@ -345,8 +346,8 @@ FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
                 bonus = bonus - 2
             END IF
         END IF
-        IF city_owner(far_city) = side_capital(enemy_side) THEN
-            bonus = bonus + 50
+        IF far_city = side_capital(enemy_side) THEN
+            bonus = bonus + ai_capital_road_bonus
         END IF
     NEXT k
     ai_beyond_score = bonus

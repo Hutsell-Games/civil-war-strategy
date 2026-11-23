@@ -4,6 +4,101 @@ Changes for players, newest first. The original DOS release notes are kept separ
 from the later Windows ports. The current port starts from Hutsell's original DOS
 source rather than extending version 1.61.
 
+## Unreleased
+
+### Computer play
+
+- When weighing an attack, the computer counts a fort of 2 as stronger than a fort
+  of 1; before, it counted it as no fort. A cautious computer compares its leader
+  and experience with the defender's.
+- The computer values a road that leads to the enemy's capital.
+- The Union's computer without a fleet keeps fortifying when it has 222 or more
+  in cash; before, it stopped half the time whatever its cash.
+- When it recruits, the computer prefers a city whose army is small, and no longer
+  picks an empty city because of the size of its last Join.
+- The computer keeps its armies in its capital only while taking the capital wins
+  the game; before, it did so with the capital rule turned off too.
+- The Rebel computer decides on an invasion by the enemy near its own fleet. Before,
+  it looked near the Union's fleet, and the game stopped when that was at sea.
+- When your last raiding ship is lost, the computer's fleet stops chasing it. Before,
+  the computer's fleet stood idle until you built a fleet again.
+
+### Armies and fleets
+
+- An army has at most 125,000 troops, as a Join already allowed. Recruiting in a
+  city whose army is full costs nothing and says so; before, a very large army
+  wrapped to a negative size.
+- Join no longer loses the armies when every leader that joins has a rating of 0.
+- A leader relieved, or freed by a Join, goes back to the list with his own
+  rating, and no longer writes over another free leader.
+- Cancel cancels the move of the army picked. Before, picking "Rebel II" could
+  cancel the move of "Rebel III" in the same city.
+- A fleet with no other sea port cannot retreat from a battle. Before, it retreated
+  to no port, kept its ships and was lost from the map.
+- After a refused city, the railroad's next destination is again picked from the
+  army's own city, which can no longer be chosen as a destination.
+- An army on the train keeps its place while it travels. Before, a new army raised
+  or sent by a special event that month could take its place, and the game stopped
+  with "subscript out of range" when the train arrived.
+- Inform, Intelligence no longer stops the game while an army is on the train.
+- A Rebel fleet at sea that receives England's ships is in port, and stops raiding.
+- A relieved leader waiting on the list is no longer lost when the army in his slot
+  is crushed or surrenders.
+- Switching between one and two players works out the Union's extra income again.
+
+### Vary Start
+
+- Vary Start is offered only before the first End Turn of a new game. It starts the
+  game again from a varied start and keeps the settings and victory conditions you
+  set. Before, it could be used at any time, and it set the date, the cash, the
+  victory conditions and the settings back while keeping the armies raised since.
+- The Union's ships are ironclads more often than the Rebels', whichever side you
+  play. Under Realism, a game of 1861 has no ironclads after Vary Start either.
+- A Rebel fleet of no ships is no longer left in port.
+
+### The end of a game
+
+- When time runs out, the Rebels' technical victory is shown in their color, and the
+  battle summary marks them as the winner.
+- After taking the enemy's capital, the Options read "No - Press Onward" instead of
+  "No - Press Onward to NONE".
+- The warning that a side nears the strength ratio has its missing space.
+
+### New Game and Load
+
+- Files, New Game starts with Moves and Ships open, and with no raid on commerce
+  left over from the game before.
+- A loaded game keeps no raid of the game played before it. A fleet saved at sea
+  raids on commerce from the first month after the load; before, it waited until
+  some fleet moved.
+- After Files, New Game or a Load, the computer's first turn no longer plays by the
+  strength ratio of the game before.
+- A Load gives back every leader of the scenario who commands no army in the saved
+  game, including those the game before had used.
+
+### Playtesting
+
+- `scenarios/TUNING.DAT` holds 135 numbers that set the game's balance: costs and
+  income, recruiting, supply, the battle formulas, victory points, the navy, the
+  railroad, and how the computer weighs its moves. Edit a value and start a new
+  game to play with it. The shipped file keeps the game as it was.
+- A scenario's folder may hold a `TUNING.DAT` of its own, with only the lines it
+  changes.
+- A saved game keeps the knobs it was saved with, and the history file names those
+  that differ from the defaults.
+
+### Events
+
+- Random events happen in a game of two players too, once a month after both
+  players have given their orders. Before, only a game against the computer had them.
+
+### Menus
+
+- The Commands menu shows Supply as "-" when it would give no army supplies:
+  every army has them, or is cut off, or the treasury cannot buy a day of them.
+  After a purchase that leaves Supply as "-", the main menu comes back, as it does
+  after the last fort the treasury can pay for.
+
 ## Version 1.7
 
 The current port, on `main`, supports QB64Rust and QB64pe. Its title screen, manual and

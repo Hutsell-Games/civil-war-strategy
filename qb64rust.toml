@@ -7,3 +7,9 @@
 keyword-case = "upper"
 block-if = true
 one-statement-per-line = true
+
+# `qb64rust -x cws.bas` builds into build/ and copies the game's data files there, and VS Code runs the game
+# there, so what it writes (CWS.CFG, HISCORE.CWS, saved games) stays out of the repo. A file is copied when the
+# copy is missing or older than the repo's.
+[build]
+copy = ["CWS.CFG", "HISCORE.CWS", "graphics", "scenarios"]

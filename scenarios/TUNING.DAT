@@ -1,0 +1,193 @@
+; Civil War Strategy: tuning knobs for playtesting.
+;
+; Each line is "name = value". Change a value and start a new game: the game reads this file at
+; each new game. A knob left out keeps its default, the value below. A name the game does not
+; know, or a value outside what the knob allows, stops the game with a message naming the file
+; and the line.
+;
+; The values below are the game's own. Keep this file as it is. For an experiment:
+;   - a scenario may have a TUNING.DAT of its own in its folder (scenarios/standard), holding
+;     only the lines it changes; they count on top of this file for games of that scenario;
+;   - tests/autoplay.py --tuning <file> plays the computer against itself with a file's lines on
+;     top of both, and counts who wins (tests/README.md, "Autoplay").
+; A saved game keeps the knobs it was saved with, and the history file names those that differ
+; from the defaults. Each knob has a least and a most, so that the game's arithmetic holds, and
+; some knobs must keep an order between them: the rules are at the end of this file.
+;
+; Written by tools/tuning/make_knobs.py from tools/tuning/knobs.txt, which is where a knob is
+; added or its default changed.
+
+; Costs, in the cash the Funds line shows.
+cost_recruit = 100                  ; raising or reinforcing an army
+cost_ship = 100                     ; one wooden ship
+ironclad_cost_times = 2             ; an ironclad costs this many wooden ships
+cost_fort = 200                     ; one level of fort
+cost_move_capital = 500             ; moving the capital
+
+; Income, upkeep and starting cash.
+capital_income = 100                ; a side's monthly income from holding its capital
+upkeep_per_size = .2                ; an army's monthly supply costs this times its size in hundreds
+start_cash_per_balance = 100        ; starting cash: this times 3, plus this for each step of Balance that helps the side
+start_cash_spread = 50              ; and up to this much more at random
+vary_cash_shift = 100               ; Vary Start: taken from the Union's cash and given to the Rebels'
+vary_cash_spread = 200              ; Vary Start: up to this much more for each side at random
+
+; The Union computer's monthly income bonus, times the Balance setting (1 to 5, Even is 3).
+union_bonus_per_balance = 120       ; in a one-player game (added only when the player is the Rebels)
+union_bonus_two_players = 50        ; in a two-player game (worked out, but not added)
+union_bonus_realism_share = .7      ; the share kept with Realism on
+
+; Armies: sizes are in hundreds of troops.
+max_army_size = 1250                ; the most troops Join can put in one army (recruiting and the events add troops without this limit), at most 1600 so that a side's 20 armies sum below 32767
+small_army_size = 15                ; an army below this fights at reduced strength
+min_detach_size = 65                ; an army needs this many troops to detach a part
+detach_share = .3                   ; the share of troops and supply a detached army takes
+resupply_level = 5                  ; Supply buys an army's supply up to this many days
+drill_experience_below = 6          ; drill raises experience only below this
+made_up_leader_spread = 8           ; a made-up commander's rating: 1 plus up to this at random
+
+; Recruiting.
+new_army_size = 70                  ; a new army's troops with Realism off
+reinforce_size = 45                 ; a reinforcement's troops with Realism off
+recruit_per_value = 3               ; with Realism, a new army: this times the city's value
+recruit_base = 33                   ; with Realism, a new army: plus this
+reinforce_per_value = 2             ; with Realism, a reinforcement: this times the city's value
+reinforce_base = 20                 ; with Realism, a reinforcement: plus this
+recruit_cut_off_divisor = 3         ; a cut-off city raises its recruits divided by this
+recruit_cities_offered = 4          ; how many cities the Recruit menu offers at most (one more when Balance is below Even)
+new_army_supply = 3                 ; a new army's days of supply
+new_army_supply_spread = 5          ; and up to this many more at random
+union_new_army_supply = 2           ; extra days of supply for a new Union army
+rebel_new_army_experience = 2       ; a new Rebel army's experience (a Union army's is 1)
+balance_recruits = 5                ; extra recruits for the computer, for each step of Balance in its favor
+balance_strength = 2                ; extra battle strength for the computer, for each step of Balance in its favor
+
+; Supply and winter.
+starve_roll = .8                    ; an army without supply loses troops on a roll above this
+starve_size_above = 50              ; only an army above this size loses them
+starve_keep_share = .9              ; the share of its troops it keeps
+forage_roll = .8                    ; an army in its own city forages another day on each roll above this
+winter_months = 2                   ; with no winter campaigns, no march into a city not the side's in the year's first months, this many
+
+; Battles: an army's strength.
+attack_per_size = .01               ; attack strength: this times the attacker's size
+defense_per_size = .013             ; defense strength: this times the defender's size
+defense_base = 1                    ; plus this
+defense_per_size_realism = .02      ; with Realism: this times the defender's size
+defense_base_realism = 2            ; with Realism: plus this
+defense_most_realism = 20           ; with Realism: at most this
+battle_leader_weight = .3           ; strength for each point of the leader's rating
+battle_experience_weight = .3       ; strength for each point of experience
+veteran_experience = 8              ; experience above this gives 1 more strength
+small_army_strength = .5            ; a small army keeps this share of its strength
+no_supply_strength = .5             ; an army without supply keeps this share
+attack_outnumbered_penalty = 2      ; an attacker with half the defender's troops or fewer loses this
+attack_outnumbering_bonus = 2       ; an attacker with over 3 times the defender's troops gains this
+defend_outnumbering_bonus = 2       ; a defender with over 1.5 times the attacker's troops gains this
+defend_outnumbered = .8             ; a defender with under half the attacker's troops keeps this share
+defend_badly_outnumbered = .5       ; a defender with under a fifth keeps this share
+defender_halt_roll = 11             ; after an attacker withdraws, the defender loses its own order when this times a roll is above its leader's rating
+
+; Battles: the losses.
+fort_defender_loss = .03            ; each level of fort lowers the loss rate that sets the defender's losses by this
+fort_attacker_loss = .02            ; each level of fort raises the loss rate that sets the attacker's losses by this
+attacker_wins_loss = 1.3            ; the defender's losses are multiplied by this when the attacker wins
+defender_wins_loss = 1.5            ; the attacker's losses are multiplied by this when the defender wins
+large_army_size = 300               ; against an army above this size, the losses are multiplied by large_army_loss
+large_army_loss = .9                ; see large_army_size
+huge_army_size = 800                ; against an army above this size, by huge_army_loss (keep it above large_army_size)
+huge_army_loss = .8                 ; see huge_army_size
+loss_own_share = .8                 ; the loser's final losses: this share of its own
+loss_other_share = .2               ; plus this share of the other side's
+attacker_loss_most_times = 9        ; the attacker loses at most this many times the defender's losses
+defender_loss_most_times = 5        ; the defender loses at most this many times the attacker's losses
+
+; Victory points.
+points_kept = .8                    ; each month a side keeps this share of its points
+points_per_income = .3              ; and gains this times its income plus its cities
+cities_bonus_above = 29             ; a side holding more cities than this gains cities_bonus each month
+cities_bonus = 50                   ; see cities_bonus_above
+cities_big_bonus_above = 34         ; and holding more than this, cities_big_bonus as well
+cities_big_bonus = 100              ; see cities_big_bonus_above
+capital_capture_points = 100        ; taking the enemy's capital: gained by the taker and lost by the enemy
+capital_move_points = 50            ; moving the capital gives the enemy this
+army_destroyed_points = 25          ; an army that surrenders or is crushed gives the winner this
+fleet_sunk_points = 10              ; a fleet lost in a sea battle gives the winner this
+fleet_lost_points = 5               ; a fleet lost outside a sea battle gives the enemy this
+wiped_out_points = 300              ; the winner's points when the enemy has no troops left
+victory_points_bonus = 100          ; the winner's points for any other victory
+time_limit_points_share = .7        ; at the time limit both sides keep this share of their points
+
+; The navy.
+invade_ships_least = 2              ; an invasion needs this many ships
+invasion_army_size = 35             ; the troops an invasion lands
+bombard_loss_per_ship = .005        ; a bombarded army's share lost, for each ship
+bombard_loss_spread = .02           ; plus up to this at random
+fort_damage_chance = .7             ; a bombarding fleet's chance to take a level off a fort
+fort_damage_per_ship = .03          ; plus this for each ship more than the fort's level
+blast_base = .25                    ; a bombarded city may turn neutral on a roll up to this
+blast_per_ship = .07                ; plus this for each ship
+raid_chance = .8                    ; a commerce raid's chance to sink shipping and take income
+raid_chance_per_ship = .02          ; plus this for each ship
+raid_loss_per_ship = .05            ; the share of the enemy's income a raid takes, for each ship (doubled at most by a roll)
+raid_loss_most_share = .3           ; a raid takes at most this share of the enemy's income
+wooden_ship_hits = 10               ; the hits a wooden ship takes before it sinks
+ironclad_hits = 20                  ; the hits an ironclad takes
+ship_hit_chance = .5                ; a shot's chance to hit
+ironclad_aim_bonus = .1             ; added for an ironclad firing at a wooden ship, taken off the other way round
+
+; The railroad, with Realism.
+rail_union_cities = 11              ; the Union's capacity changes for each city it holds above or below this
+rail_rebel_cities = 23              ; the Rebels' capacity changes for each city above or below this
+rail_per_city = 5                   ; by this many hundred troops for each city
+rail_most_times = 2                 ; capacity is at most this many times the setting
+rail_least_divisor = 4              ; and at least that most divided by this
+
+; The computer: where its armies move.
+ai_move_spread = 30                 ; a random part of every move's score, up to this
+ai_leave_fort_penalty = 25          ; leaving a fort it garrisons
+ai_leave_fort_realism_penalty = 50  ; and this much more with Realism
+ai_enemy_capital_bonus = 200        ; marching on the enemy's capital, when its capture wins the game
+ai_target_value = 5                 ; a city not its own: this times the city's value
+ai_target_fort = 10                 ; plus this times its fort
+ai_empty_enemy_value = 10           ; an enemy city with no army: this times its value more
+ai_march_direction_bonus = 2        ; marching toward the enemy's half of the map
+ai_beyond_value = 3                 ; cities one road beyond: this times their value
+ai_beyond_fort = 4                  ; plus this times their fort
+ai_capital_road_bonus = 50          ; a city one road from the enemy's capital
+ai_stay_weight_even = 200           ; how much a fort holds its army back when the enemy is near
+ai_stay_weight_strong = 80          ; the same with over 1.5 times the player's strength
+ai_stay_weight_stronger = 20        ; with over twice
+ai_stay_weight_strongest = 5        ; with over three times
+ai_aggression_strength = 20         ; added to an army's strength for each level of the computer's aggression
+
+; The computer: whether it attacks. Larger penalties make it more cautious.
+ai_small_army_penalty = 300         ; an army under the small-army size attacking
+ai_poor_odds_penalty = 200          ; odds below 1 to 2
+ai_realism_penalty = 15             ; any attack with Realism on
+ai_no_supply_penalty = 100          ; attacking without supply
+ai_odds_bad_penalty = 300           ; odds from .3 to .5, after aggression's part
+ai_odds_low_penalty = 20            ; odds from .5 to .8
+ai_odds_even_penalty = 5            ; odds from .8 to 1.2
+ai_odds_good_bonus = 10             ; odds from 1.2 to 1.5
+ai_attack_spread = 50               ; better odds: half the gap in size, plus up to this at random
+
+; The computer: its forces.
+ai_armies_base = 2                  ; it stops raising armies above this many
+ai_armies_per_side = 3              ; plus this for a Union player and twice this for a Rebel player
+ai_armies_spread = 3                ; plus up to this at random
+ai_fleet_wanted = 5                 ; it builds ships while its fleet is smaller than this
+ai_reinforce_below = 155            ; it reinforces an army smaller than this
+ai_fortify_cash = 222               ; the Union computer without a fleet stops fortifying below this cash
+
+; Rules between knobs, checked when every file has been read:
+;   huge_army_size must be above large_army_size
+;   cities_big_bonus_above must be above cities_bonus_above
+;   new_army_supply, new_army_supply_spread and union_new_army_supply may add up to 10 at most
+;   small_army_size must be below max_army_size
+;   min_detach_size may not be above max_army_size
+;   new_army_size may not be above max_army_size
+;   reinforce_size may not be above max_army_size
+;   invasion_army_size may not be above max_army_size
+;   a side's victory points may grow to 15000 at most: lower points_per_income, the bonuses or points_kept
+;   an ironclad (ironclad_cost_times times cost_ship) may cost 19999 at most

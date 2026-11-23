@@ -154,10 +154,9 @@ SUB draw_battle_fort (defender)
     IF opt_graphics >= GRAPHICS_FULL THEN
         CALL draw_cannon
         fort_level = city_fort(army_city(defender))
-        file$ = GFXDIR + "FORT" + LTRIM$(STR$(fort_level)) + ".VGA"
+        file$ = GFXDIR + "FORT" + LTRIM$(STR$(fort_level)) + ".PNG"
         IF _FILEEXISTS(file$) THEN
-            CALL load_picture(file$, pic_loaded())
-            PUT (550, 270), pic_loaded(), PSET
+            CALL draw_picture(550, 270, file$)
         END IF
     ELSE
         CALL clear_right_panel

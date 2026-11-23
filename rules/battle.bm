@@ -18,31 +18,31 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
         army_size(attacker) = 1
     END IF
 
-    attack_strength = .01 * army_size(attacker)
+    attack_strength = attack_per_size# * army_size(attacker)
     attack_strength = strength_capped(attack_strength)
     attack_steps(1) = attack_strength
     IF army_size(attacker) / army_size(defender) > .2 THEN
-        attack_strength = attack_strength + .3 * army_leader_rating(attacker) + .3 * army_experience(attacker)
+        attack_strength = attack_strength + battle_leader_weight# * army_leader_rating(attacker) + battle_experience_weight# * army_experience(attacker)
         attack_strength = strength_capped(attack_strength)
     END IF
-    IF army_experience(attacker) > 8 THEN
+    IF army_experience(attacker) > veteran_experience THEN
         attack_strength = attack_strength + 1
         attack_strength = strength_capped(attack_strength)
     END IF
     attack_steps(2) = attack_strength
-    IF army_size(attacker) < SMALL_ARMY_SIZE THEN
-        attack_strength = .5 * attack_strength
+    IF army_size(attacker) < small_army_size THEN
+        attack_strength = small_army_strength# * attack_strength
         attack_strength = strength_capped(attack_strength)
     END IF
     attack_steps(3) = attack_strength
     IF army_size(attacker) / army_size(defender) <= .5 THEN
-        attack_strength = attack_strength - 2
+        attack_strength = attack_strength - attack_outnumbered_penalty
         IF attack_strength < 1 THEN
             attack_strength = 1
         END IF
     END IF
     IF army_size(attacker) / army_size(defender) > 3 THEN
-        attack_strength = attack_strength + 2
+        attack_strength = attack_strength + attack_outnumbering_bonus
         attack_strength = strength_capped(attack_strength)
     END IF
     IF army_size(attacker) / army_size(defender) > 10 THEN
@@ -53,37 +53,37 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     END IF
     attack_steps(4) = attack_strength
     IF army_supply(attacker) < 1 THEN
-        attack_strength = .5 * attack_strength
+        attack_strength = no_supply_strength# * attack_strength
     END IF
     attack_steps(5) = attack_strength
     IF attack_strength < 1 THEN
         attack_strength = 1
     END IF
     '                       Adjust attack advantage
-    attack_strength = attack_strength + 2 * balance_help(army_side(attacker))
+    attack_strength = attack_strength + balance_strength * balance_help(army_side(attacker))
     attack_steps(6) = attack_strength
     attack_strength = strength_capped(attack_strength)
     attack_steps(7) = attack_strength
 
-    defend_strength = .013 * army_size(defender) + 1
+    defend_strength = defense_per_size# * army_size(defender) + defense_base
     IF opt_realism = REALISM_ON THEN
-        defend_strength = .02 * army_size(defender) + 2
-        IF defend_strength > 20 THEN
-            defend_strength = 20
+        defend_strength = defense_per_size_realism# * army_size(defender) + defense_base_realism
+        IF defend_strength > defense_most_realism THEN
+            defend_strength = defense_most_realism
         END IF
     END IF
     defend_steps(1) = defend_strength
     IF army_size(defender) / army_size(attacker) > .2 THEN
-        defend_strength = defend_strength + .3 * army_leader_rating(defender) + .3 * army_experience(defender)
+        defend_strength = defend_strength + battle_leader_weight# * army_leader_rating(defender) + battle_experience_weight# * army_experience(defender)
         defend_strength = strength_capped(defend_strength)
     END IF
-    IF army_experience(defender) > 8 THEN
+    IF army_experience(defender) > veteran_experience THEN
         defend_strength = defend_strength + 1
         defend_strength = strength_capped(defend_strength)
     END IF
     defend_steps(2) = defend_strength
-    IF army_size(defender) < SMALL_ARMY_SIZE THEN
-        defend_strength = .5 * defend_strength
+    IF army_size(defender) < small_army_size THEN
+        defend_strength = small_army_strength# * defend_strength
     END IF
     defend_steps(3) = defend_strength
 
@@ -92,11 +92,11 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
         CASE IS > 10
             defend_strength = rule_strength_cap
         CASE IS > 1.5
-            defend_strength = defend_strength + 2
+            defend_strength = defend_strength + defend_outnumbering_bonus
         CASE IS < .2
-            defend_strength = .5 * defend_strength
+            defend_strength = defend_badly_outnumbered# * defend_strength
         CASE IS < .5
-            defend_strength = .8 * defend_strength
+            defend_strength = defend_outnumbered# * defend_strength
     END SELECT
     IF defend_strength < 1 THEN
         defend_strength = 1
@@ -105,14 +105,14 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
 
     defend_steps(4) = defend_strength
     IF army_supply(defender) < 1 THEN
-        defend_strength = .5 * defend_strength
+        defend_strength = no_supply_strength# * defend_strength
     END IF
     defend_steps(5) = defend_strength
     IF defend_strength < 1 THEN
         defend_strength = 1
     END IF
     '                       Adjust defend advantage
-    defend_strength = defend_strength + 2 * balance_help(army_side(defender))
+    defend_strength = defend_strength + balance_strength * balance_help(army_side(defender))
     defend_steps(6) = defend_strength
 
     IF army_order(defender) = ORDER_NONE THEN
@@ -178,11 +178,25 @@ END SUB
 FUNCTION battle_size_rate! (loss_rate!, army)
     battle_size_rate! = loss_rate!
     SELECT CASE army_size(army)
-        CASE IS > 800
-            battle_size_rate! = .8 * loss_rate!
-        CASE IS > 300
-            battle_size_rate! = .9 * loss_rate!
+        CASE IS > huge_army_size
+            battle_size_rate! = huge_army_loss# * loss_rate!
+        CASE IS > large_army_size
+            battle_size_rate! = large_army_loss# * loss_rate!
     END SELECT
+END FUNCTION
+
+' A loss rate kept between 0 and 1. At the shipped knobs it is always inside. The tuning knobs
+' can push it out: below 0 behind a strong fort, above 1 for a side that loses with a large
+' multiplier. normal_random_number would then take the square root of a negative variance,
+' which stops the program.
+FUNCTION battle_rate_bounded! (loss_rate!)
+    battle_rate_bounded! = loss_rate!
+    IF loss_rate! < 0 THEN
+        battle_rate_bounded! = 0
+    END IF
+    IF loss_rate! > 1 THEN
+        battle_rate_bounded! = 1
+    END IF
 END FUNCTION
 
 ' The losses of both armies, in hundreds of troops. battle_apply_losses takes them later.
@@ -190,37 +204,37 @@ SUB battle_losses (attacker, defender, winner, attacker_losses, defender_losses)
     DIM loss_rate!
     DIM mean AS INTEGER
     DIM variance AS INTEGER
-    loss_rate! = .01 * rule_defend_loss - .03 * city_fort(army_city(defender))
+    loss_rate! = .01 * rule_defend_loss - fort_defender_loss# * city_fort(army_city(defender))
     IF winner = attacker THEN
-        loss_rate! = 1.3 * loss_rate!
+        loss_rate! = attacker_wins_loss# * loss_rate!
     END IF
-    loss_rate! = battle_size_rate!(loss_rate!, defender)
+    loss_rate! = battle_rate_bounded!(battle_size_rate!(loss_rate!, defender))
     mean = army_size(attacker) * loss_rate!
     variance = mean * (1 - loss_rate!)
     defender_losses = normal_random_number(mean, variance)
 
-    loss_rate! = .01 * rule_attack_loss + .02 * city_fort(army_city(defender))
+    loss_rate! = .01 * rule_attack_loss + fort_attacker_loss# * city_fort(army_city(defender))
     IF winner = defender THEN
-        loss_rate! = 1.5 * loss_rate!
+        loss_rate! = defender_wins_loss# * loss_rate!
     END IF
-    loss_rate! = battle_size_rate!(loss_rate!, attacker)
+    loss_rate! = battle_rate_bounded!(battle_size_rate!(loss_rate!, attacker))
     mean = army_size(defender) * loss_rate!
     variance = mean * (1 - loss_rate!)
     attacker_losses = normal_random_number(mean, variance)
 
-    attacker_losses = .8 * attacker_losses + .2 * defender_losses
+    attacker_losses = loss_own_share# * attacker_losses + loss_other_share# * defender_losses
     IF attacker_losses < 1 THEN
         attacker_losses = 1
     END IF
-    defender_losses = .8 * defender_losses + .2 * attacker_losses
+    defender_losses = loss_own_share# * defender_losses + loss_other_share# * attacker_losses
     IF defender_losses < 1 THEN
         defender_losses = 1
     END IF
-    IF attacker_losses > 9 * defender_losses THEN
-        attacker_losses = 9 * defender_losses
+    IF attacker_losses > attacker_loss_most_times * defender_losses THEN
+        attacker_losses = attacker_loss_most_times * defender_losses
     END IF
-    IF defender_losses > 5 * attacker_losses THEN
-        defender_losses = 5 * attacker_losses
+    IF defender_losses > defender_loss_most_times * attacker_losses THEN
+        defender_losses = defender_loss_most_times * attacker_losses
     END IF
 
     IF attacker_losses >= army_size(attacker) THEN

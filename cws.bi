@@ -174,22 +174,15 @@ CONST VICTORY_CAPITAL = 5
 CONST VICTORY_FORCE_RATIO = 6
 ' victory_rule_met's rule is one of the rules above, or this: the enemy has no troops left.
 CONST VICTORY_WIPED_OUT = 7
-' The Civil War's own rule numbers. Phase 11 moves them to game\.
-CONST COST_RECRUIT = 100
-CONST COST_SHIP = 100
-CONST COST_FORT = 200
-CONST COST_MOVE_CAPITAL = 500
-CONST CAPITAL_INCOME = 100
+' The Civil War's own rule numbers. Phase 11 moves them to game\. The costs and the capital's
+' income are tuning knobs now: see the knobs at the end of this file.
 CONST FIRST_YEAR = 1861
 ' The ironclads' date. The announcement [ironclads] of scenarios/EVENTS.DAT names it too
 ' (TestEventIroncladsMatchTheRule checks that the two agree).
 CONST IRONCLAD_YEAR = 1862
 CONST IRONCLAD_MONTH = 3
-CONST MIN_DETACH_SIZE = 65
-CONST RESUPPLY_LEVEL = 5
-' army_size is in hundreds of troops: an army can hold 125,000 troops, and one below 1,500 fights at half strength.
-CONST MAX_ARMY_SIZE = 1250
-CONST SMALL_ARMY_SIZE = 15
+' army_size is in hundreds of troops. The largest army, the small army that fights at reduced
+' strength, the detach size and the supply level are knobs too (max_army_size and the others).
 CONST MONTHS_PER_TURN = 2
 CONST MONTHS_PER_YEAR = 12
 ' Cities that a rule names, by their number in both scenarios' CITIES.GRD.
@@ -236,7 +229,7 @@ CONST TRAIN_OUTLINE$ = "R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3"
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
 COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_state
-COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), pic_mountain(), train_from_city()
+COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), train_from_city()
 COMMON SHARED saved_under_marker(), side_name$(), army_city(), army_name$(), opt_players, ai_strength_ratio!
 COMMON SHARED army_size(), army_leader_rating(), army_experience(), army_supply(), month_name$()
 COMMON SHARED turn_recruit_city(), victory_rule(), train_city(), side_battles_won(), city_first_owner()
@@ -250,7 +243,7 @@ DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_
 DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(MAX_LEADERS)
 DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
 DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(MONTHS_PER_YEAR)
-DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), pic_mountain(1 TO 1564), train_from_city(2)
+DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), train_from_city(2)
 DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
 DIM SHARED side_victory_points(2), side_capital(2), train_city(2), fleet_ships$(2)
 DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_casualties&(2), side_battles_won(2), city_first_owner(MAX_CITIES)
@@ -262,6 +255,9 @@ DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_ca
 ' The scenarios of scenarios/SCENARIOS.LST (load_scenario_list, io/files.bm): each one's folder
 ' and title. scenario_now is the row of the scenario the game is on.
 DIM SHARED scenario_count, scenario_now, scenario_folder$(MAX_SCENARIOS), scenario_title$(MAX_SCENARIOS)
+' 1 while the Utility menu's Vary Start may be used: in a new game until its first End Turn
+' (game_reset, turn_next_player). A loaded game sets it to 0 (load_game).
+DIM SHARED vary_start_open
 DIM SHARED event_count, event_banner$, event_file_error$
 DIM SHARED event_name$(MAX_EVENTS), event_favors(MAX_EVENTS), event_listed(MAX_EVENTS), event_done(MAX_EVENTS)
 DIM SHARED event_before(MAX_EVENTS), event_for(MAX_EVENTS)
@@ -278,11 +274,21 @@ DIM SHARED chance_count, chance_kind(MAX_CHANCE_FACTORS), chance_value#(MAX_CHAN
 ' Set by event_roll for the texts of the event: the city of a riot, the army that was
 ' reinforced, and the side the effect was for. They fill {city}, {army} and {side}.
 DIM SHARED event_city, event_army, event_target_side
-' The pictures' arrays: graphic and Ncap were declared in CWSTRAT.BAS, graft in CWSMENU.BAS.
-DIM SHARED pic_loaded(1 TO 1564), pic_capital(60)
-DIM SHARED pic_face(1 TO 1564)
+' The capital's star, taken from the icon with GET (draw_title), and the image handle of the mountains,
+' loaded by show_title. The other pictures are loaded when drawn (draw_picture, draw/pictures.bm).
+DIM SHARED pic_capital(60)
+DIM SHARED pic_mountain AS LONG
 ' Set by script_start (io/script.bm) when tests\play.py runs the program.
 DIM SHARED scripted
+' Set by script_start when CWS_AUTOPLAY is 1 as well: the computer plays both sides.
+DIM SHARED autoplay
 ' The forced dice of special_events under a script: the groups still to come, and what is
 ' left of this call's group (script_dice_next and script_rnd!, io/script.bm).
 DIM SHARED script_dice$, script_dice_now$
+' The tuning knobs: numbers that set the game's balance, read from scenarios/TUNING.DAT at each new
+' game (load_tuning, io/tuning_file.bm). Each has the name of its line in that file, and what it
+' does is said there and in tools/tuning/knobs.txt, from which io/tuning_knobs.bi is written. Their
+' defaults are set here, when the program starts, so that the unit tests see them too.
+' $INCLUDE: 'io/tuning_knobs.bi'
+DIM SHARED tuning_error$
+CALL tuning_defaults

@@ -2,10 +2,11 @@
 # Civil War Strategy: three games in one run, each to another ending (QB64Rust's tools/screen/
 # README.md, "Places and rules"). After Game Over the game starts again at its title menu. Each game sets its end
 # conditions in the Utility menu (End Cond, which starts on Time and toggles the row it is on), then END TURN by
-# rules: game 1 with only the income condition: in July 1864 the Rebels hold 80 % of the income; game 2 with only
-# the capital, the enemy made passive (Aggress three times): in January 1868 the Rebels take Washington; game 3
-# with only the time, the enemy as configured: the Union is annihilated before the time runs out, which ends
-# the game without the Options menu. Each game's end: the Hall of Fame and a name, Game Over. At the end, Quit.
+# rules: game 1 with only the income condition: in September 1865 the Rebels hold 80 % of the income; game 2 with
+# only the capital, the enemy as configured: in September 1864 the Rebels take Washington; game 3
+# with only the time, the enemy's aggression 2 (Aggress five times, from 3): the Union is annihilated before the
+# time runs out, which ends the game without the Options menu. Each game's end: the Hall of Fame and a name, Game
+# Over. At the end, Quit.
 
 # The waits of the computer's turns: a space each; a Retreat menu: the city it starts on; a main menu: END TURN;
 # the End Turn and End Game menus: Yes. The Options at an end are answered by steps.
@@ -56,14 +57,14 @@ prompt
 key esc
 prompt
 key esc
-# July 1864, the income: the Options: Quit; the Hall of Fame: a name.
+# September 1865, the income: the Options: Quit; the Hall of Fame: a name.
 play until 2:O
 state
 text q
 play until 4
 text Grant
 key enter
-# Game 2. Start NEW Game; UTILITY, Aggress three times, End Cond: Time, Cities, Income and Force Ratio off.
+# Game 2. Start NEW Game; UTILITY, End Cond: Time, Cities, Income and Force Ratio off.
 play until 2:C
 digest
 text s
@@ -73,12 +74,6 @@ text s
 play until 2:M
 digest
 text u
-prompt
-text a
-prompt
-text a
-prompt
-text a
 prompt
 text e
 prompt
@@ -101,14 +96,14 @@ prompt
 key esc
 prompt
 key esc
-# January 1868, Washington taken: the Options: Quit; the Hall of Fame: a name.
+# September 1864, Washington taken: the Options: Quit; the Hall of Fame: a name.
 play until 2:O
 state
 text q
 play until 4
 text Grant
 key enter
-# Game 3. Start NEW Game; UTILITY, End Cond: Cities, Income, Capital and Force Ratio off.
+# Game 3. Start NEW Game; UTILITY, Aggress five times, End Cond: Cities, Income, Capital and Force Ratio off.
 play until 2:C
 digest
 text s
@@ -118,6 +113,16 @@ text s
 play until 2:M
 digest
 text u
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text a
+prompt
+text a
 prompt
 text e
 prompt

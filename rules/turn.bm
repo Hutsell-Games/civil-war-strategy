@@ -25,7 +25,7 @@ SUB turn_check_commands
     IF opt_players = PLAYERS_TWO AND current_side = SIDE_NONE THEN
         current_side = SIDE_UNION
     END IF
-    IF side_cash(current_side) < COST_SHIP AND NOT fleet_exists(current_side) THEN
+    IF side_cash(current_side) < cost_ship AND NOT fleet_exists(current_side) THEN
         turn_navy_done = 1
     END IF
 END SUB
@@ -37,7 +37,9 @@ END SUB
 
 ' After a turn ends. In a two-player game the Rebels' turn follows the Union's, and
 ' month_over is 0. Otherwise the month is played, month_over is 1, and the Union is next.
+' Vary Start is no longer offered.
 SUB turn_next_player (month_over)
+    vary_start_open = 0
     month_over = 1
     IF opt_players = PLAYERS_TWO THEN
         current_side = current_side + 1
@@ -54,7 +56,7 @@ END SUB
 ' Whether winter stops a move into city: in January and February, without the January
 ' Campaigns setting, an army may not move into a city that is not its side's.
 FUNCTION winter_stops_move (side, city)
-    winter_stops_move = turn_month < 3 AND opt_winter_campaigns = 0 AND city_owner(city) <> side
+    winter_stops_move = turn_month <= winter_months AND opt_winter_campaigns = 0 AND city_owner(city) <> side
 END FUNCTION
 
 ' Two months pass.
@@ -74,14 +76,14 @@ SUB turn_army_supply (army, blockaded, starved)
     DIM side AS INTEGER
     DIM friendly_neighbors AS INTEGER
     side = army_side(army)
-    IF side_cash(side) >= .2 * army_size(army) THEN
+    IF side_cash(side) >= upkeep_per_size# * army_size(army) THEN
         friendly_neighbors = 1
         IF opt_realism >= REALISM_ON THEN
             friendly_neighbors = city_is_connected(side, army_city(army))
         END IF
         IF friendly_neighbors > 0 THEN
             army_supply(army) = army_supply(army) + 1
-            side_cash(side) = side_cash(side) - .2 * army_size(army)
+            side_cash(side) = side_cash(side) - upkeep_per_size# * army_size(army)
         END IF
     END IF
     IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(army)) < PORT_SEA THEN
@@ -96,8 +98,8 @@ SUB turn_army_supply (army, blockaded, starved)
     IF army_supply(army) < 1 THEN
         army_supply(army) = 0
         starved = 1
-        IF RND > .8 AND army_size(army) > 50 THEN
-            army_size(army) = .9 * army_size(army)
+        IF RND > starve_roll# AND army_size(army) > starve_size_above THEN
+            army_size(army) = starve_keep_share# * army_size(army)
         END IF
     END IF
 END SUB
@@ -150,7 +152,7 @@ END SUB
 SUB turn_defender_halts (army, halted, old_order)
     halted = 0
     old_order = army_order(army)
-    IF 11 * RND > army_leader_rating(army) THEN
+    IF defender_halt_roll * RND > army_leader_rating(army) THEN
         halted = 1
         IF army_has_move(army) THEN
             army_order(army) = ORDER_DONE
@@ -197,17 +199,18 @@ END SUB
 
 ' An army is crushed or surrenders to the army winner: winner's side gets 25 victory points,
 ' winner takes its supplies, and its slot is cleared. The original gave the points to the
-' loser's side, and cleared the supplies before winner took them.
+' loser's side, and cleared the supplies before winner took them. A free leader in the slot
+' stays free: the army's commander is never on the list. The original cleared the slot's free
+' leader, one who had been relieved or freed by a Join (G53).
 SUB turn_army_lost (army, winner)
     DIM side AS INTEGER
     side = army_side(winner)
-    side_victory_points(side) = side_victory_points(side) + 25
+    side_victory_points(side) = side_victory_points(side) + army_destroyed_points
     army_supply(winner) = army_supply(winner) + army_supply(army)
     IF army_supply(winner) > MAX_SUPPLY THEN
         army_supply(winner) = MAX_SUPPLY
     END IF
     CALL army_clear(army)
-    leader_name$(army) = ""
     army_name$(army) = ""
 END SUB
 
@@ -230,7 +233,7 @@ SUB turn_army_forages (army)
             EXIT SUB
         END IF
         army_supply(army) = army_supply(army) + 1
-    LOOP WHILE RND > .8
+    LOOP WHILE RND > forage_roll#
 END SUB
 
 ' The month's income: each side gets its cities' values and its capital's income, and loses
@@ -267,7 +270,7 @@ SUB turn_collect_income
 
     FOR i = SIDE_UNION TO SIDE_REBEL
         IF side_capital(i) > 0 THEN
-            side_income(i) = side_income(i) + CAPITAL_INCOME
+            side_income(i) = side_income(i) + capital_income
         END IF
         side_cash(i) = side_cash(i) + side_income(i)
         IF raiding_side > 0 AND i <> raiding_side THEN
@@ -333,14 +336,14 @@ SUB sort_move_order (limit)
 END SUB
 
 ' The month's victory points of one side: it keeps eight tenths and gains by its income and
-' cities. A computer whose enemy holds few cities gets a higher strength ratio. The points stop
-' at 0; in the original only the Union's did.
+' cities. When side is the computer's and holds fewer than 11 cities, the computer's strength
+' ratio rises by .7. The points stop at 0; in the original only the Union's did.
 SUB turn_update_victory_points (side)
-    side_victory_points(side) = .8 * side_victory_points(side) + .3 * (side_income(side) + side_city_count(side))
-    IF side_city_count(side) > 29 THEN
-        side_victory_points(side) = side_victory_points(side) + 50
-        IF side_city_count(side) > 34 THEN
-            side_victory_points(side) = side_victory_points(side) + 100
+    side_victory_points(side) = points_kept# * side_victory_points(side) + points_per_income# * (side_income(side) + side_city_count(side))
+    IF side_city_count(side) > cities_bonus_above THEN
+        side_victory_points(side) = side_victory_points(side) + cities_bonus
+        IF side_city_count(side) > cities_big_bonus_above THEN
+            side_victory_points(side) = side_victory_points(side) + cities_big_bonus
         END IF
     END IF
     IF current_side = other_side(side) AND side_city_count(side) < 11 THEN

@@ -99,6 +99,44 @@ text d
 prompt
 digest
 
+# COMMANDS, Supply: Johnston's army and Jackson's are short of supplies. Esc gives the menu up:
+# the main menu.
+text c
+prompt
+text s
+prompt
+digest
+key esc
+prompt
+digest
+
+# COMMANDS, Supply again. Down to Jackson's army: it gets supplies and the cash is spent, so
+# Supply can give no more, and the main menu comes back.
+text c
+prompt
+text s
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+
+# COMMANDS: Supply is "-". Three rows down to it: "Not enough funds in the Treasury for
+# supplies", and the main menu.
+text c
+prompt
+digest
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+
 # Files, Quit, Yes, and a key for END's "Press any key to continue".
 text f
 prompt

@@ -14,7 +14,7 @@ SUB menu_main (start)
     menu_row = 13
     menu_text$(0) = "Main"
     menu_text$(1) = "Troops"
-    IF turn_recruit_state < 0 OR side_cash(current_side) < COST_RECRUIT THEN
+    IF turn_recruit_state < 0 OR side_cash(current_side) < cost_recruit THEN
         menu_text$(1) = "-"
         start = MENU_START + MAIN_MOVES
     END IF
@@ -125,12 +125,15 @@ END SUB
 ' in the main module. The title tune plays before the first game only (replay is 0).
 SUB show_title (replay)
     DIM k AS INTEGER
-    IF _FILEEXISTS(GFXDIR + "MTN.VGA") THEN
-        CALL load_picture(GFXDIR + "MTN.VGA", pic_mountain())
+    IF _FILEEXISTS(GFXDIR + "MTN.PNG") THEN
+        IF pic_mountain < -1 THEN
+            _FREEIMAGE pic_mountain
+        END IF
+        pic_mountain = load_picture(GFXDIR + "MTN.PNG")
     ELSE
         COLOR COLOR_WHITE
         BEEP
-        PRINT "ERROR: Missing File  'MTN.VGA'"
+        PRINT "ERROR: Missing File  'MTN.PNG'"
         wait_seconds PAUSE_LONG
     END IF
     RESTORE

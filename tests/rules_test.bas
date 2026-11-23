@@ -373,6 +373,26 @@ SUB TestBattleSizeRateFallsForLargeArmies
     AssertEqualSingle .8 * .5, battle_size_rate!(.5, 4), "more: four fifths"
 END SUB
 
+' A loss rate that the tuning knobs push below 0 or above 1 is kept inside, so that
+' normal_random_number never takes the square root of a negative variance.
+SUB TestBattleRateBounded
+    AssertEqualSingle .165, battle_rate_bounded!(.165), "a rate inside stays"
+    AssertEqualSingle 0, battle_rate_bounded!(-.03), "below 0: 0"
+    AssertEqualSingle 1, battle_rate_bounded!(1.5), "above 1: 1"
+END SUB
+
+' defender_wins_loss at 10 gives the attacker a loss rate of 1.1. The battle is fought without
+' an error, and each army keeps at least 100 troops.
+SUB TestBattleLossesWithARateAboveOne
+    RANDOMIZE 1
+    rule_attack_loss = 11: rule_defend_loss = 9: defender_wins_loss# = 10
+    army_size(1) = 120: army_size(21) = 80: army_city(21) = 5: city_fort(5) = 0
+    CALL battle_losses(1, 21, 21, killa, killd)
+    defender_wins_loss# = 1.5
+    AssertTrue killa >= 1 AND killa <= 119, "the attacker's losses"
+    AssertTrue killd >= 1 AND killd <= 79, "the defender's losses"
+END SUB
+
 SUB TestBattleLossesWithSeedOne
     RANDOMIZE 1
     rule_attack_loss = 11: rule_defend_loss = 9
@@ -440,6 +460,19 @@ SUB TestCommanderNoneLeft
     AssertEqualInt 0, empty, "every Union army has a city"
 END SUB
 
+' The army on the train has no city but keeps its slot (G48).
+SUB TestCommanderSkipsTheArmyOnTheTrain
+    leader_name$(1) = "Pope": army_city(1) = 5
+    leader_name$(2) = "Meade": train_army(1) = 2
+    leader_name$(3) = "Hooker"
+    CALL army_pick_commander(1, empty)
+    AssertEqualInt 3, empty, "Meade's army rides the train; Hooker is next"
+    FOR i = 1 TO 20: army_city(i) = 5: NEXT i
+    army_city(2) = 0
+    CALL army_pick_commander(1, empty)
+    AssertEqualInt 0, empty, "no slot is free when the only army without a city is on the train"
+END SUB
+
 ' -------------------------------------------------------- combining armies
 ' Army 0 gathers the armies of a city; the best leader's army takes them over.
 
@@ -451,13 +484,17 @@ SUB TestArmyCombineTakesTheBestLeader
     best = 0
     CALL army_combine_add(1, 5, best, status)
     AssertEqualInt COMBINE_JOINED, status, "army 1 joins"
-    CALL army_combine_absorb(1)
-    AssertEqualStr "Grant", leader_name$(1), "Grant goes back to the list"
+    AssertEqualInt 1, best, "Grant leads so far"
+    CALL army_combine_absorb(1, best)
+    AssertEqualStr "", leader_name$(1), "so he is not on the list"
     AssertEqualInt 0, army_city(1), "army 1's slot is empty"
     CALL army_combine_add(2, 5, best, status)
     AssertEqualInt COMBINE_JOINED, status, "army 2 joins"
     AssertEqualInt 2, best, "Sherman is the better leader"
-    CALL army_combine_absorb(2)
+    AssertEqualStr "Grant", leader_name$(1), "Grant goes back to the list"
+    AssertEqualInt 4, leader_rating(1), "with his rating"
+    CALL army_combine_absorb(2, best)
+    AssertEqualStr "", leader_name$(2), "Sherman takes command: not on the list"
     CALL army_combine_add(3, 5, best, status)
     AssertEqualInt COMBINE_SKIPPED, status, "army 3 has an order: it does not join"
     CALL army_combine_finish(5, 2, 2)
@@ -467,6 +504,26 @@ SUB TestArmyCombineTakesTheBestLeader
     AssertEqualStr "Sherman", army_name$(2), "under Sherman"
     AssertEqualInt ORDER_BUSY, army_order(2), "two joined: no order this turn"
     AssertEqualInt 2, city_army(5), "it holds the city"
+END SUB
+
+' Armies whose leaders all have a rating of 0 (Relieve with a leader of 1) still join, under
+' the first. The original put them in army 0, and they were lost (G35).
+SUB TestArmyCombineLeadersOfRatingZero
+    army_city(1) = 5: army_size(1) = 100: army_name$(1) = "Pope"
+    army_city(2) = 5: army_size(2) = 50: army_name$(2) = "Banks"
+    CALL army_combine_start(5)
+    best = 0
+    CALL army_combine_add(1, 5, best, status)
+    CALL army_combine_absorb(1, best)
+    CALL army_combine_add(2, 5, best, status)
+    CALL army_combine_absorb(2, best)
+    AssertEqualInt 1, best, "the first army takes command"
+    CALL army_combine_finish(5, best, 2)
+    AssertEqualInt 150, army_size(1), "the troops of both"
+    AssertEqualStr "Pope", army_name$(1), "under Pope"
+    AssertEqualInt 1, city_army(5), "it holds the city"
+    AssertEqualStr "Banks", leader_name$(2), "Banks goes back to the list"
+    AssertEqualInt 1, leader_rating(2), "with a rating of 1, the lowest a leader has"
 END SUB
 
 SUB TestArmyCombineRefusesTooLarge
@@ -532,6 +589,37 @@ SUB TestArmyBuySupplyUpToTheLevel
     AssertEqualInt 1, army_supply(1), "nothing bought"
 END SUB
 
+' Supply on the Commands menu: shown only when the cash buys a day of supplies for an army
+' that the Supply menu lists.
+SUB TestSideCanSupply
+    army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 1000
+    AssertEqualInt 4, army_supply_days(1), "up to the resupply level"
+    AssertTrue side_can_supply(1), "an army short of supplies, and the cash"
+    side_cash(1) = 2
+    AssertEqualInt 0, army_supply_days(1), "2 buys a fifth of a day for 10,000 troops"
+    AssertTrue NOT side_can_supply(1), "not a day of supplies"
+    AssertTrue side_needs_supply(1), "though the army is short of them"
+    side_cash(1) = 1000: army_supply(1) = 2
+    AssertTrue NOT side_needs_supply(1), "2 days are not short"
+    AssertTrue NOT side_can_supply(1), "no army to supply"
+    army_supply(1) = 1: opt_realism = REALISM_ON
+    AssertTrue NOT side_needs_supply(1), "city 5 is cut off under Realism"
+    AssertTrue NOT side_can_supply(1), "so is its army"
+END SUB
+
+' A large treasury and a small army: 5,000 buys 50,000 days for 100 troops, more than an
+' INTEGER holds. The days are capped at the resupply level first. Before G29 they wrapped to
+' -15,536, and nothing was bought.
+SUB TestArmySupplyDaysDoesNotOverflow
+    army_city(1) = 5: army_size(1) = 1: army_supply(1) = 0: side_cash(1) = 5000
+    AssertEqualInt 5, army_supply_days(1), "up to the resupply level"
+    AssertTrue side_can_supply(1), "so Supply shows"
+    CALL army_buy_supply(1, result)
+    AssertEqualInt SUPPLY_BOUGHT, result, "bought"
+    AssertEqualInt 5, army_supply(1), "5 days"
+    AssertEqualInt 5000, side_cash(1), "they cost .5, and 4,999.5 rounds to the even 5,000"
+END SUB
+
 SUB TestArmyBuySupplyCutOff
     opt_realism = REALISM_ON
     army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 1000
@@ -547,6 +635,17 @@ SUB TestArmyAddRecruits
     AssertEqualInt 145, army_size(4), "4,500 more troops"
     AssertEqualInt 200, side_cash(1), "for 100"
     AssertEqualInt 0, isolated, "not isolated without the Realism setting"
+END SUB
+
+' An army has at most 125,000 troops (max_army_size, as for a Join). The original had no limit,
+' and an army past 32,767 wrapped to a negative size (G46).
+SUB TestArmyAddRecruitsStopsAtTheLimit
+    opt_difficulty = 3: current_side = 1
+    army_city(4) = 7: army_size(4) = 1240: side_cash(1) = 300
+    AssertTrue NOT army_is_full(4), "124,000 troops: not full"
+    CALL army_add_recruits(1, 4, isolated)
+    AssertEqualInt 1250, army_size(4), "4,500 more would be 128,500: 125,000"
+    AssertTrue army_is_full(4), "full"
 END SUB
 
 SUB TestArmyAddRecruitsWithRealismCutOff
@@ -661,8 +760,27 @@ SUB TestArmyAppointAndFreeLeader
     AssertEqualStr "Grant", army_name$(3), "the army takes the leader's name"
     AssertEqualInt 8, army_leader_rating(3), "and his rating"
     AssertEqualStr "", leader_name$(5), "he leaves the free leaders"
-    CALL army_free_leader(3)
+    CALL army_free_leader(3, slot)
     AssertEqualStr "Grant", leader_name$(3), "freed into the army's own slot"
+    AssertEqualInt 3, slot, "slot 3"
+    AssertEqualInt 8, leader_rating(3), "with his rating"
+END SUB
+
+' A leader freed when the army's slot already holds a free leader takes the side's first free
+' slot. The original wrote over the leader there (G36).
+SUB TestArmyFreeLeaderTakesAFreeSlot
+    leader_name$(1) = "McDowell": leader_name$(3) = "Banks": leader_rating(3) = 3
+    army_name$(3) = "Fremont": army_leader_rating(3) = 2
+    CALL army_free_leader(3, slot)
+    AssertEqualInt 2, slot, "the first Union slot without a free leader"
+    AssertEqualStr "Fremont", leader_name$(2), "Fremont is there"
+    AssertEqualInt 2, leader_rating(2), "with his own rating"
+    AssertEqualStr "Banks", leader_name$(3), "Banks stays"
+    AssertEqualInt 3, leader_rating(3), "with his"
+    FOR i = 1 TO 20: leader_name$(i) = "Leader": NEXT i
+    CALL army_free_leader(3, slot)
+    AssertEqualInt 0, slot, "every Union slot holds a free leader: he is not kept"
+    AssertEqualStr "Leader", leader_name$(3), "and no one is written over"
 END SUB
 
 SUB TestDrillAddsALevelAndBusiesTheArmy
@@ -927,6 +1045,26 @@ SUB TestNavyRaidRoundLosesAShip
     AssertEqualInt 0, raiding_side, "nobody raids now"
 END SUB
 
+' The player's raiders lose their last ship: the computer no longer pursues them (G51).
+' Another side's loss leaves the pursuit as it was.
+SUB TestNavyRaidRoundLastShipEndsThePursuit
+    FOR s = 1 TO 100
+        RANDOMIZE USING s
+        current_side = 1: fleet_pursuit = 1
+        raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA
+        CALL navy_raid_round(raider, sank)
+        IF sank = 0 THEN EXIT FOR
+    NEXT s
+    AssertEqualInt 0, sank, "a seed where the raiders lose"
+    AssertEqualInt 0, fleet_pursuit, "the player's raiders are gone: no pursuit"
+    RANDOMIZE USING s
+    current_side = 2: fleet_pursuit = 1
+    raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA
+    CALL navy_raid_round(raider, sank)
+    AssertEqualInt 0, sank, "the same seed"
+    AssertEqualInt 1, fleet_pursuit, "the computer's raiders lost: the pursuit stays"
+END SUB
+
 SUB TestNavyFleetLostToTheBattery
     current_side = 1: fleet_pursuit = 1: fleet_city(1) = 5
     CALL navy_fleet_lost(1)
@@ -991,9 +1129,9 @@ END SUB
 
 ' Build, Attack and Raid: one rule for the Ships menu, the player's actions and the computer.
 SUB TestNavyCanBuildAttackRaid
-    side_cash(1) = COST_SHIP: fleet_city(1) = 0: fleet_size(1) = 0
+    side_cash(1) = cost_ship: fleet_city(1) = 0: fleet_size(1) = 0
     AssertTrue navy_can_build(1), "no fleet yet, the money for a ship"
-    side_cash(1) = COST_SHIP - 1
+    side_cash(1) = cost_ship - 1
     AssertTrue NOT navy_can_build(1), "not the money"
     side_cash(1) = 500: fleet_city(1) = 30: fleet_size(1) = 3: city_owner(30) = 1: city_port_type(30) = PORT_SEA
     AssertTrue navy_can_build(1), "in a sea port of its own"
@@ -1021,8 +1159,8 @@ END SUB
 SUB TestShipKinds
     AssertEqualStr "W", SHIP_WOODEN$, "the letter of a wooden ship"
     AssertEqualStr "I", SHIP_IRONCLAD$, "the letter of an ironclad"
-    AssertEqualInt COST_SHIP, ship_cost(SHIP_WOODEN$), "a wooden ship"
-    AssertEqualInt 2 * COST_SHIP, ship_cost(SHIP_IRONCLAD$), "an ironclad costs two"
+    AssertEqualInt cost_ship, ship_cost(SHIP_WOODEN$), "a wooden ship"
+    AssertEqualInt 2 * cost_ship, ship_cost(SHIP_IRONCLAD$), "an ironclad costs two"
     AssertEqualInt 1, ship_icon(SHIP_WOODEN$), "the wooden ship's picture"
     AssertEqualInt 2, ship_icon(SHIP_IRONCLAD$), "the ironclad's picture"
 END SUB
@@ -1044,9 +1182,12 @@ SUB TestNavyRetreatPort
     CALL navy_retreat_port(1, target)
     AssertEqualInt 8, target, "the one other sea port"
     AssertEqualInt 8, fleet_city(1), "the fleet is there"
+    AssertTrue navy_has_retreat_port(1), "a port to retreat to"
     city_owner(8) = 2: fleet_city(1) = 3
+    AssertTrue NOT navy_has_retreat_port(1), "no other sea port"
     CALL navy_retreat_port(1, target)
     AssertEqualInt 0, target, "none left"
+    AssertEqualInt 3, fleet_city(1), "the fleet stays where it is (G44)"
 END SUB
 
 ' ------------------------------------------------------ the computer's choices
@@ -1124,8 +1265,56 @@ SUB TestAiBeyondScore
     AssertEqualInt 22, ai_beyond_score(21, 0, 5, 1), "a neutral city of 4 with a fort, and the enemy's of 2"
     army_size(21) = 50: army_size(1) = 100
     AssertEqualInt 20, ai_beyond_score(21, 1, 5, 1), "2 less: the army in city 5 is twice its size"
+    side_capital(1) = 7
+    AssertEqualInt 70, ai_beyond_score(21, 1, 5, 1), "city 7 is the enemy's capital: 50 more"
     side_capital(1) = 0
-    AssertEqualInt 70, ai_beyond_score(21, 1, 5, 1), "the enemy lost its capital (0): the neutral city gets 50"
+    AssertEqualInt 20, ai_beyond_score(21, 1, 5, 1), "the enemy lost its capital (0): no city gets the 50"
+END SUB
+
+' A fort multiplies the defender by the fort plus 1. Aggression 1 adds .5 to the odds.
+SUB TestAiAttackScoreCountsAFortOfTwo
+    army_city(21) = 5: army_size(21) = 200: army_supply(21) = 5: opt_ai_aggression = 1
+    army_city(1) = 6: army_size(1) = 100: city_army(6) = 1
+    city_fort(6) = 2
+    AssertEqualInt 95, ai_attack_score(21, 1, 6, 100), "a fort of 2: odds 2/3, 5 less"
+    city_fort(6) = 1
+    AssertEqualInt 110, ai_attack_score(21, 1, 6, 100), "a fort of 1: odds 1, 10 more"
+END SUB
+
+' A cautious computer, on a roll above .9, weighs leader against leader and experience
+' against experience. The seed is the first whose first number is above .9.
+SUB TestAiAttackScoreWeighsExperience
+    army_city(21) = 5: army_size(21) = 100: army_supply(21) = 5
+    army_leader_rating(21) = 5: army_experience(21) = 6
+    army_city(1) = 6: army_size(1) = 100: city_army(6) = 1
+    army_leader_rating(1) = 5: army_experience(1) = 2
+    FOR seed = 1 TO 100
+        RANDOMIZE USING seed
+        IF RND > .9 THEN EXIT FOR
+    NEXT seed
+    RANDOMIZE USING seed
+    AssertEqualInt 135, ai_attack_score(21, 1, 6, 100), "10 times 4 more experience, and odds 1: 5 less"
+END SUB
+
+' The Union's computer without a fleet stops fortifying on an even chance, only when its
+' cash is below 222. The seed is the first whose first number is above .5.
+SUB TestAiFortifyStopsByItsCash
+    FOR seed = 1 TO 100
+        RANDOMIZE USING seed
+        IF RND > .5 THEN EXIT FOR
+    NEXT seed
+    side_cash(1) = 100
+    RANDOMIZE USING seed
+    AssertTrue ai_fortify_stops(1), "100 in cash: it stops"
+    side_cash(1) = 500
+    RANDOMIZE USING seed
+    AssertTrue NOT ai_fortify_stops(1), "500 in cash: it goes on"
+    fleet_size(1) = 1: side_cash(1) = 100
+    RANDOMIZE USING seed
+    AssertTrue NOT ai_fortify_stops(1), "with a fleet it goes on"
+    fleet_size(1) = 0
+    RANDOMIZE USING seed
+    AssertTrue NOT ai_fortify_stops(2), "the Rebels never stop here"
 END SUB
 
 ' The Rebels' army 21 in city 1, with track to cities 2 and 3. A Union army is in city 5,
@@ -1156,11 +1345,44 @@ SUB TestArmyRecruitCitiesKeptForTheMonth
     AssertEqualInt 7, cities(2), "then Boston"
 END SUB
 
+' A side that holds no city has none to recruit in, and the month keeps no list.
+SUB TestArmyRecruitCitiesNoneHeld
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
+    current_side = 1: turn_recruit_state = 0
+    CALL army_recruit_cities(1, cities(), count)
+    AssertEqualInt 0, count, "no city"
+    AssertEqualInt 0, turn_recruit_state, "no list kept for the month"
+END SUB
+
+' The Rebels' capital, city 2, is empty and the enemy is next to it: the train takes army 21
+' there, whatever city the loop chose.
+SUB TestAiRailroadCityToTheCapital
+    current_side = 1: victory_rule(VICTORY_CAPITAL) = 1: side_capital(2) = 2
+    city_owner(1) = 2: city_owner(2) = 2: city_owner(3) = 2: city_owner(5) = 1
+    city_road(1, 1) = 2: city_road(1, 2) = 3
+    city_road(2, 1) = 1: city_road(2, 2) = 5
+    city_road(3, 1) = 1
+    army_city(21) = 1: army_size(21) = 100: city_army(1) = 21
+    army_city(1) = 5: army_size(1) = 50: city_army(5) = 1
+    city_y(1) = 50: city_y(2) = 60: city_y(3) = 10: city_y(5) = 70
+    AssertEqualInt 2, ai_railroad_city(2, 21), "the empty capital, with the enemy next to it"
+END SUB
+
 SUB TestAiRecruitPickSmallArmy
     DIM cities(MAX_CITIES) AS INTEGER
     cities(1) = 7: cities(2) = 3
     city_army(3) = 4: army_size(4) = 100: side_cash(2) = 500
     AssertEqualInt 3, ai_recruit_pick(2, cities(), 2), "the city with an army under 15,500 troops"
+END SUB
+
+' A city with no army is not a small army, whatever army 0 holds after a Join. The original read
+' army 0's size for it, so after a Join of 15,500 or more it picked the empty city (G38).
+SUB TestAiRecruitPickIgnoresArmyZero
+    DIM cities(MAX_CITIES) AS INTEGER
+    cities(1) = 3: cities(2) = 7
+    city_army(3) = 4: army_size(4) = 100: side_cash(2) = 500
+    army_size(0) = 600
+    AssertEqualInt 3, ai_recruit_pick(2, cities(), 2), "the small army's city, not the empty one"
 END SUB
 
 ' A list of cities is sorted by name, and the menu shows the names with the cities' numbers.
@@ -1523,6 +1745,18 @@ SUB TestEventEnglishShipsJoinFleetInPort
     AssertEqualInt 12, fleet_city(2), "the fleet stays in its port"
 END SUB
 
+' A Rebel fleet at sea takes England's ships in a port, and raids no more (G52).
+SUB TestEventEnglishShipsEndTheRaid
+    CALL events_for_test
+    city_owner(8) = 2: city_port_type(8) = PORT_SEA
+    fleet_size(2) = 3: fleet_ships$(2) = "WWW": fleet_city(2) = FLEET_AT_SEA: raiding_side = 2
+    script_dice$ = "0,0,0,0"
+    CALL event_roll(event, variant, who)
+    AssertEqualInt event_find("english ships"), event, "no riot, and the draw for ships passes"
+    AssertEqualInt 8, fleet_city(2), "the fleet is in port 8"
+    AssertEqualInt SIDE_NONE, raiding_side, "and no longer raids"
+END SUB
+
 ' Without a fleet in port the ships go to the Rebels' first sea port that the Union's fleet
 ' is not in. Without such a port the event does not happen and the list goes on.
 SUB TestEventEnglishShipsNeedAPort
@@ -1830,6 +2064,14 @@ SUB TestVictoryWonAndTechnical
     AssertEqualInt 140, side_victory_points(2), "for both sides"
 END SUB
 
+' When time runs out the Rebels win, though the Union is tested first. The original marked the
+' Union as the winner (G39).
+SUB TestVictoryWinner
+    AssertEqualInt SIDE_REBEL, victory_winner(SIDE_UNION, VICTORY_YEAR), "time: the Rebels"
+    AssertEqualInt SIDE_UNION, victory_winner(SIDE_UNION, VICTORY_CITIES), "cities: the side that met it"
+    AssertEqualInt SIDE_REBEL, victory_winner(SIDE_REBEL, VICTORY_CAPITAL), "the capital: the side that met it"
+END SUB
+
 SUB TestHallOfFamePlaceAndInsert
     DIM hall_name$(2, 5): DIM hall_score(2, 5)
     FOR i = 1 TO 5: hall_name$(1, i) = "N" + LTRIM$(STR$(i)): hall_score(1, i) = 600 - 100 * i: NEXT i
@@ -1975,6 +2217,13 @@ SUB TestTurnArmyLost
     AssertEqualInt MAX_SUPPLY, army_supply(1), "up to the most an army holds"
 END SUB
 
+' A free leader in the lost army's slot stays free (G53).
+SUB TestTurnArmyLostKeepsTheFreeLeader
+    army_city(21) = 5: army_size(21) = 80: army_name$(21) = "Hood": leader_name$(21) = "Johnston"
+    CALL turn_army_lost(21, 1)
+    AssertEqualStr "Johnston", leader_name$(21), "the relieved leader is still on the list"
+END SUB
+
 SUB TestTurnOccupyAndForage
     CALL turn_occupy(2, 7)
     AssertEqualInt 7, army_city(2), "in city 7"
@@ -2006,9 +2255,22 @@ SUB TestOptionSwapSide
 END SUB
 
 ' Vary Start reloads the scenario, then may move the Rebel capital to Montgomery (city 25).
-' A Rebel fleet it keeps is put at New Orleans (city 27). The test runs in an empty folder,
-' so it writes a small scenario there: no armies, one ship a side, capitals at cities 1 and 2.
+' A Rebel fleet it keeps is put at New Orleans (city 27). The tests run in an empty folder,
+' so they write a small scenario there (WriteVaryScenario).
 SUB TestVaryStartMovesRebelCapital
+    CALL WriteVaryScenario
+    FOR s = 1 TO 100
+        RANDOMIZE s
+        CALL vary_start_conditions
+        IF side_capital(SIDE_REBEL) <> 2 AND fleet_size(SIDE_REBEL) > 0 THEN EXIT FOR
+    NEXT s
+    AssertEqualInt 25, side_capital(SIDE_REBEL), "a seed where the capital moves: Montgomery"
+    AssertEqualInt 27, fleet_city(SIDE_REBEL), "the Rebel fleet at New Orleans"
+END SUB
+
+' A small scenario in an empty folder, for Vary Start: no armies, one ship a side, capitals at
+' cities 1 and 2, 40 cities of no side and no roads, and the settings file.
+SUB WriteVaryScenario
     CHDIR TestTempDir$
     MKDIR "scenarios": MKDIR "scenarios/test"
     scenario_folder$(0) = "test"
@@ -2025,16 +2287,92 @@ SUB TestVaryStartMovesRebelCapital
     PRINT #f, "1,2"
     PRINT #f, "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
     CLOSE #f
+    f = FREEFILE: OPEN "scenarios/test/CITIES.GRD" FOR OUTPUT AS #f
+    FOR i = 1 TO MAX_CITIES: WRITE #f, i, 0, 0, "City", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0: NEXT i
+    CLOSE #f
     f = FREEFILE: OPEN "CWS.CFG" FOR OUTPUT AS #f
     PRINT #f, "1,3,0,3,1,1,5,100,100,0,0,0,0,0,0,0,3"
     CLOSE #f
+END SUB
+
+' Vary Start starts the game again, but keeps the settings and the victory rules the player
+' set: it no longer reads cws.cfg or the scenario's rules back (G40). Under the Realism setting
+' a game of 1861 has no ironclads, as a new game (G43).
+SUB TestVaryStartKeepsSettingsAndRules
+    CALL WriteVaryScenario
+    victory_rule(VICTORY_CITIES) = -32: opt_event_balance = 0: opt_realism = REALISM_ON
+    opt_difficulty = 3: current_side = SIDE_UNION: opt_players = PLAYERS_ONE
+    army_city(8) = 4: army_size(8) = 100: city_army(4) = 8
+    FOR s = 1 TO 20
+        RANDOMIZE s
+        CALL vary_start_conditions
+        AssertEqualInt 0, INSTR(fleet_ships$(1) + fleet_ships$(2), SHIP_IRONCLAD$), "no ironclads in 1861"
+    NEXT s
+    AssertEqualInt -32, victory_rule(VICTORY_CITIES), "the cities rule as the player set it"
+    AssertEqualInt 0, opt_event_balance, "the random events as the player set them"
+    AssertEqualInt REALISM_ON, opt_realism, "Realism, not cws.cfg's"
+    AssertEqualInt 0, army_size(8), "an army raised before Vary Start is gone"
+    AssertEqualInt 0, city_army(4), "and its city is empty"
+    AssertEqualInt 1, vary_start_open, "Vary Start may be used again"
+END SUB
+
+' A Rebel fleet of no ships is no fleet (G41).
+SUB TestVaryStartRebelFleetOfNoShips
+    CALL WriteVaryScenario
+    FOR s = 1 TO 200
+        RANDOMIZE s
+        CALL vary_start_conditions
+        IF fleet_size(SIDE_REBEL) = 0 THEN EXIT FOR
+    NEXT s
+    AssertEqualInt 0, fleet_size(SIDE_REBEL), "a seed with no Rebel ships"
+    AssertEqualInt 0, fleet_city(SIDE_REBEL), "no fleet"
+    AssertTrue NOT fleet_exists(SIDE_REBEL), "fleet_exists agrees"
+END SUB
+
+' Vary Start's ironclads by the fleet's own side: more than half of the Union's ships, about a
+' tenth of the Rebels'. The original used the player's side for both fleets (G42).
+SUB TestVaryStartIroncladsBySide
+    DIM ships(SIDE_REBEL), ironclads(SIDE_REBEL)
+    CALL WriteVaryScenario
+    current_side = SIDE_REBEL: opt_realism = REALISM_OFF
     FOR s = 1 TO 100
         RANDOMIZE s
         CALL vary_start_conditions
-        IF side_capital(SIDE_REBEL) <> 2 AND fleet_size(SIDE_REBEL) > 0 THEN EXIT FOR
+        FOR k = SIDE_UNION TO SIDE_REBEL
+            ships(k) = ships(k) + LEN(fleet_ships$(k))
+            FOR i = 1 TO LEN(fleet_ships$(k))
+                IF MID$(fleet_ships$(k), i, 1) = SHIP_IRONCLAD$ THEN ironclads(k) = ironclads(k) + 1
+            NEXT i
+        NEXT k
     NEXT s
-    AssertEqualInt 25, side_capital(SIDE_REBEL), "a seed where the capital moves: Montgomery"
-    AssertEqualInt 27, fleet_city(SIDE_REBEL), "the Rebel fleet at New Orleans"
+    AssertTrue ironclads(1) > .45 * ships(1), "the Union's:" + STR$(ironclads(1)) + " of" + STR$(ships(1))
+    AssertTrue ironclads(2) < .2 * ships(2), "the Rebels':" + STR$(ironclads(2)) + " of" + STR$(ships(2))
+END SUB
+
+' Vary Start is offered until the first End Turn of a new game, and not in a loaded game.
+SUB TestVaryStartOpenUntilTheFirstEndTurn
+    CALL game_reset
+    AssertEqualInt 1, vary_start_open, "a new game"
+    CALL turn_next_player(month_over)
+    AssertEqualInt 0, vary_start_open, "after End Turn"
+END SUB
+
+' The Cancel menu's names: a name of more than 10 characters loses its first word.
+SUB TestCancelShortName
+    AssertEqualStr "Rebel II", cancel_short_name$("Rebel II"), "8 characters: as it is"
+    AssertEqualStr "Rebel III", cancel_short_name$("Rebel III"), "and not the same as Rebel II"
+    AssertEqualStr "E. Johnston", cancel_short_name$("Joseph E. Johnston"), "the first word goes"
+END SUB
+
+' Changing the number of players works out the Union's extra income again (G54).
+SUB TestOptionTogglePlayersSetsTheUnionBonus
+    opt_difficulty = 3: opt_realism = REALISM_OFF: opt_players = PLAYERS_TWO
+    CALL set_union_advantage
+    AssertEqualInt 150, union_income_bonus, "two players: 50 a step"
+    CALL option_toggle_players
+    AssertEqualInt 360, union_income_bonus, "one player: 120 a step"
+    CALL option_toggle_players
+    AssertEqualInt 150, union_income_bonus, "two again"
 END SUB
 
 SUB TestOptionSwitches
@@ -2131,13 +2469,13 @@ SUB TestCityBuildFort
     side_cash(SIDE_REBEL) = 450: city_fort(25) = 1
     CALL city_build_fort(SIDE_REBEL, 25)
     AssertEqualInt 2, city_fort(25), "a level more"
-    AssertEqualInt 450 - COST_FORT, side_cash(SIDE_REBEL), "paid for"
+    AssertEqualInt 450 - cost_fort, side_cash(SIDE_REBEL), "paid for"
 END SUB
 
 SUB TestCapitalMove
     side_cash(SIDE_REBEL) = 700: side_capital(SIDE_REBEL) = 33: side_victory_points(SIDE_UNION) = 10
     CALL capital_move_pay(SIDE_REBEL)
-    AssertEqualInt 700 - COST_MOVE_CAPITAL, side_cash(SIDE_REBEL), "paid"
+    AssertEqualInt 700 - cost_move_capital, side_cash(SIDE_REBEL), "paid"
     AssertEqualInt 60, side_victory_points(SIDE_UNION), "50 points to the other side"
     AssertEqualInt 33, side_capital(SIDE_REBEL), "the capital has not moved yet"
     CALL capital_move_to(SIDE_REBEL, 25)
@@ -2146,14 +2484,14 @@ END SUB
 
 ' Fortify and Capital: what the Commands menu and the computer ask before they act.
 SUB TestFortAndCapitalAffordable
-    side_cash(SIDE_REBEL) = COST_FORT: side_capital(SIDE_REBEL) = 33
+    side_cash(SIDE_REBEL) = cost_fort: side_capital(SIDE_REBEL) = 33
     AssertTrue fort_affordable(SIDE_REBEL), "the price of a fort"
     AssertTrue NOT capital_can_move(SIDE_REBEL), "not the price of a move"
-    side_cash(SIDE_REBEL) = COST_MOVE_CAPITAL
+    side_cash(SIDE_REBEL) = cost_move_capital
     AssertTrue capital_can_move(SIDE_REBEL), "the price, and a capital"
     side_capital(SIDE_REBEL) = 0
     AssertTrue NOT capital_can_move(SIDE_REBEL), "no capital left to move"
-    side_cash(SIDE_REBEL) = COST_FORT - 1
+    side_cash(SIDE_REBEL) = cost_fort - 1
     AssertTrue NOT fort_affordable(SIDE_REBEL), "short of a fort"
 END SUB
 
@@ -2172,13 +2510,15 @@ SUB TestWinterStopsMove
     AssertTrue NOT winter_stops_move(SIDE_REBEL, 6), "January Campaigns allowed"
 END SUB
 
-' Relieve: the old leader goes back to his army's slot among the free leaders. The army
-' takes the new leader with a point less than his rating and loses a level of experience.
+' Relieve: the old leader goes back to his army's slot among the free leaders, with his own
+' rating. The army takes the new leader with a point less than his rating and loses a level
+' of experience.
 SUB TestArmyRelieveLeader
     army_name$(3) = "Fremont": army_leader_rating(3) = 2: army_experience(3) = 4
-    leader_name$(7) = "Grant": leader_rating(7) = 9
-    CALL army_free_leader(3)
+    leader_name$(7) = "Grant": leader_rating(7) = 9: leader_rating(3) = 6
+    CALL army_free_leader(3, slot)
     AssertEqualStr "Fremont", leader_name$(3), "free again, in the army's slot"
+    AssertEqualInt 2, leader_rating(3), "his own rating, not the slot's 6"
     CALL army_take_leader(3, 7)
     AssertEqualStr "Grant", army_name$(3), "the new leader"
     AssertEqualStr "", leader_name$(7), "no longer free"
@@ -2333,6 +2673,174 @@ SUB TestAiNavyAttackSailsFromAnArmy
     AssertEqualInt 50, army_size(3), "the army is not bombarded"
 END SUB
 
+' The Rebel computer weighs an invasion by the enemy near the city its own fleet lies off.
+' The Union's fleet at sea, city 99, stopped the game before (G50).
+SUB TestAiNavyAdjustInvadesByItsOwnCity
+    current_side = SIDE_UNION: opt_realism = REALISM_OFF
+    fleet_city(SIDE_REBEL) = 6: fleet_size(SIDE_REBEL) = 2: fleet_ships$(SIDE_REBEL) = "WW"
+    fleet_city(SIDE_UNION) = FLEET_AT_SEA: fleet_size(SIDE_UNION) = 1: fleet_ships$(SIDE_UNION) = "W"
+    action = NAVY_SAIL: quit = 0
+    CALL ai_navy_adjust(SIDE_REBEL, action, quit)
+    AssertEqualInt NAVY_INVADE, action, "no enemy near city 6: it invades"
+    city_road(6, 1) = 7: city_owner(7) = SIDE_UNION: city_army(7) = 1: army_city(1) = 7: army_size(1) = 900
+    action = NAVY_SAIL
+    CALL ai_navy_adjust(SIDE_REBEL, action, quit)
+    AssertEqualInt NAVY_SAIL, action, "90,000 Union troops beside city 6: it does not"
+END SUB
+
+' ------------------- the tuning files (io/tuning_file.bm, io/tuning_knobs.bm)
+
+' The knobs start at the game's own numbers, and the shipped TUNING.DAT keeps them all.
+' tests/test_tuning.py checks that the shipped file names every knob.
+SUB TestTuningShippedFileKeepsTheDefaults
+    AssertEqualInt 200, cost_fort, "a default, set when the program starts"
+    AssertTrue defense_per_size# = .013, "a fraction's default"
+    AssertEqualStr "", tuning_changes$, "every knob starts at its default"
+    CALL tuning_read(_STARTDIR$ + "/../scenarios/TUNING.DAT")
+    AssertEqualStr "", tuning_error$, "the shipped file reads"
+    AssertEqualStr "", tuning_changes$, "and leaves every knob at its default"
+END SUB
+
+' A file sets the knobs it names, with a comment after a value, on top of the knobs as they
+' are. tuning_changes$ lists them, and tuning_apply_list sets them again from that list.
+SUB TestTuningFileSetsItsKnobs
+    CHDIR TestTempDir$
+    f = FREEFILE: OPEN "t.dat" FOR OUTPUT AS #f
+    PRINT #f, "; a comment": PRINT #f, "cost_fort = 150   ; cheaper forts": PRINT #f, ""
+    PRINT #f, "UNION_BONUS_PER_BALANCE=90": PRINT #f, "defense_per_size = .02"
+    CLOSE #f
+    CALL tuning_read("t.dat")
+    AssertEqualStr "", tuning_error$, "read"
+    AssertEqualInt 150, cost_fort, "set, with a comment after it"
+    AssertEqualInt 90, union_bonus_per_balance, "a name in capitals, no spaces"
+    AssertTrue defense_per_size# = .02, "a fraction"
+    AssertEqualInt 100, cost_ship, "not named: the default"
+    AssertEqualStr "cost_fort=150;union_bonus_per_balance=90;defense_per_size=.02;", tuning_changes$, "the changes"
+    f = FREEFILE: OPEN "more.dat" FOR OUTPUT AS #f: PRINT #f, "cost_ship = 80": CLOSE #f
+    CALL tuning_read("more.dat")
+    AssertEqualInt 80, cost_ship, "a second file counts on top"
+    AssertEqualInt 150, cost_fort, "and keeps what the first set"
+    CALL tuning_read("none.dat")
+    AssertEqualStr "", tuning_error$, "no file is no error"
+    list$ = tuning_changes$
+    CALL tuning_defaults
+    AssertEqualInt 200, cost_fort, "back at the defaults"
+    CALL tuning_apply_list(list$ + "gone_knob=5;")
+    AssertEqualStr list$, tuning_changes$, "the list sets them again; a knob that is gone is passed over"
+END SUB
+
+' A name the game does not know, a value that is not a number or is outside the knob's range,
+' and a fraction for a whole number each stop the reading.
+SUB TestTuningFileRefusesBadLines
+    CHDIR TestTempDir$
+    f = FREEFILE: OPEN "bad.dat" FOR OUTPUT AS #f: PRINT #f, "cost_fort = 150": PRINT #f, "fort_cost = 9": CLOSE #f
+    CALL tuning_read("bad.dat")
+    AssertEqualStr "bad.dat, line 2: unknown knob: fort_cost", tuning_error$, "an unknown name"
+    f = FREEFILE: OPEN "bad.dat" FOR OUTPUT AS #f: PRINT #f, "cost_fort = cheap": CLOSE #f
+    CALL tuning_read("bad.dat")
+    AssertEqualStr "bad.dat, line 1: cost_fort needs a number", tuning_error$, "not a number"
+    f = FREEFILE: OPEN "bad.dat" FOR OUTPUT AS #f: PRINT #f, "cost_fort = -5": CLOSE #f
+    CALL tuning_read("bad.dat")
+    AssertEqualStr "bad.dat, line 1: cost_fort must be from 0 to 19999", tuning_error$, "below its least"
+    f = FREEFILE: OPEN "bad.dat" FOR OUTPUT AS #f: PRINT #f, "cost_fort = 1.5": CLOSE #f
+    CALL tuning_read("bad.dat")
+    AssertEqualStr "bad.dat, line 1: cost_fort needs a whole number", tuning_error$, "a fraction"
+    AssertEqualInt 150, cost_fort, "a refused value leaves the knob as the first file set it"
+END SUB
+
+' A new game reads scenarios/TUNING.DAT and then the scenario's own, on top.
+SUB TestTuningOfAScenario
+    CHDIR TestTempDir$
+    MKDIR "scenarios": MKDIR "scenarios/test"
+    scenario_folder$(0) = "test"
+    f = FREEFILE: OPEN "scenarios/TUNING.DAT" FOR OUTPUT AS #f: PRINT #f, "cost_fort = 150": PRINT #f, "cost_ship = 80": CLOSE #f
+    f = FREEFILE: OPEN "scenarios/test/TUNING.DAT" FOR OUTPUT AS #f: PRINT #f, "cost_fort = 300": CLOSE #f
+    cost_recruit = 5
+    CALL load_tuning
+    AssertEqualStr "", tuning_error$, "read"
+    AssertEqualInt 100, cost_recruit, "a knob no file names goes back to its default"
+    AssertEqualInt 80, cost_ship, "from scenarios/TUNING.DAT"
+    AssertEqualInt 300, cost_fort, "the scenario's file counts on top"
+END SUB
+
+' The Union computer's bonus comes from its knobs.
+SUB TestUnionBonusFromItsKnobs
+    opt_difficulty = 4: opt_players = 1: opt_realism = 0
+    union_bonus_per_balance = 100
+    CALL set_union_advantage
+    AssertEqualInt 400, union_income_bonus, "100 per step of Balance"
+    opt_realism = 1: union_bonus_realism_share# = .5
+    CALL set_union_advantage
+    AssertEqualInt 200, union_income_bonus, "half kept with Realism"
+END SUB
+
+' The rules between knobs are checked when all the files are read, and the ranges keep the game's
+' INTEGER arithmetic from wrapping.
+SUB TestTuningRulesBetweenKnobs
+    AssertEqualStr "", tuning_relations$, "the defaults keep every rule"
+    huge_army_size = 200
+    AssertEqualStr "huge_army_size must be above large_army_size", tuning_relations$, "an order broken"
+    CALL tuning_defaults
+    new_army_supply_spread = 6
+    AssertEqualStr "new_army_supply, new_army_supply_spread and union_new_army_supply may add up to 10 at most", tuning_relations$, "a sum too large"
+    CALL tuning_defaults
+    CHDIR TestTempDir$
+    f = FREEFILE: OPEN "big.dat" FOR OUTPUT AS #f: PRINT #f, "cost_ship = 6000": CLOSE #f
+    CALL tuning_read("big.dat")
+    AssertEqualStr "big.dat, line 1: cost_ship must be from 0 to 5000", tuning_error$, "a ship's price is kept from overflowing an ironclad's"
+END SUB
+
+' With Realism, a defender's strength is at most defense_most_realism.
+SUB TestBattleRealismDefenseCap
+    DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
+    rule_strength_cap = 30: current_side = 1: opt_difficulty = 3: opt_realism = 1
+    army_size(1) = 1000: army_size(21) = 1000: army_supply(1) = 5: army_supply(21) = 5
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 20, defend_steps(1), ".02 * 1000 + 2 is 22: at most 20"
+END SUB
+
+' Each side loses at most a number of times the other's losses. With both knobs at 1, the side
+' that would lose more loses as much as the other.
+SUB TestBattleLossCaps
+    RANDOMIZE 1
+    attacker_loss_most_times = 1: defender_loss_most_times = 1
+    army_size(1) = 500: army_size(21) = 500: army_city(21) = 5
+    rule_attack_loss = 50: rule_defend_loss = 1
+    CALL battle_losses(1, 21, 1, killa, killd)
+    AssertTrue killa > 1, "the attacker loses some:" + STR$(killa)
+    AssertEqualInt killd, killa, "the attacker's losses cut to the defender's"
+    rule_attack_loss = 1: rule_defend_loss = 50
+    CALL battle_losses(1, 21, 1, killa, killd)
+    AssertTrue killd > 1, "the defender loses some:" + STR$(killd)
+    AssertEqualInt killa, killd, "the defender's losses cut to the attacker's"
+END SUB
+
+' An army without supply scores an attack ai_no_supply_penalty lower.
+SUB TestAiAttackScoreWithoutSupply
+    army_city(21) = 5: army_size(21) = 200: army_supply(21) = 0: opt_ai_aggression = 1
+    army_city(1) = 6: army_size(1) = 100: city_army(6) = 1: city_fort(6) = 1
+    AssertEqualInt 10, ai_attack_score(21, 1, 6, 100), "110 with supply, 100 less without"
+END SUB
+
+' A saved game holds the knobs that are off their defaults, and loading it sets them again. A
+' save with every knob at its default has no line for them, and loading it sets the defaults.
+SUB TestSaveGameKeepsTheTuning
+    CHDIR TestTempDir$
+    cost_fort = 150: detach_share# = .4
+    CALL config_write(1)
+    CALL WriteTestLeaders
+    CALL save_game(3)
+    CALL tuning_defaults: cost_ship = 80
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualStr "cost_fort=150;detach_share=.4;", tuning_changes$, "the saved knobs, and no other"
+    CALL tuning_defaults
+    CALL save_game(4)
+    cost_fort = 150
+    CALL load_game(4, problem$)
+    AssertEqualStr "", tuning_changes$, "a save at the defaults sets the defaults"
+END SUB
+
 ' ------------------------------------------------- saved games (io/files.bm)
 
 SUB TestTurnResetCommands
@@ -2347,13 +2855,13 @@ END SUB
 ' In a two-player game with no side set, the Union plays.
 SUB TestTurnCheckCommands
     current_side = SIDE_UNION: opt_players = PLAYERS_ONE
-    side_cash(SIDE_UNION) = COST_SHIP - 1: fleet_city(SIDE_UNION) = 30
+    side_cash(SIDE_UNION) = cost_ship - 1: fleet_city(SIDE_UNION) = 30
     CALL turn_check_commands
     AssertEqualInt 0, turn_navy_done, "a fleet: Ships stays open"
-    fleet_city(SIDE_UNION) = 0: side_cash(SIDE_UNION) = COST_SHIP
+    fleet_city(SIDE_UNION) = 0: side_cash(SIDE_UNION) = cost_ship
     CALL turn_check_commands
     AssertEqualInt 0, turn_navy_done, "no fleet, the price of a ship: open"
-    side_cash(SIDE_UNION) = COST_SHIP - 1
+    side_cash(SIDE_UNION) = cost_ship - 1
     CALL turn_check_commands
     AssertEqualInt 1, turn_navy_done, "no fleet and too little cash: closed"
     current_side = SIDE_NONE: opt_players = PLAYERS_TWO
@@ -2384,9 +2892,16 @@ SUB TestGameReset
     army_size(7) = 90: army_city(7) = 12: army_order(7) = 5: army_leader_rating(7) = 4: army_name$(7) = "Banks"
     fleet_size(SIDE_REBEL) = 3: fleet_city(SIDE_REBEL) = 27: train_army(SIDE_UNION) = 7: train_city(SIDE_UNION) = 30
     side_victory_points(SIDE_UNION) = 400: victory_rule(VICTORY_MONTH) = 3
+    turn_moves_done = 1: turn_navy_done = 1
+    raiding_side = SIDE_REBEL: raid_loss = 40: fleet_pursuit = 1
     CALL game_reset
     AssertEqualInt 0, game_over, "the game is on"
     AssertEqualInt 0, turn_recruit_state, "Troops open"
+    AssertEqualInt 0, turn_moves_done, "Moves open"
+    AssertEqualInt 0, turn_navy_done, "Ships open"
+    AssertEqualInt SIDE_NONE, raiding_side, "no side raids"
+    AssertEqualInt 0, raid_loss, "no income lost to raiders"
+    AssertEqualInt 0, fleet_pursuit, "no fleet pursues"
     AssertEqualInt 1, saves_exist, "Load open"
     AssertEqualInt 0, event_done(3), "no event has happened yet"
     AssertEqualInt 0, union_income_bonus, "no extra income yet"
@@ -2396,6 +2911,15 @@ SUB TestGameReset
     AssertEqualInt 0, train_army(SIDE_UNION) + train_city(SIDE_UNION), "no train"
     AssertEqualInt 0, side_victory_points(SIDE_UNION), "no points"
     AssertEqualInt 1, victory_rule(VICTORY_MONTH), "the time limit's month is January until the scenario sets it"
+END SUB
+
+' A raid of the game before takes nothing from the new game's first income (G30).
+SUB TestNewGameTakesNoRaidFromIncome
+    raiding_side = SIDE_REBEL: raid_loss = 40
+    CALL game_reset
+    city_owner(1) = SIDE_UNION: city_value(1) = 10: side_capital(SIDE_UNION) = 5
+    CALL turn_collect_income
+    AssertEqualInt 110, side_cash(SIDE_UNION), "the city and the capital, with nothing lost to raiders"
 END SUB
 
 ' The settings as a new game takes them. The Union player on Rebel ++ (1) gives the Rebels
@@ -2446,6 +2970,7 @@ SUB TestSaveGameAndLoadItAgain
     fleet_ships$(SIDE_UNION) = "WWI": fleet_city(SIDE_UNION) = 30
     train_army(SIDE_REBEL) = 22: train_city(SIDE_REBEL) = 25
     opt_difficulty = 4: opt_history = 1
+    CALL WriteTestLeaders
     CALL save_game(3)
     AssertEqualInt -1, _FILEEXISTS("cws3.sav"), "the slot's file"
 
@@ -2487,6 +3012,73 @@ SUB TestSaveGameAndLoadItAgain
     AssertEqualInt 1, opt_history, "another"
 END SUB
 
+' The raid on commerce is not saved. After a load nothing of the game played before is left. As
+' in the DOS game, a fleet saved at sea does not raid until a fleet moves.
+' A load keeps nothing of the raid of the game before, and a fleet saved at sea raids at once
+' (G31).
+SUB TestLoadGameClearsTheRaid
+    CHDIR TestTempDir$
+    fleet_ships$(SIDE_UNION) = "": fleet_city(SIDE_UNION) = 0
+    fleet_ships$(SIDE_REBEL) = "WW": fleet_city(SIDE_REBEL) = FLEET_AT_SEA
+    CALL WriteTestLeaders
+    CALL save_game(3)
+    raiding_side = SIDE_UNION: raid_loss = 40: fleet_pursuit = 1
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt SIDE_REBEL, raiding_side, "the Rebel fleet saved at sea raids"
+    AssertEqualInt 0, raid_loss, "no loss from the game before"
+    AssertEqualInt 0, fleet_pursuit, "no pursuit from the game before"
+    fleet_city(SIDE_REBEL) = 24
+    CALL save_game(3)
+    raiding_side = SIDE_UNION
+    CALL load_game(3, problem$)
+    AssertEqualInt SIDE_NONE, raiding_side, "no side raids with both fleets in port"
+END SUB
+
+' The load tests run in an empty folder, and load_game reads the scenario's leaders. This writes
+' the scenario's CWSLEAD.DAT there, with the leaders as they are now.
+SUB WriteTestLeaders
+    folder$ = SCNDIR + scenario_folder$(scenario_now)
+    IF NOT _DIREXISTS(SCNDIR) THEN MKDIR SCNDIR
+    IF NOT _DIREXISTS(folder$) THEN MKDIR folder$
+    f = FREEFILE: OPEN scenario_file$("CWSLEAD.DAT") FOR OUTPUT AS #f
+    FOR i = 1 TO MAX_LEADERS: WRITE #f, leader_name$(i), leader_rating(i): NEXT i
+    CLOSE #f
+END SUB
+
+' A leader whom the game before the load used up is free again after it, when the saved game
+' has no army of his. The scenario is the same, so load_game reads no other scenario (G33).
+SUB TestLoadGameFreesTheScenariosLeaders
+    CHDIR TestTempDir$
+    leader_name$(21) = "Lee": leader_rating(21) = 9
+    leader_name$(22) = "Jackson": leader_rating(22) = 7
+    CALL WriteTestLeaders
+    army_name$(21) = "Lee": army_size(21) = 100: army_leader_rating(21) = 9: army_city(21) = 12
+    city_army(12) = 21
+    CALL save_game(3)
+    leader_name$(21) = "": leader_name$(22) = "": leader_rating(22) = 0
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualStr "Jackson", leader_name$(22), "used up before the load, free again"
+    AssertEqualInt 7, leader_rating(22), "with his rating"
+    AssertEqualStr "", leader_name$(21), "Lee commands an army of the saved game"
+END SUB
+
+' The computer's strength ratio of the game before is not kept by a new game or a load. It is 0,
+' as in a game started from the title (G32).
+SUB TestNewGameAndLoadClearTheStrengthRatio
+    ai_strength_ratio! = 2.5
+    CALL game_reset
+    AssertTrue ai_strength_ratio! = 0, "a new game"
+    CHDIR TestTempDir$
+    CALL WriteTestLeaders
+    CALL save_game(3)
+    ai_strength_ratio! = 2.5
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertTrue ai_strength_ratio! = 0, "a load"
+END SUB
+
 ' A saved game keeps the victory rules, as switched off (negative) and as raised by playing on,
 ' and the events that have happened, by name. An event done in this session but not in the
 ' saved game is not done after the load.
@@ -2496,6 +3088,7 @@ SUB TestSaveGameKeepsVictoryRulesAndEvents
     event_done(1) = 1: event_done(3) = 1
     victory_rule(1) = 3: victory_rule(2) = 1865: victory_rule(3) = 34: victory_rule(4) = -60
     victory_rule(5) = 0: victory_rule(6) = 4
+    CALL WriteTestLeaders
     CALL save_game(3)
     event_done(1) = 0: event_done(2) = 1: event_done(3) = 0
     FOR i = 1 TO 6: victory_rule(i) = 99: NEXT i
@@ -2518,6 +3111,7 @@ SUB TestSaveGameFindsEventsByName
     CHDIR TestTempDir$
     event_count = 2: event_name$(1) = "emancipation": event_name$(2) = "riots"
     event_done(1) = 1: event_done(2) = 1
+    CALL WriteTestLeaders
     CALL save_game(3)
     event_count = 2: event_name$(1) = "riots": event_name$(2) = "reelection"
     event_done(1) = 0: event_done(2) = 0
@@ -2533,6 +3127,7 @@ SUB TestSaveGameWithoutVictoryRulesLoads
     CHDIR TestTempDir$
     event_count = 1: event_name$(1) = "emancipation": event_done(1) = 1
     victory_rule(3) = 32: turn_year = 1863
+    CALL WriteTestLeaders
     CALL save_game(3)
     f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f
     g = FREEFILE: OPEN "cws4.sav" FOR OUTPUT AS #g
@@ -2572,6 +3167,7 @@ SUB TestSaveGameNamesItsScenario
     CHDIR TestTempDir$
     scenario_count = 2: scenario_folder$(1) = "standard": scenario_folder$(2) = "alternate": scenario_now = 2
     turn_month = 9
+    CALL WriteTestLeaders
     CALL save_game(3)
     f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f: LINE INPUT #f, text$: CLOSE #f
     AssertEqualStr CHR$(34) + "alternate" + CHR$(34), text$, "the first line"
@@ -2588,6 +3184,7 @@ SUB TestSaveGameWithoutAScenarioLoads
     CHDIR TestTempDir$
     scenario_count = 1: scenario_folder$(1) = "standard": scenario_now = 1
     turn_month = 9: turn_year = 1864
+    CALL WriteTestLeaders
     CALL save_game(3)
     ' The same file without its first line, as the game wrote it before.
     f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f: LINE INPUT #f, text$
@@ -2727,4 +3324,6 @@ END SUB
 '$INCLUDE: '../game/colors.bm'
 '$INCLUDE: '../io/files.bm'
 '$INCLUDE: '../io/events_file.bm'
+'$INCLUDE: '../io/tuning_file.bm'
+'$INCLUDE: '../io/tuning_knobs.bm'
 '$INCLUDE: '../io/script.bm'

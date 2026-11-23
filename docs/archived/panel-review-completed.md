@@ -11,8 +11,16 @@ The findings of [../panel-review.md](../panel-review.md) that are done, under th
    - No CI job runs the 198 unit tests, the Python tests or the 40 scripts.
 
    Done in part: the port reached `main` on 2026-11-14, and `55e608e` fixed the copied
-   documents and added the three test steps. The scripts still fail in CI; that part stays
-   open in the review as item 2.
+   documents and added the three test steps.
+
+   Then the scripts failed in CI. On `main` at `55e608e` (2026-11-14), the build, the Python
+   tests and the unit tests passed, but all 41 scripts stopped before the title menu: the
+   game never reached a prompt on the Windows runner. The most likely cause was the first
+   sound statement on a runner with no sound device. `039e402` moved the scripts to a Linux
+   job, under Xvfb with ALSA's null sound device, as QB64Rust's CI runs its window programs.
+
+   Done 2026-11-15: the merge of pull request 27 (`69e0cec`) ran both jobs, and all 41
+   scripts passed on Linux.
 3. **Make the BASIC copy the only path for the history file.** `script_shell`
    (`port\script.bm`) already copies in BASIC under every script. Dropping
    the real `SHELL "copy ..."` removes an untested path, the console window a player sees, and
@@ -22,6 +30,15 @@ The findings of [../panel-review.md](../panel-review.md) that are done, under th
    (`io\files.bm`) renames `cws.his` to `oldhist.ory` with `NAME` in all play, and the source
    has no `SHELL` left. The file-name case was fixed with it ([devnotes.md](../devnotes.md),
    "Linux file access and history backups").
+4. **One batch ruling on the computer's inherited typos.** `TODO.md` has three: the fort of 2
+   counted as none, `ai_fortify`'s local `side_cash`, and `ai_beyond_score`'s owner compared with a
+   city. A fourth, `ai_army_order`'s test of `j = 0`, changed no play and was fixed on
+   2026-11-15. A fifth is in `ai_attack_score`: the army's leader rating is added and
+   subtracted, so it cancels. The original has the same line (`CWSTRAT2.BAS` line 364). One
+   batch means one re-record.
+
+   Done 2026-11-15: the user ruled to fix all four, and they were fixed in one batch
+   ([rule-changes.md](../rule-changes.md), G25 to G28).
 
 ## Records that are wrong now
 
@@ -42,3 +59,9 @@ The findings of [../panel-review.md](../panel-review.md) that are done, under th
 
   Done 2026-11-14: cut to the folder rules and one line per file. The old tables are in
   [file-layout-completed.md](file-layout-completed.md).
+
+## Decisions for the user
+
+3. Fix the four computer typos left in one batch?
+
+   Answered 2026-11-15 (user): yes. Fixed as G25 to G28.

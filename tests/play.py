@@ -23,7 +23,7 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
     #! data <folder>         the files of tests/data/<folder> go into the run's folder, over those
                              of the same name; a <name>.save there is a description that
                              make_save.py turns into the saved game <name>.sav
-    #! without <name> ...    files the run starts without, as graphics/MTN.VGA
+    #! without <name> ...    files the run starts without, as graphics/MTN.PNG
     #! dice <groups>         forced random numbers for the special events (CWS_DICE, io/script.bm):
                              a group for each month, as 0,.05,.95;0,.9
 
@@ -56,6 +56,7 @@ SOURCE_FOLDERS = ["rules", "ai", "commands", "ui", "draw", "game", "io"]
 NOT_DATA_SUFFIXES = SOURCE_SUFFIXES | {
     ".exe", ".obj", ".lnk", ".mak", ".zip", ".md", ".qlb", ".com", ".drv", ".bat", ".btm",
     ".pif", ".doc", ".txt", ".png", ".1st",
+    ".sav",  # a game saved while playing; a script that loads one takes it from its #! data folder
 }
 # The folders of data files, copied whole into a run's folder.
 DATA_FOLDERS: tuple[str, ...] = ("graphics", "scenarios")
@@ -484,6 +485,13 @@ def run_script(tools: Tools, exe: Path, script: Script, compiler: str, tag: str 
     remove_files(work, script.without)
     game = work / exe.name
     shutil.copy2(exe, game)
+    # In QB64Rust's suites VM, whose own OpenGL cannot open a QB64 program's window, QB64RUST_OPENGL_DIR
+    # names Mesa's software OpenGL; its two DLLs go beside the program, as QB64Rust's runner puts them
+    # (QB64Rust's tools/legacy_tests/run_legacy_tests.py, link_opengl). Unset, nothing is copied.
+    opengl = os.environ.get("QB64RUST_OPENGL_DIR")
+    if opengl:
+        for dll in ("opengl32.dll", "libgallium_wgl.dll"):
+            shutil.copy2(Path(opengl) / dll, work / dll)
     state = folder / "screen.txt"
     env = dict(os.environ)
     env["CWS_SEED"] = script.seed

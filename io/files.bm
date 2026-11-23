@@ -36,15 +36,12 @@ FUNCTION scenario_file$ (name$)
     scenario_file$ = SCNDIR + scenario_folder$(scenario_now) + "/" + name$
 END FUNCTION
 
-' Loads the selected scenario's leaders, starting forces, rules and flag details, then reads the saved settings.
+' Loads the selected scenario's leaders, starting forces, rules and flag details. The saved
+' settings are read by the caller (game_new, load_game), so that Vary Start keeps the player's.
 SUB load_scenario
     DIM k AS INTEGER
     DIM i AS INTEGER
-    OPEN "I", 1, scenario_file$("CWSLEAD.DAT")
-    FOR i = 1 TO MAX_LEADERS
-        INPUT #1, leader_name$(i), leader_rating(i)
-    NEXT i
-    CLOSE #1
+    CALL load_scenario_leaders
     OPEN "I", 1, scenario_file$("CWS.INI")
     FOR i = 0 TO 2
         INPUT #1, side_name$(i)
@@ -74,7 +71,16 @@ SUB load_scenario
         INPUT #1, flag_star_x(i), flag_star_y(i)
     NEXT i ' star locations on flag
     CLOSE #1
-    CALL config_read(current_side)
+END SUB
+
+' Reads the scenario's leaders from cwslead.dat: every leader free, with his rating.
+SUB load_scenario_leaders
+    DIM i AS INTEGER
+    OPEN "I", 1, scenario_file$("CWSLEAD.DAT")
+    FOR i = 1 TO MAX_LEADERS
+        INPUT #1, leader_name$(i), leader_rating(i)
+    NEXT i
+    CLOSE #1
 END SUB
 
 ' Reads one side's armies from cws.ini, open as #1: their count, then each army's city, troops,
@@ -126,7 +132,8 @@ END SUB
 
 ' Reads the saved game cws<slot>.sav: the scenario, the date, the armies, the cities, the sides,
 ' and the side that plays. A save of another scenario than the one loaded reads that scenario's
-' leaders and map first. A leader who commands an army leaves the free leaders. The victory
+' map first. The scenario's leaders are read again, and a leader who commands an army leaves
+' the free leaders. The victory
 ' rules and the events that have happened follow, in a game saved since 2026-11-14 (save_game).
 ' Then it reads the settings of cws.cfg. problem$ is "" when the game was loaded; otherwise it says why not,
 ' and nothing was changed. The menu of saved games is menu_load_game (ui/files.bm).
@@ -145,6 +152,7 @@ SUB load_game (slot, problem$)
     DIM folder$
     DIM named AS INTEGER
     DIM done_count AS INTEGER
+    DIM saved_tuning$
     problem$ = ""
     file$ = save_file_name$(slot)
     ' The scenario first. The file is closed again, because load_scenario and load_cities read
@@ -169,6 +177,9 @@ SUB load_game (slot, problem$)
         CALL load_scenario
         CALL load_cities
     END IF
+    ' The free leaders are not saved: they are the scenario's, less those who command an army
+    ' below (G33). The DOS game kept the list of the game played before the load.
+    CALL load_scenario_leaders
     OPEN "I", 1, file$
     IF named THEN
         LINE INPUT #1, text$
@@ -216,11 +227,29 @@ SUB load_game (slot, problem$)
                 event_done(row) = 1
             END IF
         NEXT k
+        IF NOT EOF(1) THEN
+            INPUT #1, saved_tuning$
+        END IF
     END IF
 
     CLOSE #1
+    ' The game goes on with the tuning knobs it was saved with. A save without the line was
+    ' saved with every knob at its default.
+    CALL tuning_apply_list(saved_tuning$)
     CALL config_read(config_side)
     current_side = saved_side
+    ' The raid on commerce is not saved. Nothing of the game played before the load is kept, and
+    ' a fleet saved at sea raids again at once (G31). The DOS game kept the raid of the game
+    ' played before, and a fleet saved at sea raided only once a fleet had moved.
+    raiding_side = SIDE_NONE
+    raid_loss = 0
+    fleet_pursuit = 0
+    CALL navy_note_raiding_side
+    ' The strength ratio is not saved either. It is 0, as in a game loaded from the title,
+    ' until the month's end works it out (G32).
+    ai_strength_ratio! = 0
+    ' A loaded game is under way: Vary Start would start it again (G40).
+    vary_start_open = 0
 END SUB
 
 ' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The file's first line is the
@@ -256,6 +285,11 @@ SUB save_game (slot)
             WRITE #1, event_name$(i)
         END IF
     NEXT i
+    ' The tuning knobs that are not at their defaults (tuning_changes$, io/tuning_knobs.bm). With
+    ' all at their defaults the file has no such line, as before there were knobs.
+    IF tuning_changes$ <> "" THEN
+        WRITE #1, tuning_changes$
+    END IF
     CLOSE #1
 
     config_side = current_side
@@ -360,5 +394,9 @@ SUB history_start
     END IF
     OPEN "O", 2, "cws.his"
     PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
+    ' A game played with tuning knobs off their defaults says which.
+    IF tuning_changes$ <> "" THEN
+        PRINT #2, "Tuning: "; tuning_changes$
+    END IF
     CLOSE #2
 END SUB

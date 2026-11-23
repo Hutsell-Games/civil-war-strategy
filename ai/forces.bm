@@ -16,9 +16,10 @@ SUB ai_resupply (side)
 END SUB
 
 ' The computer fortifies its capital, or a city of its own that the enemy near it outnumbers.
-' side_cash without an index is a local that is always 0, as in the original.
+' The Union without a fleet may stop when its cash is below 222. The original tested an
+' undeclared cash, always 0, so it stopped half the time whatever its cash
+' (docs/rule-changes.md, G26).
 SUB ai_fortify (side)
-    DIM side_cash AS INTEGER
     DIM city AS INTEGER
     DIM army AS INTEGER
     IF NOT fort_affordable(side) THEN
@@ -40,7 +41,7 @@ SUB ai_fortify (side)
         army = city_army(city)
         army_order(army) = ORDER_BUSY
         CALL city_fortify(side, city)
-        IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND RND > .5 AND side_cash < 222 THEN
+        IF ai_fortify_stops(side) THEN
             EXIT SUB
         END IF
         IF 3 * RND <= 1 + ai_strength_ratio! OR NOT fort_affordable(side) THEN
@@ -49,6 +50,12 @@ SUB ai_fortify (side)
         city = ai_fortify_pick(side)
     LOOP
 END SUB
+
+' Whether the Union's computer, with no fleet, stops fortifying after a fort: on an even
+' chance, when its cash is below 222. It draws its number for any side, as the original did.
+FUNCTION ai_fortify_stops (side)
+    ai_fortify_stops = side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND RND > .5 AND side_cash(side) < ai_fortify_cash
+END FUNCTION
 
 ' The computer's choice of a city to fortify: one of its armies' cities whose enemy near it
 ' outnumbers the army. 0 when it fortifies none.
@@ -85,23 +92,23 @@ END FUNCTION
 SUB ai_raise_forces (side)
     DIM ship_reserve AS INTEGER
     DIM army_count AS INTEGER
-    IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > COST_SHIP THEN
+    IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > cost_ship THEN
         CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD)
-        IF side_cash(side) < COST_RECRUIT THEN
+        IF side_cash(side) < cost_recruit THEN
             EXIT SUB
         END IF
     END IF
     army_count = ai_count_armies(side)
-    IF army_count > 2 + 3 * current_side + 3 * RND THEN
+    IF army_count > ai_armies_base + ai_armies_per_side * current_side + ai_armies_spread * RND THEN
         EXIT SUB
     END IF
-    IF fleet_size(side) < 5 AND side_cash(side) > COST_SHIP AND NOT fleet_is_at_sea(side) THEN
+    IF fleet_size(side) < ai_fleet_wanted AND side_cash(side) > cost_ship AND NOT fleet_is_at_sea(side) THEN
         IF city_owner(fleet_city(side)) = side THEN
-            ship_reserve = ship_reserve + COST_SHIP
-            side_cash(side) = side_cash(side) - COST_SHIP
+            ship_reserve = ship_reserve + cost_ship
+            side_cash(side) = side_cash(side) - cost_ship
         END IF
     END IF
-    ' ai_recruit does nothing when the cash left is less than COST_RECRUIT.
+    ' ai_recruit does nothing when the cash left is less than cost_recruit.
     CALL ai_recruit(side)
     side_cash(side) = side_cash(side) + ship_reserve
 END SUB
@@ -138,7 +145,7 @@ SUB ai_recruit (side)
     DIM raised AS INTEGER
     DIM cities(MAX_CITIES) AS INTEGER
     DIM count AS INTEGER
-    IF side_cash(side) < COST_RECRUIT THEN
+    IF side_cash(side) < cost_recruit THEN
         EXIT SUB
     END IF
     CALL draw_ai_recruit_color
@@ -147,7 +154,7 @@ SUB ai_recruit (side)
         EXIT SUB
     END IF
     DO
-        IF side_cash(side) < COST_RECRUIT THEN
+        IF side_cash(side) < cost_recruit THEN
             EXIT SUB
         END IF
         CALL draw_ai_funds(side, count)
@@ -159,7 +166,11 @@ SUB ai_recruit (side)
     LOOP
 END SUB
 
-' The computer's pick from its list of count cities to recruit in.
+' The computer's pick from its list of count cities to recruit in: the last city whose army has
+' fewer than ai_reinforce_below troops, else one at random. The original's test,
+' `x = 0 XOR armysize(x) < 155`, read army 0 for a city with no army: it holds the size of the
+' last Join, so an empty city was picked only after a Join of 155 or more, and not after a Load.
+' The test is now that of an empty army 0: an empty city is never picked by it (G38).
 FUNCTION ai_recruit_pick (side, cities(), count)
     DIM army AS INTEGER
     DIM best_score AS INTEGER
@@ -172,7 +183,7 @@ FUNCTION ai_recruit_pick (side, cities(), count)
     FOR i = 1 TO count
         city = cities(i)
         army = city_army(city)
-        IF army = 0 XOR army_size(army) < 155 THEN
+        IF army > 0 AND army_size(army) < ai_reinforce_below THEN
             choice = i
         END IF
     NEXT i
@@ -195,7 +206,7 @@ FUNCTION ai_recruit_pick (side, cities(), count)
             END IF
         NEXT i
     END IF
-    IF side_cash(side) < COST_RECRUIT THEN
+    IF side_cash(side) < cost_recruit THEN
         choice = count
     END IF
     ai_recruit_pick = cities(choice)

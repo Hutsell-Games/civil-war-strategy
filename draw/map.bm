@@ -313,15 +313,15 @@ SUB draw_map
     PAINT (200, 200), 2, 10
     COLOR COLOR_LIGHT_GREEN
     '==========================  Mountains =================================
-    IF _FILEEXISTS(GFXDIR + "MTN.VGA") THEN
-        PUT (380, 30), pic_mountain(), PSET
-        PUT (270, 200), pic_mountain(), PSET
-        PUT (310, 160), pic_mountain(), PSET
-        PUT (350, 120), pic_mountain(), PSET
-        PUT (200, 185), pic_mountain(), PSET
-        PUT (250, 130), pic_mountain(), PSET
-        PUT (320, 80), pic_mountain(), PSET
-        PUT (30, 150), pic_mountain(), PSET
+    IF _FILEEXISTS(GFXDIR + "MTN.PNG") THEN
+        _PUTIMAGE (380, 30), pic_mountain
+        _PUTIMAGE (270, 200), pic_mountain
+        _PUTIMAGE (310, 160), pic_mountain
+        _PUTIMAGE (350, 120), pic_mountain
+        _PUTIMAGE (200, 185), pic_mountain
+        _PUTIMAGE (250, 130), pic_mountain
+        _PUTIMAGE (320, 80), pic_mountain
+        _PUTIMAGE (30, 150), pic_mountain
         LINE (30, 150)-(70, 190), 2, BF
     END IF
     '===========================  Kentucky =================================
