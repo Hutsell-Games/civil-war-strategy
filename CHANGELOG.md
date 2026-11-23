@@ -102,6 +102,8 @@ source rather than extending version 1.61.
   after the last fort the treasury can pay for.
 - The army report's income line shows the right total of both sides' income.
   Before, it counted the two capitals twice, so the total was 200 too high.
+- A letter in the city picker finds your city even when it is the one just before
+  the first city with that letter. Before, the letter did nothing then.
 
 ## Version 1.7
 

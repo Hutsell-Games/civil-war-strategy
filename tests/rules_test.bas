@@ -113,8 +113,8 @@ SUB TestSideCityStepWrapsBothWays
     AssertEqualInt 0, side_city_step(4, 1, 1, 33), "33 steps from 4 reach 37, not 38"
 END SUB
 
-' The first city with the letter, or the side's next one. The search from city 1 stops at 39,
-' so city 40 is never looked at.
+' The first city with the letter, or the side's next one. The search from city 1 reaches 40,
+' the city just before it (U19).
 SUB TestSideCityByLetter
     city_name$(1) = "Albany": city_name$(5) = "Boston": city_name$(9) = "Bangor"
     city_owner(1) = 2: city_owner(5) = 1: city_owner(9) = 1
@@ -122,7 +122,9 @@ SUB TestSideCityByLetter
     AssertEqualInt 5, side_city_by_letter("A", 1, 9), "Albany is the Rebels': on to 5"
     AssertEqualInt 9, side_city_by_letter("Z", 1, 9), "no Z: stay"
     city_owner(5) = 0: city_owner(9) = 0: city_owner(40) = 1
-    AssertEqualInt 7, side_city_by_letter("A", 1, 7), "only 40 held: not reached, stay"
+    AssertEqualInt 40, side_city_by_letter("A", 1, 7), "only 40 held: reached"
+    city_owner(40) = 0
+    AssertEqualInt 7, side_city_by_letter("A", 1, 7), "none held: stay"
 END SUB
 
 ' --------------------------------------------------- city_fix_return_routes

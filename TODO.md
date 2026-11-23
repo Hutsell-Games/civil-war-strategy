@@ -28,11 +28,6 @@ is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Th
 - **`normal_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
   on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
-- **A letter in the city picker never reaches one city** (`side_city_by_letter`, `rules\city.bm`).
-  When the side does not hold the first city with that letter, the search goes on through the next
-  38 cities, as the original's 39 tries did. The 40th, the city just before the first, is never
-  looked at. When it is the only city the side holds, the picker stays where it was. It most likely meant
-  `MAX_CITIES - 1` steps. Found 2026-11-14. `TestSideCityByLetter` holds it.
 - **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
   Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
   `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
