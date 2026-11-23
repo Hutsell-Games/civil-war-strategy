@@ -74,14 +74,9 @@ END SUB
 ' (blockaded is 1). An army left without supplies may lose a tenth of its troops (starved is 1).
 SUB turn_army_supply (army, blockaded, starved)
     DIM side AS INTEGER
-    DIM friendly_neighbors AS INTEGER
     side = army_side(army)
     IF side_cash(side) >= upkeep_per_size# * army_size(army) THEN
-        friendly_neighbors = 1
-        IF opt_realism >= REALISM_ON THEN
-            friendly_neighbors = city_is_connected(side, army_city(army))
-        END IF
-        IF friendly_neighbors > 0 THEN
+        IF NOT army_supply_cut_off(army) THEN
             army_supply(army) = army_supply(army) + 1
             side_cash(side) = side_cash(side) - upkeep_per_size# * army_size(army)
         END IF
@@ -104,23 +99,14 @@ SUB turn_army_supply (army, blockaded, starved)
     END IF
 END SUB
 
-' The strength ratio the computer plays by: the player's troops against the computer's.
+' The strength ratio the computer plays by: the other side's strength divided by the current
+' side's, or 1 when the current side has none.
 SUB turn_strength_ratio
-    DIM union_strength AS INTEGER
-    DIM rebel_strength AS INTEGER
-    union_strength = side_strength(SIDE_UNION)
-    rebel_strength = side_strength(SIDE_REBEL)
-    IF current_side = SIDE_REBEL AND rebel_strength > 0 THEN
-        ai_strength_ratio! = union_strength / rebel_strength
-    ELSE
-        ai_strength_ratio! = 1
-    END IF
-    IF current_side = SIDE_UNION AND union_strength > 0 THEN
-        ai_strength_ratio! = rebel_strength / union_strength
-    ELSE
-        IF current_side = SIDE_UNION THEN
-            ai_strength_ratio! = 1
-        END IF
+    DIM own_strength AS INTEGER
+    own_strength = side_strength(current_side)
+    ai_strength_ratio! = 1
+    IF own_strength > 0 THEN
+        ai_strength_ratio! = side_strength(other_side(current_side)) / own_strength
     END IF
 END SUB
 
@@ -206,12 +192,8 @@ SUB turn_army_lost (army, winner)
     DIM side AS INTEGER
     side = army_side(winner)
     side_victory_points(side) = side_victory_points(side) + army_destroyed_points
-    army_supply(winner) = army_supply(winner) + army_supply(army)
-    IF army_supply(winner) > MAX_SUPPLY THEN
-        army_supply(winner) = MAX_SUPPLY
-    END IF
-    CALL army_clear(army)
-    army_name$(army) = ""
+    CALL army_take_supplies(winner, army)
+    CALL army_remove(army)
 END SUB
 
 ' An army enters the city and is done for the month.
@@ -253,7 +235,7 @@ SUB turn_collect_income
             side_cash(i) = 0
         END IF
     NEXT i
-    IF opt_players = PLAYERS_ONE AND current_side = SIDE_REBEL THEN
+    IF side_is_computers(SIDE_UNION) THEN
         side_income(SIDE_UNION) = side_income(SIDE_UNION) + union_income_bonus
     END IF
 

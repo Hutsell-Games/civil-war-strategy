@@ -37,8 +37,6 @@ END SUB
 SUB draw_train_box
     DIM i AS INTEGER
     DIM side_color AS INTEGER
-    DIM x AS INTEGER
-    DIM y AS INTEGER
     IF train_army(SIDE_UNION) + train_army(SIDE_REBEL) = 0 THEN
         EXIT SUB
     END IF
@@ -56,9 +54,7 @@ SUB draw_train_box
             PSET (60, 25), 3
         END IF
         DRAW "C0S4" + TRAIN_OUTLINE$ + "U8L2U5BF4"
-        x = POINT(0)
-        y = POINT(1)
-        PAINT (x, y), side_color, 0
+        CALL paint_at_pen(side_color, 0)
         LOCATE 4, 6 * (i - 1) + 2
         PRINT LEFT$(city_name$(army_order(train_army(i))), 5)
     NEXT i

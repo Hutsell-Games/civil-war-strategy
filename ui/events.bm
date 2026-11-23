@@ -54,15 +54,13 @@ SUB special_events
             CALL draw_map
     END SELECT
 
+    ' The tune of the side the event is good for.
+    IF opt_sound = SOUND_MUSIC THEN
+        CALL play_side_tune(other_side(event_side))
+    END IF
     IF event_side = SIDE_UNION THEN
-        IF opt_sound = SOUND_MUSIC THEN
-            PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
-        END IF
         CALL wait_key("S")
     ELSE
-        IF opt_sound = SOUND_MUSIC THEN
-            PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-        END IF
         CALL wait_key("N")
     END IF
 END SUB

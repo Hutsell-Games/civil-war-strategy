@@ -32,13 +32,25 @@ FUNCTION navy_has_ironclads
     END IF
 END FUNCTION
 
+' Whether the city is a sea port where the side can start a fleet or take new ships: its own,
+' and not the port the other side's fleet lies off. -1 or 0, as a comparison gives.
+FUNCTION navy_is_shipyard (side, city)
+    navy_is_shipyard = city_port_type(city) = PORT_SEA AND city_owner(city) = side AND fleet_city(other_side(side)) <> city
+END FUNCTION
+
+' Whether the side's fleet can retreat to the city: a sea port of the side's own, other than the
+' one the fleet is in. -1 or 0, as a comparison gives.
+FUNCTION navy_is_retreat_port (side, city)
+    navy_is_retreat_port = city_owner(city) = side AND city <> fleet_city(side) AND city_port_type(city) = PORT_SEA
+END FUNCTION
+
 ' The sea ports where the side can start a fleet, in the map's order: its own, without the
 ' port the other side's fleet lies off.
 SUB navy_list_shipyards (side, cities(), count)
     DIM i AS INTEGER
     count = 0
     FOR i = 1 TO MAX_CITIES
-        IF city_port_type(i) = PORT_SEA AND city_owner(i) = side AND fleet_city(other_side(side)) <> i THEN
+        IF navy_is_shipyard(side, i) THEN
             count = count + 1
             cities(count) = i
         END IF
@@ -329,7 +341,7 @@ FUNCTION navy_has_retreat_port (side)
     DIM i AS INTEGER
     navy_has_retreat_port = 0
     FOR i = 1 TO MAX_CITIES
-        IF city_owner(i) = side AND i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN
+        IF navy_is_retreat_port(side, i) THEN
             navy_has_retreat_port = -1
             EXIT FUNCTION
         END IF
@@ -343,12 +355,10 @@ SUB navy_retreat_port (side, port)
     DIM i AS INTEGER
     port = 0
     FOR i = 1 TO MAX_CITIES
-        IF city_owner(i) = side THEN
-            IF i <> fleet_city(side) AND city_port_type(i) = PORT_SEA THEN
-                port = i
-                IF RND > .3 THEN
-                    EXIT FOR
-                END IF
+        IF navy_is_retreat_port(side, i) THEN
+            port = i
+            IF RND > .3 THEN
+                EXIT FOR
             END IF
         END IF
     NEXT i

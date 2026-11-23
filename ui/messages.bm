@@ -37,7 +37,7 @@ SUB scribe_message (text$, display)
             CALL show_message_box(text$, COLOR_RED)
     END SELECT
     IF opt_history > 0 THEN
-        OPEN "A", 2, "cws.his"
+        OPEN "A", 2, HISTORY_FILE
         text$ = _TRIM$(text$)
         PRINT #2, text$
         CLOSE #2

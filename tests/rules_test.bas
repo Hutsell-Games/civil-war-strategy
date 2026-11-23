@@ -177,6 +177,57 @@ SUB TestCutoffCountsFriendlyNeighbors
     a = city_is_connected(2, 5): AssertEqualInt 0, a, "cut off"
 END SUB
 
+SUB TestCityIsCutOffAndArmySupplyCutOff
+    city_road(5, 1) = 2: city_road(5, 2) = 3
+    city_owner(2) = 1: city_owner(3) = 0
+    a = city_is_cut_off(1, 5): AssertEqualInt 0, a, "the Union holds a neighbor"
+    a = city_is_cut_off(2, 5): AssertEqualInt -1, a, "the Rebels hold none"
+    army_city(21) = 5: army_city(1) = 5
+    opt_realism = 0
+    a = army_supply_cut_off(21): AssertEqualInt 0, a, "without Realism, never cut off"
+    opt_realism = REALISM_ON
+    a = army_supply_cut_off(21): AssertEqualInt -1, a, "with Realism, the Rebels' army is"
+    a = army_supply_cut_off(1): AssertEqualInt 0, a, "and the Union's is not"
+    opt_realism = REALISM_HIGH
+    a = army_supply_cut_off(21): AssertEqualInt -1, a, "Realism 2 counts as on"
+END SUB
+
+' ------------------------------------------------------------- computer's
+' The computer plays the side that is not current_side, in a one-player game only.
+
+SUB TestSideAndArmyIsComputers
+    opt_players = PLAYERS_ONE: current_side = SIDE_UNION
+    a = side_is_computers(SIDE_REBEL): AssertEqualInt -1, a, "one player: the other side"
+    a = side_is_computers(SIDE_UNION): AssertEqualInt 0, a, "not the player's"
+    a = army_is_computers(21): AssertEqualInt -1, a, "a Rebel army"
+    a = army_is_computers(1): AssertEqualInt 0, a, "a Union army"
+    current_side = SIDE_REBEL
+    a = army_is_computers(1): AssertEqualInt -1, a, "the player is the Rebels"
+    opt_players = PLAYERS_TWO
+    a = army_is_computers(1): AssertEqualInt 0, a, "two players: no side is the computer's"
+    a = army_is_computers(21): AssertEqualInt 0, a, "either way"
+END SUB
+
+' ------------------------------------------------------- take and remove
+' An army takes another's supplies up to MAX_SUPPLY; a removed army leaves an empty slot.
+
+SUB TestArmyTakeSuppliesAndRemove
+    army_supply(3) = 3: army_supply(4) = 4
+    CALL army_take_supplies(3, 4)
+    AssertEqualInt 7, army_supply(3), "the sum"
+    AssertEqualInt 4, army_supply(4), "the other keeps its own"
+    army_supply(3) = MAX_SUPPLY - 1
+    CALL army_take_supplies(3, 4)
+    AssertEqualInt MAX_SUPPLY, army_supply(3), "capped"
+    army_city(4) = 9: army_size(4) = 50: army_name$(4) = "Grant": army_order(4) = 12
+    CALL army_remove(4)
+    AssertEqualInt 0, army_city(4), "no city"
+    AssertEqualInt 0, army_size(4), "no troops"
+    AssertEqualInt 0, army_supply(4), "no supplies"
+    AssertEqualInt ORDER_NONE, army_order(4), "no order"
+    AssertEqualStr "", army_name$(4), "no name"
+END SUB
+
 ' ------------------------------------------------------------ traincapacity
 ' Without realism the capacity is the side's own. With it, the capacity
 ' grows with the cities held, between half and twice the side's own. The
@@ -2046,6 +2097,33 @@ SUB TestVictoryNearRules
     AssertEqualInt 0, victory_near_force(1, 280, 0), "no Rebel troops: no ratio"
 END SUB
 
+' The ratio and the income share exactly at a rule's limit: the ratio rule asks for more than
+' the limit, the income rule for at least it.
+SUB TestVictoryRatioAndShareAtTheLimit
+    victory_rule(VICTORY_FORCE_RATIO) = 3
+    side_income(1) = 50: side_income(2) = 50
+    CALL victory_rule_met(1, 300, 100, j)
+    AssertEqualInt 0, j, "3 to 1 is not more than 3"
+    CALL victory_rule_met(1, 301, 100, j)
+    AssertEqualInt VICTORY_FORCE_RATIO, j, "3.01 to 1 is"
+    CALL victory_rule_met(2, 100, 301, j)
+    AssertEqualInt VICTORY_FORCE_RATIO, j, "the Rebels' ratio is theirs over the Union's"
+    AssertEqualInt 0, victory_near_force(1, 270, 100), "2.7 to 1 is not more than .9 of 3"
+    AssertEqualInt 1, victory_near_force(1, 271, 100), "2.71 to 1 is"
+    victory_rule(VICTORY_FORCE_RATIO) = 0
+    victory_rule(VICTORY_INCOME) = 60
+    side_income(1) = 60: side_income(2) = 40
+    CALL victory_rule_met(1, 100, 100, j)
+    AssertEqualInt VICTORY_INCOME, j, "60 of 100 meets 60 percent"
+    side_income(1) = 59: side_income(2) = 41
+    CALL victory_rule_met(1, 100, 100, j)
+    AssertEqualInt 0, j, "59 of 100 does not"
+    side_income(1) = 54: side_income(2) = 46
+    AssertEqualInt 1, victory_near_income(1), "54 of 100 is nine tenths of 60 percent"
+    side_income(1) = 53: side_income(2) = 47
+    AssertEqualInt 0, victory_near_income(1), "53 is not"
+END SUB
+
 SUB TestVictoryPlayOn
     victory_rule(VICTORY_CITIES) = 24: victory_rule(VICTORY_CAPITAL) = 1
     CALL victory_play_on(VICTORY_CITIES)
@@ -2122,6 +2200,12 @@ SUB TestTurnStrengthRatio
     current_side = 1: army_size(1) = 100: army_size(21) = 50: army_city(1) = 3: army_city(21) = 7
     CALL turn_strength_ratio
     AssertTrue ai_strength_ratio! = .5, "the computer's 5,000 against the player's 10,000:" + STR$(ai_strength_ratio!)
+    current_side = 2
+    CALL turn_strength_ratio
+    AssertTrue ai_strength_ratio! = 2, "the Rebels' turn: the Union's over theirs:" + STR$(ai_strength_ratio!)
+    army_city(21) = 0
+    CALL turn_strength_ratio
+    AssertTrue ai_strength_ratio! = 1, "the current side has no strength: 1"
 END SUB
 
 ' The army report's Enemy Forces: the troops of the armies that hold a city, whatever the
@@ -2644,6 +2728,22 @@ SUB TestNavyListsOfPorts
     AssertEqualInt 2, count, "two ports to sail to: every sea port but the fleet's own"
     AssertEqualInt 8, cities(1), "Norfolk"
     AssertEqualInt 9, cities(2), "Mobile, the enemy's"
+END SUB
+
+SUB TestNavyShipyardAndRetreatPortPredicates
+    city_port_type(5) = PORT_SEA: city_owner(5) = SIDE_UNION
+    city_port_type(8) = PORT_SEA: city_owner(8) = SIDE_UNION
+    city_port_type(9) = PORT_SEA: city_owner(9) = SIDE_REBEL
+    city_port_type(11) = PORT_RIVER: city_owner(11) = SIDE_UNION
+    fleet_city(SIDE_REBEL) = 8: fleet_city(SIDE_UNION) = 5
+    a = navy_is_shipyard(SIDE_UNION, 5): AssertEqualInt -1, a, "the Union's own sea port"
+    a = navy_is_shipyard(SIDE_UNION, 8): AssertEqualInt 0, a, "the enemy's fleet lies off it"
+    a = navy_is_shipyard(SIDE_UNION, 9): AssertEqualInt 0, a, "the enemy's port"
+    a = navy_is_shipyard(SIDE_UNION, 11): AssertEqualInt 0, a, "a river port"
+    a = navy_is_retreat_port(SIDE_UNION, 5): AssertEqualInt 0, a, "the fleet is in it"
+    a = navy_is_retreat_port(SIDE_UNION, 8): AssertEqualInt -1, a, "another sea port of its own"
+    a = navy_is_retreat_port(SIDE_UNION, 9): AssertEqualInt 0, a, "not the enemy's"
+    a = navy_is_retreat_port(SIDE_UNION, 11): AssertEqualInt 0, a, "nor a river port"
 END SUB
 
 ' A fleet of two ships or more, in port off a neutral city, can land an army; the Rebels'

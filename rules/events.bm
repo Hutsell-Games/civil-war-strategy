@@ -231,7 +231,7 @@ SUB event_delivery_port (side, port, found)
         EXIT SUB
     END IF
     FOR i = 1 TO MAX_CITIES
-        IF city_owner(i) = side AND city_port_type(i) = PORT_SEA AND fleet_city(other_side(side)) <> i THEN
+        IF navy_is_shipyard(side, i) THEN
             port = i
             found = 1
             EXIT FOR

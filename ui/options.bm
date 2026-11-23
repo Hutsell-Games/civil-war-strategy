@@ -1,10 +1,17 @@
 ' The Utility menu and the menus of its settings. The settings' rules are in rules/setup.bm.
 
+' The mark of a setting that is on in the Utility menu: "û" when is_on is true, or nothing.
+FUNCTION check_mark$ (is_on)
+    check_mark$ = ""
+    IF is_on THEN
+        check_mark$ = "û"
+    END IF
+END FUNCTION
+
 ' The Utility menu. It shows again after a setting is changed. Side, Chk Links, Esc, and an
 ' Esc in the SOUNDS or the Balance menu go back to the main menu.
 SUB menu_utility
     DIM balance$
-    DIM check_mark$
     DIM row AS INTEGER
     DIM picked AS INTEGER
     menu_choice = MENU_START + 1
@@ -27,28 +34,12 @@ SUB menu_utility
         END IF
         menu_text$(6) = "Balance" + balance$
         menu_text$(7) = "End Cond"
-        check_mark$ = "û"
-        IF opt_event_balance = 0 THEN
-            check_mark$ = ""
-        END IF
-        menu_text$(8) = "Rndom Evt " + check_mark$
+        menu_text$(8) = "Rndom Evt " + check_mark$(opt_event_balance <> 0)
         menu_text$(9) = "Vary Start"
-        check_mark$ = ""
-        IF opt_winter_campaigns = 1 THEN
-            check_mark$ = "û"
-        END IF
-        menu_text$(10) = "Jan Campgn" + check_mark$
-        check_mark$ = ""
-        IF opt_realism = REALISM_ON THEN
-            check_mark$ = "û"
-        END IF
-        menu_text$(11) = "Realism " + check_mark$
+        menu_text$(10) = "Jan Campgn" + check_mark$(opt_winter_campaigns = 1)
+        menu_text$(11) = "Realism " + check_mark$(opt_realism = REALISM_ON)
         menu_text$(12) = "Chk Links"
-        check_mark$ = ""
-        IF opt_history = 1 THEN
-            check_mark$ = "û"
-        END IF
-        menu_text$(13) = "History" + check_mark$
+        menu_text$(13) = "History" + check_mark$(opt_history = 1)
         menu_item_count = 13
         menu_col = PANEL_COL
         menu_row = 11

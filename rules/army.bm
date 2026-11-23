@@ -30,6 +30,17 @@ FUNCTION other_side (side)
     other_side = SIDE_UNION + SIDE_REBEL - side
 END FUNCTION
 
+' The computer plays the side: a one-player game, and not the side whose turn it is. Gives -1
+' or 0, as a comparison does.
+FUNCTION side_is_computers (side)
+    side_is_computers = opt_players = PLAYERS_ONE AND side <> current_side
+END FUNCTION
+
+' The computer plays the army's side (side_is_computers).
+FUNCTION army_is_computers (army)
+    army_is_computers = side_is_computers(army_side(army))
+END FUNCTION
+
 ' The state that army_city() and army_order() hold, by name. Each gives -1 or 0, as a comparison
 ' does. An army exists while it holds a city; army_city() is 0 for an empty slot.
 FUNCTION army_exists (army)
@@ -63,6 +74,20 @@ SUB army_clear (army)
     army_supply(army) = 0
 END SUB
 
+' The army takes the supplies of army from, up to MAX_SUPPLY. from keeps its own.
+SUB army_take_supplies (army, from)
+    army_supply(army) = army_supply(army) + army_supply(from)
+    IF army_supply(army) > MAX_SUPPLY THEN
+        army_supply(army) = MAX_SUPPLY
+    END IF
+END SUB
+
+' The army is gone: its slot is emptied (army_clear) and its name blanked.
+SUB army_remove (army)
+    CALL army_clear(army)
+    army_name$(army) = ""
+END SUB
+
 ' Whether an army counts in its side's strength: it holds a city, or rides its side's train.
 FUNCTION army_in_field (army)
     army_in_field = army_exists(army) OR (army > 0 AND train_army(army_side(army)) = army)
@@ -82,6 +107,20 @@ FUNCTION side_troops (side)
         END IF
     NEXT i
     side_troops = troops
+END FUNCTION
+
+' A side's troops in hundreds in the field: the armies that hold a city or ride the side's train
+' (army_in_field). The victory rules count these.
+FUNCTION side_field_troops (side)
+    DIM i AS INTEGER
+    DIM troops AS INTEGER
+    troops = 0
+    FOR i = side_first_army(side) TO side_last_army(side)
+        IF army_in_field(i) THEN
+            troops = troops + army_size(i)
+        END IF
+    NEXT i
+    side_field_troops = troops
 END FUNCTION
 
 ' A side's strength in thousands of troops: a tenth of each army's size in hundreds, rounded at
@@ -319,7 +358,7 @@ SUB army_add_recruits (side, army, isolated)
     isolated = 0
     IF opt_realism >= REALISM_ON THEN
         troops = recruit_troops(side, army_city(army), 1)
-        IF city_is_connected(side, army_city(army)) < 1 THEN
+        IF city_is_cut_off(side, army_city(army)) THEN
             isolated = 1
         END IF
     END IF
@@ -351,7 +390,7 @@ END FUNCTION
 ' A third of troops when the side's city is cut off: no city next to it is the side's.
 FUNCTION recruits_cut_off (side, city, troops)
     recruits_cut_off = troops
-    IF city_is_connected(side, city) < 1 THEN
+    IF city_is_cut_off(side, city) THEN
         recruits_cut_off = troops \ recruit_cut_off_divisor
     END IF
 END FUNCTION
@@ -368,15 +407,11 @@ END SUB
 ' cut off under the Realism setting. army_resupply (commands/army.bm) shows it.
 SUB army_buy_supply (army, result)
     DIM side AS INTEGER
-    DIM friendly_neighbors AS INTEGER
     DIM supply_added AS INTEGER
     result = SUPPLY_CUT_OFF
     side = army_side(army)
-    IF opt_realism >= REALISM_ON THEN
-        friendly_neighbors = city_is_connected(side, army_city(army))
-        IF friendly_neighbors < 1 THEN
-            EXIT SUB
-        END IF
+    IF army_supply_cut_off(army) THEN
+        EXIT SUB
     END IF
     result = SUPPLY_NO_CASH
     supply_added = army_supply_days(army)
@@ -413,10 +448,8 @@ FUNCTION army_may_get_supply (army)
     IF NOT army_exists(army) OR army_supply(army) > 1 THEN
         EXIT FUNCTION
     END IF
-    IF opt_realism >= REALISM_ON THEN
-        IF city_is_connected(army_side(army), army_city(army)) < 1 THEN
-            EXIT FUNCTION
-        END IF
+    IF army_supply_cut_off(army) THEN
+        EXIT FUNCTION
     END IF
     army_may_get_supply = -1
 END FUNCTION
@@ -559,15 +592,11 @@ END SUB
 ' unless it is best, the army whose leader takes command so far (army_combine_add).
 SUB army_combine_absorb (army, best)
     DIM slot AS INTEGER
-    army_supply(0) = army_supply(0) + army_supply(army)
-    IF army_supply(0) > MAX_SUPPLY THEN
-        army_supply(0) = MAX_SUPPLY
-    END IF
+    CALL army_take_supplies(0, army)
     IF army <> best THEN
         CALL army_free_leader(army, slot)
     END IF
-    CALL army_clear(army)
-    army_name$(army) = ""
+    CALL army_remove(army)
 END SUB
 
 ' The combined army takes the slot of the best leader's army, in the city. When more than one

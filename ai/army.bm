@@ -168,10 +168,7 @@ SUB ai_evaluate_move (army, best_road)
         IF city_owner(to_city) = own_side AND occupant > 0 AND army_order(occupant) = ORDER_NONE THEN
             score = score - army_size(occupant)
         END IF
-        IF enemy_side = SIDE_UNION AND city_y(to_city) < city_y(from_city) THEN
-            score = score + ai_march_direction_bonus
-        END IF
-        IF enemy_side = SIDE_REBEL AND city_y(to_city) > city_y(from_city) THEN
+        IF ai_toward_enemy(enemy_side, from_city, to_city) THEN
             score = score + ai_march_direction_bonus
         END IF
         score = score + ai_beyond_score(army, occupant, to_city, enemy_side)
@@ -329,10 +326,7 @@ FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
         IF far_city = 0 THEN
             _CONTINUE
         END IF
-        IF city_owner(far_city) = SIDE_NONE THEN
-            bonus = bonus + ai_beyond_value * city_value(far_city) + ai_beyond_fort * city_fort(far_city)
-        END IF
-        IF city_owner(far_city) = enemy_side THEN
+        IF city_owner(far_city) = SIDE_NONE OR city_owner(far_city) = enemy_side THEN
             bonus = bonus + ai_beyond_value * city_value(far_city) + ai_beyond_fort * city_fort(far_city)
         END IF
         IF city_owner(far_city) = enemy_side AND occupant > 0 THEN
@@ -353,6 +347,12 @@ FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
         END IF
     NEXT k
     ai_beyond_score = bonus
+END FUNCTION
+
+' Whether to_city lies toward enemy_side from from_city: north toward the Union, south toward
+' the Rebels. -1 or 0, as a comparison gives.
+FUNCTION ai_toward_enemy (enemy_side, from_city, to_city)
+    ai_toward_enemy = (enemy_side = SIDE_UNION AND city_y(to_city) < city_y(from_city)) OR (enemy_side = SIDE_REBEL AND city_y(to_city) > city_y(from_city))
 END FUNCTION
 
 ' The player's strength near a city: in full in the cities next to it, a tenth two roads away. The sum is an

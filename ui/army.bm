@@ -368,10 +368,8 @@ SUB menu_army_retreat (defender, retreat_city)
     DIM side AS INTEGER
     DIM k AS INTEGER
     retreat_city = 0
-    IF opt_players = PLAYERS_ONE THEN
-        IF (current_side = SIDE_UNION AND army_side(defender) = SIDE_REBEL) OR (current_side = SIDE_REBEL AND army_side(defender) = SIDE_UNION) THEN
-            EXIT SUB
-        END IF
+    IF army_is_computers(defender) THEN
+        EXIT SUB
     END IF
 
     menu_highlight = COLOR_LIGHT_MAGENTA
@@ -411,7 +409,6 @@ SUB menu_supply (picked)
     DIM first_army AS INTEGER
     DIM last_army AS INTEGER
     DIM i AS INTEGER
-    DIM friendly_neighbors AS INTEGER
     picked = 0
     first_army = side_first_army((current_side))
     last_army = side_last_army((current_side))
@@ -424,15 +421,12 @@ SUB menu_supply (picked)
         IF NOT army_exists(i) OR army_supply(i) > 1 THEN
             _CONTINUE
         END IF
-        IF opt_realism >= REALISM_ON THEN
-            friendly_neighbors = city_is_connected(current_side, army_city(i))
-            IF friendly_neighbors < 1 THEN
-                CALL clear_bottom_line
-                COLOR COLOR_WHITE
-                PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !";
-                wait_seconds opt_pause!
-                _CONTINUE
-            END IF
+        IF army_supply_cut_off(i) THEN
+            CALL clear_bottom_line
+            COLOR COLOR_WHITE
+            PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !";
+            wait_seconds opt_pause!
+            _CONTINUE
         END IF
         CALL menu_add_row(menu_short_name$(army_name$(i)), i)
     NEXT i

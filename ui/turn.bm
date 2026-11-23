@@ -7,11 +7,7 @@ SUB turn_date_and_supply
     DIM blockaded AS INTEGER
     DIM starved AS INTEGER
 
-    FOR i = 1 TO MAX_ARMIES
-        IF army_exists(i) THEN
-            CALL draw_army_flag(i)
-        END IF
-    NEXT i
+    CALL draw_army_flags
 
     CALL turn_advance_month
 
@@ -51,11 +47,8 @@ SUB turn_resolve
         CALL ai_turn
     ELSE
         CALL special_events
-        FOR i = 1 TO MAX_ARMIES
-            IF army_exists(i) AND army_has_move(i) THEN
-                CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
-            END IF
-        NEXT i
+        CALL draw_move_lines(SIDE_UNION)
+        CALL draw_move_lines(SIDE_REBEL)
     END IF
     COLOR COLOR_YELLOW
     LOCATE 1, 1
@@ -101,9 +94,7 @@ SUB turn_resolve
 
     CALL clear_bottom_line
     LINE (390, 350)-(520, 400), 1, BF
-    COLOR COLOR_LIGHT_MAGENTA
-    LOCATE 24, 51
-    PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+    CALL draw_month_label
     CALL turn_update_victory_points(SIDE_UNION)
     CALL turn_update_victory_points(SIDE_REBEL)
     IF opt_players = PLAYERS_TWO THEN

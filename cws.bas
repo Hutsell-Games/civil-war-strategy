@@ -20,14 +20,8 @@ replay = 0
 ' main_menu_start, the row the main menu starts on, is kept from one game to the next.
 DO
     CALL game_new
-    IF event_file_error$ <> "" THEN
-        PRINT event_file_error$
-        END
-    END IF
-    IF tuning_error$ <> "" THEN
-        PRINT tuning_error$
-        END
-    END IF
+    CALL stop_on_load_error(event_file_error$)
+    CALL stop_on_load_error(tuning_error$)
     IF replay = 0 THEN
         CALL window_open
     END IF
@@ -62,10 +56,7 @@ DO
             scenario_now = picked
             CALL game_new
             ' The scenario's own TUNING.DAT is read only here, so its errors are found here.
-            IF tuning_error$ <> "" THEN
-                PRINT tuning_error$
-                END
-            END IF
+            CALL stop_on_load_error(tuning_error$)
         END IF
         CALL show_new_game
     END IF
@@ -186,6 +177,15 @@ SUB window_wait_height (height)
             END IF
         END IF
     LOOP UNTIL ABS(TIMER - started!) > 1
+END SUB
+
+' Stops the game with the error of a data file that could not be read: message$, which is ""
+' when the file was read.
+SUB stop_on_load_error (message$)
+    IF message$ <> "" THEN
+        PRINT message$
+        END
+    END IF
 END SUB
 
 ' $INCLUDE: 'rules/army.bm'

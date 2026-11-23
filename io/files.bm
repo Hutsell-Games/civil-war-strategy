@@ -121,9 +121,7 @@ SUB load_cities
             owner = city_owner(i)
             side_city_count(owner) = side_city_count(owner) + 1
             side_victory_points(owner) = side_victory_points(owner) + city_value(i)
-        END IF
-        IF city_owner(i) > 0 THEN
-            side_cash(city_owner(i)) = side_cash(city_owner(i)) + city_value(i)
+            side_cash(owner) = side_cash(owner) + city_value(i)
         END IF
         total_income = total_income + city_value(i)
     NEXT i
@@ -326,14 +324,14 @@ END FUNCTION
 
 ' Reads the current side, game settings and battle totals from CWS.CFG.
 SUB config_read (side)
-    OPEN "I", 1, "CWS.CFG"
+    OPEN "I", 1, SETTINGS_FILE
     INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
     CLOSE #1
 END SUB
 
 ' Writes the current side, game settings and battle totals to CWS.CFG.
 SUB config_write (side)
-    OPEN "O", 1, "CWS.CFG"
+    OPEN "O", 1, SETTINGS_FILE
     WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
     CLOSE #1
 END SUB
@@ -360,7 +358,7 @@ END SUB
 SUB hall_of_fame_load (names$(), scores())
     DIM side AS INTEGER
     DIM i AS INTEGER
-    OPEN "I", 1, "HISCORE.CWS"
+    OPEN "I", 1, HALL_OF_FAME_FILE
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
             INPUT #1, names$(side, i), scores(side, i)
@@ -373,7 +371,7 @@ END SUB
 SUB hall_of_fame_save (names$(), scores())
     DIM side AS INTEGER
     DIM i AS INTEGER
-    OPEN "O", 1, "HISCORE.CWS"
+    OPEN "O", 1, HALL_OF_FAME_FILE
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
             WRITE #1, names$(side, i), scores(side, i)
@@ -386,13 +384,13 @@ END SUB
 ' oldhist.ory, which it replaces. The original copied cws.his there and then emptied it, so a
 ' rename does the same. NAME fails when its target exists, so an old oldhist.ory goes first.
 SUB history_start
-    IF _FILEEXISTS("cws.his") THEN
+    IF _FILEEXISTS(HISTORY_FILE) THEN
         IF _FILEEXISTS("oldhist.ory") THEN
             KILL "oldhist.ory"
         END IF
-        NAME "cws.his" AS "oldhist.ory"
+        NAME HISTORY_FILE AS "oldhist.ory"
     END IF
-    OPEN "O", 2, "cws.his"
+    OPEN "O", 2, HISTORY_FILE
     PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
     ' A game played with tuning knobs off their defaults says which.
     IF tuning_changes$ <> "" THEN

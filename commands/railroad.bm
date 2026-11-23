@@ -24,9 +24,7 @@ SUB railroad_start (side, army, city)
     END IF
     CALL draw_train_box
 
-    IF city_army(from_city) > 0 THEN
-        CALL draw_army_flag(city_army(from_city))
-    END IF
+    CALL draw_city_flag(from_city)
 END SUB
 
 ' The train arrives: its army gets off, and takes the city if it is not the side's.
@@ -35,9 +33,7 @@ SUB railroad_arrive (side)
     CALL draw_train(side, DRAW_ERASE)
     army = train_army(side)
     CALL railroad_unload(side)
-    IF city_army(train_from_city(side)) > 0 THEN
-        CALL draw_army_flag(city_army(train_from_city(side)))
-    END IF
+    CALL draw_city_flag(train_from_city(side))
     CALL draw_train(side, DRAW_SHOW)
 
     COLOR COLOR_LIGHT_CYAN

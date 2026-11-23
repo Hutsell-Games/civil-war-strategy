@@ -62,9 +62,7 @@ SUB menu_load_game
     FOR k = 1 TO 9
         file$ = save_file_name$(k)
         IF _FILEEXISTS(file$) THEN
-            menu_item_count = menu_item_count + 1
-            menu_text$(menu_item_count) = file$
-            menu_value(menu_item_count) = k
+            CALL menu_add_row(file$, k)
         END IF
     NEXT k
     CALL menu_bubble_sort((menu_item_count))

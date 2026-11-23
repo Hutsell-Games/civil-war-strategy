@@ -56,7 +56,7 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   click a row.
 - **One known folder for saves and settings.** `cws1.sav` to `cws9.sav`, `cws.cfg`, `hiscore.cws`, `cws.his`
   and `battsumm` are opened in the current folder (`io\files.bm`), so they land wherever the game was
-  started from. A single folder, for example beside the program, would keep them together.
+  started from. The names of the settings, the Hall of Fame and the history are constants in `io\folders.bi`. A single folder, for example beside the program, would keep them together.
 - **The numbers that are not tuning knobs yet.** `scenarios\TUNING.DAT` holds 135 knobs (user,
   2026-11-16; `tools\tuning\knobs.txt`). Left as numbers in the code, each for a reason:
   - **Thresholds that give a formula its shape**: the size ratios of `battle_strengths` (.2, .5, 1.5, 3,
@@ -124,9 +124,6 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   - City 0's owner stands for "the port of a side with no fleet" (`navy_mark_side`). `ai_raise_forces`
     and `navy_can_invade` read it through `city_owner(fleet_city(side))`.
   - Army 0 is the scratch army of Join and is never cleared after it.
-- **A latent precedence error** (`calculate_battle`, `ui\battle.bm`).
-  `IF opt_players = PLAYERS_ONE AND (…) OR (…)` reads as `(A AND B) OR C`. It does no harm today,
-  because `current_side` is the Union during a two-player month. The original has the same line.
 - **A literal side.** `army_get_commander(2, army_slot)` in `menu_army_detach` should be `SIDE_REBEL`.
 - **A rule that changes its input.** `battle_strengths` sets an army's size to 1 when it is below 1, in a
   procedure that otherwise only works out strengths.

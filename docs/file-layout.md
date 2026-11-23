@@ -79,7 +79,7 @@ A topic has a file of the same name in each folder that has a part of it: `army.
 | `io\tuning_file.bm` | The reader of the tuning files: `scenarios\TUNING.DAT`, a scenario's own, and the list a saved game holds |
 | `io\tuning_knobs.bm`, `io\tuning_knobs.bi` | The tuning knobs' variables, defaults, names and ranges. Written by `tools\tuning\make_knobs.py` from `tools\tuning\knobs.txt`; not edited by hand |
 | `io\script.bm` | The hooks for `tests\play.py`: the seed, forced dice, the key waits and the fixed date |
-| `io\folders.bi` | The data folders, `GFXDIR` and `SCNDIR` |
+| `io\folders.bi` | The data folders, `GFXDIR` and `SCNDIR`, and the names of the settings, Hall of Fame and history files |
 
 Inside a file, a topic's procedures are together, and a procedure that is the way in comes before its
 parts (`ai_evaluate_move`, `menu_select`).

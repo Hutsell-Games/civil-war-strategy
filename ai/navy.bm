@@ -31,11 +31,7 @@ SUB ai_fleet_orders (side)
     '                     move ships & prohibit further action this turn
     IF NOT fleet_is_at_sea(side) THEN
         'move ships & prohibit further action this turn
-        IF city_owner(fleet_city(side)) = side THEN
-            CALL ai_navy_orders(side, NAVY_SAIL)
-            EXIT SUB
-        END IF
-        IF city_owner(fleet_city(side)) = SIDE_NONE THEN
+        IF city_owner(fleet_city(side)) = side OR city_owner(fleet_city(side)) = SIDE_NONE THEN
             CALL ai_navy_orders(side, NAVY_SAIL)
             EXIT SUB
         END IF

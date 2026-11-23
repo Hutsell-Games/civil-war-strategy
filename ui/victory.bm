@@ -55,7 +55,7 @@ SUB hall_of_fame
         LOCATE 12, 1
         PRINT "Congratulations ! Score of"; side_victory_points(side)
         PRINT "New Entry into "; side_name$(side); " HALL of FAME in place "; i
-        IF opt_players = PLAYERS_ONE AND side <> current_side THEN
+        IF side_is_computers(side) THEN
             commander$ = "COMPUTER"
             PRINT commander$; " was "; side_name$(side); " commander"
         ELSE

@@ -266,22 +266,13 @@ END FUNCTION
 ' Reads conditions parted by commas, as in "roll at most .1, cities at least 30", onto the
 ' end of the condition arrays.
 SUB event_read_conditions (list$, why$)
-    DIM cut AS INTEGER
     DIM first_space AS INTEGER
     DIM last_space AS INTEGER
     DIM rest$
     DIM item$
     rest$ = LCASE$(list$)
     DO WHILE rest$ <> "" AND why$ = ""
-        cut = INSTR(rest$, ",")
-        IF cut = 0 THEN
-            item$ = rest$
-            rest$ = ""
-        ELSE
-            item$ = LEFT$(rest$, cut - 1)
-            rest$ = MID$(rest$, cut + 1)
-        END IF
-        item$ = _TRIM$(item$)
+        item$ = _TRIM$(text_take_item$(rest$, ","))
         first_space = INSTR(item$, " ")
         last_space = text_last_space(item$)
         IF condition_count = MAX_EVENT_CONDITIONS THEN
@@ -406,7 +397,6 @@ END SUB
 ' Reads the chance line, as in ".005 x (year - 1860) x weight x weight, at most .9": factors
 ' parted by " x ", then "plus" a number and "at most" a number, parted by commas.
 SUB event_read_chance (value$, why$)
-    DIM cut AS INTEGER
     DIM rest$
     DIM factors$
     DIM item$
@@ -414,13 +404,9 @@ SUB event_read_chance (value$, why$)
     DIM name$
     DIM number$
     rest$ = LCASE$(value$) + ","
-    cut = INSTR(rest$, ",")
-    factors$ = LEFT$(rest$, cut - 1) + " x "
-    rest$ = MID$(rest$, cut + 1)
+    factors$ = text_take_item$(rest$, ",") + " x "
     DO WHILE factors$ <> "" AND why$ = ""
-        cut = INSTR(factors$, " x ")
-        item$ = _TRIM$(LEFT$(factors$, cut - 1))
-        factors$ = MID$(factors$, cut + 3)
+        item$ = _TRIM$(text_take_item$(factors$, " x "))
         IF chance_count = MAX_CHANCE_FACTORS THEN
             why$ = "too many factors in the chance"
             EXIT SUB
@@ -453,9 +439,7 @@ SUB event_read_chance (value$, why$)
         END IF
     LOOP
     DO WHILE rest$ <> "" AND why$ = ""
-        cut = INSTR(rest$, ",")
-        item$ = _TRIM$(LEFT$(rest$, cut - 1))
-        rest$ = MID$(rest$, cut + 1)
+        item$ = _TRIM$(text_take_item$(rest$, ","))
         IF LEFT$(item$, 5) = "plus " AND text_is_number(LTRIM$(MID$(item$, 6))) <> 0 THEN
             chance_plus# = VAL(MID$(item$, 6))
         ELSEIF LEFT$(item$, 8) = "at most " AND text_is_number(LTRIM$(MID$(item$, 9))) <> 0 THEN
@@ -466,6 +450,21 @@ SUB event_read_chance (value$, why$)
         END IF
     LOOP
 END SUB
+
+' The first item of the list rest$: the text before the first sep$, which may be longer than one
+' character. rest$ loses the item and its sep$. Without a sep$ the item is all of rest$, and rest$
+' is left empty.
+FUNCTION text_take_item$ (rest$, sep$)
+    DIM cut AS INTEGER
+    cut = INSTR(rest$, sep$)
+    IF cut = 0 THEN
+        text_take_item$ = rest$
+        rest$ = ""
+    ELSE
+        text_take_item$ = LEFT$(rest$, cut - 1)
+        rest$ = MID$(rest$, cut + LEN(sep$))
+    END IF
+END FUNCTION
 
 ' Whether a text is a number as the file writes one: digits, at most one point, and a minus
 ' sign only at the start.

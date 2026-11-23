@@ -54,8 +54,6 @@ END SUB
 ' train goes (menu_railroad, ui/railroad.bm), and the train leaves (commands/railroad.bm). With
 ' an army on the train already, it says so.
 SUB menu_main_railroad
-    DIM x AS INTEGER
-    DIM y AS INTEGER
     DIM side_color AS INTEGER
     DIM capacity AS INTEGER
     DIM army AS INTEGER
@@ -67,9 +65,7 @@ SUB menu_main_railroad
         PSET (550, 20), 0
         DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
         side_color = side_color_of(current_side)
-        x = POINT(0)
-        y = POINT(1)
-        PAINT (x, y), side_color, 15
+        CALL paint_at_pen(side_color, 15)
         COLOR COLOR_WHITE
         IF current_side = SIDE_UNION THEN
             COLOR COLOR_LIGHT_CYAN
@@ -108,17 +104,8 @@ END SUB
 
 ' Inform: the reports, then the lines of the armies' moves drawn again on the map.
 SUB menu_main_inform
-    DIM i AS INTEGER
-    DIM first_army AS INTEGER
-    DIM last_army AS INTEGER
     CALL menu_report((current_side))
-    first_army = side_first_army(current_side)
-    last_army = side_last_army(current_side)
-    FOR i = first_army TO last_army
-        IF army_has_move(i) THEN
-            CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
-        END IF
-    NEXT i
+    CALL draw_move_lines(current_side)
 END SUB
 
 ' The title screen. First it loads the mountain picture and the map's letters, which are DATA

@@ -51,16 +51,13 @@ SUB vary_start_conditions
     side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - vary_cash_shift + vary_cash_spread * RND
     side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + vary_cash_shift + vary_cash_spread * RND
     opt_ai_aggression = 5 * RND
-    FOR k = 1 TO 6
-        IF RND > .6 THEN
-            CALL army_clear(k)
-        END IF
-    NEXT k
-    FOR k = 21 TO 26
-        IF RND > .6 THEN
-            CALL army_clear(k)
-        END IF
-    NEXT k
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        FOR k = side_first_army(i) TO side_first_army(i) + 5
+            IF RND > .6 THEN
+                CALL army_clear(k)
+            END IF
+        NEXT k
+    NEXT i
     ' A fleet of no ships is no fleet. The original left the Rebels' in its port (G41).
     fleet_size(SIDE_UNION) = 10 * RND
     IF fleet_size(SIDE_UNION) = 0 THEN

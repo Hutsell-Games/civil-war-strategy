@@ -61,7 +61,7 @@ SUB menu_report (side)
     menu_text$(5) = "Intelligence"
     menu_text$(6) = "Battles"
     menu_item_count = 6
-    IF _FILEEXISTS("cws.his") THEN
+    IF _FILEEXISTS(HISTORY_FILE) THEN
         menu_text$(7) = "Recap"
         menu_item_count = 7
     END IF
@@ -359,7 +359,7 @@ SUB report_recap
     DIM history_line$
     CLS
     line_count = 0
-    OPEN "I", 2, "cws.his"
+    OPEN "I", 2, HISTORY_FILE
     DO WHILE NOT EOF(2)
         INPUT #2, history_line$
         COLOR COLOR_GRAY

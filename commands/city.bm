@@ -18,11 +18,8 @@ SUB city_capture (moving_army, city, side, weaken_fort)
     message$ = army_name$(moving_army) + " has captured " + city_name$(city)
     COLOR COLOR_LIGHT_CYAN
     PRINT message$;
-    IF army_side(moving_army) = SIDE_UNION AND opt_sound >= SOUND_MUSIC THEN
-        PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
-    END IF
-    IF army_side(moving_army) = SIDE_REBEL AND opt_sound >= SOUND_MUSIC THEN
-        PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
+    IF opt_sound >= SOUND_MUSIC THEN
+        CALL play_side_tune(army_side(moving_army))
     END IF
     IF was_enemy_capital = 0 THEN
         CALL animate_city(city)

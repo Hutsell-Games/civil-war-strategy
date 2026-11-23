@@ -4,20 +4,25 @@
 ' The troops in the field: union_troops the Union's and rebel_troops the Rebels', in hundreds.
 ' An army on a train counts (army_in_field).
 SUB victory_forces (union_troops, rebel_troops)
-    DIM j AS INTEGER
-    union_troops = 0
-    FOR j = 1 TO ARMIES_PER_SIDE
-        IF army_in_field(j) THEN
-            union_troops = union_troops + army_size(j)
-        END IF
-    NEXT j
-    rebel_troops = 0
-    FOR j = ARMIES_PER_SIDE + 1 TO MAX_ARMIES
-        IF army_in_field(j) THEN
-            rebel_troops = rebel_troops + army_size(j)
-        END IF
-    NEXT j
+    union_troops = side_field_troops(SIDE_UNION)
+    rebel_troops = side_field_troops(SIDE_REBEL)
 END SUB
+
+' The side's share of both sides' income, from 0 to 1. A DOUBLE, so that a comparison with a
+' rule's limit comes out as it did when the division was written in the comparison.
+FUNCTION victory_income_share# (side)
+    victory_income_share# = side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL))
+END FUNCTION
+
+' The side's troops divided by the other side's. union_troops and rebel_troops are the sides'
+' troops (victory_forces); the other side's must not be 0. A DOUBLE, as victory_income_share#.
+FUNCTION victory_troop_ratio# (side, union_troops, rebel_troops)
+    IF side = SIDE_UNION THEN
+        victory_troop_ratio# = union_troops / rebel_troops
+    ELSE
+        victory_troop_ratio# = rebel_troops / union_troops
+    END IF
+END FUNCTION
 
 ' Turns a victory rule on or off (the Utility menu's End Cond). A rule that is off keeps
 ' its number as a negative.
@@ -52,7 +57,7 @@ SUB victory_rule_met (side, union_troops, rebel_troops, rule)
         rule = VICTORY_CITIES
         EXIT SUB
     END IF
-    IF side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN
+    IF victory_income_share#(side) >= .01 * victory_rule(VICTORY_INCOME) AND victory_rule(VICTORY_INCOME) > 0 THEN
         rule = VICTORY_INCOME
         EXIT SUB
     END IF
@@ -63,17 +68,8 @@ SUB victory_rule_met (side, union_troops, rebel_troops, rule)
 
     ' The enemy's troops are not 0 here: the wiped-out rule above took that case.
     IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
-        IF side = SIDE_UNION THEN
-            IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN
-                rule = VICTORY_FORCE_RATIO
-                EXIT SUB
-            END IF
-        END IF
-        IF side = SIDE_REBEL THEN
-            IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN
-                rule = VICTORY_FORCE_RATIO
-                EXIT SUB
-            END IF
+        IF victory_troop_ratio#(side, union_troops, rebel_troops) > victory_rule(VICTORY_FORCE_RATIO) THEN
+            rule = VICTORY_FORCE_RATIO
         END IF
     END IF
 END SUB
@@ -89,7 +85,7 @@ END FUNCTION
 ' 1 when the side has nine tenths of the share of the income the income rule asks for.
 FUNCTION victory_near_income (side)
     victory_near_income = 0
-    IF victory_rule(VICTORY_INCOME) > 0 AND side_income(side) / (side_income(SIDE_UNION) + side_income(SIDE_REBEL)) >= .009 * victory_rule(VICTORY_INCOME) THEN
+    IF victory_rule(VICTORY_INCOME) > 0 AND victory_income_share#(side) >= .009 * victory_rule(VICTORY_INCOME) THEN
         victory_near_income = 1
     END IF
 END FUNCTION
@@ -99,7 +95,7 @@ END FUNCTION
 FUNCTION victory_near_force (side, union_troops, rebel_troops)
     victory_near_force = 0
     IF victory_rule(VICTORY_FORCE_RATIO) > 0 AND union_troops > 0 AND rebel_troops > 0 THEN
-        IF (side = SIDE_UNION AND union_troops / rebel_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) OR (side = SIDE_REBEL AND rebel_troops / union_troops > .9 * victory_rule(VICTORY_FORCE_RATIO)) THEN
+        IF victory_troop_ratio#(side, union_troops, rebel_troops) > .9 * victory_rule(VICTORY_FORCE_RATIO) THEN
             victory_near_force = 1
         END IF
     END IF

@@ -1,4 +1,4 @@
-' The war's tunes: Shenandoah and the title's tune.
+' The war's tunes: Shenandoah, the title's tune, and each side's short tune.
 '
 ' A tune is played one note at a time, and a key stops it before its next note. A PLAY in the
 ' foreground returns about a quarter of a second before its sound ends, in QB64pe, QB64Rust and
@@ -21,6 +21,16 @@ SUB play_title_music
         stopped = play_until_key%("MST170o1e8o0b8o1e8e8e4f#8g4f#8g4e8d2o0b8o1d2 o1e8o0b8o1e8e8e4f#8g4f#8g4a8b2g8b2MLg16a16MSb4b8b8a8g8a4a8a4f#8g4g8MLg8f#8MSe8f#4f#8f#8g8a8b4.a4.g4.f#4.o0b8o1e8e8e4d8e2.")
     ELSE
         CALL play_shenandoah
+    END IF
+END SUB
+
+' The side's short tune, for a city taken or an event that is good for the side. The caller
+' asks whether music is on.
+SUB play_side_tune (side)
+    IF side = SIDE_UNION THEN
+        PLAY "MNMFL16o2T120dd.dd.co1b.o2do3g.ab.bb.ag"
+    ELSE
+        PLAY "MNMFT160o2L16geL8ccL16cdefL8ggge"
     END IF
 END SUB
 

@@ -302,11 +302,44 @@ SUB draw_map_touchup
     LINE (66, 375)-(52, 375), 10
 END SUB
 
+' The flag of every army that holds a city.
+SUB draw_army_flags
+    DIM i AS INTEGER
+    FOR i = 1 TO MAX_ARMIES
+        IF army_exists(i) THEN
+            CALL draw_army_flag(i)
+        END IF
+    NEXT i
+END SUB
+
+' The flag of the army that holds the city, if one does.
+SUB draw_city_flag (city)
+    IF city_army(city) > 0 THEN
+        CALL draw_army_flag(city_army(city))
+    END IF
+END SUB
+
+' The dotted lines of the moves that the side's armies have been ordered to make.
+SUB draw_move_lines (side)
+    DIM i AS INTEGER
+    FOR i = side_first_army(side) TO side_last_army(side)
+        IF army_exists(i) AND army_has_move(i) THEN
+            CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
+        END IF
+    NEXT i
+END SUB
+
+' The month and year on the map, at row 24, column 51.
+SUB draw_month_label
+    COLOR COLOR_LIGHT_MAGENTA
+    LOCATE 24, 51
+    PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+END SUB
+
 SUB draw_map
     DIM word$
     DIM j AS INTEGER
     DIM letter AS INTEGER
-    DIM i AS INTEGER
     DIM k AS INTEGER
     SCREEN 12
     LINE (1, 16)-(527, 440), 10, B
@@ -616,26 +649,17 @@ SUB draw_map
         LINE (447, 291)-(525, 335), 1, BF
     END IF
 
-    FOR i = 1 TO MAX_ARMIES
-        IF army_exists(i) THEN
-            CALL draw_army_flag(i)
-        END IF
-    NEXT i
+    CALL draw_army_flags
 
     FOR k = SIDE_UNION TO SIDE_REBEL
         CALL draw_stack_markers(k)
     NEXT k
 
     IF opt_players <> PLAYERS_TWO THEN
-        FOR i = 1 TO MAX_ARMIES
-            IF army_exists(i) AND army_has_move(i) THEN
-                CALL draw_map_marker(army_city(i), army_order(i), MARK_MOVE_LINE)
-            END IF
-        NEXT i
+        CALL draw_move_lines(SIDE_UNION)
+        CALL draw_move_lines(SIDE_REBEL)
     END IF
     CALL draw_fleets
     CALL draw_train_box
-    COLOR COLOR_LIGHT_MAGENTA
-    LOCATE 24, 51
-    PRINT " "; UCASE$(LEFT$(month_name$(turn_month), 3)); ","; turn_year
+    CALL draw_month_label
 END SUB

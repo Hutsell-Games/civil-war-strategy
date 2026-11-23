@@ -65,37 +65,17 @@ END SUB
 ' is a real RND. Without CWS_DICE every draw is RND, in the same order as
 ' before, so a normal game and a script without dice play as they did.
 SUB script_dice_next
-    DIM cut AS INTEGER
-    script_dice_now$ = ""
-    IF script_dice$ = "" THEN
-        EXIT SUB
-    END IF
-    cut = INSTR(script_dice$, ";")
-    IF cut = 0 THEN
-        script_dice_now$ = script_dice$
-        script_dice$ = ""
-        EXIT SUB
-    END IF
-    script_dice_now$ = LEFT$(script_dice$, cut - 1)
-    script_dice$ = MID$(script_dice$, cut + 1)
+    script_dice_now$ = text_take_item$(script_dice$, ";")
 END SUB
 
 ' Returns the next forced die value, or RND when the script gives r or has no values left.
 FUNCTION script_rnd!
-    DIM cut AS INTEGER
     DIM item$
     IF script_dice_now$ = "" THEN
         script_rnd! = RND
         EXIT FUNCTION
     END IF
-    cut = INSTR(script_dice_now$, ",")
-    IF cut = 0 THEN
-        item$ = script_dice_now$
-        script_dice_now$ = ""
-    ELSE
-        item$ = LEFT$(script_dice_now$, cut - 1)
-        script_dice_now$ = MID$(script_dice_now$, cut + 1)
-    END IF
+    item$ = text_take_item$(script_dice_now$, ",")
     IF item$ = "r" THEN
         script_rnd! = RND
     ELSE

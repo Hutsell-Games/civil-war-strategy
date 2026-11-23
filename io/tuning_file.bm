@@ -101,14 +101,7 @@ SUB tuning_apply_list (list$)
     CALL tuning_defaults
     rest$ = list$
     DO WHILE rest$ <> ""
-        cut = INSTR(rest$, ";")
-        IF cut = 0 THEN
-            item$ = rest$
-            rest$ = ""
-        ELSE
-            item$ = LEFT$(rest$, cut - 1)
-            rest$ = MID$(rest$, cut + 1)
-        END IF
+        item$ = text_take_item$(rest$, ";")
         cut = INSTR(item$, "=")
         IF cut > 0 THEN
             CALL tuning_set(LEFT$(item$, cut - 1), VAL(MID$(item$, cut + 1)), why$)

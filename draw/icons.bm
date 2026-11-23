@@ -41,9 +41,7 @@ SUB animate_army (army, picture_taken)
     step_y = .5 * (city_y(to_city) + city_y(from_city))
 
     CALL city_update_occupier(from_city)
-    IF city_army(from_city) > 0 THEN
-        CALL draw_army_flag(city_army(from_city))
-    END IF
+    CALL draw_city_flag(from_city)
 
     IF picture_taken <= 0 THEN
         CALL flag_picture_save(from_city)
@@ -118,9 +116,7 @@ SUB draw_train (side, show)
             PSET (x - 6, y - 2), 3
             side_color = side_bright_color(side)
             DRAW "C0S2" + TRAIN_OUTLINE$ + "U8L2U5BF4S4"
-            x = POINT(0)
-            y = POINT(1)
-            PAINT (x, y), side_color, 0
+            CALL paint_at_pen(side_color, 0)
         CASE ELSE
             CALL draw_erase_flag(city)
     END SELECT
