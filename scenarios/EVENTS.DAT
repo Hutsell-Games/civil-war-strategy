@@ -18,6 +18,8 @@
 ;
 ;   when    = roll (as without the line), or before: an announcement, tried before the roll.
 ;             It is shown on the bottom line with an alarm, and needs no favors line.
+;             Without one it may have no "cities" condition, and an event that its
+;             "instead" or "then" line names may have an effect only with a for line.
 ;   favors  = the side the event is good for: a side's name from CWS.INI, or 1 or 2
 ;   for     = the side the effect is for, when it is not the side the event favors
 ;   if      = conditions, parted by commas. All must hold. Without the line the event
@@ -49,7 +51,7 @@
 ;             and the other event's effect can be carried out, the other event happens in
 ;             its place. Its conditions and effect take the side this event favors.
 ;   then    = another event that also happens, with its effect and its text, for the side
-;             this event favors.
+;             this event favors. It must have a text.
 ;   redraw  = fleets or map: drawn again after the message.
 ;   listed  = yes (as without the line), or no: the event is not in its side's list. Only
 ;             "instead" and "then" reach it.

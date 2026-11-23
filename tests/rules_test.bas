@@ -1653,9 +1653,39 @@ SUB TestLoadEventsChecksNamesAtTheEnd
     AssertEqualStr "[events] needs a chance line", events_why$, "the chance"
 END SUB
 
+' An announcement that favors no side may need none: no "cities" condition, and no effect of
+' an event it names. Before these checks the game stopped in play, or gave cash to side 0.
+SUB TestLoadEventsAnnouncementNeedsNoSide
+    CALL events_from_text("[news]|when = before|text = news|then = prize|[prize]|favors = 1|listed = no|effect = points 5|text = prize")
+    AssertEqualStr TestTempDir$ + "events.dat, [news]: has no side for the effect of prize: it needs a favors line", event_file_error$, "then"
+    CALL events_from_text("[news]|when = before|text = news|instead = prize if year above 1|[prize]|favors = 1|listed = no|effect = cash 5|text = prize")
+    AssertEqualStr TestTempDir$ + "events.dat, [news]: has no side for the effect of prize: it needs a favors line", event_file_error$, "instead"
+    CALL events_from_text("[news]|when = before|if = cities at least 5|text = news")
+    AssertEqualStr TestTempDir$ + "events.dat, [news]: has a cities condition but no side: it needs a favors line", event_file_error$, "cities in the if line"
+    CALL events_from_text("[news]|when = before|text = news|instead = more if cities at least 5|[more]|favors = 1|listed = no|text = more")
+    AssertEqualStr TestTempDir$ + "events.dat, [news]: has a cities condition but no side: it needs a favors line", event_file_error$, "cities in the instead line"
+    CALL events_from_text("[news]|when = before|text = news|instead = more if year above 1|[more]|favors = 1|listed = no|text = more|then = prize|[prize]|favors = 1|listed = no|effect = points 5|text = prize")
+    AssertEqualStr TestTempDir$ + "events.dat, [news]: has no side for the effect of prize: it needs a favors line", event_file_error$, "the then of the event taken instead"
+    CALL events_from_text("[events]|banner = b|chance = 1|[news]|when = before|text = news|then = gift|instead = more if year above 1|[gift]|favors = 1|for = 2|listed = no|effect = cash 5|text = gift|[more]|favors = 1|listed = no|text = more")
+    AssertEqualStr "", event_file_error$, "a for line gives the side, and an event without an effect needs none"
+    CALL events_from_text("[events]|banner = b|chance = 1|[news]|when = before|favors = 2|if = cities at least 5|text = news|then = prize|[prize]|favors = 1|listed = no|effect = points 5|text = prize")
+    AssertEqualStr "", event_file_error$, "an announcement that favors a side may have them all"
+END SUB
+
+SUB TestLoadEventsThenNeedsAText
+    CALL events_from_text("[rain]|favors = 1|text = wet|then = snow|[snow]|favors = 1|listed = no|effect = cash 1")
+    AssertEqualStr TestTempDir$ + "events.dat, [rain]: then names an event without a text: snow", event_file_error$, "its text would be shown empty"
+END SUB
+
+SUB TestLoadEventsWithoutTheFile
+    CALL load_events(TestTempDir$ + "none.dat")
+    AssertEqualStr TestTempDir$ + "none.dat: the file is not there", event_file_error$, "no file"
+    AssertEqualInt 0, event_count, "and no event"
+END SUB
+
 ' The last check that fails is the one given; the names are looked up.
 SUB TestEventRowProblemGivesTheLast
-    event_count = 2: event_name$(2) = "snow"
+    event_count = 2: event_name$(2) = "snow": event_text_count(2) = 1
     event_before(1) = 0: event_favors(1) = SIDE_NONE: event_for(1) = SIDE_NONE: event_effect(1) = EFFECT_NONE
     AssertEqualStr "has no favors line", event_row_problem$(1, "", ""), "no favors"
     AssertEqualStr "names an event that is not there: hail", event_row_problem$(1, "hail", ""), "the name wins"
