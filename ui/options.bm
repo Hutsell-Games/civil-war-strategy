@@ -11,9 +11,6 @@ SUB menu_utility
     DO
         menu_text$(0) = "Utility"
         menu_text$(1) = "Side"
-        IF opt_players = PLAYERS_TWO THEN
-            menu_text$(2) = ""
-        END IF
         menu_text$(2) = "1 Player"
         IF opt_players = PLAYERS_TWO THEN
             menu_text$(2) = "2 Player"

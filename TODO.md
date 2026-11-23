@@ -76,17 +76,11 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 
 ## The code
 
-Left alone by phase 3, group 1, of `docs\archived\modernize-plan-completed.md` (the sides and limits). None of these changes
-how the game plays.
-
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 228 and 232).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
   report needs laying out again.
 - **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 54 and 58). That is a random
   size, not the fleet limit, so it stays 10 rather than `MAX_FLEET_SHIPS`.
-
-Left alone by group 2 (the special values):
-
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** Its tests read `fleet_exists(side)`
   since 2026-11-13 (`docs\archived\structure-review-completed.md`, item 2); 7 assignments of 0 are left.
   `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
@@ -101,27 +95,18 @@ Left alone by group 2 (the special values):
 - **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
   `docs\archived\constants.md`, section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
   since 2026-11-13.
-
-Left alone by group 6 (the settings and victory rules):
-
 - **The Realism switch is `opt_realism = 1 - opt_realism`** (`option_toggle_realism`, `rules\setup.bm`). It toggles between
   off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
   `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
   (`io\files.bm` line 57) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 20), which
   also maps a rule to a menu row (`i - 1`).
-
-Left alone by group 7 (the rule numbers):
-
 - **`total_income = union_income_bonus + 200`** (`load_cities`, `io\files.bm` line 104), where the cities are read. The 200
   may be the two capitals' income (`2 * capital_income`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`year above 1862`, `[emancipation]` in
   `scenarios\EVENTS.DAT`). That is the date of an event, not `IRONCLAD_YEAR`; phase 11 moved the
   events' dates to data (2026-11-13).
-
-Left alone by group 8 (the colors):
-
 - **`COLOR 16 - side_color` shows the other side's color** (`draw_battle_defender` and `draw_battle_losses`, `ui\battle.bm`): 16 - 9
   is 7 and 16 - 7 is 9. It stays as written. `side_color_of` (`game\colors.bm`) gives the color.
 - **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 102, Chk Links;
@@ -130,10 +115,6 @@ Left alone by group 8 (the colors):
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
 - **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 98): 0 there means "no color set",
   not black, so the test keeps its 0.
-
-Found on 2026-11-16 in a code review, by reading the code; not run. The Realism tests and the forced
-choices change how the game plays or is played; the others do not.
-
 - **`wait_seconds` at midnight.** `TIMER` goes back to 0 at midnight, so `TIMER - start!` turns negative
   and the pause lasts until a key is pressed.
 - **Files opened without a check.** `config_read` (`CWS.CFG`), `hall_of_fame_load` (`HISCORE.CWS`),
@@ -146,12 +127,6 @@ choices change how the game plays or is played; the others do not.
 - **A latent precedence error** (`calculate_battle`, `ui\battle.bm`).
   `IF opt_players = PLAYERS_ONE AND (…) OR (…)` reads as `(A AND B) OR C`. It does no harm today,
   because `current_side` is the Union during a two-player month. The original has the same line.
-- **Dead code.**
-  - `IF army < 0` in `menu_city_fortify` (`ui\city.bm`): `city_army()` is never negative.
-  - The first assignment of `menu_text$(2)` in `menu_utility` (`ui\options.bm`).
-  - The unreachable `rule = VICTORY_WIPED_OUT` tests inside the force-ratio part of `victory_rule_met`.
-  - The value of `odds! = 5 - 4 * RND` in `ai_beyond_score`, which is overwritten at once. The draw may
-    be kept so that the random numbers stay in step; if so, a comment should say so.
 - **A literal side.** `army_get_commander(2, army_slot)` in `menu_army_detach` should be `SIDE_REBEL`.
 - **A rule that changes its input.** `battle_strengths` sets an army's size to 1 when it is below 1, in a
   procedure that otherwise only works out strengths.

@@ -61,22 +61,15 @@ SUB victory_rule_met (side, union_troops, rebel_troops, rule)
         EXIT SUB
     END IF
 
+    ' The enemy's troops are not 0 here: the wiped-out rule above took that case.
     IF victory_rule(VICTORY_FORCE_RATIO) > 0 THEN
         IF side = SIDE_UNION THEN
-            IF rebel_troops = 0 THEN
-                rule = VICTORY_WIPED_OUT
-                EXIT SUB
-            END IF
             IF union_troops / rebel_troops > victory_rule(VICTORY_FORCE_RATIO) THEN
                 rule = VICTORY_FORCE_RATIO
                 EXIT SUB
             END IF
         END IF
         IF side = SIDE_REBEL THEN
-            IF union_troops = 0 THEN
-                rule = VICTORY_WIPED_OUT
-                EXIT SUB
-            END IF
             IF rebel_troops / union_troops > victory_rule(VICTORY_FORCE_RATIO) THEN
                 rule = VICTORY_FORCE_RATIO
                 EXIT SUB

@@ -32,9 +32,6 @@ SUB menu_city_fortify (city)
     city = menu_value(menu_choice)
     CALL city_update_occupier(city)
     army = city_army(city)
-    IF army < 0 THEN
-        EXIT SUB
-    END IF
     IF city_fort(city) >= MAX_FORT THEN
         CALL clear_bottom_line
         PRINT city_name$(city); " at MAXIMUM fortification level of 2";

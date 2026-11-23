@@ -336,6 +336,8 @@ FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
             bonus = bonus + ai_beyond_value * city_value(far_city) + ai_beyond_fort * city_fort(far_city)
         END IF
         IF city_owner(far_city) = enemy_side AND occupant > 0 THEN
+            ' The next line sets odds! again at once, but its RND keeps the random numbers in
+            ' step with the original game. Taking it out would change every recorded script.
             odds! = 5 - 4 * RND
             IF army_size(occupant) > 0 THEN
                 odds! = army_size(army) / army_size(occupant)
