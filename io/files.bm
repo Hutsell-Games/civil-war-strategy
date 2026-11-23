@@ -345,7 +345,7 @@ SUB save_battle_summary
         PRINT #1, " SIDE      BATTLES WON       LOSSES"
         FOR k = SIDE_UNION TO SIDE_REBEL
             winner_mark$ = " "
-            IF victory_reason = k THEN
+            IF victory_side = k THEN
                 winner_mark$ = "*"
             END IF
             PRINT #1, winner_mark$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)

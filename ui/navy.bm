@@ -1,6 +1,6 @@
 ' The player's Ships command: the Ships menu and a menu SUB for each of its actions. Each
 ' asks the player what the action needs, then gives the order (commands/navy.bm). The
-' computer's fleet is ai_navy_orders (ai/navy.bm). The Ships menu itself is menu_navy, at
+' computer's fleet is ai_navy_carry_out (ai/navy.bm). The Ships menu itself is menu_navy, at
 ' the end of this file.
 
 ' The Ships command. The menu shows again while an action asks for it, for example after a

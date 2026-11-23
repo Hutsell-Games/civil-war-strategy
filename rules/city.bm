@@ -36,7 +36,7 @@ SUB city_close_road_gaps (city)
 END SUB
 
 ' The number of cities next to city that side holds: 0 when the city is cut off.
-FUNCTION city_is_connected (side, city)
+FUNCTION city_friendly_neighbors (side, city)
     DIM j AS INTEGER
     DIM neighbor AS INTEGER
     DIM friendly_neighbors AS INTEGER
@@ -47,12 +47,12 @@ FUNCTION city_is_connected (side, city)
             friendly_neighbors = friendly_neighbors + 1
         END IF
     NEXT j
-    city_is_connected = friendly_neighbors
+    city_friendly_neighbors = friendly_neighbors
 END FUNCTION
 
 ' No city next to city is the side's. Gives -1 or 0, as a comparison does.
 FUNCTION city_is_cut_off (side, city)
-    city_is_cut_off = city_is_connected(side, city) < 1
+    city_is_cut_off = city_friendly_neighbors(side, city) < 1
 END FUNCTION
 
 ' The army is cut off from supplies: under the Realism setting, its city is cut off. Gives -1 or 0.

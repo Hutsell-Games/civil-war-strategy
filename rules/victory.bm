@@ -126,7 +126,7 @@ SUB victory_won (side, rule)
     IF rule = VICTORY_WIPED_OUT THEN
         side_victory_points(side) = side_victory_points(side) + victory_points_bonus
     END IF
-    victory_reason = side
+    victory_side = side
     game_over = 1
 END SUB
 

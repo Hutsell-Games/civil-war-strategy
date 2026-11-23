@@ -85,9 +85,9 @@ SUB draw_menu (title_col, menu_width)
 END SUB
 
 ' Shows the menu of menu_text$() and waits for the player's choice, left in menu_choice: a row,
-' MENU_ESCAPED for Esc, or what menu_arrow_key gives. menu_item_show_beside is the menu's kind
-' (MENU_PLAIN and the others): what it shows beside the highlighted row, and which keys it takes.
-SUB menu_select (menu_item_show_beside%)
+' MENU_ESCAPED for Esc, or what menu_arrow_key gives. kind is one of MENU_PLAIN and the
+' others: what the menu shows beside the highlighted row, and which keys it takes.
+SUB menu_select (kind)
     DIM previous_row AS INTEGER
     DIM done AS INTEGER
     DIM pressed$
@@ -112,7 +112,7 @@ SUB menu_select (menu_item_show_beside%)
 
     CALL draw_menu(title_col, menu_width)
     DO
-        CALL menu_show_selected(menu_item_show_beside, row, menu_width)
+        CALL menu_show_selected(kind, row, menu_width)
 
         ' Wait for a key that does something. A letter that starts no row is ignored.
         done = 0
@@ -124,10 +124,10 @@ SUB menu_select (menu_item_show_beside%)
             IF LEN(pressed$) = 2 THEN
                 pressed$ = RIGHT$(pressed$, 1)
                 previous_row = row
-                CALL menu_arrow_key(menu_item_show_beside, pressed$, row, title_col, menu_width, done)
+                CALL menu_arrow_key(kind, pressed$, row, title_col, menu_width, done)
                 EXIT DO
             END IF
-            IF menu_item_show_beside = MENU_RAW_KEYS THEN
+            IF kind = MENU_RAW_KEYS THEN
                 menu_choice = -ASC(UCASE$(pressed$))
                 done = 1
                 EXIT DO
@@ -148,7 +148,7 @@ SUB menu_select (menu_item_show_beside%)
             EXIT DO
         END IF
 
-        IF menu_item_show_beside = MENU_RAW_KEYS THEN
+        IF kind = MENU_RAW_KEYS THEN
             IF pressed$ = KEY_UP$ THEN
                 menu_choice = 1
                 EXIT DO
@@ -167,7 +167,7 @@ SUB menu_select (menu_item_show_beside%)
         END IF
 
         ' Another row: the old one is shown plain again.
-        CALL menu_show_plain(menu_item_show_beside, previous_row, menu_width)
+        CALL menu_show_plain(kind, previous_row, menu_width)
         menu_choice = row
     LOOP
 
@@ -177,7 +177,7 @@ SUB menu_select (menu_item_show_beside%)
     COLOR menu_color
     menu_col = 0
     menu_row = 0
-    CALL menu_unmark_row(menu_item_show_beside, row)
+    CALL menu_unmark_row(kind, row)
     VIEW
 END SUB
 

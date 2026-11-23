@@ -93,7 +93,7 @@ SUB ai_raise_forces (side)
     DIM ship_reserve AS INTEGER
     DIM army_count AS INTEGER
     IF side = SIDE_UNION AND fleet_size(SIDE_UNION) < 1 AND side_cash(SIDE_UNION) > cost_ship THEN
-        CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD)
+        CALL ai_navy_carry_out(SIDE_UNION, NAVY_BUILD)
         IF side_cash(side) < cost_recruit THEN
             EXIT SUB
         END IF

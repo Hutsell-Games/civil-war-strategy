@@ -171,10 +171,10 @@ END SUB
 SUB TestCutoffCountsFriendlyNeighbors
     city_road(5, 1) = 2: city_road(5, 2) = 3: city_road(5, 3) = 4
     city_owner(2) = 1: city_owner(3) = 2: city_owner(4) = 1
-    a = city_is_connected(1, 5): AssertEqualInt 2, a, "the Union holds two neighbors"
-    a = city_is_connected(2, 5): AssertEqualInt 1, a, "the Rebels hold one"
+    a = city_friendly_neighbors(1, 5): AssertEqualInt 2, a, "the Union holds two neighbors"
+    a = city_friendly_neighbors(2, 5): AssertEqualInt 1, a, "the Rebels hold one"
     city_owner(3) = 0
-    a = city_is_connected(2, 5): AssertEqualInt 0, a, "cut off"
+    a = city_friendly_neighbors(2, 5): AssertEqualInt 0, a, "cut off"
 END SUB
 
 SUB TestCityIsCutOffAndArmySupplyCutOff
@@ -976,20 +976,20 @@ SUB TestRailroadUnloadPutsTheArmyInItsCity
     AssertEqualInt 5, city_army(7), "army 5 holds city 7"
 END SUB
 
-' ------------------------------------------- ai_navy and menu_navy_items
+' ------------------------------------------- ai_navy_first_action and menu_navy_items
 
 SUB TestAiNavyChangesItsOrder
     action = NAVY_ATTACK
-    CALL ai_navy(1, action)
+    CALL ai_navy_first_action(1, action)
     AssertEqualInt NAVY_BUILD, action, "no fleet: build"
     fleet_city(1) = 5: action = NAVY_ATTACK
-    CALL ai_navy(1, action)
+    CALL ai_navy_first_action(1, action)
     AssertEqualInt NAVY_ATTACK, action, "a fleet in port: the order stands"
     raiding_side = 2: raid_loss = 3
-    CALL ai_navy(1, action)
+    CALL ai_navy_first_action(1, action)
     AssertEqualInt NAVY_RAID, action, "the Rebels' raiders sank commerce: raid back"
     fleet_pursuit = 1
-    CALL ai_navy(1, action)
+    CALL ai_navy_first_action(1, action)
     AssertEqualInt NAVY_SAIL, action, "the enemy's fleet is to be pursued: sail"
 END SUB
 
@@ -1232,13 +1232,13 @@ END SUB
 SUB TestNavyRetreatPort
     city_owner(3) = 1: city_port_type(3) = PORT_SEA: fleet_city(1) = 3
     city_owner(8) = 1: city_port_type(8) = PORT_SEA
-    CALL navy_retreat_port(1, target)
+    CALL navy_retreat(1, target)
     AssertEqualInt 8, target, "the one other sea port"
     AssertEqualInt 8, fleet_city(1), "the fleet is there"
     AssertTrue navy_has_retreat_port(1), "a port to retreat to"
     city_owner(8) = 2: fleet_city(1) = 3
     AssertTrue NOT navy_has_retreat_port(1), "no other sea port"
-    CALL navy_retreat_port(1, target)
+    CALL navy_retreat(1, target)
     AssertEqualInt 0, target, "none left"
     AssertEqualInt 3, fleet_city(1), "the fleet stays where it is (G44)"
 END SUB
@@ -1389,7 +1389,7 @@ END SUB
 
 SUB TestArmyRecruitCitiesKeptForTheMonth
     DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
-    current_side = 1: turn_recruit_state = 2
+    current_side = 1: turn_recruit_count = 2
     turn_recruit_city(1) = 7: turn_recruit_city(2) = 3
     city_name$(7) = "Boston": city_name$(3) = "Albany"
     CALL army_recruit_cities(1, cities(), count)
@@ -1401,10 +1401,10 @@ END SUB
 ' A side that holds no city has none to recruit in, and the month keeps no list.
 SUB TestArmyRecruitCitiesNoneHeld
     DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
-    current_side = 1: turn_recruit_state = 0
+    current_side = 1: turn_recruit_count = 0
     CALL army_recruit_cities(1, cities(), count)
     AssertEqualInt 0, count, "no city"
-    AssertEqualInt 0, turn_recruit_state, "no list kept for the month"
+    AssertEqualInt 0, turn_recruit_count, "no list kept for the month"
 END SUB
 
 ' The Rebels' capital, city 2, is empty and the enemy is next to it: the train takes army 21
@@ -2136,7 +2136,7 @@ SUB TestVictoryWonAndTechnical
     side_victory_points(2) = 100
     CALL victory_won(2, 7)
     AssertEqualInt 200, side_victory_points(2), "100 more for wiping out the enemy"
-    AssertEqualInt 2, victory_reason, "marked for the battle summary"
+    AssertEqualInt 2, victory_side, "marked for the battle summary"
     AssertEqualInt 1, game_over, "the game is over"
     side_victory_points(1) = 100
     CALL victory_technical_points
@@ -2952,9 +2952,9 @@ END SUB
 ' ------------------------------------------------- saved games (io/files.bm)
 
 SUB TestTurnResetCommands
-    turn_recruit_state = -1: turn_moves_done = 1: turn_navy_done = 1
+    turn_recruit_count = -1: turn_moves_done = 1: turn_navy_done = 1
     CALL turn_reset_commands
-    AssertEqualInt 0, turn_recruit_state, "Troops open"
+    AssertEqualInt 0, turn_recruit_count, "Troops open"
     AssertEqualInt 0, turn_moves_done, "Moves open"
     AssertEqualInt 0, turn_navy_done, "Ships open"
 END SUB
@@ -2976,7 +2976,7 @@ SUB TestTurnCheckCommands
     CALL turn_check_commands
     AssertEqualInt SIDE_UNION, current_side, "two players and no side: the Union"
     CALL turn_close_recruiting
-    AssertEqualInt -1, turn_recruit_state, "Troops closed"
+    AssertEqualInt -1, turn_recruit_count, "Troops closed"
 END SUB
 
 ' After a turn ends: with one player the month is played. With two, the Rebels' turn follows
@@ -2996,7 +2996,7 @@ SUB TestTurnNextPlayer
 END SUB
 
 SUB TestGameReset
-    game_over = 1: turn_recruit_state = -1: saves_exist = 0: event_done(3) = 1: union_income_bonus = 252
+    game_over = 1: turn_recruit_count = -1: saves_exist = 0: event_done(3) = 1: union_income_bonus = 252
     army_size(7) = 90: army_city(7) = 12: army_order(7) = 5: army_leader_rating(7) = 4: army_name$(7) = "Banks"
     fleet_size(SIDE_REBEL) = 3: fleet_city(SIDE_REBEL) = 27: train_army(SIDE_UNION) = 7: train_city(SIDE_UNION) = 30
     side_victory_points(SIDE_UNION) = 400: victory_rule(VICTORY_MONTH) = 3
@@ -3004,7 +3004,7 @@ SUB TestGameReset
     raiding_side = SIDE_REBEL: raid_loss = 40: fleet_pursuit = 1
     CALL game_reset
     AssertEqualInt 0, game_over, "the game is on"
-    AssertEqualInt 0, turn_recruit_state, "Troops open"
+    AssertEqualInt 0, turn_recruit_count, "Troops open"
     AssertEqualInt 0, turn_moves_done, "Moves open"
     AssertEqualInt 0, turn_navy_done, "Ships open"
     AssertEqualInt SIDE_NONE, raiding_side, "no side raids"

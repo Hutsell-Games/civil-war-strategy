@@ -72,7 +72,7 @@ DO
         ended = 0
         SELECT CASE menu_choice
             CASE MAIN_TROOPS
-                IF side_cash(current_side) < cost_recruit OR turn_recruit_state < 0 THEN
+                IF side_cash(current_side) < cost_recruit OR turn_recruit_count = RECRUIT_CLOSED THEN
                     CALL turn_close_recruiting
                 ELSE
                     CALL menu_army_recruit((current_side))

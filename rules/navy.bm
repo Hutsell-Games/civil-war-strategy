@@ -351,7 +351,7 @@ END FUNCTION
 ' Naval combat: the side's fleet retreats to one of its other sea ports. Each in turn becomes
 ' the target, and the search stops there with a chance of 7 in 10. port is 0 when there is none,
 ' and the fleet then stays where it is; navy_has_retreat_port is asked first.
-SUB navy_retreat_port (side, port)
+SUB navy_retreat (side, port)
     DIM i AS INTEGER
     port = 0
     FOR i = 1 TO MAX_CITIES

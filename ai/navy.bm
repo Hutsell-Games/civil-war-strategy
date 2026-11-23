@@ -5,11 +5,11 @@
 SUB ai_fleet_orders (side)
     IF current_side = SIDE_REBEL AND NOT fleet_exists(SIDE_UNION) AND fleet_size(SIDE_UNION) < 1 AND city_owner(AI_UNION_FLEET_CITY) = SIDE_UNION AND side_cash(SIDE_UNION) > cost_ship THEN
         fleet_city(SIDE_UNION) = AI_UNION_FLEET_CITY
-        CALL ai_navy_orders(SIDE_UNION, NAVY_BUILD)
+        CALL ai_navy_carry_out(SIDE_UNION, NAVY_BUILD)
     ELSE
         IF fleet_is_at_sea(side) THEN
             IF RND < .9 THEN
-                CALL ai_navy_orders(side, NAVY_SAIL)
+                CALL ai_navy_carry_out(side, NAVY_SAIL)
             END IF
             EXIT SUB
         END IF
@@ -17,7 +17,7 @@ SUB ai_fleet_orders (side)
         ' port, and with no fleet it read the owner of city 0, the side whose fleet had the last
         ' order (navy_mark_side).
         IF navy_can_build(side) THEN
-            CALL ai_navy_orders(side, NAVY_BUILD)
+            CALL ai_navy_carry_out(side, NAVY_BUILD)
         END IF
     END IF
 
@@ -32,21 +32,21 @@ SUB ai_fleet_orders (side)
     IF NOT fleet_is_at_sea(side) THEN
         'move ships & prohibit further action this turn
         IF city_owner(fleet_city(side)) = side OR city_owner(fleet_city(side)) = SIDE_NONE THEN
-            CALL ai_navy_orders(side, NAVY_SAIL)
+            CALL ai_navy_carry_out(side, NAVY_SAIL)
             EXIT SUB
         END IF
     ELSE
         IF RND < .5 THEN
-            CALL ai_navy_orders(side, NAVY_SAIL)
+            CALL ai_navy_carry_out(side, NAVY_SAIL)
         END IF
         EXIT SUB
     END IF
 
     IF city_owner(fleet_city(side)) <> side THEN
         IF city_army(fleet_city(side)) = 0 OR RND > .3 THEN
-            CALL ai_navy_orders(side, NAVY_ATTACK) 'attack
+            CALL ai_navy_carry_out(side, NAVY_ATTACK) 'attack
         ELSE
-            CALL ai_navy_orders(side, NAVY_SAIL) 'move
+            CALL ai_navy_carry_out(side, NAVY_SAIL) 'move
         END IF
     END IF
 END SUB
@@ -96,15 +96,15 @@ FUNCTION ai_pick_port (side, ports(), count)
 END FUNCTION
 
 ' The computer's fleet carries out an order: NAVY_BUILD, NAVY_ATTACK or NAVY_SAIL. The order
-' is first changed to what the fleet's state calls for (ai_navy), and looked at again before
-' each action (ai_navy_adjust). An action may ask for another, for example after a ship is
-' built.
-SUB ai_navy_orders (side, order)
+' is first changed to what the fleet's state calls for (ai_navy_first_action), and looked at
+' again before each action (ai_navy_adjust). An action may ask for another, for example after
+' a ship is built.
+SUB ai_navy_carry_out (side, order)
     DIM action AS INTEGER
     DIM quit AS INTEGER
     DIM again AS INTEGER
     action = order
-    CALL ai_navy(side, action)
+    CALL ai_navy_first_action(side, action)
     CALL draw_ai_navy_color
     DO
         CALL navy_mark_side(side)
@@ -273,7 +273,7 @@ END SUB
 
 ' The computer's order for its fleet, changed to what the fleet's state calls for: build
 ' with no fleet, raid back when the enemy's raiders sank commerce, sail after the enemy's fleet.
-SUB ai_navy (side, action)
+SUB ai_navy_first_action (side, action)
     IF NOT fleet_exists(side) THEN
         action = NAVY_BUILD
     ELSE

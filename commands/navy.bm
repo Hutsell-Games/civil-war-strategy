@@ -328,7 +328,7 @@ END SUB
 ' The side's fleet leaves the fight for one of its other sea ports.
 SUB navy_combat_retreat (side)
     DIM port AS INTEGER
-    CALL navy_retreat_port(side, port)
+    CALL navy_retreat(side, port)
     CALL clear_bottom_line
     COLOR COLOR_LIGHT_CYAN
     PRINT side_name$(side); " is retreating to "; city_name$(port);

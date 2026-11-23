@@ -14,7 +14,7 @@ END SUB
 
 ' Opens the main menu's Troops, Moves and Ships again for the month.
 SUB turn_reset_commands
-    turn_recruit_state = 0
+    turn_recruit_count = 0
     turn_moves_done = 0
     turn_navy_done = 0
 END SUB
@@ -32,7 +32,7 @@ END SUB
 
 ' Troops is closed for the month.
 SUB turn_close_recruiting
-    turn_recruit_state = -1
+    turn_recruit_count = RECRUIT_CLOSED
 END SUB
 
 ' After a turn ends. In a two-player game the Rebels' turn follows the Union's, and

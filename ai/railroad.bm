@@ -1,13 +1,13 @@
 ' The computer's train: which army it sends by rail, and where to.
 
 ' The computer's train. With an army aboard, it arrives. With none, the computer may send one
-' (ai_railroad).
+' (ai_railroad_pick).
 SUB ai_railroad_orders (side)
     DIM army AS INTEGER
     DIM city AS INTEGER
     SELECT CASE train_army(side)
         CASE 0
-            CALL ai_railroad(side, army, city)
+            CALL ai_railroad_pick(side, army, city)
             IF army > 0 THEN
                 CALL railroad_start(side, army, city)
             END IF
@@ -20,7 +20,7 @@ END SUB
 ' The computer's train: an army that is far from the enemy (ai_railroad_army), and a city of
 ' its own that the enemy threatens (ai_railroad_city). army and city are 0 when it sends no
 ' train.
-SUB ai_railroad (side, army, city)
+SUB ai_railroad_pick (side, army, city)
     DIM spare_army AS INTEGER
     DIM to_city AS INTEGER
     army = 0

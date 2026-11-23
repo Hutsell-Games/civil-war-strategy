@@ -32,6 +32,9 @@ CONST PORT_SEA = 99
 CONST ORDER_NONE = 0
 CONST ORDER_BUSY = -1
 CONST ORDER_DONE = -2
+' turn_recruit_count: how many cities the player's Troops list holds this month (turn_recruit_city()),
+' 0 before the list is drawn, or this when Troops is closed for the month.
+CONST RECRUIT_CLOSED = -1
 ' move_order_key(): the army does not move this turn.
 CONST MOVE_KEY_NONE = 999
 ' menu_choice: set to MENU_START + n before menu_select to start on option n; after it, these.
@@ -74,7 +77,7 @@ CONST MENU_CITY_POINTER = 9
 CONST MENU_MAIN_KEYS = 10
 ' menu_box_type: a double line round the menu (0, no line, and 1, a single line, have no caller).
 CONST BOX_DOUBLE = 2
-' The computer's order for its fleet (ai_navy_orders): the rows of the Ships menu.
+' The computer's order for its fleet (ai_navy_carry_out): the rows of the Ships menu.
 CONST NAVY_BUILD = 1
 CONST NAVY_ATTACK = 2
 CONST NAVY_SAIL = 3
@@ -228,7 +231,7 @@ CONST TRAIN_OUTLINE$ = "R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3"
 '==========================================================================
 COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
-COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_state
+COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_count
 COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), train_from_city()
 COMMON SHARED saved_under_marker(), side_name$(), army_city(), army_name$(), opt_players, ai_strength_ratio!
 COMMON SHARED army_size(), army_leader_rating(), army_experience(), army_supply(), month_name$()
@@ -237,7 +240,7 @@ COMMON SHARED army_order(), turn_month, turn_year, menu_value(), turn_moves_done
 COMMON SHARED fleet_city(), fleet_size(), city_army(), total_income, city_fort()
 COMMON SHARED side_victory_points(), opt_graphics, opt_sound, side_capital(), opt_difficulty, union_income_bonus, opt_alt_colors
 COMMON SHARED train_capacity(), map_font$(), move_order_key(), opt_winter_campaigns, opt_event_balance, opt_realism, side_casualties&()
-COMMON SHARED game_over, opt_history, victory_reason, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
+COMMON SHARED game_over, opt_history, victory_side, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
 '==========================================================================
 DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(MAX_LEADERS), turn_recruit_city(5)
 DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(MAX_LEADERS)

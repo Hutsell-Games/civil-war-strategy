@@ -293,11 +293,11 @@ SUB army_recruit_cities (side, cities(), count)
     DIM offer_count AS INTEGER
     DIM chance!
     count = 0
-    IF side = current_side AND turn_recruit_state > 0 THEN
-        FOR i = 1 TO turn_recruit_state
+    IF side = current_side AND turn_recruit_count > 0 THEN
+        FOR i = 1 TO turn_recruit_count
             cities(i) = turn_recruit_city(i)
         NEXT i
-        count = turn_recruit_state
+        count = turn_recruit_count
         CALL city_list_sort(cities(), count)
         EXIT SUB
     END IF
@@ -338,11 +338,11 @@ SUB army_recruit_cities (side, cities(), count)
     IF count = 0 THEN
         EXIT SUB
     END IF
-    IF side = current_side AND turn_recruit_state = 0 THEN
+    IF side = current_side AND turn_recruit_count = 0 THEN
         FOR i = 1 TO count
             turn_recruit_city(i) = cities(i)
         NEXT i
-        turn_recruit_state = count
+        turn_recruit_count = count
     END IF
     CALL city_list_sort(cities(), count)
 END SUB
