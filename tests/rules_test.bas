@@ -3289,6 +3289,27 @@ SUB TestHistoryStartKeepsTheLastHistory
     AssertTrue _FILEEXISTS("oldhist.ory"), "with no older one to replace"
 END SUB
 
+' ------------------------------------------------- the tunes (game/tunes.bm)
+' tune_note_end% cuts a tune into pieces of one note each, so that a key can stop it.
+
+SUB TestTuneNoteEndCutsAfterEachNote
+    t$ = "T90MFMNo1c4f8f8f4."
+    AssertEqualInt 11, tune_note_end%(t$, 1), "the commands and the first note"
+    AssertEqualInt 13, tune_note_end%(t$, 12), "the next note"
+    AssertEqualInt 18, tune_note_end%(t$, 16), "the last note runs to the end"
+    t$ = "g8a8b-8o2d8"
+    AssertEqualInt 7, tune_note_end%(t$, 5), "a flat"
+    AssertEqualInt 11, tune_note_end%(t$, 8), "an octave goes with the note after it"
+    t$ = "f#8MLg16a16MSb4"
+    AssertEqualInt 3, tune_note_end%(t$, 1), "a sharp, and a mode goes with the note after it"
+    AssertEqualInt 8, tune_note_end%(t$, 4), "the B, F or N of a mode is not a note"
+    AssertEqualInt 15, tune_note_end%(t$, 12), "MS and B4"
+    t$ = "P2N36d2 o1e8"
+    AssertEqualInt 2, tune_note_end%(t$, 1), "a pause is a note"
+    AssertEqualInt 5, tune_note_end%(t$, 3), "so is N"
+    AssertEqualInt 8, tune_note_end%(t$, 6), "a space stays with the note before it"
+END SUB
+
 '$INCLUDE: '../rules/army.bm'
 '$INCLUDE: '../rules/city.bm'
 '$INCLUDE: '../rules/battle.bm'

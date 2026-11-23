@@ -14,14 +14,6 @@ Open work on the QB64 port. Remove an item when it is done. The plan is
 Each of these is how the game behaves, in DOS too by its code. Decide whether to change it. A change to how a
 game plays changes the recorded screens.
 
-Ruled on 2026-11-13 (user): the other 22 bugs of this list, and the `SELECT CASE` branches that were never
-reached (`docs\archived\sub-names.md`, "Found while reading"), were fixed in one batch. The pictures,
-`normal_random_number` and the train's pixels below are kept. Of four rows found afterward, three were
-settled on 2026-11-13 (user). The fourth, the computer's fleet that "thinks of sailing" and
-attacks all the same, was kept then and fixed on 2026-11-14 (user; `docs\rule-changes.md`, G24). Three
-inherited typos of the computer were fixed on 2026-11-15 (user; G25 to G27), with a fourth (G28). What each fix did
-is in `docs\archived\modernize-plan-completed.md`, "The kept bugs fixed" and "Three more".
-
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
   The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
   its title.
@@ -62,9 +54,6 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   simpler code, not only a new spelling. Making them the same changes how the game plays.
 - **Mouse menus.** The menus read only keys (`menu_select`, `ui\menu.bm`). `_MOUSEINPUT` could let a player
   click a row.
-- **Music that stops as soon as a key is pressed.** The tunes in `game\tunes.bm` check `INKEY$` only between
-  `PLAY` phrases, so a key stops the music at the end of a phrase. With `PLAY "MB"` the music plays in the
-  background, as one victory tune already does (`game\victory_screens.bm`).
 - **One known folder for saves and settings.** `cws1.sav` to `cws9.sav`, `cws.cfg`, `hiscore.cws`, `cws.his`
   and `battsumm` are opened in the current folder (`io\files.bm`), so they land wherever the game was
   started from. A single folder, for example beside the program, would keep them together.
@@ -84,10 +73,6 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   A new knob is one line in `knobs.txt`, `make_knobs.py`, and the variable in the code. A fraction must
   be a DOUBLE (`name#`), which `make_knobs.py` sees to. Check a conversion as `number_knobs.py` was
   checked: the scripts, and the same autoplay games with the number and with the knob.
-- **The game in a browser, built by QBJS.** The plan is `docs\qbjs-plan.md` (2026-11-16): what QBJS
-  lacks for the game, measured by compiling it, and the steps in our fork of QBJS. Steps 0 to 12
-  are done (`docs\archived\qbjs-plan-completed.md`). Step 13, playing it in a real browser, is the
-  user's; step 14 offers the fixes upstream.
 
 ## The code
 
