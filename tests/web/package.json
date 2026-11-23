@@ -3,6 +3,6 @@
   "private": true,
   "description": "Runs a program built by QBJS in a headless Chrome and reads the result (docs/qbjs-plan.md, step 1)",
   "dependencies": {
-    "puppeteer-core": "^24.0.0"
+    "puppeteer-core": "^25.18.1"
   }
 }
