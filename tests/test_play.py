@@ -290,6 +290,12 @@ class TestDataTest(unittest.TestCase):
             self.load("#! dice 0.5 0.6\n")
         with self.assertRaises(play.SetupError):
             self.load("#! dice high\n")
+        for bad in ["1.5", "0.5.1", ".5,,1", "r5", "rr", "R", ".", "-.1", "0;,"]:
+            with self.subTest(bad=bad), self.assertRaises(play.SetupError):
+                self.load(f"#! dice {bad}\n")
+        for good in ["0,.05,.95;1;;r,.5,", "1.", "0;", ""]:
+            with self.subTest(good=good):
+                self.assertEqual(play.dice_error(good), "")
         with self.assertRaises(play.SetupError):
             self.load("#! data no-such-folder-of-test-data\n")
 

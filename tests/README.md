@@ -191,6 +191,9 @@ favors: with random events set to favor the Rebels, below .7 for the South and a
 follow the code of `special_events`, branch by branch. A month whose events are skipped (the ironclads'
 month) still takes its group.
 
+`play.py` refuses a `#! dice` line with a die that is not `r` or a number from 0 to 1 (`dice_error`). A
+`,` at the end of a group is allowed. An empty die anywhere else is refused, since the game would read it as 0.
+
 A script ends the program the way a player does: Quit at the title menu or Quit and Yes in the Files
 menu, then `repeat space` for END's "Press any key to continue". A run that ends any other way (a `prompt` that
 times out, no rule for a wait, a crash) fails, and the last line of its state file says why. `play.py` sets

@@ -19,6 +19,8 @@
 ' ===========================================================================
 
 ' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER.
+' It runs again before each new game in the same run (cws.bas). So under a script a second
+' game gets the same seed, and CWS_DICE's groups start again from the first.
 SUB script_start
     DIM seed$
     seed$ = ENVIRON$("CWS_SEED")
@@ -51,6 +53,8 @@ END SUB
 
 ' Makes PLAY and SOUND silent when the program is scripted. Called once, before the title
 ' tune, which plays before script_start seeds the random numbers.
+' It reads CWS_SEED itself and leaves scripted at 0 until script_start. Setting scripted here
+' would make the title's 9-second pause for a missing MTN.PNG return at once (bad-files.keys).
 SUB script_mute
     IF ENVIRON$("CWS_SEED") <> "" THEN
         PLAY "V0"
@@ -69,6 +73,7 @@ SUB script_dice_next
 END SUB
 
 ' Returns the next forced die value, or RND when the script gives r or has no values left.
+' tests/play.py checks the values when it reads a script's "#! dice" line (dice_error).
 FUNCTION script_rnd!
     DIM item$
     IF script_dice_now$ = "" THEN

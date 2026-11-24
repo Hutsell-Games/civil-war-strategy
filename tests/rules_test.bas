@@ -3498,6 +3498,14 @@ SUB TestScriptdateIsFixedUnderAScript
     AssertEqualStr "01-01-2000", script_date$, "scripted"
 END SUB
 
+SUB TestScriptrndTakesANumberOrR
+    script_dice_now$ = ".25,r"
+    AssertEqualSingle .25, script_rnd!, "a number"
+    x! = script_rnd!
+    AssertTrue x! >= 0 AND x! < 1, "r: a real RND"
+    AssertEqualStr "", script_dice_now$, "the group is used up"
+END SUB
+
 ' history_start keeps the last game's history as oldhist.ory, replacing an older one, and
 ' starts cws.his again.
 SUB TestHistoryStartKeepsTheLastHistory

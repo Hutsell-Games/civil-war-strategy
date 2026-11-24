@@ -25,7 +25,8 @@ Lines of a script that start with "#!" set up its run (other "#" lines are comme
                              make_save.py turns into the saved game <name>.sav
     #! without <name> ...    files the run starts without, as graphics/MTN.PNG
     #! dice <groups>         forced random numbers for the special events (CWS_DICE, io/script.bm):
-                             a group for each month, as 0,.05,.95;0,.9
+                             a group for each month, as 0,.05,.95;0,.9; each die is r (a real
+                             random number) or a number from 0 to 1
 
 Exit code: 0 when every script passed, 1 when one failed, 2 when a build or the set-up failed.
 """
@@ -217,6 +218,21 @@ class Script:
         return self.keys.with_suffix(".screen")
 
 
+def dice_error(dice: str) -> str:
+    """Why the groups of a "#! dice" line cannot be used, or "" when they can.
+
+    Each die must be r or a number from 0 to 1. A die of 1 makes its draw fail. An empty group
+    (";;") is allowed, and so is a "," at the end of a group: the game reads nothing after it
+    (script_rnd!, io/script.bm). Any other empty die is refused, since the game would read it as 0.
+    """
+    for group in dice.split(";"):
+        for die in group.removesuffix(",").split(",") if group else []:
+            digits = die.replace(".", "", 1)
+            if die != "r" and not (digits and not digits.strip("0123456789") and float(die) <= 1):
+                return f"dice: {die!r} is not r or a number from 0 to 1"
+    return ""
+
+
 def load_script(keys: Path) -> Script:
     """Reads a script's "#!" lines."""
     script = Script(name=keys.stem, keys=keys)
@@ -249,7 +265,10 @@ def load_script(keys: Path) -> Script:
             script.data.append(words[1])
         elif words[0] == "without" and len(words) > 1:
             script.without += words[1:]
-        elif words[0] == "dice" and len(words) == 2 and not words[1].strip("0123456789.,;r"):
+        elif words[0] == "dice" and len(words) == 2:
+            problem = dice_error(words[1])
+            if problem:
+                raise SetupError(f"{where}: {problem}")
             script.dice = words[1]
         else:
             raise SetupError(f"{where}: not a set-up line: {line}")
