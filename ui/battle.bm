@@ -17,7 +17,7 @@ SUB calculate_battle (attacker, defender, winner, loser)
     PRINT SPACE$(80)
     CALL clear_right_panel
     CALL draw_battle_attacker(attacker, attack_steps())
-    CALL draw_battle_defender(attacker, defender, defend_steps())
+    CALL draw_battle_defender(defender, defend_steps())
     CALL draw_battle_odds(attack_strength, defend_strength)
     CALL wait_key("P")
     CALL draw_battle_fort(defender)
@@ -76,22 +76,22 @@ SUB draw_battle_attacker (attacker, attack_steps())
 END SUB
 
 ' The defender's half of the right panel, below the attacker's, in the other side's color.
-SUB draw_battle_defender (attacker, defender, defend_steps())
+SUB draw_battle_defender (defender, defend_steps())
     DIM col AS INTEGER
     DIM side_color AS INTEGER
     DIM fort_label$
     col = 68
-    side_color = side_color_of(army_side(attacker))
+    side_color = side_color_of(army_side(defender))
     COLOR COLOR_LIGHT_CYAN
     LOCATE 13, col
     PRINT "Defender"
-    COLOR 16 - side_color
+    COLOR side_color
     LOCATE 14, col
     PRINT army_name$(defender)
     LOCATE 15, col
     CALL print_army_size(defender)
     LOCATE 16, col
-    PRINT "Base    "; INT(.01 * army_size(defender))
+    PRINT "Base    "; INT(attack_per_size# * army_size(defender))
     LOCATE 17, col
     PRINT "Defense "; defend_steps(1)
     LOCATE 18, col
@@ -105,7 +105,7 @@ SUB draw_battle_defender (attacker, defender, defend_steps())
     END IF
     LOCATE 21, col
     PRINT "Supply  "; defend_steps(5)
-    COLOR 16 - side_color
+    COLOR side_color
     LOCATE 22, col
     PRINT "Difclt  "; defend_steps(6)
     fort_label$ = "Fort"
@@ -124,7 +124,8 @@ SUB draw_battle_defender (attacker, defender, defend_steps())
     LINE (530, 380)-(635, 400), 11, B
 END SUB
 
-' The attacker's chance of winning, in whole percent and at least 1, such as "62%".
+' The attacker's share of the two strengths, a / (a + d), in whole percent and at least 1, such as
+' "62%". It is not the chance of winning, which is higher for the stronger side (TODO.md).
 FUNCTION battle_odds_text$ (attack_strength, defend_strength)
     DIM odds!
     DIM odds_pct AS INTEGER
@@ -206,7 +207,7 @@ SUB draw_battle_winner (defender, winner, loser)
     CALL wait_seconds(PAUSE_LONG)
 END SUB
 
-' Both sides' losses on the top line, in hundreds and as a percentage of each army.
+' Both sides' losses on the top line, in troops and as a percentage of each army.
 SUB draw_battle_losses (attacker, defender, attacker_losses, defender_losses)
     DIM side_color AS INTEGER
     side_color = side_color_of(army_side(attacker))
@@ -216,7 +217,7 @@ SUB draw_battle_losses (attacker, defender, attacker_losses, defender_losses)
     PRINT troops_text$(attacker_losses); "/";
     CALL print_army_size(attacker)
     PRINT " ("; _TRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker))))); "%) ²";
-    COLOR 16 - side_color
+    COLOR side_color_of(army_side(defender))
     PRINT "² Defend Loss: ";
     PRINT troops_text$(defender_losses); "/";
     CALL print_army_size(defender)
