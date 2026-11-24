@@ -1,0 +1,73 @@
+# Civil War Strategy: menus of the Commands menu that the player gives up with Esc, and
+# Fortify with no city left. The game is loaded from a prepared save
+# (tests/data/given-up/cws1.save): May 1862, the Rebels play, with 1000 in cash and two
+# armies, both in Richmond. The computer is passive.
+# A message shows on the bottom line under the next menu.
+#! seed 6
+#! cfg side=2 bold=0
+#! data given-up
+
+rule 1 key space
+
+# The title menu: Resume Saved Game; the Load menu: the one save.
+play until 2:C
+text r
+play until 2:L
+key enter
+play until 2:M
+digest
+
+# COMMANDS, Fortify: one row, Richmond, though two armies are there. Esc gives it up: the Commands menu again,
+# on Fortify, since the Rebels can still pay for a fort.
+text c
+prompt
+text f
+prompt
+digest
+key esc
+prompt
+digest
+
+# Fortify, Richmond: its fort grows a level, and the Commands menu comes back on Fortify.
+key enter
+prompt
+key enter
+prompt
+digest
+
+# Fortify, Richmond again: the second level in the same month. The army made busy is the
+# first in the city both times, so an army that has acted may fortify.
+key enter
+prompt
+key enter
+prompt
+digest
+
+# Fortify a third time: Richmond's fort is at its limit, so "No cities eligible to fortify",
+# and the Commands menu again.
+key enter
+prompt
+digest
+
+# Three rows down to Capital: the picker shows Richmond. Esc gives it up: the 500 stays paid,
+# and the main menu comes back.
+key down
+prompt
+key down
+prompt
+key down
+prompt
+key enter
+prompt
+digest
+key esc
+prompt
+digest
+
+# Files, Quit, Yes, and a key for END's "Press any key to continue".
+text f
+prompt
+text q
+prompt
+text y
+repeat space

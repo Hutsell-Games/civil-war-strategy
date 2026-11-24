@@ -35,6 +35,18 @@ SUB menu_add_row (text$, value)
     menu_value(menu_item_count) = value
 END SUB
 
+' Whether a row of the menu already holds the value. Gives -1 or 0, as a comparison does.
+FUNCTION menu_has_value (value)
+    DIM i AS INTEGER
+    menu_has_value = 0
+    FOR i = 1 TO menu_item_count
+        IF menu_value(i) = value THEN
+            menu_has_value = -1
+            EXIT FUNCTION
+        END IF
+    NEXT i
+END FUNCTION
+
 ' A name cut to the 11 characters a menu of armies or leaders shows.
 FUNCTION menu_short_name$ (name$)
     menu_short_name$ = LEFT$(name$, 11)

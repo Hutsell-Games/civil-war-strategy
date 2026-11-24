@@ -2,6 +2,7 @@
 ' player's side.
 
 ' Lets the player fortify an eligible occupied city, paying for the fort and making its army busy this turn.
+' The caller has checked that the side can pay for a fort (menu_commands).
 SUB menu_city_fortify (city)
     DIM i AS INTEGER
     DIM army AS INTEGER
@@ -12,7 +13,10 @@ SUB menu_city_fortify (city)
     menu_item_count = 0
     FOR i = side_first_army(current_side) TO side_last_army(current_side)
         IF army_exists(i) AND city_fort(army_city(i)) < MAX_FORT THEN
-            CALL menu_add_row(city_name$(army_city(i)), army_city(i))
+            ' A city with two armies gets one row; the original gave it a row for each (U22).
+            IF NOT menu_has_value(army_city(i)) THEN
+                CALL menu_add_row(city_name$(army_city(i)), army_city(i))
+            END IF
         END IF
     NEXT i
     IF menu_item_count = 0 THEN
@@ -32,18 +36,6 @@ SUB menu_city_fortify (city)
     city = menu_value(menu_choice)
     CALL city_update_occupier(city)
     army = city_army(city)
-    IF city_fort(city) >= MAX_FORT THEN
-        CALL clear_bottom_line
-        PRINT city_name$(city); " at MAXIMUM fortification level of 2";
-        CALL wait_seconds(4)
-        EXIT SUB
-    END IF
-    IF NOT fort_affordable(current_side) THEN
-        CALL clear_bottom_line
-        PRINT "Fortifications for "; city_name$(city); " cost "; cost_fort; " and you only have "; side_cash(current_side);
-        CALL wait_seconds(4)
-        EXIT SUB
-    END IF
     COLOR COLOR_CYAN
     CALL city_fortify(current_side, city)
     IF army_has_move(army) THEN
@@ -60,7 +52,6 @@ SUB menu_city_select (city)
     menu_text$(1) = "  "
     menu_text$(3) = "  "
     menu_item_count = 3
-    letter$ = city_name$(city)
     DO
         menu_col = 68
         menu_row = 15

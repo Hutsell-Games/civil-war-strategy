@@ -1506,6 +1506,18 @@ SUB TestCityListSortAndMenu
     AssertEqualInt 2, menu_value(2), "and its city"
 END SUB
 
+SUB TestMenuHasValue
+    menu_item_count = 0
+    AssertTrue NOT menu_has_value(33), "an empty menu holds nothing"
+    CALL menu_add_row("Richmond", 33)
+    CALL menu_add_row("Mobile", 2)
+    AssertTrue menu_has_value(33), "the first row's city"
+    AssertTrue menu_has_value(2), "the last row's city"
+    AssertTrue NOT menu_has_value(9), "a city of no row"
+    menu_item_count = 1
+    AssertTrue NOT menu_has_value(2), "a row past the menu's end does not count"
+END SUB
+
 ' ------------------------------------------------------ the special events
 ' The events are rows of the table read from scenarios\EVENTS.DAT. event_find gives the row
 ' of a name. script_dice$ gives event_roll its draws, as CWS_DICE does under a script: the

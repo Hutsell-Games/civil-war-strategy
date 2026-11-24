@@ -8,6 +8,11 @@ Open work on the QB64 port. Remove an item when it is done. The plan is
 - **A game that reaches March 1865 with the computer active.** The generated games end sooner, because a
   player who only ends turns is beaten in 1 to 20 turns. `union-time` and `two-player` reach the time limit
   with a passive computer or none.
+- **The count of lines that no test runs is out of date.** `docs\modernize-plan.md` ("Lines that no test
+  runs") speaks of 10 lines and lists 13 in its table, and `tests\README.md` says 18. On 2026-11-24
+  `python tests\play.py coverage --unit-tests` reported 225 lines not run of 7,961. The most are in
+  `ui\army.bm` (26), `ai\navy.bm` (24), `io\tuning_knobs.bm` (20) and `ui\turn.bm` (14). Find out
+  first whether tests were lost or the earlier count left lines out, then fix the numbers or add tests.
 
 ## The game
 

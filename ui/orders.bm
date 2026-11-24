@@ -1,6 +1,8 @@
 ' The Commands menu. The menus of its entries are in ui/army.bm and ui/city.bm.
 ' After a command is carried out it shows again, on that command's row.
 ' A command that is refused or given up goes back to the main menu, as MAIN MENU and Esc do.
+' Fortify does not: given up, or with no city to fortify, it shows the Commands menu again
+' while the side can pay for a fort.
 SUB menu_commands
     DIM row AS INTEGER
     DIM again AS INTEGER

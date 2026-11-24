@@ -1,0 +1,12 @@
+# For the script given-up: the Fortify menu and the capital's picker given up with Esc.
+# Also Fortify with two armies in one city. May 1862, the Rebels play, with 1000 in cash: two
+# forts (200 each) and a move of the capital (500).
+date 5 1862
+side 2
+cash 300 1000
+# Two Rebel armies, both in Richmond, city 33: J.E. Johnston's and Jackson's. The Fortify menu
+# has one row for the city, not one for each army (U22).
+army 22 city=33
+noarmy 23 24
+# Richmond starts the scenario with a fort of level 1. Here it has none, so two can be built.
+fort 0 33

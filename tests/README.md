@@ -35,7 +35,7 @@ On Windows, `CWS_SHOW_WINDOWS=1` shows the program's window. Otherwise it runs o
 that is never shown, and your keys and mouse cannot reach it. Everything a run makes goes into
 `tests\out\`, which git ignores. A build is made again only when a
 source file, the compiler or the screen hook changed. What a command prints also goes to
-`tests\out\last-<command>.txt`. All 41 scripts take about half a minute with four jobs on Windows.
+`tests\out\last-<command>.txt`. All 42 scripts take about half a minute with four jobs on Windows.
 
 Each run starts in a fresh copy of the game's data files in `tests\out\run\`, so the files in the repo are never
 changed. The copy takes the top-level files that are not sources, documents, DOS programs or saved games, and
@@ -220,6 +220,7 @@ on a desktop nobody sees.
 | `events-union` | From a prepared save of May 1864, the events that favor the Union: riots in a city the Rebels took, extra ships up to the fleet's limit, the Emancipation Proclamation, and Lincoln reelected. The Rebel fleet starts at sea, so the computer sails it home |
 | `refusals` | From a prepared save, one month of commands that the game refuses or that need a certain state: no commander left for a new army, a blocked track, an army too large for the train, the Which menu, a train's destination with no track, "Railroad is already carrying", the Supply menu with an army cut off, armies too large to combine, the Cancel menu, and an ironclad from the Type menu |
 | `refusals-rebel` | From a prepared save, as the Rebels with little cash, entries of the Commands menu that the game refuses: no money for a fort or to move the capital, an army too small to detach from, an army that cannot drill further, no army left to drill, Esc from the Supply menu, and Supply as "-" once supplies have spent the cash |
+| `given-up` | From a prepared save, as the Rebels with two armies in Richmond: the Fortify menu lists the city once and is given up with Esc, two forts built in one month, "No cities eligible to fortify", and Esc from the capital's picker after the move is paid for |
 | `navy-fights` | From a prepared save: the Options menu of a sea fight and a retreat, a raid on commerce without and with the lead ship's picture, a fleet that sails home from raiding, and a Union army that beats the army in Richmond, which flees |
 | `join` | From a prepared save: the player combines two armies in Washington (COMMANDS, Join), and a Rebel army's train arrives in the computer's turn |
 | `navy-build` | From a prepared save with no Union fleet: the Ships menu's entries that need a fleet, the Type menu, a new fleet through the Port menu, a sea fight in which the player attacks and wins, and the entries refused to a fleet at sea |

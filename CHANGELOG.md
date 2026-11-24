@@ -49,6 +49,7 @@ source rather than extending version 1.61.
   bought a whole day.
 - Join lists only the cities where two armies or more can join. Before, it listed
   cities where only one could, and then said it could not combine.
+- Fortify lists a city once. Before, a city with two armies was listed twice.
 - When the month's Troops list has no city, Troops closes for the month. Before,
   opening Troops again drew the cities again.
 
