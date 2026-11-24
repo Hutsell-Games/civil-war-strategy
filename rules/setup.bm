@@ -228,9 +228,9 @@ SUB game_new
     CALL load_cities
 END SUB
 
-' Clears the armies, the fleets, the trains, the city counts and the victory points for a new
-' game. Also the month's command flags, the commerce raid and the computer's strength ratio,
-' which the game before may have left set. Vary Start may be used again.
+' Clears the armies, the fleets, the trains, the city counts, the victory points and the game's
+' battle totals for a new game. Also the month's command flags, the commerce raid and the
+' computer's strength ratio, which the game before may have left set. Vary Start may be used again.
 SUB game_reset
     DIM k AS INTEGER
     game_over = 0
@@ -258,6 +258,8 @@ SUB game_reset
         side_victory_points(k) = 0
         side_city_count(k) = 0
         train_city(k) = 0
+        side_battles_won(k) = 0
+        side_casualties&(k) = 0
     NEXT k
     saves_exist = 1
     victory_rule(VICTORY_MONTH) = 1

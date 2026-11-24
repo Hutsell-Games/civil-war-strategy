@@ -201,6 +201,8 @@ SUB end_game (side, rule)
     CALL victory_won(side, rule)
     CALL draw_map
     CALL save_battle_summary
+    ' The battle totals of all games, with this game's battles, before the next game reads them.
+    CALL config_write_totals
     CALL report_battle_summary
     IF rule = VICTORY_YEAR THEN
         CALL victory_technical_points

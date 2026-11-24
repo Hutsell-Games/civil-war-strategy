@@ -71,7 +71,8 @@ CFG_NAME = "CWS.CFG"
 # The fields of CWS.CFG in the order the game reads and writes them (config_read and
 # config_write, io/files.bm), with the values a run starts with. They are those of the CWS.CFG that
 # came with the game, but noise: 0 (no sound, and no title music, which waits for its notes)
-# where the file has 2.
+# where the file has 2. The original's file came with battle totals (36, 134, 3992, 5041); the
+# port's starts at none (2026-11-24).
 CFG_FIELDS = {
     "side": "1",        # 1 the Union, 2 the Rebels
     "graf": "3",        # the map: 0 disabled, 1 roads, 2 city names, 3 full
@@ -84,10 +85,10 @@ CFG_FIELDS = {
     "train2": "300",    # railroad capacity, the Rebels
     "jancam": "1",      # January campaigns allowed
     "realism": "1",
-    "batwon1": "36",    # battles won by the Union in all games so far
-    "batwon2": "134",
-    "casualty1": "3992",
-    "casualty2": "5041",
+    "batwon1": "0",     # battles won by the Union in all games so far
+    "batwon2": "0",
+    "casualty1": "0",
+    "casualty2": "0",
     "history": "0",     # 1: the game writes its events to cws.his
     "bold": "3",        # the computer's aggression, 0 to 5
 }

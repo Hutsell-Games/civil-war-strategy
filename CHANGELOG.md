@@ -75,6 +75,13 @@ source rather than extending version 1.61.
   strength ratio of the game before.
 - A Load gives back every leader of the scenario who commands no army in the saved
   game, including those the game before had used.
+- After a Load, the army report shows the saved game's total income; before, it
+  showed the total of the game played before until the month's end.
+- The Battle Summary shows two sets of totals: those of this war, which a new game
+  starts at none and a saved game keeps, and those of all games played on this
+  computer. Before, it showed only one set, which a new game never set back to
+  zero, and the game came with 36 and 134 battles won already in it. Now both
+  start at none.
 
 ### Playtesting
 

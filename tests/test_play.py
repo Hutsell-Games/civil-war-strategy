@@ -148,7 +148,7 @@ class ScriptTest(unittest.TestCase):
             # The copy of the repo's file goes, whatever the case of its name.
             self.assertEqual([p.name for p in Path(d).iterdir()], ["CWS.CFG"])
             self.assertEqual((Path(d) / "CWS.CFG").read_text(),
-                             "2,3,0,3,1,1,7,600,300,1,1,36,134,3992,5041,0,3\n")
+                             "2,3,0,3,1,1,7,600,300,1,1,0,0,0,0,0,3\n")
 
 
 

@@ -322,15 +322,17 @@ END SUB
 
 '                               Battle Report
 SUB report_battle_summary
-    VIEW (200, 123)-(400, 284)
+    VIEW (200, 123)-(400, 412)
     CLS 1
     VIEW
-    LINE (200, 123)-(400, 284), 15, B
+    LINE (200, 123)-(400, 412), 15, B
     COLOR COLOR_YELLOW
     LOCATE 9, 32
     PRINT "BATTLE SUMMARY"
     CALL draw_flag_icon(320, 160, 1)
     CALL draw_flag_icon(370, 160, 2)
+    LOCATE 11, 27
+    PRINT "THIS WAR"
     LINE (200, 176)-(400, 230), 15, B
     LINE (200, 230)-(400, 284), 15, B
     LINE (290, 176)-(345, 284), 15, B
@@ -350,6 +352,28 @@ SUB report_battle_summary
     PRINT INT(.1 * side_casualties&(SIDE_UNION))
     LOCATE 17, 45
     PRINT INT(.1 * side_casualties&(SIDE_REBEL))
+    ' Below, the same for every game played on this machine.
+    LOCATE 19, 27
+    PRINT "ALL GAMES"
+    LINE (200, 304)-(400, 358), 15, B
+    LINE (200, 358)-(400, 412), 15, B
+    LINE (290, 304)-(345, 412), 15, B
+    LOCATE 21, 27
+    PRINT "BATTLES"
+    LOCATE 22, 27
+    PRINT "WON"
+    LOCATE 24, 27
+    PRINT "MEN LOST"
+    LOCATE 25, 27
+    PRINT "(1000's)"
+    LOCATE 22, 38
+    PRINT all_battles_won&(SIDE_UNION)
+    LOCATE 22, 45
+    PRINT all_battles_won&(SIDE_REBEL)
+    LOCATE 25, 38
+    PRINT INT(.1 * all_casualties&(SIDE_UNION))
+    LOCATE 25, 45
+    PRINT INT(.1 * all_casualties&(SIDE_REBEL))
     CALL report_wait_key
 END SUB
 

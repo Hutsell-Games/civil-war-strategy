@@ -465,6 +465,20 @@ SUB TestBattleCasualtiesBySide
     AssertEqualInt 20, side_casualties&(2), "and the Rebels' for the Rebels"
     AssertEqualInt 1, side_battles_won(1), "a battle won for the Union"
     AssertEqualInt 1, side_victory_points(1), "and a victory point"
+    AssertEqualInt 10, all_casualties&(1), "the losses count in all games too"
+    AssertEqualInt 20, all_casualties&(2), "both sides'"
+    AssertEqualInt 1, all_battles_won&(1), "and so does the battle won"
+END SUB
+
+' A new game starts its battle totals from none and keeps those of all games.
+SUB TestGameResetClearsTheGamesBattleTotals
+    side_battles_won(1) = 4: side_casualties&(2) = 70
+    all_battles_won&(1) = 9: all_casualties&(2) = 300
+    CALL game_reset
+    AssertEqualInt 0, side_battles_won(1), "the game's battles won"
+    AssertEqualInt 0, side_casualties&(2), "the game's losses"
+    AssertEqualInt 9, all_battles_won&(1), "all games' battles won stay"
+    AssertEqualInt 300, all_casualties&(2), "and their losses"
 END SUB
 
 SUB TestBattleLeavesTheDefenderOne
@@ -2961,7 +2975,7 @@ SUB TestAiAttackScoreWithoutSupply
 END SUB
 
 ' A saved game holds the knobs that are off their defaults, and loading it sets them again. A
-' save with every knob at its default has no line for them, and loading it sets the defaults.
+' save with every knob at its default has "" for them, and loading it sets the defaults.
 SUB TestSaveGameKeepsTheTuning
     CHDIR TestTempDir$
     cost_fort = 150: detach_share# = .4
@@ -3217,6 +3231,19 @@ SUB TestNewGameAndLoadClearTheStrengthRatio
     AssertTrue ai_strength_ratio! = 0, "a load"
 END SUB
 
+' The total income of the army report is the saved game's after a load, not the game's played
+' before (U20).
+SUB TestLoadGameSetsTheTotalIncome
+    CHDIR TestTempDir$
+    side_income(SIDE_UNION) = 410: side_income(SIDE_REBEL) = 290
+    CALL WriteTestLeaders
+    CALL save_game(3)
+    total_income = 1234
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt 700, total_income, "both saved incomes"
+END SUB
+
 ' A saved game keeps the victory rules, as switched off (negative) and as raised by playing on,
 ' and the events that have happened, by name. An event done in this session but not in the
 ' saved game is not done after the load.
@@ -3277,6 +3304,77 @@ SUB TestSaveGameWithoutVictoryRulesLoads
     AssertEqualInt 1863, turn_year, "the year"
     AssertEqualInt 30, victory_rule(3), "the victory rules stay as they were"
     AssertEqualInt 0, event_done(1), "no event done"
+END SUB
+
+' A saved game holds its own battle totals. Those of all games are in cws.cfg, and a load keeps
+' those of the game played, which cws.cfg may not have yet.
+SUB TestSaveGameKeepsTheBattleTotals
+    CHDIR TestTempDir$
+    side_battles_won(1) = 3: side_battles_won(2) = 5: side_casualties&(1) = 410: side_casualties&(2) = 620
+    all_battles_won&(1) = 30: all_battles_won&(2) = 50: all_casualties&(1) = 4100: all_casualties&(2) = 6200
+    CALL WriteTestLeaders
+    CALL save_game(3)
+    side_battles_won(1) = 0: side_battles_won(2) = 0: side_casualties&(1) = 0: side_casualties&(2) = 0
+    all_battles_won&(1) = 31: all_casualties&(2) = 6250
+    CALL load_game(3, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualInt 3, side_battles_won(1), "the game's battles won by the Union"
+    AssertEqualInt 5, side_battles_won(2), "by the Rebels"
+    AssertEqualInt 410, side_casualties&(1), "the game's Union losses"
+    AssertEqualInt 620, side_casualties&(2), "the Rebels'"
+    AssertEqualInt 31, all_battles_won&(1), "all games': a battle since the save, not cws.cfg's 30"
+    AssertEqualInt 6250, all_casualties&(2), "and the losses since"
+    CALL config_read(side)
+    AssertEqualInt 30, all_battles_won&(1), "cws.cfg holds all games' totals of the save"
+    AssertEqualInt 50, all_battles_won&(2), "the Rebels'"
+    AssertEqualInt 4100, all_casualties&(1), "the Union's losses"
+    AssertEqualInt 6200, all_casualties&(2), "the Rebels'"
+END SUB
+
+' The game's end and Quit write the battle totals of all games to cws.cfg and leave its settings
+' as they are there, not as the game played has them.
+SUB TestConfigWriteTotalsKeepsTheSettings
+    CHDIR TestTempDir$
+    opt_players = 1: opt_pause! = .5: opt_ai_aggression = 3
+    all_battles_won&(1) = 1: all_casualties&(2) = 2
+    CALL config_write(1)
+    opt_players = 2: opt_pause! = 8: opt_ai_aggression = 5
+    all_battles_won&(1) = 40000: all_battles_won&(2) = 7: all_casualties&(1) = 90000: all_casualties&(2) = 345
+    CALL config_write_totals
+    all_battles_won&(1) = 0: all_battles_won&(2) = 0: all_casualties&(1) = 0: all_casualties&(2) = 0
+    CALL config_read(side)
+    AssertEqualInt 1, side, "the side, from cws.cfg"
+    AssertEqualInt 1, opt_players, "the players, from cws.cfg"
+    AssertTrue opt_pause! = .5, "the display speed, from cws.cfg"
+    AssertEqualInt 3, opt_ai_aggression, "the aggression, the last field"
+    AssertTrue all_battles_won&(1) = 40000, "the Union's battles won in all games, past an INTEGER"
+    AssertEqualInt 7, all_battles_won&(2), "the Rebels'"
+    AssertTrue all_casualties&(1) = 90000, "the Union's losses, a LONG"
+    AssertTrue all_casualties&(2) = 345, "the Rebels'"
+END SUB
+
+' A game saved before saves held its battle totals ends with the tuning knobs. Its game
+' starts again from none.
+SUB TestSaveGameWithoutBattleTotalsLoads
+    CHDIR TestTempDir$
+    cost_fort = 150
+    side_battles_won(1) = 3: side_casualties&(2) = 620
+    CALL WriteTestLeaders
+    CALL save_game(3)
+    line_count = 0
+    f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f
+    DO WHILE NOT EOF(f): LINE INPUT #f, text$: line_count = line_count + 1: LOOP
+    CLOSE #f
+    f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f
+    g = FREEFILE: OPEN "cws4.sav" FOR OUTPUT AS #g
+    FOR i = 1 TO line_count - 1: LINE INPUT #f, text$: PRINT #g, text$: NEXT i
+    CLOSE #f, #g
+    cost_fort = 0
+    CALL load_game(4, problem$)
+    AssertEqualStr "", problem$, "loaded"
+    AssertEqualStr "cost_fort=150;", tuning_changes$, "the knobs, the old file's last line"
+    AssertEqualInt 0, side_battles_won(1), "no battle won in the game"
+    AssertEqualInt 0, side_casualties&(2), "no loss"
 END SUB
 
 ' A new game on another scenario counts only that scenario's cities, as the program does

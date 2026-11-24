@@ -126,7 +126,8 @@ SUB menu_save_game
     CALL draw_map
 END SUB
 
-' Quit: Yes or No. action becomes FILES_QUIT on Yes.
+' Quit: Yes or No. action becomes FILES_QUIT on Yes, and cws.cfg keeps the battle totals of all
+' games, with the battles fought since it was last written.
 SUB menu_quit (action)
     menu_choice = MENU_START + 2
     CALL menu_set_two("Quit", "Yes", "No")
@@ -137,5 +138,6 @@ SUB menu_quit (action)
     CALL clear_right_panel
     IF menu_choice = 1 THEN
         action = FILES_QUIT
+        CALL config_write_totals
     END IF
 END SUB

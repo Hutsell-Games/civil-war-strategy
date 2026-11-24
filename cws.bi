@@ -241,6 +241,7 @@ COMMON SHARED fleet_city(), fleet_size(), city_army(), total_income, city_fort()
 COMMON SHARED side_victory_points(), opt_graphics, opt_sound, side_capital(), opt_difficulty, union_income_bonus, opt_alt_colors
 COMMON SHARED train_capacity(), map_font$(), move_order_key(), opt_winter_campaigns, opt_event_balance, opt_realism, side_casualties&()
 COMMON SHARED game_over, opt_history, victory_side, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
+COMMON SHARED all_battles_won&(), all_casualties&()
 '==========================================================================
 DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(MAX_LEADERS), turn_recruit_city(5)
 DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(MAX_LEADERS)
@@ -250,6 +251,10 @@ DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8
 DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
 DIM SHARED side_victory_points(2), side_capital(2), train_city(2), fleet_ships$(2)
 DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_casualties&(2), side_battles_won(2), city_first_owner(MAX_CITIES)
+' The battles won and the men lost (in hundreds) by each side: side_battles_won() and
+' side_casualties&() in the game played, all_battles_won&() and all_casualties&() in every game
+' played on this machine. The game's are saved with it, the others in CWS.CFG.
+DIM SHARED all_battles_won&(2), all_casualties&(2)
 ' The events table: one row for each special event of scenarios/EVENTS.DAT, in the file's order.
 ' event_favors() is the side the event is good for, and event_for() the side its effect is
 ' for when that is another (SIDE_NONE when it is the same). event_before() is 1 for an
