@@ -446,6 +446,24 @@ SUB TestBattleLossesWithARateAboveOne
     AssertTrue killd >= 1 AND killd <= 79, "the defender's losses"
 END SUB
 
+' loss_own_share and loss_other_share take at most 1. At 1 each, with the largest armies and
+' defender_wins_loss at 10, the attacker's shared losses are 1,513 and the defender's about
+' 1,630, cut to 1,599; at 10 each the defender's were about 150,000, past an INTEGER.
+SUB TestBattleLossesAtTheLargestShares
+    CALL tuning_set("loss_own_share", 10, why$)
+    AssertEqualStr "loss_own_share must be from 0 to 1", why$, "10 is refused"
+    CALL tuning_set("loss_own_share", 1, why$)
+    AssertEqualStr "", why$, "1 is taken"
+    CALL tuning_set("loss_other_share", 1, why$)
+    AssertEqualStr "", why$, "1 is taken"
+    RANDOMIZE 1
+    rule_attack_loss = 11: rule_defend_loss = 9: defender_wins_loss# = 10
+    army_size(1) = 1600: army_size(21) = 1600: army_city(21) = 5: city_fort(5) = 0
+    CALL battle_losses(1, 21, 21, killa, killd)
+    AssertEqualInt 1513, killa, "the attacker's losses"
+    AssertEqualInt 1599, killd, "the defender's losses: all but 100 troops"
+END SUB
+
 SUB TestBattleLossesWithSeedOne
     RANDOMIZE 1
     rule_attack_loss = 11: rule_defend_loss = 9
@@ -1650,6 +1668,26 @@ SUB TestLoadEventsReadsTheChance
     AssertEqualStr "cannot read the chance: at most y", events_why$, "a cap that is not a number"
     CALL events_from_text("[events]|banner = b|chance = 1 x 1 x 1 x 1 x 1 x 1 x 1")
     AssertEqualStr "too many factors in the chance", events_why$, "seven factors"
+END SUB
+
+' Tabs around a line, a name in brackets, a key or a value count as spaces.
+SUB TestLoadEventsTakesTabs
+    t$ = CHR$(9)
+    CALL events_from_text("[events]|banner" + t$ + "=" + t$ + "b|chance = .1|" + t$ + "[" + t$ + "rain" + t$ + "]" + t$ + "|" + t$ + "favors" + t$ + "=" + t$ + "2" + t$)
+    AssertEqualStr "", event_file_error$, "read"
+    AssertEqualStr "b", event_banner$, "the banner, with tabs around the ="
+    AssertEqualStr "rain", event_name$(1), "the name in brackets"
+    AssertEqualInt SIDE_REBEL, event_favors(1), "favors, with tabs around it"
+END SUB
+
+' A file saved as "UTF-8 with BOM" reads, with a comment or a name in brackets on its first line.
+SUB TestLoadEventsTakesAByteOrderMark
+    bom$ = CHR$(239) + CHR$(187) + CHR$(191)
+    CALL events_from_text(bom$ + "; a comment|[events]|banner = b|chance = .1")
+    AssertEqualStr "", event_file_error$, "a comment after the mark"
+    CALL events_from_text(bom$ + "[events]|banner = b|chance = .1")
+    AssertEqualStr "", event_file_error$, "[events] after the mark"
+    AssertEqualStr "b", event_banner$, "and the lines after it"
 END SUB
 
 SUB TestLoadEventsChecksNamesAtTheEnd
@@ -2898,6 +2936,39 @@ SUB TestTuningFileRefusesBadLines
     CALL tuning_read("bad.dat")
     AssertEqualStr "bad.dat, line 1: cost_fort needs a whole number", tuning_error$, "a fraction"
     AssertEqualInt 150, cost_fort, "a refused value leaves the knob as the first file set it"
+END SUB
+
+' Tabs around a name, a value or a comment count as spaces.
+SUB TestTuningFileTakesTabs
+    CHDIR TestTempDir$
+    CALL tuning_defaults
+    tuning_error$ = ""
+    f = FREEFILE: OPEN "tabs.dat" FOR OUTPUT AS #f
+    PRINT #f, CHR$(9) + "cost_fort" + CHR$(9) + "=" + CHR$(9) + "150" + CHR$(9) + "; cheaper forts"
+    PRINT #f, CHR$(9) + "; a comment after a tab"
+    CLOSE #f
+    CALL tuning_read("tabs.dat")
+    AssertEqualStr "", tuning_error$, "read"
+    AssertEqualInt 150, cost_fort, "set, with tabs around the name and the value"
+END SUB
+
+' A file saved as "UTF-8 with BOM" reads, with a comment or a knob on its first line.
+SUB TestTuningFileTakesAByteOrderMark
+    CHDIR TestTempDir$
+    CALL tuning_defaults
+    tuning_error$ = ""
+    f = FREEFILE: OPEN "bom.dat" FOR OUTPUT AS #f
+    PRINT #f, CHR$(239) + CHR$(187) + CHR$(191) + "; a comment": PRINT #f, "cost_fort = 150"
+    CLOSE #f
+    CALL tuning_read("bom.dat")
+    AssertEqualStr "", tuning_error$, "a comment after the mark"
+    AssertEqualInt 150, cost_fort, "and the lines after it"
+    f = FREEFILE: OPEN "bom.dat" FOR OUTPUT AS #f
+    PRINT #f, CHR$(239) + CHR$(187) + CHR$(191) + "cost_ship = 80"
+    CLOSE #f
+    CALL tuning_read("bom.dat")
+    AssertEqualStr "", tuning_error$, "a knob after the mark"
+    AssertEqualInt 80, cost_ship, "the knob is set"
 END SUB
 
 ' A new game reads scenarios/TUNING.DAT and then the scenario's own, on top.

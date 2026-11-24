@@ -39,12 +39,15 @@ SUB load_events (file$)
     DO WHILE NOT EOF(file_num) AND why$ = ""
         LINE INPUT #file_num, text$
         line_num = line_num + 1
-        text$ = _TRIM$(text$)
+        IF line_num = 1 THEN
+            text$ = text_without_bom$(text$)
+        END IF
+        text$ = text_trim$(text$)
         cut = INSTR(text$, "=")
         IF text$ = "" OR LEFT$(text$, 1) = ";" THEN
             ' A blank line or a comment.
         ELSEIF LEFT$(text$, 1) = "[" THEN
-            key$ = LCASE$(_TRIM$(MID$(text$, 2, LEN(text$) - 2)))
+            key$ = LCASE$(text_trim$(MID$(text$, 2, LEN(text$) - 2)))
             in_general = 0
             row = 0
             seen$ = ""
@@ -71,8 +74,8 @@ SUB load_events (file$)
         ELSEIF cut = 0 THEN
             why$ = "the line has no ="
         ELSE
-            key$ = LCASE$(RTRIM$(LEFT$(text$, cut - 1)))
-            value$ = LTRIM$(MID$(text$, cut + 1))
+            key$ = LCASE$(text_trim$(LEFT$(text$, cut - 1)))
+            value$ = text_trim$(MID$(text$, cut + 1))
             IF LEN(value$) >= 2 AND LEFT$(value$, 1) = CHR$(34) AND RIGHT$(value$, 1) = CHR$(34) THEN
                 value$ = MID$(value$, 2, LEN(value$) - 2)
             END IF
@@ -514,6 +517,35 @@ FUNCTION text_take_item$ (rest$, sep$)
         text_take_item$ = LEFT$(rest$, cut - 1)
         rest$ = MID$(rest$, cut + LEN(sep$))
     END IF
+END FUNCTION
+
+' A file's first line without the three bytes that start a file saved as "UTF-8 with BOM".
+FUNCTION text_without_bom$ (text$)
+    text_without_bom$ = text$
+    IF LEFT$(text$, 3) = CHR$(239) + CHR$(187) + CHR$(191) THEN
+        text_without_bom$ = MID$(text$, 4)
+    END IF
+END FUNCTION
+
+' A text without the spaces and tabs at its start and end. _TRIM$ takes off spaces only.
+FUNCTION text_trim$ (text$)
+    DIM first AS INTEGER
+    DIM last AS INTEGER
+    first = 1
+    last = LEN(text$)
+    DO WHILE first <= last
+        IF MID$(text$, first, 1) <> " " AND MID$(text$, first, 1) <> CHR$(9) THEN
+            EXIT DO
+        END IF
+        first = first + 1
+    LOOP
+    DO WHILE last >= first
+        IF MID$(text$, last, 1) <> " " AND MID$(text$, last, 1) <> CHR$(9) THEN
+            EXIT DO
+        END IF
+        last = last - 1
+    LOOP
+    text_trim$ = MID$(text$, first, last - first + 1)
 END FUNCTION
 
 ' Whether a text is a number as the file writes one: digits, at most one point, and a minus

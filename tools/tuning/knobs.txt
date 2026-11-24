@@ -28,7 +28,7 @@ union_bonus_two_players | 50 | 0 | 2000 | in a two-player game (worked out, but 
 union_bonus_realism_share | .7 | 0 | 1 | the share kept with Realism on
 
 [Armies: sizes are in hundreds of troops]
-max_army_size | 1250 | 100 | 1600 | the most troops Join can put in one army (recruiting and the events add troops without this limit), at most 1600 so that a side's 20 armies sum below 32767
+max_army_size | 1250 | 100 | 1600 | the most troops Join or a reinforcement can put in one army (a new army and the events add troops without this limit), at most 1600 so that a side's 20 armies sum below 32767
 small_army_size | 15 | 0 | 16000 | an army below this fights at reduced strength
 min_detach_size | 65 | 1 | 16000 | an army needs this many troops to detach a part
 detach_share | .3 | .01 | .99 | the share of troops and supply a detached army takes
@@ -87,8 +87,10 @@ large_army_size | 300 | 0 | 16000 | against an army above this size, the losses 
 large_army_loss | .9 | 0 | 10 | see large_army_size
 huge_army_size | 800 | 0 | 16000 | against an army above this size, by huge_army_loss (keep it above large_army_size)
 huge_army_loss | .8 | 0 | 10 | see huge_army_size
-loss_own_share | .8 | 0 | 10 | the loser's final losses: this share of its own
-loss_other_share | .2 | 0 | 10 | plus this share of the other side's
+# At most 1 each: battle_losses works out the defender's share from the attacker's losses after
+# they are shared, so with both at 10 losses of 200 become 42,000, past an INTEGER.
+loss_own_share | .8 | 0 | 1 | each side's final losses: this share of its own
+loss_other_share | .2 | 0 | 1 | plus this share of the other side's
 attacker_loss_most_times | 9 | 1 | 20 | the attacker loses at most this many times the defender's losses
 defender_loss_most_times | 5 | 1 | 20 | the defender loses at most this many times the attacker's losses
 

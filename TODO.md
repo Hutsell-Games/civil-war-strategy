@@ -117,6 +117,13 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   not black, so the test keeps its 0.
 - **`wait_seconds` at midnight.** `TIMER` goes back to 0 at midnight, so `TIMER - start!` turns negative
   and the pause lasts until a key is pressed.
+- **A loaded game's knobs skip the rules between knobs.** `tuning_apply_list` (`io\tuning_file.bm`)
+  checks each knob's range but not `tuning_relations$`. A save keeps only the knobs off their defaults.
+  So if `tools\tuning\knobs.txt` changes a default after a game was saved, the mix can break a rule:
+  a save with `cost_ship=5000`, then a default `ironclad_cost_times` of 4, prices an ironclad at 20000,
+  above `MAX_CASH`. A knob whose range has been narrowed since the save is passed over without a
+  word: a save with `loss_own_share=5`, from before its most went from 10 to 1, loads it at its
+  default, .8. To decide: refuse the save, warn, or fall back to the defaults (found 2026-11-24).
 - **Files opened without a check.** `config_read` (`CWS.CFG`), `hall_of_fame_load` (`HISCORE.CWS`),
   `load_scenario_list` and `load_scenario` open their files without `_FILEEXISTS`. Started from another
   folder, the game stops with "File not found".

@@ -45,19 +45,22 @@ SUB tuning_read (file$)
     DO WHILE NOT EOF(file_num) AND why$ = ""
         LINE INPUT #file_num, text$
         line_num = line_num + 1
+        IF line_num = 1 THEN
+            text$ = text_without_bom$(text$)
+        END IF
         cut = INSTR(text$, ";")
         IF cut > 0 THEN
             text$ = LEFT$(text$, cut - 1)
         END IF
-        text$ = _TRIM$(text$)
+        text$ = text_trim$(text$)
         cut = INSTR(text$, "=")
         IF text$ = "" THEN
             ' A blank line or a comment.
         ELSEIF cut = 0 THEN
             why$ = "the line has no ="
         ELSE
-            key$ = LCASE$(_TRIM$(LEFT$(text$, cut - 1)))
-            value$ = _TRIM$(MID$(text$, cut + 1))
+            key$ = LCASE$(text_trim$(LEFT$(text$, cut - 1)))
+            value$ = text_trim$(MID$(text$, cut + 1))
             IF text_is_number(value$) = 0 THEN
                 why$ = key$ + " needs a number"
             ELSE

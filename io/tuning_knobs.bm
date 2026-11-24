@@ -472,12 +472,12 @@ SUB tuning_set (key$, value#, why$)
                 huge_army_loss# = value#
             END IF
         CASE "loss_own_share"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
             IF why$ = "" THEN
                 loss_own_share# = value#
             END IF
         CASE "loss_other_share"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, 0)
             IF why$ = "" THEN
                 loss_other_share# = value#
             END IF
