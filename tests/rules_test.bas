@@ -705,6 +705,23 @@ SUB TestArmySupplyDaysDoesNotOverflow
     AssertEqualInt 5000, side_cash(1), "they cost .5, and 4,999.5 rounds to the even 5,000"
 END SUB
 
+' The days are rounded down: cash for 0.6 of a day buys none, and for 2.6 days buys 2. The
+' original rounded to the nearest day and set the cash it overdrew to 0 (G56).
+SUB TestArmySupplyDaysRoundDown
+    army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 6
+    AssertEqualInt 0, army_supply_days(1), "6 buys 0.6 of a day for 10,000 troops"
+    AssertTrue NOT side_can_supply(1), "so Supply does not show"
+    CALL army_buy_supply(1, result)
+    AssertEqualInt SUPPLY_NO_CASH, result, "not enough cash"
+    AssertEqualInt 1, army_supply(1), "nothing bought"
+    AssertEqualInt 6, side_cash(1), "and nothing paid"
+    side_cash(1) = 26
+    CALL army_buy_supply(1, result)
+    AssertEqualInt SUPPLY_BOUGHT, result, "bought"
+    AssertEqualInt 3, army_supply(1), "2 days"
+    AssertEqualInt 6, side_cash(1), "for 20"
+END SUB
+
 SUB TestArmyBuySupplyCutOff
     opt_realism = REALISM_ON
     army_city(1) = 5: army_size(1) = 100: army_supply(1) = 1: side_cash(1) = 1000
@@ -1430,13 +1447,17 @@ SUB TestArmyRecruitCitiesKeptForTheMonth
     AssertEqualInt 7, cities(2), "then Boston"
 END SUB
 
-' A side that holds no city has none to recruit in, and the month keeps no list.
+' A side that holds no city has none to recruit in. For the player, Troops closes for the
+' month, so opening it again does not draw again (G58). The computer's draw closes nothing.
 SUB TestArmyRecruitCitiesNoneHeld
     DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
     current_side = 1: turn_recruit_count = 0
+    CALL army_recruit_cities(2, cities(), count)
+    AssertEqualInt 0, count, "the computer: no city"
+    AssertEqualInt 0, turn_recruit_count, "the player's Troops stays open"
     CALL army_recruit_cities(1, cities(), count)
     AssertEqualInt 0, count, "no city"
-    AssertEqualInt 0, turn_recruit_count, "no list kept for the month"
+    AssertEqualInt RECRUIT_CLOSED, turn_recruit_count, "Troops is closed for the month"
 END SUB
 
 ' The Rebels' capital, city 2, is empty and the enemy is next to it: the train takes army 21
@@ -1678,6 +1699,20 @@ SUB TestLoadEventsTakesTabs
     AssertEqualStr "b", event_banner$, "the banner, with tabs around the ="
     AssertEqualStr "rain", event_name$(1), "the name in brackets"
     AssertEqualInt SIDE_REBEL, event_favors(1), "favors, with tabs around it"
+END SUB
+
+' Tabs around the parts of a value count as spaces: the conditions, the chance's factors and
+' its parts after them, and the event an instead line names.
+SUB TestLoadEventsTakesTabsInsideAValue
+    t$ = CHR$(9)
+    CALL events_from_text("[events]|banner = b|chance = .1" + t$ + " x " + t$ + "(year - " + t$ + "1860)," + t$ + "at most .9|[rain]|favors = 2|if = roll at most .1," + t$ + "cities at least 30|instead = snow" + t$ + " if roll above .5|[snow]|favors = 2")
+    AssertEqualStr "", event_file_error$, "read"
+    AssertEqualInt 2, chance_count, "the chance's two factors"
+    AssertEqualInt 1860, chance_value#(2), "a tab inside the brackets"
+    AssertEqualInt 1, chance_has_most, "the cap after a comma and a tab"
+    AssertEqualInt 2, event_if_count(1), "the two conditions"
+    AssertEqualInt SUBJECT_CITIES, condition_subject(event_if_first(1) + 1), "the condition after a comma and a tab"
+    AssertEqualInt 2, event_instead(1), "the event named instead, snow, with a tab after it"
 END SUB
 
 ' A file saved as "UTF-8 with BOM" reads, with a comment or a name in brackets on its first line.
@@ -2709,10 +2744,14 @@ SUB TestArmyTakeLeaderAtZero
     AssertEqualInt 0, army_experience(3), "no experience stays none"
 END SUB
 
-' The cities where armies can combine: a city of the side with an army that holds it and
-' another army that has no order.
+' The cities where armies can combine: a city of the side with two armies or more that have
+' troops and no order.
 SUB TestArmyListCombineCities
     DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
+    DIM i AS INTEGER
+    FOR i = 1 TO 9
+        army_size(i) = 100
+    NEXT i
     city_name$(7) = "Paducah": city_owner(7) = SIDE_UNION: city_army(7) = 1
     army_city(1) = 7: army_city(2) = 7
     city_name$(3) = "Cairo": city_owner(3) = SIDE_UNION: city_army(3) = 4
@@ -2723,6 +2762,23 @@ SUB TestArmyListCombineCities
     AssertEqualInt 7, cities(1), "Paducah"
     CALL army_list_combine_cities(SIDE_REBEL, cities(), count)
     AssertEqualInt 0, count, "none for the other side"
+END SUB
+
+' The army that holds the city has acted, and one other army is free: that one would join
+' alone, so the city is not listed. The original listed it (G57). A third free army, or one
+' without troops, decides it.
+SUB TestArmyListCombineCitiesHolderHasActed
+    DIM cities(MAX_CITIES) AS INTEGER: DIM count AS INTEGER
+    city_name$(7) = "Paducah": city_owner(7) = SIDE_UNION: city_army(7) = 1
+    army_city(1) = 7: army_size(1) = 100: army_order(1) = ORDER_DONE
+    army_city(2) = 7: army_size(2) = 100
+    army_city(3) = 7
+    CALL army_list_combine_cities(SIDE_UNION, cities(), count)
+    AssertEqualInt 0, count, "one free army with troops: nothing to combine"
+    army_size(3) = 50
+    CALL army_list_combine_cities(SIDE_UNION, cities(), count)
+    AssertEqualInt 1, count, "two free armies: Paducah"
+    AssertEqualInt 7, cities(1), "Paducah"
 END SUB
 
 ' The computer razes a fort it takes without a battle under realism, in the map's lower part.

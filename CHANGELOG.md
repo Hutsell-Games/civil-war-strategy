@@ -45,6 +45,12 @@ source rather than extending version 1.61.
 - A relieved leader waiting on the list is no longer lost when the army in his slot
   is crushed or surrenders.
 - Switching between one and two players works out the Union's extra income again.
+- Supply buys only the whole days the cash pays for. Before, cash for 0.6 of a day
+  bought a whole day.
+- Join lists only the cities where two armies or more can join. Before, it listed
+  cities where only one could, and then said it could not combine.
+- When the month's Troops list has no city, Troops closes for the month. Before,
+  opening Troops again drew the cities again.
 
 ### Vary Start
 
@@ -100,6 +106,8 @@ source rather than extending version 1.61.
   players have given their orders. Before, only a game against the computer had them.
 - Turning Realism off no longer leaves a Rebel's event balance of 1 at 3. That
   balance is reached only by editing `CWS.CFG` by hand.
+- In an events file, tabs around a line's parts read as spaces: around the `=`,
+  around a name in brackets, and around each part of a value.
 
 ### Menus
 

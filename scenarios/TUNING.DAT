@@ -187,6 +187,8 @@ ai_fortify_cash = 222               ; the Union computer without a fleet stops f
 ;   small_army_size must be below max_army_size
 ;   min_detach_size may not be above max_army_size
 ;   new_army_size may not be above max_army_size
+;   new_army_size plus 2 times balance_recruits may not be above max_army_size
+;   min_detach_size times detach_share must be 1 or more
 ;   reinforce_size may not be above max_army_size
 ;   invasion_army_size may not be above max_army_size
 ;   a side's victory points may grow to 15000 at most: lower points_per_income, the bonuses or points_kept

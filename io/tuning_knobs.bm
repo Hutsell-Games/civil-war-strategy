@@ -994,6 +994,14 @@ FUNCTION tuning_relations$
         tuning_relations$ = "new_army_size may not be above max_army_size"
         EXIT FUNCTION
     END IF
+    IF NOT (new_army_size + 2 * balance_recruits <= max_army_size) THEN
+        tuning_relations$ = "new_army_size plus 2 times balance_recruits may not be above max_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT (min_detach_size * detach_share# >= 1) THEN
+        tuning_relations$ = "min_detach_size times detach_share must be 1 or more"
+        EXIT FUNCTION
+    END IF
     IF NOT (reinforce_size <= max_army_size) THEN
         tuning_relations$ = "reinforce_size may not be above max_army_size"
         EXIT FUNCTION

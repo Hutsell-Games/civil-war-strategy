@@ -180,6 +180,10 @@ check | new_army_supply + new_army_supply_spread + union_new_army_supply <= MAX_
 check | small_army_size < max_army_size | small_army_size must be below max_army_size
 check | min_detach_size <= max_army_size | min_detach_size may not be above max_army_size
 check | new_army_size <= max_army_size | new_army_size may not be above max_army_size
+# A new army gets the Balance setting's extra troops for up to 2 steps (Balance 1 or 5) without
+# the cap, and army_detach rounds the detached troops: a part of 0 troops would be an army.
+check | new_army_size + 2 * balance_recruits <= max_army_size | new_army_size plus 2 times balance_recruits may not be above max_army_size
+check | min_detach_size * detach_share >= 1 | min_detach_size times detach_share must be 1 or more
 check | reinforce_size <= max_army_size | reinforce_size may not be above max_army_size
 check | invasion_army_size <= max_army_size | invasion_army_size may not be above max_army_size
 # The points: a side's points settle where a month's gain equals what points_kept takes away. The

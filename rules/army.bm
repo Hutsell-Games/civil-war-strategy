@@ -53,7 +53,7 @@ FUNCTION army_has_move (army)
 END FUNCTION
 
 ' The army has acted this month: it is busy (ORDER_BUSY, after a fort, a drill, a combine, a
-' detach, a train or being raised) or done (ORDER_DONE, after a move or a battle).
+' train or being raised) or done (ORDER_DONE, after a move or a battle).
 FUNCTION army_has_acted (army)
     army_has_acted = army_order(army) < 0
 END FUNCTION
@@ -259,7 +259,7 @@ SUB army_generate_name (army, name$)
 END SUB
 
 ' A new army in a city: its supplies, experience, leader and size with the Balance setting's
-' extra troops, and the price of 100 taken from the side. army_new (commands/army.bm) shows it.
+' extra troops, and the price (cost_recruit) taken from the side. army_new (commands/army.bm) shows it.
 SUB army_raise (side, army_slot, city)
     DIM troops AS INTEGER
     army_supply(army_slot) = new_army_supply + new_army_supply_spread * RND
@@ -287,7 +287,9 @@ SUB army_raise (side, army_slot, city)
 END SUB
 
 ' The cities where a side may recruit this month, sorted by name. They are drawn at random;
-' the player's list is kept for the month. count is 0 when there is none.
+' the player's list is kept for the month. count is 0 when there is none, and Troops is then
+' closed for the month. The original kept no empty list, so the player could open Troops again
+' and again until the draw gave a city (G58).
 SUB army_recruit_cities (side, cities(), count)
     DIM i AS INTEGER
     DIM offer_count AS INTEGER
@@ -336,6 +338,9 @@ SUB army_recruit_cities (side, cities(), count)
         END IF
     NEXT i
     IF count = 0 THEN
+        IF side = current_side AND turn_recruit_count = 0 THEN
+            CALL turn_close_recruiting
+        END IF
         EXIT SUB
     END IF
     IF side = current_side AND turn_recruit_count = 0 THEN
@@ -347,9 +352,9 @@ SUB army_recruit_cities (side, cities(), count)
     CALL city_list_sort(cities(), count)
 END SUB
 
-' More troops for the army in a city: 4,500, or under the Realism setting a number from the
-' city's value, a third of it when the city is cut off (isolated is then 1), and the Balance
-' setting's extra troops. The side pays 100. The army has at most max_army_size, 125,000, the
+' More troops for the army in a city: reinforce_size, or under the Realism setting a number from the
+' city's value, less when the city is cut off (recruits_cut_off; isolated is then 1), and the Balance
+' setting's extra troops. The side pays cost_recruit. The army has at most max_army_size, the
 ' limit of a Join; the original had none, and an army past 32,767 wrapped to a negative size
 ' (G46). army_recruit (commands/army.bm) recruits nothing for an army that is full.
 SUB army_add_recruits (side, army, isolated)
@@ -376,8 +381,8 @@ FUNCTION army_is_full (army)
 END FUNCTION
 
 ' The troops a city gives under the Realism setting, in hundreds: by the city's value, for a new
-' army, or for the army already there when joins_army is 1. A third of that when the city is
-' cut off. army_raise, army_add_recruits and the computer's pick (ai_recruit_pick) use it.
+' army, or for the army already there when joins_army is 1. Less when the city is cut off
+' (recruits_cut_off). army_raise, army_add_recruits and the computer's pick (ai_recruit_pick) use it.
 FUNCTION recruit_troops (side, city, joins_army)
     DIM troops AS INTEGER
     troops = recruit_per_value * city_value(city) + recruit_base
@@ -387,7 +392,8 @@ FUNCTION recruit_troops (side, city, joins_army)
     recruit_troops = recruits_cut_off(side, city, troops)
 END FUNCTION
 
-' A third of troops when the side's city is cut off: no city next to it is the side's.
+' Gives troops divided by recruit_cut_off_divisor when the side's city is cut off: no city next to it
+' is the side's.
 FUNCTION recruits_cut_off (side, city, troops)
     recruits_cut_off = troops
     IF city_is_cut_off(side, city) THEN
@@ -428,17 +434,18 @@ END SUB
 ' How many days of supplies the side's cash buys for the army, up to the resupply level.
 ' army_buy_supply buys them when there is at least one. The days are capped before they are
 ' rounded, so a large treasury and a small army cannot overflow an INTEGER (rule-changes.md,
-' G29).
+' G29). They are rounded down, so the cash pays for every day bought. The original rounded to
+' the nearest, and 0.6 of a day bought a whole one (G56).
 FUNCTION army_supply_days (army)
     DIM days AS SINGLE
     days = 0
     IF army_size(army) > 0 THEN
-        days = side_cash(army_side(army)) / army_size(army) * 10
+        days = side_cash(army_side(army)) * 10# / army_size(army)
     END IF
     IF days + army_supply(army) > resupply_level THEN
         days = resupply_level - army_supply(army)
     END IF
-    army_supply_days = days
+    army_supply_days = INT(days)
 END FUNCTION
 
 ' Whether the Supply menu lists the army: it exists, it has a day of supplies or less, and
@@ -481,8 +488,8 @@ FUNCTION side_can_supply (side)
     NEXT i
 END FUNCTION
 
-' Whether drill can still improve the army: its experience is below 6 and below its leader's
-' rating. -1 or 0, as a comparison gives.
+' Whether drill can still improve the army: its experience is below drill_experience_below and
+' below its leader's rating. -1 or 0, as a comparison gives.
 FUNCTION army_can_drill (army)
     army_can_drill = army_experience(army) < drill_experience_below AND army_experience(army) < army_leader_rating(army)
 END FUNCTION
@@ -498,7 +505,7 @@ FUNCTION side_can_detach (side)
     side_can_detach = side = SIDE_REBEL
 END FUNCTION
 
-' Detaches three tenths of an army's troops and supplies into the free slot, in the city given.
+' Detaches a share (detach_share) of an army's troops and supplies into the free slot, in the city given.
 ' The new army takes the slot's leader and the old army's experience.
 SUB army_detach (army, city, army_slot)
     army_supply(army_slot) = detach_share# * army_supply(army)
@@ -514,25 +521,32 @@ SUB army_detach (army, city, army_slot)
     CALL army_appoint(army_slot, army_slot)
 END SUB
 
-' The side's cities where armies can combine, sorted by name: a city with an army that holds
-' it and another that has no order. count is 0 when there is none.
+' The side's cities where armies can combine, sorted by name: a city of the side with two armies
+' or more that army_combine_add takes, with troops and no order. count is 0 when there is none.
+' The original asked for one such army besides the army that holds the city, whatever that
+' army's order. When the holder had acted, the one army joined alone and Join said "Only 1
+' eligible army" (G57).
 SUB army_list_combine_cities (side, cities(), count)
     DIM last_army AS INTEGER
     DIM first_army AS INTEGER
     DIM i AS INTEGER
     DIM j AS INTEGER
+    DIM free_armies AS INTEGER
     first_army = side_first_army(side)
     last_army = side_last_army(side)
     count = 0
     FOR i = 1 TO MAX_CITIES
         IF city_owner(i) = side AND city_army(i) > 0 THEN
+            free_armies = 0
             FOR j = first_army TO last_army
-                IF army_city(j) = i AND city_army(i) <> j AND army_order(j) = ORDER_NONE THEN
-                    count = count + 1
-                    cities(count) = i
-                    EXIT FOR
+                IF army_city(j) = i AND army_order(j) = ORDER_NONE AND army_size(j) > 0 THEN
+                    free_armies = free_armies + 1
                 END IF
             NEXT j
+            IF free_armies >= 2 THEN
+                count = count + 1
+                cities(count) = i
+            END IF
         END IF
     NEXT i
 
@@ -555,14 +569,14 @@ END SUB
 ' army joins army 0 when it is in the city, has no order and has troops (COMBINE_JOINED). Army 0
 ' takes its leader when it is the first to join or he is better than any before (best is then
 ' army, and the leader of the best before goes back to the free leaders), its troops and their
-' share of experience. status is COMBINE_TOO_LARGE when army 0 would have more than 125,000 troops,
+' share of experience. status is COMBINE_TOO_LARGE when army 0 would have more than max_army_size,
 ' and COMBINE_SKIPPED when army does not join. The original took the first leader only when his
 ' rating was above 0, so armies whose leaders all had 0 joined army 0 and were lost (G35).
 SUB army_combine_add (army, city, best, status)
     DIM share!
     DIM slot AS INTEGER
     status = COMBINE_SKIPPED
-    IF army_order(army) <> ORDER_NONE OR army_city(army) <> city OR army_size(army) = 0 THEN
+    IF army_order(army) <> ORDER_NONE OR army_city(army) <> city OR army_size(army) < 1 THEN
         EXIT SUB
     END IF
     IF army_size(0) + army_size(army) > max_army_size THEN
@@ -580,9 +594,6 @@ SUB army_combine_add (army, city, best, status)
     END IF
 
     army_size(0) = army_size(0) + army_size(army)
-    IF army_size(0) < 1 THEN
-        EXIT SUB
-    END IF
     share! = (army_size(army) / army_size(0))
     army_experience(0) = (1 - share!) * army_experience(0) + share! * army_experience(army)
     status = COMBINE_JOINED

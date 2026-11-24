@@ -6,8 +6,8 @@ side 2
 cash 300 150
 # Two Rebel armies. J.E. Johnston in Richmond is too small to detach from (under 6,500) and too
 # experienced to drill (above 5), and has a day of supplies, so it is short of them. Jackson
-# in Front Royal can drill. His 40,000 men have no supplies: four days of them cost 160, so
-# buying them spends all the cash.
+# in Front Royal can drill. His 37,500 men have no supplies: four days of them cost 150, all
+# the cash. Supply buys only the days the cash pays for in full (G56).
 army 21 size=40 exp=6 supply=1
-army 22 exp=1 size=400 supply=0
+army 22 exp=1 size=375 supply=0
 noarmy 23 24
