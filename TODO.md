@@ -38,6 +38,11 @@ game plays changes the recorded screens.
   2026-11-21 the same games gave 76 to 24 with G34 (events in two-player games), and 78 to 22 with
   G35 to G47 as well; 43 games ended at the time limit. G35 to G47 changed the winner of 14 games,
   8 toward the Rebels and 6 toward the Union (sign test p = 0.79): no measurable change.
+- **A riot that finds no city still takes the month's event.** `event_possible` (`rules\events.bm`)
+  allows "city neutral" always. So when `event_riot_city` finds no city, or Realism is off, the riot is
+  still the month's event. The player sees only the banner, and the events after it in the list are not
+  tried. The original did the same (`GOSUB riot: EXIT SUB`). A riot with an `if = once` line would also be
+  used up. A fix changes which numbers are drawn, so every script would need `record` again.
 
 ## Improvements
 

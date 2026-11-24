@@ -279,9 +279,9 @@ DIM SHARED condition_count, condition_subject(MAX_EVENT_CONDITIONS), condition_r
 ' The month's chance of an event: the product of its factors, then chance_plus#, then at most
 ' chance_most# when chance_has_most is 1 (the chance line of EVENTS.DAT).
 DIM SHARED chance_count, chance_kind(MAX_CHANCE_FACTORS), chance_value#(MAX_CHANCE_FACTORS), chance_plus#, chance_most#, chance_has_most
-' Set by event_roll for the texts of the event: the city of a riot, the army that was
-' reinforced, and the side the effect was for. They fill {city}, {army} and {side}.
-DIM SHARED event_city, event_army, event_target_side
+' Set by event_roll for the texts of the event: the city of a riot and the army that was
+' reinforced. They fill {city} and {army}.
+DIM SHARED event_city, event_army
 ' The capital's star, taken from the icon with GET (draw_title), and the image handle of the mountains,
 ' loaded by show_title. The other pictures are loaded when drawn (draw_picture, draw/pictures.bm).
 DIM SHARED pic_capital(60)

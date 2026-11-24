@@ -1812,10 +1812,9 @@ SUB TestLoadEventsStopsAtTheLimits
 END SUB
 
 ' A file of the test's own: the code knows no event by name. The chance is that of Wars of
-' Napoleon. A third text is picked by a draw above two thirds, every comparison is used, and
-' {side} names the side.
+' Napoleon. A third text is picked by a draw above two thirds, and every comparison is used.
 SUB TestEventsOfAnotherWar
-    CALL events_from_text("[events]|banner = b|chance = .05 x (difficulty - 3), plus .1|[tribute]|favors = 1|when = roll|listed = yes|if = month below 3, cities at most 4, year at least 1805|effect = cash 10|text = a|text = b|text = {side} is paid|[calm]|favors = 1|effect = points 1|text = calm")
+    CALL events_from_text("[events]|banner = b|chance = .05 x (difficulty - 3), plus .1|[tribute]|favors = 1|when = roll|listed = yes|if = month below 3, cities at most 4, year at least 1805|effect = cash 10|text = a|text = b|text = paid|[calm]|favors = 1|effect = points 1|text = calm")
     AssertEqualStr "", event_file_error$, "read"
     opt_event_balance = 5: opt_difficulty = 3: current_side = 2: turn_year = 1863: turn_month = 2
     side_city_count(1) = 4
@@ -1824,7 +1823,6 @@ SUB TestEventsOfAnotherWar
     AssertEqualInt event_find("tribute"), event, "a draw of .1 passes the chance of .1, and side 1's first event holds"
     AssertEqualInt 2, variant, "a draw above two thirds: the third text"
     AssertEqualInt 30, side_cash(1), "its cash"
-    AssertEqualStr "Union is paid", event_message$(event_text$(event, variant)), "{side}"
     turn_month = 3: script_dice$ = "0,.9"
     CALL event_roll(event, variant, who)
     AssertEqualInt event_find("calm"), event, "March: the next event"
@@ -1834,9 +1832,9 @@ SUB TestEventsOfAnotherWar
 END SUB
 
 ' An event favors one side and its effect is for the other, as Wars of Napoleon's Hapsburgs
-' give France cash. {side} names the side the effect is for.
+' give France cash.
 SUB TestEventForAnotherSide
-    CALL events_from_text("[events]|banner = b|chance = 1|[gold]|favors = 2|for = 1|effect = cash 100|text = gold for {side}")
+    CALL events_from_text("[events]|banner = b|chance = 1|[gold]|favors = 2|for = 1|effect = cash 100|text = gold")
     AssertEqualStr "", event_file_error$, "read"
     opt_event_balance = 5: opt_difficulty = 3: current_side = 2
     script_dice$ = "0,0"
@@ -1844,7 +1842,6 @@ SUB TestEventForAnotherSide
     AssertEqualInt event_find("gold"), event, "the event of side 2"
     AssertEqualInt 300, side_cash(1), "the cash goes to side 1"
     AssertEqualInt 0, side_cash(2), "not to side 2"
-    AssertEqualStr "gold for Union", event_message$(event_text$(event, variant)), "{side}"
 END SUB
 
 ' An announcement comes before the roll, also with random events off. One that favors a side

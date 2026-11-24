@@ -15,7 +15,6 @@ SUB event_roll (event, variant, event_side)
     event_side = 0
     event_city = 0
     event_army = 0
-    event_target_side = SIDE_NONE
     CALL script_dice_next
     event_weight = opt_difficulty
     IF current_side = SIDE_UNION THEN
@@ -80,8 +79,7 @@ SUB event_pick (before, good_side, weight, event, variant)
                         END IF
                     END IF
                 END IF
-                event_target_side = event_target(chosen, side)
-                CALL event_apply(chosen, event_target_side, weight)
+                CALL event_apply(chosen, event_target(chosen, side), weight)
                 event_done(chosen) = 1
                 IF event_text_count(chosen) > 0 THEN
                     event = chosen

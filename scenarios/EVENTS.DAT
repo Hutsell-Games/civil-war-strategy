@@ -43,8 +43,7 @@
 ;               city neutral              a city the enemy took, with no army in it, turns neutral
 ;             "The side" is the for line's side, else the side the event favors.
 ;   text    = the message. Several text lines are variants: one is picked at random.
-;             {city} is the city of "city neutral", {army} the army of "reinforce", and
-;             {side} the name of the side the effect is for.
+;             {city} is the city of "city neutral" and {army} the army of "reinforce".
 ;             Put the text in double quotes to keep a space at its start or end.
 ;   outcome = a second message, for "city neutral": shown in a box after the text.
 ;   instead = another event and a condition: when this event is taken, the condition holds
