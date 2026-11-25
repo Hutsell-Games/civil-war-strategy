@@ -86,6 +86,13 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 
 ## The code
 
+- **A bad saved game or a folder the game cannot write to stops the program.** `load_game`
+  (`io\files.bm`) returns a `problem$` only for a save of a scenario that is not in `SCENARIOS.LST`. An empty
+  or cut-short `cws<n>.sav` gives a runtime error (Input past end of file) in the middle of the load. By then the
+  load has changed part of the game, so an `ON ERROR` alone would leave a game half loaded. `save_game`
+  stops on its `OPEN` when the folder is read-only. Both need a design, such as checking the whole file
+  before changing anything (found 2026-11-24, review of `ui\files.bm`).
+
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 228 and 232).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
   report needs laying out again.
@@ -96,9 +103,6 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
 - **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 293). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
-- **`menu_select` treats a start above 42 as row 1**: `IF row > 21` (`menu_start_row`, `ui\menu.bm` line 209) runs
-  after `MENU_START` is taken off. The 21 there is the menu's 21 rows (`menu_text$(21)`), not
-  `MENU_START`, so it stays.
 - **The Utility menu calls `menu_select(-1)`** (`menu_utility`, `ui\options.bm` line 65). No mode has that number, so it is a
   plain menu without the F3, F4 and F7 keys. `docs\archived\constants.md` has no row for it, so it keeps the -1
   (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.

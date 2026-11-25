@@ -649,6 +649,13 @@ SUB draw_map
         LINE (447, 291)-(525, 335), 1, BF
     END IF
 
+    ' A train with an army aboard, beside the city it left. The flag of an army still in the city
+    ' goes over it, as when the train was sent (railroad_start).
+    FOR k = SIDE_UNION TO SIDE_REBEL
+        IF train_army(k) > 0 THEN
+            CALL draw_train(k, DRAW_SHOW)
+        END IF
+    NEXT k
     CALL draw_army_flags
 
     FOR k = SIDE_UNION TO SIDE_REBEL

@@ -43,7 +43,8 @@ SUB railroad_arrive (side)
         SOUND 1200, 2
     END IF
     CALL wait_seconds(opt_pause!)
-    CALL draw_erase_flag(army_city(army))
+    ' The train is in the army's city now, and its erase takes the outline's tail too.
+    CALL draw_train(side, DRAW_ERASE)
     IF city_owner(army_city(army)) <> side THEN
         CALL city_capture(army, army_city(army), side, 0)
     END IF

@@ -469,12 +469,12 @@ p 00*312 03*4 00*36 03*5 00*283
 p 00*640
 = 16
 end
-digest 76A27D7D2D5C10C2
-digest E3B74AA46B0007C5
-digest 989ADD74BD88582F
-digest B3D9D9873F8B212C
-digest 6A4EFA9C659FEDF8
-digest C2EE5814D1CE25F3
+digest 482B3AA06F295592
+digest D19600256BC50E03
+digest 62A708BB47B8A519
+digest C5D873E1F0C5D871
+digest C4B61DAF37723677
+digest 038908997BB31004
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,22 off color 15 background 0

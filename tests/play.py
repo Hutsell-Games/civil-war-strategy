@@ -637,8 +637,10 @@ def explain(tools: Tools, exe: Path, script: Script, compiler: str, want: list[b
         return ""
     lines = ""
     fail = OUT / "fail"
-    for old in fail.glob(f"{script.name}-*.png"):
-        old.unlink()
+    # Only this script's screens: "navy-*" would also take those of navy-build and the others.
+    for kind in ("now", "recorded"):
+        for old in fail.glob(f"{script.name}-{kind}-*.png"):
+            old.unlink()
     number = state_number(got, index)
     if number:
         written = pngs(tools, run.folder / "screen.txt", fail / f"{script.name}-now.png", [number])

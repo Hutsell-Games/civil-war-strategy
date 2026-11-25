@@ -39,6 +39,8 @@ CONST RECRUIT_CLOSED = -1
 CONST MOVE_KEY_NONE = 999
 ' menu_choice: set to MENU_START + n before menu_select to start on option n; after it, these.
 CONST MENU_START = 21
+' The most rows a menu holds (menu_text$()). A row past them is not added.
+CONST MENU_MAX_ROWS = 21
 CONST MENU_ESCAPED = -1
 CONST MENU_END_TURN_KEY = 99
 ' The rows of the title menu (menu_title) and of the main menu (menu_main).
@@ -245,7 +247,7 @@ COMMON SHARED all_battles_won&(), all_casualties&()
 '==========================================================================
 DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(MAX_LEADERS), turn_recruit_city(5)
 DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(MAX_LEADERS)
-DIM SHARED menu_text$(21), saved_under_marker(300), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
+DIM SHARED menu_text$(MENU_MAX_ROWS), saved_under_marker(300), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
 DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(MONTHS_PER_YEAR)
 DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), train_from_city(2)
 DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)

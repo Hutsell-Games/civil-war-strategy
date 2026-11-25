@@ -62,10 +62,9 @@ SUB menu_load_game
     FOR k = 1 TO 9
         file$ = save_file_name$(k)
         IF _FILEEXISTS(file$) THEN
-            CALL menu_add_row(file$, k)
+            CALL menu_add_row(LTRIM$(STR$(k)) + " " + file$, k)
         END IF
     NEXT k
-    CALL menu_bubble_sort((menu_item_count))
     menu_col = PANEL_COL
     menu_row = 14 - .5 * menu_item_count
     CALL menu_select(MENU_PLAIN)
@@ -87,27 +86,23 @@ SUB menu_load_game
         EXIT SUB
     END IF
     PRINT STRING$(MAX_CITIES, ".");
-    SCREEN 12
     CLS
     CALL draw_map
     CALL clear_bottom_line
-    FOR k = SIDE_UNION TO SIDE_REBEL
-        IF train_army(k) > 0 THEN
-            CALL draw_train(k, DRAW_SHOW)
-        END IF
-    NEXT k
     CALL turn_reset_commands
 END SUB
 
-' Save: the player picks one of nine slots; a slot with a saved game has a mark.
+' Save: the player picks one of nine slots, by its number or the arrows. A slot with a saved
+' game has a mark after its name. A row has at most 11 characters, as the right panel has room
+' for no more.
 SUB menu_save_game
     DIM k AS INTEGER
     DIM slot AS INTEGER
     menu_text$(0) = "Save Game"
     FOR k = 1 TO 9
-        menu_text$(k) = save_file_name$(k)
-        IF _FILEEXISTS(menu_text$(k)) THEN
-            menu_text$(k) = menu_text$(k) + " û"
+        menu_text$(k) = LTRIM$(STR$(k)) + " " + save_file_name$(k)
+        IF _FILEEXISTS(save_file_name$(k)) THEN
+            menu_text$(k) = menu_text$(k) + "û"
         END IF
     NEXT k
     menu_col = PANEL_COL

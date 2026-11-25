@@ -906,7 +906,7 @@ p 00*640
 end
 digest 73E9CE8AC677F8EF
 digest E228ECFB6C933DFB
-digest CCC5D1FA9CD9B6FB
+digest B5A0E6A5A4FDC385
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,22 off color 15 background 0

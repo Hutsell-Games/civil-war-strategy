@@ -204,7 +204,7 @@ on a desktop nobody sees.
 
 | Script | What it plays |
 |---|---|
-| `title` | The title menu, then Quit |
+| `title` | The title menu, Esc (the title menu again), then Quit |
 | `union-manassas` | Two turns as the Union: a recruit, two moves, a ship, a railroad move, the reports, Fortify, the Utility menu, a save, and two battles. A state at each new kind of screen |
 | `commands` | Each entry of COMMANDS, each report of Inform, ships that land an army, a railroad move; then to the game's end |
 | `options` | Every entry of the Utility menu, then a game with what they set, with sound and history on |

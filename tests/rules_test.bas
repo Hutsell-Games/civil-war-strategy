@@ -1518,6 +1518,22 @@ SUB TestMenuHasValue
     AssertTrue NOT menu_has_value(2), "a row past the menu's end does not count"
 END SUB
 
+' A menu holds MENU_MAX_ROWS rows; a city or a row past them is left out.
+SUB TestMenuRowLimit
+    DIM cities(MAX_CITIES) AS INTEGER
+    DIM i AS INTEGER
+    FOR i = 1 TO MAX_CITIES
+        cities(i) = i
+        city_name$(i) = "City" + STR$(i)
+    NEXT i
+    CALL menu_set_cities(cities(), MAX_CITIES)
+    AssertEqualInt MENU_MAX_ROWS, menu_item_count, "40 cities: the first 21 rows"
+    AssertEqualInt MENU_MAX_ROWS, menu_value(MENU_MAX_ROWS), "the last row's city"
+    CALL menu_add_row("Richmond", 33)
+    AssertEqualInt MENU_MAX_ROWS, menu_item_count, "a full menu takes no row"
+    AssertTrue NOT menu_has_value(33), "and has not the city"
+END SUB
+
 ' ------------------------------------------------------ the special events
 ' The events are rows of the table read from scenarios\EVENTS.DAT. event_find gives the row
 ' of a name. script_dice$ gives event_roll its draws, as CWS_DICE does under a script: the

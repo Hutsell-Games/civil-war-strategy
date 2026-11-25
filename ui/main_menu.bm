@@ -3,8 +3,8 @@
 ' end: the title screen, the title menu and the start of a new game.
 
 ' Shows the main menu and leaves the choice in menu_choice. start is the row it starts on, as
-' MENU_START + row. An entry that cannot be chosen shows as "-". Troops as "-" sets the start
-' to Moves, and a start on a "-" entry from Moves to Railroad moves a row down.
+' MENU_START + row, or 0 for Troops. An entry that cannot be chosen shows as "-". A start on a
+' "-" entry from Troops to Railroad moves a row down; a start on any other row stays.
 SUB menu_main (start)
     CALL draw_top_bar
     CALL turn_check_commands
@@ -16,7 +16,9 @@ SUB menu_main (start)
     menu_text$(1) = "Troops"
     IF turn_recruit_count = RECRUIT_CLOSED OR side_cash(current_side) < cost_recruit THEN
         menu_text$(1) = "-"
-        start = MENU_START + MAIN_MOVES
+        IF start <= MENU_START + MAIN_TROOPS THEN
+            start = MENU_START + MAIN_MOVES
+        END IF
     END IF
     menu_text$(2) = "Moves"
     IF turn_moves_done > 0 THEN
@@ -134,7 +136,7 @@ SUB show_title (replay)
 END SUB
 
 ' The title menu: Resume Saved Game, Start NEW Game or Quit. The choice is left in
-' menu_choice as a TITLE_* action. Resume is omitted when no save slot exists.
+' menu_choice as a TITLE_* action. Resume is omitted when no save slot exists. Esc does nothing.
 ' In a two-player game the first player's turn screen comes before it.
 SUB menu_title
     CALL clear_bottom_line
@@ -151,11 +153,14 @@ SUB menu_title
     END IF
     CALL menu_add_row("Start NEW Game", TITLE_NEW_GAME)
     CALL menu_add_row("Quit", TITLE_QUIT)
-    menu_col = 33
-    menu_row = 20
-    menu_color = COLOR_MAGENTA
-    menu_choice = MENU_START + menu_item_count - 1
-    CALL menu_select(MENU_PLAIN)
+    ' Esc leaves no row chosen, so the menu is shown again.
+    DO
+        menu_col = 33
+        menu_row = 20
+        menu_color = COLOR_MAGENTA
+        menu_choice = MENU_START + menu_item_count - 1
+        CALL menu_select(MENU_PLAIN)
+    LOOP WHILE menu_choice = MENU_ESCAPED
     IF menu_choice > 0 THEN
         menu_choice = menu_value(menu_choice)
     END IF

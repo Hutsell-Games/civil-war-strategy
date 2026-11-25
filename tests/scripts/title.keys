@@ -1,4 +1,7 @@
-# The title menu, then Quit.
+# The title menu; Esc there shows the title menu again; then Quit.
+play until 2:C
+state
+key esc
 play until 2:C
 state
 text q

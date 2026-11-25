@@ -118,8 +118,18 @@ source rather than extending version 1.61.
   after the last fort the treasury can pay for.
 - The army report's income line shows the right total of both sides' income.
   Before, it counted the two capitals twice, so the total was 200 too high.
+- The main menu comes back on the row you left, also when you cannot pay for
+  troops. Before, a side short of cash always came back to Moves, or to the
+  first open row after it.
+- Esc on the title menu does nothing. Before, it started a new game.
 - A letter in the city picker finds your city even when it is the one just before
   the first city with that letter. Before, the letter did nothing then.
+- The Save Game and Load menus number their slots, and a digit picks one. Before,
+  the digits did nothing, and the key C saved over `cws1.sav` at once.
+- A train with an army aboard stays on the map after a Save, and whenever else the
+  map is drawn again. Before, only a Load drew it.
+- A train that arrives leaves no black mark beside the city it left. Before, three
+  pixels of its outline stayed on the map until it was drawn again.
 
 ## Version 1.7
 

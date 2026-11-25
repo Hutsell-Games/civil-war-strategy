@@ -119,6 +119,9 @@ SUB draw_train (side, show)
             CALL paint_at_pen(side_color, 0)
         CASE ELSE
             CALL draw_erase_flag(city)
+            ' The outline's tail reaches past the flag's box, just above the city's dot: three pixels.
+            LINE (x + 11, y + 4)-(x + 11, y + 5), 2
+            PSET (x + 12, y + 5), 2
     END SELECT
 END SUB
 

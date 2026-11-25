@@ -61,7 +61,7 @@ SUB menu_city_select (city)
         CALL menu_select(MENU_RAW_KEYS)
         CALL clear_right_panel
         SELECT CASE menu_choice
-            CASE IS = -27
+            CASE IS = -KEY_ESC
                 city = 0
                 EXIT SUB
             CASE IS < 1

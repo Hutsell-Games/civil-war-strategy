@@ -19,17 +19,21 @@ SUB menu_bubble_sort (limit)
 END SUB
 
 ' Makes a list of cities the menu's rows: each city's name, with its number in menu_value().
+' Cities past the menu's MENU_MAX_ROWS rows are left out.
 SUB menu_set_cities (cities(), count)
     DIM i AS INTEGER
-    menu_item_count = count
+    menu_item_count = 0
     FOR i = 1 TO count
-        menu_text$(i) = city_name$(cities(i))
-        menu_value(i) = cities(i)
+        CALL menu_add_row(city_name$(cities(i)), cities(i))
     NEXT i
 END SUB
 
-' Adds a row to the end of the menu: its text, and its number in menu_value().
+' Adds a row to the end of the menu: its text, and its number in menu_value(). A menu that
+' has its MENU_MAX_ROWS rows already is left as it is.
 SUB menu_add_row (text$, value)
+    IF menu_item_count >= MENU_MAX_ROWS THEN
+        EXIT SUB
+    END IF
     menu_item_count = menu_item_count + 1
     menu_text$(menu_item_count) = text$
     menu_value(menu_item_count) = value
@@ -60,22 +64,7 @@ SUB menu_set_two (heading$, first$, second$)
     menu_item_count = 2
 END SUB
 
-'============================================================================
-'                GENmenu 3.05 : Generic Menu Main Module Level  12/91
-'                Updated to Use Graphic Screens 8, 9, 12
-'============================================================================
-'       tlx  = top left x  (if zero, automatically centered)
-'       tly = top left y   (if zero, automatically centered)
-'       size = # rows (current maximum=20)
-'       mtx$() = text for menu
-'                mtx$(0) = heading (blank defaults to M E N U)
-'                mtx$(1-size) are options
-'       choose = option selected (row #)
-'            -1 indicates ESC key pressed
-'            entering with choose+21 causes choose to be default entry
-'       wtype = window type (0 = no line; 1=single line;
-'                            2=double line
-
+' Draws the menu's box at menu_col and menu_row, with its heading and its rows in menu_color.
 SUB draw_menu (title_col, menu_width)
     DIM i AS INTEGER
     VIEW (8 * menu_col - 6, 16 * menu_row - 11)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + menu_item_count + 2) + 8)
@@ -98,7 +87,9 @@ END SUB
 
 ' Shows the menu of menu_text$() and waits for the player's choice, left in menu_choice: a row,
 ' MENU_ESCAPED for Esc, or what menu_arrow_key gives. kind is one of MENU_PLAIN and the
-' others: what the menu shows beside the highlighted row, and which keys it takes.
+' others: what the menu shows beside the highlighted row, and which keys it takes. At
+' MENU_RAW_KEYS a key of one byte gives minus its code, Esc too (-KEY_ESC); Up, Enter and
+' Down give 1, 2 and 3.
 SUB menu_select (kind)
     DIM previous_row AS INTEGER
     DIM done AS INTEGER
@@ -149,7 +140,6 @@ SUB menu_select (kind)
                 done = 1
                 EXIT DO
             END IF
-            previous_row = row
             letter_row = menu_letter_row(pressed$)
             IF letter_row > 0 THEN
                 menu_choice = letter_row
@@ -218,7 +208,7 @@ FUNCTION menu_start_row
     IF row > MENU_START THEN
         row = row - MENU_START
     END IF
-    IF row > 21 THEN
+    IF row > MENU_MAX_ROWS THEN
         row = 1
     END IF
     IF row < 1 THEN
