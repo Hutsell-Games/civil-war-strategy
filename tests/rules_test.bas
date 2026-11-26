@@ -3319,6 +3319,32 @@ SUB TestConfigLayoutMatchesConfigWrite
     AssertEqualStr "44", field$(CONFIG_TOTALS_FIELD + 3), "the Rebels'"
 END SUB
 
+' The game's files take their numbers from FREEFILE, so a file held open as #1 or #2 does not
+' stop them. A fixed number would stop the program with "File already open".
+SUB TestFilesOpenWhileOthersAreOpen
+    DIM hall_name$(2, 5): DIM hall_score(2, 5)
+    DIM side AS INTEGER
+    CHDIR TestTempDir$
+    OPEN "held1.txt" FOR OUTPUT AS #1
+    OPEN "held2.txt" FOR OUTPUT AS #2
+    all_battles_won&(SIDE_UNION) = 7
+    CALL config_write(SIDE_REBEL)
+    all_battles_won&(SIDE_UNION) = 0
+    CALL config_read(side)
+    AssertEqualInt SIDE_REBEL, side, "cws.cfg written and read"
+    AssertTrue all_battles_won&(SIDE_UNION) = 7, "with its totals"
+    hall_name$(SIDE_UNION, 1) = "Grant": hall_score(SIDE_UNION, 1) = 350
+    CALL hall_of_fame_save(hall_name$(), hall_score())
+    hall_name$(SIDE_UNION, 1) = ""
+    CALL hall_of_fame_load(hall_name$(), hall_score())
+    AssertEqualStr "Grant", hall_name$(SIDE_UNION, 1), "the Hall of Fame written and read"
+    IF _FILEEXISTS(HISTORY_FILE) THEN KILL HISTORY_FILE
+    CALL history_start
+    AssertTrue _FILEEXISTS(HISTORY_FILE), "the history file started"
+    CLOSE #1, #2
+    KILL "held1.txt": KILL "held2.txt": KILL HALL_OF_FAME_FILE: KILL HISTORY_FILE
+END SUB
+
 ' Each side loses at most a number of times the other's losses. With both knobs at 1, the side
 ' that would lose more loses as much as the other.
 SUB TestBattleLossCaps

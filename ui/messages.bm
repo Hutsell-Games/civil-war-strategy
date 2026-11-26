@@ -30,6 +30,7 @@ END SUB
 
 ' Shows the message as a line or box when requested and appends it to cws.his when History is on.
 SUB scribe_message (text$, display)
+    DIM file_num AS INTEGER
     SELECT CASE display
         CASE SHOW_LINE
             CALL clear_bottom_line
@@ -38,8 +39,9 @@ SUB scribe_message (text$, display)
             CALL show_message_box(text$, COLOR_RED)
     END SELECT
     IF opt_history = HISTORY_ON THEN
-        OPEN "A", 2, HISTORY_FILE
-        PRINT #2, _TRIM$(text$)
-        CLOSE #2
+        file_num = FREEFILE
+        OPEN "A", file_num, HISTORY_FILE
+        PRINT #file_num, _TRIM$(text$)
+        CLOSE #file_num
     END IF
 END SUB

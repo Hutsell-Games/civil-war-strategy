@@ -4,13 +4,15 @@
 
 ' Reads scenarios/SCENARIOS.LST: each scenario's folder and title, up to MAX_SCENARIOS.
 SUB load_scenario_list
+    DIM file_num AS INTEGER
     scenario_count = 0
-    OPEN "I", 1, SCNDIR + "SCENARIOS.LST"
-    DO WHILE NOT EOF(1) AND scenario_count < MAX_SCENARIOS
+    file_num = FREEFILE
+    OPEN "I", file_num, SCNDIR + "SCENARIOS.LST"
+    DO WHILE NOT EOF(file_num) AND scenario_count < MAX_SCENARIOS
         scenario_count = scenario_count + 1
-        INPUT #1, scenario_folder$(scenario_count), scenario_title$(scenario_count)
+        INPUT #file_num, scenario_folder$(scenario_count), scenario_title$(scenario_count)
     LOOP
-    CLOSE #1
+    CLOSE #file_num
 END SUB
 
 ' The row of SCENARIOS.LST whose folder is folder$, whatever its case; -1 when none is. The
@@ -41,59 +43,64 @@ END FUNCTION
 SUB load_scenario
     DIM k AS INTEGER
     DIM i AS INTEGER
+    DIM file_num AS INTEGER
     CALL load_scenario_leaders
-    OPEN "I", 1, scenario_file$("CWS.INI")
+    file_num = FREEFILE
+    OPEN "I", file_num, scenario_file$("CWS.INI")
     FOR i = 0 TO 2
-        INPUT #1, side_name$(i)
+        INPUT #file_num, side_name$(i)
     NEXT i
     FOR i = 1 TO MONTHS_PER_YEAR
-        INPUT #1, month_name$(i)
+        INPUT #file_num, month_name$(i)
     NEXT i
-    INPUT #1, turn_month, turn_year
+    INPUT #file_num, turn_month, turn_year
     '               set end game conditions
     FOR i = 1 TO 6
-        INPUT #1, victory_rule(i)
+        INPUT #file_num, victory_rule(i)
     NEXT i
     victory_rule(VICTORY_CITIES) = .4 * victory_rule(VICTORY_CITIES)
-    CALL load_scenario_armies(SIDE_UNION)
-    CALL load_scenario_armies(SIDE_REBEL)
+    CALL load_scenario_armies(file_num, SIDE_UNION)
+    CALL load_scenario_armies(file_num, SIDE_REBEL)
     FOR i = SIDE_UNION TO SIDE_REBEL
-        INPUT #1, side_cash(i)
+        INPUT #file_num, side_cash(i)
     NEXT i
-    INPUT #1, rule_attack_loss, rule_defend_loss, rule_strength_cap
-    INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
+    INPUT #file_num, rule_attack_loss, rule_defend_loss, rule_strength_cap
+    INPUT #file_num, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
     FOR k = SIDE_UNION TO SIDE_REBEL
         fleet_size(k) = LEN(fleet_ships$(k))
         CALL navy_drop_empty_fleet(k)
     NEXT k
-    INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
+    INPUT #file_num, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
 
     FOR i = 1 TO 8
-        INPUT #1, flag_star_x(i), flag_star_y(i)
+        INPUT #file_num, flag_star_x(i), flag_star_y(i)
     NEXT i ' star locations on flag
-    CLOSE #1
+    CLOSE #file_num
 END SUB
 
 ' Reads the scenario's leaders from cwslead.dat: every leader free, with his rating.
 SUB load_scenario_leaders
     DIM i AS INTEGER
-    OPEN "I", 1, scenario_file$("CWSLEAD.DAT")
+    DIM file_num AS INTEGER
+    file_num = FREEFILE
+    OPEN "I", file_num, scenario_file$("CWSLEAD.DAT")
     FOR i = 1 TO MAX_LEADERS
-        INPUT #1, leader_name$(i), leader_rating(i)
+        INPUT #file_num, leader_name$(i), leader_rating(i)
     NEXT i
-    CLOSE #1
+    CLOSE #file_num
 END SUB
 
-' Reads one side's armies from cws.ini, open as #1: their count, then each army's city, troops,
-' experience and supplies. Army i takes leader i of cwslead.dat, who leaves the free leaders.
-SUB load_scenario_armies (side)
+' Reads one side's armies from cws.ini, open as file_num: their count, then each army's city,
+' troops, experience and supplies. Army i takes leader i of cwslead.dat, who leaves the free
+' leaders.
+SUB load_scenario_armies (file_num, side)
     DIM army_count AS INTEGER
     DIM first_army AS INTEGER
     DIM i AS INTEGER
-    INPUT #1, army_count
+    INPUT #file_num, army_count
     first_army = side_first_army(side)
     FOR i = first_army TO first_army + army_count - 1
-        INPUT #1, army_city(i), army_size(i), army_experience(i), army_supply(i)
+        INPUT #file_num, army_city(i), army_size(i), army_experience(i), army_supply(i)
         city_army(army_city(i)) = i
         CALL army_appoint(i, i)
     NEXT i
@@ -106,18 +113,20 @@ SUB load_cities
     DIM j AS INTEGER
     DIM unused AS INTEGER
     DIM owner AS INTEGER
+    DIM file_num AS INTEGER
     city_name$(0) = "NONE"
-    OPEN "I", 1, scenario_file$("CITIES.GRD")
+    file_num = FREEFILE
+    OPEN "I", file_num, scenario_file$("CITIES.GRD")
     total_income = union_income_bonus + 200
     FOR i = 1 TO MAX_CITIES
-        INPUT #1, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
+        INPUT #file_num, unused, city_x(i), city_y(i), city_name$(i), city_owner(i), city_value(i)
         city_first_owner(i) = city_owner(i)
         CALL city_update_occupier(i)
         FOR j = 1 TO MAX_ROADS
-            INPUT #1, city_road(i, j)
+            INPUT #file_num, city_road(i, j)
         NEXT j
         CALL city_close_road_gaps(i)
-        INPUT #1, city_port_type(i), city_fort(i)
+        INPUT #file_num, city_port_type(i), city_fort(i)
         IF city_owner(i) > 0 THEN
             owner = city_owner(i)
             side_city_count(owner) = side_city_count(owner) + 1
@@ -126,7 +135,7 @@ SUB load_cities
         END IF
         total_income = total_income + city_value(i)
     NEXT i
-    CLOSE #1
+    CLOSE #file_num
 END SUB
 
 ' Reads the saved game cws<slot>.sav: the scenario, the date, the armies, the cities, the sides,
@@ -154,13 +163,15 @@ SUB load_game (slot, problem$)
     DIM saved_tuning$
     DIM all_won&(2)
     DIM all_lost&(2)
+    DIM file_num AS INTEGER
     problem$ = ""
     file$ = save_file_name$(slot)
-    ' The scenario first. The file is closed again, because load_scenario and load_cities read
-    ' their files as #1 too.
-    OPEN "I", 1, file$
-    LINE INPUT #1, text$
-    CLOSE #1
+    ' The first line names the scenario. A save of another scenario reads that scenario's files
+    ' before the rest of the save.
+    file_num = FREEFILE
+    OPEN "I", file_num, file$
+    LINE INPUT #file_num, text$
+    CLOSE #file_num
     named = (LEFT$(text$, 1) = CHR$(34))
     IF named THEN
         folder$ = MID$(text$, 2, LEN(text$) - 2)
@@ -181,13 +192,14 @@ SUB load_game (slot, problem$)
     ' The free leaders are not saved: they are the scenario's, less those who command an army
     ' below (G33). The DOS game kept the list of the game played before the load.
     CALL load_scenario_leaders
-    OPEN "I", 1, file$
+    file_num = FREEFILE
+    OPEN "I", file_num, file$
     IF named THEN
-        LINE INPUT #1, text$
+        LINE INPUT #file_num, text$
     END IF
-    INPUT #1, turn_month, turn_year, union_income_bonus, saved_side
+    INPUT #file_num, turn_month, turn_year, union_income_bonus, saved_side
     FOR i = 1 TO MAX_ARMIES
-        INPUT #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+        INPUT #file_num, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
         IF army_exists(i) THEN
             IF army_name$(i) = leader_name$(i) THEN
                 leader_name$(i) = ""
@@ -205,11 +217,11 @@ SUB load_game (slot, problem$)
         END IF
     NEXT i
     FOR i = 1 TO MAX_CITIES
-        INPUT #1, city_army(i), city_owner(i), city_fort(i)
+        INPUT #file_num, city_army(i), city_owner(i), city_fort(i)
     NEXT i
     FOR i = SIDE_UNION TO SIDE_REBEL
-        INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
-        INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
+        INPUT #file_num, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+        INPUT #file_num, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
         fleet_size(i) = LEN(fleet_ships$(i))
         CALL navy_drop_empty_fleet(i)
     NEXT i
@@ -218,19 +230,19 @@ SUB load_game (slot, problem$)
     NEXT i
     ' A game saved before saves held the victory rules and the events ends here. It keeps the
     ' victory rules loaded now, and no event has happened.
-    IF NOT EOF(1) THEN
-        INPUT #1, victory_rule(1), victory_rule(2), victory_rule(3), victory_rule(4), victory_rule(5), victory_rule(6)
-        INPUT #1, done_count
+    IF NOT EOF(file_num) THEN
+        INPUT #file_num, victory_rule(1), victory_rule(2), victory_rule(3), victory_rule(4), victory_rule(5), victory_rule(6)
+        INPUT #file_num, done_count
         FOR k = 1 TO done_count
-            INPUT #1, text$
+            INPUT #file_num, text$
             ' A name that EVENTS.DAT no longer has is passed over.
             row = event_find(text$)
             IF row > 0 THEN
                 event_done(row) = 1
             END IF
         NEXT k
-        IF NOT EOF(1) THEN
-            INPUT #1, saved_tuning$
+        IF NOT EOF(file_num) THEN
+            INPUT #file_num, saved_tuning$
         END IF
     END IF
     ' The game's battle totals, in a game saved since 2026-11-24. An earlier save had only those
@@ -239,11 +251,11 @@ SUB load_game (slot, problem$)
         side_battles_won(i) = 0
         side_casualties&(i) = 0
     NEXT i
-    IF NOT EOF(1) THEN
-        INPUT #1, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL)
+    IF NOT EOF(file_num) THEN
+        INPUT #file_num, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL)
     END IF
 
-    CLOSE #1
+    CLOSE #file_num
     ' Both sides' income, as the month's end works it out. load_cities, or the game played
     ' before, left another (U20).
     total_income = side_income(SIDE_UNION) + side_income(SIDE_REBEL)
@@ -286,36 +298,38 @@ SUB save_game (slot)
     DIM i AS INTEGER
     DIM config_side AS INTEGER
     DIM done_count AS INTEGER
-    OPEN "O", 1, save_file_name$(slot)
-    WRITE #1, scenario_folder$(scenario_now)
-    WRITE #1, turn_month, turn_year, union_income_bonus, current_side
+    DIM file_num AS INTEGER
+    file_num = FREEFILE
+    OPEN "O", file_num, save_file_name$(slot)
+    WRITE #file_num, scenario_folder$(scenario_now)
+    WRITE #file_num, turn_month, turn_year, union_income_bonus, current_side
     FOR i = 1 TO MAX_ARMIES
-        WRITE #1, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
+        WRITE #file_num, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
     NEXT i
     FOR i = 1 TO MAX_CITIES
-        WRITE #1, city_army(i), city_owner(i), city_fort(i)
+        WRITE #file_num, city_army(i), city_owner(i), city_fort(i)
     NEXT i
     FOR i = SIDE_UNION TO SIDE_REBEL
-        WRITE #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
-        WRITE #1, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
+        WRITE #file_num, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+        WRITE #file_num, fleet_ships$(i), fleet_city(i), 0, train_army(i), train_city(i)
     NEXT i
-    WRITE #1, victory_rule(1), victory_rule(2), victory_rule(3), victory_rule(4), victory_rule(5), victory_rule(6)
+    WRITE #file_num, victory_rule(1), victory_rule(2), victory_rule(3), victory_rule(4), victory_rule(5), victory_rule(6)
     done_count = 0
     FOR i = 1 TO event_count
         done_count = done_count + event_done(i)
     NEXT i
-    WRITE #1, done_count
+    WRITE #file_num, done_count
     FOR i = 1 TO event_count
         IF event_done(i) THEN
-            WRITE #1, event_name$(i)
+            WRITE #file_num, event_name$(i)
         END IF
     NEXT i
     ' The tuning knobs that are not at their defaults (tuning_changes$, io/tuning_knobs.bm): ""
     ' with all at their defaults. The line is always written, so that the next can follow it.
-    WRITE #1, tuning_changes$
+    WRITE #file_num, tuning_changes$
     ' The game's battle totals. Those of all games are in cws.cfg.
-    WRITE #1, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL)
-    CLOSE #1
+    WRITE #file_num, side_battles_won(SIDE_UNION), side_battles_won(SIDE_REBEL), side_casualties&(SIDE_UNION), side_casualties&(SIDE_REBEL)
+    CLOSE #file_num
 
     config_side = current_side
     CALL config_write(config_side)
@@ -356,9 +370,11 @@ END FUNCTION
 ' - Realism below off is off and above on is on (G60). January campaigns and History other
 '   than off are on.
 SUB config_read (side)
-    OPEN "I", 1, SETTINGS_FILE
-    INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, all_battles_won&(SIDE_UNION), all_battles_won&(SIDE_REBEL), all_casualties&(SIDE_UNION), all_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-    CLOSE #1
+    DIM file_num AS INTEGER
+    file_num = FREEFILE
+    OPEN "I", file_num, SETTINGS_FILE
+    INPUT #file_num, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, all_battles_won&(SIDE_UNION), all_battles_won&(SIDE_REBEL), all_casualties&(SIDE_UNION), all_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+    CLOSE #file_num
     IF side <> SIDE_UNION AND side <> SIDE_REBEL THEN
         side = SIDE_UNION
     END IF
@@ -403,9 +419,11 @@ END FUNCTION
 
 ' Writes the current side, game settings and the battle totals of all games to CWS.CFG.
 SUB config_write (side)
-    OPEN "O", 1, SETTINGS_FILE
-    WRITE #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, all_battles_won&(SIDE_UNION), all_battles_won&(SIDE_REBEL), all_casualties&(SIDE_UNION), all_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
-    CLOSE #1
+    DIM file_num AS INTEGER
+    file_num = FREEFILE
+    OPEN "O", file_num, SETTINGS_FILE
+    WRITE #file_num, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, all_battles_won&(SIDE_UNION), all_battles_won&(SIDE_REBEL), all_casualties&(SIDE_UNION), all_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
+    CLOSE #file_num
 END SUB
 
 ' Writes the battle totals of all games to CWS.CFG and leaves its other fields as they are there.
@@ -416,11 +434,13 @@ SUB config_write_totals
     DIM field$(CONFIG_FIELDS)
     DIM k AS INTEGER
     DIM text$
-    OPEN "I", 1, SETTINGS_FILE
+    DIM file_num AS INTEGER
+    file_num = FREEFILE
+    OPEN "I", file_num, SETTINGS_FILE
     FOR k = 1 TO CONFIG_FIELDS
-        INPUT #1, field$(k)
+        INPUT #file_num, field$(k)
     NEXT k
-    CLOSE #1
+    CLOSE #file_num
     field$(CONFIG_TOTALS_FIELD) = LTRIM$(STR$(all_battles_won&(SIDE_UNION)))
     field$(CONFIG_TOTALS_FIELD + 1) = LTRIM$(STR$(all_battles_won&(SIDE_REBEL)))
     field$(CONFIG_TOTALS_FIELD + 2) = LTRIM$(STR$(all_casualties&(SIDE_UNION)))
@@ -429,26 +449,29 @@ SUB config_write_totals
     FOR k = 2 TO CONFIG_FIELDS
         text$ = text$ + "," + field$(k)
     NEXT k
-    OPEN "O", 1, SETTINGS_FILE
-    PRINT #1, text$
-    CLOSE #1
+    file_num = FREEFILE
+    OPEN "O", file_num, SETTINGS_FILE
+    PRINT #file_num, text$
+    CLOSE #file_num
 END SUB
 
 ' Writes both sides' battle totals of the game and marks the winner in battsumm when History is on.
 SUB save_battle_summary
     DIM k AS INTEGER
     DIM winner_mark$
+    DIM file_num AS INTEGER
     IF opt_history = HISTORY_ON THEN
-        OPEN "O", #1, "battsumm"
-        PRINT #1, " SIDE      BATTLES WON       LOSSES"
+        file_num = FREEFILE
+        OPEN "O", file_num, "battsumm"
+        PRINT #file_num, " SIDE      BATTLES WON       LOSSES"
         FOR k = SIDE_UNION TO SIDE_REBEL
             winner_mark$ = " "
             IF victory_side = k THEN
                 winner_mark$ = "*"
             END IF
-            PRINT #1, winner_mark$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
+            PRINT #file_num, winner_mark$; side_name$(k), side_battles_won(k), 100 * side_casualties&(k)
         NEXT k
-        CLOSE #1
+        CLOSE #file_num
     END IF
 END SUB
 
@@ -457,48 +480,54 @@ END SUB
 SUB hall_of_fame_load (names$(), scores())
     DIM side AS INTEGER
     DIM i AS INTEGER
+    DIM file_num AS INTEGER
     IF NOT _FILEEXISTS(HALL_OF_FAME_FILE) THEN
         EXIT SUB
     END IF
-    OPEN "I", 1, HALL_OF_FAME_FILE
+    file_num = FREEFILE
+    OPEN "I", file_num, HALL_OF_FAME_FILE
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
-            IF NOT EOF(1) THEN
-                INPUT #1, names$(side, i), scores(side, i)
+            IF NOT EOF(file_num) THEN
+                INPUT #file_num, names$(side, i), scores(side, i)
             END IF
         NEXT i
     NEXT side
-    CLOSE #1
+    CLOSE #file_num
 END SUB
 
 ' Writes the five Hall of Fame names and scores for each side to HISCORE.CWS.
 SUB hall_of_fame_save (names$(), scores())
     DIM side AS INTEGER
     DIM i AS INTEGER
-    OPEN "O", 1, HALL_OF_FAME_FILE
+    DIM file_num AS INTEGER
+    file_num = FREEFILE
+    OPEN "O", file_num, HALL_OF_FAME_FILE
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
-            WRITE #1, names$(side, i), scores(side, i)
+            WRITE #file_num, names$(side, i), scores(side, i)
         NEXT i
     NEXT side
-    CLOSE #1
+    CLOSE #file_num
 END SUB
 
 ' Starts the history file cws.his with the date. The history of the game before is kept as
 ' oldhist.ory, which it replaces. The original copied cws.his there and then emptied it, so a
 ' rename does the same. NAME fails when its target exists, so an old oldhist.ory goes first.
 SUB history_start
+    DIM file_num AS INTEGER
     IF _FILEEXISTS(HISTORY_FILE) THEN
         IF _FILEEXISTS("oldhist.ory") THEN
             KILL "oldhist.ory"
         END IF
         NAME HISTORY_FILE AS "oldhist.ory"
     END IF
-    OPEN "O", 2, HISTORY_FILE
-    PRINT #2, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
+    file_num = FREEFILE
+    OPEN "O", file_num, HISTORY_FILE
+    PRINT #file_num, TAB(20); "[ HISTORY OF GAME BEGUN "; script_date$; " ]"
     ' A game played with tuning knobs off their defaults says which.
     IF tuning_changes$ <> "" THEN
-        PRINT #2, "Tuning: "; tuning_changes$
+        PRINT #file_num, "Tuning: "; tuning_changes$
     END IF
-    CLOSE #2
+    CLOSE #file_num
 END SUB

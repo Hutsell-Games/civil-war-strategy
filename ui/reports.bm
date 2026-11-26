@@ -380,11 +380,13 @@ END SUB
 SUB report_recap
     DIM line_count AS INTEGER
     DIM history_line$
+    DIM file_num AS INTEGER
     CLS
     line_count = 0
-    OPEN "I", 2, HISTORY_FILE
-    DO WHILE NOT EOF(2)
-        LINE INPUT #2, history_line$
+    file_num = FREEFILE
+    OPEN "I", file_num, HISTORY_FILE
+    DO WHILE NOT EOF(file_num)
+        LINE INPUT #file_num, history_line$
         COLOR COLOR_GRAY
         IF INSTR(history_line$, "[") THEN
             COLOR COLOR_WHITE
@@ -405,7 +407,7 @@ SUB report_recap
             wait_seconds .4
         END IF
     LOOP
-    CLOSE #2
+    CLOSE #file_num
     CALL report_wait_key
 END SUB
 
