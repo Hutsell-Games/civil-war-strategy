@@ -81,8 +81,7 @@ SUB turn_resolve
         IF move_order_key(j) = MOVE_KEY_NONE THEN
             EXIT FOR
         END IF
-        moving_army = INT(move_order_key(j) / 100)
-        moving_army = move_order_key(j) - 100 * moving_army
+        moving_army = move_order_key(j) MOD 100
         CALL turn_move_army(moving_army)
     NEXT j
 
@@ -335,7 +334,7 @@ SUB turn_enter_city (moving_army, to_city, fought)
             CALL city_redraw_fort(city)
             CALL clear_bottom_line
             PRINT army_name$(moving_army); " has destroyed the forts at "; city_name$(city);
-            wait_seconds 3
+            CALL wait_seconds(3)
         END IF
         CALL city_capture(moving_army, city, side, fought)
     END IF

@@ -264,6 +264,7 @@ END SUB
 
 ' Gives each army with an order its place in the month's moves and sorts them. An army
 ' out of supplies moves last; a large one moves later; a good leader may move sooner.
+' A key is the place times 100 plus the army's number, so MAX_ARMIES must stay below 100.
 SUB turn_set_move_order
     DIM i AS INTEGER
     FOR i = 1 TO MAX_ARMIES

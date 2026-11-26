@@ -48,6 +48,17 @@ game plays changes the recorded screens.
   still the month's event. The player sees only the banner, and the events after it in the list are not
   tried. The original did the same (`GOSUB riot: EXIT SUB`). A riot with an `if = once` line would also be
   used up. A fix changes which numbers are drawn, so every script would need `record` again.
+- **The first "is blockaded" message of a month takes the color before it.** `turn_date_and_supply`
+  (`ui\turn.bm`) sets `COLOR COLOR_LIGHT_MAGENTA` after that message, so the first one shows in whatever
+  color was set last, and later ones in magenta. The original did the same (`COLOR 13` after the `PRINT`)
+  (found 2026-11-25, review of `ui\turn.bm`).
+- **In a two-player game only a Rebel army's surrender plays the tune.** `turn_army_surrenders`
+  (`ui\turn.bm`) plays it when the army's side is not `current_side`, and while the month is worked out
+  `current_side` is the Union. Both players are people, so either both sides should hear it or neither.
+  The original did the same (`x <> side`) (found 2026-11-25, review of `ui\turn.bm`).
+- **No fort can be razed in a two-player game.** `turn_enter_city` (`ui\turn.bm`) offers "Raze ?" only when
+  `opt_players = PLAYERS_ONE`, so neither player is ever asked. The original did the same (`player = 1`)
+  (found 2026-11-25, review of `ui\turn.bm`).
 
 ## Improvements
 
@@ -137,6 +148,10 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   `ui\turn.bm` line 224, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
+- **`turn_resolve` clears two screen boxes by number** (`ui\turn.bm`): `LINE (5, 17)-(100, 63), 3, BF` with
+  its border, the train's box after a train arrives, and `LINE (390, 350)-(520, 400), 1, BF`, under the
+  month's label. They stay numbers for now. Name them in one pass over the panel's boxes, not one at a
+  time (found 2026-11-25, review of `ui\turn.bm`).
 - **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 98): 0 there means "no color set",
   not black, so the test keeps its 0.
 - **`wait_seconds` at midnight.** `TIMER` goes back to 0 at midnight, so `TIMER - start!` turns negative
