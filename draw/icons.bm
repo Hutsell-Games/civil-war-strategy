@@ -60,10 +60,8 @@ SUB animate_army (army, picture_taken)
         ELSE
             CALL wait_seconds(.02)
         END IF
-        IF opt_sound >= SOUND_EFFECTS THEN
-            SOUND 200, .1
-            SOUND 50, .1
-        END IF
+        CALL sound_effect(200, .1)
+        CALL sound_effect(50, .1)
         PUT (step_x - 10, step_y - 10), saved_under_marker(), PSET
     NEXT i
     army_city(army) = from_city

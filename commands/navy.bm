@@ -24,9 +24,7 @@ END SUB
 SUB navy_show_new_ship (side, ship$)
     PSET (400, 465), 0
     CALL draw_ship_icon(side, ship_icon(ship$))
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 3000, 1
-    END IF
+    CALL sound_effect(3000, 1)
     CALL wait_seconds(opt_pause!)
 END SUB
 
@@ -198,11 +196,9 @@ SUB navy_commerce_raid
             ELSE
                 COLOR COLOR_WHITE
                 PRINT side_name$(raider); " raiders have lost a ship ("; fleet_size(raider); " remain)";
-                IF opt_sound >= SOUND_EFFECTS THEN
-                    SOUND 590, .5
-                    SOUND 999, .5
-                    SOUND 1999, .5
-                END IF
+                CALL sound_effect(590, .5)
+                CALL sound_effect(999, .5)
+                CALL sound_effect(1999, .5)
                 IF fleet_exists(raider) THEN
                     wait_seconds PAUSE_LONG
                     again = 1

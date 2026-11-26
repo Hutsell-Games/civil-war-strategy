@@ -1,6 +1,6 @@
 ' Parts of the screen that many SUBs share: the bottom line, the right panel and an army's
-' numbers there, the top bar, the train's box, the screen between two players' turns, and
-' the waits for a time or a key.
+' numbers there, the top bar, the train's box, the screen between two players' turns, the
+' waits for a time or a key, and the sound effects and music the Noise setting allows.
 
 ' Saves or restores the 21-by-21 pixel area centered on x and y using saved_under_marker().
 SUB screen_snapshot (x, y, put_back)
@@ -84,6 +84,20 @@ SUB wait_key (letter$)
     DO WHILE INKEY$ = ""
         _LIMIT 60
     LOOP
+END SUB
+
+' A sound effect: SOUND frequency, ticks! when the Noise setting has sounds on.
+SUB sound_effect (frequency, ticks!)
+    IF opt_sound >= SOUND_EFFECTS THEN
+        SOUND frequency, ticks!
+    END IF
+END SUB
+
+' A tune for PLAY when the Noise setting has music on.
+SUB play_music (tune$)
+    IF opt_sound = SOUND_MUSIC THEN
+        PLAY tune$
+    END IF
 END SUB
 
 ' Shows the current side and date above the map, with its flag, funds, victory points and settings in the right panel.

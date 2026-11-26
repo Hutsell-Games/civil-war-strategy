@@ -119,9 +119,7 @@ SUB menu_option_side
     COLOR side_color_of(current_side)
     CALL clear_bottom_line
     PRINT "Now playing "; side_name$(current_side); " side";
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 999, 1
-    END IF
+    CALL sound_effect(999, 1)
     CALL draw_top_bar
 END SUB
 
@@ -131,9 +129,7 @@ SUB menu_option_players
     CALL option_toggle_players
     CALL clear_bottom_line
     COLOR COLOR_LIGHT_RED
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 999, 1
-    END IF
+    CALL sound_effect(999, 1)
     setting$ = "Solo"
     IF opt_players = PLAYERS_TWO THEN
         setting$ = "2 Player"
@@ -160,9 +156,7 @@ SUB menu_option_graphics
     CALL clear_bottom_line
     COLOR COLOR_LIGHT_CYAN
     PRINT "Graphics : "; setting$;
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 2700, 1
-    END IF
+    CALL sound_effect(2700, 1)
 END SUB
 
 ' Noise: the SOUNDS menu. picked is 0 when the player left it with Esc.
@@ -186,9 +180,7 @@ SUB menu_option_sound (picked)
     CALL clear_bottom_line
     PRINT "Sound Option : "; menu_text$(menu_choice);
     CALL option_set_sound(menu_choice - 1)
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 999, 1
-    END IF
+    CALL sound_effect(999, 1)
     picked = 1
 END SUB
 

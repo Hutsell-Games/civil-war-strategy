@@ -55,9 +55,7 @@ END SUB
 
 ' Join, third part: the map shows the city's one army.
 SUB army_combine_redraw (side, city, best)
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 4000, .7
-    END IF
+    CALL sound_effect(4000, .7)
 
     CALL draw_cities
     CALL draw_army_flag(best)
@@ -73,9 +71,7 @@ SUB army_new (side, army_slot, city)
     PRINT "Placing NEW army "; army_slot; army_name$(army_slot); " in "; city_name$(city);
     PRINT " Size = ";
     CALL print_army_size(army_slot)
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 2222, .5
-    END IF
+    CALL sound_effect(2222, .5)
     CALL draw_army_flag(army_slot)
     CALL wait_seconds(opt_pause! - .5)
 END SUB
@@ -103,9 +99,7 @@ SUB army_resupply (army)
         CASE SUPPLY_BOUGHT
             CALL clear_bottom_line
             PRINT army_name$(army); " has received supplies ";
-            IF opt_sound >= SOUND_EFFECTS THEN
-                SOUND 4500, .5
-            END IF
+            CALL sound_effect(4500, .5)
     END SELECT
     CALL wait_seconds(opt_pause!)
 END SUB
@@ -144,9 +138,7 @@ SUB army_recruit (side, city, raised)
     from_city = army_city(i)
     CALL flag_picture_save(from_city)
     CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 2222, 1
-    END IF
+    CALL sound_effect(2222, 1)
     COLOR COLOR_LIGHT_CYAN
     CALL clear_bottom_line
     PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to ";

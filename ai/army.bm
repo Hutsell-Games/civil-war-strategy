@@ -1,5 +1,5 @@
 ' The computer's decisions for its armies: where each one moves, drill, Join, and razing a
-' fort. Like every file of ai/, they draw nothing themselves: their messages are SUBs of
+' fort. They draw nothing themselves: their messages are SUBs of
 ' ui/ai.bm, and they carry out an order through the commands of commands/, as the player's
 ' menus do.
 
@@ -40,13 +40,12 @@ SUB ai_army_order (side, army, ordered)
 
     enemy_strength = city_nearby_enemy_strength(city)
 
-    'hold capital
+    ' hold capital
     IF enemy_strength > 0 AND city = side_capital(side) AND city_army(city) = army THEN
         EXIT SUB
     END IF
     ' Any army in the capital stays while an enemy is next to it, when taking the capital wins
-    ' the game. The original tested the rule with <> 0, and a rule turned off is negative
-    ' (victory_toggle_rule), so it held the capital with the rule off too (G45).
+    ' the game.
     IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) > 0 THEN
         FOR j = 1 TO MAX_ROADS
             neighbor = city_road(city, j)
@@ -68,8 +67,7 @@ SUB ai_army_order (side, army, ordered)
     IF city_owner(army_order(army)) = side THEN
         other_army = city_army(army_order(army))
         IF other_army > 0 THEN
-            ' Two armies of the side that would trade cities stay where they are. The original
-            ' compared the other army's order with this army's size.
+            ' Two armies of the side that would trade cities stay where they are.
             IF army_order(other_army) = city THEN
                 army_order(army) = ORDER_NONE
                 EXIT SUB

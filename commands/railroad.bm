@@ -19,9 +19,7 @@ SUB railroad_start (side, army, city)
     PRINT army_name$(army); " is taking the train from "; city_name$(from_city); " to "; city_name$(city);
     CALL railroad_board(side, army, city)
     CALL draw_train(side, DRAW_SHOW)
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 2222, 1
-    END IF
+    CALL sound_effect(2222, 1)
     CALL draw_train_box
 
     CALL draw_city_flag(from_city)
@@ -39,9 +37,7 @@ SUB railroad_arrive (side)
     COLOR COLOR_LIGHT_CYAN
     CALL clear_bottom_line
     PRINT "Train with "; army_name$(army); " has arrived in "; city_name$(army_city(army));
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 1200, 2
-    END IF
+    CALL sound_effect(1200, 2)
     CALL wait_seconds(opt_pause!)
     ' The train is in the army's city now, and its erase takes the outline's tail too.
     CALL draw_train(side, DRAW_ERASE)

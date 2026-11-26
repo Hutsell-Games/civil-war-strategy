@@ -102,10 +102,8 @@ SUB menu_army_move
 
     CALL clear_bottom_line
     PRINT "Army "; army; " "; army_name$(army); " is moving from "; city_name$(city); " to "; city_name$(menu_value(menu_choice));
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 2200, .5
-        SOUND 2900, .7
-    END IF
+    CALL sound_effect(2200, .5)
+    CALL sound_effect(2900, .7)
     CALL draw_map_marker(city, menu_value(menu_choice), MARK_MOVE_LINE)
     CALL army_set_order(army, menu_value(menu_choice))
     CALL wait_seconds(opt_pause!)
@@ -287,9 +285,7 @@ SUB menu_army_cancel (side)
             CALL wait_seconds(1)
             CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_ARMY)
             CALL army_set_order(army, ORDER_NONE)
-            IF opt_sound >= SOUND_EFFECTS THEN
-                SOUND 2999, .5
-            END IF
+            CALL sound_effect(2999, .5)
             CALL draw_stack_markers(side)
         CASE ELSE
     END SELECT
@@ -479,9 +475,7 @@ SUB menu_army_detach (again)
     CALL print_army_size(army_slot)
     PRINT " men detached under "; army_name$(army_slot);
     CALL wait_seconds(opt_pause!)
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 2222, 1
-    END IF
+    CALL sound_effect(2222, 1)
     CALL draw_stack_markers(current_side)
     again = 1
 END SUB
@@ -513,9 +507,7 @@ SUB menu_army_drill (again, drilled)
     CALL army_drill(army)
     CALL clear_bottom_line
     PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 2222, 1
-    END IF
+    CALL sound_effect(2222, 1)
     CALL wait_seconds(opt_pause!)
     clear_bottom_line
     drilled = 1

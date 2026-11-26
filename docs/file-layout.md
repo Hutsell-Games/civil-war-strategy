@@ -60,7 +60,7 @@ A topic has a file of the same name in each folder that has a part of it: `army.
 | `ui\files.bm` | The Files menu and the menus of saved games |
 | `ui\options.bm` | The Utility menu and the menus of its settings |
 | `ui\reports.bm` | The Inform menu's reports, the Victory Conditions menu, and Chk Links |
-| `ui\screen.bm` | Parts of the screen that many procedures share, and the waits for a time or a key |
+| `ui\screen.bm` | Parts of the screen that many procedures share, the waits for a time or a key, and the sound effects and music that the Noise setting allows |
 | `ui\messages.bm` | A message in a box, and a message written to the history file |
 | `ui\battle.bm` | A land battle as the player sees it |
 | `ui\turn.bm` | The month's moves as the player sees them, and the computer's turn (`ai_turn`) |

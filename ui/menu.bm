@@ -173,9 +173,7 @@ SUB menu_select (kind)
         menu_choice = row
     LOOP
 
-    IF opt_sound >= SOUND_EFFECTS THEN
-        SOUND 700, .5
-    END IF
+    CALL sound_effect(700, .5)
     COLOR menu_color
     menu_col = 0
     menu_row = 0
