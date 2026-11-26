@@ -105,6 +105,8 @@ source rather than extending version 1.61.
 
 - Random events happen in a game of two players too, once a month after both
   players have given their orders. Before, only a game against the computer had them.
+- Random events that you turn off stay off when you change sides or start a new
+  game. Before, both turned them on again, in favor of the computer.
 - Turning Realism off no longer leaves a Rebel's event balance of 1 at 3. That
   balance is reached only by editing `CWS.CFG` by hand.
 - In an events file, tabs around a line's parts read as spaces: around the `=`,
@@ -139,6 +141,11 @@ source rather than extending version 1.61.
   Port menu came back until you picked a port.
 - The Ships menu starts on Sail when Build and Attack are both "-". Before, it
   started on the "-" of Build.
+- The Display and Random Events menus start on the setting in force. Before,
+  Display started on Fast when the speed was Very Slow, and Random Events always
+  on OFF.
+- The line below the Random Events menu names the setting without the menu's
+  marker.
 
 ## Version 1.7
 

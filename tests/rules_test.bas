@@ -2473,13 +2473,17 @@ END SUB
 ' The option_ SUBs of rules/setup.bm, and victory_toggle_rule.
 
 SUB TestOptionSwapSide
-    current_side = SIDE_UNION
+    current_side = SIDE_UNION: opt_event_balance = 5
     CALL option_swap_side
     AssertEqualInt SIDE_REBEL, current_side, "the Rebels"
     AssertEqualInt 3, opt_event_balance, "events favor the Union"
     CALL option_swap_side
     AssertEqualInt SIDE_UNION, current_side, "the Union again"
     AssertEqualInt 7, opt_event_balance, "events favor the Rebels"
+    opt_event_balance = 0
+    CALL option_swap_side
+    AssertEqualInt SIDE_REBEL, current_side, "the Rebels again"
+    AssertEqualInt 0, opt_event_balance, "events that are off stay off (G59)"
 END SUB
 
 ' Vary Start reloads the scenario, then may move the Rebel capital to Montgomery (city 25).
@@ -2631,6 +2635,9 @@ SUB TestOptionDisplaySpeed
     AssertTrue opt_pause! = 2, "Normal is 2 seconds:" + STR$(opt_pause!)
     CALL option_set_display_speed(4)
     AssertTrue opt_pause! = 8, "Very Slow is 8 seconds:" + STR$(opt_pause!)
+    AssertEqualInt 4, option_display_row, "the menu starts on Very Slow"
+    CALL option_set_display_speed(2)
+    AssertEqualInt 2, option_display_row, "the menu starts on Normal"
 END SUB
 
 SUB TestOptionSetBalance
@@ -2646,6 +2653,13 @@ SUB TestOptionSetEventBalance
     CALL option_set_event_balance(4): AssertEqualInt 7, opt_event_balance, "favor the Rebels"
     CALL option_set_event_balance(MENU_ESCAPED): AssertEqualInt 7, opt_event_balance, "Esc changes nothing"
     CALL option_set_event_balance(1): AssertEqualInt 0, opt_event_balance, "off"
+    DIM row AS INTEGER
+    FOR row = 1 TO 4
+        CALL option_set_event_balance(row)
+        AssertEqualInt row, option_event_balance_row, "the menu starts on the row picked"
+    NEXT row
+    opt_event_balance = 1
+    AssertEqualInt 1, option_event_balance_row, "a balance no row gives: OFF's row"
 END SUB
 
 ' Realism on and off both work the Union's extra income out again; the original did it only
@@ -3232,7 +3246,7 @@ SUB TestGameApplySettingsUnion
     RANDOMIZE 1
     opt_realism = REALISM_ON: turn_year = 1861: fleet_ships$(SIDE_UNION) = "WIIW"
     opt_players = 0: current_side = SIDE_NONE: opt_pause! = 0: opt_difficulty = 1
-    side_cash(SIDE_UNION) = 300: side_cash(SIDE_REBEL) = 50
+    side_cash(SIDE_UNION) = 300: side_cash(SIDE_REBEL) = 50: opt_event_balance = 5
     CALL game_apply_settings
     AssertEqualStr "WWWW", fleet_ships$(SIDE_UNION), "no ironclads before 1862 under realism"
     AssertEqualInt PLAYERS_ONE, opt_players, "one player when the setting is not 1 or 2"
@@ -3249,7 +3263,7 @@ SUB TestGameApplySettingsRebel
     RANDOMIZE 1
     opt_realism = REALISM_OFF: turn_year = 1861: fleet_ships$(SIDE_UNION) = "WI"
     opt_players = PLAYERS_ONE: current_side = SIDE_REBEL: opt_pause! = 8: opt_difficulty = 5
-    side_cash(SIDE_UNION) = 300: side_cash(SIDE_REBEL) = 50
+    side_cash(SIDE_UNION) = 300: side_cash(SIDE_REBEL) = 50: opt_event_balance = 5
     CALL game_apply_settings
     AssertEqualStr "WI", fleet_ships$(SIDE_UNION), "ironclads stay"
     AssertEqualInt 3, opt_event_balance, "events favor the Union"
@@ -3259,6 +3273,9 @@ SUB TestGameApplySettingsRebel
     opt_players = PLAYERS_TWO
     CALL game_apply_settings
     AssertEqualInt SIDE_UNION, current_side, "two players: the Union starts"
+    opt_event_balance = 0
+    CALL game_apply_settings
+    AssertEqualInt 0, opt_event_balance, "events that are off stay off (G59)"
 END SUB
 
 ' A game saved in a slot and loaded again, in a folder of the test's own. save_game also

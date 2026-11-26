@@ -194,7 +194,7 @@ END SUB
 
 ' Display: how long a message stays, or the other set of colors.
 SUB menu_option_display
-    menu_choice = opt_pause! + 21
+    menu_choice = MENU_START + option_display_row
     menu_text$(0) = "Display"
     menu_text$(1) = "Fast"
     menu_text$(2) = "Normal"
@@ -244,14 +244,14 @@ SUB menu_option_balance (picked)
     END IF
     CALL clear_bottom_line
     COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
     PRINT "Play Balance : "; menu_text$(menu_choice);
     CALL option_set_balance(menu_choice)
     picked = 1
 END SUB
 
-' Rndom Evt: off, or which side the special events favor. The line below shows the setting in
-' force. The original kept the last choice's text, so after an Esc it showed that instead.
+' Rndom Evt: off, or which side the special events favor. The menu starts on the setting in
+' force, and the line below shows it, without the menu's marker. The original kept the last
+' choice's text, so after an Esc it showed that instead.
 SUB menu_option_events
     DIM setting$
     DIM favor$
@@ -272,6 +272,7 @@ SUB menu_option_events
     IF opt_event_balance = 7 THEN
         menu_text$(4) = menu_text$(4) + " "
     END IF
+    menu_choice = MENU_START + option_event_balance_row
     menu_color = COLOR_MAGENTA
     CALL menu_select(MENU_PLAIN)
     menu_color = COLOR_RED
@@ -279,12 +280,15 @@ SUB menu_option_events
     CALL option_set_event_balance(menu_choice)
     ' The setting in force, which Esc leaves as it was.
     SELECT CASE opt_event_balance
+        CASE 0
         CASE 3
-            favor$ = menu_text$(2)
+            favor$ = "Favor Union "
         CASE 5
-            favor$ = menu_text$(3)
+            favor$ = "Neutral     "
         CASE 7
-            favor$ = menu_text$(4)
+            favor$ = "Favor Rebels"
+        CASE ELSE
+            favor$ = LTRIM$(STR$(opt_event_balance))
     END SELECT
     CALL clear_bottom_line
     setting$ = ""
@@ -334,6 +338,7 @@ SUB menu_option_history
         setting$ = "ON"
     END IF
     CALL clear_bottom_line
+    COLOR COLOR_LIGHT_CYAN
     PRINT "History is now "; setting$;
 END SUB
 
@@ -357,5 +362,5 @@ SUB menu_option_aggression
     END SELECT
     CALL clear_bottom_line
     COLOR COLOR_LIGHT_CYAN
-    PRINT "Enemy Aggression : "; setting$; " ("; opt_ai_aggression; ")";
+    PRINT "Enemy Aggression : "; setting$; " ("; LTRIM$(STR$(opt_ai_aggression)); ")";
 END SUB

@@ -116,7 +116,12 @@ SUB option_swap_side
 END SUB
 
 ' The special events favor the side left to the computer: 7 for the Rebels, 3 for the Union.
+' Events that are off stay off. The original turned them on again at each change of side and
+' each new game (G59).
 SUB option_events_favor_computer
+    IF opt_event_balance = 0 THEN
+        EXIT SUB
+    END IF
     SELECT CASE current_side
         CASE SIDE_UNION
             opt_event_balance = 7
@@ -152,6 +157,14 @@ SUB option_set_display_speed (choice)
     END IF
 END SUB
 
+' The Display menu's row of the speed in force: Very Slow's 8 seconds is row 4.
+FUNCTION option_display_row
+    option_display_row = opt_pause!
+    IF opt_pause! = 8 THEN
+        option_display_row = 4
+    END IF
+END FUNCTION
+
 SUB option_toggle_alt_colors
     opt_alt_colors = 1 - opt_alt_colors
 END SUB
@@ -177,6 +190,21 @@ SUB option_set_event_balance (choice)
         CASE ELSE
     END SELECT
 END SUB
+
+' The Rndom Evt menu's row of the setting in force, as option_set_event_balance numbers them.
+' A setting no row gives (1, from a CWS.CFG written by hand) is row 1, OFF.
+FUNCTION option_event_balance_row
+    SELECT CASE opt_event_balance
+        CASE 3
+            option_event_balance_row = 2
+        CASE 5
+            option_event_balance_row = 3
+        CASE 7
+            option_event_balance_row = 4
+        CASE ELSE
+            option_event_balance_row = 1
+    END SELECT
+END FUNCTION
 
 SUB option_toggle_winter_campaigns
     opt_winter_campaigns = 1 - opt_winter_campaigns
@@ -267,7 +295,7 @@ END SUB
 
 ' After the scenario and the settings are read. Under the Realism setting a game that starts
 ' before 1862 has no ironclads. The number of players and the display speed get a valid
-' value, and the special events favor the side left to the computer. The Balance setting
+' value, and the special events, unless off, favor the side left to the computer. The Balance setting
 ' gives the computer's side cash. Each side's cash becomes its income, and it gets up to 50
 ' more.
 SUB game_apply_settings

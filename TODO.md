@@ -19,6 +19,11 @@ Open work on the QB64 port. Remove an item when it is done. The plan is
 Each of these is how the game behaves, in DOS too by its code. Decide whether to change it. A change to how a
 game plays changes the recorded screens.
 
+- **Realism 2 (`REALISM_HIGH`) has no menu, and the toggle turns it into -1.** Only a `CWS.CFG` or save
+  written by hand can hold 2; `ai\army.bm` reads it. The Utility menu shows no check mark for it, and Realism's
+  `1 - opt_realism` gives -1. Tests of `>= REALISM_ON` read -1 as off, and tests of `= REALISM_OFF` (as in
+  `rules\railroad.bm` and `rules\events.bm`) read it as on, while the message says "REALISM ON". Either clamp
+  the value when `CWS.CFG` and a save are read, or offer the level in the menu.
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
   The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
   its title.
