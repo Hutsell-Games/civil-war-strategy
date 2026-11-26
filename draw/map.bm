@@ -132,10 +132,8 @@ SUB draw_cities
         IF opt_graphics = GRAPHICS_OFF THEN
             _CONTINUE
         END IF
-        FOR j = 1 TO MAX_ROADS
-            IF city_road(i, j) > 0 THEN
-                CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
-            END IF
+        FOR j = 1 TO city_road_count(i)
+            CALL draw_map_marker(i, city_road(i, j), MARK_ROAD)
         NEXT j
     NEXT i
 END SUB

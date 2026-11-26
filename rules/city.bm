@@ -35,15 +35,28 @@ SUB city_close_road_gaps (city)
     NEXT j
 END SUB
 
+' The number of roads that leave city: its list up to the first 0 (city_close_road_gaps). A
+' loop over the city's roads goes FOR j = 1 TO city_road_count(city) and meets no 0.
+FUNCTION city_road_count (city)
+    DIM j AS INTEGER
+    city_road_count = MAX_ROADS
+    FOR j = 1 TO MAX_ROADS
+        IF city_road(city, j) = 0 THEN
+            city_road_count = j - 1
+            EXIT FUNCTION
+        END IF
+    NEXT j
+END FUNCTION
+
 ' The number of cities next to city that side holds: 0 when the city is cut off.
 FUNCTION city_friendly_neighbors (side, city)
     DIM j AS INTEGER
     DIM neighbor AS INTEGER
     DIM friendly_neighbors AS INTEGER
     friendly_neighbors = 0
-    FOR j = 1 TO MAX_ROADS
+    FOR j = 1 TO city_road_count(city)
         neighbor = city_road(city, j)
-        IF neighbor > 0 AND city_owner(neighbor) = side THEN
+        IF city_owner(neighbor) = side THEN
             friendly_neighbors = friendly_neighbors + 1
         END IF
     NEXT j
@@ -161,10 +174,7 @@ SUB city_fix_return_routes (count, added(), from_city(), to_city())
     DIM linked AS INTEGER
     count = 0
     FOR i = 1 TO MAX_CITIES
-        FOR j = 1 TO MAX_ROADS
-            IF city_road(i, j) = 0 THEN
-                EXIT FOR
-            END IF
+        FOR j = 1 TO city_road_count(i)
             neighbor = city_road(i, j)
             linked = 0
             FOR k = 1 TO MAX_ROADS

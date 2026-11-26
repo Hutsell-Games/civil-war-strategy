@@ -77,10 +77,8 @@ SUB menu_army_move
     PRINT city_name$(city)
     menu_item_count = 0
     menu_text$(0) = "To"
-    FOR i = 1 TO MAX_ROADS
-        IF city_road(city, i) > 0 THEN
-            CALL menu_add_row(city_name$(city_road(city, i)), city_road(city, i))
-        END IF
+    FOR i = 1 TO city_road_count(city)
+        CALL menu_add_row(city_name$(city_road(city, i)), city_road(city, i))
     NEXT i
     CALL menu_bubble_sort(menu_item_count)
 
@@ -375,8 +373,8 @@ SUB menu_army_retreat (defender, retreat_city)
     menu_item_count = 0
     city = army_city(defender)
     side = army_side(defender)
-    FOR k = 1 TO MAX_ROADS
-        IF city_road(city, k) > 0 AND city_owner(city_road(city, k)) = side THEN
+    FOR k = 1 TO city_road_count(city)
+        IF city_owner(city_road(city, k)) = side THEN
             CALL menu_add_row(city_name$(city_road(city, k)), city_road(city, k))
         END IF
     NEXT k

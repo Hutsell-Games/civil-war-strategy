@@ -61,9 +61,9 @@ FUNCTION ai_railroad_army (side)
             _CONTINUE
         END IF
         enemy_neighbors = 0
-        FOR j = 1 TO MAX_ROADS
+        FOR j = 1 TO city_road_count(army_city(i))
             neighbor = city_road(army_city(i), j)
-            IF neighbor > 0 AND city_owner(neighbor) <> side THEN
+            IF city_owner(neighbor) <> side THEN
                 enemy_neighbors = enemy_neighbors + 1
             END IF
         NEXT j

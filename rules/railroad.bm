@@ -35,13 +35,13 @@ FUNCTION railroad_route_count (side, city)
     DIM m AS INTEGER
     DIM far_city AS INTEGER
     routes = 0
-    FOR j = 1 TO MAX_ROADS
+    FOR j = 1 TO city_road_count(city)
         neighbor = city_road(city, j)
-        IF neighbor > 0 AND city_owner(neighbor) = side THEN
+        IF city_owner(neighbor) = side THEN
             routes = routes + 1
-            FOR m = 1 TO MAX_ROADS
+            FOR m = 1 TO city_road_count(neighbor)
                 far_city = city_road(neighbor, m)
-                IF far_city > 0 AND far_city <> city AND city_owner(far_city) = side THEN
+                IF far_city <> city AND city_owner(far_city) = side THEN
                     routes = routes + 1
                 END IF
             NEXT m

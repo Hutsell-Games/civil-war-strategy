@@ -47,11 +47,8 @@ SUB ai_army_order (side, army, ordered)
     ' Any army in the capital stays while an enemy is next to it, when taking the capital wins
     ' the game.
     IF city = side_capital(side) AND victory_rule(VICTORY_CAPITAL) > 0 THEN
-        FOR j = 1 TO MAX_ROADS
+        FOR j = 1 TO city_road_count(city)
             neighbor = city_road(city, j)
-            IF neighbor = 0 THEN
-                EXIT FOR
-            END IF
             neighbor_strength = city_nearby_enemy_strength(neighbor)
             IF neighbor_strength > 0 THEN
                 EXIT SUB
@@ -124,14 +121,9 @@ SUB ai_evaluate_move (army, best_road)
         road_score(j) = -1
     NEXT j
 
-    road_count = 6
-    FOR j = 1 TO MAX_ROADS
+    road_count = city_road_count(from_city)
+    FOR j = 1 TO road_count
         to_city = city_road(from_city, j)
-        IF to_city = 0 THEN
-            road_count = j - 1
-            EXIT FOR
-        END IF
-
         occupant = city_army(to_city)
         ' An empty city that another of the computer's armies already marches to is left to it.
         IF occupant = 0 THEN
@@ -220,12 +212,10 @@ FUNCTION ai_move_strength (army)
     DIM j AS INTEGER
     DIM to_city AS INTEGER
     strength = army_size(army)
-    FOR j = 1 TO MAX_ROADS
+    FOR j = 1 TO city_road_count(army_city(army))
         to_city = city_road(army_city(army), j)
-        IF to_city > 0 THEN
-            IF city_army(to_city) > 0 THEN
-                strength = strength - army_size(city_army(to_city))
-            END IF
+        IF city_army(to_city) > 0 THEN
+            strength = strength - army_size(city_army(to_city))
         END IF
     NEXT j
     strength = .01 * strength
@@ -319,11 +309,8 @@ FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
     DIM odds!
     DIM bonus AS INTEGER
     bonus = 0
-    FOR k = 1 TO MAX_ROADS
+    FOR k = 1 TO city_road_count(to_city)
         far_city = city_road(to_city, k)
-        IF far_city = 0 THEN
-            _CONTINUE
-        END IF
         IF city_owner(far_city) = SIDE_NONE OR city_owner(far_city) = enemy_side THEN
             bonus = bonus + ai_beyond_value * city_value(far_city) + ai_beyond_fort * city_fort(far_city)
         END IF
@@ -364,17 +351,14 @@ FUNCTION city_nearby_enemy_strength (city)
     DIM enemy_side AS INTEGER
     enemy_side = current_side
     strength = 0
-    FOR j = 1 TO MAX_ROADS
+    FOR j = 1 TO city_road_count(city)
         neighbor = city_road(city, j)
-        IF neighbor = 0 THEN
-            EXIT FOR
-        END IF
         IF city_owner(neighbor) = enemy_side AND city_army(neighbor) > 0 THEN
             strength = strength + army_size(city_army(neighbor))
         END IF
-        FOR k = 1 TO MAX_ROADS
+        FOR k = 1 TO city_road_count(neighbor)
             far_city = city_road(neighbor, k)
-            IF far_city = 0 OR far_city = city THEN
+            IF far_city = city THEN
                 _CONTINUE
             END IF
             IF city_owner(far_city) = enemy_side AND city_army(far_city) > 0 THEN

@@ -165,6 +165,19 @@ SUB TestCityCloseRoadGapsKeepsTheOrder
     AssertEqualInt 0, city_road(8, 3), "and ends at its first 0"
 END SUB
 
+' The number of a city's roads: its list up to the first 0, and all six when it is full. A
+' road after a gap is not counted, so the loops over a city's roads need packed lists
+' (city_close_road_gaps).
+SUB TestCityRoadCount
+    AssertEqualInt 0, city_road_count(7), "no road"
+    city_road(7, 1) = 12: city_road(7, 2) = 3
+    AssertEqualInt 2, city_road_count(7), "two roads"
+    FOR k = 1 TO MAX_ROADS: city_road(8, k) = 10 + k: NEXT k
+    AssertEqualInt MAX_ROADS, city_road_count(8), "a full list"
+    city_road(9, 1) = 4: city_road(9, 3) = 5
+    AssertEqualInt 1, city_road_count(9), "a gap ends the list"
+END SUB
+
 ' ------------------------------------------------------------------- cutoff
 ' a counts the cities linked to target that who holds; 0 means cut off.
 

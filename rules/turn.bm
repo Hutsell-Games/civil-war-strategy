@@ -156,9 +156,9 @@ FUNCTION turn_retreat_city (city, attacker_side)
     turn_retreat_city = 0
     best = 0
     best_road = 0
-    FOR i = 1 TO MAX_ROADS
+    FOR i = 1 TO city_road_count(city)
         neighbor = city_road(city, i)
-        IF neighbor > 0 AND (city_owner(neighbor) = other_side(attacker_side)) AND city_value(neighbor) > best THEN
+        IF (city_owner(neighbor) = other_side(attacker_side)) AND city_value(neighbor) > best THEN
             IF best = 0 THEN
                 best_road = i
                 best = city_value(neighbor)
