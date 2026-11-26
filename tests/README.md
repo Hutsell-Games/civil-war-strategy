@@ -35,7 +35,7 @@ On Windows, `CWS_SHOW_WINDOWS=1` shows the program's window. Otherwise it runs o
 that is never shown, and your keys and mouse cannot reach it. Everything a run makes goes into
 `tests\out\`, which git ignores. A build is made again only when a
 source file, the compiler or the screen hook changed. What a command prints also goes to
-`tests\out\last-<command>.txt`. All 42 scripts take about half a minute with four jobs on Windows.
+`tests\out\last-<command>.txt`. All 43 scripts take about half a minute with four jobs on Windows.
 
 Each run starts in a fresh copy of the game's data files in `tests\out\run\`, so the files in the repo are never
 changed. The copy takes the top-level files that are not sources, documents, DOS programs or saved games, and
@@ -218,6 +218,7 @@ on a desktop nobody sees.
 | `endings` | Three games in one run, each to another ending: income, a captured capital, and an army annihilated |
 | `events-south` | From a prepared save of November 1863, the events that favor the South, by forced dice: riots in a city the Union took, England's ships, mercenaries, furloughs for the 1864 election, a loan, and the victory points of January 1864 and 1865 |
 | `events-union` | From a prepared save of May 1864, the events that favor the Union: riots in a city the Rebels took, extra ships up to the fleet's limit, the Emancipation Proclamation, and Lincoln reelected. The Rebel fleet starts at sea, so the computer sails it home |
+| `long-event` | `events-union` with an events file whose shipworks text is 83 characters: the game no longer stops at it, and `cws.his` keeps the whole line |
 | `refusals` | From a prepared save, one month of commands that the game refuses or that need a certain state: no commander left for a new army, a blocked track, an army too large for the train, the Which menu, a train's destination with no track, "Railroad is already carrying", the Supply menu with an army cut off, armies too large to combine, the Cancel menu, and an ironclad from the Type menu |
 | `refusals-rebel` | From a prepared save, as the Rebels with little cash, entries of the Commands menu that the game refuses: no money for a fort or to move the capital, an army too small to detach from, an army that cannot drill further, no army left to drill, Esc from the Supply menu, and Supply as "-" once supplies have spent the cash |
 | `given-up` | From a prepared save, as the Rebels with two armies in Richmond: the Fortify menu lists the city once and is given up with Esc, two forts built in one month, "No cities eligible to fortify", and Esc from the capital's picker after the move is paid for |

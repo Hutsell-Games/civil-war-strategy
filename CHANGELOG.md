@@ -109,6 +109,11 @@ source rather than extending version 1.61.
   balance is reached only by editing `CWS.CFG` by hand.
 - In an events file, tabs around a line's parts read as spaces: around the `=`,
   around a name in brackets, and around each part of a value.
+- The history file keeps the whole text of an event. Before, a message longer than
+  59 characters lost its end: "furloughs to vote in 1864 elections" was saved
+  without its last letter.
+- An event text of 64 characters or more in an events file is shown cut to 59 in
+  its box. Before, the game stopped with an error.
 
 ### Menus
 
