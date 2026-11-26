@@ -151,6 +151,5 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 - **Realism tests disagree.** Some places test `opt_realism = REALISM_ON`, others `>= REALISM_ON`, so
   Realism 2 (`REALISM_HIGH`, reachable through `CWS.CFG`) is on for some rules and off for others. This
   follows the original.
-- **Forced choices.** Relieve and the port menu of a new fleet loop until a row is picked, so Esc does not
-  back out. The Capital command takes the money before the city is picked, and picking the same capital
+- **Forced choices.** Relieve loops until a row is picked, so Esc does not back out. The Capital command takes the money before the city is picked, and picking the same capital
   still pays (documented in `menu_move_capital`).

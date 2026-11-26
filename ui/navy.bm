@@ -33,8 +33,8 @@ SUB menu_navy_commands (side)
 END SUB
 
 ' Build: a ship is added to the fleet, or a new fleet is started in a sea port that the
-' player picks. With the money for it, the player chooses wood or iron. again is 0 only when
-' there is no port for a new fleet.
+' player picks. With the money for it, the player chooses wood or iron. Esc at either menu
+' builds nothing. again is 0 only when there is no port for a new fleet.
 SUB menu_navy_build (side, again)
     DIM cost AS INTEGER
     DIM ship$
@@ -68,22 +68,25 @@ SUB menu_navy_build (side, again)
         CALL navy_ship_joins(side, ship$)
         EXIT SUB
     END IF
-    DO
-        CALL navy_list_shipyards(side, cities(), count)
-        menu_text$(0) = "Port"
-        CALL menu_set_cities(cities(), count)
-        menu_col = PANEL_COL
-        menu_row = 12
-        IF menu_item_count < 1 THEN
-            CALL navy_cancel_new_fleet(side)
-            CALL clear_bottom_line
-            PRINT "NO SHIPYARDS AVAILABLE !";
-            again = 0
-            EXIT SUB
-        END IF
-        CALL menu_select(MENU_CITY_POINTER)
-        CALL clear_right_panel
-    LOOP WHILE menu_choice < 1
+    CALL navy_list_shipyards(side, cities(), count)
+    menu_text$(0) = "Port"
+    CALL menu_set_cities(cities(), count)
+    menu_col = PANEL_COL
+    menu_row = 12
+    IF menu_item_count < 1 THEN
+        CALL navy_cancel_new_fleet(side)
+        CALL clear_bottom_line
+        PRINT "NO SHIPYARDS AVAILABLE !";
+        again = 0
+        EXIT SUB
+    END IF
+    CALL menu_select(MENU_CITY_POINTER)
+    CALL clear_right_panel
+    ' Esc at the Port menu: the ship is not built. The original showed the menu again.
+    IF menu_choice < 1 THEN
+        CALL navy_cancel_new_fleet(side)
+        EXIT SUB
+    END IF
     CALL navy_fleet_founded(side, menu_value(menu_choice), ship$, cost)
 END SUB
 
@@ -209,8 +212,9 @@ SUB menu_navy_combat (side)
     LOOP UNTIL combat_over = 1
 END SUB
 
-' The Ships menu for the player. quit is 1 when the fleet has acted this month and the menu
-' has nothing left to offer.
+' The Ships menu for the player. quit is 1 when the fleet has acted this month. The main menu
+' opens Ships only before that, and each action that acts also ends the Ships menu, so quit
+' stays 0 (in the original, an Attack on no enemy city set it).
 SUB menu_navy (side, quit)
     CALL clear_bottom_line
     PRINT "Funds available "; side_cash(side);
@@ -239,6 +243,10 @@ SUB menu_navy_items (side)
         IF NOT navy_can_attack(side) THEN
             menu_text$(2) = "-"
             menu_choice = MENU_START + 1
+            ' With Build "-" too, Sail. The original started on the "-" of Build.
+            IF menu_text$(1) = "-" THEN
+                menu_choice = MENU_START + 3
+            END IF
         END IF
     ELSE
         menu_text$(1) = "-"

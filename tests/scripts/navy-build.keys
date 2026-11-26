@@ -56,8 +56,8 @@ key esc
 prompt
 digest
 
-# Build, Ironclad: the Port menu, with the Union's two sea ports. Esc there shows it again.
-# Norfolk: the new fleet, and the Ships menu again.
+# Build, Ironclad: the Port menu, with the Union's two sea ports. Esc there builds nothing:
+# the Ships menu again. Build, Ironclad, Norfolk: the new fleet, and the Ships menu again.
 text b
 prompt
 text i
@@ -66,6 +66,10 @@ digest
 key esc
 prompt
 digest
+text b
+prompt
+text i
+prompt
 text n
 prompt
 digest

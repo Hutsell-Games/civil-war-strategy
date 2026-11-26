@@ -135,6 +135,10 @@ source rather than extending version 1.61.
   map is drawn again. Before, only a Load drew it.
 - A train that arrives leaves no black mark beside the city it left. Before, three
   pixels of its outline stayed on the map until it was drawn again.
+- Esc at the Port menu of a new fleet builds nothing and costs nothing. Before, the
+  Port menu came back until you picked a port.
+- The Ships menu starts on Sail when Build and Attack are both "-". Before, it
+  started on the "-" of Build.
 
 ## Version 1.7
 
