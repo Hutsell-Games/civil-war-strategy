@@ -27,6 +27,15 @@ FUNCTION balance_help (side)
     END IF
 END FUNCTION
 
+' The Balance setting as the player's side sees it: for the Union, 1 and 5 trade places, so a
+' higher number always favors the side the player is not on.
+FUNCTION balance_seen_by_player
+    balance_seen_by_player = opt_difficulty
+    IF current_side = SIDE_UNION THEN
+        balance_seen_by_player = DIFFICULTY_LOWEST + DIFFICULTY_HIGHEST - opt_difficulty
+    END IF
+END FUNCTION
+
 ' Vary Start: the game starts again from its scenario, with cash, armies, fleets, the Rebel
 ' capital and the leaders' ratings changed at random. Each side may lose some of its first six
 ' armies. The Utility menu offers it while vary_start_open is 1, until the first End Turn of a
@@ -50,7 +59,7 @@ SUB vary_start_conditions
     CALL load_scenario
     side_cash(SIDE_UNION) = side_cash(SIDE_UNION) - vary_cash_shift + vary_cash_spread * RND
     side_cash(SIDE_REBEL) = side_cash(SIDE_REBEL) + vary_cash_shift + vary_cash_spread * RND
-    opt_ai_aggression = 5 * RND
+    opt_ai_aggression = AGGRESSION_HIGHEST * RND
     FOR i = SIDE_UNION TO SIDE_REBEL
         FOR k = side_first_army(i) TO side_first_army(i) + 5
             IF RND > .6 THEN
@@ -119,14 +128,14 @@ END SUB
 ' Events that are off stay off. The original turned them on again at each change of side and
 ' each new game (G59).
 SUB option_events_favor_computer
-    IF opt_event_balance = 0 THEN
+    IF opt_event_balance = EVENTS_OFF THEN
         EXIT SUB
     END IF
     SELECT CASE current_side
         CASE SIDE_UNION
-            opt_event_balance = 7
+            opt_event_balance = EVENTS_FAVOR_REBELS
         CASE SIDE_REBEL
-            opt_event_balance = 3
+            opt_event_balance = EVENTS_FAVOR_UNION
     END SELECT
 END SUB
 
@@ -150,19 +159,43 @@ SUB option_set_sound (level)
 END SUB
 
 ' Display: choice is the menu's row, 1 (Fast) to 4 (Very Slow). Very Slow is 8 seconds.
+' Any other choice changes nothing.
 SUB option_set_display_speed (choice)
-    opt_pause! = choice
-    IF opt_pause! = 4 THEN
-        opt_pause! = 8
+    IF choice >= 1 AND choice <= DISPLAY_SPEED_ROWS THEN
+        opt_pause! = display_speed_of_row!(choice)
     END IF
 END SUB
 
-' The Display menu's row of the speed in force: Very Slow's 8 seconds is row 4.
+' The seconds of the Display menu's row, 1 to DISPLAY_SPEED_ROWS. The one list of the speeds:
+' the menu, its start row and config_read all go by it.
+FUNCTION display_speed_of_row! (row)
+    SELECT CASE row
+        CASE 1
+            display_speed_of_row! = SPEED_FAST
+        CASE 2
+            display_speed_of_row! = SPEED_NORMAL
+        CASE 3
+            display_speed_of_row! = SPEED_SLOW
+        CASE 4
+            display_speed_of_row! = SPEED_VERY_SLOW
+    END SELECT
+END FUNCTION
+
+' The Display menu's row of speed!, or 0 when no row gives it.
+FUNCTION display_row_of_speed (speed!)
+    DIM row AS INTEGER
+    display_row_of_speed = 0
+    FOR row = 1 TO DISPLAY_SPEED_ROWS
+        IF display_speed_of_row!(row) = speed! THEN
+            display_row_of_speed = row
+        END IF
+    NEXT row
+END FUNCTION
+
+' The Display menu's row of the speed in force, or 0 when no row gives it. A menu told to start
+' on row 0 starts on its first row (menu_start_row).
 FUNCTION option_display_row
-    option_display_row = opt_pause!
-    IF opt_pause! = 8 THEN
-        option_display_row = 4
-    END IF
+    option_display_row = display_row_of_speed(opt_pause!)
 END FUNCTION
 
 SUB option_toggle_alt_colors
@@ -178,31 +211,41 @@ END SUB
 ' Rndom Evt: choice is the menu's row: off, favor the Union, neutral, favor the Rebels.
 ' Any other choice changes nothing.
 SUB option_set_event_balance (choice)
-    SELECT CASE choice
-        CASE 1
-            opt_event_balance = 0
-        CASE 2
-            opt_event_balance = 3
-        CASE 3
-            opt_event_balance = 5
-        CASE 4
-            opt_event_balance = 7
-        CASE ELSE
-    END SELECT
+    IF choice >= 1 AND choice <= EVENT_BALANCE_ROWS THEN
+        opt_event_balance = event_balance_of_row(choice)
+    END IF
 END SUB
 
-' The Rndom Evt menu's row of the setting in force, as option_set_event_balance numbers them.
-FUNCTION option_event_balance_row
-    SELECT CASE opt_event_balance
+' The event balance of the Rndom Evt menu's row, 1 to EVENT_BALANCE_ROWS. The one list of the
+' balances: the menu, its start row and config_read all go by it.
+FUNCTION event_balance_of_row (row)
+    SELECT CASE row
+        CASE 1
+            event_balance_of_row = EVENTS_OFF
+        CASE 2
+            event_balance_of_row = EVENTS_FAVOR_UNION
         CASE 3
-            option_event_balance_row = 2
-        CASE 5
-            option_event_balance_row = 3
-        CASE 7
-            option_event_balance_row = 4
-        CASE ELSE
-            option_event_balance_row = 1
+            event_balance_of_row = EVENTS_NEUTRAL
+        CASE 4
+            event_balance_of_row = EVENTS_FAVOR_REBELS
     END SELECT
+END FUNCTION
+
+' The Rndom Evt menu's row of balance, or 0 when no row gives it.
+FUNCTION event_row_of_balance (balance)
+    DIM row AS INTEGER
+    event_row_of_balance = 0
+    FOR row = 1 TO EVENT_BALANCE_ROWS
+        IF event_balance_of_row(row) = balance THEN
+            event_row_of_balance = row
+        END IF
+    NEXT row
+END FUNCTION
+
+' The Rndom Evt menu's row of the setting in force, or 0 when no row gives it. A menu told to
+' start on row 0 starts on its first row (menu_start_row).
+FUNCTION option_event_balance_row
+    option_event_balance_row = event_row_of_balance(opt_event_balance)
 END FUNCTION
 
 SUB option_toggle_winter_campaigns
@@ -227,8 +270,8 @@ END SUB
 ' Aggress: the next level of the computer's boldness, 0 to 5, and after 5 again 0.
 SUB option_next_aggression
     opt_ai_aggression = opt_ai_aggression + 1
-    IF opt_ai_aggression > 5 THEN
-        opt_ai_aggression = 0
+    IF opt_ai_aggression > AGGRESSION_HIGHEST THEN
+        opt_ai_aggression = AGGRESSION_LOWEST
     END IF
 END SUB
 

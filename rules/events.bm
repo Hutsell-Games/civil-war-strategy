@@ -16,15 +16,12 @@ SUB event_roll (event, variant, event_side)
     event_city = 0
     event_army = 0
     CALL script_dice_next
-    event_weight = opt_difficulty
-    IF current_side = SIDE_UNION THEN
-        event_weight = 6 - opt_difficulty
-    END IF
+    event_weight = balance_seen_by_player
     CALL event_pick(1, SIDE_NONE, event_weight, event, variant)
     IF event <> EVENT_NONE THEN
         EXIT SUB
     END IF
-    IF opt_event_balance = 0 THEN
+    IF opt_event_balance = EVENTS_OFF THEN
         EXIT SUB
     END IF
     IF script_rnd! > event_chance!(event_weight) THEN

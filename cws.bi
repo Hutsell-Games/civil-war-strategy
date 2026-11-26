@@ -169,7 +169,31 @@ CONST HISTORY_ON = 1
 CONST PLAYERS_ONE = 1
 CONST PLAYERS_TWO = 2
 ' opt_difficulty runs from 1 to 5; at 3 neither side gets help.
+CONST DIFFICULTY_LOWEST = 1
 CONST DIFFICULTY_EVEN = 3
+CONST DIFFICULTY_HIGHEST = 5
+' opt_pause!: the seconds of the Display menu's speeds Fast, Normal, Slow and Very Slow, its
+' first DISPLAY_SPEED_ROWS rows (display_speed_of_row!).
+CONST SPEED_FAST = 1
+CONST SPEED_NORMAL = 2
+CONST SPEED_SLOW = 3
+CONST SPEED_VERY_SLOW = 8
+CONST DISPLAY_SPEED_ROWS = 4
+' opt_event_balance: the Rndom Evt menu's off, favor the Union, neutral and favor the Rebels,
+' its EVENT_BALANCE_ROWS rows (event_balance_of_row).
+CONST EVENTS_OFF = 0
+CONST EVENTS_FAVOR_UNION = 3
+CONST EVENTS_NEUTRAL = 5
+CONST EVENTS_FAVOR_REBELS = 7
+CONST EVENT_BALANCE_ROWS = 4
+' opt_ai_aggression runs from AGGRESSION_LOWEST to AGGRESSION_HIGHEST.
+CONST AGGRESSION_LOWEST = 0
+CONST AGGRESSION_HIGHEST = 5
+' CWS.CFG holds CONFIG_FIELDS fields, in config_write's order. The battle totals of all games
+' are four of them from CONFIG_TOTALS_FIELD on: the battles won by the Union and the Rebels,
+' then their losses.
+CONST CONFIG_FIELDS = 17
+CONST CONFIG_TOTALS_FIELD = 12
 ' The rules of victory_rule(): when the time runs out, and the cities, income, capital and force ratio
 ' that win. A rule that is off is 0 or negative.
 CONST VICTORY_MONTH = 1

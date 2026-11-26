@@ -2,7 +2,7 @@
 
 ' An army's move order: its line and a pointer on the map, and a message when the pause is long.
 SUB draw_ai_plan (army, text_color)
-    IF opt_pause! > 1 THEN
+    IF opt_pause! > SPEED_FAST THEN
         COLOR text_color
         CALL clear_bottom_line
         PRINT army_name$(army); " plans to move from "; city_name$(army_city(army)); " to "; city_name$(army_order(army));
@@ -15,7 +15,7 @@ END SUB
 
 ' An army that drilled.
 SUB draw_ai_drill (army)
-    IF opt_pause! > 1 THEN
+    IF opt_pause! > SPEED_FAST THEN
         CALL clear_bottom_line
         PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
     END IF

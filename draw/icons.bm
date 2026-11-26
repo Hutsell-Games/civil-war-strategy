@@ -55,7 +55,7 @@ SUB animate_army (army, picture_taken)
         step_y = .1 * (i * city_y(to_city) + (10 - i) * city_y(from_city))
         GET (step_x - 10, step_y - 10)-(step_x + 9, step_y + 9), saved_under_marker()
         PUT (step_x - 10, step_y - 10), saved_under_army(), PSET
-        IF opt_pause! > 1 THEN
+        IF opt_pause! > SPEED_FAST THEN
             CALL wait_seconds(.1)
         ELSE
             CALL wait_seconds(.02)

@@ -364,15 +364,15 @@ SUB config_read (side)
     END IF
     opt_graphics = setting_in_range(opt_graphics, GRAPHICS_OFF, GRAPHICS_FULL)
     opt_sound = setting_in_range(opt_sound, SOUND_OFF, SOUND_MUSIC)
-    opt_difficulty = setting_in_range(opt_difficulty, 1, 5)
+    opt_difficulty = setting_in_range(opt_difficulty, DIFFICULTY_LOWEST, DIFFICULTY_HIGHEST)
     IF opt_players <> PLAYERS_ONE AND opt_players <> PLAYERS_TWO THEN
         opt_players = PLAYERS_ONE
     END IF
-    IF opt_pause! <> 1 AND opt_pause! <> 2 AND opt_pause! <> 3 AND opt_pause! <> 8 THEN
-        opt_pause! = 2
+    IF display_row_of_speed(opt_pause!) = 0 THEN
+        opt_pause! = SPEED_NORMAL
     END IF
-    IF opt_event_balance <> 0 AND opt_event_balance <> 3 AND opt_event_balance <> 5 AND opt_event_balance <> 7 THEN
-        opt_event_balance = 5
+    IF event_row_of_balance(opt_event_balance) = 0 THEN
+        opt_event_balance = EVENTS_NEUTRAL
     END IF
     IF train_capacity(SIDE_UNION) < 0 THEN
         train_capacity(SIDE_UNION) = 0
@@ -387,7 +387,7 @@ SUB config_read (side)
     IF opt_history <> HISTORY_OFF THEN
         opt_history = HISTORY_ON
     END IF
-    opt_ai_aggression = setting_in_range(opt_ai_aggression, 0, 5)
+    opt_ai_aggression = setting_in_range(opt_ai_aggression, AGGRESSION_LOWEST, AGGRESSION_HIGHEST)
 END SUB
 
 ' The value, or lowest or highest when it is outside that range.
@@ -408,24 +408,25 @@ SUB config_write (side)
     CLOSE #1
 END SUB
 
-' Writes the battle totals of all games to CWS.CFG, its fields 12 to 15, and leaves its other 13
-' fields as they are there. The game's end and Quit keep the battles so; only Save and New Game
-' write the settings. The 17 fields and their order are config_write's: keep the two in step.
+' Writes the battle totals of all games to CWS.CFG and leaves its other fields as they are there.
+' The game's end and Quit keep the battles so; only Save and New Game write the settings.
+' CONFIG_FIELDS and CONFIG_TOTALS_FIELD give config_write's layout;
+' TestConfigLayoutMatchesConfigWrite checks them against it.
 SUB config_write_totals
-    DIM field$(17)
+    DIM field$(CONFIG_FIELDS)
     DIM k AS INTEGER
     DIM text$
     OPEN "I", 1, SETTINGS_FILE
-    FOR k = 1 TO 17
+    FOR k = 1 TO CONFIG_FIELDS
         INPUT #1, field$(k)
     NEXT k
     CLOSE #1
-    field$(12) = LTRIM$(STR$(all_battles_won&(SIDE_UNION)))
-    field$(13) = LTRIM$(STR$(all_battles_won&(SIDE_REBEL)))
-    field$(14) = LTRIM$(STR$(all_casualties&(SIDE_UNION)))
-    field$(15) = LTRIM$(STR$(all_casualties&(SIDE_REBEL)))
+    field$(CONFIG_TOTALS_FIELD) = LTRIM$(STR$(all_battles_won&(SIDE_UNION)))
+    field$(CONFIG_TOTALS_FIELD + 1) = LTRIM$(STR$(all_battles_won&(SIDE_REBEL)))
+    field$(CONFIG_TOTALS_FIELD + 2) = LTRIM$(STR$(all_casualties&(SIDE_UNION)))
+    field$(CONFIG_TOTALS_FIELD + 3) = LTRIM$(STR$(all_casualties&(SIDE_REBEL)))
     text$ = field$(1)
-    FOR k = 2 TO 17
+    FOR k = 2 TO CONFIG_FIELDS
         text$ = text$ + "," + field$(k)
     NEXT k
     OPEN "O", 1, SETTINGS_FILE

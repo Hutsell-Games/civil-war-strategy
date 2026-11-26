@@ -2692,11 +2692,32 @@ SUB TestOptionDisplaySpeed
     AssertEqualInt 2, option_display_row, "the menu starts on Normal"
 END SUB
 
+' A row the Display menu does not have changes nothing, as Esc does.
+SUB TestOptionDisplaySpeedIgnoresOtherRows
+    CALL option_set_display_speed(3)
+    CALL option_set_display_speed(DISPLAY_SPEED_ROWS + 1)
+    AssertTrue opt_pause! = SPEED_SLOW, "the row past Very Slow"
+    CALL option_set_display_speed(MENU_ESCAPED)
+    AssertTrue opt_pause! = SPEED_SLOW, "Esc"
+END SUB
+
 SUB TestOptionSetBalance
     opt_players = PLAYERS_ONE
     CALL option_set_balance(4)
     AssertEqualInt 4, opt_difficulty, "the level"
     AssertEqualInt 480, union_income_bonus, "the Union's extra income follows it"
+END SUB
+
+' The Balance as the player's side sees it: the Rebels see it as set, the Union with 1 and 5
+' traded.
+SUB TestBalanceSeenByPlayer
+    opt_difficulty = 4
+    current_side = SIDE_REBEL
+    AssertEqualInt 4, balance_seen_by_player, "the Rebels"
+    current_side = SIDE_UNION
+    AssertEqualInt 2, balance_seen_by_player, "the Union"
+    opt_difficulty = DIFFICULTY_LOWEST
+    AssertEqualInt DIFFICULTY_HIGHEST, balance_seen_by_player, "the Union at the lowest"
 END SUB
 
 SUB TestOptionSetEventBalance
@@ -3194,14 +3215,14 @@ SUB TestConfigReadMakesSettingsValid
     AssertEqualInt SIDE_UNION, side, "no side: the Union"
     AssertEqualInt GRAPHICS_OFF, opt_graphics, "Graphics below 0: off"
     AssertEqualInt SOUND_OFF, opt_sound, "Sound below 0: off"
-    AssertEqualInt 1, opt_difficulty, "Balance below 1: 1"
+    AssertEqualInt DIFFICULTY_LOWEST, opt_difficulty, "Balance below 1: 1"
     AssertEqualInt PLAYERS_ONE, opt_players, "0 players: one"
-    AssertTrue opt_pause! = 2, "a speed below 1: Normal"
-    AssertEqualInt 5, opt_event_balance, "events at 1: neutral"
+    AssertTrue opt_pause! = SPEED_NORMAL, "a speed below 1: Normal"
+    AssertEqualInt EVENTS_NEUTRAL, opt_event_balance, "events at 1: neutral"
     AssertEqualInt 0, train_capacity(SIDE_UNION), "the Union's railroad: at least 0"
     AssertEqualInt 0, train_capacity(SIDE_REBEL), "the Rebels' railroad: at least 0"
     AssertEqualInt 1, opt_winter_campaigns, "January campaigns at -1: allowed"
-    AssertEqualInt 0, opt_ai_aggression, "Aggression below 0: 0"
+    AssertEqualInt AGGRESSION_LOWEST, opt_ai_aggression, "Aggression below 0: 0"
 
     opt_graphics = 9: opt_sound = 9: opt_difficulty = 9: opt_players = 3: opt_pause! = 5
     opt_event_balance = 9: opt_winter_campaigns = 2: opt_ai_aggression = 9
@@ -3210,12 +3231,12 @@ SUB TestConfigReadMakesSettingsValid
     AssertEqualInt SIDE_UNION, side, "side 3: the Union"
     AssertEqualInt GRAPHICS_FULL, opt_graphics, "Graphics above 3: full"
     AssertEqualInt SOUND_MUSIC, opt_sound, "Sound above 2: music"
-    AssertEqualInt 5, opt_difficulty, "Balance above 5: 5"
+    AssertEqualInt DIFFICULTY_HIGHEST, opt_difficulty, "Balance above 5: 5"
     AssertEqualInt PLAYERS_ONE, opt_players, "3 players: one"
-    AssertTrue opt_pause! = 2, "a speed no menu row gives: Normal"
-    AssertEqualInt 5, opt_event_balance, "events at 9: neutral"
+    AssertTrue opt_pause! = SPEED_NORMAL, "a speed no menu row gives: Normal"
+    AssertEqualInt EVENTS_NEUTRAL, opt_event_balance, "events at 9: neutral"
     AssertEqualInt 1, opt_winter_campaigns, "January campaigns at 2: allowed"
-    AssertEqualInt 5, opt_ai_aggression, "Aggression above 5: 5"
+    AssertEqualInt AGGRESSION_HIGHEST, opt_ai_aggression, "Aggression above 5: 5"
 
     opt_graphics = GRAPHICS_NAMES: opt_sound = SOUND_EFFECTS: opt_difficulty = 4: opt_players = PLAYERS_TWO
     opt_pause! = 8: opt_event_balance = 0: train_capacity(SIDE_UNION) = 600: train_capacity(SIDE_REBEL) = 300
@@ -3233,6 +3254,69 @@ SUB TestConfigReadMakesSettingsValid
     AssertEqualInt 300, train_capacity(SIDE_REBEL), "the Rebels' railroad stays"
     AssertEqualInt 0, opt_winter_campaigns, "no January campaigns stays"
     AssertEqualInt 3, opt_ai_aggression, "Aggression stays"
+END SUB
+
+' Every value the Utility menus set comes back from CWS.CFG as it was, and on the same menu row.
+' A menu that offered a new value without config_read's knowing it would fail here.
+SUB TestConfigReadKeepsWhatTheMenusSet
+    DIM row AS INTEGER
+    DIM pause_set!
+    DIM value AS INTEGER
+    CHDIR TestTempDir$
+    FOR row = 1 TO DISPLAY_SPEED_ROWS
+        CALL option_set_display_speed(row)
+        pause_set! = opt_pause!
+        CALL config_write(SIDE_UNION)
+        CALL config_read(side)
+        AssertTrue opt_pause! = pause_set!, "the display speed of row" + STR$(row) + ":" + STR$(opt_pause!)
+        AssertEqualInt row, option_display_row, "the display speed's row"
+    NEXT row
+    FOR row = 1 TO EVENT_BALANCE_ROWS
+        CALL option_set_event_balance(row)
+        value = opt_event_balance
+        CALL config_write(SIDE_UNION)
+        CALL config_read(side)
+        AssertEqualInt value, opt_event_balance, "the events of row" + STR$(row)
+        AssertEqualInt row, option_event_balance_row, "the events' row"
+    NEXT row
+    FOR row = DIFFICULTY_LOWEST TO DIFFICULTY_HIGHEST
+        CALL option_set_balance(row)
+        CALL config_write(SIDE_UNION)
+        CALL config_read(side)
+        AssertEqualInt row, opt_difficulty, "Balance"
+    NEXT row
+    opt_ai_aggression = AGGRESSION_HIGHEST
+    FOR row = AGGRESSION_LOWEST TO AGGRESSION_HIGHEST
+        CALL option_next_aggression
+        value = opt_ai_aggression
+        CALL config_write(SIDE_UNION)
+        CALL config_read(side)
+        AssertEqualInt value, opt_ai_aggression, "Aggression"
+    NEXT row
+    AssertEqualInt AGGRESSION_HIGHEST, opt_ai_aggression, "a step for each level ends on the highest again"
+END SUB
+
+' config_write writes CONFIG_FIELDS fields, and the battle totals of all games from field
+' CONFIG_TOTALS_FIELD on, where config_write_totals puts them.
+SUB TestConfigLayoutMatchesConfigWrite
+    DIM field$(CONFIG_FIELDS)
+    DIM k AS INTEGER
+    DIM f AS INTEGER
+    CHDIR TestTempDir$
+    all_battles_won&(SIDE_UNION) = 11: all_battles_won&(SIDE_REBEL) = 22
+    all_casualties&(SIDE_UNION) = 33: all_casualties&(SIDE_REBEL) = 44
+    CALL config_write(SIDE_UNION)
+    f = FREEFILE
+    OPEN SETTINGS_FILE FOR INPUT AS #f
+    FOR k = 1 TO CONFIG_FIELDS
+        INPUT #f, field$(k)
+    NEXT k
+    AssertTrue EOF(f), "no field after the last"
+    CLOSE #f
+    AssertEqualStr "11", field$(CONFIG_TOTALS_FIELD), "the Union's battles won"
+    AssertEqualStr "22", field$(CONFIG_TOTALS_FIELD + 1), "the Rebels'"
+    AssertEqualStr "33", field$(CONFIG_TOTALS_FIELD + 2), "the Union's losses"
+    AssertEqualStr "44", field$(CONFIG_TOTALS_FIELD + 3), "the Rebels'"
 END SUB
 
 ' Each side loses at most a number of times the other's losses. With both knobs at 1, the side
