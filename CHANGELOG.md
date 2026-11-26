@@ -148,6 +148,13 @@ source rather than extending version 1.61.
   marker.
 - A pause that runs past midnight ends on time. Before, it lasted until a key was
   pressed.
+- The army report's second line starts with the number of cities controlled.
+  Before, when the victory points were few, that number could end the first line,
+  and its "/ 40" start the second.
+- Recap shows each line of the history as it was written. Before, a comma split a
+  line in two, and the heading lost its indent.
+- Chk Links names each city with its own number. Before, a road without a way back
+  showed the number of the city at the road's other end.
 
 ## Version 1.7
 

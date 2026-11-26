@@ -97,6 +97,11 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   load has changed part of the game, so an `ON ERROR` alone would leave a game half loaded. `save_game`
   stops on its `OPEN` when the folder is read-only. Both need a design, such as checking the whole file
   before changing anything (found 2026-11-24, review of `ui\files.bm`).
+- **The Battles report's ALL GAMES casualties outgrow their box.** `report_battle_summary` (`ui\reports.bm`)
+  prints each side's men lost, in thousands, at columns 38 and 45, inside boxes that end at x 345 and x 400.
+  A 5-digit total (10 million men, about 30 wars at 300,000 each) prints as `" 12345 "`. The Rebel column
+  then runs past the box to x 408, and the Union column's trailing space covers the divider at x 345. Print
+  the numbers at a fixed width, right-aligned in their boxes (found 2026-11-25, review of `ui\reports.bm`).
 
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 228 and 232).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
