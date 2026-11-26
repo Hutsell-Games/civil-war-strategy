@@ -63,6 +63,7 @@ SUB hall_of_fame
                 PRINT "What is name of "; side_name$(side); " commander";
                 CALL script_mark_key_wait(4, "")
                 INPUT commander$
+                commander$ = hall_of_fame_name$(commander$)
             LOOP WHILE commander$ = ""
         END IF
         CALL hall_of_fame_insert(side, i, commander$, hall_name$(), hall_score())
@@ -207,6 +208,10 @@ SUB end_game (side, rule)
     IF rule = VICTORY_YEAR THEN
         CALL victory_technical_points
         CALL draw_rebel_victory
+        COLOR COLOR_WHITE
+        LOCATE 2, 27
+        message$ = "REBEL TECHNICAL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL))
+        PRINT message$
     ELSEIF side = SIDE_UNION THEN
         CALL draw_union_victory
         COLOR COLOR_WHITE

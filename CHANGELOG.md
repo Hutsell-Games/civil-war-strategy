@@ -70,6 +70,12 @@ source rather than extending version 1.61.
 - After taking the enemy's capital, the Options read "No - Press Onward" instead of
   "No - Press Onward to NONE".
 - The warning that a side nears the strength ratio has its missing space.
+- A technical victory shows the Rebels' victory points, and the history records that
+  victory instead of "END GAME VICTORY CONDITION 1 REACHED".
+- A commander's name in the Hall of Fame keeps 12 characters and no quotes, so the
+  table stays in its columns and the name is saved as shown.
+- A missing Hall of Fame file gives an empty Hall of Fame instead of an error at the
+  end of the game.
 
 ### New Game and Load
 

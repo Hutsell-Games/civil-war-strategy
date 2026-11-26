@@ -162,3 +162,17 @@ SUB hall_of_fame_insert (side, place, name$, hall_name$(), hall_score())
     hall_name$(side, place) = name$
     hall_score(side, place) = side_victory_points(side)
 END SUB
+
+' The name that the Hall of Fame keeps for a commander's typed$: without quotes, which WRITE #
+' does not escape, and at most 12 characters, which fit the name's column of the table. A
+' longer name pushed the score into the next column or past the box.
+FUNCTION hall_of_fame_name$ (typed$)
+    DIM i AS INTEGER
+    DIM kept$
+    FOR i = 1 TO LEN(typed$)
+        IF MID$(typed$, i, 1) <> CHR$(34) THEN
+            kept$ = kept$ + MID$(typed$, i, 1)
+        END IF
+    NEXT i
+    hall_of_fame_name$ = LEFT$(kept$, 12)
+END FUNCTION

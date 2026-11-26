@@ -2308,6 +2308,35 @@ SUB TestHallOfFamePlaceAndInsert
     AssertEqualInt 0, hall_of_fame_place(1, hall_score()), "50 reaches none"
 END SUB
 
+' hall_of_fame_name$ drops quotes, which WRITE # does not escape, and keeps 12 characters, the
+' width of the table's name column.
+SUB TestHallOfFameName
+    AssertEqualStr "Grant", hall_of_fame_name$("Grant"), "a short name as typed"
+    AssertEqualStr "Ulysses S. G", hall_of_fame_name$("Ulysses S. Grant"), "cut to 12"
+    AssertEqualStr "Bobs", hall_of_fame_name$("Bob" + CHR$(34) + "s"), "without the quote"
+    AssertEqualStr "", hall_of_fame_name$(CHR$(34)), "only a quote: nothing, so it is asked again"
+END SUB
+
+' hall_of_fame_load leaves the entries empty when HISCORE.CWS is missing, and those past the
+' end of a short file.
+SUB TestHallOfFameLoadMissingOrShortFile
+    DIM hall_name$(2, 5): DIM hall_score(2, 5)
+    CHDIR TestTempDir$
+    IF _FILEEXISTS(HALL_OF_FAME_FILE) THEN KILL HALL_OF_FAME_FILE
+    CALL hall_of_fame_load(hall_name$(), hall_score())
+    AssertEqualStr "", hall_name$(SIDE_REBEL, 5), "no file: empty"
+    AssertEqualInt 0, hall_score(SIDE_REBEL, 5), "no file: no score"
+    f = FREEFILE: OPEN HALL_OF_FAME_FILE FOR OUTPUT AS #f
+    WRITE #f, "Grant", 350: WRITE #f, "Sherman", 300
+    CLOSE #f
+    CALL hall_of_fame_load(hall_name$(), hall_score())
+    AssertEqualStr "Sherman", hall_name$(SIDE_UNION, 2), "the file's entries"
+    AssertEqualInt 300, hall_score(SIDE_UNION, 2), "with their scores"
+    AssertEqualStr "", hall_name$(SIDE_UNION, 3), "past the end: empty"
+    AssertEqualStr "", hall_name$(SIDE_REBEL, 1), "the Rebels too"
+    KILL HALL_OF_FAME_FILE
+END SUB
+
 ' ------------------------------------------------------- the month's moves
 
 SUB TestTurnAdvanceMonth

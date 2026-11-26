@@ -404,14 +404,20 @@ SUB save_battle_summary
     END IF
 END SUB
 
-' Reads the Hall of Fame: five names and scores for each side.
+' Reads the Hall of Fame: five names and scores for each side. A missing file, or the entries
+' past a short file's end, are left as they are: empty, as in the file that ships.
 SUB hall_of_fame_load (names$(), scores())
     DIM side AS INTEGER
     DIM i AS INTEGER
+    IF NOT _FILEEXISTS(HALL_OF_FAME_FILE) THEN
+        EXIT SUB
+    END IF
     OPEN "I", 1, HALL_OF_FAME_FILE
     FOR side = SIDE_UNION TO SIDE_REBEL
         FOR i = 1 TO 5
-            INPUT #1, names$(side, i), scores(side, i)
+            IF NOT EOF(1) THEN
+                INPUT #1, names$(side, i), scores(side, i)
+            END IF
         NEXT i
     NEXT side
     CLOSE #1
