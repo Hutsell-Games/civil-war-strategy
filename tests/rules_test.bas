@@ -3175,11 +3175,9 @@ SUB TestSaveGameKeepsTheTuning
     CHDIR TestTempDir$
     cost_fort = 150: detach_share# = .4
     CALL config_write(1)
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     CALL tuning_defaults: cost_ship = 80
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualStr "cost_fort=150;detach_share=.4;", tuning_changes$, "the saved knobs, and no other"
     CALL tuning_defaults
     CALL save_game(4)
@@ -3320,8 +3318,7 @@ SUB TestSaveGameAndLoadItAgain
     fleet_ships$(SIDE_UNION) = "WWI": fleet_city(SIDE_UNION) = 30
     train_army(SIDE_REBEL) = 22: train_city(SIDE_REBEL) = 25
     opt_difficulty = 4: opt_history = 1
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     AssertEqualInt -1, _FILEEXISTS("cws3.sav"), "the slot's file"
 
     turn_month = 0: turn_year = 0: union_income_bonus = 0: current_side = SIDE_UNION
@@ -3332,8 +3329,7 @@ SUB TestSaveGameAndLoadItAgain
     fleet_ships$(SIDE_UNION) = "": fleet_city(SIDE_UNION) = 0: fleet_size(SIDE_UNION) = 0
     train_army(SIDE_REBEL) = 0: train_city(SIDE_REBEL) = 0
     opt_difficulty = 0: opt_history = 0
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualInt 7, turn_month, "the month"
     AssertEqualInt 1863, turn_year, "the year"
     AssertEqualInt 252, union_income_bonus, "the Union's extra income"
@@ -3370,11 +3366,9 @@ SUB TestLoadGameClearsTheRaid
     CHDIR TestTempDir$
     fleet_ships$(SIDE_UNION) = "": fleet_city(SIDE_UNION) = 0
     fleet_ships$(SIDE_REBEL) = "WW": fleet_city(SIDE_REBEL) = FLEET_AT_SEA
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     raiding_side = SIDE_UNION: raid_loss = 40: fleet_pursuit = 1
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualInt SIDE_REBEL, raiding_side, "the Rebel fleet saved at sea raids"
     AssertEqualInt 0, raid_loss, "no loss from the game before"
     AssertEqualInt 0, fleet_pursuit, "no pursuit from the game before"
@@ -3396,19 +3390,30 @@ SUB WriteTestLeaders
     CLOSE #f
 END SUB
 
+' Saves the game in a slot, with the leaders as they are now (WriteTestLeaders), so that
+' LoadTestGame can load it in the test's folder.
+SUB SaveTestGame (slot)
+    CALL WriteTestLeaders
+    CALL save_game(slot)
+END SUB
+
+' Loads the game of a slot, and checks that it was loaded.
+SUB LoadTestGame (slot)
+    CALL load_game(slot, problem$)
+    AssertEqualStr "", problem$, "loaded"
+END SUB
+
 ' A leader whom the game before the load used up is free again after it, when the saved game
 ' has no army of his. The scenario is the same, so load_game reads no other scenario (G33).
 SUB TestLoadGameFreesTheScenariosLeaders
     CHDIR TestTempDir$
     leader_name$(21) = "Lee": leader_rating(21) = 9
     leader_name$(22) = "Jackson": leader_rating(22) = 7
-    CALL WriteTestLeaders
     army_name$(21) = "Lee": army_size(21) = 100: army_leader_rating(21) = 9: army_city(21) = 12
     city_army(12) = 21
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     leader_name$(21) = "": leader_name$(22) = "": leader_rating(22) = 0
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualStr "Jackson", leader_name$(22), "used up before the load, free again"
     AssertEqualInt 7, leader_rating(22), "with his rating"
     AssertEqualStr "", leader_name$(21), "Lee commands an army of the saved game"
@@ -3421,11 +3426,9 @@ SUB TestNewGameAndLoadClearTheStrengthRatio
     CALL game_reset
     AssertTrue ai_strength_ratio! = 0, "a new game"
     CHDIR TestTempDir$
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     ai_strength_ratio! = 2.5
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertTrue ai_strength_ratio! = 0, "a load"
 END SUB
 
@@ -3434,11 +3437,9 @@ END SUB
 SUB TestLoadGameSetsTheTotalIncome
     CHDIR TestTempDir$
     side_income(SIDE_UNION) = 410: side_income(SIDE_REBEL) = 290
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     total_income = 1234
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualInt 700, total_income, "both saved incomes"
 END SUB
 
@@ -3451,12 +3452,10 @@ SUB TestSaveGameKeepsVictoryRulesAndEvents
     event_done(1) = 1: event_done(3) = 1
     victory_rule(1) = 3: victory_rule(2) = 1865: victory_rule(3) = 34: victory_rule(4) = -60
     victory_rule(5) = 0: victory_rule(6) = 4
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     event_done(1) = 0: event_done(2) = 1: event_done(3) = 0
     FOR i = 1 TO 6: victory_rule(i) = 99: NEXT i
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualInt 1, event_done(1), "the Emancipation Proclamation has happened"
     AssertEqualInt 0, event_done(2), "riots done since, not in the saved game"
     AssertEqualInt 1, event_done(3), "the reelection has happened"
@@ -3474,12 +3473,10 @@ SUB TestSaveGameFindsEventsByName
     CHDIR TestTempDir$
     event_count = 2: event_name$(1) = "emancipation": event_name$(2) = "riots"
     event_done(1) = 1: event_done(2) = 1
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     event_count = 2: event_name$(1) = "riots": event_name$(2) = "reelection"
     event_done(1) = 0: event_done(2) = 0
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualInt 1, event_done(1), "riots, now row 1"
     AssertEqualInt 0, event_done(2), "the reelection was not saved"
 END SUB
@@ -3490,15 +3487,13 @@ SUB TestSaveGameWithoutVictoryRulesLoads
     CHDIR TestTempDir$
     event_count = 1: event_name$(1) = "emancipation": event_done(1) = 1
     victory_rule(3) = 32: turn_year = 1863
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f
     g = FREEFILE: OPEN "cws4.sav" FOR OUTPUT AS #g
     FOR i = 1 TO 86: LINE INPUT #f, text$: PRINT #g, text$: NEXT i
     CLOSE #f, #g
     victory_rule(3) = 30: turn_year = 0
-    CALL load_game(4, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(4)
     AssertEqualInt 1863, turn_year, "the year"
     AssertEqualInt 30, victory_rule(3), "the victory rules stay as they were"
     AssertEqualInt 0, event_done(1), "no event done"
@@ -3510,12 +3505,10 @@ SUB TestSaveGameKeepsTheBattleTotals
     CHDIR TestTempDir$
     side_battles_won(1) = 3: side_battles_won(2) = 5: side_casualties&(1) = 410: side_casualties&(2) = 620
     all_battles_won&(1) = 30: all_battles_won&(2) = 50: all_casualties&(1) = 4100: all_casualties&(2) = 6200
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     side_battles_won(1) = 0: side_battles_won(2) = 0: side_casualties&(1) = 0: side_casualties&(2) = 0
     all_battles_won&(1) = 31: all_casualties&(2) = 6250
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualInt 3, side_battles_won(1), "the game's battles won by the Union"
     AssertEqualInt 5, side_battles_won(2), "by the Rebels"
     AssertEqualInt 410, side_casualties&(1), "the game's Union losses"
@@ -3557,8 +3550,7 @@ SUB TestSaveGameWithoutBattleTotalsLoads
     CHDIR TestTempDir$
     cost_fort = 150
     side_battles_won(1) = 3: side_casualties&(2) = 620
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     line_count = 0
     f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f
     DO WHILE NOT EOF(f): LINE INPUT #f, text$: line_count = line_count + 1: LOOP
@@ -3568,8 +3560,7 @@ SUB TestSaveGameWithoutBattleTotalsLoads
     FOR i = 1 TO line_count - 1: LINE INPUT #f, text$: PRINT #g, text$: NEXT i
     CLOSE #f, #g
     cost_fort = 0
-    CALL load_game(4, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(4)
     AssertEqualStr "cost_fort=150;", tuning_changes$, "the knobs, the old file's last line"
     AssertEqualInt 0, side_battles_won(1), "no battle won in the game"
     AssertEqualInt 0, side_casualties&(2), "no loss"
@@ -3601,13 +3592,11 @@ SUB TestSaveGameNamesItsScenario
     CHDIR TestTempDir$
     scenario_count = 2: scenario_folder$(1) = "standard": scenario_folder$(2) = "alternate": scenario_now = 2
     turn_month = 9
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f: LINE INPUT #f, text$: CLOSE #f
     AssertEqualStr CHR$(34) + "alternate" + CHR$(34), text$, "the first line"
     turn_month = 0
-    CALL load_game(3, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(3)
     AssertEqualInt 9, turn_month, "the month, after the scenario's line"
     AssertEqualInt 2, scenario_now, "still the same scenario"
 END SUB
@@ -3618,16 +3607,14 @@ SUB TestSaveGameWithoutAScenarioLoads
     CHDIR TestTempDir$
     scenario_count = 1: scenario_folder$(1) = "standard": scenario_now = 1
     turn_month = 9: turn_year = 1864
-    CALL WriteTestLeaders
-    CALL save_game(3)
+    CALL SaveTestGame(3)
     ' The same file without its first line, as the game wrote it before.
     f = FREEFILE: OPEN "cws3.sav" FOR INPUT AS #f: LINE INPUT #f, text$
     g = FREEFILE: OPEN "cws4.sav" FOR OUTPUT AS #g
     DO WHILE NOT EOF(f): LINE INPUT #f, text$: PRINT #g, text$: LOOP
     CLOSE #f, #g
     turn_month = 0: turn_year = 0
-    CALL load_game(4, problem$)
-    AssertEqualStr "", problem$, "loaded"
+    CALL LoadTestGame(4)
     AssertEqualInt 9, turn_month, "the month"
     AssertEqualInt 1864, turn_year, "the year"
     AssertEqualInt 1, scenario_now, "the first scenario"
