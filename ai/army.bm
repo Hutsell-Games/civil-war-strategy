@@ -136,7 +136,7 @@ SUB ai_evaluate_move (army, best_road)
         IF city_fort(from_city) > 0 THEN
             IF army = city_army(from_city) THEN
                 score = score - ai_leave_fort_penalty
-                IF opt_realism >= REALISM_ON THEN
+                IF opt_realism = REALISM_ON THEN
                     score = score - ai_leave_fort_realism_penalty
                 END IF
             END IF
@@ -253,9 +253,6 @@ FUNCTION ai_attack_score (army, occupant, to_city, score_before)
 
     IF army_size(occupant) > 0 THEN
         odds! = army_size(army) / (fort_factor * army_size(occupant))
-        IF opt_realism >= REALISM_HIGH THEN
-            odds! = .8 * odds!
-        END IF
     ELSE
         odds! = 5
     END IF
@@ -267,7 +264,7 @@ FUNCTION ai_attack_score (army, occupant, to_city, score_before)
     IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN
         score = 0
     END IF
-    IF opt_realism >= REALISM_ON THEN
+    IF opt_realism = REALISM_ON THEN
         score = score - ai_realism_penalty
     END IF
     IF odds! < .5 THEN
@@ -394,7 +391,7 @@ END SUB
 ' Realism setting, in the lower part of the map.
 FUNCTION ai_razes_fort (city)
     ai_razes_fort = 0
-    IF opt_realism >= REALISM_ON AND city_y(city) > 150 THEN
+    IF opt_realism = REALISM_ON AND city_y(city) > 150 THEN
         ai_razes_fort = 1
     END IF
 END FUNCTION

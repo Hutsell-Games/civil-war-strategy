@@ -191,7 +191,7 @@ FUNCTION ai_recruit_pick (side, cities(), count)
     IF choice = 0 THEN
         choice = 1 + INT(RND * count)
     END IF
-    IF opt_realism >= REALISM_ON THEN
+    IF opt_realism = REALISM_ON THEN
         best_score = 0
         FOR i = 1 TO count
             city = cities(i)

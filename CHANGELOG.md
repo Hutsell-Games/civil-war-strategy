@@ -113,8 +113,9 @@ source rather than extending version 1.61.
   players have given their orders. Before, only a game against the computer had them.
 - Random events that you turn off stay off when you change sides or start a new
   game. Before, both turned them on again, in favor of the computer.
-- Turning Realism off no longer leaves a Rebel's event balance of 1 at 3. That
-  balance is reached only by editing `CWS.CFG` by hand.
+- An event balance of 1, which no menu sets, is read from `CWS.CFG` as neutral.
+  Before, the original turned it into 3 when a Rebel player turned Realism on, and
+  kept the 3 after Realism went off.
 - In an events file, tabs around a line's parts read as spaces: around the `=`,
   around a name in brackets, and around each part of a value.
 - The history file keeps the whole text of an event. Before, a message longer than
@@ -161,6 +162,18 @@ source rather than extending version 1.61.
   line in two, and the heading lost its indent.
 - Chk Links names each city with its own number. Before, a road without a way back
   showed the number of the city at the road's other end.
+- Realism is off or on. The original also read a level 2, which no menu or shipped
+  file set and the manual did not describe; it only made the computer a little more
+  careful when it attacked. A `CWS.CFG` written by hand with 2 now plays as Realism
+  on everywhere, with a check mark in the Utility menu. Before, some rules read 2 as
+  on and others as off, and turning it off gave -1.
+- Every setting read from `CWS.CFG` is one the menus give. A number past a scale's
+  end is read as that end, such as a Balance of 9 as 5. Any other number the menus
+  do not offer is read as the default: the Union, one player, Normal speed and
+  neutral events. Before, a Display speed of 5 had no row in its menu, and January
+  campaigns of 2 became -1 when switched.
+- A message box is as wide as its message. Before, a short message got a box as
+  wide as the heading of the last menu shown.
 
 ## Version 1.7
 

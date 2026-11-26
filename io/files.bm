@@ -64,6 +64,7 @@ SUB load_scenario
     INPUT #1, fleet_ships$(SIDE_UNION), fleet_city(SIDE_UNION), fleet_ships$(SIDE_REBEL), fleet_city(SIDE_REBEL)
     FOR k = SIDE_UNION TO SIDE_REBEL
         fleet_size(k) = LEN(fleet_ships$(k))
+        CALL navy_drop_empty_fleet(k)
     NEXT k
     INPUT #1, side_capital(SIDE_UNION), side_capital(SIDE_REBEL)
 
@@ -210,6 +211,7 @@ SUB load_game (slot, problem$)
         INPUT #1, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
         INPUT #1, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
         fleet_size(i) = LEN(fleet_ships$(i))
+        CALL navy_drop_empty_fleet(i)
     NEXT i
     FOR i = 1 TO MAX_EVENTS
         event_done(i) = 0
@@ -316,9 +318,6 @@ SUB save_game (slot)
     CLOSE #1
 
     config_side = current_side
-    IF config_side < 1 OR config_side > 2 THEN
-        config_side = 1
-    END IF
     CALL config_write(config_side)
 END SUB
 
@@ -348,11 +347,59 @@ FUNCTION save_file_name$ (slot)
 END FUNCTION
 
 ' Reads the current side, game settings and the battle totals of all games from CWS.CFG.
+' CWS.CFG is a text file that a player may edit (CWS.DOC 9.2), so each setting is made one
+' of the values the game itself sets, and the rest of the game trusts it (G62):
+' - a scale is held to its ends: Graphics 0 to 3, Sound 0 to 2, Balance 1 to 5, Aggression
+'   0 to 5, and a railroad capacity of at least 0;
+' - a choice that is not on the menu becomes the default: the Union, one player, Normal
+'   speed (2), and neutral events (5);
+' - Realism below off is off and above on is on (G60). January campaigns and History other
+'   than off are on.
 SUB config_read (side)
     OPEN "I", 1, SETTINGS_FILE
     INPUT #1, side, opt_graphics, opt_sound, opt_difficulty, opt_players, opt_pause!, opt_event_balance, train_capacity(SIDE_UNION), train_capacity(SIDE_REBEL), opt_winter_campaigns, opt_realism, all_battles_won&(SIDE_UNION), all_battles_won&(SIDE_REBEL), all_casualties&(SIDE_UNION), all_casualties&(SIDE_REBEL), opt_history, opt_ai_aggression
     CLOSE #1
+    IF side <> SIDE_UNION AND side <> SIDE_REBEL THEN
+        side = SIDE_UNION
+    END IF
+    opt_graphics = setting_in_range(opt_graphics, GRAPHICS_OFF, GRAPHICS_FULL)
+    opt_sound = setting_in_range(opt_sound, SOUND_OFF, SOUND_MUSIC)
+    opt_difficulty = setting_in_range(opt_difficulty, 1, 5)
+    IF opt_players <> PLAYERS_ONE AND opt_players <> PLAYERS_TWO THEN
+        opt_players = PLAYERS_ONE
+    END IF
+    IF opt_pause! <> 1 AND opt_pause! <> 2 AND opt_pause! <> 3 AND opt_pause! <> 8 THEN
+        opt_pause! = 2
+    END IF
+    IF opt_event_balance <> 0 AND opt_event_balance <> 3 AND opt_event_balance <> 5 AND opt_event_balance <> 7 THEN
+        opt_event_balance = 5
+    END IF
+    IF train_capacity(SIDE_UNION) < 0 THEN
+        train_capacity(SIDE_UNION) = 0
+    END IF
+    IF train_capacity(SIDE_REBEL) < 0 THEN
+        train_capacity(SIDE_REBEL) = 0
+    END IF
+    IF opt_winter_campaigns <> 0 THEN
+        opt_winter_campaigns = 1
+    END IF
+    opt_realism = setting_in_range(opt_realism, REALISM_OFF, REALISM_ON)
+    IF opt_history <> HISTORY_OFF THEN
+        opt_history = HISTORY_ON
+    END IF
+    opt_ai_aggression = setting_in_range(opt_ai_aggression, 0, 5)
 END SUB
+
+' The value, or lowest or highest when it is outside that range.
+FUNCTION setting_in_range (value, lowest, highest)
+    setting_in_range = value
+    IF value < lowest THEN
+        setting_in_range = lowest
+    END IF
+    IF value > highest THEN
+        setting_in_range = highest
+    END IF
+END FUNCTION
 
 ' Writes the current side, game settings and the battle totals of all games to CWS.CFG.
 SUB config_write (side)
@@ -390,7 +437,7 @@ END SUB
 SUB save_battle_summary
     DIM k AS INTEGER
     DIM winner_mark$
-    IF opt_history > 0 THEN
+    IF opt_history = HISTORY_ON THEN
         OPEN "O", #1, "battsumm"
         PRINT #1, " SIDE      BATTLES WON       LOSSES"
         FOR k = SIDE_UNION TO SIDE_REBEL

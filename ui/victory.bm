@@ -227,7 +227,7 @@ SUB end_game (side, rule)
     END IF
     COLOR COLOR_YELLOW
     LOCATE 4, 40 - .5 * LEN(reason$)
-    IF opt_history > 0 THEN
+    IF opt_history = HISTORY_ON THEN
         CALL scribe_message(message$, SHOW_HISTORY_ONLY)
         CALL scribe_message(reason$, SHOW_HISTORY_ONLY)
     END IF

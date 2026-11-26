@@ -273,7 +273,7 @@ SUB army_raise (side, army_slot, city)
     CALL army_appoint(army_slot, army_slot)
 
     troops = new_army_size
-    IF opt_realism >= REALISM_ON THEN
+    IF opt_realism = REALISM_ON THEN
         troops = recruit_troops(side, city, 0)
     ELSE
         troops = recruits_cut_off(side, city, troops)
@@ -327,7 +327,7 @@ SUB army_recruit_cities (side, cities(), count)
             chance! = .4
         END IF
         IF RND < chance! AND city_owner(i) = side THEN
-            IF opt_realism >= REALISM_ON AND city_first_owner(i) = other_side(side) THEN
+            IF opt_realism = REALISM_ON AND city_first_owner(i) = other_side(side) THEN
                 _CONTINUE
             END IF
             count = count + 1
@@ -361,7 +361,7 @@ SUB army_add_recruits (side, army, isolated)
     DIM troops AS INTEGER
     troops = reinforce_size
     isolated = 0
-    IF opt_realism >= REALISM_ON THEN
+    IF opt_realism = REALISM_ON THEN
         troops = recruit_troops(side, army_city(army), 1)
         IF city_is_cut_off(side, army_city(army)) THEN
             isolated = 1

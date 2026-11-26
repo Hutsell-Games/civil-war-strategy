@@ -185,13 +185,13 @@ SUB draw_city_names
     NEXT k
 END SUB
 
+' Each side's fleet, at the city it lies off or at sea.
 SUB draw_fleets
     DIM side AS INTEGER
     DIM x AS INTEGER
     DIM y AS INTEGER
     FOR side = SIDE_UNION TO SIDE_REBEL
         IF fleet_size(side) = 0 OR NOT fleet_exists(side) THEN
-            fleet_city(side) = 0
             _CONTINUE
         END IF
         SELECT CASE fleet_city(side)

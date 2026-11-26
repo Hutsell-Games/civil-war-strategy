@@ -8,7 +8,7 @@ SUB set_union_advantage
     IF opt_players = PLAYERS_TWO THEN
         union_income_bonus = union_bonus_two_players * opt_difficulty
     END IF
-    IF opt_realism >= REALISM_ON THEN
+    IF opt_realism = REALISM_ON THEN
         union_income_bonus = union_income_bonus * union_bonus_realism_share#
     END IF
 END SUB
@@ -192,7 +192,6 @@ SUB option_set_event_balance (choice)
 END SUB
 
 ' The Rndom Evt menu's row of the setting in force, as option_set_event_balance numbers them.
-' A setting no row gives (1, from a CWS.CFG written by hand) is row 1, OFF.
 FUNCTION option_event_balance_row
     SELECT CASE opt_event_balance
         CASE 3
@@ -213,19 +212,13 @@ END SUB
 ' Realism: off or on. Either way the Union's extra income is worked out again. The original
 ' worked it out only when Realism went on, so turning it off kept the 70% of Realism.
 SUB option_toggle_realism
-    opt_realism = 1 - opt_realism
+    IF opt_realism = REALISM_ON THEN
+        opt_realism = REALISM_OFF
+    ELSE
+        opt_realism = REALISM_ON
+    END IF
     CALL set_union_advantage
 END SUB
-
-' The event balance that the month's roll uses. With Realism on, a Rebel player's balance of
-' 1 counts as 3. The original added the 2 to the setting itself when Realism went on, and
-' never took it off (G55). No menu sets 1; only a CWS.CFG written by hand does.
-FUNCTION event_balance_in_play
-    event_balance_in_play = opt_event_balance
-    IF opt_realism <> REALISM_OFF AND current_side = SIDE_REBEL AND opt_event_balance = 1 THEN
-        event_balance_in_play = 3
-    END IF
-END FUNCTION
 
 SUB option_toggle_history
     opt_history = 1 - opt_history
@@ -294,29 +287,23 @@ SUB game_reset
 END SUB
 
 ' After the scenario and the settings are read. Under the Realism setting a game that starts
-' before 1862 has no ironclads. The number of players and the display speed get a valid
-' value, and the special events, unless off, favor the side left to the computer. The Balance setting
+' before 1862 has no ironclads. With two players the Union starts. The special events,
+' unless off, favor the side left to the computer. The Balance setting
 ' gives the computer's side cash. Each side's cash becomes its income, and it gets up to 50
 ' more.
 SUB game_apply_settings
     DIM i AS INTEGER
     DIM ships$
-    IF opt_realism >= REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
+    IF opt_realism = REALISM_ON AND turn_year < IRONCLAD_YEAR THEN
         FOR i = SIDE_UNION TO SIDE_REBEL
             ships$ = STRING$(LEN(fleet_ships$(i)), SHIP_WOODEN$)
             fleet_ships$(i) = ships$
         NEXT i
     END IF
-    IF opt_players < PLAYERS_ONE OR opt_players > PLAYERS_TWO THEN
-        opt_players = PLAYERS_ONE
-    END IF
-    IF opt_players = PLAYERS_TWO OR current_side = SIDE_NONE THEN
+    IF opt_players = PLAYERS_TWO THEN
         current_side = SIDE_UNION
     END IF
     CALL option_events_favor_computer
-    IF opt_pause! < 1 THEN
-        opt_pause! = 2
-    END IF
     FOR i = SIDE_UNION TO SIDE_REBEL
         IF balance_help(i) > 0 THEN
             side_cash(i) = side_cash(i) + start_cash_per_balance * (DIFFICULTY_EVEN + balance_help(i))

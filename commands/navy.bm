@@ -331,18 +331,14 @@ SUB navy_combat_retreat (side)
     CALL wait_seconds(opt_pause!)
 END SUB
 
-' The computer's fleet fights: it fires volley after volley until a fleet is sunk. The menu's
-' texts and choice are set as the player's fight sets them, though no menu shows.
+' The computer's fleet fights: it fires volley after volley until a fleet is sunk. No menu shows,
+' and the menu's rows are left alone.
 SUB navy_combat_auto (side)
     DIM combat_over AS INTEGER
     DIM hits(SIDE_REBEL)
     CALL navy_combat_begin(hits())
     DO
         CALL navy_combat_draw
-        menu_text$(0) = "Options"
-        menu_text$(1) = "Attack"
-        menu_text$(2) = "Retreat"
-        menu_choice = 1
         CALL navy_combat_volley(side, hits(), combat_over)
     LOOP UNTIL combat_over = 1
 END SUB

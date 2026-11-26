@@ -1,32 +1,31 @@
 ' A message in a box over the screen, and scribe_message, which also writes a message to the
 ' history file (cws.his) when the History setting is on.
 
-' The box shows at most 59 characters of text$ and leaves text$ itself as it was.
+' The box shows at most 59 characters of text$ and leaves text$ itself as it was. It leaves the
+' menu's rows and place alone. Before 2026-11-26 it set menu_text$(1), menu_col, menu_row and
+' menu_item_count to measure the text, and its width counted the heading left in menu_text$(0).
 SUB show_message_box (text$, box_color)
-    DIM menu_width AS INTEGER
+    DIM box_col AS INTEGER
+    DIM box_row AS INTEGER
+    DIM box_width AS INTEGER
     DIM shown$
     DIM saved_screen(1 TO 8000)
     shown$ = LEFT$(text$, 59)
-    menu_text$(1) = shown$
-    menu_col = 32 - LEN(shown$) \ 2
-    menu_row = 10
-    menu_item_count = 1
-    menu_width = menu_measure_width
-    IF menu_width > 59 THEN
-        menu_width = 59
-    END IF
-    GET (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 15, 16 * (menu_row + 3) + 7), saved_screen()
-    VIEW (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + 3) + 4)
+    box_col = 32 - LEN(shown$) \ 2
+    box_row = 10
+    box_width = LEN(shown$)
+    GET (8 * box_col - 4, 16 * box_row - 3)-(8 * (box_col + box_width + 1) + 15, 16 * (box_row + 3) + 7), saved_screen()
+    VIEW (8 * box_col - 4, 16 * box_row - 3)-(8 * (box_col + box_width + 1) + 7, 16 * (box_row + 3) + 4)
     CLS 1
     VIEW
-    LINE (8 * menu_col, 16 * menu_row - 1)-(8 * (menu_col + menu_width + 1) + 15, 16 * (menu_row + 3) + 7), 0, BF
-    LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + 3)), box_color, BF
-    LINE (8 * menu_col - 4, 16 * menu_row - 3)-(8 * (menu_col + menu_width + 1) + 7, 16 * (menu_row + 3)), 15, B
+    LINE (8 * box_col, 16 * box_row - 1)-(8 * (box_col + box_width + 1) + 15, 16 * (box_row + 3) + 7), 0, BF
+    LINE (8 * box_col - 4, 16 * box_row - 3)-(8 * (box_col + box_width + 1) + 7, 16 * (box_row + 3)), box_color, BF
+    LINE (8 * box_col - 4, 16 * box_row - 3)-(8 * (box_col + box_width + 1) + 7, 16 * (box_row + 3)), 15, B
     COLOR COLOR_YELLOW
-    LOCATE menu_row + 2, menu_col + 2
+    LOCATE box_row + 2, box_col + 2
     PRINT shown$
     CALL wait_seconds(PAUSE_LONG)
-    PUT (8 * menu_col - 4, 16 * menu_row - 3), saved_screen(), PSET
+    PUT (8 * box_col - 4, 16 * box_row - 3), saved_screen(), PSET
 END SUB
 
 ' Shows the message as a line or box when requested and appends it to cws.his when History is on.
@@ -38,7 +37,7 @@ SUB scribe_message (text$, display)
         CASE SHOW_BOX
             CALL show_message_box(text$, COLOR_RED)
     END SELECT
-    IF opt_history > 0 THEN
+    IF opt_history = HISTORY_ON THEN
         OPEN "A", 2, HISTORY_FILE
         PRINT #2, _TRIM$(text$)
         CLOSE #2

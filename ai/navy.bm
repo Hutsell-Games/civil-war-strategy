@@ -6,6 +6,7 @@ SUB ai_fleet_orders (side)
     IF current_side = SIDE_REBEL AND NOT fleet_exists(SIDE_UNION) AND fleet_size(SIDE_UNION) < 1 AND city_owner(AI_UNION_FLEET_CITY) = SIDE_UNION AND side_cash(SIDE_UNION) > cost_ship THEN
         fleet_city(SIDE_UNION) = AI_UNION_FLEET_CITY
         CALL ai_navy_carry_out(SIDE_UNION, NAVY_BUILD)
+        CALL navy_drop_empty_fleet(SIDE_UNION)
     ELSE
         IF fleet_is_at_sea(side) THEN
             IF RND < .9 THEN
@@ -21,9 +22,7 @@ SUB ai_fleet_orders (side)
         END IF
     END IF
 
-    IF fleet_size(side) = 0 THEN
-        CALL navy_clear_fleet(side)
-    END IF
+    CALL navy_drop_empty_fleet(side)
     IF NOT fleet_exists(side) THEN
         EXIT SUB
     END IF

@@ -39,7 +39,7 @@ SUB menu_utility
         menu_text$(10) = "Jan Campgn" + check_mark$(opt_winter_campaigns = 1)
         menu_text$(11) = "Realism " + check_mark$(opt_realism = REALISM_ON)
         menu_text$(12) = "Chk Links"
-        menu_text$(13) = "History" + check_mark$(opt_history = 1)
+        menu_text$(13) = "History" + check_mark$(opt_history = HISTORY_ON)
         menu_item_count = 13
         menu_col = PANEL_COL
         menu_row = 11
@@ -326,7 +326,7 @@ SUB menu_option_history
     DIM setting$
     CALL option_toggle_history
     setting$ = "OFF"
-    IF opt_history = 1 THEN
+    IF opt_history = HISTORY_ON THEN
         setting$ = "ON"
     END IF
     CALL clear_bottom_line

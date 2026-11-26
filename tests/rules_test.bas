@@ -201,8 +201,6 @@ SUB TestCityIsCutOffAndArmySupplyCutOff
     opt_realism = REALISM_ON
     a = army_supply_cut_off(21): AssertEqualInt -1, a, "with Realism, the Rebels' army is"
     a = army_supply_cut_off(1): AssertEqualInt 0, a, "and the Union's is not"
-    opt_realism = REALISM_HIGH
-    a = army_supply_cut_off(21): AssertEqualInt -1, a, "Realism 2 counts as on"
 END SUB
 
 ' ------------------------------------------------------------- computer's
@@ -1093,6 +1091,18 @@ SUB TestNavyFoundAndCancelANewFleet
     CALL navy_cancel_new_fleet(1)
     AssertEqualInt 0, fleet_size(1), "no ship"
     AssertEqualStr "", fleet_ships$(1), "none"
+END SUB
+
+' A fleet of no ships loses its port too, as when the computer's first Union ship is not built
+' at city 30. A fleet with ships keeps its port. Before 2026-11-26 the map's drawing cleared it.
+SUB TestNavyDropEmptyFleet
+    fleet_city(SIDE_UNION) = AI_UNION_FLEET_CITY: fleet_size(SIDE_UNION) = 0
+    fleet_city(SIDE_REBEL) = 24: fleet_ships$(SIDE_REBEL) = "W": fleet_size(SIDE_REBEL) = 1
+    CALL navy_drop_empty_fleet(SIDE_UNION)
+    CALL navy_drop_empty_fleet(SIDE_REBEL)
+    AssertEqualInt 0, fleet_city(SIDE_UNION), "no ships: no port"
+    AssertEqualInt 24, fleet_city(SIDE_REBEL), "ships: the port stays"
+    AssertEqualInt 1, fleet_size(SIDE_REBEL), "and its ship"
 END SUB
 
 SUB TestNavyBombardArmy
@@ -2090,7 +2100,7 @@ END SUB
 ' and the event is still the month's.
 SUB TestEventRiotsForTheSouth
     CALL events_for_test
-    opt_realism = REALISM_HIGH: turn_month = 5: side_city_count(1) = 5
+    opt_realism = REALISM_ON: turn_month = 5: side_city_count(1) = 5
     city_first_owner(7) = 2: city_owner(7) = 1: city_name$(7) = "Atlanta"
     script_dice$ = "0,0,.95,.15"
     CALL event_roll(event, variant, who)
@@ -2700,12 +2710,10 @@ SUB TestOptionSetEventBalance
         CALL option_set_event_balance(row)
         AssertEqualInt row, option_event_balance_row, "the menu starts on the row picked"
     NEXT row
-    opt_event_balance = 1
-    AssertEqualInt 1, option_event_balance_row, "a balance no row gives: OFF's row"
 END SUB
 
 ' Realism on and off both work the Union's extra income out again; the original did it only
-' for on. From high realism (2) the switch gives -1, which counts as on (as in the original).
+' for on.
 SUB TestOptionToggleRealism
     opt_players = PLAYERS_ONE: opt_difficulty = 3
     CALL option_toggle_realism
@@ -2714,26 +2722,6 @@ SUB TestOptionToggleRealism
     CALL option_toggle_realism
     AssertEqualInt REALISM_OFF, opt_realism, "off"
     AssertEqualInt 360, union_income_bonus, "all of it again"
-    opt_realism = REALISM_HIGH: union_income_bonus = 0
-    CALL option_toggle_realism
-    AssertEqualInt -1, opt_realism, "from high realism: -1 (as in the original)"
-    AssertEqualInt 360, union_income_bonus, "worked out, without the seven tenths"
-END SUB
-
-' With Realism on, a Rebel player's event balance of 1 counts as 3, and as 1 again when
-' Realism goes off. The setting itself stays 1 (G55). No menu sets 1.
-SUB TestOptionToggleRealismEventBalance
-    current_side = SIDE_REBEL: opt_event_balance = 1
-    CALL option_toggle_realism
-    AssertEqualInt 1, opt_event_balance, "the setting stays 1"
-    AssertEqualInt 3, event_balance_in_play, "1 counts as 3"
-    CALL option_toggle_realism
-    AssertEqualInt 1, opt_event_balance, "still 1"
-    AssertEqualInt 1, event_balance_in_play, "1 again with Realism off"
-    opt_realism = REALISM_ON: current_side = SIDE_UNION
-    AssertEqualInt 1, event_balance_in_play, "a Union player's 1 stays 1"
-    current_side = SIDE_REBEL: opt_event_balance = 5
-    AssertEqualInt 5, event_balance_in_play, "any other value stays"
 END SUB
 
 SUB TestVictoryToggleRule
@@ -3159,6 +3147,94 @@ SUB TestBattleRealismDefenseCap
     AssertEqualInt 20, defend_steps(1), ".02 * 1000 + 2 is 22: at most 20"
 END SUB
 
+' CWS.CFG's Realism is made off or on: below off is off, and above on is on (G60).
+SUB TestConfigReadClampsRealism
+    CHDIR TestTempDir$
+    opt_realism = -1
+    CALL config_write(SIDE_UNION)
+    CALL config_read(side)
+    AssertEqualInt REALISM_OFF, opt_realism, "-1 is off"
+    opt_realism = 2
+    CALL config_write(SIDE_UNION)
+    CALL config_read(side)
+    AssertEqualInt REALISM_ON, opt_realism, "2 is on"
+    opt_realism = REALISM_ON
+    CALL config_write(SIDE_UNION)
+    CALL config_read(side)
+    AssertEqualInt REALISM_ON, opt_realism, "on stays"
+END SUB
+
+' CWS.CFG's History is off or on. Any value but 0 is on: some places asked for 1 and others
+' for more than 0, so 2 was on for some and off for others.
+SUB TestConfigReadClampsHistory
+    CHDIR TestTempDir$
+    opt_history = 2
+    CALL config_write(SIDE_UNION)
+    CALL config_read(side)
+    AssertEqualInt HISTORY_ON, opt_history, "2 is on"
+    opt_history = -1
+    CALL config_write(SIDE_UNION)
+    CALL config_read(side)
+    AssertEqualInt HISTORY_ON, opt_history, "-1 is on"
+    opt_history = HISTORY_OFF
+    CALL config_write(SIDE_UNION)
+    CALL config_read(side)
+    AssertEqualInt HISTORY_OFF, opt_history, "off stays"
+END SUB
+
+' CWS.CFG's settings are made values the game sets: a scale is held to its ends, and a
+' choice the menus do not offer becomes the default (G62). The values the menus offer stay.
+SUB TestConfigReadMakesSettingsValid
+    CHDIR TestTempDir$
+    opt_graphics = -1: opt_sound = -1: opt_difficulty = 0: opt_players = 0: opt_pause! = 0
+    opt_event_balance = 1: train_capacity(SIDE_UNION) = -5: train_capacity(SIDE_REBEL) = -5
+    opt_winter_campaigns = -1: opt_ai_aggression = -1
+    CALL config_write(SIDE_NONE)
+    CALL config_read(side)
+    AssertEqualInt SIDE_UNION, side, "no side: the Union"
+    AssertEqualInt GRAPHICS_OFF, opt_graphics, "Graphics below 0: off"
+    AssertEqualInt SOUND_OFF, opt_sound, "Sound below 0: off"
+    AssertEqualInt 1, opt_difficulty, "Balance below 1: 1"
+    AssertEqualInt PLAYERS_ONE, opt_players, "0 players: one"
+    AssertTrue opt_pause! = 2, "a speed below 1: Normal"
+    AssertEqualInt 5, opt_event_balance, "events at 1: neutral"
+    AssertEqualInt 0, train_capacity(SIDE_UNION), "the Union's railroad: at least 0"
+    AssertEqualInt 0, train_capacity(SIDE_REBEL), "the Rebels' railroad: at least 0"
+    AssertEqualInt 1, opt_winter_campaigns, "January campaigns at -1: allowed"
+    AssertEqualInt 0, opt_ai_aggression, "Aggression below 0: 0"
+
+    opt_graphics = 9: opt_sound = 9: opt_difficulty = 9: opt_players = 3: opt_pause! = 5
+    opt_event_balance = 9: opt_winter_campaigns = 2: opt_ai_aggression = 9
+    CALL config_write(3)
+    CALL config_read(side)
+    AssertEqualInt SIDE_UNION, side, "side 3: the Union"
+    AssertEqualInt GRAPHICS_FULL, opt_graphics, "Graphics above 3: full"
+    AssertEqualInt SOUND_MUSIC, opt_sound, "Sound above 2: music"
+    AssertEqualInt 5, opt_difficulty, "Balance above 5: 5"
+    AssertEqualInt PLAYERS_ONE, opt_players, "3 players: one"
+    AssertTrue opt_pause! = 2, "a speed no menu row gives: Normal"
+    AssertEqualInt 5, opt_event_balance, "events at 9: neutral"
+    AssertEqualInt 1, opt_winter_campaigns, "January campaigns at 2: allowed"
+    AssertEqualInt 5, opt_ai_aggression, "Aggression above 5: 5"
+
+    opt_graphics = GRAPHICS_NAMES: opt_sound = SOUND_EFFECTS: opt_difficulty = 4: opt_players = PLAYERS_TWO
+    opt_pause! = 8: opt_event_balance = 0: train_capacity(SIDE_UNION) = 600: train_capacity(SIDE_REBEL) = 300
+    opt_winter_campaigns = 0: opt_ai_aggression = 3
+    CALL config_write(SIDE_REBEL)
+    CALL config_read(side)
+    AssertEqualInt SIDE_REBEL, side, "the Rebels stay"
+    AssertEqualInt GRAPHICS_NAMES, opt_graphics, "Graphics stays"
+    AssertEqualInt SOUND_EFFECTS, opt_sound, "Sound stays"
+    AssertEqualInt 4, opt_difficulty, "Balance stays"
+    AssertEqualInt PLAYERS_TWO, opt_players, "two players stay"
+    AssertTrue opt_pause! = 8, "Very Slow stays"
+    AssertEqualInt 0, opt_event_balance, "events off stay off"
+    AssertEqualInt 600, train_capacity(SIDE_UNION), "the Union's railroad stays"
+    AssertEqualInt 300, train_capacity(SIDE_REBEL), "the Rebels' railroad stays"
+    AssertEqualInt 0, opt_winter_campaigns, "no January campaigns stays"
+    AssertEqualInt 3, opt_ai_aggression, "Aggression stays"
+END SUB
+
 ' Each side loses at most a number of times the other's losses. With both knobs at 1, the side
 ' that would lose more loses as much as the other.
 SUB TestBattleLossCaps
@@ -3285,14 +3361,12 @@ END SUB
 SUB TestGameApplySettingsUnion
     RANDOMIZE 1
     opt_realism = REALISM_ON: turn_year = 1861: fleet_ships$(SIDE_UNION) = "WIIW"
-    opt_players = 0: current_side = SIDE_NONE: opt_pause! = 0: opt_difficulty = 1
+    opt_players = PLAYERS_ONE: current_side = SIDE_UNION: opt_pause! = 2: opt_difficulty = 1
     side_cash(SIDE_UNION) = 300: side_cash(SIDE_REBEL) = 50: opt_event_balance = 5
     CALL game_apply_settings
     AssertEqualStr "WWWW", fleet_ships$(SIDE_UNION), "no ironclads before 1862 under realism"
-    AssertEqualInt PLAYERS_ONE, opt_players, "one player when the setting is not 1 or 2"
-    AssertEqualInt SIDE_UNION, current_side, "the Union when no side is set"
+    AssertEqualInt SIDE_UNION, current_side, "the Union player stays the Union"
     AssertEqualInt 7, opt_event_balance, "events favor the Rebels"
-    AssertTrue opt_pause! = 2, "the display speed is Normal when not set"
     AssertEqualInt 300, side_income(SIDE_UNION), "the Union's income is its cash"
     AssertEqualInt 550, side_income(SIDE_REBEL), "the Rebels' cash and income with 500 for Rebel ++"
     AssertTrue side_cash(SIDE_UNION) >= 300 AND side_cash(SIDE_UNION) <= 350, "up to 50 more:" + STR$(side_cash(SIDE_UNION))
@@ -3307,7 +3381,6 @@ SUB TestGameApplySettingsRebel
     CALL game_apply_settings
     AssertEqualStr "WI", fleet_ships$(SIDE_UNION), "ironclads stay"
     AssertEqualInt 3, opt_event_balance, "events favor the Union"
-    AssertTrue opt_pause! = 8, "a display speed that is set stays"
     AssertEqualInt 800, side_income(SIDE_UNION), "the Union's cash and income with 500 for Union ++"
     AssertEqualInt 50, side_income(SIDE_REBEL), "the Rebels' income"
     opt_players = PLAYERS_TWO
@@ -3539,7 +3612,7 @@ END SUB
 ' as they are there, not as the game played has them.
 SUB TestConfigWriteTotalsKeepsTheSettings
     CHDIR TestTempDir$
-    opt_players = 1: opt_pause! = .5: opt_ai_aggression = 3
+    opt_players = 1: opt_pause! = 3: opt_ai_aggression = 3
     all_battles_won&(1) = 1: all_casualties&(2) = 2
     CALL config_write(1)
     opt_players = 2: opt_pause! = 8: opt_ai_aggression = 5
@@ -3549,7 +3622,7 @@ SUB TestConfigWriteTotalsKeepsTheSettings
     CALL config_read(side)
     AssertEqualInt 1, side, "the side, from cws.cfg"
     AssertEqualInt 1, opt_players, "the players, from cws.cfg"
-    AssertTrue opt_pause! = .5, "the display speed, from cws.cfg"
+    AssertTrue opt_pause! = 3, "the display speed, from cws.cfg"
     AssertEqualInt 3, opt_ai_aggression, "the aggression, the last field"
     AssertTrue all_battles_won&(1) = 40000, "the Union's battles won in all games, past an INTEGER"
     AssertEqualInt 7, all_battles_won&(2), "the Rebels'"

@@ -194,7 +194,7 @@ END SUB
 
 ' A new game begins: the history file is started when History is on, and the map is drawn.
 SUB show_new_game
-    IF opt_history = 1 THEN
+    IF opt_history = HISTORY_ON THEN
         CLS
         CALL history_start
     ELSE

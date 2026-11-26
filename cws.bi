@@ -154,7 +154,7 @@ CONST RELATION_AT_MOST = 5
 CONST REDRAW_NONE = 0
 CONST REDRAW_FLEETS = 1
 CONST REDRAW_MAP = 2
-' Settings: opt_graphics, opt_sound, opt_realism, opt_players.
+' Settings: opt_graphics, opt_sound, opt_realism, opt_history, opt_players.
 CONST GRAPHICS_OFF = 0
 CONST GRAPHICS_BASIC = 1
 CONST GRAPHICS_NAMES = 2
@@ -164,7 +164,8 @@ CONST SOUND_EFFECTS = 1
 CONST SOUND_MUSIC = 2
 CONST REALISM_OFF = 0
 CONST REALISM_ON = 1
-CONST REALISM_HIGH = 2
+CONST HISTORY_OFF = 0
+CONST HISTORY_ON = 1
 CONST PLAYERS_ONE = 1
 CONST PLAYERS_TWO = 2
 ' opt_difficulty runs from 1 to 5; at 3 neither side gets help.

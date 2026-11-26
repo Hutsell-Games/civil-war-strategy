@@ -32,7 +32,7 @@ SUB event_roll (event, variant, event_side)
     END IF
 
     event_side = SIDE_UNION
-    IF script_rnd! > .1 * event_balance_in_play THEN
+    IF script_rnd! > .1 * opt_event_balance THEN
         event_side = SIDE_REBEL
     END IF
     CALL event_pick(0, other_side(event_side), event_weight, event, variant)

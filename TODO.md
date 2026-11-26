@@ -19,11 +19,6 @@ Open work on the QB64 port. Remove an item when it is done. The plan is
 Each of these is how the game behaves, in DOS too by its code. Decide whether to change it. A change to how a
 game plays changes the recorded screens.
 
-- **Realism 2 (`REALISM_HIGH`) has no menu, and the toggle turns it into -1.** Only a `CWS.CFG` or save
-  written by hand can hold 2; `ai\army.bm` reads it. The Utility menu shows no check mark for it, and Realism's
-  `1 - opt_realism` gives -1. Tests of `>= REALISM_ON` read -1 as off, and tests of `= REALISM_OFF` (as in
-  `rules\railroad.bm` and `rules\events.bm`) read it as on, while the message says "REALISM ON". Either clamp
-  the value when `CWS.CFG` and a save are read, or offer the level in the menu.
 - **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
   The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
   its title.
@@ -130,9 +125,6 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 - **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
   `docs\archived\constants.md`, section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
   since 2026-11-13.
-- **The Realism switch is `opt_realism = 1 - opt_realism`** (`option_toggle_realism`, `rules\setup.bm`). It toggles between
-  off and on, but from `REALISM_HIGH` (2) it gives -1. Written with names it would read
-  `REALISM_ON - opt_realism`, which hides that, so the numbers stay.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
   (`io\files.bm` line 57) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 20), which
   also maps a rule to a menu row (`i - 1`).
@@ -173,8 +165,5 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 - **A literal side.** `army_get_commander(2, army_slot)` in `menu_army_detach` should be `SIDE_REBEL`.
 - **A rule that changes its input.** `battle_strengths` sets an army's size to 1 when it is below 1, in a
   procedure that otherwise only works out strengths.
-- **Realism tests disagree.** Some places test `opt_realism = REALISM_ON`, others `>= REALISM_ON`, so
-  Realism 2 (`REALISM_HIGH`, reachable through `CWS.CFG`) is on for some rules and off for others. This
-  follows the original.
 - **Forced choices.** Relieve loops until a row is picked, so Esc does not back out. The Capital command takes the money before the city is picked, and picking the same capital
   still pays (documented in `menu_move_capital`).

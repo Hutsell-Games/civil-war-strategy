@@ -70,7 +70,7 @@ END FUNCTION
 
 ' The army is cut off from supplies: under the Realism setting, its city is cut off. Gives -1 or 0.
 FUNCTION army_supply_cut_off (army)
-    army_supply_cut_off = opt_realism >= REALISM_ON AND city_is_cut_off(army_side(army), army_city(army))
+    army_supply_cut_off = (opt_realism = REALISM_ON) AND city_is_cut_off(army_side(army), army_city(army))
 END FUNCTION
 
 ' A side takes a city: the city's value in victory points, and 100 more taken from the other
