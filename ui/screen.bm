@@ -71,6 +71,10 @@ SUB wait_seconds (seconds!)
         ' rest between checks, so that the wait does not use a whole processor core (and so that
         ' QBJS lets the browser deliver the key)
         _LIMIT 60
+        ' TIMER drops back to 0 at midnight; move the start back a day so the wait still ends
+        IF TIMER < start! THEN
+            start! = start! - 86400
+        END IF
     LOOP
 END SUB
 
@@ -88,6 +92,7 @@ SUB draw_top_bar
     DIM total_points AS INTEGER
     DIM percent AS INTEGER
     DIM side_color AS INTEGER
+    DIM bar_back_color AS INTEGER
     DIM settings$
     LOCATE 1, 1
     PRINT SPACE$(80);
@@ -107,6 +112,7 @@ SUB draw_top_bar
     LOCATE 7, 68
     PRINT "Funds:"; side_cash(current_side);
 
+    ' Victory points below 0 are set to 0 here, when the bar is drawn, as in the original game.
     FOR i = SIDE_UNION TO SIDE_REBEL
         IF side_victory_points(i) < 0 THEN
             side_victory_points(i) = 0
@@ -115,8 +121,14 @@ SUB draw_top_bar
     total_points = side_victory_points(SIDE_UNION) + side_victory_points(SIDE_REBEL)
     percent = 0
     side_color = side_color_of(current_side)
+    ' The original drew the background in 8 minus the side's color. For the Union that is -1,
+    ' which QB64pe draws as 15.
+    bar_back_color = COLOR_WHITE
+    IF current_side = SIDE_REBEL THEN
+        bar_back_color = COLOR_BLUE
+    END IF
     LINE (580, 15)-(580, 35), 15
-    LINE (530, 20)-(630, 30), 8 - side_color, BF
+    LINE (530, 20)-(630, 30), bar_back_color, BF
     IF total_points > 0 THEN
         percent = 100 * (side_victory_points(current_side) / total_points)
     END IF

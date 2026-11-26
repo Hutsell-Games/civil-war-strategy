@@ -146,6 +146,8 @@ source rather than extending version 1.61.
   on OFF.
 - The line below the Random Events menu names the setting without the menu's
   marker.
+- A pause that runs past midnight ends on time. Before, it lasted until a key was
+  pressed.
 
 ## Version 1.7
 
