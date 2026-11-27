@@ -23,7 +23,7 @@ END SUB
 ' Build: the new ship's icon at the end of the bottom line, a sound, and a pause.
 SUB navy_show_new_ship (side, ship$)
     PSET (400, 465), 0
-    CALL draw_ship_icon(side, ship_icon(ship$))
+    CALL draw_ship_icon(side, ship$)
     CALL sound_effect(3000, 1)
     CALL wait_seconds(opt_pause!)
 END SUB
@@ -188,7 +188,7 @@ SUB navy_commerce_raid
                 COLOR COLOR_WHITE
                 PRINT side_name$(raider); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raider)); " commerce";
                 PSET (500, 465), 0
-                CALL draw_ship_icon(raider, ship_icon(LEFT$(fleet_ships$(raider), 1)))
+                CALL draw_ship_icon(raider, LEFT$(fleet_ships$(raider), 1))
                 IF opt_sound >= SOUND_EFFECTS THEN
                     PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
                 END IF
@@ -250,7 +250,7 @@ SUB navy_combat_draw
     COLOR COLOR_BLUE
     FOR i = 1 TO fleet_size(SIDE_UNION)
         x = x + 50
-        PSET (x, y)
+        PSET (x, y), COLOR_BLUE
         CALL draw_fleet_ship(SIDE_UNION, i)
     NEXT i
     COLOR COLOR_LIGHT_CYAN
@@ -263,7 +263,7 @@ SUB navy_combat_draw
     COLOR COLOR_BLUE
     FOR i = 1 TO fleet_size(SIDE_REBEL)
         x = x + 50
-        PSET (x, y)
+        PSET (x, y), COLOR_BLUE
         CALL draw_fleet_ship(SIDE_REBEL, i)
     NEXT i
     COLOR COLOR_LIGHT_CYAN

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Rename shared variables from the tables of docs/archived/variable-names.md (phase 4 of docs/modernize-plan.md).
+"""Rename shared variables from the tables of "Shared variable and parameter names" in
+docs/archived/devnotes-completed.md (phase 4 of docs/modernize-plan.md).
 
     python tools/refactor/rename_vars.py report   # counts, shadowed names, collisions; changes nothing
     python tools/refactor/rename_vars.py apply    # rewrite the sources
@@ -20,12 +21,19 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TABLE = ROOT / "docs" / "archived" / "variable-names.md"
+TABLE = ROOT / "docs" / "archived" / "devnotes-completed.md"
+SECTION = "## Shared variable and parameter names"
 FILES = ["CWSTRAT.BAS", "CWSTRAT1.BM", "CWSTRAT2.BM", "CWSMENU.BM", "CWS14.BI",
          "QB64.BM", "SCRIPT.BM", "FOLDERS.BI", "tests/rules_test.bas"]
 SKIP = {"side", "matrix", "navymove", "scripted", "price"}
 TOKEN = re.compile(r'"[^"]*"|\'.*$|[A-Za-z_][A-Za-z0-9_]*[$%&!#]?|\s+|.', re.S)
 BODY_STOP = ("## Unused", "## Parameters", "## Notes")
+
+
+def section_of(text, heading):
+    """The text of one `## ` section of the archive, up to the next `## ` heading."""
+    body = text.split("\n" + heading + "\n", 1)[1]
+    return re.split(r"\n## ", body, maxsplit=1)[0]
 
 
 def key_of(name):
@@ -35,7 +43,7 @@ def key_of(name):
 
 
 def load_table():
-    text = TABLE.read_text(encoding="utf-8")
+    text = section_of(TABLE.read_text(encoding="utf-8"), SECTION)
     text = text.split("## Armies", 1)[1]
     for stop in BODY_STOP:
         text = text.split(stop, 1)[0]

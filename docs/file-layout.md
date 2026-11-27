@@ -7,7 +7,7 @@ below, which `cws.bas` and `tests\rules_test.bas` include.
 Each file says at its top what it holds. This page gives that in one line, and the rule of each
 folder. It does not list the procedures: search for `SUB name` or `FUNCTION name` to find one. Until
 2026-11-14 it did, and the tables, with where each procedure came from, are in
-[archived/file-layout-completed.md](archived/file-layout-completed.md).
+[the archive](archived/devnotes-completed.md#done-where-each-sub-goes-phase-6).
 
 ## The folders and their rules
 

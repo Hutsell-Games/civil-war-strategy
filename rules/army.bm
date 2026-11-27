@@ -216,8 +216,7 @@ SUB army_pick_commander (side, army_slot)
     '                 generic leaders if set list is exhausted
     FOR i = first_army TO last_army
         IF NOT army_in_field(i) THEN
-            ' (i): army_generate_name changes its first argument.
-            CALL army_generate_name((i), generated_name$)
+            CALL army_generate_name(i, generated_name$)
             army_slot = i
             leader_name$(i) = generated_name$
             leader_rating(i) = 1 + made_up_leader_spread * RND
@@ -226,28 +225,29 @@ SUB army_pick_commander (side, army_slot)
     NEXT i
 END SUB
 
-' Builds a fallback name from the side and a Roman numeral, reducing the army argument as it goes.
+' Builds a fallback name from the side and the army's number in its side as a Roman numeral.
+' army is left as it was.
 SUB army_generate_name (army, name$)
     DIM ones AS INTEGER
+    DIM number AS INTEGER
+    number = army
     name$ = "Union "
     IF army_side(army) = SIDE_REBEL THEN
         name$ = "Rebel "
+        number = number - ARMIES_PER_SIDE
     END IF
-    IF army_side(army) = SIDE_REBEL THEN
-        army = army - ARMIES_PER_SIDE
-    END IF
-    IF army > 10 THEN
+    IF number > 10 THEN
         name$ = name$ + "X"
-        army = army - 10
+        number = number - 10
     END IF
-    SELECT CASE army
+    SELECT CASE number
         CASE IS < 4
-            ones = army
+            ones = number
         CASE 4
             name$ = name$ + "IV"
         CASE 5 TO 8
             name$ = name$ + "V"
-            ones = army - 5
+            ones = number - 5
         CASE 9
             name$ = name$ + "IX"
         CASE 10
@@ -431,7 +431,7 @@ SUB army_buy_supply (army, result)
     supply_added = army_supply_days(army)
     IF supply_added >= 1 THEN
         army_supply(army) = army_supply(army) + supply_added
-        side_cash(side) = side_cash(side) - .1 * supply_added * army_size(army)
+        side_cash(side) = side_cash(side) - SUPPLY_PRICE * supply_added * army_size(army)
         result = SUPPLY_BOUGHT
     END IF
     IF side_cash(side) < 0 THEN
@@ -448,7 +448,7 @@ FUNCTION army_supply_days (army)
     DIM days AS SINGLE
     days = 0
     IF army_size(army) > 0 THEN
-        days = side_cash(army_side(army)) * 10# / army_size(army)
+        days = side_cash(army_side(army)) / SUPPLY_PRICE / army_size(army)
     END IF
     IF days + army_supply(army) > resupply_level THEN
         days = resupply_level - army_supply(army)
@@ -459,23 +459,23 @@ END FUNCTION
 ' Whether the Supply menu lists the army: it exists, it has a day of supplies or less, and
 ' under the Realism setting it is not cut off.
 FUNCTION army_may_get_supply (army)
-    army_may_get_supply = 0
+    army_may_get_supply = FALSE
     IF NOT army_exists(army) OR army_supply(army) > 1 THEN
         EXIT FUNCTION
     END IF
     IF army_supply_cut_off(army) THEN
         EXIT FUNCTION
     END IF
-    army_may_get_supply = -1
+    army_may_get_supply = TRUE
 END FUNCTION
 
 ' Whether the side has an army that the Supply menu lists.
 FUNCTION side_needs_supply (side)
     DIM i AS INTEGER
-    side_needs_supply = 0
+    side_needs_supply = FALSE
     FOR i = side_first_army(side) TO side_last_army(side)
         IF army_may_get_supply(i) THEN
-            side_needs_supply = -1
+            side_needs_supply = TRUE
             EXIT FUNCTION
         END IF
     NEXT i
@@ -485,11 +485,11 @@ END FUNCTION
 ' that its cash buys a day of supplies for. The Commands menu shows Supply as "-" otherwise.
 FUNCTION side_can_supply (side)
     DIM i AS INTEGER
-    side_can_supply = 0
+    side_can_supply = FALSE
     FOR i = side_first_army(side) TO side_last_army(side)
         IF army_may_get_supply(i) THEN
             IF army_supply_days(i) >= 1 THEN
-                side_can_supply = -1
+                side_can_supply = TRUE
                 EXIT FUNCTION
             END IF
         END IF

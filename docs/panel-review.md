@@ -3,7 +3,7 @@
 A review of branch `refactor_naming` at `846b079`, after phases 0 to 10 of
 [modernize-plan.md](modernize-plan.md). It asks where the biggest opportunities are and what is
 not worth doing. Nits are left out. Its findings that are done are in
-[archived/panel-review-completed.md](archived/panel-review-completed.md).
+[the archive](archived/devnotes-completed.md#done-panel-review-of-the-code-2026-11-14).
 
 **Verdict:** the code is in good shape, and the cleanup has reached diminishing returns. The
 biggest opportunities are now outside the refactor: shipping, and testing phase 11 against the

@@ -117,7 +117,7 @@ SUB draw_cities
             SELECT CASE city_fort(i)
                 CASE 1
                     DRAW "BR2C0e1D6BL1R2"
-                CASE MAX_FORT
+                CASE IS >= MAX_FORT
                     DRAW "C0e1R1F1D1G3R3"
             END SELECT
         ELSE
@@ -164,16 +164,16 @@ SUB draw_city_names
         FOR j = 1 TO LEN(city_name$(k))
             letter_x = city_x(k) + 6 * (j - 4) - 3
             letter = ASC(MID$(UCASE$(city_name$(k)), j, 1)) - 64
-            IF letter_x > 527 THEN
+            IF letter_x > MAP_RIGHT THEN
                 EXIT FOR
             END IF
             PSET (letter_x, city_y(k) + 12), 10
 
             IF city_port_type(k) < PORT_RIVER THEN
-                IF opt_alt_colors = 0 THEN
-                    DRAW "S4C0"
-                ELSE
+                IF opt_alt_colors > 0 THEN
                     DRAW "S4C7"
+                ELSE
+                    DRAW "S4C0"
                 END IF
             ELSE
                 DRAW "C10"
@@ -213,7 +213,7 @@ SUB draw_fleets
                 END IF
         END SELECT
         PSET (x, y), 1
-        CALL draw_ship_icon(side, ship_icon(LEFT$(fleet_ships$(side), 1)))
+        CALL draw_ship_icon(side, LEFT$(fleet_ships$(side), 1))
     NEXT side
 END SUB
 
@@ -224,7 +224,7 @@ SUB draw_stack_markers (side)
     DIM city AS INTEGER
     DIM x AS INTEGER
     FOR i = side_first_army(side) TO side_last_army(side)
-        IF army_size(i) > 0 AND city_army(army_city(i)) <> i THEN
+        IF army_exists(i) AND army_size(i) > 0 AND city_army(army_city(i)) <> i THEN
             city = army_city(i)
             x = city_x(city) - 12
             y = city_y(city) - 12
@@ -336,7 +336,7 @@ SUB draw_map
     DIM letter AS INTEGER
     DIM k AS INTEGER
     SCREEN 12
-    LINE (1, 16)-(527, 440), 10, B
+    LINE (1, 16)-(MAP_RIGHT, 440), 10, B
     PAINT (200, 200), 2, 10
     COLOR COLOR_LIGHT_GREEN
     '==========================  Mountains =================================

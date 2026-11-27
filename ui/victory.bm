@@ -135,7 +135,7 @@ SUB end_game (side, rule)
         CASE IS < VICTORY_CITIES
             reason$ = "TIME EXPIRED"
         CASE VICTORY_CITIES
-            reason$ = STR$(2.5 * victory_rule(VICTORY_CITIES)) + "% CITIES CONTROLLED"
+            reason$ = STR$(100 * victory_rule(VICTORY_CITIES) / MAX_CITIES) + "% CITIES CONTROLLED"
         CASE VICTORY_INCOME
             reason$ = STR$(victory_rule(VICTORY_INCOME)) + " % OF TOTAL INCOME"
         CASE VICTORY_CAPITAL

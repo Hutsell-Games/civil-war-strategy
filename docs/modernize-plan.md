@@ -2,7 +2,7 @@
 
 Started 2026-11-11; active plan updated 2026-11-14. Completed work, the original numbered
 decisions and phase table, and historical surveys are in
-[the archive](archived/modernize-plan-completed.md).
+[the archive](archived/devnotes-completed.md#done-modernizing-the-code-of-civil-war-strategy).
 
 ## Goal
 
@@ -18,7 +18,7 @@ Step 4's named inventory is complete below; it makes no decision about moving ru
 Step 5's [QB64 friction list](qb64-friction.md) is started with evidence from the work
 already done; keep it current through the remaining content moves.
 Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews are
-[complete](archived/structure-review-completed.md).
+[complete](archived/devnotes-completed.md#done-the-review-of-the-structure-of-the-games-code).
 
 ## Current decisions and working rules
 
@@ -54,7 +54,7 @@ decisions and phases".
 
 Phase 11, the one phase left, is marked for Fable: `DRAW` and `PAINT` depend on order; expect several
 tries. **When the next step is one marked Opus or Fable, stop and tell the user to switch model** before
-starting it. The table for every phase is in `archived\modernize-plan-completed.md`, "Which model did which phase".
+starting it. The table for every phase is in `archived\devnotes-completed.md`, "Which model did which phase".
 
 ## How a SUB is split
 
@@ -81,7 +81,7 @@ starting it. The table for every phase is in `archived\modernize-plan-completed.
 
 ## Lines that no test runs
 
-Phase 0 measured the coverage and added the scripts (`archived\modernize-plan-completed.md`, "Phase 0: coverage").
+Phase 0 measured the coverage and added the scripts (`archived\devnotes-completed.md`, "Phase 0: coverage").
 The coverage rule still holds for new changes:
 
 - Before the step, read `tests\out\coverage\report.txt` for the lines the step moves or rewrites.
@@ -115,7 +115,7 @@ first (`play.py coverage`).
 ## Phase 11: the war's own content
 
 Drafted 2026-11-12. Question 1 answered 2026-11-13: data files
-(`archived\modernize-plan-completed.md`). Questions 2 and 3 are still open.
+(`archived\devnotes-completed.md`). Questions 2 and 3 are still open.
 
 ### The test of this phase
 

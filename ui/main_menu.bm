@@ -4,7 +4,8 @@
 
 ' Shows the main menu and leaves the choice in menu_choice. start is the row it starts on, or
 ' 0 for Troops. An entry that cannot be chosen shows as "-". A start on a
-' "-" entry from Troops to Railroad moves a row down; a start on any other row stays.
+' "-" entry from Troops to Railroad moves a row down; a start on any other row stays. The move
+' changes start for the caller too, so main_menu_start (cws.bas) remembers the row it moved to.
 SUB menu_main (start)
     CALL draw_top_bar
     CALL turn_check_commands

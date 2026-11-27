@@ -42,10 +42,10 @@ END SUB
 ' Whether a row of the menu already holds the value. Gives -1 or 0, as a comparison does.
 FUNCTION menu_has_value (value)
     DIM i AS INTEGER
-    menu_has_value = 0
+    menu_has_value = FALSE
     FOR i = 1 TO menu_item_count
         IF menu_value(i) = value THEN
-            menu_has_value = -1
+            menu_has_value = TRUE
             EXIT FUNCTION
         END IF
     NEXT i

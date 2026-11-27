@@ -19,7 +19,7 @@ to `game\` changes its home but does not give it a private namespace. During the
 `fleet_at_sea`: it collides with `FLEET_AT_SEA` because names ignore case. The
 function is now `fleet_is_at_sea` in [rules/navy.bm](../rules/navy.bm).
 The failed name is recorded in the
-[completed structure review](archived/structure-review-completed.md), under
+[completed structure review](archived/devnotes-completed.md#done-the-review-of-the-structure-of-the-games-code), under
 "Item 2, the state predicates".
 
 **Cost and current answer.** Names need project-wide coordination. Subject
@@ -60,7 +60,7 @@ BASIC modules became one included program and why procedures and picture arrays
 had to be moved so tests could include them without the main loop.
 
 **Cost and current answer.** A file move must update both entry points. The
-[modernization archive](archived/modernize-plan-completed.md), phase 9 step 7,
+[modernization archive](archived/devnotes-completed.md#done-modernizing-the-code-of-civil-war-strategy), phase 9 step 7,
 records a preceding commit that renamed files without updating the includes;
 the next step repaired the build. Explicit include lists currently keep the
 application and test program assembled correctly.
@@ -93,10 +93,11 @@ alone would not model their full range.
 
 **Evidence.** [rules/battle.bm](../rules/battle.bm), `battle_fight`, returns
 `winner`, `loser` and `rounds` through parameters; `battle_strengths` fills two
-arrays. [rules/army.bm](../rules/army.bm), `army_generate_name`, changes both its
-army argument and its name result. `TestRomanChangesItsTarget` in the rule suite
-pins that mutation. Calls such as `menu_army_recruit((current_side))` in
-`cws.bas` use an expression to pass a copy of shared state.
+arrays. [rules/army.bm](../rules/army.bm), `army_generate_name`, changed both its
+army argument and its name result until 2026-11-27. It now works on a local copy,
+and `TestRomanLeavesItsTarget` in the rule suite checks that. Calls such as
+`menu_army_recruit((current_side))` in `cws.bas` use an expression to pass a copy
+of shared state.
 
 **Cost and current answer.** A reader must consult the procedure to learn which
 arguments change. Pure single-result procedures have become FUNCTIONs; commands
@@ -168,7 +169,7 @@ constant cannot be read from a file.
 
 **Evidence.** On 2026-11-14 four city numbers in `rules\setup.bm` and
 `ai\navy.bm` became constants in `cws.bi` (`VARY_REBEL_FLEET_CITY` and three
-more; [the completed structure review](archived/structure-review-completed.md)). A city's own column in
+more; [the completed structure review](archived/devnotes-completed.md#done-the-review-of-the-structure-of-the-games-code)). A city's own column in
 `CITIES.GRD` would have fitted better. But `load_cities`
 ([io/files.bm](../io/files.bm)) reads each line by position with `INPUT #`.
 A new field changes the layout of both scenarios' files and of any scenario a
@@ -184,7 +185,7 @@ language feature.
 ## Findings that do not justify modules or records
 
 - **Records already work.** Phase 10's
-  [record trials](archived/modernize-plan-completed.md) measured strings, field
+  [record trials](archived/devnotes-completed.md#done-modernizing-the-code-of-civil-war-strategy) measured strings, field
   arguments, copies, swaps and file input in both compilers. Records were
   reverted because longer field expressions bought little and whole-record
   copying would change which fields the game preserves. Shared arrays stay

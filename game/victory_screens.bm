@@ -72,6 +72,8 @@ SUB draw_rebel_victory
     DIM i AS INTEGER
     DIM x AS INTEGER
     DIM y AS INTEGER
+    SCREEN 12
+    CLS
     LINE (2, 2)-(637, 239), 4, BF
     COLOR COLOR_WHITE
     LINE (2, 40)-(597, 239)
@@ -158,23 +160,21 @@ SUB draw_rebel_victory
         LINE (x + 19 * i - 12, y + 7)-(x + 19 * i - 12 + 2, y + 40), 15, BF
     NEXT i
 
-    IF opt_sound < SOUND_MUSIC THEN
-        EXIT SUB
-    END IF
-    PLAY "MBMS T120"
-    PLAY "O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
-    PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8"
-    PLAY "L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b"
-    PLAY "O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4."
-    PLAY "L16 T150 g a b T120 O4 L8 c e d. c16 O3 a O4 c4 O3 a O4 d4."
-    PLAY "O3 a O4 d4. O3 T150 L16 g a b T120 L8 O4 c e d. c16"
-    PLAY "L8 O3 a b O4 c. O3 a16 g e O4 c. O3 e16 e d4 e c4. e d4. a"
-    PLAY "L8 g e O4 c. e16 d c4 O3 e c4. e d4. a g e O4 e4. c16 d c4"
+    CALL play_music("MBMS T120")
+    CALL play_music("O3 L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b")
+    CALL play_music("O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4 P8")
+    CALL play_music("L16 g e L8 c c L16 c d e f L8 g g g e a a a. L16 g a8. g a b")
+    CALL play_music("O4 L16 c d e4. c O3 g O4 c4. O3 g e g4. d e c4.")
+    CALL play_music("L16 T150 g a b T120 O4 L8 c e d. c16 O3 a O4 c4 O3 a O4 d4.")
+    CALL play_music("O3 a O4 d4. O3 T150 L16 g a b T120 L8 O4 c e d. c16")
+    CALL play_music("L8 O3 a b O4 c. O3 a16 g e O4 c. O3 e16 e d4 e c4. e d4. a")
+    CALL play_music("L8 g e O4 c. e16 d c4 O3 e c4. e d4. a g e O4 e4. c16 d c4")
 END SUB
 
 SUB draw_surrender (army)
     DIM side AS INTEGER
     DIM side_color AS INTEGER
+    DIM face_color AS INTEGER
     DIM panel_left AS INTEGER
     DIM x AS INTEGER
     DIM y AS INTEGER
@@ -335,16 +335,14 @@ SUB draw_surrender (army)
     LINE -(panel_left + 37, 250)
     LINE -(panel_left + 39, 246)
     LINE -(panel_left + 40, 243)
-    side_color = 0
+    face_color = 0
     IF side = SIDE_REBEL THEN
-        side_color = 15
-        LINE (547, 263)-(558, 263), 15
+        face_color = 15
+        LINE (panel_left + 33, 263)-(panel_left + 44, 263), 15
     END IF
-    PAINT (panel_left + 33, 250), side_color, 0
-    PAINT (panel_left + 42, 264), side_color, 0
+    PAINT (panel_left + 33, 250), face_color, 0
+    PAINT (panel_left + 42, 264), face_color, 0
 
     CALL draw_large_flag(other_side(side), 26, 0)
-    IF army < 99 THEN
-        CALL wait_seconds(opt_pause!)
-    END IF
+    CALL wait_seconds(opt_pause!)
 END SUB

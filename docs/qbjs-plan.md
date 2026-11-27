@@ -1,7 +1,7 @@
 # Plan: run Civil War Strategy in a browser with QBJS
 
 Written 2026-11-16. What is done (steps 0 to 12 and the progress record) is in
-[archived/qbjs-plan-completed.md](archived/qbjs-plan-completed.md). The work list
+[the archive](archived/devnotes-completed.md#done-the-plan-to-run-civil-war-strategy-in-a-browser-with-qbjs). The work list
 that was `qbjs-steps.md` was merged into this file on 2026-11-17.
 
 ## Goal

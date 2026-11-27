@@ -2,19 +2,12 @@
 ' fleet putting to sea, and a ship sunk.
 
 SUB draw_fleet_ship (side, ship)
-    CALL draw_ship_icon(side, ship_icon(MID$(fleet_ships$(side), ship, 1)))
+    CALL draw_ship_icon(side, MID$(fleet_ships$(side), ship, 1))
 END SUB
 
-' The ship_type of draw_ship_icon for a ship of kind ship$: 1 wooden, 2 ironclad.
-FUNCTION ship_icon (ship$)
-    ship_icon = 1
-    IF ship$ = SHIP_IRONCLAD$ THEN
-        ship_icon = 2
-    END IF
-END FUNCTION
-
-' Draws a wooden ship or ironclad near the current graphics position, flying the side's flag.
-SUB draw_ship_icon (side, ship_type)
+' Draws a ship of kind ship$ near the current graphics position, flying the side's flag: an
+' ironclad for SHIP_IRONCLAD$, and a wooden ship for any other letter, or none.
+SUB draw_ship_icon (side, ship$)
     DIM x AS INTEGER
     DIM y AS INTEGER
     x = POINT(0) - 10
@@ -22,8 +15,18 @@ SUB draw_ship_icon (side, ship_type)
     CIRCLE (x, y), 18, 9, , , .4
     PAINT (x + 3, y + 4), 9, 9
     CIRCLE (x, y), 18, 10, , , .4
-    SELECT CASE ship_type
-        CASE 1 'wooden ship
+    SELECT CASE ship$
+        CASE SHIP_IRONCLAD$
+            DRAW "BL15BD4E1"
+            DRAW "C0R30H1L2C8L24E1R1"
+            DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1"
+            DRAW "C0R2BR3C0R2BR3C0R2"
+            DRAW "BU3BL10D1"
+            DRAW "C0U4R1D4BR9"
+            PSET (x + 8, y - 1)
+            CALL draw_ship_jack(side)
+
+        CASE ELSE ' a wooden ship
             DRAW "BF5R5D1C4L20C0H1R22E1L9"
             DRAW "BL6"
             DRAW "C0L10H1L1H2"
@@ -35,26 +38,15 @@ SUB draw_ship_icon (side, ship_type)
             DRAW "C0R10BL12"
             PSET (x + 8, y - 1)
             CALL draw_ship_jack(side)
-
-        CASE 2 'ironclad
-            DRAW "BL15BD4E1"
-            DRAW "C0R30H1L2C8L24E1R1"
-            DRAW "C8E1R18F1L19BR4C6C5C4C3C2C1"
-            DRAW "C0R2BR3C0R2BR3C0R2"
-            DRAW "BU3BL10D1"
-            DRAW "C0U4R1D4BR9"
-            PSET (x + 8, y - 1)
-            CALL draw_ship_jack(side)
-        CASE ELSE
     END SELECT
 END SUB
 
 ' The side's flag on a ship's icon, drawn from the last point.
 SUB draw_ship_jack (side)
     SELECT CASE side
-        CASE 1
+        CASE SIDE_UNION
             DRAW "C4R7BU1C7L6BU1C1R3C4R3BU1C7L2BL1C1L3"
-        CASE 2
+        CASE SIDE_REBEL
             DRAW "C4R4U1L4U1R4U1L4C3F4BU4C3G4BD2BR2BU1"
     END SELECT
 END SUB
@@ -515,17 +507,15 @@ END SUB
 ' lead ship. Then a pause.
 SUB draw_fleet_sailing (side)
     DIM i AS INTEGER
-    DIM lead_ship AS INTEGER
     FOR i = 1 TO fleet_size(side)
         PSET (120 + 41 * i, 210), 0
         CALL draw_fleet_ship(side, i)
     NEXT i
     IF opt_graphics >= GRAPHICS_FULL THEN
-        lead_ship = ASC(LEFT$(fleet_ships$(side), 1))
-        SELECT CASE lead_ship
-            CASE 73
+        SELECT CASE LEFT$(fleet_ships$(side), 1)
+            CASE SHIP_IRONCLAD$
                 CALL draw_ironclad
-            CASE 87
+            CASE SHIP_WOODEN$
                 CALL draw_schooner
         END SELECT
         CALL wait_seconds(2 * opt_pause!)

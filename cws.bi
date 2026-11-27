@@ -18,6 +18,9 @@ CONST MAX_ROADS = 6
 CONST MAX_FLEET_SHIPS = 10
 CONST MAX_FORT = 2
 CONST MAX_SUPPLY = 10
+' The cash that a day of supplies for 100 troops costs (army_buy_supply and army_supply_days,
+' rules/army.bm).
+CONST SUPPLY_PRICE = .1#
 CONST MAX_EXPERIENCE = 10
 CONST MAX_LEADER_RATING = 9
 CONST MAX_CASH = 19999
@@ -263,6 +266,8 @@ CONST KEY_F7$ = "A"
 CONST PAUSE_LONG = 9
 ' The column of the right panel, where most menus go.
 CONST PANEL_COL = 67
+' The map's right edge in pixels. The right panel starts after it.
+CONST MAP_RIGHT = 527
 ' The train's outline for DRAW. Each picture adds its own color, scale and last strokes.
 CONST TRAIN_OUTLINE$ = "R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3"
 ' The sizes of the GET buffers. saved_under_army() holds the 19-by-14 area under a city's flag

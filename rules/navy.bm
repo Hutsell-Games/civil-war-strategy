@@ -73,7 +73,7 @@ END SUB
 ' and its fleet is not at sea. A fleet in port must lie off a sea port of its own. -1 or 0, as
 ' a comparison gives.
 FUNCTION navy_can_build (side)
-    navy_can_build = 0
+    navy_can_build = FALSE
     IF fleet_is_at_sea(side) OR side_cash(side) < cost_ship OR fleet_size(side) >= MAX_FLEET_SHIPS THEN
         EXIT FUNCTION
     END IF
@@ -82,7 +82,7 @@ FUNCTION navy_can_build (side)
             EXIT FUNCTION
         END IF
     END IF
-    navy_can_build = -1
+    navy_can_build = TRUE
 END FUNCTION
 
 ' Whether the side's fleet can bombard: it lies off a city of the other side.
@@ -101,7 +101,7 @@ END FUNCTION
 ' Whether the side's fleet can land an army: two ships or more, in port off a neutral city.
 ' The Rebels can only without the Realism setting. -1 or 0, as a comparison gives.
 FUNCTION navy_can_invade (side)
-    navy_can_invade = 0
+    navy_can_invade = FALSE
     IF fleet_is_at_sea(side) OR fleet_size(side) < invade_ships_least THEN
         EXIT FUNCTION
     END IF
@@ -109,7 +109,7 @@ FUNCTION navy_can_invade (side)
         EXIT FUNCTION
     END IF
     IF side = SIDE_UNION OR (side = SIDE_REBEL AND opt_realism = REALISM_OFF) THEN
-        navy_can_invade = -1
+        navy_can_invade = TRUE
     END IF
 END FUNCTION
 
@@ -346,10 +346,10 @@ END SUB
 ' port: the fleet kept its ships, was never drawn and counted as no fleet (G44).
 FUNCTION navy_has_retreat_port (side)
     DIM i AS INTEGER
-    navy_has_retreat_port = 0
+    navy_has_retreat_port = FALSE
     FOR i = 1 TO MAX_CITIES
         IF navy_is_retreat_port(side, i) THEN
-            navy_has_retreat_port = -1
+            navy_has_retreat_port = TRUE
             EXIT FUNCTION
         END IF
     NEXT i

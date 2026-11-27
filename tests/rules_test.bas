@@ -46,7 +46,7 @@ END SUB
 
 ' -------------------------------------------------------------------- roman
 ' The name of a general the game makes up: the side and the army's number
-' in Roman numerals. It changes target, which the caller gives as a copy.
+' in Roman numerals. It leaves the army's number as it was.
 
 SUB TestRomanNamesUnionArmies
     t = 1: CALL army_generate_name(t, a$): AssertEqualStr "Union I", a$, "1"
@@ -66,9 +66,9 @@ SUB TestRomanNamesRebelArmiesFromOne
     t = 40: CALL army_generate_name(t, a$): AssertEqualStr "Rebel XX", a$, "40"
 END SUB
 
-SUB TestRomanChangesItsTarget
+SUB TestRomanLeavesItsTarget
     t = 36: CALL army_generate_name(t, a$)
-    AssertEqualInt 6, t, "36 comes back as 6"
+    AssertEqualInt 36, t, "36 comes back as 36"
 END SUB
 
 ' ------------------------------------------------------------------- occupy
@@ -1360,14 +1360,12 @@ SUB TestNavyCanBuildAttackRaid
     AssertTrue NOT navy_can_raid(1), "not without ships"
 END SUB
 
-' A ship's letter in fleet_ships$, its price and its picture.
+' A ship's letter in fleet_ships$, and its price.
 SUB TestShipKinds
     AssertEqualStr "W", SHIP_WOODEN$, "the letter of a wooden ship"
     AssertEqualStr "I", SHIP_IRONCLAD$, "the letter of an ironclad"
     AssertEqualInt cost_ship, ship_cost(SHIP_WOODEN$), "a wooden ship"
     AssertEqualInt 2 * cost_ship, ship_cost(SHIP_IRONCLAD$), "an ironclad costs two"
-    AssertEqualInt 1, ship_icon(SHIP_WOODEN$), "the wooden ship's picture"
-    AssertEqualInt 2, ship_icon(SHIP_IRONCLAD$), "the ironclad's picture"
 END SUB
 
 SUB TestNavyFleetDefeated

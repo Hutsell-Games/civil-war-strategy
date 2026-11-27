@@ -1,16 +1,20 @@
 ' The Inform menu's reports (menu_report), the Victory Conditions menu of Utility, and Chk
 ' Links (check_map_links).
 
-' Lets the player turn individual victory conditions on or off, then redraws the map.
+' Lets the player turn individual victory conditions on or off, then redraws the map. Rows 1 to 5
+' are the rules VICTORY_YEAR to VICTORY_FORCE_RATIO, whose numbers are 2 to 6: a row is its rule
+' less 1.
 SUB menu_victory_conditions
+    DIM time_text$
     DIM cities_text$
     DIM income_text$
+    DIM ratio_text$
     DIM i AS INTEGER
     DIM start_option AS INTEGER
-    cities_text$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 2.5) + "% Cities"
+    cities_text$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 100 / MAX_CITIES) + "% Cities"
     income_text$ = STR$(ABS(victory_rule(VICTORY_INCOME))) + "% Total Income"
-    menu_text$(8) = "Time: " + month_name$(victory_rule(VICTORY_MONTH)) + STR$(ABS(victory_rule(VICTORY_YEAR)))
-    menu_text$(9) = RTRIM$(STR$(ABS(victory_rule(VICTORY_FORCE_RATIO)))) + ":1 Force Ratio"
+    time_text$ = "Time: " + month_name$(victory_rule(VICTORY_MONTH)) + STR$(ABS(victory_rule(VICTORY_YEAR)))
+    ratio_text$ = RTRIM$(STR$(ABS(victory_rule(VICTORY_FORCE_RATIO)))) + ":1 Force Ratio"
     COLOR COLOR_WHITE
     LOCATE 1, 1
     PRINT "Press ENTER to toggle ending conditions";
@@ -25,11 +29,11 @@ SUB menu_victory_conditions
             END IF
         NEXT i
         menu_text$(0) = "Victory Conditions"
-        menu_text$(1) = menu_text$(1) + menu_text$(8)
+        menu_text$(1) = menu_text$(1) + time_text$
         menu_text$(2) = menu_text$(2) + cities_text$
         menu_text$(3) = menu_text$(3) + income_text$
         menu_text$(4) = menu_text$(4) + "Capital Captured"
-        menu_text$(5) = menu_text$(5) + menu_text$(9)
+        menu_text$(5) = menu_text$(5) + ratio_text$
         menu_text$(6) = "DONE"
         menu_box_type = BOX_DOUBLE
         menu_color = COLOR_CYAN
@@ -119,9 +123,9 @@ SUB report_armies (side)
     PRINT
     CALL draw_flag_icon(215, 8, side)
     COLOR side_color
-    PRINT side_city_count(side); "/ 40"; TAB(15); "CITIES CONTROLLED"; TAB(40);
+    PRINT side_city_count(side); "/"; MAX_CITIES; TAB(15); "CITIES CONTROLLED"; TAB(40);
     PRINT "(";
-    percent = INT(side_city_count(side) * 2.5 + .5)
+    percent = INT(side_city_count(side) * 100 / MAX_CITIES + .5)
     PRINT percent; "%)";
     PRINT TAB(50);
     COLOR COLOR_LIGHT_RED

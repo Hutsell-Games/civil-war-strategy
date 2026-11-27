@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Rename SUBs and FUNCTIONs from the "Settled names" table of docs/archived/sub-names.md.
+"""Rename SUBs and FUNCTIONs from the "Settled names" table of "SUB and FUNCTION names" in
+docs/archived/devnotes-completed.md.
 
 Works on tokens, so strings and comments are left alone. Case is ignored, as in BASIC.
 
@@ -19,7 +20,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TABLE = ROOT / "docs" / "archived" / "sub-names.md"
+TABLE = ROOT / "docs" / "archived" / "devnotes-completed.md"
+SECTION = "## SUB and FUNCTION names"
 FILES = ["CWSTRAT.BAS", "CWSTRAT1.BM", "CWSTRAT2.BM", "CWSMENU.BM", "CWS14.BI",
          "QB64.BM", "SCRIPT.BM", "FOLDERS.BI", "tests/rules_test.bas"]
 FUNCTIONS = {"dir$", "scriptdate$", "scripttick%"}
@@ -28,7 +30,8 @@ TOKEN = re.compile(r'"[^"]*"|\'.*$|[A-Za-z_][A-Za-z0-9_]*[$%&!#]?|\s+|.', re.S)
 
 
 def load_table():
-    text = TABLE.read_text(encoding="utf-8").split("## Settled names", 1)[1]
+    text = TABLE.read_text(encoding="utf-8").split("\n" + SECTION + "\n", 1)[1]
+    text = re.split(r"\n## ", text, maxsplit=1)[0].split("## Settled names", 1)[1]
     table = {}
     for line in text.splitlines():
         m = re.match(r"\| `([^`]+)` \| `([^`]+)`", line)

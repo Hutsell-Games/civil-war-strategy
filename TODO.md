@@ -52,7 +52,7 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   a simulation of the roll, 2026-11-14). The manual (`docs\CWS.DOC`, section 7.3) calls the odds "A GUIDE
   ONLY", calculated "separately" from the combat, so this is as designed. Showing the true chance changes the
   screen of every battle, not the battles, and the manual's sentence would need rewording.
-- **Records for the armies.** Phase 10 closed with no records (`docs\archived\modernize-plan-completed.md`, "Phase 10:
+- **Records for the armies.** Phase 10 closed with no records (`docs\archived\devnotes-completed.md`, "Phase 10:
   records"). Join copies some of an army's fields and four places clear a slot, each clearing different fields.
   If those clears and copies were made the same, an `armies(i)` record with one copy and one clear would be
   simpler code, not only a new spelling. Making them the same changes how the game plays.
@@ -106,12 +106,12 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 - **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 71 and 75). That is a random
   size, not the fleet limit, so it stays 10 rather than `MAX_FLEET_SHIPS`.
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** Its tests read `fleet_exists(side)`
-  since 2026-11-13 (`docs\archived\structure-review-completed.md`, item 2); 7 assignments of 0 are left.
-  `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
+  since 2026-11-13 (`docs\archived\devnotes-completed.md`, the structure review, item 2); 7 assignments
+  of 0 are left. The constants table there ("Constants") has no row for it; a `FLEET_NONE` would be a new name to agree.
 - **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 279). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
 - **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
-  `docs\archived\constants.md`, section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
+  `docs\archived\devnotes-completed.md`, "Constants", section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
   since 2026-11-13.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
   (`io\files.bm` line 58) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 20), which

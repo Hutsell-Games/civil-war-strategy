@@ -357,9 +357,10 @@ END SUB
 ' Whether one of the nine save slots, cws1.sav to cws9.sav, holds a saved game.
 FUNCTION any_saved_game
     DIM k AS INTEGER
+    any_saved_game = FALSE
     FOR k = 1 TO 9
         IF _FILEEXISTS(save_file_name$(k)) THEN
-            any_saved_game = -1
+            any_saved_game = TRUE
             EXIT FUNCTION
         END IF
     NEXT k

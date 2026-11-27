@@ -4,7 +4,7 @@ The port starts from `canonical-source`, the BASIC PDS 7.1 source as W.R. Hutsel
 source as little as possible so that the game builds with QB64Rust and with QB64pe, and so that its SUBs can be
 tested. Since 2026-11-11 the code has been modernized: formatted, renamed and split by topic
 ([modernize-plan.md](modernize-plan.md)). The plan of the port was `docs\port-study.md` (QB64Rust's study 46 until 2026-11-06), now
-`docs\archived\port-study-completed.md`. It follows the ports of World War 2
+a section of `docs\archived\devnotes-completed.md`. It follows the ports of World War 2
 (`Hutsell-Games/world-war-2`) and Civil War Battleset (`Hutsell-Games/civil-war-battleset`), both on a branch
 `qb64rust`, and the principles in QB64Rust's `docs\PORTING-PDS.md`, section 0.
 
@@ -94,7 +94,7 @@ from a label.
    `ALTMAP.BAT`. Nine lines name a folder now. `CWS.CFG`, `HISCORE.CWS`, the saved games and the history files
    stay beside the program. Since 2026-11-13 each map has a folder of `scenarios\`, `standard\` and `alternate\`,
    and `ALTMAP.BAT` is removed: the player picks the map after Start NEW Game, and a saved game names its
-   map in its first line (`docs\archived\scenario-plan.md`).
+   map in its first line (`docs\archived\devnotes-completed.md`, "Plan: scenarios in folders").
 10. **The test hooks**: `SCRIPT.BM`, included at the end of `CWSTRAT.BAS`, and calls to it in the sources. When
     the environment variable `CWS_SEED` is not set, the program behaves as before. Each changed line is listed
     in "The test hooks", below.
@@ -128,7 +128,7 @@ The lines changed for them:
 The menu's loop reads keys as before. Its label stays, so the wait is announced again after a key the menu
 ignores.
 
-Choices made here (`docs\archived\port-study-completed.md`, section 4):
+Choices made here (`docs\archived\devnotes-completed.md`, the port study, section 4):
 
 - **`TICK` of 99 seconds or more waits for a key** under a script, as in Civil War Battleset. The game uses
   `TICK 99` twice as "read this, then press a key": after Chk Links, and at "There are still defenders".
@@ -220,6 +220,7 @@ is not a new source review or test run.
 | U38 | The color of the month's "is blockaded" message | `CWSTRAT.BAS` sets `COLOR 13` after the "is blockaded" `PRINT` and before "is out of supplies". So a month's first blockade message showed in whatever color was set last, and the later ones in light magenta. | The color is set before either message, so every blockade message is light magenta, as the supply messages are. Found in the review of `ui/turn.bm` on 2026-11-25 and fixed at the user's request, 2026-11-27. [ui/turn.bm](../ui/turn.bm), `turn_date_and_supply`. **Uncommitted** (2026-11-27). The color is not tested. |
 | U39 | The armies Army Drill and Detach offer | `CWSTRAT.BAS:478` (Drill) and Detach pick the army with `movefrom`, which lists every army without an order. Drill listed an army at experience 6, or at its leader's rating, and picking it printed "Army has reached maximum improvement through drilling" (line 480). Detach listed an army smaller than the least it detaches from (65, now the knob `min_detach_size`), and picking it printed "Too small to detach". The Commands menu always showed "Army Drill". | Drill lists only the armies that drill can still improve (`army_can_drill`), and Detach only those of `min_detach_size` troops or more (`army_can_detach`). The Commands menu shows Army Drill as "-" when no army with no order can drill (`side_can_drill`), as it does for Supply. Enter on that "-" says "No armies remain eligible for drills in" the month, as Drill did before when no army was free. Esc in Drill's lists now says nothing; the original (line 479) said "No armies remain eligible" then too. Detach with no army to offer says "No armies remain eligible to detach in" the month. Before, when no army was free, it went back to the main menu with no message. Asked for by the user, 2026-11-27. [ui/army.bm](../ui/army.bm), `menu_army_select`, `menu_army_offered`; [rules/army.bm](../rules/army.bm), `side_can_drill`, `army_can_detach`; [ui/orders.bm](../ui/orders.bm), `menu_commands`. **Uncommitted** (2026-11-27). `TestArmyCanDrillAndDetach`, `TestSideCanDrill`. `refusals-rebel` recorded again: Detach lists only Front Royal and is given up with Esc. Drill lists only Front Royal, after which Army Drill is "-". The last Detach says "No armies remain eligible to detach in May". The other 42 scripts did not change. |
 | U40 | A city with several armies in the army picker | `movefrom` (`CWSTRAT.BAS:1478`), used by Moves, Railroad, Detach and Army Drill, adds a row for each army with no order. A city with two armies shows twice, and `refusals`' Railroad list showed Springfield on 11 rows. | The city gets one row (`menu_has_value`), as in Fortify (U22). Its armies are still offered in the Which list. Found in the review of U39 and fixed at the user's request, 2026-11-27. [ui/army.bm](../ui/army.bm), `menu_army_select`. **Uncommitted** (2026-11-27). `refusals` recorded again: its Railroad From list has 8 rows in place of 20. The other 42 scripts did not change. |
+| U41 | What shows below the Rebels' victory picture | `rwin` (`CWSTRAT2.BAS:1038`) draws over the screen as it is, while `capitol`, the Union's picture, starts with `SCREEN 12` and `CLS` (line 141). The game's end shows the map, then the battle summary, then the picture, which ends at y 440. So below it stayed the summary's "press a key" in its black band, and the map's red at the bottom right (seen by the user, 2026-11-27). | `draw_rebel_victory` starts with `SCREEN 12` and `CLS`, as `draw_union_victory` does. Found in the code smells review (item 24) and fixed at the user's request, 2026-11-27. [game/victory_screens.bm](../game/victory_screens.bm), `draw_rebel_victory`. **Uncommitted** (2026-11-27). No script takes a checkpoint at a Rebel victory, so all 43 passed unchanged; the screen was seen only by the user. |
 
 ### DOS presentation, runtime and external files
 

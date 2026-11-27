@@ -206,7 +206,7 @@ FUNCTION ai_stay_weight (enemy_strength)
 END FUNCTION
 
 ' The army's urge to move: a hundredth of its size less the armies of either side in the
-' cities next to it, plus 20 for each level of the computer's aggression.
+' cities next to it, plus ai_aggression_strength for each level of the computer's aggression.
 FUNCTION ai_move_strength (army)
     DIM strength AS INTEGER
     DIM j AS INTEGER
@@ -297,9 +297,9 @@ END FUNCTION
 
 ' What the cities one road beyond to_city add to its score: their worth and forts when the
 ' enemy or no side holds them, and 2 less for each of the enemy's when the army is smaller than
-' the one in to_city (occupant), and 50 for the enemy's capital. The original compared a city's
-' owner with the capital's number, so its 50 went to no city while the enemy held its capital
-' (docs/rule-changes.md, G27).
+' the one in to_city (occupant), and ai_capital_road_bonus for the enemy's capital. The original
+' compared a city's owner with the capital's number, so its 50 went to no city while the enemy
+' held its capital (docs/rule-changes.md, G27).
 FUNCTION ai_beyond_score (army, occupant, to_city, enemy_side)
     DIM k AS INTEGER
     DIM far_city AS INTEGER
