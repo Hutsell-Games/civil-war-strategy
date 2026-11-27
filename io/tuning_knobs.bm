@@ -54,6 +54,11 @@ SUB tuning_defaults
     veteran_experience = 8
     small_army_strength# = .5
     no_supply_strength# = .5
+    badly_outnumbered_ratio# = .2
+    outnumbered_ratio# = .5
+    attack_outnumbering_ratio# = 3.0
+    defend_outnumbering_ratio# = 1.5
+    overwhelming_ratio# = 10.0
     attack_outnumbered_penalty = 2
     attack_outnumbering_bonus = 2
     defend_outnumbering_bonus = 2
@@ -124,6 +129,9 @@ SUB tuning_defaults
     ai_stay_weight_strongest = 5
     ai_aggression_strength = 20
     ai_small_army_penalty = 300
+    ai_cautious_aggression = 3
+    ai_cautious_army_size = 40
+    ai_cautious_odds# = .8
     ai_poor_odds_penalty = 200
     ai_realism_penalty = 15
     ai_no_supply_penalty = 100
@@ -400,6 +408,31 @@ SUB tuning_set (key$, value#, why$)
             why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 no_supply_strength# = value#
+            END IF
+        CASE "badly_outnumbered_ratio"
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
+            IF why$ = "" THEN
+                badly_outnumbered_ratio# = value#
+            END IF
+        CASE "outnumbered_ratio"
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
+            IF why$ = "" THEN
+                outnumbered_ratio# = value#
+            END IF
+        CASE "attack_outnumbering_ratio"
+            why$ = tuning_check$(key$, value#, 1, 1000, FALSE)
+            IF why$ = "" THEN
+                attack_outnumbering_ratio# = value#
+            END IF
+        CASE "defend_outnumbering_ratio"
+            why$ = tuning_check$(key$, value#, 1, 1000, FALSE)
+            IF why$ = "" THEN
+                defend_outnumbering_ratio# = value#
+            END IF
+        CASE "overwhelming_ratio"
+            why$ = tuning_check$(key$, value#, 1, 1000, FALSE)
+            IF why$ = "" THEN
+                overwhelming_ratio# = value#
             END IF
         CASE "attack_outnumbered_penalty"
             why$ = tuning_check$(key$, value#, 0, 50, TRUE)
@@ -751,6 +784,21 @@ SUB tuning_set (key$, value#, why$)
             IF why$ = "" THEN
                 ai_small_army_penalty = value#
             END IF
+        CASE "ai_cautious_aggression"
+            why$ = tuning_check$(key$, value#, 0, 6, TRUE)
+            IF why$ = "" THEN
+                ai_cautious_aggression = value#
+            END IF
+        CASE "ai_cautious_army_size"
+            why$ = tuning_check$(key$, value#, 0, 16000, TRUE)
+            IF why$ = "" THEN
+                ai_cautious_army_size = value#
+            END IF
+        CASE "ai_cautious_odds"
+            why$ = tuning_check$(key$, value#, 0, 100, FALSE)
+            IF why$ = "" THEN
+                ai_cautious_odds# = value#
+            END IF
         CASE "ai_poor_odds_penalty"
             why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
@@ -880,6 +928,11 @@ FUNCTION tuning_changes$
     list$ = list$ + tuning_note$("veteran_experience", (veteran_experience), 8)
     list$ = list$ + tuning_note$("small_army_strength", (small_army_strength#), .5)
     list$ = list$ + tuning_note$("no_supply_strength", (no_supply_strength#), .5)
+    list$ = list$ + tuning_note$("badly_outnumbered_ratio", (badly_outnumbered_ratio#), .2)
+    list$ = list$ + tuning_note$("outnumbered_ratio", (outnumbered_ratio#), .5)
+    list$ = list$ + tuning_note$("attack_outnumbering_ratio", (attack_outnumbering_ratio#), 3.0)
+    list$ = list$ + tuning_note$("defend_outnumbering_ratio", (defend_outnumbering_ratio#), 1.5)
+    list$ = list$ + tuning_note$("overwhelming_ratio", (overwhelming_ratio#), 10.0)
     list$ = list$ + tuning_note$("attack_outnumbered_penalty", (attack_outnumbered_penalty), 2)
     list$ = list$ + tuning_note$("attack_outnumbering_bonus", (attack_outnumbering_bonus), 2)
     list$ = list$ + tuning_note$("defend_outnumbering_bonus", (defend_outnumbering_bonus), 2)
@@ -950,6 +1003,9 @@ FUNCTION tuning_changes$
     list$ = list$ + tuning_note$("ai_stay_weight_strongest", (ai_stay_weight_strongest), 5)
     list$ = list$ + tuning_note$("ai_aggression_strength", (ai_aggression_strength), 20)
     list$ = list$ + tuning_note$("ai_small_army_penalty", (ai_small_army_penalty), 300)
+    list$ = list$ + tuning_note$("ai_cautious_aggression", (ai_cautious_aggression), 3)
+    list$ = list$ + tuning_note$("ai_cautious_army_size", (ai_cautious_army_size), 40)
+    list$ = list$ + tuning_note$("ai_cautious_odds", (ai_cautious_odds#), .8)
     list$ = list$ + tuning_note$("ai_poor_odds_penalty", (ai_poor_odds_penalty), 200)
     list$ = list$ + tuning_note$("ai_realism_penalty", (ai_realism_penalty), 15)
     list$ = list$ + tuning_note$("ai_no_supply_penalty", (ai_no_supply_penalty), 100)
@@ -984,6 +1040,18 @@ FUNCTION tuning_relations$
     END IF
     IF NOT (small_army_size < max_army_size) THEN
         tuning_relations$ = "small_army_size must be below max_army_size"
+        EXIT FUNCTION
+    END IF
+    IF NOT (badly_outnumbered_ratio# < outnumbered_ratio#) THEN
+        tuning_relations$ = "badly_outnumbered_ratio must be below outnumbered_ratio"
+        EXIT FUNCTION
+    END IF
+    IF NOT (attack_outnumbering_ratio# < overwhelming_ratio#) THEN
+        tuning_relations$ = "attack_outnumbering_ratio must be below overwhelming_ratio"
+        EXIT FUNCTION
+    END IF
+    IF NOT (defend_outnumbering_ratio# < overwhelming_ratio#) THEN
+        tuning_relations$ = "defend_outnumbering_ratio must be below overwhelming_ratio"
         EXIT FUNCTION
     END IF
     IF NOT (min_detach_size <= max_army_size) THEN

@@ -39,7 +39,8 @@ The window opens at 1280 by 960, when the desktop has room for it
 The game no longer has F1 help. The quick help is
 [docs/CWSDOC.TXT](docs/CWSDOC.TXT), and the full manual is [docs/CWS.DOC](docs/CWS.DOC).
 
-The tests are described in [tests/README.md](tests/README.md). Work still to do is in [TODO.md](TODO.md).
+The tests are described in [tests/README.md](tests/README.md). Work still to do is in [TODO.md](TODO.md), and
+ideas for later in [docs/SOMEDAY.md](docs/SOMEDAY.md).
 
 The original documentation of the game is in `docs`: the manual `CWS.DOC`. The DOS game's release notes (its `README.1ST`) are in [CHANGELOG.md](CHANGELOG.md).
 The notes on the port are in [docs/devnotes.md](docs/devnotes.md).

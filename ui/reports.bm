@@ -215,12 +215,13 @@ SUB report_cities
     COLOR COLOR_WHITE
     PRINT " #    City       Control   Value"; TAB(41); " #    City       Control   Value"
     LINE (1, 30)-(630, 30), 15
-    FOR i = 1 TO 20
+    ' Two columns, each with half the cities.
+    FOR i = 1 TO MAX_CITIES \ 2
         CALL report_city_line(i, 2 + i, 1)
     NEXT i
 
-    FOR i = 21 TO 40
-        CALL report_city_line(i, i - 18, 41)
+    FOR i = MAX_CITIES \ 2 + 1 TO MAX_CITIES
+        CALL report_city_line(i, 2 + i - MAX_CITIES \ 2, 41)
     NEXT i
     LINE (1, 360)-(630, 360), 15
     COLOR COLOR_LIGHT_BLUE

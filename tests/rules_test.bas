@@ -366,6 +366,68 @@ SUB TestBattleCountsAnEmptyArmyAsOne
     AssertEqualInt 20, defend_steps(4), "50 to 1: the cap"
 END SUB
 
+' Each ratio of an attacker's troops to the defender's, exactly at its knob's default, and then
+' with the knob moved past it. A leader of 9 adds 2.7 when it counts.
+SUB TestBattleAttackRatiosAtTheirKnobs
+    DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
+    rule_strength_cap = 20: current_side = 1: opt_difficulty = 3
+    army_supply(1) = 5: army_supply(21) = 5: army_size(21) = 100
+    army_size(1) = 20: army_leader_rating(1) = 9
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 0, attack_steps(2), "20 against 100, a fifth: the leader does not count"
+    badly_outnumbered_ratio# = .1
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 3, attack_steps(2), "badly_outnumbered_ratio .1: it does"
+    CALL tuning_defaults
+    army_size(1) = 50
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 1, attack_steps(4), "50 against 100, a half: 3, 2 less"
+    outnumbered_ratio# = .4
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 3, attack_steps(4), "outnumbered_ratio .4: no less"
+    CALL tuning_defaults
+    army_size(1) = 300: army_leader_rating(1) = 0
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 3, attack_steps(4), "300 against 100, 3 times: no more"
+    attack_outnumbering_ratio# = 2.5
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 5, attack_steps(4), "attack_outnumbering_ratio 2.5: 2 more"
+    CALL tuning_defaults
+    army_size(1) = 1000
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 12, attack_steps(4), "1000 against 100, 10 times: 10 and 2 more, below the cap"
+    overwhelming_ratio# = 9.5
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 20, attack_steps(4), "overwhelming_ratio 9.5: the cap"
+END SUB
+
+' The same for a defender's troops to the attacker's.
+SUB TestBattleDefendRatiosAtTheirKnobs
+    DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
+    rule_strength_cap = 20: current_side = 1: opt_difficulty = 3
+    army_supply(1) = 5: army_supply(21) = 5: army_size(1) = 100
+    army_size(21) = 20: army_leader_rating(21) = 9
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 1, defend_steps(2), "20 against 100, a fifth: .013 * 20 + 1, the leader does not count"
+    badly_outnumbered_ratio# = .1
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 4, defend_steps(2), "badly_outnumbered_ratio .1: it does"
+    CALL tuning_defaults
+    army_size(21) = 50
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 5, defend_steps(4), "50 against 100, a half: 2 and the leader's 2.7, kept whole"
+    outnumbered_ratio# = .6
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 4, defend_steps(4), "outnumbered_ratio .6: eight tenths"
+    CALL tuning_defaults
+    army_size(21) = 150: army_leader_rating(21) = 0
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 3, defend_steps(4), "150 against 100, 1.5 times: .013 * 150 + 1, no more"
+    defend_outnumbering_ratio# = 1.4
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    AssertEqualInt 5, defend_steps(4), "defend_outnumbering_ratio 1.4: 2 more"
+END SUB
+
 ' A defender with less than a fifth of the attacker's troops has half its strength; with less
 ' than half, eight tenths.
 SUB TestBattleOutnumberedDefender
@@ -1403,6 +1465,25 @@ SUB TestAiAttackScoreCountsAFortOfTwo
     AssertEqualInt 95, ai_attack_score(21, 1, 6, 100), "a fort of 2: odds 2/3, 5 less"
     city_fort(6) = 1
     AssertEqualInt 110, ai_attack_score(21, 1, 6, 100), "a fort of 1: odds 1, 10 more"
+END SUB
+
+' Below aggression 3, an army under 40 does not attack at odds under .8: its score is 0, and
+' odds of .6 plus aggression's .5 take 5 more. Each knob moved past the army lets it attack.
+SUB TestAiAttackScoreOfACautiousComputer
+    army_city(21) = 5: army_size(21) = 30: army_supply(21) = 5: opt_ai_aggression = 1
+    army_city(1) = 6: army_size(1) = 50: city_army(6) = 1
+    AssertEqualInt -5, ai_attack_score(21, 1, 6, 100), "30 against 50 at aggression 1"
+    army_size(21) = 40: army_size(1) = 67
+    AssertEqualInt 95, ai_attack_score(21, 1, 6, 100), "an army of 40 is not held back"
+    army_size(21) = 30: army_size(1) = 50
+    ai_cautious_aggression = 1
+    AssertEqualInt 95, ai_attack_score(21, 1, 6, 100), "ai_cautious_aggression 1"
+    CALL tuning_defaults
+    ai_cautious_army_size = 30
+    AssertEqualInt 95, ai_attack_score(21, 1, 6, 100), "ai_cautious_army_size 30"
+    CALL tuning_defaults
+    ai_cautious_odds# = .5
+    AssertEqualInt 95, ai_attack_score(21, 1, 6, 100), "ai_cautious_odds .5"
 END SUB
 
 ' A cautious computer, on a roll above .9, weighs leader against leader and experience

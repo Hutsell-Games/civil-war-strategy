@@ -21,7 +21,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     attack_strength = attack_per_size# * army_size(attacker)
     attack_strength = strength_capped(attack_strength)
     attack_steps(1) = attack_strength
-    IF army_size(attacker) / army_size(defender) > .2 THEN
+    IF army_size(attacker) / army_size(defender) > badly_outnumbered_ratio# THEN
         attack_strength = attack_strength + battle_leader_weight# * army_leader_rating(attacker) + battle_experience_weight# * army_experience(attacker)
         attack_strength = strength_capped(attack_strength)
     END IF
@@ -35,20 +35,20 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
         attack_strength = strength_capped(attack_strength)
     END IF
     attack_steps(3) = attack_strength
-    IF army_size(attacker) / army_size(defender) <= .5 THEN
+    IF army_size(attacker) / army_size(defender) <= outnumbered_ratio# THEN
         attack_strength = attack_strength - attack_outnumbered_penalty
         IF attack_strength < 1 THEN
             attack_strength = 1
         END IF
     END IF
-    IF army_size(attacker) / army_size(defender) > 3 THEN
+    IF army_size(attacker) / army_size(defender) > attack_outnumbering_ratio# THEN
         attack_strength = attack_strength + attack_outnumbering_bonus
         attack_strength = strength_capped(attack_strength)
     END IF
-    IF army_size(attacker) / army_size(defender) > 10 THEN
+    IF army_size(attacker) / army_size(defender) > overwhelming_ratio# THEN
         attack_strength = rule_strength_cap
     END IF
-    IF army_size(attacker) / army_size(defender) <= .2 THEN
+    IF army_size(attacker) / army_size(defender) <= badly_outnumbered_ratio# THEN
         attack_strength = 1
     END IF
     attack_steps(4) = attack_strength
@@ -73,7 +73,7 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
         END IF
     END IF
     defend_steps(1) = defend_strength
-    IF army_size(defender) / army_size(attacker) > .2 THEN
+    IF army_size(defender) / army_size(attacker) > badly_outnumbered_ratio# THEN
         defend_strength = defend_strength + battle_leader_weight# * army_leader_rating(defender) + battle_experience_weight# * army_experience(defender)
         defend_strength = strength_capped(defend_strength)
     END IF
@@ -89,13 +89,13 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
 
     size_ratio! = army_size(defender) / army_size(attacker)
     SELECT CASE size_ratio!
-        CASE IS > 10
+        CASE IS > overwhelming_ratio#
             defend_strength = rule_strength_cap
-        CASE IS > 1.5
+        CASE IS > defend_outnumbering_ratio#
             defend_strength = defend_strength + defend_outnumbering_bonus
-        CASE IS < .2
+        CASE IS < badly_outnumbered_ratio#
             defend_strength = defend_badly_outnumbered# * defend_strength
-        CASE IS < .5
+        CASE IS < outnumbered_ratio#
             defend_strength = defend_outnumbered# * defend_strength
     END SELECT
     IF defend_strength < 1 THEN

@@ -71,11 +71,16 @@ battle_experience_weight | .3 | 0 | 10 | strength for each point of experience
 veteran_experience | 8 | 0 | 10 | experience above this gives 1 more strength
 small_army_strength | .5 | 0 | 1 | a small army keeps this share of its strength
 no_supply_strength | .5 | 0 | 1 | an army without supply keeps this share
-attack_outnumbered_penalty | 2 | 0 | 50 | an attacker with half the defender's troops or fewer loses this
-attack_outnumbering_bonus | 2 | 0 | 50 | an attacker with over 3 times the defender's troops gains this
-defend_outnumbering_bonus | 2 | 0 | 50 | a defender with over 1.5 times the attacker's troops gains this
-defend_outnumbered | .8 | 0 | 1 | a defender with under half the attacker's troops keeps this share
-defend_badly_outnumbered | .5 | 0 | 1 | a defender with under a fifth keeps this share
+badly_outnumbered_ratio | .2 | 0 | 1 | an army with this share of the enemy's troops or fewer gains nothing from its leader and experience, and an attacker so outnumbered fights at 1
+outnumbered_ratio | .5 | 0 | 1 | the share of the enemy's troops below which an army counts as outnumbered (an attacker at this share counts too)
+attack_outnumbering_ratio | 3.0 | 1 | 1000 | an attacker with over this many times the defender's troops gains attack_outnumbering_bonus
+defend_outnumbering_ratio | 1.5 | 1 | 1000 | a defender with over this many times the attacker's troops gains defend_outnumbering_bonus
+overwhelming_ratio | 10.0 | 1 | 1000 | an army with over this many times the enemy's troops fights at the strength cap
+attack_outnumbered_penalty | 2 | 0 | 50 | an outnumbered attacker loses this
+attack_outnumbering_bonus | 2 | 0 | 50 | see attack_outnumbering_ratio
+defend_outnumbering_bonus | 2 | 0 | 50 | see defend_outnumbering_ratio
+defend_outnumbered | .8 | 0 | 1 | an outnumbered defender keeps this share
+defend_badly_outnumbered | .5 | 0 | 1 | a defender with under badly_outnumbered_ratio of the attacker's troops keeps this share instead
 defender_halt_roll | 11 | 1 | 100 | after an attacker withdraws, the defender loses its own order when this times a roll is above its leader's rating
 
 [Battles: the losses]
@@ -155,6 +160,9 @@ ai_aggression_strength | 20 | 0 | 1000 | added to an army's strength for each le
 
 [The computer: whether it attacks. Larger penalties make it more cautious]
 ai_small_army_penalty | 300 | 0 | 1000 | an army under the small-army size attacking
+ai_cautious_aggression | 3 | 0 | 6 | below this level of aggression, an army under ai_cautious_army_size does not attack at odds under ai_cautious_odds
+ai_cautious_army_size | 40 | 0 | 16000 | see ai_cautious_aggression
+ai_cautious_odds | .8 | 0 | 100 | see ai_cautious_aggression
 ai_poor_odds_penalty | 200 | 0 | 1000 | odds below 1 to 2
 ai_realism_penalty | 15 | 0 | 1000 | any attack with Realism on
 ai_no_supply_penalty | 100 | 0 | 1000 | attacking without supply
@@ -178,6 +186,11 @@ check | huge_army_size > large_army_size | huge_army_size must be above large_ar
 check | cities_big_bonus_above > cities_bonus_above | cities_big_bonus_above must be above cities_bonus_above
 check | new_army_supply + new_army_supply_spread + union_new_army_supply <= MAX_SUPPLY | new_army_supply, new_army_supply_spread and union_new_army_supply may add up to 10 at most
 check | small_army_size < max_army_size | small_army_size must be below max_army_size
+# battle_strengths tests an army's share of the enemy's troops against these in order, so a ratio
+# past the next one would hide it.
+check | badly_outnumbered_ratio < outnumbered_ratio | badly_outnumbered_ratio must be below outnumbered_ratio
+check | attack_outnumbering_ratio < overwhelming_ratio | attack_outnumbering_ratio must be below overwhelming_ratio
+check | defend_outnumbering_ratio < overwhelming_ratio | defend_outnumbering_ratio must be below overwhelming_ratio
 check | min_detach_size <= max_army_size | min_detach_size may not be above max_army_size
 check | new_army_size <= max_army_size | new_army_size may not be above max_army_size
 # A new army gets the Balance setting's extra troops for up to 2 steps (Balance 1 or 5) without

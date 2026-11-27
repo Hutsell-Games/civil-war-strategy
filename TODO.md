@@ -97,12 +97,6 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
 
 ## The code
 
-- **A bad saved game or a folder the game cannot write to stops the program.** `load_game`
-  (`io\files.bm`) returns a `problem$` only for a save of a scenario that is not in `SCENARIOS.LST`. An empty
-  or cut-short `cws<n>.sav` gives a runtime error (Input past end of file) in the middle of the load. By then the
-  load has changed part of the game, so an `ON ERROR` alone would leave a game half loaded. `save_game`
-  stops on its `OPEN` when the folder is read-only. Both need a design, such as checking the whole file
-  before changing anything (found 2026-11-24, review of `ui\files.bm`).
 - **The Battles report's ALL GAMES casualties outgrow their box.** `report_battle_summary` (`ui\reports.bm`)
   prints each side's men lost, in thousands, at columns 38 and 45, inside boxes that end at x 345 and x 400.
   A 5-digit total (10 million men, about 30 wars at 300,000 each) prints as `" 12345 "`. The Rebel column

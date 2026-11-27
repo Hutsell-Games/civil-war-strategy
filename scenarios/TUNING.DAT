@@ -81,11 +81,16 @@ battle_experience_weight = .3       ; strength for each point of experience
 veteran_experience = 8              ; experience above this gives 1 more strength
 small_army_strength = .5            ; a small army keeps this share of its strength
 no_supply_strength = .5             ; an army without supply keeps this share
-attack_outnumbered_penalty = 2      ; an attacker with half the defender's troops or fewer loses this
-attack_outnumbering_bonus = 2       ; an attacker with over 3 times the defender's troops gains this
-defend_outnumbering_bonus = 2       ; a defender with over 1.5 times the attacker's troops gains this
-defend_outnumbered = .8             ; a defender with under half the attacker's troops keeps this share
-defend_badly_outnumbered = .5       ; a defender with under a fifth keeps this share
+badly_outnumbered_ratio = .2        ; an army with this share of the enemy's troops or fewer gains nothing from its leader and experience, and an attacker so outnumbered fights at 1
+outnumbered_ratio = .5              ; the share of the enemy's troops below which an army counts as outnumbered (an attacker at this share counts too)
+attack_outnumbering_ratio = 3.0     ; an attacker with over this many times the defender's troops gains attack_outnumbering_bonus
+defend_outnumbering_ratio = 1.5     ; a defender with over this many times the attacker's troops gains defend_outnumbering_bonus
+overwhelming_ratio = 10.0           ; an army with over this many times the enemy's troops fights at the strength cap
+attack_outnumbered_penalty = 2      ; an outnumbered attacker loses this
+attack_outnumbering_bonus = 2       ; see attack_outnumbering_ratio
+defend_outnumbering_bonus = 2       ; see defend_outnumbering_ratio
+defend_outnumbered = .8             ; an outnumbered defender keeps this share
+defend_badly_outnumbered = .5       ; a defender with under badly_outnumbered_ratio of the attacker's troops keeps this share instead
 defender_halt_roll = 11             ; after an attacker withdraws, the defender loses its own order when this times a roll is above its leader's rating
 
 ; Battles: the losses.
@@ -163,6 +168,9 @@ ai_aggression_strength = 20         ; added to an army's strength for each level
 
 ; The computer: whether it attacks. Larger penalties make it more cautious.
 ai_small_army_penalty = 300         ; an army under the small-army size attacking
+ai_cautious_aggression = 3          ; below this level of aggression, an army under ai_cautious_army_size does not attack at odds under ai_cautious_odds
+ai_cautious_army_size = 40          ; see ai_cautious_aggression
+ai_cautious_odds = .8               ; see ai_cautious_aggression
 ai_poor_odds_penalty = 200          ; odds below 1 to 2
 ai_realism_penalty = 15             ; any attack with Realism on
 ai_no_supply_penalty = 100          ; attacking without supply
@@ -185,6 +193,9 @@ ai_fortify_cash = 222               ; the Union computer without a fleet stops f
 ;   cities_big_bonus_above must be above cities_bonus_above
 ;   new_army_supply, new_army_supply_spread and union_new_army_supply may add up to 10 at most
 ;   small_army_size must be below max_army_size
+;   badly_outnumbered_ratio must be below outnumbered_ratio
+;   attack_outnumbering_ratio must be below overwhelming_ratio
+;   defend_outnumbering_ratio must be below overwhelming_ratio
 ;   min_detach_size may not be above max_army_size
 ;   new_army_size may not be above max_army_size
 ;   new_army_size plus 2 times balance_recruits may not be above max_army_size

@@ -219,7 +219,7 @@ FUNCTION ai_move_strength (army)
         END IF
     NEXT j
     strength = .01 * strength
-    IF opt_ai_aggression > 0 THEN
+    IF opt_ai_aggression > AGGRESSION_LOWEST THEN
         strength = strength + ai_aggression_strength * opt_ai_aggression
     END IF
     ai_move_strength = strength
@@ -261,7 +261,7 @@ FUNCTION ai_attack_score (army, occupant, to_city, score_before)
         score = score - ai_small_army_penalty
         odds! = .1
     END IF
-    IF opt_ai_aggression < 3 AND army_size(army) < 40 AND odds! < .8 THEN
+    IF opt_ai_aggression < ai_cautious_aggression AND army_size(army) < ai_cautious_army_size AND odds! < ai_cautious_odds# THEN
         score = 0
     END IF
     IF opt_realism = REALISM_ON THEN
@@ -272,7 +272,7 @@ FUNCTION ai_attack_score (army, occupant, to_city, score_before)
     END IF
     ' Leader against leader and experience against experience. The original subtracted the
     ' army's own leader in place of the occupant's experience (docs/rule-changes.md, G28).
-    IF opt_ai_aggression = 0 AND RND > .9 THEN
+    IF opt_ai_aggression = AGGRESSION_LOWEST AND RND > .9 THEN
         score = score + 10 * (army_leader_rating(army) - army_leader_rating(occupant) + army_experience(army) - army_experience(occupant))
     END IF
     IF army_supply(army) < 1 THEN

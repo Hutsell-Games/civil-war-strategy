@@ -291,6 +291,14 @@ END SUB
 ' closed for the month. The original kept no empty list, so the player could open Troops again
 ' and again until the draw gave a city (G58).
 SUB army_recruit_cities (side, cities(), count)
+    ' A roll above this offers one city fewer.
+    CONST FEWER_CITIES_ROLL = .8
+    ' A city's chance to be offered: this times the cities to offer, over the side's cities.
+    CONST CHANCE_SPREAD = .6
+    ' The chance when the list is still short late in the loop, and for a side with no city.
+    CONST CHANCE_CATCH_UP = .3
+    ' The chance of a city where the side has an army.
+    CONST CHANCE_WITH_ARMY = .4
     DIM i AS INTEGER
     DIM offer_count AS INTEGER
     DIM chance!
@@ -304,7 +312,7 @@ SUB army_recruit_cities (side, cities(), count)
         EXIT SUB
     END IF
     offer_count = recruit_cities_offered
-    IF RND > .8 THEN
+    IF RND > FEWER_CITIES_ROLL THEN
         offer_count = offer_count - 1
     END IF
     IF opt_difficulty < DIFFICULTY_EVEN THEN
@@ -313,18 +321,18 @@ SUB army_recruit_cities (side, cities(), count)
 
     FOR i = 1 TO MAX_CITIES
         IF side_city_count(side) > 0 THEN
-            chance! = .6 * offer_count / side_city_count(side)
+            chance! = CHANCE_SPREAD * offer_count / side_city_count(side)
         ELSE
-            chance! = .3
+            chance! = CHANCE_CATCH_UP
         END IF
-        IF count = 0 AND i > 20 THEN
-            chance! = .3
+        IF count = 0 AND i > MAX_CITIES \ 2 THEN
+            chance! = CHANCE_CATCH_UP
         END IF
-        IF count < 2 AND i > 30 THEN
-            chance! = .3
+        IF count < 2 AND i > 3 * MAX_CITIES \ 4 THEN
+            chance! = CHANCE_CATCH_UP
         END IF
         IF city_army(i) > 0 AND city_owner(i) = side THEN
-            chance! = .4
+            chance! = CHANCE_WITH_ARMY
         END IF
         IF RND < chance! AND city_owner(i) = side THEN
             IF opt_realism = REALISM_ON AND city_first_owner(i) = other_side(side) THEN
