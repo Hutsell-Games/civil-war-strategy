@@ -19,12 +19,12 @@ SUB hall_of_fame
     COLOR COLOR_LIGHT_CYAN, COLOR_BLACK
 
     LOCATE 2, 7
-    PRINT STRING$(57, "²")
+    PRINT STRING$(57, 178)
     LOCATE 9, 7
-    PRINT STRING$(57, "²")
+    PRINT STRING$(57, 178)
     FOR i = 1 TO 6
         LOCATE 2 + i, 7
-        PRINT "²"; SPACE$(55); "²"
+        PRINT CHR$(178); SPACE$(55); CHR$(178)
     NEXT i
 
     CALL hall_of_fame_load(hall_name$(), hall_score())

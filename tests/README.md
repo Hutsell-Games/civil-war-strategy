@@ -28,7 +28,7 @@ python tests\play.py explore <keys file>         # one run, a PNG of every scree
 python tests\play.py seeds rebel 1 12            # the seeds from 1 to 12 that play a script to its end (below)
 python tests\make_scripts.py                     # writes the generated scripts again (below)
 python tests\make_save.py <description> <out>    # writes a saved game from a description (below)
-python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and make_scripts.py, and the folder rules (test_layers.py)
+python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and make_scripts.py, the folder rules (test_layers.py), and ASCII-only source (test_ascii.py)
 ```
 
 `--jobs N` (before the command) sets how many runs go at once (default 4 on Windows, 1 on Linux).

@@ -1,10 +1,10 @@
 ' The Utility menu and the menus of its settings. The settings' rules are in rules/setup.bm.
 
-' The mark of a setting that is on in the Utility menu: "û" when is_on is true, or nothing.
+' The mark of a setting that is on in the Utility menu: a check mark, CHR$(251), when is_on is true, or nothing.
 FUNCTION check_mark$ (is_on)
     check_mark$ = ""
     IF is_on THEN
-        check_mark$ = "û"
+        check_mark$ = CHR$(251) ' Checkmark
     END IF
 END FUNCTION
 
@@ -160,7 +160,7 @@ SUB menu_option_sound (picked)
     menu_text$(0) = "SOUNDS"
     menu_text$(1) = "Quiet"
     menu_text$(2) = "Sound"
-    menu_text$(3) = " & Sound"
+    menu_text$(3) = CHR$(14) + " & Sound" ' Double notes
     menu_item_count = 3
     menu_col = PANEL_COL
     menu_row = 12
@@ -245,15 +245,15 @@ SUB menu_option_events
     menu_text$(1) = "OFF"
     menu_text$(2) = "Favor Union "
     IF opt_event_balance = EVENTS_FAVOR_UNION THEN
-        menu_text$(2) = menu_text$(2) + " "
+        menu_text$(2) = menu_text$(2) + " " + CHR$(17) ' Left arrow
     END IF
     menu_text$(3) = "Neutral     "
     IF opt_event_balance = EVENTS_NEUTRAL THEN
-        menu_text$(3) = menu_text$(3) + " "
+        menu_text$(3) = menu_text$(3) + " " + CHR$(17) ' Left arrow
     END IF
     menu_text$(4) = "Favor Rebels"
     IF opt_event_balance = EVENTS_FAVOR_REBELS THEN
-        menu_text$(4) = menu_text$(4) + " "
+        menu_text$(4) = menu_text$(4) + " " + CHR$(17) ' Left arrow
     END IF
     menu_color = COLOR_MAGENTA
     CALL menu_select(MENU_PLAIN, option_event_balance_row)

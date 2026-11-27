@@ -155,7 +155,7 @@ SUB draw_top_bar
     LOCATE 5, 68
     PRINT "("; percent; "%)"
 
-    settings$ = "  Snd"
+    settings$ = CHR$(14) + "  Snd" ' Double notes
     IF opt_sound < SOUND_MUSIC THEN
         settings$ = "   Snd"
         IF opt_sound = SOUND_OFF THEN
@@ -196,12 +196,13 @@ SUB draw_update_box
     LINE (450, 318)-(526, 420), 1, BF
     LINE (527, 315)-(527, 439), 10
     COLOR COLOR_YELLOW
+    ' A box of double lines around "U P D A T E".
     LOCATE 23, 50
-    PRINT "ษอออออออออออออป"
+    PRINT CHR$(201); STRING$(13, 205); CHR$(187)
     LOCATE 24, 50
-    PRINT "บ U P D A T E บ"
+    PRINT CHR$(186); " U P D A T E "; CHR$(186)
     LOCATE 25, 50
-    PRINT "ศอออออออออออออผ"
+    PRINT CHR$(200); STRING$(13, 205); CHR$(188)
 END SUB
 
 SUB draw_army_stats (army)

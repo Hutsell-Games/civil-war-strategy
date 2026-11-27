@@ -103,7 +103,7 @@ SUB menu_save_game
     FOR k = 1 TO 9
         menu_text$(k) = LTRIM$(STR$(k)) + " " + save_file_name$(k)
         IF _FILEEXISTS(save_file_name$(k)) THEN
-            menu_text$(k) = menu_text$(k) + "û"
+            menu_text$(k) = menu_text$(k) + CHR$(251) ' Checkmark
         END IF
     NEXT k
     menu_col = PANEL_COL

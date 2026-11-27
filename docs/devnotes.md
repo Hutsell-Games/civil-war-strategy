@@ -102,7 +102,10 @@ from a label.
 Not changed by these steps: the code was not reformatted, no variable was renamed, and no feature of the game
 was removed. The modernization since then has formatted the code and renamed its variables. The
 text "Registered Edition" and the version stay. The DOS line-drawing characters in the sources (code page 437)
-stay as they are, and both compilers draw them as DOS did.
+stayed as they were, and both compilers draw them as DOS did. Since 2026-11-27 they, and the control
+characters in strings, are written as their codes, such as `CHR$(201)`, `STRING$(57, 178)` or `CHR$(14)`. Every source file is then plain ASCII, which
+editing tools that write UTF-8 can change; they refuse a whole file over one byte above 127.
+`tests\test_ascii.py` keeps it so.
 
 ## The test hooks
 

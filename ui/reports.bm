@@ -19,7 +19,7 @@ SUB menu_victory_conditions
     DO
         FOR i = 2 TO 6
             IF victory_rule(i) > 0 THEN
-                menu_text$(i - 1) = "û "
+                menu_text$(i - 1) = CHR$(251) + " " ' Checkmark
             ELSE
                 menu_text$(i - 1) = "  "
             END IF
@@ -160,9 +160,9 @@ SUB report_armies (side)
             PRINT "FORT +"; city_fort(army_city(i))
         END IF
     NEXT i
-    PRINT " "; STRING$(70, "Ä")
+    PRINT " "; STRING$(70, 196) ' Horizontal line
     PRINT " Total Forces "; TAB(25); troops_text$(total_troops); TAB(40); "[ Enemy Forces "; troops_text$(side_troops(other_side(side))); " ]"
-    PRINT " "; STRING$(70, "Ä")
+    PRINT " "; STRING$(70, 196) ' Horizontal line
     PRINT " "; side_name$(side); " NAVY has "; fleet_size(side); " ship(s) ";
     ironclads = 0
     FOR k = 1 TO fleet_size(side)

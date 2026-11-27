@@ -216,9 +216,9 @@ SUB draw_battle_losses (attacker, defender, attacker_losses, defender_losses)
     PRINT "Attack Loss: ";
     PRINT troops_text$(attacker_losses); "/";
     CALL print_army_size(attacker)
-    PRINT " ("; _TRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker))))); "%) ²";
+    PRINT " ("; _TRIM$(STR$(INT(100 * (attacker_losses / army_size(attacker))))); "%) "; CHR$(178);
     COLOR side_color_of(army_side(defender))
-    PRINT "² Defend Loss: ";
+    PRINT CHR$(178); " Defend Loss: ";
     PRINT troops_text$(defender_losses); "/";
     CALL print_army_size(defender)
     PRINT " ("; _TRIM$(STR$(INT(100 * (defender_losses / army_size(defender))))); "%)"

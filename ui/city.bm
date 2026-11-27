@@ -47,8 +47,8 @@ END SUB
 
 ' Lets the player browse friendly cities by arrow or initial letter, returning city = 0 on cancellation.
 SUB menu_city_select (city)
-    menu_text$(1) = "  "
-    menu_text$(3) = "  "
+    menu_text$(1) = "  " + CHR$(24) ' Up Arrow
+    menu_text$(3) = "  " + CHR$(25) ' Down Arrow
     menu_item_count = 3
     DO
         menu_col = 68
