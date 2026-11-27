@@ -1,9 +1,9 @@
-#! seed 1861
+#! seed 1
 # Civil War Strategy: three games in one run, each to another ending (QB64Rust's tools/screen/
 # README.md, "Places and rules"). After Game Over the game starts again at its title menu. Each game sets its end
 # conditions in the Utility menu (End Cond, which starts on Time and toggles the row it is on), then END TURN by
-# rules: game 1 with only the income condition: in September 1865 the Rebels hold 80 % of the income; game 2 with
-# only the capital, the enemy as configured: in September 1864 the Rebels take Washington; game 3
+# rules: game 1 with only the income condition: in November 1863 the Rebels hold 80 % of the income; game 2 with
+# only the capital, the enemy as configured: in January 1863 the Rebels take Washington; game 3
 # with only the time, the enemy's aggression 2 (Aggress five times, from 3): the Union is annihilated before the
 # time runs out, which ends the game without the Options menu. Each game's end: the Hall of Fame and a name, Game
 # Over. At the end, Quit.
@@ -57,7 +57,7 @@ prompt
 key esc
 prompt
 key esc
-# September 1865, the income: the Options: Quit; the Hall of Fame: a name.
+# November 1863, the income: the Options: Quit; the Hall of Fame: a name.
 play until 2:O
 state
 text q
@@ -96,7 +96,7 @@ prompt
 key esc
 prompt
 key esc
-# September 1864, Washington taken: the Options: Quit; the Hall of Fame: a name.
+# January 1863, Washington taken: the Options: Quit; the Hall of Fame: a name.
 play until 2:O
 state
 text q

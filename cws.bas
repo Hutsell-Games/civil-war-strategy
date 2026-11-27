@@ -15,18 +15,19 @@ DIM title_choice AS INTEGER
 DIM picked AS INTEGER
 
 CALL script_mute
-replay = 0
+replay = FALSE
 ' Each game: the title, then the main menu until the game ends or a new one is asked for.
 ' main_menu_start, the row the main menu starts on, is kept from one game to the next.
 DO
+    CALL script_seed
     CALL game_new
     CALL stop_on_load_error(event_file_error$)
     CALL stop_on_load_error(tuning_error$)
-    IF replay = 0 THEN
+    IF NOT replay THEN
         CALL window_open
     END IF
     CALL show_title(replay)
-    replay = 1
+    replay = TRUE
     CALL script_start
     ' The title menu, and for a new game the scenario menu. Esc there goes back to the title menu,
     ' and so does Resume Saved Game when no game is loaded.
@@ -60,7 +61,7 @@ DO
         END IF
         CALL show_new_game
     END IF
-    new_game = 0
+    new_game = FALSE
     DO
         IF autoplay THEN
             ' The computer plays the player's side, then ends the turn as F7 does.
@@ -69,7 +70,7 @@ DO
         ELSE
             CALL menu_main(main_menu_start)
         END IF
-        ended = 0
+        ended = FALSE
         SELECT CASE menu_choice
             CASE MAIN_TROOPS
                 IF side_cash(current_side) < cost_recruit OR turn_recruit_count = RECRUIT_CLOSED THEN
@@ -82,7 +83,7 @@ DO
                 CALL menu_army_move
                 main_menu_start = MAIN_MOVES
             CASE MAIN_SHIPS
-                IF turn_navy_done = 0 THEN
+                IF NOT turn_navy_done THEN
                     CALL menu_navy_commands((current_side))
                 END IF
                 main_menu_start = MAIN_RAILROAD
@@ -90,7 +91,7 @@ DO
                 CALL menu_main_railroad
             CASE MAIN_END_TURN
                 CALL menu_main_end_turn(ended)
-                IF ended = 0 THEN
+                IF NOT ended THEN
                     main_menu_start = MAIN_SHIPS
                 END IF
             CASE MAIN_INFORM
@@ -107,19 +108,19 @@ DO
                 CALL menu_files(action)
                 SELECT CASE action
                     CASE FILES_NEW_GAME
-                        new_game = 1
+                        new_game = TRUE
                     CASE FILES_QUIT
                         SYSTEM
                 END SELECT
             CASE MENU_END_TURN_KEY
-                ended = 1
+                ended = TRUE
             CASE ELSE
                 main_menu_start = MAIN_TROOPS
         END SELECT
-        IF ended = 1 THEN
+        IF ended THEN
             CALL turn_reset_commands
             CALL turn_next_player(month_over)
-            IF month_over = 0 THEN
+            IF NOT month_over THEN
                 CALL draw_player_turn
                 CALL draw_map
             ELSE
@@ -133,12 +134,12 @@ DO
                     CALL draw_map
                 END IF
                 CALL check_victory_conditions
-                IF game_over > 0 THEN
-                    new_game = 1
+                IF game_over THEN
+                    new_game = TRUE
                 END IF
             END IF
         END IF
-    LOOP UNTIL new_game = 1
+    LOOP UNTIL new_game
 LOOP
 ' The map's letters, for DRAW: A to Z (show_title reads them).
 DATA "U2E2F2D2BU1L3","U4R3F1G1L2BR2BF1G1L2","H1U2E1R2F1BD2G1L1"

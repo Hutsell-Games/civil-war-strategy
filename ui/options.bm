@@ -45,7 +45,7 @@ SUB menu_utility
             menu_item_count = 14
             menu_text$(14) = "Aggress" + STR$(opt_ai_aggression)
         END IF
-        CALL menu_select(-1, row)
+        CALL menu_select(MENU_NO_KEYS, row)
         CALL clear_right_panel
         row = menu_choice
         SELECT CASE row
@@ -58,14 +58,14 @@ SUB menu_utility
                 CALL menu_option_graphics
             CASE 4
                 CALL menu_option_sound(picked)
-                IF picked = 0 THEN
+                IF NOT picked THEN
                     EXIT SUB
                 END IF
             CASE 5
                 CALL menu_option_display
             CASE 6
                 CALL menu_option_balance(picked)
-                IF picked = 0 THEN
+                IF NOT picked THEN
                     EXIT SUB
                 END IF
             CASE 7
@@ -74,7 +74,7 @@ SUB menu_utility
                 CALL menu_option_events
             CASE 9
                 ' Only before the first End Turn of a new game (vary_start_conditions).
-                IF vary_start_open = 1 THEN
+                IF vary_start_open THEN
                     CALL vary_start_conditions
                     CLS
                     CALL draw_map
@@ -153,9 +153,9 @@ SUB menu_option_graphics
     CALL sound_effect(2700, 1)
 END SUB
 
-' Noise: the SOUNDS menu. picked is 0 when the player left it with Esc.
+' Noise: the SOUNDS menu. picked is FALSE when the player left it with Esc.
 SUB menu_option_sound (picked)
-    picked = 0
+    picked = FALSE
     CALL clear_right_panel
     menu_text$(0) = "SOUNDS"
     menu_text$(1) = "Quiet"
@@ -174,7 +174,7 @@ SUB menu_option_sound (picked)
     PRINT "Sound Option : "; menu_text$(menu_choice);
     CALL option_set_sound(menu_choice - 1)
     CALL sound_effect(999, 1)
-    picked = 1
+    picked = TRUE
 END SUB
 
 ' Display: how long a message stays, or the other set of colors.
@@ -208,9 +208,9 @@ SUB menu_option_display
     END SELECT
 END SUB
 
-' Balance: the menu with the faces. picked is 0 when the player left it with Esc.
+' Balance: the menu with the faces. picked is FALSE when the player left it with Esc.
 SUB menu_option_balance (picked)
-    picked = 0
+    picked = FALSE
     menu_text$(0) = "Balance"
     menu_text$(1) = "Rebel ++"
     menu_text$(2) = "Rebel +"
@@ -229,7 +229,7 @@ SUB menu_option_balance (picked)
     COLOR COLOR_LIGHT_CYAN
     PRINT "Play Balance : "; menu_text$(menu_choice);
     CALL option_set_balance(menu_choice)
-    picked = 1
+    picked = TRUE
 END SUB
 
 ' Rndom Evt: off, or which side the special events favor. The menu starts on the setting in

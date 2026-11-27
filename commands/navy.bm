@@ -52,7 +52,7 @@ SUB navy_bombard (side)
     END IF
     DO UNTIL city_fort(city) = 0
         CALL navy_shore_battery(side, city, damaged)
-        IF damaged = 1 THEN
+        IF damaged THEN
             CALL clear_bottom_line
             PRINT city_name$(city); " fortifications damaged";
             CALL city_redraw_fort(city)
@@ -96,14 +96,14 @@ END SUB
 SUB navy_say_no_ships
     CALL clear_bottom_line
     PRINT "No ships remain";
-    wait_seconds 1
+    CALL wait_seconds(1)
 END SUB
 
-' Sail: the fleet goes to a port. sailed is 0, and nothing happens, when the port is the one
+' Sail: the fleet goes to a port. sailed is FALSE, and nothing happens, when the port is the one
 ' it lies off or is no city. After it the caller lets the fleets fight if they meet, and
 ' calls navy_finish_move.
 SUB navy_sail_to (side, city, sailed)
-    sailed = 0
+    sailed = FALSE
     IF city = fleet_city(side) THEN
         EXIT SUB
     END IF
@@ -127,7 +127,7 @@ SUB navy_sail_to (side, city, sailed)
 
     CALL draw_fleet_sailing(side)
     CALL navy_move_fleet(side, city)
-    sailed = 1
+    sailed = TRUE
 END SUB
 
 ' Sail and Raid: the navy box, and its first line, the fleet that sails.
@@ -155,7 +155,7 @@ SUB navy_land_army (side, army_slot)
     CALL navy_remove_ship(side)
     city = fleet_city(side)
     CALL army_new((side), army_slot, city)
-    CALL city_capture(army_slot, city, side, 0)
+    CALL city_capture(army_slot, city, side, FALSE)
     CALL navy_landed(side, army_slot)
 END SUB
 
@@ -180,11 +180,11 @@ SUB navy_commerce_raid
     DIM sank AS INTEGER
     DIM again AS INTEGER
     DO
-        again = 0
+        again = FALSE
         CALL navy_raid_round(raider, sank)
         IF raider > 0 THEN
             CALL clear_bottom_line
-            IF sank = 1 THEN
+            IF sank THEN
                 COLOR COLOR_WHITE
                 PRINT side_name$(raider); " raiders have sunk $"; raid_loss; " of "; side_name$(other_side(raider)); " commerce";
                 PSET (500, 465), 0
@@ -192,7 +192,7 @@ SUB navy_commerce_raid
                 IF opt_sound >= SOUND_EFFECTS THEN
                     PLAY "t210l8o4co3bo4l4co3ccL8gfego4co3bo4c"
                 END IF
-                wait_seconds PAUSE_LONG
+                CALL wait_seconds(PAUSE_LONG)
             ELSE
                 COLOR COLOR_WHITE
                 PRINT side_name$(raider); " raiders have lost a ship ("; fleet_size(raider); " remain)";
@@ -200,19 +200,19 @@ SUB navy_commerce_raid
                 CALL sound_effect(999, .5)
                 CALL sound_effect(1999, .5)
                 IF fleet_exists(raider) THEN
-                    wait_seconds PAUSE_LONG
-                    again = 1
+                    CALL wait_seconds(PAUSE_LONG)
+                    again = TRUE
                 ELSE
                     LINE (447, 291)-(525, 335), 1, BF
                     FOR k = 1 TO 5
                         CIRCLE (480, 315), 4 * k, 11
                     NEXT k
-                    wait_seconds PAUSE_LONG
+                    CALL wait_seconds(PAUSE_LONG)
                     LINE (447, 291)-(525, 335), 1, BF
                 END IF
             END IF
         END IF
-    LOOP WHILE again = 1
+    LOOP WHILE again
 END SUB
 
 ' Ship against ship: the two fleets are in the same place. The four SUBs below are its parts.
@@ -269,15 +269,15 @@ SUB navy_combat_draw
     COLOR COLOR_LIGHT_CYAN
 END SUB
 
-' A volley: the side's fleet and the other fire until a ship is sunk. combat_over is 1 when that
+' A volley: the side's fleet and the other fire until a ship is sunk. combat_over is TRUE when that
 ' ship was its fleet's last, and the fight is over.
 SUB navy_combat_volley (side, hits(), combat_over)
     DIM struck AS INTEGER
-    combat_over = 0
+    combat_over = FALSE
     DO
         CALL cannon_shot(.1)
         struck = side
-        IF navy_shot_hits(side) = 1 THEN
+        IF navy_shot_hits(side) THEN
             struck = other_side(side)
         END IF
         hits(struck) = hits(struck) - 1
@@ -292,7 +292,7 @@ END SUB
 
 ' A ship of the side struck is sunk in a volley. Its row is the struck side's: y 90 for the
 ' Union, 190 for the Rebels. sunk$ shows for pause! seconds. When it was the fleet's last,
-' defeated$ shows, the fleet is defeated and combat_over is 1. Otherwise the next ship takes
+' defeated$ shows, the fleet is defeated and combat_over is TRUE. Otherwise the next ship takes
 ' its hits.
 SUB navy_combat_sinks (struck, sunk$, pause!, defeated$, hits(), combat_over)
     DIM x AS INTEGER
@@ -315,7 +315,7 @@ SUB navy_combat_sinks (struck, sunk$, pause!, defeated$, hits(), combat_over)
         PRINT defeated$
         CALL wait_seconds(opt_pause!)
         CALL navy_fleet_defeated(struck)
-        combat_over = 1
+        combat_over = TRUE
         EXIT SUB
     END IF
     hits(struck) = navy_ship_hits(struck)
@@ -340,7 +340,7 @@ SUB navy_combat_auto (side)
     DO
         CALL navy_combat_draw
         CALL navy_combat_volley(side, hits(), combat_over)
-    LOOP UNTIL combat_over = 1
+    LOOP UNTIL combat_over
 END SUB
 
 ' Shows how many hits each side's last ship can still take.
@@ -350,6 +350,6 @@ SUB navy_show_hits (hits())
     LOCATE 15, 6 * fleet_size(SIDE_REBEL)
     PRINT hits(SIDE_REBEL); " ";
     IF opt_sound = SOUND_OFF THEN
-        wait_seconds .1 * opt_pause!
+        CALL wait_seconds(.1 * opt_pause!)
     END IF
 END SUB

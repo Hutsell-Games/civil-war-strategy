@@ -3,14 +3,14 @@
 ' ai/forces.bm.
 
 ' Commands, Join: the player picks a city where armies can combine, and they become one.
-' found is 0 when there is no such city.
+' found is FALSE when there is no such city.
 SUB menu_army_combine (side, found)
     DIM city AS INTEGER
     DIM best AS INTEGER
     DIM joined AS INTEGER
     DIM cities(MAX_CITIES) AS INTEGER
     DIM count AS INTEGER
-    found = 0
+    found = FALSE
     menu_color = COLOR_CYAN
     menu_highlight = COLOR_CYAN
     menu_col = PANEL_COL
@@ -20,7 +20,7 @@ SUB menu_army_combine (side, found)
     IF menu_item_count = 0 THEN
         EXIT SUB
     END IF
-    found = 1
+    found = TRUE
     menu_text$(0) = "Join"
     menu_highlight = COLOR_LIGHT_CYAN
     CALL menu_select(MENU_CITY_POINTER, 10)
@@ -32,7 +32,7 @@ SUB menu_army_combine (side, found)
     CALL army_combine_gather(side, city, best, joined)
     IF joined = 0 THEN
         PRINT "No valid armies to combine at this time in "; city_name$(city);
-        wait_seconds opt_pause!
+        CALL wait_seconds(opt_pause!)
         EXIT SUB
     END IF
     CALL army_combine_done(city, best, joined)
@@ -40,9 +40,9 @@ SUB menu_army_combine (side, found)
     CALL army_combine_redraw(side, city, best)
 END SUB
 
-' Raze ?: the player's army takes a city with a fort, without a battle. raze is 1 on Yes.
+' Raze ?: the player's army takes a city with a fort, without a battle. raze is TRUE on Yes.
 SUB menu_raze_fort (raze)
-    raze = 0
+    raze = FALSE
     menu_col = PANEL_COL
     menu_row = 15
     menu_highlight = COLOR_WHITE
@@ -51,7 +51,7 @@ SUB menu_raze_fort (raze)
     CALL menu_select(MENU_PLAIN, 1)
     CALL clear_right_panel
     IF menu_choice = 2 THEN
-        raze = 1
+        raze = TRUE
     END IF
 END SUB
 
@@ -63,7 +63,7 @@ SUB menu_army_move
     CALL menu_army_select(army, city)
     IF city <= 0 OR army <= 0 THEN
         IF army = -1 THEN
-            CALL turn_set_moves_done(1)
+            CALL turn_set_moves_done(TRUE)
         END IF
         EXIT SUB
     END IF
@@ -349,7 +349,7 @@ SUB menu_army_relieve (side)
     COLOR COLOR_WHITE
     CALL clear_bottom_line
     PRINT new_name$; " has replaced "; old_name$; " in "; city_name$(army_city(army));
-    wait_seconds PAUSE_LONG
+    CALL wait_seconds(PAUSE_LONG)
     CALL draw_map_marker(army_city(army), 0, MARK_RESTORE)
     CALL clear_bottom_line
 END SUB
@@ -417,7 +417,7 @@ SUB menu_supply (picked)
             CALL clear_bottom_line
             COLOR COLOR_WHITE
             PRINT side_name$(current_side); " army in "; city_name$(army_city(i)); " is CUT OFF !";
-            wait_seconds opt_pause!
+            CALL wait_seconds(opt_pause!)
             _CONTINUE
         END IF
         CALL menu_add_row(menu_short_name$(army_name$(i)), i)
@@ -435,12 +435,12 @@ SUB menu_supply (picked)
 END SUB
 
 ' Commands, Detach: three tenths of a Rebel army become a new army in the same city. again
-' is 1 when an army was detached.
+' is TRUE when an army was detached.
 SUB menu_army_detach (again)
     DIM army AS INTEGER
     DIM city AS INTEGER
     DIM army_slot AS INTEGER
-    again = 0
+    again = FALSE
     IF NOT side_can_detach(current_side) THEN
         CALL clear_bottom_line
         COLOR COLOR_LIGHT_CYAN
@@ -473,16 +473,16 @@ SUB menu_army_detach (again)
     CALL wait_seconds(opt_pause!)
     CALL sound_effect(2222, 1)
     CALL draw_stack_markers(current_side)
-    again = 1
+    again = TRUE
 END SUB
 
-' Commands, Army Drill: an army gains a level of experience. again is 0 when no army is
-' free to drill. drilled is 0 when the army picked cannot drill further.
+' Commands, Army Drill: an army gains a level of experience. again is FALSE when no army is
+' free to drill. drilled is FALSE when the army picked cannot drill further.
 SUB menu_army_drill (again, drilled)
     DIM army AS INTEGER
     DIM city AS INTEGER
-    again = 0
-    drilled = 0
+    again = FALSE
+    drilled = FALSE
     COLOR COLOR_YELLOW
     LOCATE 4, 68
     PRINT "DRILL ARMY"
@@ -493,7 +493,7 @@ SUB menu_army_drill (again, drilled)
         PRINT "No armies remain eligible for drills in "; month_name$(turn_month);
         EXIT SUB
     END IF
-    again = 1
+    again = TRUE
     IF NOT army_can_drill(army) THEN
         COLOR COLOR_LIGHT_RED
         CALL clear_bottom_line
@@ -505,6 +505,6 @@ SUB menu_army_drill (again, drilled)
     PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
     CALL sound_effect(2222, 1)
     CALL wait_seconds(opt_pause!)
-    clear_bottom_line
-    drilled = 1
+    CALL clear_bottom_line
+    drilled = TRUE
 END SUB

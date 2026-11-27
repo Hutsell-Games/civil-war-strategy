@@ -197,6 +197,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--only", nargs="*", help="names of the scripts to write (default: all)")
     args = parser.parse_args(argv)
+    try:
+        with play.one_at_a_time():
+            return write_scripts(args)
+    except play.SetupError as e:
+        print(f"make_scripts.py: {e}", file=sys.stderr)
+        return 2
+
+
+def write_scripts(args: argparse.Namespace) -> int:
     tools = play.find_tools(args)
     exe = play.build(tools, "rust")
     games = [g for g in GAMES if not args.only or g.name in args.only]

@@ -7,7 +7,7 @@
 ' After a train was sent, was refused or arrived: clears the right panel and the bottom line.
 SUB railroad_finish
     CALL clear_right_panel
-    clear_bottom_line
+    CALL clear_bottom_line
 END SUB
 
 ' Puts an army on the train for a city. It arrives at the start of next month's moves.
@@ -42,7 +42,7 @@ SUB railroad_arrive (side)
     ' The train is in the army's city now, and its erase takes the outline's tail too.
     CALL draw_train(side, DRAW_ERASE)
     IF city_owner(army_city(army)) <> side THEN
-        CALL city_capture(army, army_city(army), side, 0)
+        CALL city_capture(army, army_city(army), side, FALSE)
     END IF
     CALL draw_army_flag(army)
     IF city_army(army_city(army)) > 0 THEN

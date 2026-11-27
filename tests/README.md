@@ -25,6 +25,7 @@ python tests\play.py compare                     # the QB64pe and QB64Rust build
 python tests\play.py record [script ...]         # both builds, twice each; writes scripts\<name>.screen
 python tests\play.py coverage                    # the lines and the SUBs the scripts and unit tests reach
 python tests\play.py explore <keys file>         # one run, a PNG of every screen; for writing a script
+python tests\play.py seeds rebel 1 12            # the seeds from 1 to 12 that play a script to its end (below)
 python tests\make_scripts.py                     # writes the generated scripts again (below)
 python tests\make_save.py <description> <out>    # writes a saved game from a description (below)
 python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and make_scripts.py, and the folder rules (test_layers.py)
@@ -34,8 +35,12 @@ python -m unittest discover -s tests -p "test_*.py"   # the tests of play.py and
 On Windows, `CWS_SHOW_WINDOWS=1` shows the program's window. Otherwise it runs on a desktop of its own
 that is never shown, and your keys and mouse cannot reach it. Everything a run makes goes into
 `tests\out\`, which git ignores. A build is made again only when a
-source file, the compiler or the screen hook changed. What a command prints also goes to
-`tests\out\last-<command>.txt`. All 43 scripts take about half a minute with four jobs on Windows.
+source file, the compiler or the screen hook changed. Each run prints a line such as
+`[57/172] navy-build [rust 2]` as it ends, and the results follow once all have ended. What a
+command prints also goes to `tests\out\last-<command>.txt`. All 43 scripts take about half a
+minute with four jobs on Windows. Only one of `play.py`, `make_scripts.py` and `autoplay.py run`
+plays games at a time: a second one refuses to start (`tests\out\play.lock`), since games that
+share the machine wait too long and fail with "no prompt in time".
 
 Each run starts in a fresh copy of the game's data files in `tests\out\run\`, so the files in the repo are never
 changed. The copy takes the top-level files that are not sources, documents, DOS programs or saved games, and
@@ -256,6 +261,13 @@ catches it.
 How many turns a game lasts, and whether the Hall of Fame asks for a name, depends on the game. So
 `make_scripts.py` first plays each game with a probe, then writes what it found. Run it again only when a
 change is meant to change how the games go, then `record`. It takes about 20 seconds with four jobs.
+
+A hand-written script is played with a seed of its own (`#! seed`), picked so that the game
+goes as the script's comment says. A change that draws a random number more or fewer times
+moves every number after it, so the script may meet a prompt it has no keys for. `seeds`
+names the seeds of a range with which it plays to its end. Look at the screens of one with
+`explore` before it goes in the script, since playing to the end does not show that the game
+went as the comment says. For G65, seeds 1 to 12 were enough for each of the four scripts.
 
 ### Writing a script by hand
 

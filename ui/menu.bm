@@ -120,7 +120,7 @@ SUB menu_select (kind, start_row)
         CALL menu_show_selected(kind, row, menu_width)
 
         ' Wait for a key that does something. A letter that starts no row is ignored.
-        done = 0
+        done = FALSE
         DO
             pressed$ = menu_wait_key$
             IF ASC(pressed$) = KEY_ENTER THEN
@@ -134,21 +134,21 @@ SUB menu_select (kind, start_row)
             END IF
             IF kind = MENU_RAW_KEYS THEN
                 menu_key$ = UCASE$(pressed$)
-                done = 1
+                done = TRUE
                 EXIT DO
             END IF
             IF ASC(pressed$) = KEY_ESC THEN
                 menu_choice = MENU_ESCAPED
-                done = 1
+                done = TRUE
                 EXIT DO
             END IF
             letter_row = menu_letter_row(pressed$)
             IF letter_row > 0 THEN
                 menu_choice = letter_row
-                done = 1
+                done = TRUE
             END IF
-        LOOP UNTIL done = 1
-        IF done = 1 THEN
+        LOOP UNTIL done
+        IF done THEN
             EXIT DO
         END IF
 
@@ -228,7 +228,7 @@ END FUNCTION
 SUB menu_show_selected (kind, row, menu_width)
     DIM row_shown AS INTEGER
     CALL menu_mark_row(kind, row, menu_width, row_shown)
-    IF row_shown = 0 THEN
+    IF NOT row_shown THEN
         COLOR menu_highlight
         LOCATE menu_row + 2 + row, menu_col + 2
         PRINT menu_text$(row)
@@ -262,7 +262,7 @@ END SUB
 ' A key of two bytes at a menu, given by its second byte. Up, Down, PgUp and PgDn move the row,
 ' round from one end to the other. At a plain menu (MENU_PLAIN) and the main menu
 ' (MENU_MAIN_KEYS), F3 draws the screen again and F4 shows the force report. F7 ends the turn
-' (done = 1) at the main menu only: the original took it at every plain menu, where the 99
+' (done = TRUE) at the main menu only: the original took it at every plain menu, where the 99
 ' it gives back was read as a row.
 SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
     SELECT CASE pressed$
@@ -281,7 +281,7 @@ SUB menu_arrow_key (kind, pressed$, row, title_col, menu_width, done)
         CASE KEY_F7$
             IF kind = MENU_MAIN_KEYS THEN
                 menu_choice = MENU_END_TURN_KEY
-                done = 1
+                done = TRUE
             END IF
         CASE KEY_F4$
             IF kind = MENU_PLAIN OR kind = MENU_MAIN_KEYS THEN
@@ -299,7 +299,7 @@ END SUB
 
 ' What a menu shows beside its highlighted row, by the menu's kind: a marker on the map at
 ' the row's city or army, the army's numbers, or a face. For a city with an army, the row
-' shows the army's name and row_shown is 1, so that menu_select does not print the row again.
+' shows the army's name and row_shown is TRUE, so that menu_select does not print the row again.
 SUB menu_mark_row (kind, row, menu_width, row_shown)
     DIM army AS INTEGER
     DIM short_name$
@@ -312,7 +312,7 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
             CALL draw_map_marker(menu_value(row), 0, MARK_POINTER)
             army = city_army(menu_value(row))
             IF army > 0 THEN
-                row_shown = 1
+                row_shown = TRUE
                 short_name$ = LEFT$(army_name$(army), menu_width)
                 COLOR COLOR_LIGHT_RED
                 LOCATE menu_row + 2 + row, menu_col + 2
@@ -324,7 +324,7 @@ SUB menu_mark_row (kind, row, menu_width, row_shown)
                 LOCATE menu_row + 4 + menu_item_count, menu_col + 1
                 PRINT "Size "; troops_text$(army_size(army));
             ELSE
-                row_shown = 0
+                row_shown = FALSE
                 LOCATE menu_row + 4 + menu_item_count, menu_col + 1
                 PRINT SPACE$(12);
             END IF

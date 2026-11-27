@@ -140,8 +140,8 @@ END SUB
 
 ' Reads the saved game cws<slot>.sav: the scenario, the date, the armies, the cities, the sides,
 ' and the side that plays. A save of another scenario than the one loaded reads that scenario's
-' map first. The scenario's leaders are read again, and a leader who commands an army leaves
-' the free leaders. The victory
+' map first. The scenario's leaders are read again, and a leader who commands an army, on a
+' train too, leaves the free leaders. The victory
 ' rules and the events that have happened follow, in a game saved since 2026-11-14 (save_game).
 ' Then it reads the settings of cws.cfg. problem$ is "" when the game was loaded; otherwise it says why not,
 ' and nothing was changed. The menu of saved games is menu_load_game (ui/files.bm).
@@ -200,7 +200,24 @@ SUB load_game (slot, problem$)
     INPUT #file_num, turn_month, turn_year, union_income_bonus, saved_side
     FOR i = 1 TO MAX_ARMIES
         INPUT #file_num, army_name$(i), army_size(i), army_leader_rating(i), army_city(i), army_experience(i), army_supply(i), army_order(i)
-        IF army_exists(i) THEN
+    NEXT i
+    FOR i = 1 TO MAX_CITIES
+        INPUT #file_num, city_army(i), city_owner(i), city_fort(i)
+    NEXT i
+    FOR i = SIDE_UNION TO SIDE_REBEL
+        INPUT #file_num, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
+        INPUT #file_num, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
+        ' The save has no city the train left. A train with an army aboard waits beside it, so it
+        ' is train_city (railroad_board). The DOS game saved no such city either, and the train's
+        ' arrival then made an army the occupier of city 0 (G63).
+        train_from_city(i) = train_city(i)
+        fleet_size(i) = LEN(fleet_ships$(i))
+        CALL navy_drop_empty_fleet(i)
+    NEXT i
+    ' A leader who commands an army leaves the free leaders. The army on a train has no city but
+    ' has its leader (army_in_field), so the sides' trains are read first (R4).
+    FOR i = 1 TO MAX_ARMIES
+        IF army_in_field(i) THEN
             IF army_name$(i) = leader_name$(i) THEN
                 leader_name$(i) = ""
             ELSE
@@ -216,17 +233,8 @@ SUB load_game (slot, problem$)
             END IF
         END IF
     NEXT i
-    FOR i = 1 TO MAX_CITIES
-        INPUT #file_num, city_army(i), city_owner(i), city_fort(i)
-    NEXT i
-    FOR i = SIDE_UNION TO SIDE_REBEL
-        INPUT #file_num, side_cash(i), side_city_count(i), side_income(i), side_victory_points(i), side_capital(i)
-        INPUT #file_num, fleet_ships$(i), fleet_city(i), unused, train_army(i), train_city(i)
-        fleet_size(i) = LEN(fleet_ships$(i))
-        CALL navy_drop_empty_fleet(i)
-    NEXT i
     FOR i = 1 TO MAX_EVENTS
-        event_done(i) = 0
+        event_done(i) = FALSE
     NEXT i
     ' A game saved before saves held the victory rules and the events ends here. It keeps the
     ' victory rules loaded now, and no event has happened.
@@ -238,7 +246,7 @@ SUB load_game (slot, problem$)
             ' A name that EVENTS.DAT no longer has is passed over.
             row = event_find(text$)
             IF row > 0 THEN
-                event_done(row) = 1
+                event_done(row) = TRUE
             END IF
         NEXT k
         IF NOT EOF(file_num) THEN
@@ -279,13 +287,13 @@ SUB load_game (slot, problem$)
     ' played before, and a fleet saved at sea raided only once a fleet had moved.
     raiding_side = SIDE_NONE
     raid_loss = 0
-    fleet_pursuit = 0
+    fleet_pursuit = FALSE
     CALL navy_note_raiding_side
     ' The strength ratio is not saved either. It is 0, as in a game loaded from the title,
     ' until the month's end works it out (G32).
     ai_strength_ratio! = 0
     ' A loaded game is under way: Vary Start would start it again (G40).
-    vary_start_open = 0
+    vary_start_open = FALSE
 END SUB
 
 ' Writes the game to cws<slot>.sav, and the settings to cws.cfg. The file's first line is the
@@ -316,7 +324,9 @@ SUB save_game (slot)
     WRITE #file_num, victory_rule(1), victory_rule(2), victory_rule(3), victory_rule(4), victory_rule(5), victory_rule(6)
     done_count = 0
     FOR i = 1 TO event_count
-        done_count = done_count + event_done(i)
+        IF event_done(i) THEN
+            done_count = done_count + 1
+        END IF
     NEXT i
     WRITE #file_num, done_count
     FOR i = 1 TO event_count
@@ -338,9 +348,9 @@ END SUB
 ' Notes whether a saved game is on the disk, so that the Files menu shows Load, or "-" when
 ' there is none.
 SUB saved_games_check
-    saves_exist = 0
+    saves_exist = FALSE
     IF any_saved_game THEN
-        saves_exist = 1
+        saves_exist = TRUE
     END IF
 END SUB
 

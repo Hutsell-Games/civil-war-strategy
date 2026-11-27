@@ -147,677 +147,677 @@ SUB tuning_set (key$, value#, why$)
     why$ = ""
     SELECT CASE key$
         CASE "cost_recruit"
-            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            why$ = tuning_check$(key$, value#, 0, 19999, TRUE)
             IF why$ = "" THEN
                 cost_recruit = value#
             END IF
         CASE "cost_ship"
-            why$ = tuning_check$(key$, value#, 0, 5000, 1)
+            why$ = tuning_check$(key$, value#, 0, 5000, TRUE)
             IF why$ = "" THEN
                 cost_ship = value#
             END IF
         CASE "ironclad_cost_times"
-            why$ = tuning_check$(key$, value#, 1, 4, 1)
+            why$ = tuning_check$(key$, value#, 1, 4, TRUE)
             IF why$ = "" THEN
                 ironclad_cost_times = value#
             END IF
         CASE "cost_fort"
-            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            why$ = tuning_check$(key$, value#, 0, 19999, TRUE)
             IF why$ = "" THEN
                 cost_fort = value#
             END IF
         CASE "cost_move_capital"
-            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            why$ = tuning_check$(key$, value#, 0, 19999, TRUE)
             IF why$ = "" THEN
                 cost_move_capital = value#
             END IF
         CASE "capital_income"
-            why$ = tuning_check$(key$, value#, 0, 5000, 1)
+            why$ = tuning_check$(key$, value#, 0, 5000, TRUE)
             IF why$ = "" THEN
                 capital_income = value#
             END IF
         CASE "upkeep_per_size"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 upkeep_per_size# = value#
             END IF
         CASE "start_cash_per_balance"
-            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            why$ = tuning_check$(key$, value#, 0, 2000, TRUE)
             IF why$ = "" THEN
                 start_cash_per_balance = value#
             END IF
         CASE "start_cash_spread"
-            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            why$ = tuning_check$(key$, value#, 0, 2000, TRUE)
             IF why$ = "" THEN
                 start_cash_spread = value#
             END IF
         CASE "vary_cash_shift"
-            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            why$ = tuning_check$(key$, value#, 0, 2000, TRUE)
             IF why$ = "" THEN
                 vary_cash_shift = value#
             END IF
         CASE "vary_cash_spread"
-            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            why$ = tuning_check$(key$, value#, 0, 2000, TRUE)
             IF why$ = "" THEN
                 vary_cash_spread = value#
             END IF
         CASE "union_bonus_per_balance"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 union_bonus_per_balance = value#
             END IF
         CASE "union_bonus_two_players"
-            why$ = tuning_check$(key$, value#, 0, 2000, 1)
+            why$ = tuning_check$(key$, value#, 0, 2000, TRUE)
             IF why$ = "" THEN
                 union_bonus_two_players = value#
             END IF
         CASE "union_bonus_realism_share"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 union_bonus_realism_share# = value#
             END IF
         CASE "max_army_size"
-            why$ = tuning_check$(key$, value#, 100, 1600, 1)
+            why$ = tuning_check$(key$, value#, 100, 1600, TRUE)
             IF why$ = "" THEN
                 max_army_size = value#
             END IF
         CASE "small_army_size"
-            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            why$ = tuning_check$(key$, value#, 0, 16000, TRUE)
             IF why$ = "" THEN
                 small_army_size = value#
             END IF
         CASE "min_detach_size"
-            why$ = tuning_check$(key$, value#, 1, 16000, 1)
+            why$ = tuning_check$(key$, value#, 1, 16000, TRUE)
             IF why$ = "" THEN
                 min_detach_size = value#
             END IF
         CASE "detach_share"
-            why$ = tuning_check$(key$, value#, .01, .99, 0)
+            why$ = tuning_check$(key$, value#, .01, .99, FALSE)
             IF why$ = "" THEN
                 detach_share# = value#
             END IF
         CASE "resupply_level"
-            why$ = tuning_check$(key$, value#, 1, 10, 1)
+            why$ = tuning_check$(key$, value#, 1, 10, TRUE)
             IF why$ = "" THEN
                 resupply_level = value#
             END IF
         CASE "drill_experience_below"
-            why$ = tuning_check$(key$, value#, 0, 11, 1)
+            why$ = tuning_check$(key$, value#, 0, 11, TRUE)
             IF why$ = "" THEN
                 drill_experience_below = value#
             END IF
         CASE "made_up_leader_spread"
-            why$ = tuning_check$(key$, value#, 0, 8, 1)
+            why$ = tuning_check$(key$, value#, 0, 8, TRUE)
             IF why$ = "" THEN
                 made_up_leader_spread = value#
             END IF
         CASE "new_army_size"
-            why$ = tuning_check$(key$, value#, 1, 1250, 1)
+            why$ = tuning_check$(key$, value#, 1, 1250, TRUE)
             IF why$ = "" THEN
                 new_army_size = value#
             END IF
         CASE "reinforce_size"
-            why$ = tuning_check$(key$, value#, 1, 1250, 1)
+            why$ = tuning_check$(key$, value#, 1, 1250, TRUE)
             IF why$ = "" THEN
                 reinforce_size = value#
             END IF
         CASE "recruit_per_value"
-            why$ = tuning_check$(key$, value#, 0, 100, 1)
+            why$ = tuning_check$(key$, value#, 0, 100, TRUE)
             IF why$ = "" THEN
                 recruit_per_value = value#
             END IF
         CASE "recruit_base"
-            why$ = tuning_check$(key$, value#, 0, 1250, 1)
+            why$ = tuning_check$(key$, value#, 0, 1250, TRUE)
             IF why$ = "" THEN
                 recruit_base = value#
             END IF
         CASE "reinforce_per_value"
-            why$ = tuning_check$(key$, value#, 0, 100, 1)
+            why$ = tuning_check$(key$, value#, 0, 100, TRUE)
             IF why$ = "" THEN
                 reinforce_per_value = value#
             END IF
         CASE "reinforce_base"
-            why$ = tuning_check$(key$, value#, 0, 1250, 1)
+            why$ = tuning_check$(key$, value#, 0, 1250, TRUE)
             IF why$ = "" THEN
                 reinforce_base = value#
             END IF
         CASE "recruit_cut_off_divisor"
-            why$ = tuning_check$(key$, value#, 1, 100, 1)
+            why$ = tuning_check$(key$, value#, 1, 100, TRUE)
             IF why$ = "" THEN
                 recruit_cut_off_divisor = value#
             END IF
         CASE "recruit_cities_offered"
-            why$ = tuning_check$(key$, value#, 1, 4, 1)
+            why$ = tuning_check$(key$, value#, 1, 4, TRUE)
             IF why$ = "" THEN
                 recruit_cities_offered = value#
             END IF
         CASE "new_army_supply"
-            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            why$ = tuning_check$(key$, value#, 0, 10, TRUE)
             IF why$ = "" THEN
                 new_army_supply = value#
             END IF
         CASE "new_army_supply_spread"
-            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            why$ = tuning_check$(key$, value#, 0, 10, TRUE)
             IF why$ = "" THEN
                 new_army_supply_spread = value#
             END IF
         CASE "union_new_army_supply"
-            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            why$ = tuning_check$(key$, value#, 0, 10, TRUE)
             IF why$ = "" THEN
                 union_new_army_supply = value#
             END IF
         CASE "rebel_new_army_experience"
-            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            why$ = tuning_check$(key$, value#, 0, 10, TRUE)
             IF why$ = "" THEN
                 rebel_new_army_experience = value#
             END IF
         CASE "balance_recruits"
-            why$ = tuning_check$(key$, value#, 0, 500, 1)
+            why$ = tuning_check$(key$, value#, 0, 500, TRUE)
             IF why$ = "" THEN
                 balance_recruits = value#
             END IF
         CASE "balance_strength"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 balance_strength = value#
             END IF
         CASE "starve_roll"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 starve_roll# = value#
             END IF
         CASE "starve_size_above"
-            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            why$ = tuning_check$(key$, value#, 0, 16000, TRUE)
             IF why$ = "" THEN
                 starve_size_above = value#
             END IF
         CASE "starve_keep_share"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 starve_keep_share# = value#
             END IF
         CASE "forage_roll"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 forage_roll# = value#
             END IF
         CASE "winter_months"
-            why$ = tuning_check$(key$, value#, 0, 12, 1)
+            why$ = tuning_check$(key$, value#, 0, 12, TRUE)
             IF why$ = "" THEN
                 winter_months = value#
             END IF
         CASE "attack_per_size"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 attack_per_size# = value#
             END IF
         CASE "defense_per_size"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 defense_per_size# = value#
             END IF
         CASE "defense_base"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 defense_base = value#
             END IF
         CASE "defense_per_size_realism"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 defense_per_size_realism# = value#
             END IF
         CASE "defense_base_realism"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 defense_base_realism = value#
             END IF
         CASE "defense_most_realism"
-            why$ = tuning_check$(key$, value#, 1, 1000, 1)
+            why$ = tuning_check$(key$, value#, 1, 1000, TRUE)
             IF why$ = "" THEN
                 defense_most_realism = value#
             END IF
         CASE "battle_leader_weight"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 battle_leader_weight# = value#
             END IF
         CASE "battle_experience_weight"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 battle_experience_weight# = value#
             END IF
         CASE "veteran_experience"
-            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            why$ = tuning_check$(key$, value#, 0, 10, TRUE)
             IF why$ = "" THEN
                 veteran_experience = value#
             END IF
         CASE "small_army_strength"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 small_army_strength# = value#
             END IF
         CASE "no_supply_strength"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 no_supply_strength# = value#
             END IF
         CASE "attack_outnumbered_penalty"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 attack_outnumbered_penalty = value#
             END IF
         CASE "attack_outnumbering_bonus"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 attack_outnumbering_bonus = value#
             END IF
         CASE "defend_outnumbering_bonus"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 defend_outnumbering_bonus = value#
             END IF
         CASE "defend_outnumbered"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 defend_outnumbered# = value#
             END IF
         CASE "defend_badly_outnumbered"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 defend_badly_outnumbered# = value#
             END IF
         CASE "defender_halt_roll"
-            why$ = tuning_check$(key$, value#, 1, 100, 1)
+            why$ = tuning_check$(key$, value#, 1, 100, TRUE)
             IF why$ = "" THEN
                 defender_halt_roll = value#
             END IF
         CASE "fort_defender_loss"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 fort_defender_loss# = value#
             END IF
         CASE "fort_attacker_loss"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 fort_attacker_loss# = value#
             END IF
         CASE "attacker_wins_loss"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 attacker_wins_loss# = value#
             END IF
         CASE "defender_wins_loss"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 defender_wins_loss# = value#
             END IF
         CASE "large_army_size"
-            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            why$ = tuning_check$(key$, value#, 0, 16000, TRUE)
             IF why$ = "" THEN
                 large_army_size = value#
             END IF
         CASE "large_army_loss"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 large_army_loss# = value#
             END IF
         CASE "huge_army_size"
-            why$ = tuning_check$(key$, value#, 0, 16000, 1)
+            why$ = tuning_check$(key$, value#, 0, 16000, TRUE)
             IF why$ = "" THEN
                 huge_army_size = value#
             END IF
         CASE "huge_army_loss"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 huge_army_loss# = value#
             END IF
         CASE "loss_own_share"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 loss_own_share# = value#
             END IF
         CASE "loss_other_share"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 loss_other_share# = value#
             END IF
         CASE "attacker_loss_most_times"
-            why$ = tuning_check$(key$, value#, 1, 20, 1)
+            why$ = tuning_check$(key$, value#, 1, 20, TRUE)
             IF why$ = "" THEN
                 attacker_loss_most_times = value#
             END IF
         CASE "defender_loss_most_times"
-            why$ = tuning_check$(key$, value#, 1, 20, 1)
+            why$ = tuning_check$(key$, value#, 1, 20, TRUE)
             IF why$ = "" THEN
                 defender_loss_most_times = value#
             END IF
         CASE "points_kept"
-            why$ = tuning_check$(key$, value#, 0, .95, 0)
+            why$ = tuning_check$(key$, value#, 0, .95, FALSE)
             IF why$ = "" THEN
                 points_kept# = value#
             END IF
         CASE "points_per_income"
-            why$ = tuning_check$(key$, value#, 0, 10, 0)
+            why$ = tuning_check$(key$, value#, 0, 10, FALSE)
             IF why$ = "" THEN
                 points_per_income# = value#
             END IF
         CASE "cities_bonus_above"
-            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            why$ = tuning_check$(key$, value#, 0, 40, TRUE)
             IF why$ = "" THEN
                 cities_bonus_above = value#
             END IF
         CASE "cities_bonus"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 cities_bonus = value#
             END IF
         CASE "cities_big_bonus_above"
-            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            why$ = tuning_check$(key$, value#, 0, 40, TRUE)
             IF why$ = "" THEN
                 cities_big_bonus_above = value#
             END IF
         CASE "cities_big_bonus"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 cities_big_bonus = value#
             END IF
         CASE "capital_capture_points"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 capital_capture_points = value#
             END IF
         CASE "capital_move_points"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 capital_move_points = value#
             END IF
         CASE "army_destroyed_points"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 army_destroyed_points = value#
             END IF
         CASE "fleet_sunk_points"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 fleet_sunk_points = value#
             END IF
         CASE "fleet_lost_points"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 fleet_lost_points = value#
             END IF
         CASE "wiped_out_points"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 wiped_out_points = value#
             END IF
         CASE "victory_points_bonus"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 victory_points_bonus = value#
             END IF
         CASE "time_limit_points_share"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 time_limit_points_share# = value#
             END IF
         CASE "invade_ships_least"
-            why$ = tuning_check$(key$, value#, 2, 10, 1)
+            why$ = tuning_check$(key$, value#, 2, 10, TRUE)
             IF why$ = "" THEN
                 invade_ships_least = value#
             END IF
         CASE "invasion_army_size"
-            why$ = tuning_check$(key$, value#, 1, 1250, 1)
+            why$ = tuning_check$(key$, value#, 1, 1250, TRUE)
             IF why$ = "" THEN
                 invasion_army_size = value#
             END IF
         CASE "bombard_loss_per_ship"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 bombard_loss_per_ship# = value#
             END IF
         CASE "bombard_loss_spread"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 bombard_loss_spread# = value#
             END IF
         CASE "fort_damage_chance"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 fort_damage_chance# = value#
             END IF
         CASE "fort_damage_per_ship"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 fort_damage_per_ship# = value#
             END IF
         CASE "blast_base"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 blast_base# = value#
             END IF
         CASE "blast_per_ship"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 blast_per_ship# = value#
             END IF
         CASE "raid_chance"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 raid_chance# = value#
             END IF
         CASE "raid_chance_per_ship"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 raid_chance_per_ship# = value#
             END IF
         CASE "raid_loss_per_ship"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 raid_loss_per_ship# = value#
             END IF
         CASE "raid_loss_most_share"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 raid_loss_most_share# = value#
             END IF
         CASE "wooden_ship_hits"
-            why$ = tuning_check$(key$, value#, 1, 1000, 1)
+            why$ = tuning_check$(key$, value#, 1, 1000, TRUE)
             IF why$ = "" THEN
                 wooden_ship_hits = value#
             END IF
         CASE "ironclad_hits"
-            why$ = tuning_check$(key$, value#, 1, 1000, 1)
+            why$ = tuning_check$(key$, value#, 1, 1000, TRUE)
             IF why$ = "" THEN
                 ironclad_hits = value#
             END IF
         CASE "ship_hit_chance"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 ship_hit_chance# = value#
             END IF
         CASE "ironclad_aim_bonus"
-            why$ = tuning_check$(key$, value#, 0, 1, 0)
+            why$ = tuning_check$(key$, value#, 0, 1, FALSE)
             IF why$ = "" THEN
                 ironclad_aim_bonus# = value#
             END IF
         CASE "rail_union_cities"
-            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            why$ = tuning_check$(key$, value#, 0, 40, TRUE)
             IF why$ = "" THEN
                 rail_union_cities = value#
             END IF
         CASE "rail_rebel_cities"
-            why$ = tuning_check$(key$, value#, 0, 40, 1)
+            why$ = tuning_check$(key$, value#, 0, 40, TRUE)
             IF why$ = "" THEN
                 rail_rebel_cities = value#
             END IF
         CASE "rail_per_city"
-            why$ = tuning_check$(key$, value#, 0, 200, 1)
+            why$ = tuning_check$(key$, value#, 0, 200, TRUE)
             IF why$ = "" THEN
                 rail_per_city = value#
             END IF
         CASE "rail_most_times"
-            why$ = tuning_check$(key$, value#, 1, 10, 1)
+            why$ = tuning_check$(key$, value#, 1, 10, TRUE)
             IF why$ = "" THEN
                 rail_most_times = value#
             END IF
         CASE "rail_least_divisor"
-            why$ = tuning_check$(key$, value#, 1, 100, 1)
+            why$ = tuning_check$(key$, value#, 1, 100, TRUE)
             IF why$ = "" THEN
                 rail_least_divisor = value#
             END IF
         CASE "ai_move_spread"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_move_spread = value#
             END IF
         CASE "ai_leave_fort_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_leave_fort_penalty = value#
             END IF
         CASE "ai_leave_fort_realism_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_leave_fort_realism_penalty = value#
             END IF
         CASE "ai_enemy_capital_bonus"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_enemy_capital_bonus = value#
             END IF
         CASE "ai_target_value"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 ai_target_value = value#
             END IF
         CASE "ai_target_fort"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 ai_target_fort = value#
             END IF
         CASE "ai_empty_enemy_value"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 ai_empty_enemy_value = value#
             END IF
         CASE "ai_march_direction_bonus"
-            why$ = tuning_check$(key$, value#, 0, 100, 1)
+            why$ = tuning_check$(key$, value#, 0, 100, TRUE)
             IF why$ = "" THEN
                 ai_march_direction_bonus = value#
             END IF
         CASE "ai_beyond_value"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 ai_beyond_value = value#
             END IF
         CASE "ai_beyond_fort"
-            why$ = tuning_check$(key$, value#, 0, 50, 1)
+            why$ = tuning_check$(key$, value#, 0, 50, TRUE)
             IF why$ = "" THEN
                 ai_beyond_fort = value#
             END IF
         CASE "ai_capital_road_bonus"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_capital_road_bonus = value#
             END IF
         CASE "ai_stay_weight_even"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_stay_weight_even = value#
             END IF
         CASE "ai_stay_weight_strong"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_stay_weight_strong = value#
             END IF
         CASE "ai_stay_weight_stronger"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_stay_weight_stronger = value#
             END IF
         CASE "ai_stay_weight_strongest"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_stay_weight_strongest = value#
             END IF
         CASE "ai_aggression_strength"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_aggression_strength = value#
             END IF
         CASE "ai_small_army_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_small_army_penalty = value#
             END IF
         CASE "ai_poor_odds_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_poor_odds_penalty = value#
             END IF
         CASE "ai_realism_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_realism_penalty = value#
             END IF
         CASE "ai_no_supply_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_no_supply_penalty = value#
             END IF
         CASE "ai_odds_bad_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_odds_bad_penalty = value#
             END IF
         CASE "ai_odds_low_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_odds_low_penalty = value#
             END IF
         CASE "ai_odds_even_penalty"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_odds_even_penalty = value#
             END IF
         CASE "ai_odds_good_bonus"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_odds_good_bonus = value#
             END IF
         CASE "ai_attack_spread"
-            why$ = tuning_check$(key$, value#, 0, 1000, 1)
+            why$ = tuning_check$(key$, value#, 0, 1000, TRUE)
             IF why$ = "" THEN
                 ai_attack_spread = value#
             END IF
         CASE "ai_armies_base"
-            why$ = tuning_check$(key$, value#, 0, 20, 1)
+            why$ = tuning_check$(key$, value#, 0, 20, TRUE)
             IF why$ = "" THEN
                 ai_armies_base = value#
             END IF
         CASE "ai_armies_per_side"
-            why$ = tuning_check$(key$, value#, 0, 9, 1)
+            why$ = tuning_check$(key$, value#, 0, 9, TRUE)
             IF why$ = "" THEN
                 ai_armies_per_side = value#
             END IF
         CASE "ai_armies_spread"
-            why$ = tuning_check$(key$, value#, 0, 20, 1)
+            why$ = tuning_check$(key$, value#, 0, 20, TRUE)
             IF why$ = "" THEN
                 ai_armies_spread = value#
             END IF
         CASE "ai_fleet_wanted"
-            why$ = tuning_check$(key$, value#, 0, 10, 1)
+            why$ = tuning_check$(key$, value#, 0, 10, TRUE)
             IF why$ = "" THEN
                 ai_fleet_wanted = value#
             END IF
         CASE "ai_reinforce_below"
-            why$ = tuning_check$(key$, value#, 0, 1250, 1)
+            why$ = tuning_check$(key$, value#, 0, 1250, TRUE)
             IF why$ = "" THEN
                 ai_reinforce_below = value#
             END IF
         CASE "ai_fortify_cash"
-            why$ = tuning_check$(key$, value#, 0, 19999, 1)
+            why$ = tuning_check$(key$, value#, 0, 19999, TRUE)
             IF why$ = "" THEN
                 ai_fortify_cash = value#
             END IF

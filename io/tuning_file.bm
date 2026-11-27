@@ -61,7 +61,7 @@ SUB tuning_read (file$)
         ELSE
             key$ = LCASE$(text_trim$(LEFT$(text$, cut - 1)))
             value$ = text_trim$(MID$(text$, cut + 1))
-            IF text_is_number(value$) = 0 THEN
+            IF NOT text_is_number(value$) THEN
                 why$ = key$ + " needs a number"
             ELSE
                 CALL tuning_set(key$, VAL(value$), why$)
@@ -75,12 +75,12 @@ SUB tuning_read (file$)
 END SUB
 
 ' tuning_set's check of a value: "" when value# is from least# to most#, and a whole number when
-' whole is 1; otherwise why not.
+' whole is TRUE; otherwise why not.
 FUNCTION tuning_check$ (key$, value#, least#, most#, whole)
     tuning_check$ = ""
     IF value# < least# OR value# > most# THEN
         tuning_check$ = key$ + " must be from" + STR$(least#) + " to" + STR$(most#)
-    ELSEIF whole = 1 AND value# <> INT(value#) THEN
+    ELSEIF whole AND value# <> INT(value#) THEN
         tuning_check$ = key$ + " needs a whole number"
     END IF
 END FUNCTION

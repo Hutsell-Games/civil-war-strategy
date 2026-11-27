@@ -109,26 +109,23 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   then runs past the box to x 408, and the Union column's trailing space covers the divider at x 345. Print
   the numbers at a fixed width, right-aligned in their boxes (found 2026-11-25, review of `ui\reports.bm`).
 
-- **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 228 and 232).
+- **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 218 and 222).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the
   report needs laying out again.
-- **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 54 and 58). That is a random
+- **Vary Start gives each fleet `10 * RND` ships** (`rules\setup.bm` lines 71 and 75). That is a random
   size, not the fleet limit, so it stays 10 rather than `MAX_FLEET_SHIPS`.
 - **`fleet_city() = 0`, "the side has no fleet", has no constant.** Its tests read `fleet_exists(side)`
   since 2026-11-13 (`docs\archived\structure-review-completed.md`, item 2); 7 assignments of 0 are left.
   `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
-- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 293). The 900
+- **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 279). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
-- **The Utility menu calls `menu_select(-1, row)`** (`menu_utility`, `ui\options.bm` line 48). No mode has that number, so it is a
-  plain menu without the F3, F4 and F7 keys. `docs\archived\constants.md` has no row for it, so it keeps the -1
-  (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
 - **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see
   `docs\archived\constants.md`, section 2. Those of `army_order()` read `army_has_move` and `army_has_acted`
   since 2026-11-13.
 - **The loops over the victory rules keep their numbers**: `FOR i = 1 TO 6` when the rules are read
-  (`io\files.bm` line 57) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 20), which
+  (`io\files.bm` line 58) and `FOR i = 2 TO 6` in `menu_victory_conditions` (`ui\reports.bm` line 20), which
   also maps a rule to a menu row (`i - 1`).
-- **`total_income = union_income_bonus + 200`** (`load_cities`, `io\files.bm` line 104), where the cities are read. The 200
+- **`total_income = union_income_bonus + 200`** (`load_cities`, `io\files.bm` line 120), where the cities are read. The 200
   may be the two capitals' income (`2 * capital_income`), but nothing says so, and the main loop works
   `total_income` out again from the sides' income. It stays a number.
 - **The Emancipation Proclamation comes after 1862** (`year above 1862`, `[emancipation]` in
@@ -136,18 +133,16 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   events' dates to data (2026-11-13).
 - **`COLOR 16 - side_color` shows the other side's color** (`draw_battle_defender` and `draw_battle_losses`, `ui\battle.bm`): 16 - 9
   is 7 and 16 - 7 is 9. It stays as written. `side_color_of` (`game\colors.bm`) gives the color.
-- **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 102, Chk Links;
-  `ui\turn.bm` line 224, "There are still defenders"; left alone by group 9). It goes with phase 7's
+- **`CALL wait_seconds(99)`, "press a key", stays a number** (`ui\options.bm` line 94, Chk Links;
+  `ui\turn.bm` line 218, "There are still defenders"; left alone by group 9). It goes with phase 7's
   `wait_key`, which replaces the 12 loops that announce a wait and read a key. Outside a script, a 99-second
   pause ends by itself; those loops do not, so `wait_key` must keep the difference or decide it.
 - **`turn_resolve` clears two screen boxes by number** (`ui\turn.bm`): `LINE (5, 17)-(100, 63), 3, BF` with
   its border, the train's box after a train arrives, and `LINE (390, 350)-(520, 400), 1, BF`, under the
   month's label. They stay numbers for now. Name them in one pass over the panel's boxes, not one at a
   time (found 2026-11-25, review of `ui\turn.bm`).
-- **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 98): 0 there means "no color set",
+- **`IF menu_color = 0 THEN menu_color = COLOR_GRAY`** (`ui\menu.bm` line 103): 0 there means "no color set",
   not black, so the test keeps its 0.
-- **`wait_seconds` at midnight.** `TIMER` goes back to 0 at midnight, so `TIMER - start!` turns negative
-  and the pause lasts until a key is pressed.
 - **A loaded game's knobs skip the rules between knobs.** `tuning_apply_list` (`io\tuning_file.bm`)
   checks each knob's range but not `tuning_relations$`. A save keeps only the knobs off their defaults.
   So if `tools\tuning\knobs.txt` changes a default after a game was saved, the mix can break a rule:
@@ -155,8 +150,8 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   above `MAX_CASH`. A knob whose range has been narrowed since the save is passed over without a
   word: a save with `loss_own_share=5`, from before its most went from 10 to 1, loads it at its
   default, .8. To decide: refuse the save, warn, or fall back to the defaults (found 2026-11-24).
-- **Files opened without a check.** `config_read` (`CWS.CFG`), `hall_of_fame_load` (`HISCORE.CWS`),
-  `load_scenario_list` and `load_scenario` open their files without `_FILEEXISTS`. Started from another
+- **Files opened without a check.** `config_read` (`CWS.CFG`), `load_scenario_list` and `load_scenario`
+  open their files without `_FILEEXISTS`. Started from another
   folder, the game stops with "File not found".
 - **Special slots used as data.**
   - City 0's owner stands for "the port of a side with no fleet" (`navy_mark_side`). `ai_raise_forces`

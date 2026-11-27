@@ -59,7 +59,7 @@ FUNCTION tune_note_end% (tune$, start)
     DIM i AS INTEGER
     DIM c$
     DIM noted AS INTEGER
-    noted = 0
+    noted = FALSE
     i = start
     DO WHILE i <= LEN(tune$)
         c$ = UCASE$(MID$(tune$, i, 1))
@@ -72,7 +72,7 @@ FUNCTION tune_note_end% (tune$, start)
             IF noted THEN
                 EXIT DO
             END IF
-            noted = 1
+            noted = TRUE
         ELSEIF INSTR("OTLV<>", c$) > 0 THEN
             IF noted THEN
                 EXIT DO

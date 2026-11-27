@@ -152,21 +152,21 @@ SUB battle_fight (attack_strength, defend_strength, attacker, defender, winner, 
     END IF
     rounds = 0
     DO
-        attacker_hit = 0
-        defender_hit = 0
+        attacker_hit = FALSE
+        defender_hit = FALSE
         attack_roll = scale * RND
         defend_roll = scale * RND
         rounds = rounds + 1
         IF attack_roll <= attack_strength THEN
-            attacker_hit = 1
+            attacker_hit = TRUE
         END IF
         IF defend_roll <= defend_strength THEN
-            defender_hit = 1
+            defender_hit = TRUE
         END IF
     LOOP WHILE attacker_hit = defender_hit
     winner = defender
     loser = attacker
-    IF attacker_hit = 1 THEN
+    IF attacker_hit THEN
         winner = attacker
         loser = defender
     END IF

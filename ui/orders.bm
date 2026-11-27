@@ -47,7 +47,7 @@ SUB menu_commands
         SELECT CASE row
             CASE 1
                 CALL menu_army_cancel(current_side)
-                CALL turn_set_moves_done(0)
+                CALL turn_set_moves_done(FALSE)
             CASE 2
                 IF NOT fort_affordable(current_side) THEN
                     COLOR COLOR_LIGHT_CYAN
@@ -61,7 +61,7 @@ SUB menu_commands
                 END IF
             CASE 3
                 CALL menu_army_combine(current_side, found)
-                IF found = 0 THEN
+                IF NOT found THEN
                     CALL clear_bottom_line
                     COLOR COLOR_LIGHT_CYAN
                     PRINT "No eligible armies in same city to combine";
@@ -96,16 +96,16 @@ SUB menu_commands
                 row = 2
             CASE 6
                 CALL menu_army_detach(again)
-                IF again = 0 THEN
+                IF NOT again THEN
                     EXIT SUB
                 END IF
             CASE 7
                 CALL menu_army_drill(again, drilled)
-                IF again = 0 THEN
+                IF NOT again THEN
                     EXIT SUB
                 END IF
                 ' An army that cannot drill further: the menu comes back on its first row.
-                IF drilled = 0 THEN
+                IF NOT drilled THEN
                     row = 1
                 END IF
             CASE 8

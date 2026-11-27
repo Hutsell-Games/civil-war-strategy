@@ -5,8 +5,10 @@ DEFINT A-Z
 CONST SIDE_NONE = 0
 CONST SIDE_UNION = 1
 CONST SIDE_REBEL = 2
-' A yes-or-no that is no: the sorts' swaps% before a pass has swapped anything.
+' A yes or no. TRUE is -1, as a comparison gives, so that NOT turns one into the other. Every
+' flag and every FUNCTION that answers yes or no holds one of the two.
 CONST FALSE = 0
+CONST TRUE = -1
 ' Limits. Army slots 1 to 20 are the Union's, 21 to 40 the Rebels'.
 CONST MAX_CITIES = 40
 CONST MAX_ARMIES = 40
@@ -77,6 +79,9 @@ CONST MENU_ARMY_POINTER = 6
 CONST MENU_FACES = 8
 CONST MENU_CITY_POINTER = 9
 CONST MENU_MAIN_KEYS = 10
+' A plain menu without F3 and F4, which draw the map: the Utility menu, and the menus with no
+' map under them (the title, the scenarios and the naval fight).
+CONST MENU_NO_KEYS = -1
 ' menu_box_type: a double line round the menu (0, no line, and 1, a single line, have no caller).
 CONST BOX_DOUBLE = 2
 ' The computer's order for its fleet (ai_navy_carry_out): the rows of the Ships menu.
@@ -284,14 +289,14 @@ DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_ca
 DIM SHARED all_battles_won&(2), all_casualties&(2)
 ' The events table: one row for each special event of scenarios/EVENTS.DAT, in the file's order.
 ' event_favors() is the side the event is good for, and event_for() the side its effect is
-' for when that is another (SIDE_NONE when it is the same). event_before() is 1 for an
+' for when that is another (SIDE_NONE when it is the same). event_before() is TRUE for an
 ' announcement, which is tried before the month's roll. event_instead() and event_then() are
 ' rows, 0 for none. event_done() is set when the event has happened in this game.
 ' The scenarios of scenarios/SCENARIOS.LST (load_scenario_list, io/files.bm): each one's folder
 ' and title. scenario_now is the row of the scenario the game is on.
 DIM SHARED scenario_count, scenario_now, scenario_folder$(MAX_SCENARIOS), scenario_title$(MAX_SCENARIOS)
-' 1 while the Utility menu's Vary Start may be used: in a new game until its first End Turn
-' (game_reset, turn_next_player). A loaded game sets it to 0 (load_game).
+' TRUE while the Utility menu's Vary Start may be used: in a new game until its first End Turn
+' (game_reset, turn_next_player). A loaded game sets it to FALSE (load_game).
 DIM SHARED vary_start_open
 DIM SHARED event_count, event_banner$, event_file_error$
 DIM SHARED event_name$(MAX_EVENTS), event_favors(MAX_EVENTS), event_listed(MAX_EVENTS), event_done(MAX_EVENTS)
@@ -304,7 +309,7 @@ DIM SHARED event_instead(MAX_EVENTS), event_then(MAX_EVENTS)
 DIM SHARED event_if_first(MAX_EVENTS), event_if_count(MAX_EVENTS), event_instead_first(MAX_EVENTS), event_instead_count(MAX_EVENTS)
 DIM SHARED condition_count, condition_subject(MAX_EVENT_CONDITIONS), condition_relation(MAX_EVENT_CONDITIONS), condition_value!(MAX_EVENT_CONDITIONS)
 ' The month's chance of an event: the product of its factors, then chance_plus#, then at most
-' chance_most# when chance_has_most is 1 (the chance line of EVENTS.DAT).
+' chance_most# when chance_has_most is TRUE (the chance line of EVENTS.DAT).
 DIM SHARED chance_count, chance_kind(MAX_CHANCE_FACTORS), chance_value#(MAX_CHANCE_FACTORS), chance_plus#, chance_most#, chance_has_most
 ' Set by event_roll for the texts of the event: the city of a riot and the army that was
 ' reinforced. They fill {city} and {army}.

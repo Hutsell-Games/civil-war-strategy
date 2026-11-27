@@ -75,7 +75,7 @@ END FUNCTION
 
 ' A side takes a city: the city's value in victory points, and 100 more taken from the other
 ' side when it is that side's capital, which the other side then no longer has. A fort loses a
-' level when weaken_fort is above 0. city_capture (commands/city.bm) shows it.
+' level when weaken_fort is TRUE. city_capture (commands/city.bm) shows it.
 SUB city_take (city, side, weaken_fort)
     city_owner(city) = side
     side_victory_points(side) = side_victory_points(side) + city_value(city)
@@ -84,7 +84,7 @@ SUB city_take (city, side, weaken_fort)
         side_victory_points(other_side(side)) = side_victory_points(other_side(side)) - capital_capture_points
         side_capital(other_side(side)) = 0
     END IF
-    IF city_fort(city) > 0 AND weaken_fort > 0 THEN
+    IF city_fort(city) > 0 AND weaken_fort THEN
         city_fort(city) = city_fort(city) - 1
     END IF
 END SUB
@@ -164,7 +164,7 @@ END SUB
 
 ' Gives every road a way back: when city i has a road to a city that has no road to i, the
 ' road back is added in that city's first free slot. Each road without a way back is listed
-' in from_city() and to_city(), with added() 1 when the road back was added and 0 when the
+' in from_city() and to_city(), with added() TRUE when the road back was added and FALSE when the
 ' city had no free slot. count is the length of the list. check_map_links (ui/reports.bm) shows it.
 SUB city_fix_return_routes (count, added(), from_city(), to_city())
     DIM i AS INTEGER
@@ -176,25 +176,25 @@ SUB city_fix_return_routes (count, added(), from_city(), to_city())
     FOR i = 1 TO MAX_CITIES
         FOR j = 1 TO city_road_count(i)
             neighbor = city_road(i, j)
-            linked = 0
+            linked = FALSE
             FOR k = 1 TO MAX_ROADS
                 IF city_road(neighbor, k) = i THEN
-                    linked = 1
+                    linked = TRUE
                     EXIT FOR
                 END IF
                 IF city_road(neighbor, k) = 0 THEN
                     city_road(neighbor, k) = i
                     count = count + 1
-                    added(count) = 1
+                    added(count) = TRUE
                     from_city(count) = neighbor
                     to_city(count) = i
-                    linked = 1
+                    linked = TRUE
                     EXIT FOR
                 END IF
             NEXT k
-            IF linked = 0 THEN
+            IF NOT linked THEN
                 count = count + 1
-                added(count) = 0
+                added(count) = FALSE
                 from_city(count) = neighbor
                 to_city(count) = i
             END IF

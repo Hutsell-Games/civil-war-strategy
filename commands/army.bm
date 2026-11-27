@@ -105,21 +105,21 @@ SUB army_resupply (army)
 END SUB
 
 ' Raises troops in a city for 100: a new army under the next commander, or more troops for the
-' army already there. raised is 0 when a new army was needed and no commander is left, or when
+' army already there. raised is FALSE when a new army was needed and no commander is left, or when
 ' the army there is full (army_is_full); nothing is then paid.
 SUB army_recruit (side, city, raised)
     DIM army_slot AS INTEGER
     DIM i AS INTEGER
     DIM from_city AS INTEGER
     DIM isolated AS INTEGER
-    raised = 1
+    raised = TRUE
     army_slot = 0
     CALL city_update_occupier(city)
     IF city_army(city) <= 0 THEN
         CALL army_get_commander((side), army_slot)
 
         IF army_slot = 0 THEN
-            raised = 0
+            raised = FALSE
             EXIT SUB
         END IF
         CALL army_new(side, army_slot, city)
@@ -127,7 +127,7 @@ SUB army_recruit (side, city, raised)
     END IF
     i = city_army(city)
     IF army_is_full(i) THEN
-        raised = 0
+        raised = FALSE
         COLOR COLOR_LIGHT_CYAN
         CALL clear_bottom_line
         PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " is at full strength";
@@ -143,7 +143,7 @@ SUB army_recruit (side, city, raised)
     CALL clear_bottom_line
     PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to ";
     CALL print_army_size(i)
-    IF isolated = 1 THEN
+    IF isolated THEN
         PRINT " ISOLATED !";
     END IF
     CALL flag_picture_restore(from_city)

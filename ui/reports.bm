@@ -280,7 +280,7 @@ SUB report_intelligence
             LOCATE y + 3, x
             PRINT "Sup:"; army_supply(k);
             LINE (8 * (x - 1) - 1, 16 * (y - 1) - 1)-(8 * (x + box_width - 1) + 1, 16 * (y + 3) + 1), 15, B
-            wait_seconds 1
+            CALL wait_seconds(1)
         END IF
     NEXT k
     CALL report_wait_key
@@ -403,7 +403,7 @@ SUB report_recap
         PRINT history_line$
         line_count = line_count + 1
         IF line_count > 27 THEN
-            wait_seconds .4
+            CALL wait_seconds(.4)
         END IF
     LOOP
     CLOSE #file_num
@@ -433,14 +433,14 @@ SUB check_map_links
     unresolved = 0
     fixed = 0
     FOR n = 1 TO count
-        IF added(n) = 1 THEN
+        IF added(n) THEN
             PRINT "+ Adding return route from "; city_name$(from_city(n)); " to "; city_name$(to_city(n))
             fixed = fixed + 1
         END IF
-        IF added(n) = 0 THEN
+        IF NOT added(n) THEN
             unresolved = unresolved + 1
             PRINT "Error in CITIES.GRD entry for city #"; from_city(n); city_name$(from_city(n)); ": no return route to "; city_name$(to_city(n))
-            wait_seconds 1
+            CALL wait_seconds(1)
         END IF
     NEXT n
     IF unresolved + fixed = 0 THEN

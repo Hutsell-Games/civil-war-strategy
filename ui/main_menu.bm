@@ -21,14 +21,14 @@ SUB menu_main (start)
         END IF
     END IF
     menu_text$(2) = "Moves"
-    IF turn_moves_done > 0 THEN
+    IF turn_moves_done THEN
         menu_text$(2) = "-"
         IF start = MAIN_MOVES THEN
             start = MAIN_SHIPS
         END IF
     END IF
     menu_text$(3) = "Ships"
-    IF turn_navy_done > 0 THEN
+    IF turn_navy_done THEN
         menu_text$(3) = "-"
         IF start = MAIN_SHIPS THEN
             start = MAIN_RAILROAD
@@ -87,7 +87,7 @@ SUB menu_main_railroad
     END IF
 END SUB
 
-' END TURN: Yes or NOT YET. ended is 1 on Yes.
+' END TURN: Yes or NOT YET. ended is TRUE on Yes.
 SUB menu_main_end_turn (ended)
     menu_col = PANEL_COL
     menu_row = 15
@@ -96,9 +96,9 @@ SUB menu_main_end_turn (ended)
     CALL menu_set_two("End Turn", "Yes", "NOT YET")
     CALL menu_select(MENU_PLAIN, 2)
     CALL clear_right_panel
-    ended = 0
+    ended = FALSE
     IF menu_choice = 1 THEN
-        ended = 1
+        ended = TRUE
     END IF
 END SUB
 
@@ -109,7 +109,7 @@ SUB menu_main_inform
 END SUB
 
 ' The title screen. First it loads the mountain picture and the map's letters, which are DATA
-' in the main module. The title tune plays before the first game only (replay is 0).
+' in the main module. The title tune plays before the first game only (replay is FALSE).
 SUB show_title (replay)
     DIM k AS INTEGER
     IF _FILEEXISTS(GFXDIR + "MTN.PNG") THEN
@@ -121,14 +121,14 @@ SUB show_title (replay)
         COLOR COLOR_WHITE
         BEEP
         PRINT "ERROR: Missing File  'MTN.PNG'"
-        wait_seconds PAUSE_LONG
+        CALL wait_seconds(PAUSE_LONG)
     END IF
     RESTORE
     FOR k = 1 TO 26
         READ map_font$(k)
     NEXT k
     CALL draw_title
-    IF replay = 0 AND opt_sound = SOUND_MUSIC THEN
+    IF NOT replay AND opt_sound = SOUND_MUSIC THEN
         CALL play_title_music
     END IF
 END SUB
@@ -138,7 +138,7 @@ END SUB
 ' In a two-player game the first player's turn screen comes before it.
 SUB menu_title
     CALL clear_bottom_line
-    wait_seconds .3
+    CALL wait_seconds(.3)
     menu_box_type = BOX_DOUBLE
     menu_highlight = COLOR_WHITE
     IF opt_players = PLAYERS_TWO THEN
@@ -156,7 +156,7 @@ SUB menu_title
         menu_col = 33
         menu_row = 20
         menu_color = COLOR_MAGENTA
-        CALL menu_select(MENU_PLAIN, menu_item_count - 1)
+        CALL menu_select(MENU_NO_KEYS, menu_item_count - 1)
     LOOP WHILE menu_choice = MENU_ESCAPED
     IF menu_choice > 0 THEN
         menu_choice = menu_value(menu_choice)
@@ -181,7 +181,7 @@ SUB menu_scenario (picked)
     menu_row = 20
     menu_color = COLOR_MAGENTA
     menu_item_count = scenario_count
-    CALL menu_select(MENU_PLAIN, scenario_now)
+    CALL menu_select(MENU_NO_KEYS, scenario_now)
     picked = 0
     IF menu_choice >= 1 AND menu_choice <= scenario_count THEN
         picked = menu_choice

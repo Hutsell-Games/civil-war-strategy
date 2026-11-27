@@ -1,9 +1,13 @@
 """Tests of play.py's parts that need no build:  python -m unittest discover -s tests -p "test_*.py" """
 
+import contextlib
+import io
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import play  # noqa: E402
@@ -375,6 +379,38 @@ class MakeSaveTest(unittest.TestCase):
         for bad in ("owner 2 41", "army 1 colour=3", "date eleven 1864", "fleet 1 XX 3", "speed 3"):
             with self.assertRaises(make_save.SaveError):
                 self.game(bad)
+
+
+class ParallelTest(unittest.TestCase):
+    def test_results_keep_the_works_order(self):
+        # record groups the results four to a script, so they must come back in the work's order
+        # however the runs end: here the first piece of work ends last.
+        def work(i):
+            def run():
+                time.sleep(0.05 * (3 - i))
+                return i
+            return run
+
+        self.assertEqual(play.parallel(4, [work(i) for i in range(4)]), [0, 1, 2, 3])
+
+
+class LockTest(unittest.TestCase):
+    def test_a_second_holder_is_refused_until_the_first_lets_go(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(play, "OUT", Path(tmp)):
+            with play.one_at_a_time():
+                with self.assertRaises(play.SetupError):
+                    with play.one_at_a_time():
+                        pass
+            with play.one_at_a_time():
+                pass
+
+    def test_a_refused_command_leaves_the_log_of_the_one_running(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(play, "OUT", Path(tmp)):
+            log = Path(tmp) / "last-check.txt"
+            log.write_text("the running command's log\n")
+            with play.one_at_a_time(), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(play.main(["check", "title"]), 2)
+            self.assertEqual(log.read_text(), "the running command's log\n")
 
 
 if __name__ == "__main__":

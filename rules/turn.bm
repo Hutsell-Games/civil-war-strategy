@@ -1,13 +1,13 @@
 ' The rules of the month's moves. They draw nothing. The moves as the player sees them are in
 ' ui/turn.bm, and call these.
 
-' The main menu's Moves entry: done is 1 when no army is left to give an order to, and 0 when
+' The main menu's Moves entry: done is TRUE when no army is left to give an order to, and FALSE when
 ' an order may have been cancelled.
 SUB turn_set_moves_done (done)
     turn_moves_done = done
 END SUB
 
-' The main menu's Ships entry: done is 1 when the player's fleet has acted this month.
+' The main menu's Ships entry: done is TRUE when the player's fleet has acted this month.
 SUB turn_set_navy_done (done)
     turn_navy_done = done
 END SUB
@@ -15,8 +15,8 @@ END SUB
 ' Opens the main menu's Troops, Moves and Ships again for the month.
 SUB turn_reset_commands
     turn_recruit_count = 0
-    turn_moves_done = 0
-    turn_navy_done = 0
+    turn_moves_done = FALSE
+    turn_navy_done = FALSE
 END SUB
 
 ' Before each main menu. In a two-player game with no side set, the Union plays. Ships is
@@ -26,7 +26,7 @@ SUB turn_check_commands
         current_side = SIDE_UNION
     END IF
     IF side_cash(current_side) < cost_ship AND NOT fleet_exists(current_side) THEN
-        turn_navy_done = 1
+        turn_navy_done = TRUE
     END IF
 END SUB
 
@@ -36,15 +36,15 @@ SUB turn_close_recruiting
 END SUB
 
 ' After a turn ends. In a two-player game the Rebels' turn follows the Union's, and
-' month_over is 0. Otherwise the month is played, month_over is 1, and the Union is next.
+' month_over is FALSE. Otherwise the month is played, month_over is TRUE, and the Union is next.
 ' Vary Start is no longer offered.
 SUB turn_next_player (month_over)
-    vary_start_open = 0
-    month_over = 1
+    vary_start_open = FALSE
+    month_over = TRUE
     IF opt_players = PLAYERS_TWO THEN
         current_side = current_side + 1
         IF current_side = SIDE_REBEL THEN
-            month_over = 0
+            month_over = FALSE
             EXIT SUB
         END IF
     END IF
@@ -71,7 +71,7 @@ END SUB
 ' An army's supplies for the month. Its side pays for a day of supply if it can, and the army
 ' must be connected to it under the Realism setting. Outside the summer an army away from a sea
 ' port uses a day, and an army in a sea port blockaded by the other side's fleet uses one
-' (blockaded is 1). An army left without supplies may lose a tenth of its troops (starved is 1).
+' (blockaded is TRUE). An army left without supplies may lose a tenth of its troops (starved is TRUE).
 SUB turn_army_supply (army, blockaded, starved)
     DIM side AS INTEGER
     side = army_side(army)
@@ -84,15 +84,15 @@ SUB turn_army_supply (army, blockaded, starved)
     IF (turn_month < 7 OR turn_month > 10) AND city_port_type(army_city(army)) < PORT_SEA THEN
         army_supply(army) = army_supply(army) - 1
     END IF
-    blockaded = 0
-    starved = 0
+    blockaded = FALSE
+    starved = FALSE
     IF city_port_type(army_city(army)) = PORT_SEA AND fleet_city(other_side(side)) = army_city(army) THEN
         army_supply(army) = army_supply(army) - 1
-        blockaded = 1
+        blockaded = TRUE
     END IF
     IF army_supply(army) < 1 THEN
         army_supply(army) = 0
-        starved = 1
+        starved = TRUE
         IF RND > starve_roll# AND army_size(army) > starve_size_above THEN
             army_size(army) = starve_keep_share# * army_size(army)
         END IF
@@ -110,13 +110,13 @@ SUB turn_strength_ratio
     END IF
 END SUB
 
-' An army sets out: it uses a day of supply. starved is 1 when it had none left.
+' An army sets out: it uses a day of supply. starved is TRUE when it had none left.
 SUB turn_army_marches (army, starved)
-    starved = 0
+    starved = FALSE
     army_supply(army) = army_supply(army) - 1
     IF army_supply(army) < 0 THEN
         army_supply(army) = 0
-        starved = 1
+        starved = TRUE
     END IF
 END SUB
 
@@ -133,13 +133,13 @@ SUB turn_withdraw (army)
     CALL turn_retreat_to(army, (army_order(army)))
 END SUB
 
-' After the attacker withdrew, the defender loses its own order for the month (halted is 1)
+' After the attacker withdrew, the defender loses its own order for the month (halted is TRUE)
 ' unless its leader's rating beats a draw from 0 to 11. old_order is its order before.
 SUB turn_defender_halts (army, halted, old_order)
-    halted = 0
+    halted = FALSE
     old_order = army_order(army)
     IF defender_halt_roll * RND > army_leader_rating(army) THEN
-        halted = 1
+        halted = TRUE
         IF army_has_move(army) THEN
             army_order(army) = ORDER_DONE
         END IF

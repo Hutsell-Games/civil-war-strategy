@@ -14,13 +14,13 @@ SUB ai_army_orders (side, text_color)
     last_army = side_last_army(side)
     FOR i = first_army TO last_army
         CALL ai_army_order(side, i, ordered)
-        IF ordered <> 0 THEN
+        IF ordered THEN
             CALL draw_ai_plan(i, text_color)
         END IF
     NEXT i
 END SUB
 
-' The computer's move order for an army, or none (ordered is 0).
+' The computer's move order for an army, or none (ordered is FALSE).
 SUB ai_army_order (side, army, ordered)
     DIM city AS INTEGER
     DIM enemy_strength AS INTEGER
@@ -29,7 +29,7 @@ SUB ai_army_order (side, army, ordered)
     DIM neighbor_strength AS INTEGER
     DIM best_road AS INTEGER
     DIM other_army AS INTEGER
-    ordered = 0
+    ordered = FALSE
     city = army_city(army)
     IF NOT army_exists(army) OR army_has_acted(army) THEN
         EXIT SUB
@@ -75,7 +75,7 @@ SUB ai_army_order (side, army, ordered)
         army_order(army) = ORDER_NONE
         EXIT SUB
     END IF
-    ordered = 1
+    ordered = TRUE
 END SUB
 
 ' The computer drills each army that has no order and can still improve.
@@ -228,11 +228,11 @@ END FUNCTION
 ' True when an army of the side already has an order to march to the city.
 FUNCTION ai_city_targeted (side, city)
     DIM k AS INTEGER
-    ai_city_targeted = 0
+    ai_city_targeted = FALSE
     FOR k = side_first_army(side) TO side_last_army(side)
         IF army_exists(k) THEN
             IF army_order(k) = city THEN
-                ai_city_targeted = -1
+                ai_city_targeted = TRUE
                 EXIT FUNCTION
             END IF
         END IF
@@ -387,11 +387,11 @@ SUB ai_combine (side)
     CALL army_combine_redraw(side, city, best)
 END SUB
 
-' 1 when the computer's army razes the fort of a city it takes without a battle: under the
+' TRUE when the computer's army razes the fort of a city it takes without a battle: under the
 ' Realism setting, in the lower part of the map.
 FUNCTION ai_razes_fort (city)
-    ai_razes_fort = 0
+    ai_razes_fort = FALSE
     IF opt_realism = REALISM_ON AND city_y(city) > 150 THEN
-        ai_razes_fort = 1
+        ai_razes_fort = TRUE
     END IF
 END FUNCTION

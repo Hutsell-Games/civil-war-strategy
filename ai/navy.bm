@@ -107,12 +107,12 @@ SUB ai_navy_carry_out (side, order)
     CALL draw_ai_navy_color
     DO
         CALL navy_mark_side(side)
-        quit = 0
+        quit = FALSE
         CALL ai_navy_adjust(side, action, quit)
-        IF quit > 0 THEN
+        IF quit THEN
             EXIT SUB
         END IF
-        again = 0
+        again = FALSE
         SELECT CASE action
             CASE NAVY_BUILD
                 CALL ai_navy_build(side, again)
@@ -125,20 +125,20 @@ SUB ai_navy_carry_out (side, order)
             CASE NAVY_INVADE
                 CALL ai_navy_invade(side)
         END SELECT
-    LOOP WHILE again > 0
+    LOOP WHILE again
 END SUB
 
 ' Build, for the computer. It may decide against a ship, the more so the larger its fleet.
 ' With the money for two ships it builds an ironclad, at the price of two, as the player pays
 ' (the original charged one). A new fleet starts in one of its sea ports, picked at random.
-' again is 1 when a ship was built, or when the cash or a fleet at sea prevented it.
+' again is TRUE when a ship was built, or when the cash or a fleet at sea prevented it.
 SUB ai_navy_build (side, again)
     DIM ship$
     DIM cost AS INTEGER
     DIM cities(MAX_CITIES) AS INTEGER
     DIM count AS INTEGER
     DIM choice AS INTEGER
-    again = 0
+    again = FALSE
     IF NOT navy_can_build(side) THEN
         EXIT SUB
     END IF
@@ -146,7 +146,7 @@ SUB ai_navy_build (side, again)
         EXIT SUB
     END IF
     ship$ = SHIP_WOODEN$
-    IF navy_has_ironclads = 1 AND side_cash(side) >= ship_cost(SHIP_IRONCLAD$) THEN
+    IF navy_has_ironclads AND side_cash(side) >= ship_cost(SHIP_IRONCLAD$) THEN
         ship$ = SHIP_IRONCLAD$
     END IF
     cost = ship_cost(ship$)
@@ -154,7 +154,7 @@ SUB ai_navy_build (side, again)
     CALL navy_add_ship(side, ship$, cost)
     IF fleet_size(side) > 1 THEN
         CALL navy_ship_joins(side, ship$)
-        again = 1
+        again = TRUE
         EXIT SUB
     END IF
     CALL navy_list_shipyards(side, cities(), count)
@@ -164,16 +164,16 @@ SUB ai_navy_build (side, again)
         EXIT SUB
     END IF
     CALL navy_fleet_founded(side, cities(choice), ship$, cost)
-    again = 1
+    again = TRUE
 END SUB
 
 ' Attack, for the computer: the fleet bombards the enemy city it lies off. Off a city with
 ' an army, on an even chance, and off a neutral city the order becomes NAVY_SAIL and again
 ' is 1.
 SUB ai_navy_attack (side, action, again)
-    again = 0
+    again = FALSE
     IF fleet_is_at_sea(side) THEN
-        again = 1
+        again = TRUE
         EXIT SUB
     END IF
     IF city_owner(fleet_city(side)) = side THEN
@@ -183,18 +183,18 @@ SUB ai_navy_attack (side, action, again)
         ' The fleet sails instead of attacking an army. The original set the order to Sail and
         ' then bombarded all the same (docs/rule-changes.md, G24).
         action = NAVY_SAIL
-        again = 1
+        again = TRUE
         EXIT SUB
     ELSE
         IF city_owner(fleet_city(side)) = SIDE_NONE THEN
             action = NAVY_SAIL
-            again = 1
+            again = TRUE
             EXIT SUB
         END IF
     END IF
     IF NOT navy_can_attack(side) THEN
         IF fleet_exists(side) THEN
-            again = 1
+            again = TRUE
         END IF
         EXIT SUB
     END IF
@@ -208,14 +208,14 @@ SUB ai_navy_sail (side, again)
     DIM ports(MAX_CITIES) AS INTEGER
     DIM count AS INTEGER
     DIM port AS INTEGER
-    again = 0
+    again = FALSE
     CALL navy_count_ships(side)
     IF fleet_size(side) < 1 THEN
         EXIT SUB
     END IF
     IF NOT fleet_exists(side) THEN
         CALL navy_say_no_ships
-        again = 1
+        again = TRUE
         EXIT SUB
     END IF
 
@@ -223,13 +223,13 @@ SUB ai_navy_sail (side, again)
     IF count = 0 THEN
         EXIT SUB
     END IF
-    IF fleet_pursuit > 0 THEN
+    IF fleet_pursuit THEN
         port = fleet_city(other_side(side))
     ELSE
         port = ai_pick_port(side, ports(), count)
     END IF
     CALL navy_sail_to(side, port, sailed)
-    IF sailed = 0 THEN
+    IF NOT sailed THEN
         EXIT SUB
     END IF
     IF fleet_city(SIDE_UNION) = fleet_city(SIDE_REBEL) THEN
@@ -241,11 +241,11 @@ END SUB
 ' Raid, for the computer: the fleet goes to sea to raid commerce. The fleets fight if the
 ' enemy's is at sea too.
 SUB ai_navy_raid (side, again)
-    again = 0
+    again = FALSE
     CALL navy_count_ships(side)
     IF NOT navy_can_raid(side) THEN
         IF fleet_size(side) >= 1 THEN
-            again = 1
+            again = TRUE
         END IF
         EXIT SUB
     END IF
@@ -279,20 +279,20 @@ SUB ai_navy_first_action (side, action)
         IF raiding_side = other_side(side) AND raid_loss > 0 THEN
             action = NAVY_RAID
         END IF
-        IF fleet_pursuit > 0 THEN
+        IF fleet_pursuit THEN
             action = NAVY_SAIL
         END IF
     END IF
 END SUB
 
 ' The computer's order, looked at again before each action. It stops building when the
-' money or the fleet's limit is reached (quit is 1). A fleet that is gone builds, not sails.
+' money or the fleet's limit is reached (quit is TRUE). A fleet that is gone builds, not sails.
 ' It invades when the fleet can (navy_can_invade) and the enemy near the city it lies off is
 ' weak. The original looked near the Union's fleet for either side. For the Rebels that read the
 ' wrong city, and city 99 when the Union's fleet was at sea, which stopped the game (G50).
 SUB ai_navy_adjust (side, action, quit)
     IF action = NAVY_BUILD AND NOT navy_can_build(side) THEN
-        quit = 1
+        quit = TRUE
         EXIT SUB
     END IF
     IF NOT fleet_exists(side) AND action = NAVY_SAIL THEN

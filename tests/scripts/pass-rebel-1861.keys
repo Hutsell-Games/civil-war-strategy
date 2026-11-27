@@ -1,5 +1,5 @@
 # A whole game as the Rebel side, which only ends each turn; the computer plays the Union side.
-# A digest at each of the 5 main menus, at Game Over and at the title menus.
+# A digest at each of the 3 main menus, at Game Over and at the title menus.
 # Written by tests/make_scripts.py.
 #! seed 1861
 #! cfg side=2 history=1
@@ -23,7 +23,7 @@ play until 2:S
 text s
 
 # Each month's main menu: a digest, then END TURN.
-repeat 5
+repeat 3
 play until 2:M
 digest
 text e

@@ -13,7 +13,7 @@ SUB special_events
         EXIT SUB
     END IF
     ' An announcement: its text on the bottom line, and an alarm.
-    IF event_before(event) <> 0 THEN
+    IF event_before(event) THEN
         COLOR COLOR_YELLOW
         CALL clear_bottom_line
         PRINT event_message$(event_text$(event, variant));
@@ -65,10 +65,10 @@ SUB event_show_city (event, variant)
     COLOR COLOR_WHITE
     PRINT event_message$(event_text$(event, variant));
     CALL draw_cities
-    wait_seconds opt_pause!
+    CALL wait_seconds(opt_pause!)
     CALL clear_bottom_line
     CALL show_message_box(event_message$(event_outcome$(event)), COLOR_RED)
-    wait_seconds opt_pause!
+    CALL wait_seconds(opt_pause!)
 END SUB
 
 ' What every kind of event shows after its own message: the text of its "then" event in a box,

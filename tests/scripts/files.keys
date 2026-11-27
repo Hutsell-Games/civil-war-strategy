@@ -1,4 +1,4 @@
-#! seed 1861
+#! seed 2
 #! files cws1.sav cws2.sav cws.his oldhist.ory CWS.CFG
 # Civil War Strategy: the Files menu and Resume Saved Game (QB64Rust's tools/screen/README.md, "Places and rules").
 # Resume Saved Game is absent with no saves, and its R key is ignored; Start NEW Game. Files

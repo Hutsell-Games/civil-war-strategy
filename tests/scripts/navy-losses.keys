@@ -1,8 +1,9 @@
 # Civil War Strategy: the Rebels lose their fleet and cannot build another. The game is loaded
 # from a prepared save (tests/data/navy-losses/cws1.save): May 1862, the Rebels play, with one
 # ship off Philadelphia, one army in Richmond and no sea port. The computer is passive.
-# The seed is one with which the shore battery sinks the ship at the first shot.
-#! seed 2
+# The seed is one with which the shore battery sinks the one ship at the Attack.
+#! seed 3
+#! timeout 60
 #! cfg side=2 bold=0
 #! data navy-losses
 

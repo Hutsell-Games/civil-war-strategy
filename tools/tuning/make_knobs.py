@@ -146,7 +146,7 @@ def make_bm(knobs: list[Knob], checks: list[Check]) -> str:
             "    SELECT CASE key$"]
     for k in knobs:
         out += [f"        CASE \"{k.name}\"",
-                f"            why$ = tuning_check$(key$, value#, {k.least}, {k.most}, {0 if k.fraction else 1})",
+                f"            why$ = tuning_check$(key$, value#, {k.least}, {k.most}, {'FALSE' if k.fraction else 'TRUE'})",
                 "            IF why$ = \"\" THEN",
                 f"                {k.var} = value#",
                 "            END IF"]

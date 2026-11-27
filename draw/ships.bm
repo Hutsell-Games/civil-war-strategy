@@ -528,9 +528,9 @@ SUB draw_fleet_sailing (side)
             CASE 87
                 CALL draw_schooner
         END SELECT
-        wait_seconds 2 * opt_pause!
+        CALL wait_seconds(2 * opt_pause!)
     ELSE
-        wait_seconds opt_pause!
+        CALL wait_seconds(opt_pause!)
     END IF
 END SUB
 

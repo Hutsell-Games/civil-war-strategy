@@ -85,7 +85,7 @@ SUB check_victory_conditions
 
     CALL clear_bottom_line
     COLOR COLOR_YELLOW
-    IF victory_time_near = 1 THEN
+    IF victory_time_near THEN
         message$ = "Time almost expired (" + month_name$(victory_rule(VICTORY_MONTH)) + "," + STR$(victory_rule(VICTORY_YEAR)) + ")"
         CALL show_message_box(message$, COLOR_RED)
     END IF
@@ -105,17 +105,17 @@ SUB victory_warnings (side, union_troops, rebel_troops)
     DIM message$
     CALL clear_bottom_line
     COLOR COLOR_YELLOW
-    IF victory_near_cities(side) = 1 THEN
+    IF victory_near_cities(side) THEN
         message$ = side_name$(side) + " side almost controls" + STR$(victory_rule(VICTORY_CITIES)) + " cities"
         CALL show_message_box(message$, COLOR_RED)
     END IF
 
-    IF victory_near_income(side) = 1 THEN
+    IF victory_near_income(side) THEN
         message$ = side_name$(side) + " side close to" + STR$(victory_rule(VICTORY_INCOME)) + " % of total income"
         CALL show_message_box(message$, COLOR_RED)
     END IF
 
-    IF victory_near_force(side, union_troops, rebel_troops) = 1 THEN
+    IF victory_near_force(side, union_troops, rebel_troops) THEN
         message$ = side_name$(side) + " side close to" + STR$(victory_rule(VICTORY_FORCE_RATIO)) + ":1 strength ratio"
         CALL show_message_box(message$, COLOR_RED)
     END IF

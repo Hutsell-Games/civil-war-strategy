@@ -87,18 +87,18 @@ END SUB
 
 SUB TestCityTakeCountsTheCitysValue
     city_value(7) = 15: city_fort(7) = 2: side_capital(2) = 25
-    CALL city_take(7, 1, 0)
+    CALL city_take(7, 1, FALSE)
     AssertEqualInt 1, city_owner(7), "the Union holds it"
     AssertEqualInt 15, side_victory_points(1), "its value"
     AssertEqualInt 2, city_fort(7), "weaken_fort 0: the fort stands"
-    CALL city_take(7, 2, 1)
+    CALL city_take(7, 2, TRUE)
     AssertEqualInt 1, city_fort(7), "weaken_fort 1: a level less"
     AssertEqualInt 25, side_capital(2), "not a capital"
 END SUB
 
 SUB TestCityTakeOfTheCapital
     city_value(25) = 20: side_capital(2) = 25: side_victory_points(2) = 300
-    CALL city_take(25, 1, 0)
+    CALL city_take(25, 1, FALSE)
     AssertEqualInt 120, side_victory_points(1), "its value and 100"
     AssertEqualInt 200, side_victory_points(2), "100 from the Rebels"
     AssertEqualInt 0, side_capital(2), "the Rebels have no capital"
@@ -139,11 +139,11 @@ SUB TestCityFixReturnRoutesListsEach
     FOR k = 1 TO 6: city_road(5, k) = 10 + k: city_road(10 + k, 1) = 5: NEXT k
     CALL city_fix_return_routes(count, added(), from_city(), to_city())
     AssertEqualInt 2, count, "two roads without a way back"
-    AssertEqualInt 1, added(1), "the first is added"
+    AssertEqualInt TRUE, added(1), "the first is added"
     AssertEqualInt 3, from_city(1), "from city 3"
     AssertEqualInt 1, to_city(1), "to city 1"
     AssertEqualInt 1, city_road(3, 2), "in city 3's second slot"
-    AssertEqualInt 0, added(2), "the second has no free slot"
+    AssertEqualInt FALSE, added(2), "the second has no free slot"
     AssertEqualInt 5, from_city(2), "city 5"
     AssertEqualInt 4, to_city(2), "has no road to city 4"
 END SUB
@@ -747,7 +747,7 @@ SUB TestArmyAddRecruits
     CALL army_add_recruits(1, 4, isolated)
     AssertEqualInt 145, army_size(4), "4,500 more troops"
     AssertEqualInt 200, side_cash(1), "for 100"
-    AssertEqualInt 0, isolated, "not isolated without the Realism setting"
+    AssertEqualInt FALSE, isolated, "not isolated without the Realism setting"
 END SUB
 
 ' An army has at most 125,000 troops (max_army_size, as for a Join). The original had no limit,
@@ -766,16 +766,16 @@ SUB TestArmyAddRecruitsWithRealismCutOff
     city_value(7) = 20: army_city(4) = 7: army_size(4) = 100: side_cash(1) = 300
     CALL army_add_recruits(1, 4, isolated)
     AssertEqualInt 120, army_size(4), "(2 * 20 + 20) \ 3 more: city 7 has no road to a Union city"
-    AssertEqualInt 1, isolated, "isolated"
+    AssertEqualInt TRUE, isolated, "isolated"
 END SUB
 
 ' recruit_troops: the troops a city gives under the Realism setting.
 SUB TestRecruitTroopsByCityValue
     city_value(7) = 20: city_value(8) = 20: city_road(7, 1) = 8: city_owner(8) = 1
-    AssertEqualInt 93, recruit_troops(1, 7, 0), "a new army: 3 * 20 + 33"
-    AssertEqualInt 60, recruit_troops(1, 7, 1), "added troops: 2 * 20 + 20"
-    AssertEqualInt 31, recruit_troops(2, 7, 0), "a third, cut off from the Rebels' cities"
-    AssertEqualInt 20, recruit_troops(2, 7, 1), "a third of 60"
+    AssertEqualInt 93, recruit_troops(1, 7, FALSE), "a new army: 3 * 20 + 33"
+    AssertEqualInt 60, recruit_troops(1, 7, TRUE), "added troops: 2 * 20 + 20"
+    AssertEqualInt 31, recruit_troops(2, 7, FALSE), "a third, cut off from the Rebels' cities"
+    AssertEqualInt 20, recruit_troops(2, 7, TRUE), "a third of 60"
     AssertEqualInt 70, recruits_cut_off(1, 7, 70), "not cut off: all of it"
     AssertEqualInt 23, recruits_cut_off(2, 7, 70), "cut off: 70 \ 3"
 END SUB
@@ -1045,7 +1045,7 @@ SUB TestAiNavyChangesItsOrder
     raiding_side = 2: raid_loss = 3
     CALL ai_navy_first_action(1, action)
     AssertEqualInt NAVY_RAID, action, "the Rebels' raiders sank commerce: raid back"
-    fleet_pursuit = 1
+    fleet_pursuit = TRUE
     CALL ai_navy_first_action(1, action)
     AssertEqualInt NAVY_SAIL, action, "the enemy's fleet is to be pursued: sail"
 END SUB
@@ -1121,9 +1121,9 @@ SUB TestNavyShoreBatteryDamagesFort
         RANDOMIZE s
         fleet_ships$(1) = "W": fleet_size(1) = 1: fleet_city(1) = 5: city_fort(5) = 2
         CALL navy_shore_battery(1, 5, damaged)
-        IF damaged = 1 THEN EXIT FOR
+        IF damaged THEN EXIT FOR
     NEXT s
-    AssertEqualInt 1, damaged, "a seed where the fleet hits the fort"
+    AssertEqualInt TRUE, damaged, "a seed where the fleet hits the fort"
     AssertEqualInt 1, city_fort(5), "the fort loses a level"
     AssertEqualInt 1, fleet_size(1), "the ship is safe"
     AssertEqualInt 5, fleet_city(1), "the fleet stays"
@@ -1134,9 +1134,9 @@ SUB TestNavyShoreBatterySinksShip
         RANDOMIZE s
         fleet_ships$(1) = "WI": fleet_size(1) = 2: fleet_city(1) = 5: city_fort(5) = 2
         CALL navy_shore_battery(1, 5, damaged)
-        IF damaged = 0 THEN EXIT FOR
+        IF NOT damaged THEN EXIT FOR
     NEXT s
-    AssertEqualInt 0, damaged, "a seed where the battery hits"
+    AssertEqualInt FALSE, damaged, "a seed where the battery hits"
     AssertEqualInt 2, city_fort(5), "the fort stands"
     AssertEqualInt 1, fleet_size(1), "a ship is sunk"
     AssertEqualStr "W", fleet_ships$(1), "the last of the list"
@@ -1145,13 +1145,13 @@ END SUB
 SUB TestNavyShotIroncladBeatsWood
     fleet_ships$(1) = "I": fleet_ships$(2) = "W"
     RANDOMIZE 1
-    iron = 0: FOR k = 1 TO 200: iron = iron + navy_shot_hits(1): NEXT k
+    iron = 0: FOR k = 1 TO 200: iron = iron - navy_shot_hits(1): NEXT k
     RANDOMIZE 1
-    wood = 0: FOR k = 1 TO 200: wood = wood + navy_shot_hits(2): NEXT k
+    wood = 0: FOR k = 1 TO 200: wood = wood - navy_shot_hits(2): NEXT k
     AssertTrue iron > wood, "the same draws: the ironclad hits more often:" + STR$(iron) + STR$(wood)
     fleet_ships$(2) = "I"
     RANDOMIZE 1
-    even = 0: FOR k = 1 TO 200: even = even + navy_shot_hits(2): NEXT k
+    even = 0: FOR k = 1 TO 200: even = even - navy_shot_hits(2): NEXT k
     AssertTrue even > wood AND even < iron, "two ironclads: in between:" + STR$(even)
 END SUB
 
@@ -1160,9 +1160,9 @@ SUB TestNavyRaidRoundLosesAShip
         RANDOMIZE s
         raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA: raid_loss = 7
         CALL navy_raid_round(raider, sank)
-        IF sank = 0 THEN EXIT FOR
+        IF NOT sank THEN EXIT FOR
     NEXT s
-    AssertEqualInt 0, sank, "a seed where the raiders lose"
+    AssertEqualInt FALSE, sank, "a seed where the raiders lose"
     AssertEqualInt 1, raider, "the Union raided"
     AssertEqualInt 0, raid_loss, "they sank nothing"
     AssertEqualInt 0, fleet_size(1), "their last ship is gone"
@@ -1174,27 +1174,27 @@ END SUB
 SUB TestNavyRaidRoundLastShipEndsThePursuit
     FOR s = 1 TO 100
         RANDOMIZE USING s
-        current_side = 1: fleet_pursuit = 1
+        current_side = 1: fleet_pursuit = TRUE
         raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA
         CALL navy_raid_round(raider, sank)
-        IF sank = 0 THEN EXIT FOR
+        IF NOT sank THEN EXIT FOR
     NEXT s
-    AssertEqualInt 0, sank, "a seed where the raiders lose"
-    AssertEqualInt 0, fleet_pursuit, "the player's raiders are gone: no pursuit"
+    AssertEqualInt FALSE, sank, "a seed where the raiders lose"
+    AssertEqualInt FALSE, fleet_pursuit, "the player's raiders are gone: no pursuit"
     RANDOMIZE USING s
-    current_side = 2: fleet_pursuit = 1
+    current_side = 2: fleet_pursuit = TRUE
     raiding_side = 1: fleet_size(1) = 1: fleet_ships$(1) = "W": fleet_city(1) = FLEET_AT_SEA
     CALL navy_raid_round(raider, sank)
-    AssertEqualInt 0, sank, "the same seed"
-    AssertEqualInt 1, fleet_pursuit, "the computer's raiders lost: the pursuit stays"
+    AssertEqualInt FALSE, sank, "the same seed"
+    AssertEqualInt TRUE, fleet_pursuit, "the computer's raiders lost: the pursuit stays"
 END SUB
 
 SUB TestNavyFleetLostToTheBattery
-    current_side = 1: fleet_pursuit = 1: fleet_city(1) = 5
+    current_side = 1: fleet_pursuit = TRUE: fleet_city(1) = 5
     CALL navy_fleet_lost(1)
     AssertEqualInt 0, fleet_city(1), "no fleet"
     AssertEqualInt 5, side_victory_points(2), "5 points for the Rebels"
-    AssertEqualInt 0, fleet_pursuit, "no pursuit"
+    AssertEqualInt FALSE, fleet_pursuit, "no pursuit"
 END SUB
 
 SUB TestNavyBlastCapitalAndNeutral
@@ -1232,9 +1232,9 @@ SUB TestNavyRaidRound
     AssertEqualInt 0, raiding_side, "nobody raids"
     raiding_side = 1: fleet_size(1) = 10: side_income(2) = 100: current_side = 1
     CALL navy_raid_round(raider, sank)
-    AssertEqualInt 1, sank, "10 ships always sink commerce"
+    AssertEqualInt TRUE, sank, "10 ships always sink commerce"
     AssertEqualInt 30, raid_loss, "at most 30% of the income"
-    AssertEqualInt 1, fleet_pursuit, "the other fleet will pursue"
+    AssertEqualInt TRUE, fleet_pursuit, "the other fleet will pursue"
 END SUB
 
 SUB TestNavyShipHits
@@ -1295,9 +1295,9 @@ SUB TestNavyFleetDefeated
     AssertEqualInt 0, fleet_city(2), "the Rebels' fleet is gone"
     AssertEqualInt 10, side_victory_points(1), "10 points for the winner"
     AssertEqualInt 0, side_victory_points(2), "none for the loser"
-    AssertEqualInt 1, fleet_pursuit, "the Union, whose turn it is, won: pursuit"
+    AssertEqualInt TRUE, fleet_pursuit, "the Union, whose turn it is, won: pursuit"
     CALL navy_fleet_defeated(1)
-    AssertEqualInt 0, fleet_pursuit, "the Union lost: no pursuit"
+    AssertEqualInt FALSE, fleet_pursuit, "the Union lost: no pursuit"
 END SUB
 
 SUB TestNavyRetreatPort
@@ -1332,15 +1332,15 @@ SUB TestAiArmyOrderAndWinter
     army_city(21) = 5: army_size(21) = 100: army_supply(21) = 5: city_army(5) = 21
     city_road(5, 1) = 6: city_value(6) = 10
     CALL ai_army_order(2, 21, ordered)
-    AssertEqualInt 1, ordered, "an order"
+    AssertEqualInt TRUE, ordered, "an order"
     AssertEqualInt 6, army_order(21), "to the neutral city next to it"
     army_order(21) = ORDER_NONE: turn_month = 1
     CALL ai_army_order(2, 21, ordered)
-    AssertEqualInt 0, ordered, "no winter campaigns: none in January"
+    AssertEqualInt FALSE, ordered, "no winter campaigns: none in January"
     AssertEqualInt ORDER_NONE, army_order(21), "left where it is"
     army_city(22) = 0
     CALL ai_army_order(2, 22, ordered)
-    AssertEqualInt 0, ordered, "an army without a city has none"
+    AssertEqualInt FALSE, ordered, "an army without a city has none"
 END SUB
 
 SUB TestAiStayWeight
@@ -1579,13 +1579,13 @@ SUB TestLoadEventsReadsTheTable
     AssertEqualInt 4, chance_count, "the chance has four factors"
     AssertEqualInt CHANCE_YEAR, chance_kind(2), "the second: the years"
     AssertEqualInt 1860, chance_value#(2), "since 1860"
-    AssertEqualInt 1, chance_has_most, "the chance has a cap"
+    AssertEqualInt TRUE, chance_has_most, "the chance has a cap"
     row = event_find("ironclads")
-    AssertEqualInt 1, event_before(row), "an announcement"
+    AssertEqualInt TRUE, event_before(row), "an announcement"
     AssertEqualInt SIDE_NONE, event_favors(row), "that favors no side"
     row = event_find("riots")
     AssertEqualInt SIDE_REBEL, event_favors(row), "the side by its name"
-    AssertEqualInt 0, event_before(row), "an event of the roll"
+    AssertEqualInt FALSE, event_before(row), "an event of the roll"
     AssertEqualInt EFFECT_CITY_NEUTRAL, event_effect(row), "an effect without a number"
     AssertEqualStr " Riots have broken out in {city}", event_text$(row, 0), "quotes keep the space at the start"
     AssertEqualStr "{city} is now NEUTRAL !", event_outcome$(row), "the outcome"
@@ -1598,7 +1598,7 @@ SUB TestLoadEventsReadsTheTable
     row = event_find("uprising")
     AssertEqualInt event_find("furloughs"), event_instead(row), "instead names an event further down"
     AssertEqualInt 2, event_instead_count(row), "with two conditions"
-    AssertEqualInt 0, event_listed(event_find("furloughs")), "which is not in the list"
+    AssertEqualInt FALSE, event_listed(event_find("furloughs")), "which is not in the list"
     row = event_find("emancipation")
     AssertEqualInt 100, event_amount!(row, 0), "the effect's first number"
     AssertEqualInt -100, event_amount!(row, 1), "and its second"
@@ -1759,7 +1759,7 @@ SUB TestLoadEventsTakesTabsInsideAValue
     AssertEqualStr "", event_file_error$, "read"
     AssertEqualInt 2, chance_count, "the chance's two factors"
     AssertEqualInt 1860, chance_value#(2), "a tab inside the brackets"
-    AssertEqualInt 1, chance_has_most, "the cap after a comma and a tab"
+    AssertEqualInt TRUE, chance_has_most, "the cap after a comma and a tab"
     AssertEqualInt 2, event_if_count(1), "the two conditions"
     AssertEqualInt SUBJECT_CITIES, condition_subject(event_if_first(1) + 1), "the condition after a comma and a tab"
     AssertEqualInt 2, event_instead(1), "the event named instead, snow, with a tab after it"
@@ -1823,7 +1823,7 @@ END SUB
 ' The last check that fails is the one given; the names are looked up.
 SUB TestEventRowProblemGivesTheLast
     event_count = 2: event_name$(2) = "snow": event_text_count(2) = 1
-    event_before(1) = 0: event_favors(1) = SIDE_NONE: event_for(1) = SIDE_NONE: event_effect(1) = EFFECT_NONE
+    event_before(1) = FALSE: event_favors(1) = SIDE_NONE: event_for(1) = SIDE_NONE: event_effect(1) = EFFECT_NONE
     AssertEqualStr "has no favors line", event_row_problem$(1, "", ""), "no favors"
     AssertEqualStr "names an event that is not there: hail", event_row_problem$(1, "hail", ""), "the name wins"
     event_favors(1) = SIDE_UNION
@@ -1833,9 +1833,9 @@ SUB TestEventRowProblemGivesTheLast
 END SUB
 
 SUB TestEventGeneralProblem
-    AssertEqualStr "", event_general_problem$(1, 1), "both lines"
-    AssertEqualStr "[events] needs a banner line", event_general_problem$(0, 1), "no banner"
-    AssertEqualStr "[events] needs a chance line", event_general_problem$(0, 0), "neither: the chance, checked last"
+    AssertEqualStr "", event_general_problem$(TRUE, TRUE), "both lines"
+    AssertEqualStr "[events] needs a banner line", event_general_problem$(FALSE, TRUE), "no banner"
+    AssertEqualStr "[events] needs a chance line", event_general_problem$(FALSE, FALSE), "neither: the chance, checked last"
 END SUB
 
 SUB TestLoadEventsStopsAtTheLimits
@@ -2162,7 +2162,7 @@ SUB TestEventEmancipation
     AssertEqualInt event_find("emancipation"), event, "the Proclamation, once, after 1862"
     AssertEqualInt 300, side_victory_points(1), "100 points for the Union"
     AssertEqualInt 100, side_victory_points(2), "100 from the Rebels"
-    AssertEqualInt 1, event_done(event), "not again"
+    AssertEqualInt TRUE, event_done(event), "not again"
     script_dice$ = "0,.9,.5,0,.9"
     CALL event_roll(event, variant, who)
     AssertEqualInt event_find("donations"), event, "the next time another event comes"
@@ -2171,7 +2171,7 @@ END SUB
 
 SUB TestEventReelection
     CALL events_for_test
-    turn_year = 1864: turn_month = 11: event_done(event_find("emancipation")) = 1
+    turn_year = 1864: turn_month = 11: event_done(event_find("emancipation")) = TRUE
     side_victory_points(2) = 200
     script_dice$ = "0,.9,.5,0"
     CALL event_roll(event, variant, who)
@@ -2181,7 +2181,7 @@ END SUB
 
 SUB TestEventDeserters
     CALL events_for_test
-    event_done(event_find("emancipation")) = 1
+    event_done(event_find("emancipation")) = TRUE
     army_size(1) = 100: army_size(21) = 100
     script_dice$ = "0,.9,.5,0,0,.9"
     CALL event_roll(event, variant, who)
@@ -2193,7 +2193,7 @@ END SUB
 ' The rifles are followed by Stanton's prediction: its points and its text.
 SUB TestEventRiflesThenStanton
     CALL events_for_test
-    event_done(event_find("emancipation")) = 1
+    event_done(event_find("emancipation")) = TRUE
     army_experience(1) = 5: army_experience(2) = 9: army_experience(21) = 5
     script_dice$ = "0,.9,.5,0,0,0,.9"
     CALL event_roll(event, variant, who)
@@ -2245,20 +2245,20 @@ END SUB
 SUB TestVictoryTimeNear
     victory_rule(VICTORY_YEAR) = 1865: victory_rule(VICTORY_MONTH) = 3
     turn_year = 1865: turn_month = 1
-    AssertEqualInt 1, victory_time_near, "January 1865, the limit March 1865"
+    AssertEqualInt TRUE, victory_time_near, "January 1865, the limit March 1865"
     turn_month = 3
-    AssertEqualInt 0, victory_time_near, "March: the time is up, not near"
+    AssertEqualInt FALSE, victory_time_near, "March: the time is up, not near"
 END SUB
 
 SUB TestVictoryNearRules
     victory_rule(VICTORY_CITIES) = 20: side_city_count(1) = 18
-    AssertEqualInt 1, victory_near_cities(1), "18 of 20 cities: nine tenths"
+    AssertEqualInt TRUE, victory_near_cities(1), "18 of 20 cities: nine tenths"
     side_city_count(1) = 17
-    AssertEqualInt 0, victory_near_cities(1), "17: not yet"
+    AssertEqualInt FALSE, victory_near_cities(1), "17: not yet"
     victory_rule(VICTORY_FORCE_RATIO) = 3
-    AssertEqualInt 1, victory_near_force(1, 280, 100), "2.8 to 1 against 3"
-    AssertEqualInt 0, victory_near_force(2, 280, 100), "the Rebels are outnumbered"
-    AssertEqualInt 0, victory_near_force(1, 280, 0), "no Rebel troops: no ratio"
+    AssertEqualInt TRUE, victory_near_force(1, 280, 100), "2.8 to 1 against 3"
+    AssertEqualInt FALSE, victory_near_force(2, 280, 100), "the Rebels are outnumbered"
+    AssertEqualInt FALSE, victory_near_force(1, 280, 0), "no Rebel troops: no ratio"
 END SUB
 
 ' The ratio and the income share exactly at a rule's limit: the ratio rule asks for more than
@@ -2272,8 +2272,8 @@ SUB TestVictoryRatioAndShareAtTheLimit
     AssertEqualInt VICTORY_FORCE_RATIO, j, "3.01 to 1 is"
     CALL victory_rule_met(2, 100, 301, j)
     AssertEqualInt VICTORY_FORCE_RATIO, j, "the Rebels' ratio is theirs over the Union's"
-    AssertEqualInt 0, victory_near_force(1, 270, 100), "2.7 to 1 is not more than .9 of 3"
-    AssertEqualInt 1, victory_near_force(1, 271, 100), "2.71 to 1 is"
+    AssertEqualInt FALSE, victory_near_force(1, 270, 100), "2.7 to 1 is not more than .9 of 3"
+    AssertEqualInt TRUE, victory_near_force(1, 271, 100), "2.71 to 1 is"
     victory_rule(VICTORY_FORCE_RATIO) = 0
     victory_rule(VICTORY_INCOME) = 60
     side_income(1) = 60: side_income(2) = 40
@@ -2283,9 +2283,9 @@ SUB TestVictoryRatioAndShareAtTheLimit
     CALL victory_rule_met(1, 100, 100, j)
     AssertEqualInt 0, j, "59 of 100 does not"
     side_income(1) = 54: side_income(2) = 46
-    AssertEqualInt 1, victory_near_income(1), "54 of 100 is nine tenths of 60 percent"
+    AssertEqualInt TRUE, victory_near_income(1), "54 of 100 is nine tenths of 60 percent"
     side_income(1) = 53: side_income(2) = 47
-    AssertEqualInt 0, victory_near_income(1), "53 is not"
+    AssertEqualInt FALSE, victory_near_income(1), "53 is not"
 END SUB
 
 SUB TestVictoryPlayOn
@@ -2301,7 +2301,7 @@ SUB TestVictoryWonAndTechnical
     CALL victory_won(2, 7)
     AssertEqualInt 200, side_victory_points(2), "100 more for wiping out the enemy"
     AssertEqualInt 2, victory_side, "marked for the battle summary"
-    AssertEqualInt 1, game_over, "the game is over"
+    AssertEqualInt TRUE, game_over, "the game is over"
     side_victory_points(1) = 100
     CALL victory_technical_points
     AssertEqualInt 70, side_victory_points(1), "seven tenths"
@@ -2375,16 +2375,16 @@ SUB TestTurnArmySupplyInWinter
     CALL turn_army_supply(1, blockaded, starved)
     AssertEqualInt 80, side_cash(1), "a day of supply for 10,000 troops costs 20"
     AssertEqualInt 2, army_supply(1), "bought one, used one away from a sea port in winter"
-    AssertEqualInt 0, blockaded, "not blockaded"
-    AssertEqualInt 0, starved, "not starved"
+    AssertEqualInt FALSE, blockaded, "not blockaded"
+    AssertEqualInt FALSE, starved, "not starved"
 END SUB
 
 SUB TestTurnArmySupplyBlockaded
     turn_month = 8: army_city(21) = 9: city_port_type(9) = PORT_SEA: fleet_city(1) = 9
     army_size(21) = 40: army_supply(21) = 1
     CALL turn_army_supply(21, blockaded, starved)
-    AssertEqualInt 1, blockaded, "the Union's fleet is in port 9"
-    AssertEqualInt 1, starved, "the day it had is gone"
+    AssertEqualInt TRUE, blockaded, "the Union's fleet is in port 9"
+    AssertEqualInt TRUE, starved, "the day it had is gone"
     AssertEqualInt 0, army_supply(21), "no supplies"
     AssertEqualInt 40, army_size(21), "an army of 50 or fewer keeps its troops"
 END SUB
@@ -2418,11 +2418,11 @@ SUB TestTurnArmyMarches
     army_supply(1) = 2
     CALL turn_army_marches(1, starved)
     AssertEqualInt 1, army_supply(1), "a day used"
-    AssertEqualInt 0, starved, "it had one"
+    AssertEqualInt FALSE, starved, "it had one"
     army_supply(1) = 0
     CALL turn_army_marches(1, starved)
     AssertEqualInt 0, army_supply(1), "not below 0"
-    AssertEqualInt 1, starved, "it had none"
+    AssertEqualInt TRUE, starved, "it had none"
 END SUB
 
 SUB TestTurnBattleExperience
@@ -2441,12 +2441,12 @@ SUB TestTurnWithdrawAndHalt
     AssertEqualInt ORDER_DONE, army_order(2), "done for the month"
     army_leader_rating(21) = 11: army_order(21) = 7
     CALL turn_defender_halts(21, halted, old_order)
-    AssertEqualInt 0, halted, "a leader rated 11 always keeps his order"
+    AssertEqualInt FALSE, halted, "a leader rated 11 always keeps his order"
     AssertEqualInt 7, army_order(21), "kept"
     RANDOMIZE 1
     army_leader_rating(22) = 0: army_order(22) = 8
     CALL turn_defender_halts(22, halted, old_order)
-    AssertEqualInt 1, halted, "a leader rated 0 loses it"
+    AssertEqualInt TRUE, halted, "a leader rated 0 loses it"
     AssertEqualInt 8, old_order, "the order it had"
     AssertEqualInt ORDER_DONE, army_order(22), "lost"
 END SUB
@@ -2523,6 +2523,23 @@ END SUB
 ' ------------------------------------------ the Utility menu's settings
 ' The option_ SUBs of rules/setup.bm, and victory_toggle_rule.
 
+' The Union's Troops list of the month goes with the swap: the Rebels, who hold neither city,
+' are offered none of them (G64).
+SUB TestOptionSwapSideDropsTheTroopsList
+    DIM cities(MAX_CITIES) AS INTEGER
+    opt_players = PLAYERS_ONE: current_side = SIDE_UNION
+    city_owner(5) = SIDE_UNION: city_owner(6) = SIDE_UNION
+    city_name$(5) = "Alpha": city_name$(6) = "Beta"
+    turn_recruit_count = 2: turn_recruit_city(1) = 5: turn_recruit_city(2) = 6
+    CALL option_swap_side
+    AssertEqualInt 0, turn_recruit_count, "the list is gone"
+    CALL army_recruit_cities(current_side, cities(), count)
+    AssertEqualInt 0, count, "the Rebels hold no city, so they are offered none"
+    turn_recruit_count = RECRUIT_CLOSED
+    CALL option_swap_side
+    AssertEqualInt 0, turn_recruit_count, "Troops closed for one side is open for the other"
+END SUB
+
 SUB TestOptionSwapSide
     current_side = SIDE_UNION: opt_event_balance = 5
     CALL option_swap_side
@@ -2596,7 +2613,7 @@ SUB TestVaryStartKeepsSettingsAndRules
     AssertEqualInt REALISM_ON, opt_realism, "Realism, not cws.cfg's"
     AssertEqualInt 0, army_size(8), "an army raised before Vary Start is gone"
     AssertEqualInt 0, city_army(4), "and its city is empty"
-    AssertEqualInt 1, vary_start_open, "Vary Start may be used again"
+    AssertEqualInt TRUE, vary_start_open, "Vary Start may be used again"
 END SUB
 
 ' A Rebel fleet of no ships is no fleet (G41).
@@ -2635,9 +2652,9 @@ END SUB
 ' Vary Start is offered until the first End Turn of a new game, and not in a loaded game.
 SUB TestVaryStartOpenUntilTheFirstEndTurn
     CALL game_reset
-    AssertEqualInt 1, vary_start_open, "a new game"
+    AssertEqualInt TRUE, vary_start_open, "a new game"
     CALL turn_next_player(month_over)
-    AssertEqualInt 0, vary_start_open, "after End Turn"
+    AssertEqualInt FALSE, vary_start_open, "after End Turn"
 END SUB
 
 ' The Cancel menu's names: a name of more than 10 characters loses its first word.
@@ -2759,8 +2776,8 @@ SUB TestArmySetOrder
     AssertEqualInt 17, army_order(3), "a city to march to"
     CALL army_set_order(3, ORDER_NONE)
     AssertEqualInt ORDER_NONE, army_order(3), "cancelled"
-    CALL turn_set_moves_done(1): AssertEqualInt 1, turn_moves_done, "no army left to move"
-    CALL turn_set_moves_done(0): AssertEqualInt 0, turn_moves_done, "open again"
+    CALL turn_set_moves_done(TRUE): AssertEqualInt TRUE, turn_moves_done, "no army left to move"
+    CALL turn_set_moves_done(FALSE): AssertEqualInt FALSE, turn_moves_done, "open again"
 END SUB
 
 SUB TestCityBuildFort
@@ -2874,10 +2891,10 @@ END SUB
 SUB TestAiRazesFort
     city_y(5) = 151: city_y(6) = 150
     opt_realism = REALISM_OFF
-    AssertEqualInt 0, ai_razes_fort(5), "not without realism"
+    AssertEqualInt FALSE, ai_razes_fort(5), "not without realism"
     opt_realism = REALISM_ON
-    AssertEqualInt 1, ai_razes_fort(5), "with realism, below line 150"
-    AssertEqualInt 0, ai_razes_fort(6), "not at line 150 or above"
+    AssertEqualInt TRUE, ai_razes_fort(5), "with realism, below line 150"
+    AssertEqualInt FALSE, ai_razes_fort(6), "not at line 150 or above"
 END SUB
 
 ' ------------------------------------------ the army and fleet state, by name
@@ -2921,21 +2938,21 @@ SUB TestNavyMarkSideAndCountShips
     fleet_ships$(SIDE_UNION) = "IWW": fleet_size(SIDE_UNION) = 7
     CALL navy_count_ships(SIDE_UNION)
     AssertEqualInt 3, fleet_size(SIDE_UNION), "counted from the list of ships"
-    CALL turn_set_navy_done(1)
-    AssertEqualInt 1, turn_navy_done, "the fleet has acted"
+    CALL turn_set_navy_done(TRUE)
+    AssertEqualInt TRUE, turn_navy_done, "the fleet has acted"
 END SUB
 
 SUB TestNavyHasIronclads
     opt_realism = REALISM_OFF: turn_year = 1861: turn_month = 5
-    AssertEqualInt 1, navy_has_ironclads, "without realism: always"
+    AssertEqualInt TRUE, navy_has_ironclads, "without realism: always"
     opt_realism = REALISM_ON
-    AssertEqualInt 0, navy_has_ironclads, "with realism: not in 1861"
+    AssertEqualInt FALSE, navy_has_ironclads, "with realism: not in 1861"
     turn_year = IRONCLAD_YEAR: turn_month = 1
-    AssertEqualInt 0, navy_has_ironclads, "nor in January 1862"
+    AssertEqualInt FALSE, navy_has_ironclads, "nor in January 1862"
     turn_month = IRONCLAD_MONTH
-    AssertEqualInt 1, navy_has_ironclads, "from March 1862"
+    AssertEqualInt TRUE, navy_has_ironclads, "from March 1862"
     turn_year = 1863: turn_month = 1
-    AssertEqualInt 1, navy_has_ironclads, "and in every later year"
+    AssertEqualInt TRUE, navy_has_ironclads, "and in every later year"
 END SUB
 
 ' The ports for a new fleet are the side's sea ports without the one the enemy's fleet lies
@@ -3001,10 +3018,10 @@ SUB TestAiNavyAttackSailsFromAnArmy
         IF RND > .5 THEN EXIT FOR
     NEXT seed
     RANDOMIZE USING seed
-    action = NAVY_ATTACK: again = 0
+    action = NAVY_ATTACK: again = FALSE
     CALL ai_navy_attack(2, action, again)
     AssertEqualInt NAVY_SAIL, action, "the order is Sail"
-    AssertEqualInt 1, again, "the fleet goes on to sail"
+    AssertEqualInt TRUE, again, "the fleet goes on to sail"
     AssertEqualInt 50, army_size(3), "the army is not bombarded"
 END SUB
 
@@ -3014,7 +3031,7 @@ SUB TestAiNavyAdjustInvadesByItsOwnCity
     current_side = SIDE_UNION: opt_realism = REALISM_OFF
     fleet_city(SIDE_REBEL) = 6: fleet_size(SIDE_REBEL) = 2: fleet_ships$(SIDE_REBEL) = "WW"
     fleet_city(SIDE_UNION) = FLEET_AT_SEA: fleet_size(SIDE_UNION) = 1: fleet_ships$(SIDE_UNION) = "W"
-    action = NAVY_SAIL: quit = 0
+    action = NAVY_SAIL: quit = FALSE
     CALL ai_navy_adjust(SIDE_REBEL, action, quit)
     AssertEqualInt NAVY_INVADE, action, "no enemy near city 6: it invades"
     city_road(6, 1) = 7: city_owner(7) = SIDE_UNION: city_army(7) = 1: army_city(1) = 7: army_size(1) = 900
@@ -3387,11 +3404,11 @@ END SUB
 ' ------------------------------------------------- saved games (io/files.bm)
 
 SUB TestTurnResetCommands
-    turn_recruit_count = -1: turn_moves_done = 1: turn_navy_done = 1
+    turn_recruit_count = -1: turn_moves_done = TRUE: turn_navy_done = TRUE
     CALL turn_reset_commands
     AssertEqualInt 0, turn_recruit_count, "Troops open"
-    AssertEqualInt 0, turn_moves_done, "Moves open"
-    AssertEqualInt 0, turn_navy_done, "Ships open"
+    AssertEqualInt FALSE, turn_moves_done, "Moves open"
+    AssertEqualInt FALSE, turn_navy_done, "Ships open"
 END SUB
 
 ' Before each main menu: Ships is closed when the side has no fleet and under 100 in cash.
@@ -3400,13 +3417,13 @@ SUB TestTurnCheckCommands
     current_side = SIDE_UNION: opt_players = PLAYERS_ONE
     side_cash(SIDE_UNION) = cost_ship - 1: fleet_city(SIDE_UNION) = 30
     CALL turn_check_commands
-    AssertEqualInt 0, turn_navy_done, "a fleet: Ships stays open"
+    AssertEqualInt FALSE, turn_navy_done, "a fleet: Ships stays open"
     fleet_city(SIDE_UNION) = 0: side_cash(SIDE_UNION) = cost_ship
     CALL turn_check_commands
-    AssertEqualInt 0, turn_navy_done, "no fleet, the price of a ship: open"
+    AssertEqualInt FALSE, turn_navy_done, "no fleet, the price of a ship: open"
     side_cash(SIDE_UNION) = cost_ship - 1
     CALL turn_check_commands
-    AssertEqualInt 1, turn_navy_done, "no fleet and too little cash: closed"
+    AssertEqualInt TRUE, turn_navy_done, "no fleet and too little cash: closed"
     current_side = SIDE_NONE: opt_players = PLAYERS_TWO
     CALL turn_check_commands
     AssertEqualInt SIDE_UNION, current_side, "two players and no side: the Union"
@@ -3419,34 +3436,34 @@ END SUB
 SUB TestTurnNextPlayer
     opt_players = PLAYERS_ONE: current_side = SIDE_REBEL
     CALL turn_next_player(over)
-    AssertEqualInt 1, over, "one player: the month is played"
+    AssertEqualInt TRUE, over, "one player: the month is played"
     AssertEqualInt SIDE_REBEL, current_side, "and the player keeps the side"
     opt_players = PLAYERS_TWO: current_side = SIDE_UNION
     CALL turn_next_player(over)
-    AssertEqualInt 0, over, "two players, after the Union: no month yet"
+    AssertEqualInt FALSE, over, "two players, after the Union: no month yet"
     AssertEqualInt SIDE_REBEL, current_side, "the Rebels' turn"
     CALL turn_next_player(over)
-    AssertEqualInt 1, over, "after the Rebels: the month is played"
+    AssertEqualInt TRUE, over, "after the Rebels: the month is played"
     AssertEqualInt SIDE_UNION, current_side, "then the Union again"
 END SUB
 
 SUB TestGameReset
-    game_over = 1: turn_recruit_count = -1: saves_exist = 0: event_done(3) = 1: union_income_bonus = 252
+    game_over = TRUE: turn_recruit_count = -1: saves_exist = FALSE: event_done(3) = TRUE: union_income_bonus = 252
     army_size(7) = 90: army_city(7) = 12: army_order(7) = 5: army_leader_rating(7) = 4: army_name$(7) = "Banks"
     fleet_size(SIDE_REBEL) = 3: fleet_city(SIDE_REBEL) = 27: train_army(SIDE_UNION) = 7: train_city(SIDE_UNION) = 30
     side_victory_points(SIDE_UNION) = 400: victory_rule(VICTORY_MONTH) = 3
-    turn_moves_done = 1: turn_navy_done = 1
-    raiding_side = SIDE_REBEL: raid_loss = 40: fleet_pursuit = 1
+    turn_moves_done = TRUE: turn_navy_done = TRUE
+    raiding_side = SIDE_REBEL: raid_loss = 40: fleet_pursuit = TRUE
     CALL game_reset
-    AssertEqualInt 0, game_over, "the game is on"
+    AssertEqualInt FALSE, game_over, "the game is on"
     AssertEqualInt 0, turn_recruit_count, "Troops open"
-    AssertEqualInt 0, turn_moves_done, "Moves open"
-    AssertEqualInt 0, turn_navy_done, "Ships open"
+    AssertEqualInt FALSE, turn_moves_done, "Moves open"
+    AssertEqualInt FALSE, turn_navy_done, "Ships open"
     AssertEqualInt SIDE_NONE, raiding_side, "no side raids"
     AssertEqualInt 0, raid_loss, "no income lost to raiders"
-    AssertEqualInt 0, fleet_pursuit, "no fleet pursues"
-    AssertEqualInt 1, saves_exist, "Load open"
-    AssertEqualInt 0, event_done(3), "no event has happened yet"
+    AssertEqualInt FALSE, fleet_pursuit, "no fleet pursues"
+    AssertEqualInt TRUE, saves_exist, "Load open"
+    AssertEqualInt FALSE, event_done(3), "no event has happened yet"
     AssertEqualInt 0, union_income_bonus, "no extra income yet"
     AssertEqualInt 0, army_size(7) + army_city(7) + army_order(7) + army_leader_rating(7), "no army"
     AssertEqualStr "", army_name$(7), "nor its name"
@@ -3562,11 +3579,11 @@ SUB TestLoadGameClearsTheRaid
     fleet_ships$(SIDE_UNION) = "": fleet_city(SIDE_UNION) = 0
     fleet_ships$(SIDE_REBEL) = "WW": fleet_city(SIDE_REBEL) = FLEET_AT_SEA
     CALL SaveTestGame(3)
-    raiding_side = SIDE_UNION: raid_loss = 40: fleet_pursuit = 1
+    raiding_side = SIDE_UNION: raid_loss = 40: fleet_pursuit = TRUE
     CALL LoadTestGame(3)
     AssertEqualInt SIDE_REBEL, raiding_side, "the Rebel fleet saved at sea raids"
     AssertEqualInt 0, raid_loss, "no loss from the game before"
-    AssertEqualInt 0, fleet_pursuit, "no pursuit from the game before"
+    AssertEqualInt FALSE, fleet_pursuit, "no pursuit from the game before"
     fleet_city(SIDE_REBEL) = 24
     CALL save_game(3)
     raiding_side = SIDE_UNION
@@ -3614,6 +3631,35 @@ SUB TestLoadGameFreesTheScenariosLeaders
     AssertEqualStr "", leader_name$(21), "Lee commands an army of the saved game"
 END SUB
 
+' A saved game with Lee's army on the train, loaded in a session that has no train in memory.
+SUB SaveAndLoadWithATrain
+    CHDIR TestTempDir$
+    leader_name$(21) = "Lee": leader_rating(21) = 9
+    army_name$(21) = "Lee": army_size(21) = 100: army_leader_rating(21) = 9: army_city(21) = 12
+    city_army(12) = 21: city_owner(12) = SIDE_REBEL: city_owner(13) = SIDE_REBEL
+    CALL railroad_board(SIDE_REBEL, 21, 13)
+    CALL SaveTestGame(3)
+    train_from_city(SIDE_REBEL) = 0
+    CALL LoadTestGame(3)
+    AssertEqualInt 21, train_army(SIDE_REBEL), "Lee's army rides the train"
+END SUB
+
+' The leader of the army on the train commands it, so he is not free after the load (R4).
+SUB TestLoadGameKeepsTheTrainsLeader
+    CALL SaveAndLoadWithATrain
+    AssertEqualStr "", leader_name$(21), "Lee is not among the free leaders"
+END SUB
+
+' The train of a loaded game left from the city it waits beside. Its arrival makes no army the
+' occupier of city 0 (G63).
+SUB TestLoadGameKeepsTheTrainsCity
+    CALL SaveAndLoadWithATrain
+    AssertEqualInt 12, train_from_city(SIDE_REBEL), "the train left city 12"
+    CALL railroad_unload(SIDE_REBEL)
+    AssertEqualInt 13, army_city(21), "the army got off in city 13"
+    AssertEqualInt 0, city_army(0), "city 0 holds no army"
+END SUB
+
 ' The computer's strength ratio of the game before is not kept by a new game or a load. It is 0,
 ' as in a game started from the title (G32).
 SUB TestNewGameAndLoadClearTheStrengthRatio
@@ -3644,16 +3690,16 @@ END SUB
 SUB TestSaveGameKeepsVictoryRulesAndEvents
     CHDIR TestTempDir$
     event_count = 3: event_name$(1) = "emancipation": event_name$(2) = "riots": event_name$(3) = "reelection"
-    event_done(1) = 1: event_done(3) = 1
+    event_done(1) = TRUE: event_done(3) = TRUE
     victory_rule(1) = 3: victory_rule(2) = 1865: victory_rule(3) = 34: victory_rule(4) = -60
     victory_rule(5) = 0: victory_rule(6) = 4
     CALL SaveTestGame(3)
-    event_done(1) = 0: event_done(2) = 1: event_done(3) = 0
+    event_done(1) = FALSE: event_done(2) = TRUE: event_done(3) = FALSE
     FOR i = 1 TO 6: victory_rule(i) = 99: NEXT i
     CALL LoadTestGame(3)
-    AssertEqualInt 1, event_done(1), "the Emancipation Proclamation has happened"
-    AssertEqualInt 0, event_done(2), "riots done since, not in the saved game"
-    AssertEqualInt 1, event_done(3), "the reelection has happened"
+    AssertEqualInt TRUE, event_done(1), "the Emancipation Proclamation has happened"
+    AssertEqualInt FALSE, event_done(2), "riots done since, not in the saved game"
+    AssertEqualInt TRUE, event_done(3), "the reelection has happened"
     AssertEqualInt 3, victory_rule(1), "the month"
     AssertEqualInt 1865, victory_rule(2), "the year"
     AssertEqualInt 34, victory_rule(3), "the cities, raised by playing on"
@@ -3667,13 +3713,13 @@ END SUB
 SUB TestSaveGameFindsEventsByName
     CHDIR TestTempDir$
     event_count = 2: event_name$(1) = "emancipation": event_name$(2) = "riots"
-    event_done(1) = 1: event_done(2) = 1
+    event_done(1) = TRUE: event_done(2) = TRUE
     CALL SaveTestGame(3)
     event_count = 2: event_name$(1) = "riots": event_name$(2) = "reelection"
-    event_done(1) = 0: event_done(2) = 0
+    event_done(1) = FALSE: event_done(2) = FALSE
     CALL LoadTestGame(3)
-    AssertEqualInt 1, event_done(1), "riots, now row 1"
-    AssertEqualInt 0, event_done(2), "the reelection was not saved"
+    AssertEqualInt TRUE, event_done(1), "riots, now row 1"
+    AssertEqualInt FALSE, event_done(2), "the reelection was not saved"
 END SUB
 
 ' A game saved before saves held the victory rules and the events ends after the sides'
@@ -3691,7 +3737,7 @@ SUB TestSaveGameWithoutVictoryRulesLoads
     CALL LoadTestGame(4)
     AssertEqualInt 1863, turn_year, "the year"
     AssertEqualInt 30, victory_rule(3), "the victory rules stay as they were"
-    AssertEqualInt 0, event_done(1), "no event done"
+    AssertEqualInt FALSE, event_done(1), "no event done"
 END SUB
 
 ' A saved game holds its own battle totals. Those of all games are in cws.cfg, and a load keeps
@@ -3832,12 +3878,12 @@ END SUB
 ' saves_exist is 0 when no saved game is on the disk, and 1 again once a game is saved.
 SUB TestSavedGamesCheck
     CHDIR TestTempDir$
-    saves_exist = 1
+    saves_exist = TRUE
     CALL saved_games_check
-    AssertEqualInt 0, saves_exist, "no saved game"
+    AssertEqualInt FALSE, saves_exist, "no saved game"
     CALL save_game(1)
     CALL saved_games_check
-    AssertEqualInt 1, saves_exist, "1 after a save"
+    AssertEqualInt TRUE, saves_exist, "set after a save"
 END SUB
 
 ' any_saved_game looks at the nine slots only: another .sav file is not a saved game.
@@ -3874,7 +3920,7 @@ END SUB
 
 SUB TestScriptdateIsFixedUnderAScript
     AssertEqualStr DATE$, script_date$, "not scripted: today"
-    scripted = 1
+    scripted = TRUE
     AssertEqualStr "01-01-2000", script_date$, "scripted"
 END SUB
 

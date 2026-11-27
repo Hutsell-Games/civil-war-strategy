@@ -7,6 +7,8 @@
     python tests/play.py coverage [--unit-tests] [script ...]
                                                 a coverage build; the lines the scripts and the unit tests reach
     python tests/play.py explore <keys file>    one run, a PNG of every state, stops at the next wait
+    python tests/play.py seeds <script> <first> <last> [--timeout s]
+                                                the seeds of the range that play the script to its end
 
 A script is tests/scripts/<name>.keys, a keys file of QB64Rust's screen-state check
 (QB64Rust/tools/screen/README.md). Its recorded screens are tests/scripts/<name>.screen. A script
@@ -35,12 +37,13 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import contextlib
 import hashlib
 import os
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -615,9 +618,48 @@ def pngs(tools: Tools, state_file: Path, out_base: Path, numbers: list[int] | No
 # ---------------------------------------------------------------------------------- commands
 
 
-def parallel(jobs: int, work: list) -> list:
+@contextlib.contextmanager
+def one_at_a_time():
+    """Holds tests/out/play.lock while games run, so that a second command refuses to start.
+
+    Two commands at once share the machine: their games then wait longer for the screen than a
+    prompt allows, and fail with "no prompt in time" though nothing is wrong. The lock is the
+    operating system's on an open file, so it ends with the process, even one that was killed.
+    """
+    OUT.mkdir(parents=True, exist_ok=True)
+    lock = open(OUT / "play.lock", "a+")
+    try:
+        if os.name == "nt":
+            import msvcrt
+            msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        lock.close()
+        raise SetupError("another play.py, make_scripts.py or autoplay.py is running games; "
+                         "wait for it to end (tests/out/play.lock)") from None
+    try:
+        yield
+    finally:
+        lock.close()
+
+
+def parallel(jobs: int, work: list, name: str = "") -> list:
+    """Runs the work, jobs at a time, and gives the results in the work's order. A result that
+    is a Run prints a line when it ends, so a long command shows how far it has got; name, when
+    given, starts the line, to tell one pass of a command from another."""
+    results: list = [None] * len(work)
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
-        return list(pool.map(lambda f: f(), work))
+        futures = {pool.submit(f): i for i, f in enumerate(work)}
+        for done, future in enumerate(concurrent.futures.as_completed(futures), 1):
+            result = future.result()
+            results[futures[future]] = result
+            if isinstance(result, Run):
+                problem = run_problem(result)
+                print(f"{name + ' ' if name else ''}[{done}/{len(work)}] {result.label}"
+                      + (f": {problem}" if problem else ""), flush=True)
+    return results
 
 
 def state_number(found: list[bytes], index: int) -> int | None:
@@ -746,7 +788,7 @@ def cmd_record(args: argparse.Namespace, tools: Tools) -> int:
     done = [s for s in scripts if s.recorded.is_file()]
     full = parallel(args.jobs, [lambda s=s: run_script(tools, exes["rust", s.program], s, "rust", tag="full",
                                                        full_states=True)
-                                for s in done])
+                                for s in done], name="full copy")
     for run in full:
         if first_difference(entries(run.state), entries(run.script.recorded.read_bytes())) is None:
             full_copy(run.script).parent.mkdir(parents=True, exist_ok=True)
@@ -957,6 +999,25 @@ def cmd_explore(args: argparse.Namespace, tools: Tools) -> int:
     return 0
 
 
+def cmd_seeds(args: argparse.Namespace, tools: Tools) -> int:
+    """Plays a script once with each seed of a range and names those that play it to its end.
+
+    A change to the rules that draws a random number more or fewer times moves every number after
+    it, and a script written for one seed may then meet a prompt it has no keys for. A seed named
+    here reaches every prompt the script expects. Whether the game goes as the script's comment
+    says is still to be seen on the screens (explore), before the seed goes in the script.
+    """
+    script = find_scripts([args.script])[0]
+    exe = build(tools, args.compiler, program=script.program)
+    tries = [replace(script, name=f"seed-{script.name}-{s}", seed=str(s),
+                     timeout=args.timeout or script.timeout)
+             for s in range(args.first, args.last + 1)]
+    runs = parallel(args.jobs, [lambda t=t: run_script(tools, exe, t, args.compiler) for t in tries])
+    good = [r.script.seed for r in runs if run_problem(r) is None]
+    print(f"{script.name}: seeds that play to the end: {', '.join(good) or 'none'}")
+    return 0 if good else 1
+
+
 # ---------------------------------------------------------------------------------- main
 
 
@@ -988,24 +1049,36 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--compiler", choices=COMPILERS, default="rust")
     p.add_argument("--wait-ms", type=int, default=5000, help="how long the last prompt waits (default 5000)")
     p.add_argument("keys")
+    p = sub.add_parser("seeds", help="the seeds of a range with which a script plays to its end")
+    p.add_argument("--compiler", choices=COMPILERS, default="rust")
+    p.add_argument("--timeout", type=int, default=0, help="seconds for each run (default: the script's)")
+    p.add_argument("script")
+    p.add_argument("first", type=int)
+    p.add_argument("last", type=int)
     args = parser.parse_args(argv)
-    # What the command prints also goes to tests/out/last-<command>.txt, so that a failure seen once
-    # can be read again.
-    OUT.mkdir(parents=True, exist_ok=True)
-    log = open(OUT / f"last-{args.command}.txt", "w", encoding="utf-8")
-    sys.stdout = Tee(sys.stdout, log)
-    try:
-        tools = find_tools(args)
-        command = {"check": cmd_check, "compare": cmd_compare, "record": cmd_record, "coverage": cmd_coverage,
-                   "explore": cmd_explore}
-        return command[args.command](args, tools)
-    except SetupError as e:
-        print(f"play.py: {e}", file=sys.stderr)
-        print(f"play.py: {e}", file=log)
-        return 2
-    finally:
-        sys.stdout = sys.stdout.streams[0]
-        log.close()
+    # The lock comes first, so that a command refused for it leaves the log of the one running.
+    with contextlib.ExitStack() as stack:
+        try:
+            stack.enter_context(one_at_a_time())
+        except SetupError as e:
+            print(f"play.py: {e}", file=sys.stderr)
+            return 2
+        # What the command prints also goes to tests/out/last-<command>.txt, so that a failure seen
+        # once can be read again.
+        log = open(OUT / f"last-{args.command}.txt", "w", encoding="utf-8")
+        sys.stdout = Tee(sys.stdout, log)
+        try:
+            tools = find_tools(args)
+            command = {"check": cmd_check, "compare": cmd_compare, "record": cmd_record, "coverage": cmd_coverage,
+                       "explore": cmd_explore, "seeds": cmd_seeds}
+            return command[args.command](args, tools)
+        except SetupError as e:
+            print(f"play.py: {e}", file=sys.stderr)
+            print(f"play.py: {e}", file=log)
+            return 2
+        finally:
+            sys.stdout = sys.stdout.streams[0]
+            log.close()
 
 
 class Tee:

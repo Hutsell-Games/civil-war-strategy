@@ -160,7 +160,7 @@ SUB ai_recruit (side)
         CALL draw_ai_funds(side, count)
         city = ai_recruit_pick(side, cities(), count)
         CALL army_recruit(side, city, raised)
-        IF raised = 0 THEN
+        IF NOT raised THEN
             EXIT SUB
         END IF
     LOOP
@@ -196,9 +196,9 @@ FUNCTION ai_recruit_pick (side, cities(), count)
         FOR i = 1 TO count
             city = cities(i)
             IF city_army(city) = 0 THEN
-                score = recruit_troops(side, city, 0)
+                score = recruit_troops(side, city, FALSE)
             ELSE
-                score = recruit_troops(side, city, 1)
+                score = recruit_troops(side, city, TRUE)
             END IF
             IF score > best_score AND RND > .5 THEN
                 best_score = score

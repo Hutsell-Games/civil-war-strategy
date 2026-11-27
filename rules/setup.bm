@@ -38,7 +38,7 @@ END FUNCTION
 
 ' Vary Start: the game starts again from its scenario, with cash, armies, fleets, the Rebel
 ' capital and the leaders' ratings changed at random. Each side may lose some of its first six
-' armies. The Utility menu offers it while vary_start_open is 1, until the first End Turn of a
+' armies. The Utility menu offers it while vary_start_open is TRUE, until the first End Turn of a
 ' new game. The settings and the victory rules stay as the player set them; the Balance
 ' setting's cash and the Realism setting's wooden ships of 1861 are given as in a new game
 ' (game_apply_settings). The original was offered at any time and only read the scenario again:
@@ -118,9 +118,12 @@ END SUB
 ' The settings of the Utility menu. Its menus are in ui/options.bm.
 
 ' Side: the player takes the other side, and the special events favor the side left to
-' the computer.
+' the computer. The month's Troops list was drawn for the side before, so it goes, and the new
+' side's is drawn when Troops is opened. The original kept it, so the new side could recruit
+' in the other side's cities (G64).
 SUB option_swap_side
     current_side = other_side(current_side)
+    turn_recruit_count = 0
     CALL option_events_favor_computer
 END SUB
 
@@ -297,12 +300,12 @@ END SUB
 ' computer's strength ratio, which the game before may have left set. Vary Start may be used again.
 SUB game_reset
     DIM k AS INTEGER
-    game_over = 0
-    vary_start_open = 1
+    game_over = FALSE
+    vary_start_open = TRUE
     CALL turn_reset_commands
     raiding_side = SIDE_NONE
     raid_loss = 0
-    fleet_pursuit = 0
+    fleet_pursuit = FALSE
     ai_strength_ratio! = 0
     FOR k = 1 TO MAX_ARMIES
         army_size(k) = 0
@@ -313,7 +316,7 @@ SUB game_reset
     NEXT k
     union_income_bonus = 0
     FOR k = 1 TO MAX_EVENTS
-        event_done(k) = 0
+        event_done(k) = FALSE
     NEXT k
     FOR k = SIDE_UNION TO SIDE_REBEL
         fleet_size(k) = 0
@@ -325,7 +328,7 @@ SUB game_reset
         side_battles_won(k) = 0
         side_casualties&(k) = 0
     NEXT k
-    saves_exist = 1
+    saves_exist = TRUE
     victory_rule(VICTORY_MONTH) = 1
 END SUB
 

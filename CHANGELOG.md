@@ -87,7 +87,12 @@ source rather than extending version 1.61.
 - After Files, New Game or a Load, the computer's first turn no longer plays by the
   strength ratio of the game before.
 - A Load gives back every leader of the scenario who commands no army in the saved
-  game, including those the game before had used.
+  game, including those the game before had used. The leader of an army on the
+  train is not among them.
+- A train loaded with an army aboard arrives as any other train does. Before, its
+  arrival could leave the computer fortifying a city that does not exist.
+- The first game after you start the program has random starting cash. Before, it
+  was the same in every first game.
 - After a Load, the army report shows the saved game's total income; before, it
   showed the total of the game played before until the month's end.
 - The Battle Summary shows two sets of totals: those of this war, which a new game
@@ -136,6 +141,10 @@ source rather than extending version 1.61.
   troops. Before, a side short of cash always came back to Moves, or to the
   first open row after it.
 - Esc on the title menu does nothing. Before, it started a new game.
+- F3 and F4 do nothing at the title menu, the scenario menu and a naval fight's
+  Attack or Retreat. Before, they drew the map over those screens.
+- Utility, Side gives the side you take its own list of cities for Troops. Before,
+  it kept the other side's list, so you could recruit in the enemy's cities.
 - A letter in the city picker finds your city even when it is the one just before
   the first city with that letter. Before, the letter did nothing then.
 - The Save Game and Load menus number their slots, and a digit picks one. Before,

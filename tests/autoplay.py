@@ -213,7 +213,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("after")
     args = parser.parse_args(argv)
     if args.command == "run":
-        return cmd_run(args)
+        try:
+            with play.one_at_a_time():
+                return cmd_run(args)
+        except play.SetupError as e:
+            print(f"autoplay.py: {e}", file=sys.stderr)
+            return 2
     if args.command == "summary":
         summarize(json.loads(Path(args.results).read_text(encoding="utf-8")))
         return 0

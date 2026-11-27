@@ -5,13 +5,13 @@ SUB city_capture (moving_army, city, side, weaken_fort)
     DIM message$
     DIM was_enemy_capital AS INTEGER
     DIM razed AS INTEGER
-    was_enemy_capital = 0
+    was_enemy_capital = FALSE
     IF city = side_capital(other_side(side)) THEN
-        was_enemy_capital = 1
+        was_enemy_capital = TRUE
     END IF
-    razed = 0
-    IF city_fort(city) > 0 AND weaken_fort > 0 THEN
-        razed = 1
+    razed = FALSE
+    IF city_fort(city) > 0 AND weaken_fort THEN
+        razed = TRUE
     END IF
     CALL city_take(city, side, weaken_fort)
     CALL clear_bottom_line
@@ -21,16 +21,16 @@ SUB city_capture (moving_army, city, side, weaken_fort)
     IF opt_sound >= SOUND_MUSIC THEN
         CALL play_side_tune(army_side(moving_army))
     END IF
-    IF was_enemy_capital = 0 THEN
+    IF NOT was_enemy_capital THEN
         CALL animate_city(city)
     END IF
-    IF was_enemy_capital = 1 THEN
+    IF was_enemy_capital THEN
         message$ = side_name$(other_side(side)) + " CAPITAL captured !"
         CALL scribe_message(message$, SHOW_LINE)
         CALL show_message_box(city_name$(city) + " has fallen!", COLOR_RED)
         CALL animate_city(city)
     END IF
-    IF razed = 1 THEN
+    IF razed THEN
         CALL city_redraw_fort(city)
     END IF
 END SUB

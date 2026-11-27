@@ -18,22 +18,31 @@
 ' A program started without it plays as before: script_mark_key_wait does nothing.
 ' ===========================================================================
 
-' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER.
-' It runs again before each new game in the same run (cws.bas). So under a script a second
-' game gets the same seed, and CWS_DICE's groups start again from the first.
-SUB script_start
+' Seeds the random numbers, from CWS_SEED when it is set, else from TIMER. It runs before
+' each new game in the same run, before game_new draws the starting cash (cws.bas). So under a
+' script a second game gets the same seed. The original seeded after its first game's setup,
+' so that game's cash was the same in every session (G65).
+SUB script_seed
     DIM seed$
     seed$ = ENVIRON$("CWS_SEED")
     IF seed$ = "" THEN
         RANDOMIZE TIMER
+    ELSE
+        RANDOMIZE VAL(seed$)
+    END IF
+END SUB
+
+' Notes whether a script runs the program, after the title. It runs again before each new game
+' in the same run, so CWS_DICE's groups start again from the first.
+SUB script_start
+    IF ENVIRON$("CWS_SEED") = "" THEN
         EXIT SUB
     END IF
-    scripted = 1
-    RANDOMIZE VAL(seed$)
+    scripted = TRUE
     script_dice$ = ENVIRON$("CWS_DICE")
-    autoplay = 0
+    autoplay = FALSE
     IF ENVIRON$("CWS_AUTOPLAY") = "1" THEN
-        autoplay = 1
+        autoplay = TRUE
     END IF
 END SUB
 
@@ -52,7 +61,7 @@ SUB script_autoplay_end (side, rule)
 END SUB
 
 ' Makes PLAY and SOUND silent when the program is scripted. Called once, before the title
-' tune, which plays before script_start seeds the random numbers.
+' tune, which plays before script_start.
 ' It reads CWS_SEED itself and leaves scripted at 0 until script_start. Setting scripted here
 ' would make the title's 9-second pause for a missing MTN.PNG return at once (bad-files.keys).
 SUB script_mute
@@ -104,7 +113,7 @@ END FUNCTION
 ' script waits there for a key; a shorter one returns at once.
 FUNCTION script_tick% (seconds!)
     script_tick% = 0
-    IF scripted = 0 THEN
+    IF NOT scripted THEN
         EXIT FUNCTION
     END IF
     script_tick% = -1
@@ -138,7 +147,7 @@ END FUNCTION
 ' Byte &H4F1 holds the place, &H4F2 the letter, and &H4F0 counts the waits.
 SUB script_mark_key_wait (place, letter$)
     DIM code AS INTEGER
-    IF scripted = 0 THEN
+    IF NOT scripted THEN
         EXIT SUB
     END IF
     code = 0

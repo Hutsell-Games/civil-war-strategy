@@ -17,7 +17,7 @@ SUB event_roll (event, variant, event_side)
     event_army = 0
     CALL script_dice_next
     event_weight = balance_seen_by_player
-    CALL event_pick(1, SIDE_NONE, event_weight, event, variant)
+    CALL event_pick(TRUE, SIDE_NONE, event_weight, event, variant)
     IF event <> EVENT_NONE THEN
         EXIT SUB
     END IF
@@ -32,10 +32,10 @@ SUB event_roll (event, variant, event_side)
     IF script_rnd! > .1 * opt_event_balance THEN
         event_side = SIDE_REBEL
     END IF
-    CALL event_pick(0, other_side(event_side), event_weight, event, variant)
+    CALL event_pick(FALSE, other_side(event_side), event_weight, event, variant)
 END SUB
 
-' Tries events in the table's order: the announcements when before is 1, else the events
+' Tries events in the table's order: the announcements when before is TRUE, else the events
 ' that favor good_side. Takes the first whose conditions hold and whose effect can be carried
 ' out, and carries it out. An event without a text is silent: the list goes on after it.
 ' The numbers are drawn in a fixed order: those of the "if" line, then one to pick a text
@@ -49,10 +49,10 @@ SUB event_pick (before, good_side, weight, event, variant)
     DIM rolled!
     FOR row = 1 TO event_count
         side = good_side
-        IF before <> 0 THEN
+        IF before THEN
             side = event_favors(row)
         END IF
-        IF event_before(row) = before AND event_listed(row) <> 0 AND event_favors(row) = side THEN
+        IF event_before(row) = before AND event_listed(row) AND event_favors(row) = side THEN
             holds = event_conditions_hold(event_if_first(row), event_if_count(row), row, side)
             IF holds THEN
                 holds = event_possible(row, event_target(row, side))
@@ -77,12 +77,12 @@ SUB event_pick (before, good_side, weight, event, variant)
                     END IF
                 END IF
                 CALL event_apply(chosen, event_target(chosen, side), weight)
-                event_done(chosen) = 1
+                event_done(chosen) = TRUE
                 IF event_text_count(chosen) > 0 THEN
                     event = chosen
                     IF event_then(chosen) <> 0 THEN
                         CALL event_apply(event_then(chosen), event_target(event_then(chosen), side), weight)
-                        event_done(event_then(chosen)) = 1
+                        event_done(event_then(chosen)) = TRUE
                     END IF
                     EXIT SUB
                 END IF
@@ -121,7 +121,7 @@ FUNCTION event_chance! (weight)
         END SELECT
     NEXT k
     chance! = product# + chance_plus#
-    IF chance_has_most <> 0 AND chance! > chance_most# THEN
+    IF chance_has_most AND chance! > chance_most# THEN
         chance! = chance_most#
     END IF
     event_chance! = chance!
@@ -134,7 +134,7 @@ FUNCTION event_conditions_hold (first, count, row, good_side)
     DIM k AS INTEGER
     DIM amount!
     DIM met AS INTEGER
-    event_conditions_hold = 1
+    event_conditions_hold = TRUE
     FOR k = first TO first + count - 1
         SELECT CASE condition_subject(k)
             CASE SUBJECT_ROLL
@@ -148,34 +148,34 @@ FUNCTION event_conditions_hold (first, count, row, good_side)
             CASE SUBJECT_REALISM
                 amount! = opt_realism
         END SELECT
-        met = 0
+        met = FALSE
         SELECT CASE condition_relation(k)
             CASE RELATION_IS
                 IF amount! = condition_value!(k) THEN
-                    met = 1
+                    met = TRUE
                 END IF
             CASE RELATION_ABOVE
                 IF amount! > condition_value!(k) THEN
-                    met = 1
+                    met = TRUE
                 END IF
             CASE RELATION_BELOW
                 IF amount! < condition_value!(k) THEN
-                    met = 1
+                    met = TRUE
                 END IF
             CASE RELATION_AT_LEAST
                 IF amount! >= condition_value!(k) THEN
-                    met = 1
+                    met = TRUE
                 END IF
             CASE RELATION_AT_MOST
                 IF amount! <= condition_value!(k) THEN
-                    met = 1
+                    met = TRUE
                 END IF
         END SELECT
         IF condition_subject(k) = SUBJECT_ONCE THEN
-            met = 1 - event_done(row)
+            met = NOT event_done(row)
         END IF
-        IF met = 0 THEN
-            event_conditions_hold = 0
+        IF NOT met THEN
+            event_conditions_hold = FALSE
         END IF
     NEXT k
 END FUNCTION
@@ -187,48 +187,48 @@ FUNCTION event_possible (row, good_side)
     DIM port AS INTEGER
     DIM found AS INTEGER
     DIM i AS INTEGER
-    event_possible = 1
+    event_possible = TRUE
     SELECT CASE event_effect(row)
         CASE EFFECT_REINFORCE
-            event_possible = 0
+            event_possible = FALSE
             IF side_capital(good_side) > 0 THEN
                 IF city_army(side_capital(good_side)) > 0 THEN
-                    event_possible = 1
+                    event_possible = TRUE
                 END IF
                 FOR i = side_first_army(good_side) TO side_last_army(good_side)
                     IF NOT army_in_field(i) THEN
-                        event_possible = 1
+                        event_possible = TRUE
                     END IF
                 NEXT i
             END IF
         CASE EFFECT_SHIPS
             IF NOT fleet_exists(good_side) OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN
-                event_possible = 0
+                event_possible = FALSE
             END IF
         CASE EFFECT_SHIPS_TO_PORT
             CALL event_delivery_port(good_side, port, found)
-            IF found = 0 OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN
-                event_possible = 0
+            IF NOT found OR fleet_size(good_side) >= MAX_FLEET_SHIPS THEN
+                event_possible = FALSE
             END IF
     END SELECT
 END FUNCTION
 
 ' The port where new ships are delivered to a side: the port of its fleet, or without a
-' fleet in port the side's first sea port that the enemy's fleet is not in. found is 0 when
+' fleet in port the side's first sea port that the enemy's fleet is not in. found is FALSE when
 ' there is none.
 SUB event_delivery_port (side, port, found)
     DIM i AS INTEGER
     port = 0
-    found = 0
+    found = FALSE
     IF fleet_size(side) > 0 AND NOT fleet_is_at_sea(side) THEN
         port = fleet_city(side)
-        found = 1
+        found = TRUE
         EXIT SUB
     END IF
     FOR i = 1 TO MAX_CITIES
         IF navy_is_shipyard(side, i) THEN
             port = i
-            found = 1
+            found = TRUE
             EXIT FOR
         END IF
     NEXT i

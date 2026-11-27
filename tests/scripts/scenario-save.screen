@@ -1,7 +1,7 @@
 digest 0193F66BF5B0479C
-digest E4FE268443357821
-digest 570BDC3C5A55CB4A
-digest 032AAED54F9494AC
+digest 4AC8AA29EF67030B
+digest 07753CF8FAE296FF
+digest 8D42A9206E2CB5AC
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,1 off color 5 background 0
@@ -448,4 +448,4 @@ p 00 0A*527 00*112
 p 00*640
 = 38
 end
-file cws1.sav F90727997A759B66
+file cws1.sav 7A227A4E008EC950

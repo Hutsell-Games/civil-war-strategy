@@ -274,7 +274,7 @@ SUB army_raise (side, army_slot, city)
 
     troops = new_army_size
     IF opt_realism = REALISM_ON THEN
-        troops = recruit_troops(side, city, 0)
+        troops = recruit_troops(side, city, FALSE)
     ELSE
         troops = recruits_cut_off(side, city, troops)
     END IF
@@ -360,11 +360,11 @@ END SUB
 SUB army_add_recruits (side, army, isolated)
     DIM troops AS INTEGER
     troops = reinforce_size
-    isolated = 0
+    isolated = FALSE
     IF opt_realism = REALISM_ON THEN
-        troops = recruit_troops(side, army_city(army), 1)
+        troops = recruit_troops(side, army_city(army), TRUE)
         IF city_is_cut_off(side, army_city(army)) THEN
-            isolated = 1
+            isolated = TRUE
         END IF
     END IF
     army_size(army) = army_size(army) + troops
@@ -381,12 +381,12 @@ FUNCTION army_is_full (army)
 END FUNCTION
 
 ' The troops a city gives under the Realism setting, in hundreds: by the city's value, for a new
-' army, or for the army already there when joins_army is 1. Less when the city is cut off
+' army, or for the army already there when joins_army is TRUE. Less when the city is cut off
 ' (recruits_cut_off). army_raise, army_add_recruits and the computer's pick (ai_recruit_pick) use it.
 FUNCTION recruit_troops (side, city, joins_army)
     DIM troops AS INTEGER
     troops = recruit_per_value * city_value(city) + recruit_base
-    IF joins_army = 1 THEN
+    IF joins_army THEN
         troops = reinforce_per_value * city_value(city) + reinforce_base
     END IF
     recruit_troops = recruits_cut_off(side, city, troops)

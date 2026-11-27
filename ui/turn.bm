@@ -16,13 +16,13 @@ SUB turn_date_and_supply
             _CONTINUE
         END IF
         CALL turn_army_supply(i, blockaded, starved)
-        IF blockaded = 1 THEN
+        IF blockaded THEN
             CALL clear_bottom_line
             PRINT army_name$(i); " is blockaded";
             CALL wait_seconds(opt_pause!)
         END IF
         COLOR COLOR_LIGHT_MAGENTA
-        IF starved = 1 THEN
+        IF starved THEN
             CALL clear_bottom_line
             PRINT army_name$(i); " is out of supplies";
             CALL draw_army_flag(i)
@@ -121,7 +121,7 @@ SUB turn_move_army (moving_army)
     PRINT army_name$(moving_army); " is moving to "; city_name$(army_order(moving_army));
 
     CALL turn_army_marches(moving_army, starved)
-    IF starved = 1 THEN
+    IF starved THEN
         CALL wait_seconds(opt_pause!)
         CALL clear_bottom_line
         PRINT army_name$(moving_army); " is out of supplies !";
@@ -142,7 +142,7 @@ SUB turn_move_army (moving_army)
             CALL clear_bottom_line
         ELSE
             CALL turn_attack(moving_army, to_city, fought, took)
-            IF took = 0 THEN
+            IF NOT took THEN
                 EXIT SUB
             END IF
         END IF
@@ -150,8 +150,8 @@ SUB turn_move_army (moving_army)
     CALL turn_enter_city(moving_army, to_city, fought)
 END SUB
 
-' An army attacks the enemy in a city, one defender after another. fought is 1 once a battle
-' was fought. took is 1 when the last defender has fled or surrendered. It is 0 when the
+' An army attacks the enemy in a city, one defender after another. fought is TRUE once a battle
+' was fought. took is TRUE when the last defender has fled or surrendered. It is FALSE when the
 ' attacker withdrew or was crushed.
 SUB turn_attack (moving_army, city, fought, took)
     DIM defender AS INTEGER
@@ -159,7 +159,7 @@ SUB turn_attack (moving_army, city, fought, took)
     DIM loser AS INTEGER
     DIM gone AS INTEGER
     DIM message$
-    took = 0
+    took = FALSE
     DO
         CALL draw_map_marker(city, 0, MARK_EXPLOSION)
         defender = city_army(city)
@@ -170,7 +170,7 @@ SUB turn_attack (moving_army, city, fought, took)
         CALL wait_seconds(opt_pause! - 1)
         IF army_size(defender) > 0 THEN
             CALL calculate_battle(moving_army, defender, winner, loser)
-            fought = 1
+            fought = TRUE
             IF opt_graphics >= GRAPHICS_BASIC THEN
                 CALL draw_update_box
             END IF
@@ -198,7 +198,7 @@ SUB turn_attack (moving_army, city, fought, took)
                 EXIT SUB
             END IF
             CALL turn_defender_retreats(moving_army, city, defender, gone)
-            IF gone = 0 THEN
+            IF NOT gone THEN
                 message$ = army_name$(defender) + " surrenders to " + army_name$(moving_army) + " in " + city_name$(army_city(defender))
                 CALL scribe_message(message$, SHOW_BOX)
                 CALL turn_army_surrenders(defender, moving_army)
@@ -209,7 +209,7 @@ SUB turn_attack (moving_army, city, fought, took)
         END IF
         CALL city_update_occupier(city)
         IF city_army(city) = 0 THEN
-            took = 1
+            took = TRUE
             EXIT SUB
         END IF
         COLOR COLOR_LIGHT_CYAN
@@ -238,7 +238,7 @@ SUB turn_attacker_withdraws (moving_army, city, defender)
     CALL draw_army_flag(moving_army)
 
     CALL turn_defender_halts(defender, halted, old_order)
-    IF halted = 1 THEN
+    IF halted THEN
         CALL draw_map_marker(army_city(defender), old_order, MARK_ERASE_ARMY)
     END IF
 
@@ -247,12 +247,12 @@ END SUB
 
 ' The defender lost the battle: it retreats to a city of its side next to this one. The
 ' player picks the city for an army of the player's; otherwise the richest is taken. gone is
-' 0 when there is no such city.
+' FALSE when there is no such city.
 SUB turn_defender_retreats (moving_army, city, defender, gone)
     DIM attacker_side AS INTEGER
     DIM chosen_city AS INTEGER
     DIM retreat_city AS INTEGER
-    gone = 0
+    gone = FALSE
     attacker_side = army_side(moving_army)
     CALL draw_map_marker(army_city(moving_army), city, MARK_ERASE_ARMY)
     IF army_has_move(defender) THEN
@@ -280,7 +280,7 @@ SUB turn_defender_retreats (moving_army, city, defender, gone)
     CALL draw_army_flag(defender) ' in new city
 
     CALL draw_map_marker(city, 0, MARK_FLASH_FRAME)
-    gone = 1
+    gone = TRUE
 END SUB
 
 ' An army is crushed or surrenders to winner: its slot is cleared, and winner's side gets
@@ -321,15 +321,15 @@ SUB turn_enter_city (moving_army, to_city, fought)
     '                            City Capture
     IF city_owner(army_city(moving_army)) <> side THEN
         city = army_city(moving_army)
-        raze = 0
-        IF opt_players = PLAYERS_ONE AND city_fort(city) > 0 AND fought = 0 THEN
+        raze = FALSE
+        IF opt_players = PLAYERS_ONE AND city_fort(city) > 0 AND NOT fought THEN
             IF side = current_side THEN
                 CALL menu_raze_fort(raze)
             ELSE
                 raze = ai_razes_fort(city)
             END IF
         END IF
-        IF raze = 1 THEN
+        IF raze THEN
             CALL turn_raze_fort(city)
             CALL city_redraw_fort(city)
             CALL clear_bottom_line

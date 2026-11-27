@@ -15,7 +15,7 @@ SUB menu_files (action)
         END IF
         menu_text$(0) = "Options"
         menu_text$(1) = "Load"
-        IF saves_exist = 0 THEN
+        IF NOT saves_exist THEN
             menu_text$(1) = "-"
             start_row = 2
         END IF
@@ -27,13 +27,13 @@ SUB menu_files (action)
         menu_row = 15
         CALL menu_select(MENU_PLAIN, start_row)
         CALL clear_right_panel
-        again = 0
+        again = FALSE
         SELECT CASE menu_choice
             CASE 1
-                IF saves_exist > 0 THEN
+                IF saves_exist THEN
                     CALL menu_load_game
                 ELSE
-                    again = 1
+                    again = TRUE
                 END IF
             CASE 2
                 CALL menu_save_game
@@ -44,7 +44,7 @@ SUB menu_files (action)
             CASE 4
                 CALL menu_quit(action)
         END SELECT
-    LOOP WHILE again > 0
+    LOOP WHILE again
 END SUB
 
 ' Load, and the title menu's Resume Saved Game: the player picks a saved game, and the map is
