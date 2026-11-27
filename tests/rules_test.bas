@@ -360,8 +360,10 @@ END SUB
 SUB TestBattleCountsAnEmptyArmyAsOne
     DIM attack_steps(7) AS INTEGER: DIM defend_steps(8) AS INTEGER
     rule_strength_cap = 20: opt_difficulty = 3: army_size(21) = 50
-    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
+    CALL battle_armies_ready(1, 21)
     AssertEqualInt 1, army_size(1), "an attacker of 0 troops becomes 100"
+    AssertEqualInt 50, army_size(21), "a defender of 5,000 is unchanged"
+    CALL battle_strengths(1, 21, attack_steps(), defend_steps())
     AssertEqualInt 1, attack_steps(4), "outmanned 1 to 50: 1"
     AssertEqualInt 20, defend_steps(4), "50 to 1: the cap"
 END SUB
@@ -911,6 +913,23 @@ SUB TestArmyCanDrillAndDetach
     AssertTrue NOT army_can_drill(3), "not past the leader's rating"
     AssertTrue side_can_detach(SIDE_REBEL), "the Rebels detach"
     AssertTrue NOT side_can_detach(SIDE_UNION), "the Union does not"
+    army_size(3) = min_detach_size
+    AssertTrue army_can_detach(3), "the smallest army that detaches"
+    army_size(3) = min_detach_size - 1
+    AssertTrue NOT army_can_detach(3), "too small to detach"
+END SUB
+
+' Army Drill is "-" unless an army with no order can still drill.
+SUB TestSideCanDrill
+    AssertTrue NOT side_can_drill(SIDE_UNION), "no army"
+    army_size(3) = 100: army_city(3) = 4: army_experience(3) = 6: army_leader_rating(3) = 9
+    AssertTrue NOT side_can_drill(SIDE_UNION), "drilled to the most"
+    army_experience(3) = 2
+    AssertTrue side_can_drill(SIDE_UNION), "an army drill can improve"
+    army_order(3) = ORDER_BUSY
+    AssertTrue NOT side_can_drill(SIDE_UNION), "it has acted this month"
+    army_order(3) = ORDER_NONE
+    AssertTrue NOT side_can_drill(SIDE_REBEL), "the other side's army"
 END SUB
 
 ' A side's strength counts the army on its train, which holds no city while it rides.

@@ -138,10 +138,11 @@ rules are inventoried below; deciding whether to move them belongs to the engine
    (`VARY_REBEL_FLEET_CITY`, `VARY_REBEL_CAPITAL`, `AI_UNION_FLEET_CITY`, `AI_REBEL_HOLD_CITY`,
    in `cws.bi` since 2026-11-14). Most of the ten, and 120 more numbers of the rules and
    the computer, became tuning knobs in `scenarios\TUNING.DAT` on 2026-11-16
-   (`tools\tuning\knobs.txt`); they are data already, and a scenario's folder may hold its own. The map's seven city numbers in `draw\map.bm` go with the
+   (`tools\tuning\knobs.txt`); they are data already, and a scenario's folder may hold its own. The map's six city numbers in `draw\map.bm` go with the
    map's line work, so question 2 decides where they live:
-   - `draw_fleets`: fixed icon positions for a fleet at 30 Philadelphia, 28 Norfolk and
-     17 Jackson MS, and a shifted icon at 24 Mobile.
+   - `draw_fleets`: fixed icon positions for a fleet at 30 Philadelphia and 28 Norfolk,
+     and a shifted icon at 24 Mobile. A third position, for 17 Jackson MS, was removed on
+     2026-11-27: Jackson is no port in either map, so no fleet could be there.
    - `draw_map`: the box drawn when a fleet is at 30.
    - `draw_map_marker`, `MARK_ERASE_ARMY`: erasing an army at 27 New Orleans or 28 Norfolk
      redraws the coast (`draw_map_touchup`).

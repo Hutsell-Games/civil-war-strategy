@@ -12,7 +12,7 @@ SUB menu_railroad (side, army, city)
     DIM to_city AS INTEGER
     army = 0
     city = 0
-    CALL menu_army_select(chosen_army, chosen_city)
+    CALL menu_army_select(chosen_army, chosen_city, PICK_ANY)
     IF chosen_city < 1 OR chosen_army < 1 THEN
         COLOR COLOR_LIGHT_CYAN
         CALL clear_bottom_line

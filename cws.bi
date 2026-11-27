@@ -39,7 +39,7 @@ CONST ORDER_DONE = -2
 CONST RECRUIT_CLOSED = -1
 ' move_order_key(): the army does not move this turn.
 CONST MOVE_KEY_NONE = 999
-' The most rows a menu holds (menu_text$()). A row past them is not added.
+' The most rows a menu holds (menu_text$() and menu_value()). A row past them is not added.
 CONST MENU_MAX_ROWS = 21
 ' menu_choice after menu_select: the row chosen, or one of these. F7 ends the turn at the main
 ' menu only.
@@ -69,6 +69,11 @@ CONST MARK_BOX = 7
 CONST MARK_RESTORE = 8
 CONST MARK_POINTER = 9
 CONST MARK_ROAD = 11
+' What menu_army_select picks an army for: any army with no order, or one that Army Drill can
+' improve (army_can_drill), or one that Detach can split (army_can_detach).
+CONST PICK_ANY = 0
+CONST PICK_DRILL = 1
+CONST PICK_DETACH = 2
 ' The modes of menu_select: what it shows beside the option the player is on.
 CONST MENU_PLAIN = 0
 CONST MENU_CITY_BOX = 1
@@ -260,26 +265,31 @@ CONST PAUSE_LONG = 9
 CONST PANEL_COL = 67
 ' The train's outline for DRAW. Each picture adds its own color, scale and last strokes.
 CONST TRAIN_OUTLINE$ = "R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3"
+' The sizes of the GET buffers. saved_under_army() holds the 19-by-14 area under a city's flag
+' (draw/icons.bm), saved_under_marker() a marker's area of at most 21 by 21 (ui/screen.bm), and
+' pic_capital() the 13-by-13 star (draw/pictures.bm). The sizes are the DOS game's. They are not
+' made smaller, since what GET needs has not been measured in each compiler.
+CONST FLAG_BUFFER_SIZE = 300
+CONST MARKER_BUFFER_SIZE = 300
+CONST CAPITAL_BUFFER_SIZE = 60
 '==========================================================================
-COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%, menu_key$
-COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
-COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_count
-COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), train_from_city()
-COMMON SHARED saved_under_marker(), side_name$(), army_city(), army_name$(), opt_players, ai_strength_ratio!
-COMMON SHARED army_size(), army_leader_rating(), army_experience(), army_supply(), month_name$()
-COMMON SHARED turn_recruit_city(), victory_rule(), train_city(), side_battles_won(), city_first_owner()
-COMMON SHARED army_order(), turn_month, turn_year, menu_value(), turn_moves_done, current_side, rule_attack_loss, rule_defend_loss, rule_strength_cap
-COMMON SHARED fleet_city(), fleet_size(), city_army(), total_income, city_fort()
-COMMON SHARED side_victory_points(), opt_graphics, opt_sound, side_capital(), opt_difficulty, union_income_bonus, opt_alt_colors
-COMMON SHARED train_capacity(), map_font$(), move_order_key(), opt_winter_campaigns, opt_event_balance, opt_realism, side_casualties&()
-COMMON SHARED game_over, opt_history, victory_side, fleet_ships$(), raiding_side, raid_loss, fleet_pursuit
-COMMON SHARED all_battles_won&(), all_casualties&()
-'==========================================================================
+' The menu that menu_select shows (ui/menu.bm).
+DIM SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_box_type%, menu_color%, menu_highlight%, menu_key$
+' The turn and the game.
+DIM SHARED turn_month, turn_year, current_side, turn_moves_done, turn_navy_done, turn_recruit_count
+DIM SHARED game_over, victory_side, saves_exist
+' The options.
+DIM SHARED opt_players, opt_graphics, opt_sound, opt_pause!, opt_difficulty, opt_alt_colors, opt_ai_aggression
+DIM SHARED opt_winter_campaigns, opt_event_balance, opt_realism, opt_history
+' The rules, the income and the computer's strength.
+DIM SHARED rule_attack_loss, rule_defend_loss, rule_strength_cap, union_income_bonus, total_income, ai_strength_ratio!
+' Commerce raiding at sea.
+DIM SHARED raiding_side, raid_loss, fleet_pursuit
 DIM SHARED city_x(MAX_CITIES), city_y(MAX_CITIES), city_value(MAX_CITIES), city_owner(MAX_CITIES), city_name$(MAX_CITIES), leader_name$(MAX_LEADERS), turn_recruit_city(5)
-DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(300), leader_rating(MAX_LEADERS)
-DIM SHARED menu_text$(MENU_MAX_ROWS), saved_under_marker(300), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
+DIM SHARED side_cash(2), side_city_count(2), city_road(MAX_CITIES, MAX_ROADS), city_port_type(MAX_CITIES), side_income(2), saved_under_army(FLAG_BUFFER_SIZE), leader_rating(MAX_LEADERS)
+DIM SHARED menu_text$(MENU_MAX_ROWS), saved_under_marker(MARKER_BUFFER_SIZE), side_name$(2), army_city(MAX_ARMIES), army_name$(MAX_ARMIES), victory_rule(6)
 DIM SHARED army_size(MAX_ARMIES), army_leader_rating(MAX_ARMIES), army_experience(MAX_ARMIES), army_supply(MAX_ARMIES), month_name$(MONTHS_PER_YEAR)
-DIM SHARED army_order(MAX_ARMIES), menu_value(40), flag_star_x(8), flag_star_y(8), train_from_city(2)
+DIM SHARED army_order(MAX_ARMIES), menu_value(MENU_MAX_ROWS), flag_star_x(8), flag_star_y(8), train_from_city(2)
 DIM SHARED fleet_city(2), fleet_size(2), city_army(MAX_CITIES), city_fort(MAX_CITIES), train_army(2)
 DIM SHARED side_victory_points(2), side_capital(2), train_city(2), fleet_ships$(2)
 DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_casualties&(2), side_battles_won(2), city_first_owner(MAX_CITIES)
@@ -287,17 +297,17 @@ DIM SHARED train_capacity(2), map_font$(26), move_order_key(MAX_ARMIES), side_ca
 ' side_casualties&() in the game played, all_battles_won&() and all_casualties&() in every game
 ' played on this machine. The game's are saved with it, the others in CWS.CFG.
 DIM SHARED all_battles_won&(2), all_casualties&(2)
-' The events table: one row for each special event of scenarios/EVENTS.DAT, in the file's order.
-' event_favors() is the side the event is good for, and event_for() the side its effect is
-' for when that is another (SIDE_NONE when it is the same). event_before() is TRUE for an
-' announcement, which is tried before the month's roll. event_instead() and event_then() are
-' rows, 0 for none. event_done() is set when the event has happened in this game.
 ' The scenarios of scenarios/SCENARIOS.LST (load_scenario_list, io/files.bm): each one's folder
 ' and title. scenario_now is the row of the scenario the game is on.
 DIM SHARED scenario_count, scenario_now, scenario_folder$(MAX_SCENARIOS), scenario_title$(MAX_SCENARIOS)
 ' TRUE while the Utility menu's Vary Start may be used: in a new game until its first End Turn
 ' (game_reset, turn_next_player). A loaded game sets it to FALSE (load_game).
 DIM SHARED vary_start_open
+' The events table: one row for each special event of scenarios/EVENTS.DAT, in the file's order.
+' event_favors() is the side the event is good for, and event_for() the side its effect is
+' for when that is another (SIDE_NONE when it is the same). event_before() is TRUE for an
+' announcement, which is tried before the month's roll. event_instead() and event_then() are
+' rows, 0 for none. event_done() is set when the event has happened in this game.
 DIM SHARED event_count, event_banner$, event_file_error$
 DIM SHARED event_name$(MAX_EVENTS), event_favors(MAX_EVENTS), event_listed(MAX_EVENTS), event_done(MAX_EVENTS)
 DIM SHARED event_before(MAX_EVENTS), event_for(MAX_EVENTS)
@@ -316,7 +326,7 @@ DIM SHARED chance_count, chance_kind(MAX_CHANCE_FACTORS), chance_value#(MAX_CHAN
 DIM SHARED event_city, event_army
 ' The capital's star, taken from the icon with GET (draw_title), and the image handle of the mountains,
 ' loaded by show_title. The other pictures are loaded when drawn (draw_picture, draw/pictures.bm).
-DIM SHARED pic_capital(60)
+DIM SHARED pic_capital(CAPITAL_BUFFER_SIZE)
 DIM SHARED pic_mountain AS LONG
 ' Set by script_start (io/script.bm) when tests\play.py runs the program.
 DIM SHARED scripted

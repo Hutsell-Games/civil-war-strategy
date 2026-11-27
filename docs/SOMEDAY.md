@@ -6,9 +6,11 @@ Ideas for the QB64 port that may be worth doing, but are not planned. Open work 
 ## Bad saves and settings files stop the program
 
 A missing or cut-short save (`cws<n>.sav`) or `CWS.CFG` stops the game with a runtime error. It does
-not show a message. This is the open part of item 7 in [code-smells-review.md](code-smells-review.md),
-together with item 6. The plan below came from a pragmatic engineer's review on 2026-11-27. It is
-not a priority yet (user, 2026-11-27).
+not show a message. This was item 6 and the open part of item 7 of
+[code-smells-review.md](code-smells-review.md), moved here on 2026-11-27 (user, 2026-11-27). The
+plan below came from a pragmatic engineer's review on 2026-11-27. It is not a priority yet (user,
+2026-11-27). It can be built without changing how the game plays, so the recorded screens stay the
+same.
 
 `load_game` (`io\files.bm`) returns a `problem$` only for a save of a scenario that is not in
 `SCENARIOS.LST`. An empty or cut-short `cws<n>.sav` gives a runtime error (Input past end of file)
@@ -30,7 +32,15 @@ plain message when one of them is missing.
 3. **Check a save before loading it.** Read it one field per `INPUT #` into a string array, with an
    `EOF` check before each. Check the count, then set the game's values from the array. Nothing in
    the game changes until the whole file is known to be good. The count also tells which format the
-   save has, which replaces the `IF NOT EOF` tests of item 6.
+   save has. It replaces the `IF NOT EOF(1)` tests by which `load_game` now decides which fields
+   a save holds. A save has no version number, and still writes a field named `unused`.
+4. **Stop `load_game` working around `config_read`.** `load_game` keeps the battle totals of all
+   games aside while it calls `config_read`, and puts them back after, because `config_read` reads
+   more than this caller needs.
+
+The older readers in `io\files.bm` do not return an error's text, as the newer `io\events_file.bm`
+and `io\tuning_file.bm` do. Making them alike is not worth doing for its own sake. QBJS's translator
+has no `ON ERROR` (`tools\qb2js.bas` at `266df99`, not checked again).
 
 Not checked yet:
 

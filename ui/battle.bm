@@ -8,6 +8,7 @@ SUB calculate_battle (attacker, defender, winner, loser)
     DIM rounds AS INTEGER
     DIM attacker_losses AS INTEGER
     DIM defender_losses AS INTEGER
+    CALL battle_armies_ready(attacker, defender)
     CALL battle_strengths(attacker, defender, attack_steps(), defend_steps())
     attack_strength = attack_steps(7)
     defend_strength = defend_steps(8)

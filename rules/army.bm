@@ -502,6 +502,21 @@ FUNCTION army_can_drill (army)
     army_can_drill = army_experience(army) < drill_experience_below AND army_experience(army) < army_leader_rating(army)
 END FUNCTION
 
+' Whether Army Drill would drill an army: the side has an army with no order that drill can still
+' improve. The Commands menu shows Army Drill as "-" otherwise.
+FUNCTION side_can_drill (side)
+    DIM i AS INTEGER
+    side_can_drill = FALSE
+    FOR i = side_first_army(side) TO side_last_army(side)
+        IF army_exists(i) AND army_order(i) = ORDER_NONE THEN
+            IF army_can_drill(i) THEN
+                side_can_drill = TRUE
+                EXIT FUNCTION
+            END IF
+        END IF
+    NEXT i
+END FUNCTION
+
 ' A month of drill: one more level of experience, and the army is busy for the month.
 SUB army_drill (army)
     army_experience(army) = army_experience(army) + 1
@@ -511,6 +526,11 @@ END SUB
 ' Whether a side may detach part of an army: the Rebels only.
 FUNCTION side_can_detach (side)
     side_can_detach = side = SIDE_REBEL
+END FUNCTION
+
+' Whether the army is large enough to detach part of it: min_detach_size troops or more.
+FUNCTION army_can_detach (army)
+    army_can_detach = army_size(army) >= min_detach_size
 END FUNCTION
 
 ' Detaches a share (detach_share) of an army's troops and supplies into the free slot, in the city given.

@@ -16,12 +16,12 @@ SUB turn_date_and_supply
             _CONTINUE
         END IF
         CALL turn_army_supply(i, blockaded, starved)
+        COLOR COLOR_LIGHT_MAGENTA
         IF blockaded THEN
             CALL clear_bottom_line
             PRINT army_name$(i); " is blockaded";
             CALL wait_seconds(opt_pause!)
         END IF
-        COLOR COLOR_LIGHT_MAGENTA
         IF starved THEN
             CALL clear_bottom_line
             PRINT army_name$(i); " is out of supplies";
@@ -284,7 +284,8 @@ SUB turn_defender_retreats (moving_army, city, defender, gone)
 END SUB
 
 ' An army is crushed or surrenders to winner: its slot is cleared, and winner's side gets
-' 25 victory points and the army's supplies.
+' 25 victory points and the army's supplies. The tune plays for a person's win: against the
+' computer's army in a one-player game, and for every surrender in a two-player game.
 SUB turn_army_surrenders (army, winner)
     DIM side AS INTEGER
     IF opt_graphics >= GRAPHICS_FULL THEN
@@ -296,7 +297,7 @@ SUB turn_army_surrenders (army, winner)
         PRINT "surrenders !"
     END IF
     side = army_side(army)
-    IF opt_sound >= SOUND_MUSIC AND side <> current_side THEN
+    IF opt_sound >= SOUND_MUSIC AND (opt_players = PLAYERS_TWO OR side <> current_side) THEN
         PLAY "MFMST220o3e4g8g2.g8g8g8o4c2"
     END IF
     IF army_has_move(army) THEN
@@ -308,7 +309,8 @@ SUB turn_army_surrenders (army, winner)
 END SUB
 
 ' An army moves into the city, which is now free of the enemy, and takes it if it is not
-' its side's. Without a battle, the player may raze a fort there, and the computer does.
+' its side's. Without a battle, the player may raze a fort there, and the computer does. In a
+' two-player game each player is asked for their own armies.
 SUB turn_enter_city (moving_army, to_city, fought)
     DIM side AS INTEGER
     DIM city AS INTEGER
@@ -322,11 +324,11 @@ SUB turn_enter_city (moving_army, to_city, fought)
     IF city_owner(army_city(moving_army)) <> side THEN
         city = army_city(moving_army)
         raze = FALSE
-        IF opt_players = PLAYERS_ONE AND city_fort(city) > 0 AND NOT fought THEN
-            IF side = current_side THEN
-                CALL menu_raze_fort(raze)
-            ELSE
+        IF city_fort(city) > 0 AND NOT fought THEN
+            IF side_is_computers(side) THEN
                 raze = ai_razes_fort(city)
+            ELSE
+                CALL menu_raze_fort(raze)
             END IF
         END IF
         IF raze THEN

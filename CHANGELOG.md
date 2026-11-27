@@ -50,6 +50,15 @@ source rather than extending version 1.61.
 - Join lists only the cities where two armies or more can join. Before, it listed
   cities where only one could, and then said it could not combine.
 - Fortify lists a city once. Before, a city with two armies was listed twice.
+- Army Drill lists only the armies that drill can still improve, and the Commands
+  menu shows it as "-" when there are none. Before, it listed every army without an
+  order, and one already drilled to its most was refused.
+- Detach lists only the armies large enough to detach, and says so when there are
+  none. Before, it listed every army without an order, and a small one was refused.
+- Moves, Railroad, Detach and Army Drill list a city once. Before, a city was listed
+  once for each of its armies.
+- In a two-player game, an army that takes a fortified city without a battle asks
+  "Raze ?", as in a one-player game. Before, no fort could be razed.
 - When the month's Troops list has no city, Troops closes for the month. Before,
   opening Troops again drew the cities again.
 

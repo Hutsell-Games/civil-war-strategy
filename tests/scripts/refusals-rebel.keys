@@ -41,42 +41,36 @@ key enter
 prompt
 digest
 
-# COMMANDS, Detach, the army in Richmond: "Too small to detach", and the main menu.
+# COMMANDS, Detach: the army in Richmond is too small to detach, so the list offers only Front
+# Royal. Esc gives Detach up: the main menu.
 text c
 prompt
 text d
 prompt
 digest
-text r
+key esc
 prompt
 digest
 
-# COMMANDS, Army Drill, the army in Richmond: "... has reached maximum improvement through
-# drilling", and the Commands menu again on its first row.
+# COMMANDS, Army Drill: the army in Richmond has drilled as far as it can, so the list offers
+# only Front Royal.
 text c
 prompt
 text a
 prompt
 digest
-text r
-prompt
-digest
 
-# Army Drill, the army in Front Royal: it drills, and the Commands menu comes back on Army
-# Drill.
-text a
-prompt
+# The army in Front Royal: it drills. The Commands menu comes back on Army Drill, now "-": the
+# army in Richmond is the only one still free, and it cannot drill.
 text f
 prompt
 digest
 
-# Army Drill, the army in Richmond, the only one still free: refused again. Esc to the main
-# menu. Moves: the army in Richmond, to the first city offered.
-text a
+# Enter on the "-": "No armies remain eligible for drills in May", and the main menu. Moves:
+# the army in Richmond, to the first city offered.
+key enter
 prompt
 digest
-key esc
-prompt
 text m
 prompt
 key enter
@@ -85,16 +79,11 @@ key enter
 prompt
 digest
 
-# COMMANDS, Army Drill: "No armies remain eligible for drills in May", and the main menu.
+# COMMANDS: Army Drill is "-". Detach: no army is free, "No armies remain eligible to detach
+# in May", and the main menu.
 text c
-prompt
-text a
 prompt
 digest
-
-# COMMANDS, Detach: no army is free, and the main menu comes back with no message.
-text c
-prompt
 text d
 prompt
 digest

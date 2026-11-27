@@ -8,7 +8,6 @@ SUB menu_commands
     DIM again AS INTEGER
     DIM picked AS INTEGER
     DIM found AS INTEGER
-    DIM drilled AS INTEGER
     row = 1
     DO
         menu_col = PANEL_COL
@@ -38,6 +37,9 @@ SUB menu_commands
             menu_text$(6) = "-"
         END IF
         menu_text$(7) = "Army Drill"
+        IF NOT side_can_drill(current_side) THEN
+            menu_text$(7) = "-"
+        END IF
         menu_text$(8) = "Relieve"
         menu_text$(9) = "MAIN MENU"
         menu_item_count = 9
@@ -100,13 +102,9 @@ SUB menu_commands
                     EXIT SUB
                 END IF
             CASE 7
-                CALL menu_army_drill(again, drilled)
+                CALL menu_army_drill(again)
                 IF NOT again THEN
                     EXIT SUB
-                END IF
-                ' An army that cannot drill further: the menu comes back on its first row.
-                IF NOT drilled THEN
-                    row = 1
                 END IF
             CASE 8
                 CALL menu_army_relieve(current_side)

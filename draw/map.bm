@@ -201,9 +201,6 @@ SUB draw_fleets
             CASE 28
                 x = 517
                 y = 172
-            CASE 17
-                x = 380
-                y = 425
             CASE FLEET_AT_SEA
                 x = 495
                 y = 310

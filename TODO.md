@@ -19,15 +19,9 @@ Open work on the QB64 port. Remove an item when it is done. The plan is
 Each of these is how the game behaves, in DOS too by its code. Decide whether to change it. A change to how a
 game plays changes the recorded screens.
 
-- **The title screen, the burning capital and Lincoln's picture are not shown** (`docs\devnotes.md`, item 5).
-  The pictures are in `docs\`. The game could load and show them, as World War 2's `TODO.md` also notes for
-  its title.
 - **`normal_random_number` draws high.** It sums 12 RNDs and subtracts 5.5, though the sum averages 6, so every draw centers
   on `mean + SQR(variance) / 2` (`TestNormalDrawsHigh` in `tests\rules_test.bas`), as in World War 2 and Civil War
   Battleset. A fix changes the battles, so every script would need `record` again.
-- **The train and the cannon's wheel differ from DOS by a few pixels**, and the water beside Norfolk and
-  Mobile is no longer filled by `touchup` (`docs\devnotes.md`, item 8). If QB64Rust ever draws `DRAW` and
-  `CIRCLE` as QB 4.5 did, the four lines can go back to the original.
 - **The computer playing both sides favors the Rebels.** In 100 two-player games of the computer
   against itself (`tests\autoplay.py`, standard map, seeds 1 to 100), the Rebels won 80 and the Union 20.
   43 of the Rebels' wins came at the time limit, March 1865, a technical victory: the Union's computer did
@@ -43,17 +37,6 @@ game plays changes the recorded screens.
   still the month's event. The player sees only the banner, and the events after it in the list are not
   tried. The original did the same (`GOSUB riot: EXIT SUB`). A riot with an `if = once` line would also be
   used up. A fix changes which numbers are drawn, so every script would need `record` again.
-- **The first "is blockaded" message of a month takes the color before it.** `turn_date_and_supply`
-  (`ui\turn.bm`) sets `COLOR COLOR_LIGHT_MAGENTA` after that message, so the first one shows in whatever
-  color was set last, and later ones in magenta. The original did the same (`COLOR 13` after the `PRINT`)
-  (found 2026-11-25, review of `ui\turn.bm`).
-- **In a two-player game only a Rebel army's surrender plays the tune.** `turn_army_surrenders`
-  (`ui\turn.bm`) plays it when the army's side is not `current_side`, and while the month is worked out
-  `current_side` is the Union. Both players are people, so either both sides should hear it or neither.
-  The original did the same (`x <> side`) (found 2026-11-25, review of `ui\turn.bm`).
-- **No fort can be razed in a two-player game.** `turn_enter_city` (`ui\turn.bm`) offers "Raze ?" only when
-  `opt_players = PLAYERS_ONE`, so neither player is ever asked. The original did the same (`player = 1`)
-  (found 2026-11-25, review of `ui\turn.bm`).
 
 ## Improvements
 
@@ -73,11 +56,25 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   records"). Join copies some of an army's fields and four places clear a slot, each clearing different fields.
   If those clears and copies were made the same, an `armies(i)` record with one copy and one clear would be
   simpler code, not only a new spelling. Making them the same changes how the game plays.
+- **Show a menu row that cannot be chosen by its name, dimmed.** Such a row shows as "-" now, in the
+  menu's own color: up to four in the main menu, five in Commands, four in Ships, and Load in Files.
+  With several, the player cannot tell which entries they were. Keep the name and print it in a dimmed
+  color, as other games do (the user liked this of the panel's views, 2026-11-27). Up and Down still
+  land on the row, because Enter there is the only way to learn why it is off ("Not enough money for
+  fort"). To settle when building:
+  - The dimmed color. Dark gray (`COLOR_DARK_GRAY`) is about as bright as the main menu's red, so a
+    red-blind player may not tell them apart. A "-" in front of the name ("-Troops") would not need
+    color; the right panel holds 11 characters and "-Army Drill" is 11.
+  - The row's first letter picks it again (T for Troops). The "-" key, which `refusals-rebel` presses,
+    would pick nothing.
+  - Enter on such a row differs by menu: Commands prints a reason and goes back to the main menu; Ships
+    and Files, Load show the menu again and say nothing. A reason on every row is a change of its own.
+
+  It needs a flag for each row beside `menu_text$()` (`draw_menu`, `menu_show_selected` and
+  `menu_show_plain`, `ui\menu.bm`) and the 14 places that set "-". `tests\rules_test.bas` tests for
+  "-", and every script that shows such a menu is recorded again.
 - **Mouse menus.** The menus read only keys (`menu_select`, `ui\menu.bm`). `_MOUSEINPUT` could let a player
   click a row.
-- **One known folder for saves and settings.** `cws1.sav` to `cws9.sav`, `cws.cfg`, `hiscore.cws`, `cws.his`
-  and `battsumm` are opened in the current folder (`io\files.bm`), so they land wherever the game was
-  started from. The names of the settings, the Hall of Fame and the history are constants in `io\folders.bi`. A single folder, for example beside the program, would keep them together.
 - **The numbers that are not tuning knobs yet.** `scenarios\TUNING.DAT` holds 135 knobs (user,
   2026-11-16; `tools\tuning\knobs.txt`). Left as numbers in the code, each for a reason:
   - **Thresholds that give a formula its shape**: the size ratios of `battle_strengths` (.2, .5, 1.5, 3,
@@ -144,15 +141,21 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   above `MAX_CASH`. A knob whose range has been narrowed since the save is passed over without a
   word: a save with `loss_own_share=5`, from before its most went from 10 to 1, loads it at its
   default, .8. To decide: refuse the save, warn, or fall back to the defaults (found 2026-11-24).
-- **Files opened without a check.** `config_read` (`CWS.CFG`), `load_scenario_list` and `load_scenario`
-  open their files without `_FILEEXISTS`. Started from another
-  folder, the game stops with "File not found".
+- **The game runs only from its own folder.** Every file is opened relative to the current folder:
+  `graphics\`, `scenarios\`, and the files the game writes (`CWS.CFG`, `HISCORE.CWS`, `cws.his`,
+  `oldhist.ory`, `battsumm`, `cws1.sav` to `cws9.sav`). Their names are in `io\folders.bi`.
+  `config_read` (`CWS.CFG`), `load_scenario_list` and `load_scenario` open their files without
+  `_FILEEXISTS`, so started from another folder, the game stops with "File not found". One fix for
+  both: at startup, switch to the program's own folder, or put that folder in front of each name.
+  Check first what `COMMAND$(0)` gives: the reference says the program's name, perhaps without its
+  path. `_STARTDIR$` is the folder the game was started from, so it does not help. The tests count on
+  the current folder: `tests\rules_test.bas` does `CHDIR TestTempDir$` before each file test, and
+  `tests\play.py` runs each script in a copy of the game. A folder of the user's own
+  (`_DIR$("documents")`) is a later idea, for when the game is installed where it cannot write.
 - **Special slots used as data.**
   - City 0's owner stands for "the port of a side with no fleet" (`navy_mark_side`). `ai_raise_forces`
     and `navy_can_invade` read it through `city_owner(fleet_city(side))`.
   - Army 0 is the scratch army of Join and is never cleared after it.
 - **A literal side.** `army_get_commander(2, army_slot)` in `menu_army_detach` should be `SIDE_REBEL`.
-- **A rule that changes its input.** `battle_strengths` sets an army's size to 1 when it is below 1, in a
-  procedure that otherwise only works out strengths.
 - **Forced choices.** Relieve loops until a row is picked, so Esc does not back out. The Capital command takes the money before the city is picked, and picking the same capital
   still pays (documented in `menu_move_capital`).

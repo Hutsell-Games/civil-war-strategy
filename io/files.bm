@@ -367,7 +367,7 @@ END FUNCTION
 
 ' The name of save slot slot's file: cws1.sav to cws9.sav.
 FUNCTION save_file_name$ (slot)
-    save_file_name$ = "cws" + LTRIM$(STR$(slot)) + ".sav"
+    save_file_name$ = SAVE_FILE_PREFIX + LTRIM$(STR$(slot)) + SAVE_FILE_SUFFIX
 END FUNCTION
 
 ' Reads the current side, game settings and the battle totals of all games from CWS.CFG.
@@ -472,7 +472,7 @@ SUB save_battle_summary
     DIM file_num AS INTEGER
     IF opt_history = HISTORY_ON THEN
         file_num = FREEFILE
-        OPEN "O", file_num, "battsumm"
+        OPEN "O", file_num, BATTLE_SUMMARY_FILE
         PRINT #file_num, " SIDE      BATTLES WON       LOSSES"
         FOR k = SIDE_UNION TO SIDE_REBEL
             winner_mark$ = " "
@@ -527,10 +527,10 @@ END SUB
 SUB history_start
     DIM file_num AS INTEGER
     IF _FILEEXISTS(HISTORY_FILE) THEN
-        IF _FILEEXISTS("oldhist.ory") THEN
-            KILL "oldhist.ory"
+        IF _FILEEXISTS(OLD_HISTORY_FILE) THEN
+            KILL OLD_HISTORY_FILE
         END IF
-        NAME HISTORY_FILE AS "oldhist.ory"
+        NAME HISTORY_FILE AS OLD_HISTORY_FILE
     END IF
     file_num = FREEFILE
     OPEN "O", file_num, HISTORY_FILE

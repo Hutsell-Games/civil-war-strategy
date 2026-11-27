@@ -60,7 +60,7 @@ SUB menu_army_move
     DIM army AS INTEGER
     DIM city AS INTEGER
     DIM i AS INTEGER
-    CALL menu_army_select(army, city)
+    CALL menu_army_select(army, city, PICK_ANY)
     IF city <= 0 OR army <= 0 THEN
         IF army = -1 THEN
             CALL turn_set_moves_done(TRUE)
@@ -109,7 +109,8 @@ SUB menu_army_move
 END SUB
 
 ' Picks an unordered army and its city, returning army = -1 when none is available and 0 on cancellation.
-SUB menu_army_select (army, city)
+' purpose (PICK_ANY, PICK_DRILL or PICK_DETACH) limits the armies offered (menu_army_offered).
+SUB menu_army_select (army, city, purpose)
     DIM last_army AS INTEGER
     DIM first_army AS INTEGER
     DIM i AS INTEGER
@@ -122,8 +123,10 @@ SUB menu_army_select (army, city)
     first_army = side_first_army(current_side)
     last_army = side_last_army(current_side)
     FOR i = first_army TO last_army
-        IF army_exists(i) AND army_order(i) = ORDER_NONE THEN
-            CALL menu_add_row(city_name$(army_city(i)), army_city(i))
+        IF menu_army_offered(i, purpose) THEN
+            IF NOT menu_has_value(army_city(i)) THEN
+                CALL menu_add_row(city_name$(army_city(i)), army_city(i))
+            END IF
         END IF
     NEXT i
     IF menu_item_count = 0 THEN
@@ -145,7 +148,7 @@ SUB menu_army_select (army, city)
 
     menu_item_count = 0
     FOR i = first_army TO last_army
-        IF army_city(i) = city AND army_order(i) = ORDER_NONE THEN
+        IF army_city(i) = city AND menu_army_offered(i, purpose) THEN
             army = i
             CALL menu_add_row("Army" + STR$(i), i)
         END IF
@@ -165,6 +168,22 @@ SUB menu_army_select (army, city)
     END IF
     army = menu_value(menu_choice)
 END SUB
+
+' Whether menu_army_select offers the army for the purpose (PICK_ANY, PICK_DRILL or PICK_DETACH):
+' it has no order, and Army Drill or Detach can act on it.
+FUNCTION menu_army_offered (army, purpose)
+    menu_army_offered = FALSE
+    IF NOT army_exists(army) OR army_order(army) <> ORDER_NONE THEN
+        EXIT FUNCTION
+    END IF
+    IF purpose = PICK_DRILL AND NOT army_can_drill(army) THEN
+        EXIT FUNCTION
+    END IF
+    IF purpose = PICK_DETACH AND NOT army_can_detach(army) THEN
+        EXIT FUNCTION
+    END IF
+    menu_army_offered = TRUE
+END FUNCTION
 
 ' The Troops command: the player picks a city from the month's list and raises troops there,
 ' again and again while the money lasts.
@@ -450,14 +469,14 @@ SUB menu_army_detach (again)
     COLOR COLOR_YELLOW
     LOCATE 4, 68
     PRINT "DETACH UNIT"
-    CALL menu_army_select(army, city)
-    IF city < 1 OR army < 1 THEN
+    CALL menu_army_select(army, city, PICK_DETACH)
+    IF army = -1 THEN
+        COLOR COLOR_LIGHT_CYAN
+        CALL clear_bottom_line
+        PRINT "No armies remain eligible to detach in "; month_name$(turn_month);
         EXIT SUB
     END IF
-    IF army_size(army) < min_detach_size THEN
-        CALL clear_bottom_line
-        PRINT "Too small to detach";
-        CALL wait_seconds(opt_pause!)
+    IF city < 1 OR army < 1 THEN
         EXIT SUB
     END IF
     CALL army_get_commander(2, army_slot)
@@ -476,35 +495,30 @@ SUB menu_army_detach (again)
     again = TRUE
 END SUB
 
-' Commands, Army Drill: an army gains a level of experience. again is FALSE when no army is
-' free to drill. drilled is FALSE when the army picked cannot drill further.
-SUB menu_army_drill (again, drilled)
+' Commands, Army Drill: an army gains a level of experience. Only armies that drill can still
+' improve are offered. again is FALSE when none is, or the player gives up.
+SUB menu_army_drill (again)
     DIM army AS INTEGER
     DIM city AS INTEGER
     again = FALSE
-    drilled = FALSE
     COLOR COLOR_YELLOW
     LOCATE 4, 68
     PRINT "DRILL ARMY"
-    CALL menu_army_select(army, city)
-    IF city < 1 OR army < 1 THEN
+    CALL menu_army_select(army, city, PICK_DRILL)
+    IF army = -1 THEN
         COLOR COLOR_LIGHT_CYAN
         CALL clear_bottom_line
         PRINT "No armies remain eligible for drills in "; month_name$(turn_month);
         EXIT SUB
     END IF
-    again = TRUE
-    IF NOT army_can_drill(army) THEN
-        COLOR COLOR_LIGHT_RED
-        CALL clear_bottom_line
-        PRINT army_name$(army); ": Army has reached maximum improvement through drilling";
+    IF city < 1 OR army < 1 THEN
         EXIT SUB
     END IF
+    again = TRUE
     CALL army_drill(army)
     CALL clear_bottom_line
     PRINT army_name$(army); " has drilled to reach experience level "; army_experience(army);
     CALL sound_effect(2222, 1)
     CALL wait_seconds(opt_pause!)
     CALL clear_bottom_line
-    drilled = TRUE
 END SUB

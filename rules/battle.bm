@@ -1,8 +1,20 @@
 ' The rules of a land battle. They draw nothing. calculate_battle (ui/battle.bm) shows the battle
-' and calls them in this order: battle_strengths, battle_fight, battle_losses, battle_apply_losses.
+' and calls them in this order: battle_armies_ready, battle_strengths, battle_fight, battle_losses,
+' battle_apply_losses.
 
-' Both armies' strengths, step by step, as the right panel shows them. An army of fewer than 100
-' troops fights as one of 100.
+' Makes an army of fewer than 100 troops one of 100, for each of the two armies. The later steps
+' need it: battle_strengths divides by the sizes, and battle_losses leaves each army 100 troops.
+SUB battle_armies_ready (attacker, defender)
+    IF army_size(defender) < 1 THEN
+        army_size(defender) = 1
+    END IF
+    IF army_size(attacker) < 1 THEN
+        army_size(attacker) = 1
+    END IF
+END SUB
+
+' Both armies' strengths, step by step, as the right panel shows them. Each army has at least 100
+' troops (battle_armies_ready).
 ' attack_steps(): 1 base, 2 leader and experience, 3 small army, 4 outmanned, 5 supply,
 '   6 difficulty, 7 the attack.
 ' defend_steps(): 1 defense, 2 leader and experience, 3 small army, 4 outmanned, 5 supply,
@@ -11,13 +23,6 @@ SUB battle_strengths (attacker, defender, attack_steps(), defend_steps())
     DIM attack_strength AS INTEGER
     DIM defend_strength AS INTEGER
     DIM size_ratio!
-    IF army_size(defender) < 1 THEN
-        army_size(defender) = 1
-    END IF
-    IF army_size(attacker) < 1 THEN
-        army_size(attacker) = 1
-    END IF
-
     attack_strength = attack_per_size# * army_size(attacker)
     attack_strength = strength_capped(attack_strength)
     attack_steps(1) = attack_strength
