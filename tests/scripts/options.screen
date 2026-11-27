@@ -912,8 +912,8 @@ p 00*640
 = 19
 end
 digest 4369B3DBB9F8B53D
-digest BCB4705E315DA16A
-digest BE24A91C758EE141
+digest 8985AE36CFAC51D3
+digest 793D5C1A4A995DC7
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,22 off color 15 background 0

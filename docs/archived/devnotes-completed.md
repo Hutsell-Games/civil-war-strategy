@@ -4719,6 +4719,33 @@ Left as they are:
   exact ratio such as 1 to 5. Showing that it does not would take a recording at each boundary,
   to save four repeated expressions.
 
+#### 15. The same map lines are drawn in two places (priority: medium)
+
+`draw_map_touchup` (`draw\map.bm`) was the original's `touchup` (`CWSTRAT2.BAS`, line 1367).
+`turn_resolve` called it after the month's moves. `MARK_ERASE_ARMY` called it after it painted a
+green box over an army's flag at New Orleans (27) or Norfolk (28). Most of its 40 lines copied
+lines of `draw_map` point for point, so a point moved in one copy would have left two lines on
+the map. The commerce box, `(447, 291)-(525, 335)`, was written out in `draw_map` and twice in
+`navy_commerce_raid`. `draw_map` also had two lines of no length, and `draw_map_touchup` two
+`PAINT` lines that were comments.
+
+A check of the screens showed more: touchup drew its lines over city dots and names, such as
+the letters of "MOBILE", and repaired only its own pieces.
+
+Fixed on 2026-11-27 at the user's request (U42 in `devnotes.md`):
+- `turn_resolve` draws the map again over its area (`draw_map_area`). `draw_map` is
+  `SCREEN 12` and `draw_map_area`.
+- `MARK_ERASE_ARMY` puts back the bare map under the flag, from a copy that `draw_map_area`
+  keeps (`draw_map_restore`), at every city. When no army is left in the city, it then draws
+  the city's mark again (`draw_city`, taken out of `draw_cities`).
+- Not changed: an army marching out (`animate_army`) and an erased train (`draw_train`) still
+  paint a green box with `draw_erase_flag` (`TODO.md`).
+- `draw_map_touchup` and the two lines of no length are gone. `draw_commerce_box` draws the
+  commerce box for `draw_map_area` and `navy_commerce_raid`.
+
+235 of the 592 screens of the 43 scripts changed, in 32 scripts, which were recorded again.
+Every change looked at matches what a fresh `draw_map` draws.
+
 ### Smaller items
 
 #### 10. Bare numbers beside named ones (priority: low)

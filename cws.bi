@@ -333,6 +333,8 @@ DIM SHARED event_city, event_army
 ' loaded by show_title. The other pictures are loaded when drawn (draw_picture, draw/pictures.bm).
 DIM SHARED pic_capital(CAPITAL_BUFFER_SIZE)
 DIM SHARED pic_mountain AS LONG
+' A copy of the map without its cities and marks, kept by draw_map_area for draw_map_restore.
+DIM SHARED map_base AS LONG
 ' Set by script_start (io/script.bm) when tests\play.py runs the program.
 DIM SHARED scripted
 ' Set by script_start when CWS_AUTOPLAY is 1 as well: the computer plays both sides.

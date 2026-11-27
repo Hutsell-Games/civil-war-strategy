@@ -87,8 +87,7 @@ SUB turn_resolve
 
     CALL navy_commerce_raid
 
-    CALL draw_map_touchup
-    CALL draw_fleets
+    CALL draw_map_area
     CALL turn_date_and_supply
 
     CALL clear_bottom_line

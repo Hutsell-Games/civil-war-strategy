@@ -99,6 +99,13 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   A 5-digit total (10 million men, about 30 wars at 300,000 each) prints as `" 12345 "`. The Rebel column
   then runs past the box to x 408, and the Union column's trailing space covers the divider at x 345. Print
   the numbers at a fixed width, right-aligned in their boxes (found 2026-11-25, review of `ui\reports.bm`).
+- **An army marching out of a city still cuts the river under its flag.** `draw_erase_flag`
+  (`draw\icons.bm`) paints a green box over the flag. `animate_army` calls it when the last army leaves a
+  city during the month's moves, and `draw_train` when it erases a train. The box cuts the river or coast
+  under it, as at Harper's Ferry, until `draw_map_area` redraws the map at the month's end. Make it put
+  back the bare map with `draw_map_restore` and draw the city's mark again, as `MARK_ERASE_ARMY` does
+  since U42 (`docs\devnotes.md`). Screens in the middle of the month change, so the scripts need
+  recording again (found 2026-11-27, review of U42).
 
 - **The city report lists cities 1 to 20 and 21 to 40 in two columns** (`ui\reports.bm` lines 218 and 222).
   The numbers are the screen layout, so they stay. If another war has a different count of cities, the

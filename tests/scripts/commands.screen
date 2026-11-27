@@ -4,7 +4,7 @@ digest 9312A2B166172FC3
 digest 778C4688216BF357
 digest 2BB078041A4EBB0B
 digest 5823CD5215EB81F2
-digest 590D578FE4A3810F
+digest AA83647D50401BA0
 digest 4B151242C13EBCBF
 screen-state 1
 pages 1 display 0 write 0 read 0
@@ -469,12 +469,12 @@ p 00*312 03*4 00*36 03*5 00*283
 p 00*640
 = 16
 end
-digest 833317B68CD06461
-digest D7A2DE765B37E7A0
-digest C0C264F8313805FA
-digest BA72BE4B0DA530BE
-digest 0FED8A43D04ADC2A
-digest BA6ACE9B53A216DC
+digest 39DBEEE9DDC7AEB7
+digest F99A32A6356D8190
+digest 1F55E1A7E983822E
+digest 3EBFD4F6C99A6B58
+digest DAABF75606ADF42E
+digest 3C99FC8A6CEA4BDF
 screen-state 1
 pages 1 display 0 write 0 read 0
 page 0 mode 12 graphics 640x480 bits 4 font 16 cursor 1,22 off color 15 background 0

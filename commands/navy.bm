@@ -203,12 +203,12 @@ SUB navy_commerce_raid
                     CALL wait_seconds(PAUSE_LONG)
                     again = TRUE
                 ELSE
-                    LINE (447, 291)-(525, 335), 1, BF
+                    CALL draw_commerce_box(0)
                     FOR k = 1 TO 5
                         CIRCLE (480, 315), 4 * k, 11
                     NEXT k
                     CALL wait_seconds(PAUSE_LONG)
-                    LINE (447, 291)-(525, 335), 1, BF
+                    CALL draw_commerce_box(0)
                 END IF
             END IF
         END IF
