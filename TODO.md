@@ -119,7 +119,7 @@ it keeps its files, so each needs its own decision and its scripts recorded agai
   `docs\archived\constants.md` has no row for it; a `FLEET_NONE` would be a new name to agree.
 - **An army without supply moves last**: `move_order_key(i) = 900 + i` (`rules\turn.bm` line 293). The 900
   is a sort key below `MOVE_KEY_NONE` (999), not a special value, so it stays.
-- **The Utility menu calls `menu_select(-1)`** (`menu_utility`, `ui\options.bm` line 65). No mode has that number, so it is a
+- **The Utility menu calls `menu_select(-1, row)`** (`menu_utility`, `ui\options.bm` line 48). No mode has that number, so it is a
   plain menu without the F3, F4 and F7 keys. `docs\archived\constants.md` has no row for it, so it keeps the -1
   (left alone by group 4). A `MENU_NO_KEYS` would be a new name to agree.
 - **Tests of `menu_choice` by sign keep their numbers** (`> 0`, `< 0`, `< 1`); see

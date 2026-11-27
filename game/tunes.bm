@@ -6,11 +6,10 @@
 ' do: QB64pe cannot take back notes already queued, and QBJS has no PLAY function to pace them.
 
 SUB play_shenandoah
+    DIM stopped AS INTEGER
     '                       Shenandoah
     IF opt_sound = SOUND_MUSIC THEN
-        IF play_until_key%("T90MFMNo1c4f8f8f4.g8a8b-8o2d8c4.MLf8e8MNd4.c8d8c8o1a8o2c4.c4d8d8d4.o1a8o2c8o1a8g8f4.g4a4.f8a8o2d8c4.o1f8g8a4.f8g4f2.") THEN
-            menu_choice = 1
-        END IF
+        stopped = play_until_key%("T90MFMNo1c4f8f8f4.g8a8b-8o2d8c4.MLf8e8MNd4.c8d8c8o1a8o2c4.c4d8d8d4.o1a8o2c8o1a8g8f4.g4a4.f8a8o2d8c4.o1f8g8a4.f8g4f2.")
     END IF
 END SUB
 

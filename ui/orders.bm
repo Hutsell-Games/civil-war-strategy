@@ -41,8 +41,7 @@ SUB menu_commands
         menu_text$(8) = "Relieve"
         menu_text$(9) = "MAIN MENU"
         menu_item_count = 9
-        menu_choice = MENU_START + row
-        CALL menu_select(MENU_PLAIN)
+        CALL menu_select(MENU_PLAIN, row)
         CALL clear_right_panel
         row = menu_choice
         SELECT CASE row
@@ -93,7 +92,7 @@ SUB menu_commands
                     EXIT SUB
                 END IF
                 ' The menu comes back on Fortify: the Enter that picked the capital was row 2 of the
-                ' city picker (menu_city_select), and the main module added that row to MENU_START.
+                ' city picker (menu_city_select), and the original started this menu on that row.
                 row = 2
             CASE 6
                 CALL menu_army_detach(again)

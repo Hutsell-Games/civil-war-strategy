@@ -104,7 +104,6 @@ than line numbers, because refactors move them; consult a fresh `report.txt` bef
 | `ai\forces.bm` | `ai_fortify` | 2 | It stops at a city whose fort is already at its limit; and the Union computer without a fleet stops when its cash is below 222 (G26), which no script's Union has after a fort |
 | `ai\forces.bm` | `ai_recruit` | 1 | The computer has no city to recruit in; since G25 to G28 no script's game reaches it |
 | `ai\navy.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
-| `ui\city.bm` | `menu_city_select` | 2 | `CASE ELSE` of the picker's menu; the menu returns only a key, 1, 2 or 3 |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
 
 Of the 178 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays

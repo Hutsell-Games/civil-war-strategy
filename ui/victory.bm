@@ -174,7 +174,7 @@ SUB end_game (side, rule)
     IF rule = VICTORY_WIPED_OUT THEN
         menu_item_count = 1
     END IF
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, 1)
 
     IF menu_choice <> 1 AND rule < VICTORY_WIPED_OUT THEN
         CALL end_game_play_on(rule)
@@ -192,7 +192,7 @@ SUB end_game (side, rule)
     menu_col = 27
     menu_row = 18
     IF rule <> VICTORY_WIPED_OUT THEN
-        CALL menu_select(MENU_PLAIN)
+        CALL menu_select(MENU_PLAIN, 1)
         IF menu_choice <> 1 THEN
             CALL end_game_play_on(rule)
             EXIT SUB

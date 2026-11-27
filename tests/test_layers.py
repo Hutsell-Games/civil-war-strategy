@@ -36,7 +36,7 @@ ALLOWED = {
 # The menu's shared variables (cws.bi).
 MENU_SHARED = {
     "menu_choice", "menu_col", "menu_row", "menu_item_count", "menu_text$", "menu_value",
-    "menu_box_type", "menu_color", "menu_highlight",
+    "menu_box_type", "menu_color", "menu_highlight", "menu_key$",
 }
 
 TOKEN = re.compile(r'"[^"]*"?|\'.*|[A-Za-z_][A-Za-z0-9_.]*[$!%&#]?')

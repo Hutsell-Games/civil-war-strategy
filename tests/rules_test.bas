@@ -796,14 +796,11 @@ END SUB
 
 SUB TestMenuStartRow
     menu_item_count = 5
-    menu_choice = MENU_START + 3
-    AssertEqualInt 3, menu_start_row, "MENU_START + 3: row 3"
-    menu_choice = 4
-    AssertEqualInt 1, menu_start_row, "a number below MENU_START: row 1"
-    menu_choice = MENU_START + 6
-    AssertEqualInt 1, menu_start_row, "past the last row: row 1"
-    menu_choice = 2 * MENU_START + 1
-    AssertEqualInt 1, menu_start_row, "above 42: row 1"
+    AssertEqualInt 3, menu_start_row(3), "a row of the menu"
+    AssertEqualInt 5, menu_start_row(5), "the last row"
+    AssertEqualInt 1, menu_start_row(0), "row 0: row 1"
+    AssertEqualInt 1, menu_start_row(6), "past the last row: row 1"
+    AssertEqualInt 1, menu_start_row(-1), "below the first row: row 1"
 END SUB
 
 SUB TestMenuLetterRow
@@ -1054,13 +1051,15 @@ SUB TestAiNavyChangesItsOrder
 END SUB
 
 SUB TestNavyMenuOffersWhatTheFleetCanDo
-    CALL menu_navy_items(1)
+    DIM start_row AS INTEGER
+    CALL menu_navy_items(1, start_row)
+    AssertEqualInt 3, start_row, "no Build and no Attack: the menu starts on Sail"
     AssertEqualStr "-", menu_text$(1), "no money: no Build"
     AssertEqualStr "-", menu_text$(3), "no fleet: no Sail"
     AssertEqualStr "-", menu_text$(4), "no fleet: no Raid"
     AssertEqualInt 4, menu_item_count, "four entries"
     fleet_city(1) = 5: fleet_size(1) = 2
-    CALL menu_navy_items(1)
+    CALL menu_navy_items(1, start_row)
     AssertEqualStr "Sail", menu_text$(3), "a fleet may sail"
     AssertEqualStr "Raid", menu_text$(4), "and raid"
     AssertEqualStr "-", menu_text$(2), "off a neutral city: no Attack"

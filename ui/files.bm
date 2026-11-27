@@ -5,18 +5,19 @@
 ' game, the "-" row, shows the menu again.
 SUB menu_files (action)
     DIM again AS INTEGER
+    DIM start_row AS INTEGER
     action = FILES_BACK
     CALL saved_games_check
     DO
-        menu_choice = MENU_START + 2
+        start_row = 2
         IF turn_year = FIRST_YEAR THEN
-            menu_choice = MENU_START + 1
+            start_row = 1
         END IF
         menu_text$(0) = "Options"
         menu_text$(1) = "Load"
         IF saves_exist = 0 THEN
             menu_text$(1) = "-"
-            menu_choice = MENU_START + 2
+            start_row = 2
         END IF
         menu_text$(2) = "Save"
         menu_text$(3) = "New Game"
@@ -24,7 +25,7 @@ SUB menu_files (action)
         menu_item_count = 4
         menu_col = PANEL_COL
         menu_row = 15
-        CALL menu_select(MENU_PLAIN)
+        CALL menu_select(MENU_PLAIN, start_row)
         CALL clear_right_panel
         again = 0
         SELECT CASE menu_choice
@@ -67,7 +68,7 @@ SUB menu_load_game
     NEXT k
     menu_col = PANEL_COL
     menu_row = 14 - .5 * menu_item_count
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, 1)
     CALL clear_right_panel
     IF menu_choice < 1 THEN
         EXIT SUB
@@ -107,7 +108,7 @@ SUB menu_save_game
     NEXT k
     menu_col = PANEL_COL
     menu_item_count = 9
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, 1)
     IF menu_choice < 1 THEN
         clear_right_panel: EXIT SUB
     END IF
@@ -124,12 +125,11 @@ END SUB
 ' Quit: Yes or No. action becomes FILES_QUIT on Yes, and cws.cfg keeps the battle totals of all
 ' games, with the battles fought since it was last written.
 SUB menu_quit (action)
-    menu_choice = MENU_START + 2
     CALL menu_set_two("Quit", "Yes", "No")
     menu_color = COLOR_MAGENTA
     menu_col = PANEL_COL
     menu_row = 15
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, 2)
     CALL clear_right_panel
     IF menu_choice = 1 THEN
         action = FILES_QUIT

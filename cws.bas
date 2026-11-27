@@ -76,34 +76,34 @@ DO
                     CALL turn_close_recruiting
                 ELSE
                     CALL menu_army_recruit((current_side))
-                    main_menu_start = MENU_START + MAIN_MOVES
+                    main_menu_start = MAIN_MOVES
                 END IF
             CASE MAIN_MOVES
                 CALL menu_army_move
-                main_menu_start = MENU_START + MAIN_MOVES
+                main_menu_start = MAIN_MOVES
             CASE MAIN_SHIPS
                 IF turn_navy_done = 0 THEN
                     CALL menu_navy_commands((current_side))
                 END IF
-                main_menu_start = MENU_START + MAIN_RAILROAD
+                main_menu_start = MAIN_RAILROAD
             CASE MAIN_RAILROAD
                 CALL menu_main_railroad
             CASE MAIN_END_TURN
                 CALL menu_main_end_turn(ended)
                 IF ended = 0 THEN
-                    main_menu_start = MENU_START + MAIN_SHIPS
+                    main_menu_start = MAIN_SHIPS
                 END IF
             CASE MAIN_INFORM
                 CALL menu_main_inform
-                main_menu_start = MENU_START + MAIN_INFORM
+                main_menu_start = MAIN_INFORM
             CASE MAIN_COMMANDS
-                main_menu_start = MENU_START + MAIN_COMMANDS
+                main_menu_start = MAIN_COMMANDS
                 CALL menu_commands
             CASE MAIN_UTILITY
-                main_menu_start = MENU_START + MAIN_UTILITY
+                main_menu_start = MAIN_UTILITY
                 CALL menu_utility
             CASE MAIN_FILES
-                main_menu_start = MENU_START + MAIN_FILES
+                main_menu_start = MAIN_FILES
                 CALL menu_files(action)
                 SELECT CASE action
                     CASE FILES_NEW_GAME
@@ -114,7 +114,7 @@ DO
             CASE MENU_END_TURN_KEY
                 ended = 1
             CASE ELSE
-                main_menu_start = MENU_START + MAIN_TROOPS
+                main_menu_start = MAIN_TROOPS
         END SELECT
         IF ended = 1 THEN
             CALL turn_reset_commands
@@ -127,7 +127,7 @@ DO
                 CALL scribe_message(message$, SHOW_HISTORY_ONLY)
                 CALL turn_resolve
                 CALL turn_collect_income
-                main_menu_start = MENU_START + MAIN_TROOPS
+                main_menu_start = MAIN_TROOPS
                 IF opt_players = PLAYERS_TWO THEN
                     CALL draw_player_turn
                     CALL draw_map

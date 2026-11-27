@@ -24,7 +24,6 @@ SUB menu_victory_conditions
                 menu_text$(i - 1) = "  "
             END IF
         NEXT i
-        menu_choice = start_option
         menu_text$(0) = "Victory Conditions"
         menu_text$(1) = menu_text$(1) + menu_text$(8)
         menu_text$(2) = menu_text$(2) + cities_text$
@@ -36,8 +35,8 @@ SUB menu_victory_conditions
         menu_color = COLOR_CYAN
         menu_item_count = 6
         menu_highlight = COLOR_YELLOW
-        CALL menu_select(MENU_PLAIN)
-        start_option = MENU_START + menu_choice
+        CALL menu_select(MENU_PLAIN, start_option)
+        start_option = menu_choice
         SELECT CASE menu_choice
             CASE 1
                 CALL victory_toggle_rule(VICTORY_YEAR)
@@ -65,7 +64,7 @@ SUB menu_report (side)
         menu_text$(7) = "Recap"
         menu_item_count = 7
     END IF
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, 1)
     SELECT CASE menu_choice
         CASE IS < 0
             CLS

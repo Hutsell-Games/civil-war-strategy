@@ -37,10 +37,10 @@ CONST ORDER_DONE = -2
 CONST RECRUIT_CLOSED = -1
 ' move_order_key(): the army does not move this turn.
 CONST MOVE_KEY_NONE = 999
-' menu_choice: set to MENU_START + n before menu_select to start on option n; after it, these.
-CONST MENU_START = 21
 ' The most rows a menu holds (menu_text$()). A row past them is not added.
 CONST MENU_MAX_ROWS = 21
+' menu_choice after menu_select: the row chosen, or one of these. F7 ends the turn at the main
+' menu only.
 CONST MENU_ESCAPED = -1
 CONST MENU_END_TURN_KEY = 99
 ' The rows of the title menu (menu_title) and of the main menu (menu_main).
@@ -256,7 +256,7 @@ CONST PANEL_COL = 67
 ' The train's outline for DRAW. Each picture adds its own color, scale and last strokes.
 CONST TRAIN_OUTLINE$ = "R9D4R6U3R3D3R7U5H3U2R9D3G2D6F1D3F5L10D1G1L4H2L7G2L3H2L3"
 '==========================================================================
-COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%
+COMMON SHARED menu_choice%, menu_col%, menu_row%, menu_item_count%, menu_text$(), menu_box_type%, menu_color%, menu_highlight%, menu_key$
 COMMON SHARED city_x(), city_y(), city_value(), city_owner(), city_name$(), leader_name$(), saves_exist
 COMMON SHARED side_cash(), side_city_count(), city_road(), city_port_type(), side_income(), saved_under_army(), leader_rating(), turn_recruit_count
 COMMON SHARED turn_navy_done, opt_ai_aggression, opt_pause!, train_army(), flag_star_x(), flag_star_y(), train_from_city()

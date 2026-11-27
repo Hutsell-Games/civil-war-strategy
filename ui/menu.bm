@@ -87,10 +87,12 @@ END SUB
 
 ' Shows the menu of menu_text$() and waits for the player's choice, left in menu_choice: a row,
 ' MENU_ESCAPED for Esc, or what menu_arrow_key gives. kind is one of MENU_PLAIN and the
-' others: what the menu shows beside the highlighted row, and which keys it takes. At
-' MENU_RAW_KEYS a key of one byte gives minus its code, Esc too (-KEY_ESC); Up, Enter and
-' Down give 1, 2 and 3.
-SUB menu_select (kind)
+' others: what the menu shows beside the highlighted row, and which keys it takes. start_row
+' is the row the menu starts on; a number that is no row of the menu starts it on row 1.
+' At MENU_RAW_KEYS the player chooses no row: the menu closes at Up, Down or a key of one
+' byte, and leaves that key in menu_key$. That is the key's one byte, a letter in upper case,
+' or CHR$(0) and KEY_UP$ or KEY_DOWN$. menu_choice is no choice then.
+SUB menu_select (kind, start_row)
     DIM previous_row AS INTEGER
     DIM done AS INTEGER
     DIM pressed$
@@ -107,7 +109,7 @@ SUB menu_select (kind)
     END IF
     menu_width = menu_measure_width
     CALL menu_place(menu_width)
-    row = menu_start_row
+    row = menu_start_row(start_row)
     menu_choice = row
     previous_row = row
 
@@ -131,7 +133,7 @@ SUB menu_select (kind)
                 EXIT DO
             END IF
             IF kind = MENU_RAW_KEYS THEN
-                menu_choice = -ASC(UCASE$(pressed$))
+                menu_key$ = UCASE$(pressed$)
                 done = 1
                 EXIT DO
             END IF
@@ -151,16 +153,12 @@ SUB menu_select (kind)
         END IF
 
         IF kind = MENU_RAW_KEYS THEN
-            IF pressed$ = KEY_UP$ THEN
-                menu_choice = 1
+            IF pressed$ = KEY_UP$ OR pressed$ = KEY_DOWN$ THEN
+                menu_key$ = CHR$(0) + pressed$
                 EXIT DO
             END IF
             IF ASC(pressed$) = KEY_ENTER THEN
-                menu_choice = 2
-                EXIT DO
-            END IF
-            IF pressed$ = KEY_DOWN$ THEN
-                menu_choice = 3
+                menu_key$ = pressed$
                 EXIT DO
             END IF
         END IF
@@ -195,27 +193,12 @@ SUB menu_place (menu_width)
     END IF
 END SUB
 
-' The row a menu starts on, from menu_choice: MENU_START + row, or row 1 for anything that is
-' not a row of the menu.
-FUNCTION menu_start_row
-    DIM row AS INTEGER
-    row = menu_choice
-    IF row < MENU_START THEN
-        row = 1
+' The row a menu starts on: start_row, or row 1 when that is no row of the menu.
+FUNCTION menu_start_row (start_row)
+    menu_start_row = start_row
+    IF start_row < 1 OR start_row > menu_item_count THEN
+        menu_start_row = 1
     END IF
-    IF row > MENU_START THEN
-        row = row - MENU_START
-    END IF
-    IF row > MENU_MAX_ROWS THEN
-        row = 1
-    END IF
-    IF row < 1 THEN
-        row = 1
-    END IF
-    IF row > menu_item_count THEN
-        row = 1
-    END IF
-    menu_start_row = row
 END FUNCTION
 
 ' Waits for a key at a menu, and gives it. A script is told that the menu waits.

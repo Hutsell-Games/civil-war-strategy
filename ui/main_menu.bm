@@ -2,8 +2,8 @@
 ' entries are in ui/army.bm, ui/navy.bm, ui/orders.bm, ui/options.bm and ui/files.bm. At the
 ' end: the title screen, the title menu and the start of a new game.
 
-' Shows the main menu and leaves the choice in menu_choice. start is the row it starts on, as
-' MENU_START + row, or 0 for Troops. An entry that cannot be chosen shows as "-". A start on a
+' Shows the main menu and leaves the choice in menu_choice. start is the row it starts on, or
+' 0 for Troops. An entry that cannot be chosen shows as "-". A start on a
 ' "-" entry from Troops to Railroad moves a row down; a start on any other row stays.
 SUB menu_main (start)
     CALL draw_top_bar
@@ -16,29 +16,29 @@ SUB menu_main (start)
     menu_text$(1) = "Troops"
     IF turn_recruit_count = RECRUIT_CLOSED OR side_cash(current_side) < cost_recruit THEN
         menu_text$(1) = "-"
-        IF start <= MENU_START + MAIN_TROOPS THEN
-            start = MENU_START + MAIN_MOVES
+        IF start <= MAIN_TROOPS THEN
+            start = MAIN_MOVES
         END IF
     END IF
     menu_text$(2) = "Moves"
     IF turn_moves_done > 0 THEN
         menu_text$(2) = "-"
-        IF start = MENU_START + MAIN_MOVES THEN
-            start = MENU_START + MAIN_SHIPS
+        IF start = MAIN_MOVES THEN
+            start = MAIN_SHIPS
         END IF
     END IF
     menu_text$(3) = "Ships"
     IF turn_navy_done > 0 THEN
         menu_text$(3) = "-"
-        IF start = MENU_START + MAIN_SHIPS THEN
-            start = MENU_START + MAIN_RAILROAD
+        IF start = MAIN_SHIPS THEN
+            start = MAIN_RAILROAD
         END IF
     END IF
     menu_text$(4) = "Railroad"
     IF train_army(current_side) > 0 THEN
         menu_text$(4) = "-"
-        IF start = MENU_START + MAIN_RAILROAD THEN
-            start = MENU_START + MAIN_END_TURN
+        IF start = MAIN_RAILROAD THEN
+            start = MAIN_END_TURN
         END IF
     END IF
     menu_text$(5) = "END TURN"
@@ -47,8 +47,7 @@ SUB menu_main (start)
     menu_text$(8) = "UTILITY"
     menu_text$(9) = "Files"
     menu_item_count = 9
-    menu_choice = start
-    CALL menu_select(MENU_MAIN_KEYS)
+    CALL menu_select(MENU_MAIN_KEYS, start)
     CALL clear_right_panel
 END SUB
 
@@ -94,9 +93,8 @@ SUB menu_main_end_turn (ended)
     menu_row = 15
     menu_highlight = COLOR_WHITE
     menu_color = COLOR_CYAN
-    menu_choice = MENU_START + 2
     CALL menu_set_two("End Turn", "Yes", "NOT YET")
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, 2)
     CALL clear_right_panel
     ended = 0
     IF menu_choice = 1 THEN
@@ -158,8 +156,7 @@ SUB menu_title
         menu_col = 33
         menu_row = 20
         menu_color = COLOR_MAGENTA
-        menu_choice = MENU_START + menu_item_count - 1
-        CALL menu_select(MENU_PLAIN)
+        CALL menu_select(MENU_PLAIN, menu_item_count - 1)
     LOOP WHILE menu_choice = MENU_ESCAPED
     IF menu_choice > 0 THEN
         menu_choice = menu_value(menu_choice)
@@ -184,8 +181,7 @@ SUB menu_scenario (picked)
     menu_row = 20
     menu_color = COLOR_MAGENTA
     menu_item_count = scenario_count
-    menu_choice = MENU_START + scenario_now
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, scenario_now)
     picked = 0
     IF menu_choice >= 1 AND menu_choice <= scenario_count THEN
         picked = menu_choice

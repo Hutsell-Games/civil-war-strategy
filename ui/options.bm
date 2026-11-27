@@ -13,7 +13,7 @@ END FUNCTION
 SUB menu_utility
     DIM row AS INTEGER
     DIM picked AS INTEGER
-    menu_choice = MENU_START + 1
+    row = 1
     DO
         menu_text$(0) = "Utility"
         menu_text$(1) = "Side"
@@ -45,7 +45,7 @@ SUB menu_utility
             menu_item_count = 14
             menu_text$(14) = "Aggress" + STR$(opt_ai_aggression)
         END IF
-        CALL menu_select(-1)
+        CALL menu_select(-1, row)
         CALL clear_right_panel
         row = menu_choice
         SELECT CASE row
@@ -101,7 +101,6 @@ SUB menu_utility
             CASE ELSE
                 EXIT SUB
         END SELECT
-        menu_choice = MENU_START + row
     LOOP
 END SUB
 
@@ -158,7 +157,6 @@ END SUB
 SUB menu_option_sound (picked)
     picked = 0
     CALL clear_right_panel
-    menu_choice = MENU_START + 1 + opt_sound
     menu_text$(0) = "SOUNDS"
     menu_text$(1) = "Quiet"
     menu_text$(2) = "Sound"
@@ -166,7 +164,7 @@ SUB menu_option_sound (picked)
     menu_item_count = 3
     menu_col = PANEL_COL
     menu_row = 12
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, 1 + opt_sound)
     CALL clear_right_panel
     IF menu_choice < 1 THEN
         EXIT SUB
@@ -181,7 +179,6 @@ END SUB
 
 ' Display: how long a message stays, or the other set of colors.
 SUB menu_option_display
-    menu_choice = MENU_START + option_display_row
     menu_text$(0) = "Display"
     menu_text$(1) = "Fast"
     menu_text$(2) = "Normal"
@@ -194,7 +191,7 @@ SUB menu_option_display
     menu_col = PANEL_COL
     menu_row = 15
     menu_item_count = DISPLAY_SPEED_ROWS + 1
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, option_display_row)
     CALL clear_right_panel
     SELECT CASE menu_choice
         CASE IS < 1
@@ -214,7 +211,6 @@ END SUB
 ' Balance: the menu with the faces. picked is 0 when the player left it with Esc.
 SUB menu_option_balance (picked)
     picked = 0
-    menu_choice = MENU_START + opt_difficulty
     menu_text$(0) = "Balance"
     menu_text$(1) = "Rebel ++"
     menu_text$(2) = "Rebel +"
@@ -224,7 +220,7 @@ SUB menu_option_balance (picked)
     menu_col = PANEL_COL
     menu_row = 15
     menu_item_count = 5
-    CALL menu_select(MENU_FACES)
+    CALL menu_select(MENU_FACES, opt_difficulty)
     CALL clear_right_panel
     IF menu_choice < 1 THEN
         EXIT SUB
@@ -259,9 +255,8 @@ SUB menu_option_events
     IF opt_event_balance = EVENTS_FAVOR_REBELS THEN
         menu_text$(4) = menu_text$(4) + " "
     END IF
-    menu_choice = MENU_START + option_event_balance_row
     menu_color = COLOR_MAGENTA
-    CALL menu_select(MENU_PLAIN)
+    CALL menu_select(MENU_PLAIN, option_event_balance_row)
     menu_color = COLOR_RED
 
     CALL option_set_event_balance(menu_choice)

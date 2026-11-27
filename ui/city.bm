@@ -27,8 +27,7 @@ SUB menu_city_fortify (city)
     END IF
     CALL menu_bubble_sort(menu_item_count)
     menu_text$(0) = "Fortify"
-    menu_choice = MENU_START + 10
-    CALL menu_select(MENU_CITY_POINTER)
+    CALL menu_select(MENU_CITY_POINTER, 10)
     CALL clear_right_panel
     IF menu_choice < 0 THEN
         EXIT SUB
@@ -48,7 +47,6 @@ END SUB
 
 ' Lets the player browse friendly cities by arrow or initial letter, returning city = 0 on cancellation.
 SUB menu_city_select (city)
-    DIM letter$
     menu_text$(1) = "  "
     menu_text$(3) = "  "
     menu_item_count = 3
@@ -56,26 +54,21 @@ SUB menu_city_select (city)
         menu_col = 68
         menu_row = 15
         menu_color = COLOR_CYAN
-        menu_choice = MENU_START + 2
         menu_text$(2) = city_name$(city)
-        CALL menu_select(MENU_RAW_KEYS)
+        CALL menu_select(MENU_RAW_KEYS, 2)
         CALL clear_right_panel
-        SELECT CASE menu_choice
-            CASE IS = -KEY_ESC
+        SELECT CASE menu_key$
+            CASE CHR$(KEY_ESC)
                 city = 0
                 EXIT SUB
-            CASE IS < 1
-                letter$ = CHR$(ABS(menu_choice))
-                city = side_city_by_letter(letter$, current_side, city)
-            CASE 1
-                city = side_city_step(city, current_side, -1, MAX_CITIES)
-            CASE 2
+            CASE CHR$(KEY_ENTER)
                 EXIT SUB
-            CASE 3
+            CASE CHR$(0) + KEY_UP$
+                city = side_city_step(city, current_side, -1, MAX_CITIES)
+            CASE CHR$(0) + KEY_DOWN$
                 city = side_city_step(city, current_side, 1, MAX_CITIES)
             CASE ELSE
-                city = 0
-                EXIT SUB
+                city = side_city_by_letter(menu_key$, current_side, city)
         END SELECT
     LOOP
 END SUB
