@@ -75,6 +75,7 @@ A topic has a file of the same name in each folder that has a part of it: `army.
 | `game\tunes.bm` | Shenandoah and the title's tune |
 | `game\victory_screens.bm` | The victory and surrender screens |
 | `io\files.bm` | The scenario list, a scenario, the map, saved games, `cws.cfg`, the battle summary, the Hall of Fame and the history file |
+| `io\text.bm` | Small text helpers that the data readers and `io\script.bm` share: trim, BOM strip, number test, list items |
 | `io\events_file.bm` | The reader of `scenarios\EVENTS.DAT` |
 | `io\tuning_file.bm` | The reader of the tuning files: `scenarios\TUNING.DAT`, a scenario's own, and the list a saved game holds |
 | `io\tuning_knobs.bm`, `io\tuning_knobs.bi` | The tuning knobs' variables, defaults, names and ranges. Written by `tools\tuning\make_knobs.py` from `tools\tuning\knobs.txt`; not edited by hand |

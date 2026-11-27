@@ -4014,6 +4014,7 @@ END SUB
 '$INCLUDE: '../game/tunes.bm'
 '$INCLUDE: '../game/colors.bm'
 '$INCLUDE: '../io/files.bm'
+'$INCLUDE: '../io/text.bm'
 '$INCLUDE: '../io/events_file.bm'
 '$INCLUDE: '../io/tuning_file.bm'
 '$INCLUDE: '../io/tuning_knobs.bm'

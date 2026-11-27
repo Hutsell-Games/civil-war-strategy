@@ -343,7 +343,7 @@ SUB draw_map
     PAINT (200, 200), 2, 10
     COLOR COLOR_LIGHT_GREEN
     '==========================  Mountains =================================
-    IF _FILEEXISTS(GFXDIR + "MTN.PNG") THEN
+    IF pic_mountain < -1 THEN
         _PUTIMAGE (380, 30), pic_mountain
         _PUTIMAGE (270, 200), pic_mountain
         _PUTIMAGE (310, 160), pic_mountain

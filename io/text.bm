@@ -1,0 +1,81 @@
+' Small helpers for reading text, shared by the readers of the data files (io/events_file.bm,
+' io/tuning_file.bm) and by the script hooks (io/script.bm).
+
+' The first item of the list rest$: the text before the first sep$, which may be longer than one
+' character. rest$ loses the item and its sep$. Without a sep$ the item is all of rest$, and rest$
+' is left empty.
+FUNCTION text_take_item$ (rest$, sep$)
+    DIM cut AS INTEGER
+    cut = INSTR(rest$, sep$)
+    IF cut = 0 THEN
+        text_take_item$ = rest$
+        rest$ = ""
+    ELSE
+        text_take_item$ = LEFT$(rest$, cut - 1)
+        rest$ = MID$(rest$, cut + LEN(sep$))
+    END IF
+END FUNCTION
+
+' A file's first line without the three bytes that start a file saved as "UTF-8 with BOM".
+FUNCTION text_without_bom$ (text$)
+    text_without_bom$ = text$
+    IF LEFT$(text$, 3) = CHR$(239) + CHR$(187) + CHR$(191) THEN
+        text_without_bom$ = MID$(text$, 4)
+    END IF
+END FUNCTION
+
+' A text without the spaces and tabs at its start and end. _TRIM$ takes off spaces only.
+FUNCTION text_trim$ (text$)
+    DIM first AS INTEGER
+    DIM last AS INTEGER
+    first = 1
+    last = LEN(text$)
+    DO WHILE first <= last
+        IF MID$(text$, first, 1) <> " " AND MID$(text$, first, 1) <> CHR$(9) THEN
+            EXIT DO
+        END IF
+        first = first + 1
+    LOOP
+    DO WHILE last >= first
+        IF MID$(text$, last, 1) <> " " AND MID$(text$, last, 1) <> CHR$(9) THEN
+            EXIT DO
+        END IF
+        last = last - 1
+    LOOP
+    text_trim$ = MID$(text$, first, last - first + 1)
+END FUNCTION
+
+' Whether a text is a number as the file writes one: digits, at most one point, and a minus
+' sign only at the start.
+FUNCTION text_is_number (text$)
+    DIM k AS INTEGER
+    DIM digits AS INTEGER
+    DIM points AS INTEGER
+    DIM c$
+    text_is_number = FALSE
+    FOR k = 1 TO LEN(text$)
+        c$ = MID$(text$, k, 1)
+        IF c$ >= "0" AND c$ <= "9" THEN
+            digits = digits + 1
+        ELSEIF c$ = "." THEN
+            points = points + 1
+        ELSEIF c$ <> "-" OR k > 1 THEN
+            EXIT FUNCTION
+        END IF
+    NEXT k
+    IF digits > 0 AND points <= 1 THEN
+        text_is_number = TRUE
+    END IF
+END FUNCTION
+
+' The place of the last space in a text. 0 when it has none.
+FUNCTION text_last_space (text$)
+    DIM k AS INTEGER
+    text_last_space = 0
+    FOR k = LEN(text$) TO 1 STEP -1
+        IF MID$(text$, k, 1) = " " THEN
+            text_last_space = k
+            EXIT FUNCTION
+        END IF
+    NEXT k
+END FUNCTION

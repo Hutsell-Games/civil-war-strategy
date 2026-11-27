@@ -134,7 +134,7 @@ one. Namespaces alone would not resolve an explicitly declared local scalar.
 
 **Evidence.** [io/events_file.bm](../io/events_file.bm) parses event names,
 conditions, effects and chance factors into the parallel arrays in `cws.bi`.
-Its `text_is_number` validates numbers before conversion, and `load_events`
+It calls `text_is_number` (`io/text.bm`) to validate numbers before conversion, and `load_events`
 reports recognized definition errors through shared `event_file_error$`.
 [rules/events.bm](../rules/events.bm) consumes the resulting table.
 
