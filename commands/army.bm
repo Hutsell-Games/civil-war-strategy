@@ -128,8 +128,7 @@ SUB army_recruit (side, city, raised)
     i = city_army(city)
     IF army_is_full(i) THEN
         raised = FALSE
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
+        CALL start_bottom_message
         PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " is at full strength";
         CALL wait_seconds(opt_pause! - .5)
         EXIT SUB
@@ -139,8 +138,7 @@ SUB army_recruit (side, city, raised)
     CALL flag_picture_save(from_city)
     CALL draw_map_marker(army_city(i), 0, MARK_RECRUIT)
     CALL sound_effect(2222, 1)
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT "Army "; i; army_name$(i); " in "; city_name$(army_city(i)); " strength increased to ";
     CALL print_army_size(i)
     IF isolated THEN

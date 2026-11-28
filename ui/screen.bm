@@ -27,6 +27,12 @@ SUB clear_bottom_line
     LOCATE 29, 1
 END SUB
 
+' Clears the bottom line for a message in light cyan, the color of most of the game's messages.
+SUB start_bottom_message
+    COLOR COLOR_LIGHT_CYAN
+    CALL clear_bottom_line
+END SUB
+
 SUB clear_right_panel
     VIEW (528, 1)-(639, 450)
     CLS 1
@@ -121,9 +127,9 @@ SUB draw_top_bar
     IF opt_alt_colors > 0 THEN
         COLOR COLOR_GRAY
     END IF
-    LOCATE 6, 68
+    LOCATE 6, PANEL_TEXT_COL
     PRINT "Difficulty "; _TRIM$(STR$(opt_difficulty))
-    LOCATE 7, 68
+    LOCATE 7, PANEL_TEXT_COL
     PRINT "Funds:"; side_cash(current_side);
 
     ' Victory points below 0 are set to 0 here, when the bar is drawn, as in the original game.
@@ -149,10 +155,10 @@ SUB draw_top_bar
 
     LINE (530, 20)-(530 + percent, 30), side_color, BF
     COLOR side_color
-    LOCATE 4, 68
+    LOCATE 4, PANEL_TEXT_COL
     PRINT "VP :"; side_victory_points(current_side)
 
-    LOCATE 5, 68
+    LOCATE 5, PANEL_TEXT_COL
     PRINT "("; percent; "%)"
 
     settings$ = CHR$(14) + "  Snd" ' Double notes
@@ -167,11 +173,11 @@ SUB draw_top_bar
     END IF
     settings$ = settings$ + STR$(opt_players)
     COLOR side_color
-    LOCATE 26, 68
+    LOCATE 26, PANEL_TEXT_COL
     PRINT "F3 Redrw Scrn"
-    LOCATE 27, 68
+    LOCATE 27, PANEL_TEXT_COL
     PRINT "F7 End Turn"
-    LOCATE 28, 68
+    LOCATE 28, PANEL_TEXT_COL
     PRINT settings$
 END SUB
 
@@ -208,20 +214,20 @@ END SUB
 SUB draw_army_stats (army)
     LINE (530, 60)-(639, 150), 0, BF
     COLOR COLOR_WHITE
-    LOCATE 5, 68
+    LOCATE 5, PANEL_TEXT_COL
     PRINT army_name$(army)
     COLOR side_color_of(army_side(army))
-    LOCATE 6, 68
+    LOCATE 6, PANEL_TEXT_COL
     PRINT "Size:";
     CALL print_army_size(army)
-    LOCATE 7, 68
+    LOCATE 7, PANEL_TEXT_COL
     PRINT "Leader:"; TAB(75); army_leader_rating(army)
-    LOCATE 8, 68
+    LOCATE 8, PANEL_TEXT_COL
     PRINT "Exper:"; TAB(75); army_experience(army)
     IF army_supply(army) < 2 THEN
         COLOR COLOR_LIGHT_RED
     END IF
-    LOCATE 9, 68
+    LOCATE 9, PANEL_TEXT_COL
     PRINT "Supply:"; TAB(75); army_supply(army)
 END SUB
 

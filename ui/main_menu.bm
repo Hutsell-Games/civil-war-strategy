@@ -62,7 +62,7 @@ SUB menu_main_railroad
     DIM city AS INTEGER
     IF train_army(current_side) = 0 THEN
         COLOR COLOR_WHITE
-        LOCATE 4, 68
+        LOCATE 4, PANEL_TEXT_COL
         PRINT "RAILROAD MOVE"
         PSET (550, 20), 0
         DRAW "C15S6" + TRAIN_OUTLINE$ + "U9L2U5R1BF4"
@@ -82,8 +82,7 @@ SUB menu_main_railroad
         CALL wait_seconds(PAUSE_LONG)
         CALL railroad_finish
     ELSE
-        CALL clear_bottom_line
-        COLOR COLOR_LIGHT_CYAN
+        CALL start_bottom_message
         PRINT "Railroad is already carrying "; army_name$(train_army(current_side)); " to "; city_name$(army_order(train_army(current_side)));
     END IF
 END SUB

@@ -266,6 +266,8 @@ CONST KEY_F7$ = "A"
 CONST PAUSE_LONG = 9
 ' The column of the right panel, where most menus go.
 CONST PANEL_COL = 67
+' The column where the right panel's own text starts: its titles, an army's numbers, a battle's.
+CONST PANEL_TEXT_COL = 68
 ' The map's right edge in pixels. The right panel starts after it.
 CONST MAP_RIGHT = 527
 ' The train's outline for DRAW. Each picture adds its own color, scale and last strokes.

@@ -14,8 +14,7 @@ END SUB
 SUB navy_fleet_founded (side, city, ship$, cost)
     CALL navy_found_fleet(side, city, cost)
     CALL draw_fleets
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     PRINT side_name$(side); " is building NEW fleet in "; city_name$(city);
     CALL navy_show_new_ship(side, ship$)
 END SUB
@@ -325,8 +324,7 @@ END SUB
 SUB navy_combat_retreat (side)
     DIM port AS INTEGER
     CALL navy_retreat(side, port)
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     PRINT side_name$(side); " is retreating to "; city_name$(port);
     CALL wait_seconds(opt_pause!)
 END SUB

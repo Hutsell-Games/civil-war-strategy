@@ -121,7 +121,7 @@ SUB menu_navy_sail (side, again)
     CALL navy_list_ports(side, cities(), count)
     CALL menu_set_cities(cities(), count)
     COLOR COLOR_LIGHT_CYAN
-    LOCATE 11, 68
+    LOCATE 11, PANEL_TEXT_COL
     IF NOT fleet_is_at_sea(side) THEN
         PRINT city_name$(fleet_city(side))
     ELSE
@@ -202,8 +202,7 @@ SUB menu_navy_combat (side)
                 CALL navy_combat_retreat(side)
                 EXIT SUB
             END IF
-            CALL clear_bottom_line
-            COLOR COLOR_LIGHT_CYAN
+            CALL start_bottom_message
             PRINT side_name$(side); " has no port to retreat to";
             CALL wait_seconds(opt_pause!)
         ELSE

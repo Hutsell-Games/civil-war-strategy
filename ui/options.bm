@@ -79,8 +79,7 @@ SUB menu_utility
                     CLS
                     CALL draw_map
                 ELSE
-                    CALL clear_bottom_line
-                    COLOR COLOR_LIGHT_CYAN
+                    CALL start_bottom_message
                     PRINT "Vary Start only before the first End Turn of a new game";
                     CALL wait_seconds(PAUSE_LONG)
                     CALL clear_bottom_line
@@ -147,8 +146,7 @@ SUB menu_option_graphics
     END SELECT
     CLS
     CALL draw_map
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     PRINT "Graphics : "; setting$;
     CALL sound_effect(2700, 1)
 END SUB
@@ -169,8 +167,7 @@ SUB menu_option_sound (picked)
     IF menu_choice < 1 THEN
         EXIT SUB
     END IF
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT "Sound Option : "; menu_text$(menu_choice);
     CALL option_set_sound(menu_choice - 1)
     CALL sound_effect(999, 1)
@@ -197,8 +194,7 @@ SUB menu_option_display
         CASE IS < 1
         CASE IS <= DISPLAY_SPEED_ROWS
             CALL option_set_display_speed(menu_choice)
-            CALL clear_bottom_line
-            COLOR COLOR_LIGHT_CYAN
+            CALL start_bottom_message
             PRINT "Display Speed : "; menu_text$(menu_choice);
         CASE DISPLAY_SPEED_ROWS + 1
             CALL option_toggle_alt_colors
@@ -225,8 +221,7 @@ SUB menu_option_balance (picked)
     IF menu_choice < 1 THEN
         EXIT SUB
     END IF
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     PRINT "Play Balance : "; menu_text$(menu_choice);
     CALL option_set_balance(menu_choice)
     picked = TRUE
@@ -292,16 +287,14 @@ SUB menu_option_january
     IF opt_winter_campaigns = 1 THEN
         setting$ = "ALLOWED"
     END IF
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT "January Campaigns : "; setting$;
 END SUB
 
 ' Realism: recruits by the city's size, or a fixed number.
 SUB menu_option_realism
     CALL option_toggle_realism
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     IF opt_realism = REALISM_OFF THEN
         PRINT "Recruiting FIXED :  7000 for NEW Armies   4500 for Additions";
     ELSE
@@ -317,8 +310,7 @@ SUB menu_option_history
     IF opt_history = HISTORY_ON THEN
         setting$ = "ON"
     END IF
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     PRINT "History is now "; setting$;
 END SUB
 
@@ -340,7 +332,6 @@ SUB menu_option_aggression
         CASE 5
             setting$ = "RECKLESS"
     END SELECT
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     PRINT "Enemy Aggression : "; setting$; " ("; LTRIM$(STR$(opt_ai_aggression)); ")";
 END SUB

@@ -14,8 +14,7 @@ SUB menu_railroad (side, army, city)
     city = 0
     CALL menu_army_select(chosen_army, chosen_city, PICK_ANY)
     IF chosen_city < 1 OR chosen_army < 1 THEN
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
+        CALL start_bottom_message
         PRINT "Railroad move not allowed";
         EXIT SUB
     END IF

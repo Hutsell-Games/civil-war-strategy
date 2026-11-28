@@ -52,8 +52,7 @@ SUB menu_commands
                 CALL turn_set_moves_done(FALSE)
             CASE 2
                 IF NOT fort_affordable(current_side) THEN
-                    COLOR COLOR_LIGHT_CYAN
-                    CALL clear_bottom_line
+                    CALL start_bottom_message
                     PRINT "Not enough money for fort";
                     EXIT SUB
                 END IF
@@ -64,16 +63,14 @@ SUB menu_commands
             CASE 3
                 CALL menu_army_combine(current_side, found)
                 IF NOT found THEN
-                    CALL clear_bottom_line
-                    COLOR COLOR_LIGHT_CYAN
+                    CALL start_bottom_message
                     PRINT "No eligible armies in same city to combine";
                     CALL draw_stack_markers(current_side)
                     EXIT SUB
                 END IF
             CASE 4
                 IF NOT side_can_supply(current_side) THEN
-                    COLOR COLOR_LIGHT_CYAN
-                    CALL clear_bottom_line
+                    CALL start_bottom_message
                     IF side_needs_supply(current_side) THEN
                         PRINT "Not enough funds in the Treasury for supplies";
                     ELSE

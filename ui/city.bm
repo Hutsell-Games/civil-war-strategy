@@ -20,8 +20,7 @@ SUB menu_city_fortify (city)
         END IF
     NEXT i
     IF menu_item_count = 0 THEN
-        CALL clear_bottom_line
-        COLOR COLOR_LIGHT_CYAN
+        CALL start_bottom_message
         PRINT "No cities eligible to fortify";
         EXIT SUB
     END IF
@@ -51,7 +50,7 @@ SUB menu_city_select (city)
     menu_text$(3) = "  " + CHR$(25) ' Down Arrow
     menu_item_count = 3
     DO
-        menu_col = 68
+        menu_col = PANEL_TEXT_COL
         menu_row = 15
         menu_color = COLOR_CYAN
         menu_text$(2) = city_name$(city)
@@ -79,8 +78,7 @@ SUB menu_move_capital (city)
     DIM old_capital$
     city = 0
     IF NOT capital_can_move(current_side) THEN
-        CALL clear_bottom_line
-        COLOR COLOR_LIGHT_CYAN
+        CALL start_bottom_message
         PRINT "Cannot move capital";
         EXIT SUB
     END IF

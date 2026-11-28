@@ -73,8 +73,7 @@ SUB menu_load_game
     IF menu_choice < 1 THEN
         EXIT SUB
     END IF
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT "Loading";
     CALL load_game(menu_value(menu_choice), problem$)
     IF problem$ <> "" THEN
@@ -113,8 +112,7 @@ SUB menu_save_game
         clear_right_panel: EXIT SUB
     END IF
     slot = menu_choice
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT "Saving";
     CALL save_game(slot)
     PRINT STRING$(MAX_CITIES, ".");

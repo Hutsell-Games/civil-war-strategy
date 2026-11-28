@@ -72,7 +72,7 @@ SUB menu_army_move
 
     CALL draw_army_stats(army)
     COLOR COLOR_LIGHT_CYAN
-    LOCATE 11, 68
+    LOCATE 11, PANEL_TEXT_COL
     PRINT city_name$(city)
     menu_item_count = 0
     menu_text$(0) = "To"
@@ -89,8 +89,7 @@ SUB menu_army_move
         EXIT SUB
     END IF
     IF winter_stops_move(current_side, menu_value(menu_choice)) THEN
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
+        CALL start_bottom_message
         PRINT "No campaigns in January";
         CALL wait_seconds(PAUSE_LONG)
         CALL clear_bottom_line
@@ -271,8 +270,7 @@ SUB menu_army_cancel (side)
     menu_box_type = BOX_DOUBLE
     menu_text$(0) = "Cancel"
     IF menu_item_count < 1 THEN
-        CALL clear_bottom_line
-        COLOR COLOR_LIGHT_CYAN
+        CALL start_bottom_message
         PRINT "No units have orders to cancel";
         EXIT SUB
     END IF
@@ -295,8 +293,7 @@ SUB menu_army_cancel (side)
                 EXIT SUB
             END IF
 
-            CALL clear_bottom_line
-            COLOR COLOR_LIGHT_CYAN
+            CALL start_bottom_message
             PRINT army_name$(army); " has cancelled move to "; city_name$(army_order(army));
             CALL wait_seconds(1)
             CALL draw_map_marker(army_city(army), army_order(army), MARK_ERASE_ARMY)
@@ -461,18 +458,16 @@ SUB menu_army_detach (again)
     DIM army_slot AS INTEGER
     again = FALSE
     IF NOT side_can_detach(current_side) THEN
-        CALL clear_bottom_line
-        COLOR COLOR_LIGHT_CYAN
+        CALL start_bottom_message
         PRINT "Option not available to Union";
         EXIT SUB
     END IF
     COLOR COLOR_YELLOW
-    LOCATE 4, 68
+    LOCATE 4, PANEL_TEXT_COL
     PRINT "DETACH UNIT"
     CALL menu_army_select(army, city, PICK_DETACH)
     IF army = -1 THEN
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
+        CALL start_bottom_message
         PRINT "No armies remain eligible to detach in "; month_name$(turn_month);
         EXIT SUB
     END IF
@@ -484,8 +479,7 @@ SUB menu_army_detach (again)
         EXIT SUB
     END IF
     CALL army_detach(army, city, army_slot)
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT "Unit #"; army_slot; " with ";
     CALL print_army_size(army_slot)
     PRINT " men detached under "; army_name$(army_slot);
@@ -502,12 +496,11 @@ SUB menu_army_drill (again)
     DIM city AS INTEGER
     again = FALSE
     COLOR COLOR_YELLOW
-    LOCATE 4, 68
+    LOCATE 4, PANEL_TEXT_COL
     PRINT "DRILL ARMY"
     CALL menu_army_select(army, city, PICK_DRILL)
     IF army = -1 THEN
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
+        CALL start_bottom_message
         PRINT "No armies remain eligible for drills in "; month_name$(turn_month);
         EXIT SUB
     END IF

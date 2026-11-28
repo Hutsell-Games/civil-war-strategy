@@ -44,7 +44,7 @@ END SUB
 SUB draw_battle_attacker (attacker, attack_steps())
     DIM col AS INTEGER
     DIM side_color AS INTEGER
-    col = 68
+    col = PANEL_TEXT_COL
     COLOR COLOR_LIGHT_CYAN
     LOCATE 1, col
     PRINT "Attacker"
@@ -56,20 +56,7 @@ SUB draw_battle_attacker (attacker, attack_steps())
     CALL print_army_size(attacker)
     LOCATE 4, col
     PRINT "Base    "; attack_steps(1)
-    LOCATE 5, col
-    PRINT "Ldr/Exp "; attack_steps(2)
-    LOCATE 6, col
-    PRINT "Small   "; attack_steps(3)
-    LOCATE 7, col
-    PRINT "Outman  "; attack_steps(4)
-    IF army_supply(attacker) < 1 THEN
-        COLOR COLOR_LIGHT_MAGENTA
-    END IF
-    LOCATE 8, col
-    PRINT "Supply  "; attack_steps(5)
-    COLOR side_color
-    LOCATE 9, col
-    PRINT "Difclt  "; attack_steps(6)
+    CALL draw_battle_steps(attacker, attack_steps(), 5, col, side_color)
     COLOR COLOR_LIGHT_CYAN
     LOCATE 11, col
     PRINT "Attack  "; attack_steps(7)
@@ -81,7 +68,7 @@ SUB draw_battle_defender (defender, defend_steps())
     DIM col AS INTEGER
     DIM side_color AS INTEGER
     DIM fort_label$
-    col = 68
+    col = PANEL_TEXT_COL
     side_color = side_color_of(army_side(defender))
     COLOR COLOR_LIGHT_CYAN
     LOCATE 13, col
@@ -95,20 +82,7 @@ SUB draw_battle_defender (defender, defend_steps())
     PRINT "Base    "; INT(attack_per_size# * army_size(defender))
     LOCATE 17, col
     PRINT "Defense "; defend_steps(1)
-    LOCATE 18, col
-    PRINT "Ldr/Exp "; defend_steps(2)
-    LOCATE 19, col
-    PRINT "Small   "; defend_steps(3)
-    LOCATE 20, col
-    PRINT "Outman  "; defend_steps(4)
-    IF army_supply(defender) < 1 THEN
-        COLOR COLOR_LIGHT_MAGENTA
-    END IF
-    LOCATE 21, col
-    PRINT "Supply  "; defend_steps(5)
-    COLOR side_color
-    LOCATE 22, col
-    PRINT "Difclt  "; defend_steps(6)
+    CALL draw_battle_steps(defender, defend_steps(), 18, col, side_color)
     fort_label$ = "Fort"
     IF city_fort(army_city(defender)) > 0 AND army_order(defender) = ORDER_NONE THEN
         COLOR COLOR_LIGHT_MAGENTA
@@ -123,6 +97,26 @@ SUB draw_battle_defender (defender, defend_steps())
     LOCATE 25, col
     PRINT "Defend  "; defend_steps(8)
     LINE (530, 380)-(635, 400), 11, B
+END SUB
+
+' The steps that both armies' halves of the panel show, steps(2) to steps(6), on five rows from
+' top_row down: leader and experience, small army, outmanned, supply and difficulty. Supply is in
+' magenta when the army has none. The color is side_color after it.
+SUB draw_battle_steps (army, steps(), top_row, col, side_color)
+    LOCATE top_row, col
+    PRINT "Ldr/Exp "; steps(2)
+    LOCATE top_row + 1, col
+    PRINT "Small   "; steps(3)
+    LOCATE top_row + 2, col
+    PRINT "Outman  "; steps(4)
+    IF army_supply(army) < 1 THEN
+        COLOR COLOR_LIGHT_MAGENTA
+    END IF
+    LOCATE top_row + 3, col
+    PRINT "Supply  "; steps(5)
+    COLOR side_color
+    LOCATE top_row + 4, col
+    PRINT "Difclt  "; steps(6)
 END SUB
 
 ' The attacker's share of the two strengths, a / (a + d), in whole percent and at least 1, such as
@@ -141,7 +135,7 @@ END FUNCTION
 ' The odds, boxed at the foot of the right panel.
 SUB draw_battle_odds (attack_strength, defend_strength)
     DIM col AS INTEGER
-    col = 68
+    col = PANEL_TEXT_COL
     COLOR COLOR_YELLOW
     LOCATE 27, col
     PRINT "Odds:  "; battle_odds_text$(attack_strength, defend_strength);
@@ -194,7 +188,7 @@ SUB draw_battle_winner (defender, winner, loser)
         winner_label$ = "REBEL"
     END IF
     COLOR COLOR_YELLOW
-    LOCATE 3, 68
+    LOCATE 3, PANEL_TEXT_COL
     PRINT winner_label$; " VICTORY"
     LOCATE 4, 71
     PRINT "in"
@@ -202,8 +196,7 @@ SUB draw_battle_winner (defender, winner, loser)
     PRINT city_name$(army_city(defender))
     winner_side = army_side(winner)
     CALL draw_large_flag(winner_side, 0, 0)
-    CALL clear_bottom_line
-    COLOR COLOR_LIGHT_CYAN
+    CALL start_bottom_message
     PRINT army_name$(winner); " defeats "; army_name$(loser); " in "; city_name$(army_city(defender));
     CALL wait_seconds(PAUSE_LONG)
 END SUB

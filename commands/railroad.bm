@@ -14,8 +14,7 @@ END SUB
 SUB railroad_start (side, army, city)
     DIM from_city AS INTEGER
     from_city = army_city(army)
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT army_name$(army); " is taking the train from "; city_name$(from_city); " to "; city_name$(city);
     CALL railroad_board(side, army, city)
     CALL draw_train(side, DRAW_SHOW)
@@ -34,8 +33,7 @@ SUB railroad_arrive (side)
     CALL draw_city_flag(train_from_city(side))
     CALL draw_train(side, DRAW_SHOW)
 
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT "Train with "; army_name$(army); " has arrived in "; city_name$(army_city(army));
     CALL sound_effect(1200, 2)
     CALL wait_seconds(opt_pause!)

@@ -115,8 +115,7 @@ SUB turn_move_army (moving_army)
     IF NOT army_has_move(moving_army) THEN
         EXIT SUB
     END IF
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT army_name$(moving_army); " is moving to "; city_name$(army_order(moving_army));
 
     CALL turn_army_marches(moving_army, starved)
@@ -133,8 +132,7 @@ SUB turn_move_army (moving_army)
     to_city = army_order(moving_army)
     IF city_army(to_city) > 0 THEN
         IF army_side(city_army(to_city)) = side THEN
-            COLOR COLOR_LIGHT_CYAN
-            CALL clear_bottom_line
+            CALL start_bottom_message
             PRINT army_name$(moving_army); " and "; army_name$(city_army(to_city)); " meet in "; city_name$(to_city);
             CALL wait_seconds(opt_pause!)
             CALL draw_map_marker(army_order(moving_army), 0, MARK_FLASH_FRAME)
@@ -163,8 +161,7 @@ SUB turn_attack (moving_army, city, fought, took)
         CALL draw_map_marker(city, 0, MARK_EXPLOSION)
         defender = city_army(city)
 
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
+        CALL start_bottom_message
         PRINT army_name$(moving_army); " attacks "; army_name$(defender); " in "; city_name$(army_city(defender));
         CALL wait_seconds(opt_pause! - 1)
         IF army_size(defender) > 0 THEN
@@ -211,8 +208,7 @@ SUB turn_attack (moving_army, city, fought, took)
             took = TRUE
             EXIT SUB
         END IF
-        COLOR COLOR_LIGHT_CYAN
-        CALL clear_bottom_line
+        CALL start_bottom_message
         PRINT "There are still defenders in "; city_name$(city);
         CALL wait_seconds(99)
     LOOP
@@ -227,8 +223,7 @@ SUB turn_attacker_withdraws (moving_army, city, defender)
     DIM old_order AS INTEGER
     army_order(moving_army) = army_city(moving_army)
     army_city(moving_army) = city
-    COLOR COLOR_LIGHT_CYAN
-    CALL clear_bottom_line
+    CALL start_bottom_message
     PRINT army_name$(moving_army); " withdrew to "; city_name$(army_order(moving_army));
 
     CALL animate_army(moving_army, ANIMATE_PICTURE_TAKEN)
@@ -290,9 +285,9 @@ SUB turn_army_surrenders (army, winner)
     IF opt_graphics >= GRAPHICS_FULL THEN
         CALL draw_surrender(army)
         COLOR COLOR_YELLOW
-        LOCATE 3, 68
+        LOCATE 3, PANEL_TEXT_COL
         PRINT army_name$(army)
-        LOCATE 4, 68
+        LOCATE 4, PANEL_TEXT_COL
         PRINT "surrenders !"
     END IF
     side = army_side(army)
