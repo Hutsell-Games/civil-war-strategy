@@ -127,12 +127,3 @@ Found while building, not fixed:
 two arguments, or when a `SHARED` variable is passed to a procedure that also uses it by name. On
 2026-11-16 `alias_scan.py` found no such call that matters in the game (the archive, "Questions
 for the user"). Run it again after a change to the game, before relying on the build.
-
-## Not in this plan
-
-- **Phones.** A bar of keys on the page and menus that take a tap (`TODO.md`, "Mouse menus"). First
-  the game must run in a desktop browser.
-- **A QBJS target in QB64Rust** (`qb64rust` builds the folder and warns about what QBJS cannot run).
-  That is QB64Rust's work (its `docs\SOMEDAY.md`, the QBJS web build row).
-- **The WebAssembly target** of QB64Rust's `study\51`. It runs the game with no change and no fork,
-  and is a different piece of work. This plan does not replace it.

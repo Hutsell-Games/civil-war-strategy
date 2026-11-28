@@ -40,6 +40,7 @@ SUB menu_navy_build (side, again)
     DIM ship$
     DIM cities(MAX_CITIES) AS INTEGER
     DIM count AS INTEGER
+    DIM saved_color AS INTEGER
     again = TRUE
     cost = ship_cost(SHIP_WOODEN$)
     IF NOT navy_can_build(side) THEN
@@ -50,9 +51,12 @@ SUB menu_navy_build (side, again)
     IF navy_has_ironclads AND side_cash(side) >= ship_cost(SHIP_IRONCLAD$) THEN
         menu_col = PANEL_COL
         menu_row = 12
+        ' The type menu's color is put back, so that the menus after it keep their parent's.
+        saved_color = menu_color
         menu_color = COLOR_LIGHT_BLUE
         CALL menu_set_two("Type", "Wooden", "Ironclad")
         CALL menu_select(MENU_PLAIN, 1)
+        menu_color = saved_color
         CALL clear_right_panel
         IF menu_choice < 1 THEN
             EXIT SUB

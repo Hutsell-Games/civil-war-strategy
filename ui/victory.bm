@@ -208,23 +208,17 @@ SUB end_game (side, rule)
     IF rule = VICTORY_YEAR THEN
         CALL victory_technical_points
         CALL draw_rebel_victory
-        COLOR COLOR_WHITE
-        LOCATE 2, 27
         message$ = "REBEL TECHNICAL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL))
-        PRINT message$
     ELSEIF side = SIDE_UNION THEN
         CALL draw_union_victory
-        COLOR COLOR_WHITE
-        LOCATE 2, 27
         message$ = "UNION VICTORY  VP's=" + STR$(side_victory_points(SIDE_UNION))
-        PRINT message$
-    ELSEIF side = SIDE_REBEL THEN
+    ELSE
         CALL draw_rebel_victory
-        COLOR COLOR_WHITE
-        LOCATE 2, 27
         message$ = "REBEL VICTORY  VP's=" + STR$(side_victory_points(SIDE_REBEL))
-        PRINT message$
     END IF
+    COLOR COLOR_WHITE
+    LOCATE 2, 27
+    PRINT message$
     COLOR COLOR_YELLOW
     LOCATE 4, 40 - .5 * LEN(reason$)
     IF opt_history = HISTORY_ON THEN

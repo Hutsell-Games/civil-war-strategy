@@ -11,6 +11,12 @@ SUB menu_victory_conditions
     DIM ratio_text$
     DIM i AS INTEGER
     DIM start_option AS INTEGER
+    DIM saved_color AS INTEGER
+    DIM saved_highlight AS INTEGER
+    ' This menu's colors are put back at the end, so that Utility and the menus after it keep
+    ' their own.
+    saved_color = menu_color
+    saved_highlight = menu_highlight
     cities_text$ = STR$(ABS(victory_rule(VICTORY_CITIES)) * 100 / MAX_CITIES) + "% Cities"
     income_text$ = STR$(ABS(victory_rule(VICTORY_INCOME))) + "% Total Income"
     time_text$ = "Time: " + month_name$(victory_rule(VICTORY_MONTH)) + STR$(ABS(victory_rule(VICTORY_YEAR)))
@@ -50,6 +56,8 @@ SUB menu_victory_conditions
                 EXIT DO
         END SELECT
     LOOP
+    menu_color = saved_color
+    menu_highlight = saved_highlight
     CLS
     CALL draw_map
 END SUB

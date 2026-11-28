@@ -603,6 +603,20 @@ whole of each special event is data, so that the code does not know which war is
 The events' two tunes are still `PLAY` strings in `ui\events.bm`. The other 24 war-naming strings
 wait on step 3; questions 2 and 3 are still open.
 
+### Phase 11 step 4, and the events' tunes
+
+Moved from the active plan on 2026-11-28.
+
+- **Step 4, done 2026-11-14: the rules that treat the sides differently are named.** The inventory
+  covers `rules\`, `ai\`, their callers in `commands\` and `ui\`, `io\files.bm` and
+  `scenarios\EVENTS.DAT`. It stays in `../modernize-plan.md`, "Rules that treat the sides
+  differently", because it describes the code as it is now. It moves no rule; whether the rules
+  move is a question for the engine split. Fixes since then removed two of its 26 rules: the
+  Realism setting no longer raises an event balance of 1 (G55), and the Rebel computer's invasion
+  check looks at its own fleet's city (G50).
+- **The events' two tunes are in `game\`.** Commit `2d5bf02` (2026-11-23) moved them from
+  `ui\events.bm` into `play_side_tune` (`game\tunes.bm`), which a city's capture plays too.
+
 ### Progress, phase by phase
 
 Updated 2026-11-11. Phase 1 is committed (`1727bf9`). Phase 2 is done in the working tree, not committed:
@@ -3784,6 +3798,12 @@ The findings of [../panel-review.md](../panel-review.md) that are done, under th
 
    Answered 2026-11-15 (user): yes. Fixed as G25 to G28.
 
+### The panel
+
+- **QB64 engineer:** drop the `SHELL` and settle file-name case, which is cheap. Done
+  2026-11-14 (item 3 above).
+- **Test engineer:** CI is the gap, not coverage. Done 2026-11-15 (item 2 above).
+
 ## Done: the code review of 2026-11-16
 
 Was `docs\archived\code-review-completed.md`.
@@ -4999,3 +5019,44 @@ Fixed on 2026-11-27. No recorded screen changed.
   request). No script takes a checkpoint at a Rebel victory, so the 43 scripts passed unchanged.
 
 Left as it is: the three lines that the ironclad and the schooner share.
+
+#### 26. The victory banner is written out three times (priority: low)
+
+`end_game` (`ui\victory.bm`) had three branches for the banner: the Rebels' technical victory,
+the Union's victory and the Rebels' victory. They differed only in the picture and the text; each
+repeated `COLOR COLOR_WHITE`, `LOCATE 2, 27` and `PRINT message$`.
+
+Fixed on 2026-11-28: each branch draws its picture and sets `message$`, and the banner is printed
+once after them. The last branch is a plain `ELSE`, since `side` is always the Union or the Rebels
+(`check_victory_conditions` loops from `SIDE_UNION` to `SIDE_REBEL`).
+
+#### 27. The battle panel's two halves repeat five rows (priority: low)
+
+`draw_battle_attacker` and `draw_battle_defender` (`ui\battle.bm`) each printed Ldr/Exp, Small,
+Outman, Supply and Difclt from `steps(2)` to `steps(6)`, with Supply in magenta when the army has
+none. Only the rows differed: 5 to 9 and 18 to 22. A change to the supply test could have reached
+one side and not the other.
+
+Fixed on 2026-11-27: both call `draw_battle_steps (army, steps(), top_row, col, side_color)`. No
+recorded screen changed.
+
+#### 28. The bottom line's message color is set by hand (priority: low)
+
+`COLOR COLOR_LIGHT_CYAN` stood beside `CALL clear_bottom_line` 38 times, in either order, in
+`commands\` and `ui\`. `clear_bottom_line` prints spaces, which show only the background, so the
+order drew the same pixels.
+
+Fixed on 2026-11-27: the 38 pairs are `CALL start_bottom_message` (`ui\screen.bm`), which sets
+the color and clears the line. No recorded screen changed. Left as they are: the messages
+themselves. Most are `PRINT` lists with numbers, and building them as strings would change the
+spaces around the numbers.
+
+#### 29. The right panel's text column is a bare 68 (priority: low)
+
+24 places in `ui\` placed the right panel's text at column 68, beside `PANEL_COL = 67` in
+`cws.bi`: `LOCATE row, 68`, `col = 68` in `ui\battle.bm`, and `menu_col = 68` in
+`menu_city_select`.
+
+Fixed on 2026-11-27: they read `PANEL_TEXT_COL`, a new constant of 68 in `cws.bi`. No recorded
+screen changed. Left as it is: `LOCATE row, 68` in the army report (`ui\reports.bm`), a column of
+the report and not of the panel.

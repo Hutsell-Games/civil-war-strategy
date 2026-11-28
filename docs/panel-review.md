@@ -25,8 +25,6 @@ the documents in `docs\`. The rest was measured by a script. No test was run for
      since then have removed that overlap.
    - The useful next step is to run this repo's `tools\refactor` rename tables over Wars of
      Napoleon and measure again. That shows the engine boundary instead of guessing it.
-5. **Show the three lost pictures** (title, burning capital, Lincoln). They are the only DOS
-   content a player lost, and Wars of Napoleon has the same item, so one helper serves both.
 
 ## Not worth doing
 
@@ -34,13 +32,8 @@ the documents in `docs\`. The rest was measured by a script. No test was run for
   of order-dependent `DRAW` and `PAINT`, and Wars of Napoleon's map should set the format.
 - **Phase 11 steps 1 and 3**: moving the flags, ships and 24 texts only moves text until the
   engine's shape is known.
-- **More splitting**: there are 420 procedures with a median of 12 lines. Nine exceed 100
-  lines, and five of those are pictures (`draw_map`, `draw_schooner`, `draw_ironclad`,
-  `draw_surrender`, `draw_rebel_victory`).
 - **Unit tests for `ai\` and `commands\`**: the scripts already run all but about 11 lines
   ([modernize-plan.md](modernize-plan.md), "Lines that no test runs").
-- **Records, a `FLEET_NONE` constant and the other "left alone" rows of `TODO.md`**: these are
-  settled notes, not work.
 
 ## The panel
 
@@ -48,19 +41,7 @@ A player was added to the usual five roles, because "worth doing" depends on who
 
 - **Pragmatic engineer:** ship it; phase 11 is preparing for a test the real second war does
   not pass.
-- **QB64 engineer:** drop the `SHELL` and settle file-name case, which is cheap.
 - **Compiler/languages engineer:** [qb64-friction.md](qb64-friction.md) has made its case for
   scope across files; more moves add no evidence.
-- **Test engineer:** CI is the gap, not coverage.
 - **Rust engineer:** nothing to add here.
 - **Player:** wants the pictures and a computer that plays as it was written to.
-
-The panel recommended items 2 and 3 now, item 1 as the next plan, and item 4 when the user rules.
-Items 2 to 4 are done.
-
-## Decisions for the user
-
-1. Stop phase 11 after step 2?
-2. May the renames go to Wars of Napoleon? `pretzel-wargames`' `README.md` lists "Hutsell's
-   short names stay until one engine exists" under "Decided so far" (2026-11-10). That file does
-   not say whether it was the user's ruling.

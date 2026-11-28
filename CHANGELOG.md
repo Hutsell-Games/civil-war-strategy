@@ -192,6 +192,10 @@ source rather than extending version 1.61.
   campaigns of 2 became -1 when switched.
 - A message box is as wide as its message. Before, a short message got a box as
   wide as the heading of the last menu shown.
+- Utility, the menus it opens, Ships and the Port menu of a new fleet keep their
+  usual colors. Before, Utility and its menus took Victory Conditions' yellow on
+  cyan after that menu was shown, and Ships and Port took the light blue of
+  Build's ship-type menu.
 
 ## Version 1.7
 

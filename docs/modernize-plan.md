@@ -1,6 +1,6 @@
 # Plan: modernize the code of Civil War Strategy
 
-Started 2026-11-11; active plan updated 2026-11-14. Completed work, the original numbered
+Started 2026-11-11; active plan updated 2026-11-28. Completed work, the original numbered
 decisions and phase table, and historical surveys are in
 [the archive](archived/devnotes-completed.md#done-modernizing-the-code-of-civil-war-strategy).
 
@@ -14,7 +14,8 @@ Splitting the engine into a separate project is a second plan.
 
 Phases 0 to 10 are complete; phase 10 closed with no records. Phase 11 is the remaining phase.
 Its event data and rules are already in `scenarios\EVENTS.DAT` (archive, "Phase 11 step 2").
-Step 4's named inventory is complete below; it makes no decision about moving rules.
+Step 4 is done (archive, "Phase 11 step 4"); its inventory of the rules that treat the sides
+differently is below, checked against the code on 2026-11-28.
 Step 5's [QB64 friction list](qb64-friction.md) is started with evidence from the work
 already done; keep it current through the remaining content moves.
 Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews are
@@ -22,12 +23,10 @@ Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews 
 
 ## Current decisions and working rules
 
-- **QB64, built by both compilers.** Use nothing accepted only by QB64Rust. The DOS source
-  stays on `canonical-source`.
 - **Refactors keep recorded screens identical.** Run `play.py check`, `play.py compare` and
   the unit tests. Preserve the order of random draws and screen statements. A deliberate
   behavior or screen change is a separate commit; record only the scripts whose checkpoints
-  differ and list them in the commit message. Remaining known bugs are in `TODO.md`.
+  differ and list them in the commit message.
 - **One reviewable step per commit.** Run the checks and hand over a commit message; the user
   stages and commits. Keep rename and move scripts and their tables in `tools\refactor\`.
 - **Keep the rule-change record current.** Record gameplay-rule and AI changes
@@ -46,9 +45,6 @@ Questions 2 and 3 below remain open before steps 1 and 3. The structure reviews 
   but open no menu and read no key. Menus and other screens live in `ui\`.
   `tests\test_layers.py` enforces these boundaries and records the remaining exception.
   [file-layout.md](file-layout.md) gives each folder's rule and each file's topic.
-
-The original numbered decisions are preserved in the archive under "Original plan: baseline,
-decisions and phases".
 
 ## Which model does which phase
 
@@ -89,11 +85,12 @@ The coverage rule still holds for new changes:
   change inside it. The hand-over names the lines that moved without a test.
 - A step that must rewrite lines no test runs waits for tests that reach them.
 
-The last recorded inventory lists 10 lines that no test runs. The script `navy-first-fleet`
-reached an 11th, in `ai_fleet_orders`, on 2026-11-14. The fixes G25 to G28 (2026-11-15) changed
-the scripts' games: two lines in `ai_fortify` and `ai_recruit` are no longer reached, and two
-others lost are reached by new unit tests. The table names the SUB rather
-than line numbers, because refactors move them; consult a fresh `report.txt` before changing them.
+The table below is the inventory of 2026-11-15, and it is out of date. The last report,
+of 2026-11-26, lists 209 lines not run of 7,978 and one line run in part. It also lists no
+line of `rules\setup.bm`, so the table's first row no longer holds. `TODO.md` ("The count of
+lines that no test runs is out of date") asks for the table to be made again. It names the SUB
+rather than line numbers, because refactors move them; consult a fresh `report.txt` before
+changing them.
 
 | File | SUB | Lines | Why |
 |------|-----|-------|-----|
@@ -105,9 +102,6 @@ than line numbers, because refactors move them; consult a fresh `report.txt` bef
 | `ai\forces.bm` | `ai_recruit` | 1 | The computer has no city to recruit in; since G25 to G28 no script's game reaches it |
 | `ai\navy.bm` | `ai_navy_raid` | 1 | The computer's fleet goes raiding and meets no enemy at sea. It raids only in answer to the player's raiders, which are at sea |
 | `ui\reports.bm` | `report_armies` | 1 | The army report when both sides have 0 victory points; a side gets points for its cities at the start |
-
-Of the 178 lines run in part, most are a one-line `IF` whose `THEN` part did not run, or a sound that plays
-only with the sound on. In `rules\events.bm` one is left: the riot's early return for a side with one city.
 
 A step that rewrites a line still looks that line up in `tests\out\coverage\report.txt`
 first (`play.py coverage`).
@@ -127,17 +121,18 @@ only moves text around is not.
 
 The original 2026-11-12 survey is in the archive under "Phase 11: the original survey".
 The remaining work covers the map and flags, the title and ship pictures, war-naming texts,
-the two event tunes and presentation details, and the war's rule constants. The side-specific
+the events' presentation details, and the war's rule constants. The side-specific
 rules are inventoried below; deciding whether to move them belongs to the engine split.
 
 ### Steps, as proposed
 
 1. **Move what is the war's and is already a SUB**: the flags, the map's line work, the title,
-   the cannon and the two ship pictures go to `game\`, whole (as phase 6 moved SUBs). The ten
-   rule constants go to a `game\rules.bi`, with the four city constants beside them
-   (`VARY_REBEL_FLEET_CITY`, `VARY_REBEL_CAPITAL`, `AI_UNION_FLEET_CITY`, `AI_REBEL_HOLD_CITY`,
-   in `cws.bi` since 2026-11-14). Most of the ten, and 120 more numbers of the rules and
-   the computer, became tuning knobs in `scenarios\TUNING.DAT` on 2026-11-16
+   the cannon and the two ship pictures go to `game\`, whole (as phase 6 moved SUBs). The five
+   rule constants left in `cws.bi` (`FIRST_YEAR`, `IRONCLAD_YEAR`, `IRONCLAD_MONTH`,
+   `MONTHS_PER_TURN`, `MONTHS_PER_YEAR`) go to a `game\rules.bi`, with the four city constants
+   beside them (`VARY_REBEL_FLEET_CITY`, `VARY_REBEL_CAPITAL`, `AI_UNION_FLEET_CITY`,
+   `AI_REBEL_HOLD_CITY`, in `cws.bi` since 2026-11-14). The other five of the original ten, the
+   costs and the capital's income, are among the 158 tuning knobs in `scenarios\TUNING.DAT`
    (`tools\tuning\knobs.txt`); they are data already, and a scenario's folder may hold its own. The map's four city numbers in `draw\map.bm` go with the
    map's line work, so question 2 decides where they live:
    - `draw_fleets`: fixed icon positions for a fleet at 30 Philadelphia and 28 Norfolk,
@@ -145,19 +140,16 @@ rules are inventoried below; deciding whether to move them belongs to the engine
      2026-11-27: Jackson is no port in either map, so no fleet could be there.
    - `draw_map_area`: the box drawn when a fleet is at 30.
 
-   A rule for 27 New Orleans and 28 Norfolk in `draw_map_marker` was removed on 2026-11-27:
-   erasing a flag now puts back the bare map under it at every city (U42 in `devnotes.md`).
-
    A city constant of 0 would not turn its rule off: `city_owner(0)` is a real element, which
    `rules\navy.bm` writes. A second war that drops one of these rules needs a guard then.
 2. **Remaining event presentation.** The event data and rules are completed in the archive
-   ("Phase 11 step 2"). Still in `ui\events.bm`: the two `PLAY` tunes, the alarm of an
-   announcement, and the bottom line cleared only for an event of the Union's roll.
-3. **The other 24 texts**, each looked at: a text that only uses `side_name$()` already passes
-   the test; one that spells "Union" does not. Those that fail go to a data file too (question 1).
-4. **Complete, 2026-11-14: list the rules that treat the sides differently**, with a name for
-   each. See "Step 4: named inventory" below. Whether they move is a question for the engine
-   split, not for this phase.
+   ("Phase 11 step 2"), and the two tunes are in `game\tunes.bm`. Still in `ui\events.bm`: the
+   alarm of an announcement, and the bottom line cleared only for an event of the Union's roll.
+3. **The other texts that name the war**, each looked at. A search on 2026-11-28 found 25 string
+   literals that spell a side or "ironclad": `ui\options.bm` 8, `ui\victory.bm` 4, `ui\army.bm` 3,
+   `ui\reports.bm` 3, `ui\battle.bm` 2, `commands\navy.bm` 2, `rules\army.bm` 2 and `ui\navy.bm` 1.
+   A text that only uses `side_name$()` already passes the test; one that spells "Union" does
+   not. Those that fail go to a data file too (question 1).
 5. **Started, 2026-11-14: [a list of what QB64 made awkward](qb64-friction.md)**,
    seeded from the port and modernization work already done. Keep it current from step 1
    on. It is the evidence for whether QB64Rust should gain modules or another feature
@@ -167,19 +159,21 @@ rules are inventoried below; deciding whether to move them belongs to the engine
 
 2. **The map's line work: code in `game\`, or a data file read by a small drawer?** Decision 19
    says a data file.
-3. **Are steps 1 to 4 the right size**, given the test above, or should the phase stop after
+3. **Are steps 1 to 3 the right size**, given the test above, or should the phase stop after
    step 2?
 
-### Step 4: named inventory
+### Rules that treat the sides differently
 
-Completed 2026-11-14 against the current source. These are names for the inventory, not new
-constants or procedures. No rule was moved or changed. The archived survey's "not yet counted"
-entry is the historical starting point; this inventory supersedes it.
+Made in step 4 on 2026-11-14, and checked against the code again on 2026-11-28. These are names
+for the inventory, not new constants or procedures. No rule was moved or changed. The archived
+survey's "not yet counted" entry is the historical starting point; this inventory supersedes it.
+Where a rule's number is a tuning knob, the tables give the knob's default
+(`tools\tuning\knobs.txt`).
 
 Reviewed `rules\`, `ai\`, their callers in `commands\` and `ui\`, setup and loading in
 `io\files.bm`, and `scenarios\EVENTS.DAT`. The tables include explicit side tests, arithmetic
 using a side number, fixed city references, and ordering that gives one side precedence.
-Locations name the procedure so they survive changes to line numbers. There are 26 named
+Locations name the procedure so they survive changes to line numbers. There are 24 named
 code rules below, followed by the 17 side-specific event entries already in data.
 
 #### Army, navy, economy and balance
@@ -194,18 +188,17 @@ code rules below, followed by the 17 side-specific event entries already in data
 | Union computer income bonus | `union_income_bonus` is `120 * opt_difficulty` (50 instead of 120 with two players), reduced to 70% with Realism. Monthly collection actually adds it only in a one-player game with a Rebel player. It also enters the initial `total_income = union_income_bonus + 200`. | [rules/setup.bm](../rules/setup.bm), `set_union_advantage`; [rules/turn.bm](../rules/turn.bm), `turn_collect_income`; [io/files.bm](../io/files.bm), `load_cities` |
 | Side-directed balance help | Above Even favors the Union computer; below Even favors the Rebel computer. `balance_help` returns the distance from Even only for that favored computer side. Starting cash uses `100 * (DIFFICULTY_EVEN + help)` when help is positive; recruitment adds `5 * help` hundred men; battle strength adds `2 * help`. | `rules/setup.bm`, `balance_help`, `game_apply_settings`; `rules/army.bm`, `army_recruit_bonus`; [rules/battle.bm](../rules/battle.bm), `battle_strengths` |
 | Side-directed event weight | Event weight is `6 - opt_difficulty` for a Union player, `opt_difficulty` for a Rebel player. It controls event chance and effects multiplied by weight. | [rules/events.bm](../rules/events.bm), `event_roll`, `event_chance!`, `event_apply` |
-| Event beneficiary selection | A roll at or below `.1 * opt_event_balance` favors the Rebels; above it favors the Union. The option maps Favor Union/Neutral/Favor Rebels to 3/5/7; changing side or applying settings defaults to favoring the computer (7 for a Union player, 3 for a Rebel player). `event_side` names the disadvantaged side. | `rules/events.bm`, `event_roll`; `rules/setup.bm`, `option_set_event_balance`, `option_events_favor_computer`, `game_apply_settings` |
+| Event beneficiary selection | A roll at or below `.1 * opt_event_balance` favors the Rebels; above it favors the Union. The option maps Favor Union/Neutral/Favor Rebels to 3/5/7; changing side or applying settings defaults to favoring the computer (7 for a Union player, 3 for a Rebel player), unless random events are off (G59). `event_side` names the disadvantaged side. | `rules/events.bm`, `event_roll`; `rules/setup.bm`, `option_set_event_balance`, `option_events_favor_computer`, `game_apply_settings` |
 
 #### Starting conditions and settings
 
 | Name | Current difference | Location |
 |------|--------------------|----------|
 | Vary Start cash offsets | Union cash becomes scenario cash minus 100 plus `200 * RND`; Rebel cash becomes scenario cash plus 100 plus `200 * RND`. | `rules/setup.bm`, `vary_start_conditions` |
-| Vary Start fleet locations | Both fleet sizes are redrawn with `10 * RND`. A zero Union fleet clears its location; otherwise its scenario location stays. A positive Rebel fleet is placed at city 27; otherwise its scenario location stays. | `rules/setup.bm`, `vary_start_conditions` |
+| Vary Start fleet locations | Both fleet sizes are redrawn with `10 * RND`. A zero fleet of either side clears its location (the Rebels' since G41). A positive Union fleet keeps its scenario location; a positive Rebel fleet is placed at city 27. | `rules/setup.bm`, `vary_start_conditions` |
 | Vary Start Rebel capital | On `RND > .7`, only the Rebel capital changes, to city 25. The Union capital stays as loaded. | `rules/setup.bm`, `vary_start_conditions` |
-| Vary Start player-dependent ironclads | For both fleets, a ship is ironclad when `RND > .45 * current_side`: the threshold is .45 for a Union player, .9 for a Rebel player. This depends on the player's side, not the fleet's side. | `rules/setup.bm`, `vary_start_conditions` |
+| Vary Start ironclads | A ship is ironclad when `RND > .45 * side`, by the fleet's own side: a chance of .55 for a Union ship, .1 for a Rebel ship. Until G42 the side was the player's, for both fleets. | `rules/setup.bm`, `vary_start_conditions` |
 | Union first player | A two-player game starts with the Union, then the Rebels give orders before the month resolves. A missing player side also defaults to Union. | `rules/setup.bm`, `game_apply_settings`; `rules/turn.bm`, `turn_check_commands`, `turn_next_player` |
-| Rebel-player Realism event adjustment | Turning Realism on adds 2 to event balance only for a Rebel player with `opt_event_balance = 1` (the further `< 5` test is redundant). The current event menu sets only 0/3/5/7, so this is a legacy setting path, not the usual option behavior. | `rules/setup.bm`, `option_toggle_realism` |
 
 #### Computer decisions
 
@@ -218,15 +211,14 @@ code rules below, followed by the 17 side-specific event entries already in data
 | Computer march direction | A Rebel computer gets 2 extra move-score points for decreasing map y (toward the Union); a Union computer gets them for increasing y (toward the Rebels). | [ai/army.bm](../ai/army.bm), `ai_evaluate_move` |
 | Computer rail direction | Among otherwise eligible rail destinations, the Rebel computer selects decreasing map y, the Union computer increasing y. Fort and capital choices can override this preference. | [ai/railroad.bm](../ai/railroad.bm), `ai_railroad_city` |
 | Rebel fleet holds at city 30 | At the end of port selection, a Rebel fleet already at city 30 selects 30 again on `RND > .5`, so it stays. Earlier returns from port selection bypass this test. | `ai/navy.bm`, `ai_pick_port` |
-| Union fleet reference for invasion | The computer's invasion decision checks enemy strength below 100 at the Union fleet's location, even when deciding for the Rebels. Rebel invasion eligibility still requires Realism off. | `ai/navy.bm`, `ai_navy_adjust`; `rules/navy.bm`, `navy_can_invade` |
 
 #### Order and victory
 
 | Name | Current difference | Location |
 |------|--------------------|----------|
-| Union precedence within a move priority | Move keys include the army slot as their last two digits. Within the same priority band, Union slots 1–20 sort before Rebel slots 21–40. This also orders armies forced into the out-of-supply band. | `rules/turn.bm`, `turn_set_move_order`; `rules/army.bm`, `sort_move_order`, `side_first_army`, `side_last_army`; [ui/turn.bm](../ui/turn.bm), `turn_resolve` |
-| Union first victory check | Victory checks run Union then Rebel and stop at the first met condition. This gives the Union precedence when both qualify, including the shared time-limit condition. When the player plays on past the Union's condition, the Rebels' conditions and warnings are not checked until the next month. | [ui/victory.bm](../ui/victory.bm), `check_victory_conditions`; [rules/victory.bm](../rules/victory.bm), `victory_rule_met` |
-| Rebel technical victory | Accepting the time limit announces a Confederate technical victory and draws the Rebel victory screen; both sides' points are multiplied by .7. The recorded `victory_reason` still receives the side passed by the first victory check, normally Union. Preserve this distinction when considering the engine split. | `ui/victory.bm`, `end_game`; `rules/victory.bm`, `victory_won`, `victory_technical_points` |
+| Union precedence within a move priority | Move keys include the army slot as their last two digits. Within the same priority band, Union slots 1–20 sort before Rebel slots 21–40. This also orders armies forced into the out-of-supply band. | `rules/turn.bm`, `turn_set_move_order`, `sort_move_order`; `rules/army.bm`, `side_first_army`, `side_last_army`; [ui/turn.bm](../ui/turn.bm), `turn_resolve` |
+| Union first victory check | Victory checks run Union then Rebel and stop at the first met condition. This gives the Union precedence when both qualify. The time limit is the exception: since G39 it goes to the Rebels whichever side's check finds it. When the player plays on past the Union's condition, the Rebels' conditions and warnings are not checked until the next month. | [ui/victory.bm](../ui/victory.bm), `check_victory_conditions`; [rules/victory.bm](../rules/victory.bm), `victory_rule_met` |
+| Rebel technical victory | The time limit is a Confederate technical victory: `victory_winner` makes the Rebels the side that wins, for the box, the battle summary and the victory screen (G39). Both sides' points are multiplied by .7. | `ui/victory.bm`, `check_victory_conditions`, `end_game`; `rules/victory.bm`, `victory_winner`, `victory_won`, `victory_technical_points` |
 
 #### Named event rules already in data
 
@@ -267,7 +259,9 @@ hundreds. Other effects do not multiply by weight unless stated.
 - Equal treatment written twice is not a side-specific rule: force ratios, casualties,
   city bonuses, the victory-point floor, supply costs and ship combat use the same rules for
   both sides. The old one-sided victory-point floor and Vary Start army-removal bug have
-  already been fixed; they are not current differences.
+  already been fixed; they are not current differences. Nor are two rules of the first
+  inventory: the Rebel invasion check that looked at the Union fleet (G50), and the Realism
+  setting's change to an event balance of 1 (G55).
 - Slot partitioning and names alone are representation, not unequal rules. Slot order is
   included above where it changes move precedence. Colors, flags, tunes, labels and screen
   layout belong to presentation steps 1–3, including the Union-roll event-line clear and
